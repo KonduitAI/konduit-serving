@@ -80,14 +80,14 @@ Upon startup, the server loads a config.json or config.yaml file specified by
 the user.  If the user specifies a yaml file it is converted to a config.json
 that is then loaded by [vertx](http://vertx.io/).
 
-This gets loaded in to an [InferenceConfiguration](https://github.com/KonduitAI/konduit/blob/master/konduit-serving-api/src/main/java/ai/konduit/serving/InferenceConfiguration.java)
+This gets loaded in to an [InferenceConfiguration](https://github.com/KonduitAI/konduit-serving/blob/master/konduit-serving-api/src/main/java/ai/konduit/serving/InferenceConfiguration.java)
 which just contains a list of pipeline steps. Configuring the steps is relative to the implementation.
 
-A small list (but not all!)  of possible implementations can be found [here](https://github.com/KonduitAI/konduit/blob/master/konduit-serving-core/src/main/java/ai/konduit/serving/pipeline/steps)
+A small list (but not all!)  of possible implementations can be found [here](https://github.com/KonduitAI/konduit-serving/blob/master/konduit-serving-core/src/main/java/ai/konduit/serving/pipeline/steps)
 
-An individual agent is a java process that gets managed by a [KonduitServerMain](https://github.com/KonduitAI/konduit/blob/master/konduit-serving-core/src/main/java/ai/konduit/serving/configprovider/KonduitServerMain.java)
+An individual agent is a java process that gets managed by a [KonduitServerMain](https://github.com/KonduitAI/konduit-serving/blob/master/konduit-serving-core/src/main/java/ai/konduit/serving/configprovider/KonduitServerMain.java)
 
-Outside of the pipeline components themselves, the main configuration is a [ServingConfig](https://github.com/KonduitAI/konduit/blob/master/konduit-serving-api/src/main/java/ai/konduit/serving/config/ServingConfig.java)
+Outside of the pipeline components themselves, the main configuration is a [ServingConfig](https://github.com/KonduitAI/konduit-serving/blob/master/konduit-serving-api/src/main/java/ai/konduit/serving/config/ServingConfig.java)
 which contains information such as the expected port to start the server on, and the 
 host to listen on (default localhost)
 
@@ -272,9 +272,9 @@ profile, and the output will be found in model-server-uber-jar/target.
 ## Custom Pipeline steps
 
 Konduit Serving supports customization via 2 ways: python code or implementing your own
-[PipelineStep](https://github.com/KonduitAI/konduit/blob/master/konduit-serving-api/src/main/java/ai/konduit/serving/pipeline/PipelineStep.java)
-via the [CustomPipelineStep](https://github.com/KonduitAI/konduit/blob/master/konduit-serving-api/src/main/java/ai/konduit/serving/pipeline/PipelineStep.java)
-and associated [PipelineStepRunner](https://github.com/KonduitAI/konduit/blob/master/konduit-serving-core/src/main/java/ai/konduit/serving/pipeline/steps/CustomPipelineStepRunner.java#L40)
+[PipelineStep](https://github.com/KonduitAI/konduit-serving/blob/master/konduit-serving-api/src/main/java/ai/konduit/serving/pipeline/PipelineStep.java)
+via the [CustomPipelineStep](https://github.com/KonduitAI/konduit-serving/blob/master/konduit-serving-api/src/main/java/ai/konduit/serving/pipeline/PipelineStep.java)
+and associated [PipelineStepRunner](https://github.com/KonduitAI/konduit-serving/blob/master/konduit-serving-core/src/main/java/ai/konduit/serving/pipeline/steps/CustomPipelineStepRunner.java#L40)
 in java.
 
 Custom pipeline steps are generally recommended for performance reasons.
@@ -313,7 +313,7 @@ For configuration, we recommend versioning all of your assets that are needed al
 the config.json in something like a bundle where you can download each versioned asset
 with its associated configuration and model and start the associated instances from that.
 
-Reference [KonduitServingMain](https://github.com/KonduitAI/konduit/blob/master/konduit-serving-core/src/main/java/ai/konduit/serving/configprovider/KonduitServingMain.java)
+Reference [KonduitServingMain](https://github.com/KonduitAI/konduit-serving/blob/master/konduit-serving-core/src/main/java/ai/konduit/serving/configprovider/KonduitServingMain.java)
 for an example of the single node use case.
 
 We will add clustering support based on these ideas at a later date. Please file an issue if you have specific questions
