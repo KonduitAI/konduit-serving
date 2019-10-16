@@ -1,0 +1,18 @@
+[Unit]
+Description=Skymind Konduit Service
+After=multi-user.target
+
+[Service]
+Type=forking
+User=pipelines
+Group=daemon
+Restart=on-success
+EnvironmentFile=/etc/pipelines/konduit-serving-env.sh
+PermissionsStartOnly=true
+ExecStartPre=/bin/sh ${KONDUIT_SERVING_HOME}/sbin/pre-start.sh
+ExecStart=/usr/bin/env bash ${KONDUIT_SERVING_HOME}/sbin/start-konduit-serving-daemon
+ExecStop=/usr/bin/env bash ${KONDUIT_SERVING_HOME}/sbin/stop-konduit-serving-daemon
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

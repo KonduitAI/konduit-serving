@@ -1,0 +1,21 @@
+#!/bin/sh
+
+if ! getent passwd pipelines > /dev/null
+then
+    echo "adding user pipelines:daemon"
+    useradd -r -M -d /srv/pipelines -s /sbin/nologin \
+    -c "konduit serving Daemon" pipelines
+fi
+
+mkdir /var/run/pipelines
+mkdir /var/pipelines
+mkdir /var/log/pipelines
+chown -R pipelines:daemon /var/run/pipelines
+chown -R pipelines:daemon /opt/pipelines
+chown -R pipelines:daemon /var/pipelines
+chown -R pipelines:daemon /var/log/pipelines
+chmod 755 /var/pipelines
+chmod 755 /var/run/pipelines
+chmod 755 /var/log/pipelines
+
+exit 0

@@ -1,0 +1,9 @@
+{
+  "apiPackage": "ai.skymind.skil",
+  "modelPackage": "ai.skymind.skil.model",
+  "invokerPackage": "ai.skymind",
+  "groupId": "ai.skymind",
+  "artifactId": "skil-client",
+  "artifactVersion": "1.1.0-beta",
+  "serializableModel": "true"
+}

@@ -1,0 +1,50 @@
+<!--
+  ~ /*
+  ~  * ******************************************************************************
+  ~  *  * Copyright (c) 2015-2018 Skymind, Inc.
+  ~  *  *
+  ~  *  * This program and the accompanying materials are made available under the
+  ~  *  * terms of the Apache License, Version 2.0 which is available at
+  ~  *  * https://www.apache.org/licenses/LICENSE-2.0.
+  ~  *  *
+  ~  *  * Unless required by applicable law or agreed to in writing, software
+  ~  *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  ~  *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  ~  *  * License for the specific language governing permissions and limitations
+  ~  *  * under the License.
+  ~  *  *
+  ~  *  * SPDX-License-Identifier: Apache-2.0
+  ~  *  *****************************************************************************
+  ~  */
+  ~
+  -->
+
+<configuration scan="true" scanPeriod="30 seconds">
+    <appender name="FILE" class="ch.qos.logback.core.ConsoleAppender">
+        <file>${SKIL_LOG_DIR:-/var/log/skil}/${service.type}-${service.id}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.apache.catalina.core" level="DEBUG"/>
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.deeplearning4j" level="INFO"/>
+    <logger name="org.nd4j" level="INFO"/>
+    <logger name="opennlp.uima.util" level="OFF"/>
+    <logger name="org.apache.uima" level="OFF"/>
+    <logger name="io.skymind" level="INFO"/>
+    <logger name="ai.skymind" level="INFO"/>
+    <logger name="io.micrometer" level="INFO"/>
+    <logger name="io.prometheus" level="INFO"/>
+    <logger name="org.apache" level="WARN"/>
+    <logger name="com.sun" level="INFO"/>
+    <logger name="org.eclipse" level="INFO"/>
+    <logger name="org.bytedeco" level="DEBUG"/>
+
+    <root level="INFO">
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>

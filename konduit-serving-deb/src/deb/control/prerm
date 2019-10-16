@@ -1,0 +1,12 @@
+    #!/bin/sh
+
+if command -v systemctl > /dev/null
+then
+    if systemctl is-enabled konduit.serving.service
+    then
+        echo "stopping Konduit service"
+        systemctl stop pipelines
+    fi
+fi
+
+exit 0

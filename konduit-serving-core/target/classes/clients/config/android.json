@@ -1,0 +1,9 @@
+{
+  "apiPackage": "ai.konduit.serving.skil",
+  "modelPackage": "ai.konduit.serving.skil.model",
+  "invokerPackage": "ai.konduit.serving",
+  "groupId": "ai.konduit.serving",
+  "artifactId": "skil-client",
+  "artifactVersion": "1.1.0-beta",
+  "serializableModel": "true"
+}

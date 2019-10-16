@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ /*
+  ~  * ******************************************************************************
+  ~  *  * Copyright (c) 2015-2019 Skymind, Inc.
+  ~  *  *
+  ~  *  * This program and the accompanying materials are made available under the
+  ~  *  * terms of the Apache License, Version 2.0 which is available at
+  ~  *  * https://www.apache.org/licenses/LICENSE-2.0.
+  ~  *  *
+  ~  *  * Unless required by applicable law or agreed to in writing, software
+  ~  *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  ~  *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  ~  *  * License for the specific language governing permissions and limitations
+  ~  *  * under the License.
+  ~  *  *
+  ~  *  * SPDX-License-Identifier: Apache-2.0
+  ~  *  *****************************************************************************
+  ~  */
+  ~
+  -->
+
+<PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+    <Header>
+        <Application name="JPMML-XGBoost" version="1.3.0"/>
+        <Timestamp>2018-06-27T02:01:32Z</Timestamp>
+    </Header>
+    <DataDictionary>
+        <DataField name="_target" optype="categorical" jsonInputType="string">
+            <Value value="0"/>
+            <Value value="1"/>
+        </DataField>
+    </DataDictionary>
+    <MiningModel functionName="classification" x-mathContext="float">
+        <MiningSchema>
+            <MiningField name="_target" usageType="target"/>
+        </MiningSchema>
+        <Segmentation multipleModelMethod="modelChain">
+            <Segment id="1">
+                <True/>
+                <MiningModel functionName="regression" x-mathContext="float">
+                    <MiningSchema/>
+                    <Output>
+                        <OutputField name="xgbValue" optype="continuous" jsonInputType="float" feature="predictedValue" isFinalResult="false"/>
+                    </Output>
+                    <Segmentation multipleModelMethod="sum"/>
+                </MiningModel>
+            </Segment>
+            <Segment id="2">
+                <True/>
+                <RegressionModel functionName="classification" normalizationMethod="logit" x-mathContext="float">
+                    <MiningSchema>
+                        <MiningField name="_target" usageType="target"/>
+                        <MiningField name="xgbValue"/>
+                    </MiningSchema>
+                    <Output>
+                        <OutputField name="probability(0)" optype="continuous" jsonInputType="float" feature="probability" value="0"/>
+                        <OutputField name="probability(1)" optype="continuous" jsonInputType="float" feature="probability" value="1"/>
+                    </Output>
+                    <RegressionTable intercept="0.0" targetCategory="1">
+                        <NumericPredictor name="xgbValue" coefficient="1.0"/>
+                    </RegressionTable>
+                    <RegressionTable intercept="0.0" targetCategory="0"/>
+                </RegressionModel>
+            </Segment>
+        </Segmentation>
+    </MiningModel>
+</PMML>

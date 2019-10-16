@@ -1,0 +1,5 @@
+{
+  "packageName": "ai.konduit.serving.skil",
+  "packageVersion": "1.1.0-beta",
+  "invokerPackage": "ai.konduit.serving"
+}

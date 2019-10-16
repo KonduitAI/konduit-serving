@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  # ---------------------------
+  # prometheus
+  # ---------------------------
+  prometheus:
+   image: prom/prometheus
+   container_name: prometheus
+   ports:
+    - 9090:9090
+   volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  pipeline:
+    image: pipeline-with-conda-tensorflow
+    ports:
+     - 65535:65535
+    volumes:
+     - ./input-data:/usr/share/input-data
+    entrypoint:
+     - java
+     - -Dorg.bytedeco.javacpp.logger.debug=true
+     - -Dorg.bytedeco.javacpp.logger=slf4j
+     - -Dai.konduit.serving.python.javacpp.path.append=none
+     - -Dvertx.options.maxEventLoopExecuteTime=10000000000000
+     - -cp
+     - /srv/pipelines.jar
+     - ai.konduit.serving.configprovider.KonduitServerMain
+     - --configPath
+     - /usr/share/input-data/config.json
+
+  # ---------------------------
+  # grafana
+  # ---------------------------
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
+
+  jupyter:
+    image: pipeline-with-conda-tensorflow
+    container_name: konduit-serving-jupyter
+    ports:
+      - 8888:8888
+

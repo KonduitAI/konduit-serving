@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ /*
+  ~  * ******************************************************************************
+  ~  *  * Copyright (c) 2015-2019 Skymind, Inc.
+  ~  *  *
+  ~  *  * This program and the accompanying materials are made available under the
+  ~  *  * terms of the Apache License, Version 2.0 which is available at
+  ~  *  * https://www.apache.org/licenses/LICENSE-2.0.
+  ~  *  *
+  ~  *  * Unless required by applicable law or agreed to in writing, software
+  ~  *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  ~  *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  ~  *  * License for the specific language governing permissions and limitations
+  ~  *  * under the License.
+  ~  *  *
+  ~  *  * SPDX-License-Identifier: Apache-2.0
+  ~  *  *****************************************************************************
+  ~  */
+  ~
+  -->
+
+<PMML version="4.1" xmlns="http://www.dmg.org/PMML-4_1">
+  <Header copyright="KNIME">
+    <Application name="KNIME" version="2.8.0"/>
+  </Header>
+  <DataDictionary numberOfFields="5">
+    <DataField dataType="double" name="sepal_length" optype="continuous">
+      <Interval closure="closedClosed" leftMargin="4.3" rightMargin="7.9"/>
+    </DataField>
+    <DataField dataType="double" name="sepal_width" optype="continuous">
+      <Interval closure="closedClosed" leftMargin="2.0" rightMargin="4.4"/>
+    </DataField>
+    <DataField dataType="double" name="petal_length" optype="continuous">
+      <Interval closure="closedClosed" leftMargin="1.0" rightMargin="6.9"/>
+    </DataField>
+    <DataField dataType="double" name="petal_width" optype="continuous">
+      <Interval closure="closedClosed" leftMargin="0.1" rightMargin="2.5"/>
+    </DataField>
+    <DataField dataType="string" name="class" optype="categorical">
+      <Value value="Iris-setosa"/>
+      <Value value="Iris-versicolor"/>
+      <Value value="Iris-virginica"/>
+    </DataField>
+  </DataDictionary>
+  <MiningModel functionName="classification">
+    <MiningSchema>
+      <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+      <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+      <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+      <MiningField invalidValueTreatment="asIs" name="petal_width"/>
+      <MiningField invalidValueTreatment="asIs" name="class" usageType="predicted"/>
+    </MiningSchema>
+    <Segmentation multipleModelMethod="majorityVote">
+      <Segment>
+        <True/>
+        <SupportVectorMachineModel algorithmName="Sequential Minimal Optimization (SMO)" functionName="classification" modelName="SVM" svmRepresentation="SupportVectors">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="class" usageType="predicted"/>
+          </MiningSchema>
+          <Targets>
+            <Target field="class" optype="categorical">
+              <TargetValue value="Iris-setosa"/>
+              <TargetValue value="Iris-versicolor"/>
+            </Target>
+          </Targets>
+          <PolynomialKernelType coef0="1.0" degree="1.0" gamma="1.0"/>
+          <VectorDictionary numberOfVectors="4">
+            <VectorFields numberOfFields="4">
+              <FieldRef field="sepal_length"/>
+              <FieldRef field="sepal_width"/>
+              <FieldRef field="petal_length"/>
+              <FieldRef field="petal_width"/>
+            </VectorFields>
+            <VectorInstance id="Iris-setosa_Row23">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>5.1 3.3 1.7 0.5</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-setosa_Row24">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>4.8 3.4 1.9 0.2</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-setosa_Row41">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>4.5 2.3 1.3 0.3</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-versicolor_Row57">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>4.9 2.4 3.3 1.0</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+          </VectorDictionary>
+          <SupportVectorMachine alternateTargetCategory="Iris-versicolor" targetCategory="Iris-setosa">
+            <SupportVectors numberOfAttributes="4" numberOfSupportVectors="4">
+              <SupportVector vectorId="Iris-setosa_Row23"/>
+              <SupportVector vectorId="Iris-setosa_Row24"/>
+              <SupportVector vectorId="Iris-setosa_Row41"/>
+              <SupportVector vectorId="Iris-versicolor_Row57"/>
+            </SupportVectors>
+            <Coefficients absoluteValue="-1.3842611015136308" numberOfCoefficients="4">
+              <Coefficient value="-0.15668592683415214"/>
+              <Coefficient value="-0.3193000561823094"/>
+              <Coefficient value="-0.08942304332595367"/>
+              <Coefficient value="0.5654090263424152"/>
+            </Coefficients>
+          </SupportVectorMachine>
+        </SupportVectorMachineModel>
+      </Segment>
+      <Segment>
+        <True/>
+        <SupportVectorMachineModel algorithmName="Sequential Minimal Optimization (SMO)" functionName="classification" modelName="SVM" svmRepresentation="SupportVectors">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="class" usageType="predicted"/>
+          </MiningSchema>
+          <Targets>
+            <Target field="class" optype="categorical">
+              <TargetValue value="Iris-versicolor"/>
+              <TargetValue value="Iris-virginica"/>
+            </Target>
+          </Targets>
+          <PolynomialKernelType coef0="1.0" degree="1.0" gamma="1.0"/>
+          <VectorDictionary numberOfVectors="19">
+            <VectorFields numberOfFields="4">
+              <FieldRef field="sepal_length"/>
+              <FieldRef field="sepal_width"/>
+              <FieldRef field="petal_length"/>
+              <FieldRef field="petal_width"/>
+            </VectorFields>
+            <VectorInstance id="Iris-versicolor_Row76">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.8 2.8 4.8 1.4</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-versicolor_Row77">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.7 3.0 5.0 1.7</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-versicolor_Row78">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.0 2.9 4.5 1.5</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-versicolor_Row83">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.0 2.7 5.1 1.6</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-versicolor_Row84">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>5.4 3.0 4.5 1.5</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-versicolor_Row85">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.0 3.4 4.5 1.6</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-versicolor_Row86">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.7 3.1 4.7 1.5</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-versicolor_Row87">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.3 2.3 4.4 1.3</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-versicolor_Row90">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>5.5 2.6 4.4 1.2</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-versicolor_Row91">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.1 3.0 4.6 1.4</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-virginica_Row106">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>4.9 2.5 4.5 1.7</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-virginica_Row110">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.5 3.2 5.1 2.0</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-virginica_Row119">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.0 2.2 5.0 1.5</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-virginica_Row123">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.3 2.7 4.9 1.8</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-virginica_Row126">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.2 2.8 4.8 1.8</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-virginica_Row127">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.1 3.0 4.9 1.8</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-virginica_Row133">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.3 2.8 5.1 1.5</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-virginica_Row138">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>6.0 3.0 4.8 1.8</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+            <VectorInstance id="Iris-virginica_Row149">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3 4</Indices>
+                <REAL-Entries>5.9 3.0 5.1 1.8</REAL-Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+          </VectorDictionary>
+          <SupportVectorMachine alternateTargetCategory="Iris-virginica" targetCategory="Iris-versicolor">
+            <SupportVectors numberOfAttributes="4" numberOfSupportVectors="19">
+              <SupportVector vectorId="Iris-versicolor_Row76"/>
+              <SupportVector vectorId="Iris-versicolor_Row77"/>
+              <SupportVector vectorId="Iris-versicolor_Row78"/>
+              <SupportVector vectorId="Iris-versicolor_Row83"/>
+              <SupportVector vectorId="Iris-versicolor_Row84"/>
+              <SupportVector vectorId="Iris-versicolor_Row85"/>
+              <SupportVector vectorId="Iris-versicolor_Row86"/>
+              <SupportVector vectorId="Iris-versicolor_Row87"/>
+              <SupportVector vectorId="Iris-versicolor_Row90"/>
+              <SupportVector vectorId="Iris-versicolor_Row91"/>
+              <SupportVector vectorId="Iris-virginica_Row106"/>
+              <SupportVector vectorId="Iris-virginica_Row110"/>
+              <SupportVector vectorId="Iris-virginica_Row119"/>
+              <SupportVector vectorId="Iris-virginica_Row123"/>
+              <SupportVector vectorId="Iris-virginica_Row126"/>
+              <SupportVector vectorId="Iris-virginica_Row127"/>
+              <SupportVector vectorId="Iris-virginica_Row133"/>
+              <SupportVector vectorId="Iris-virginica_Row138"/>
+              <SupportVector vectorId="Iris-virginica_Row149"/>
+            </SupportVectors>
+            <Coefficients absoluteValue="-6.018324659903929" numberOfCoefficients="19">
+              <Coefficient value="-1.0"/>
+              <Coefficient value="-0.9999999999999999"/>
+              <Coefficient value="-0.9999999999999999"/>
+              <Coefficient value="-1.0"/>
+              <Coefficient value="-1.0"/>
+              <Coefficient value="-0.763069346499641"/>
+              <Coefficient value="-0.3533345294691425"/>
+              <Coefficient value="-0.3369598577205241"/>
+              <Coefficient value="-0.921871366425314"/>
+              <Coefficient value="-1.0"/>
+              <Coefficient value="1.0"/>
+              <Coefficient value="1.0"/>
+              <Coefficient value="1.0"/>
+              <Coefficient value="1.0"/>
+              <Coefficient value="1.0"/>
+              <Coefficient value="1.0"/>
+              <Coefficient value="1.0"/>
+              <Coefficient value="0.9999999999999999"/>
+              <Coefficient value="0.3752351001146213"/>
+            </Coefficients>
+          </SupportVectorMachine>
+        </SupportVectorMachineModel>
+      </Segment>
+    </Segmentation>
+  </MiningModel>
+</PMML>

@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/agibsonccc/pbdirs/iris_graph/data-all-1000"
+all_model_checkpoint_paths: "/home/agibsonccc/pbdirs/iris_graph/data-all-1000"

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>konduit-serving</artifactId>
+        <groupId>ai.konduit.serving</groupId>
+        <version>1.2.1</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>konduit-serving-rpm</artifactId>
+
+    <name>konduit-serving-rpm</name>
+    <properties>
+        <rpm-maven-plugin.version>2.1.5</rpm-maven-plugin.version>
+        <resource.dir>src/main/resources</resource.dir>
+        <prefix>/pipelines</prefix>
+        <pipeline.dir>${project.artifactId}</pipeline.dir>
+
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-distro-bom</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>pipelines</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M2</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.3,)</version>
+                                </requireMavenVersion>
+                                <requireOS>
+                                    <family>unix</family>
+                                </requireOS>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.commonjava.maven.plugins</groupId>
+                <artifactId>directory-maven-plugin</artifactId>
+                <version>0.1</version>
+                <executions>
+                    <execution>
+                        <id>directories</id>
+                        <goals>
+                            <goal>directory-of</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <property>pipeline.dir</property>
+                            <project>
+                                <groupId>ai.konduit.serving</groupId>
+                                <artifactId>konduit-serving-rpm</artifactId>
+                            </project>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>dist</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <inherited>false</inherited>
+                <version>${rpm-maven-plugin.version}</version>
+
+                <executions>
+                    <execution>
+                        <id>generate-rpm</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>rpm</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <name>pipelines</name>
+                    <license>(C) 2019 Skymind.ai, https://www.apache.org/licenses/LICENSE-2.0</license>
+                    <group>Application/Misc</group>
+                    <targetVendor>redhat</targetVendor>
+                    <targetOS>linux</targetOS>
+                    <distribution>el7</distribution>
+                    <autoProvides>false</autoProvides>
+                    <autoRequires>false</autoRequires>
+                    <prefix>${prefix}</prefix>
+                    <needarch>true</needarch>
+
+                    <defineStatements>
+                        <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+                        <defineStatement>_missing_doc_files_terminate_build 0</defineStatement>
+                        <defineStatement>__check_files %{nil}</defineStatement>
+                    </defineStatements>
+
+                    <requires>
+                        <require>java-1.8.0-openjdk-devel &gt;= 1.8</require>
+                        <require>which</require>
+                        <require>curl</require>
+                        <require>wget</require>
+                        <require>bzip2</require>
+                        <require>gcc</require>
+                        <require>gcc-c++</require>
+                        <require>make</require>
+                        <require>openssl-devel</require>
+                    </requires>
+
+                    <mappings>
+                        <mapping>
+                            <directory>${prefix}</directory>
+                            <username>pipelines</username>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/etc/pipelines</directory>
+                            <configuration>true</configuration>
+                            <sources>
+                                <source>
+                                    <location>${resource.dir}/etc/pipelines/logback.xml</location>
+                                </source>
+                            </sources>
+                            <username>pipelines</username>
+                            <groupname>daemon</groupname>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/etc/pipelines</directory>
+                            <configuration>true</configuration>
+                            <sources>
+                                <source>
+                                    <location>${resource.dir}/etc/pipelines/konduit-serving-env.sh</location>
+                                </source>
+                            </sources>
+                            <username>pipelines</username>
+                            <groupname>daemon</groupname>
+                        </mapping>
+
+
+                        <mapping>
+                            <directory>/etc/profile.d</directory>
+                            <directoryIncluded>false</directoryIncluded>
+                            <configuration>true</configuration>
+                            <sources>
+                                <source>
+                                    <location>${resource.dir}/etc/profile.d/konduit-serving-env.sh</location>
+                                </source>
+                            </sources>
+                        </mapping>
+
+
+                    </mappings>
+
+                    <!-- RPM scripts -->
+                    <preinstallScriptlet>
+                        <scriptFile>${resource.dir}/scripts/pre-install.sh</scriptFile>
+                    </preinstallScriptlet>
+
+                    <postinstallScriptlet>
+                        <scriptFile>${resource.dir}/scripts/post-install.sh</scriptFile>
+                    </postinstallScriptlet>
+
+                    <preremoveScriptlet>
+                        <scriptFile>${resource.dir}/scripts/pre-remove.sh</scriptFile>
+                    </preremoveScriptlet>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>

@@ -1,0 +1,18 @@
+[Unit]
+Description=Skymind PIPELINES Service
+After=multi-user.target
+
+[Service]
+Type=forking
+User=pipelines
+Group=daemon
+Restart=on-success
+EnvironmentFile=/etc/pipelines/pipelines-env.sh
+PermissionsStartOnly=true
+ExecStartPre=/bin/sh ${PIPELINES_HOME}/sbin/pre-start.sh
+ExecStart=/usr/bin/env bash ${PIPELINES_HOME}/sbin/start-pipelines-daemon
+ExecStop=/usr/bin/env bash ${PIPELINES_HOME}/sbin/stop-pipelines-daemon
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

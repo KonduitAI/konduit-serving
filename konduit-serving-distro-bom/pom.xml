@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>konduit-serving</artifactId>
+        <groupId>ai.konduit.serving</groupId>
+        <version>1.2.1</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>konduit-serving-distro-bom</artifactId>
+
+    <name>konduit-serving-distro-bom</name>
+
+    <profiles>
+        <profile>
+            <id>converter</id>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.konduit.serving</groupId>
+                    <artifactId>konduit-serving-converter</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>pmml</id>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.konduit.serving</groupId>
+                    <artifactId>konduit-serving-pmml</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>cpu</id>
+            <activation>
+                <property>
+                    <name>chip</name>
+                    <value>cpu</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.konduit.serving</groupId>
+                    <artifactId>konduit-serving-native</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>gpu</id>
+            <activation>
+                <property>
+                    <name>chip</name>
+                    <value>gpu</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.konduit.serving</groupId>
+                    <artifactId>konduit-serving-gpu</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>python</id>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.konduit.serving</groupId>
+                    <artifactId>konduit-serving-python</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
+
+
+    <dependencies>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+    </dependencies>
+
+</project>

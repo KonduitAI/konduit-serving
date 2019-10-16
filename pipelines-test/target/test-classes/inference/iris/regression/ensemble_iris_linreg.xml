@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ /*
+  ~  * ******************************************************************************
+  ~  *  * Copyright (c) 2015-2019 Skymind, Inc.
+  ~  *  *
+  ~  *  * This program and the accompanying materials are made available under the
+  ~  *  * terms of the Apache License, Version 2.0 which is available at
+  ~  *  * https://www.apache.org/licenses/LICENSE-2.0.
+  ~  *  *
+  ~  *  * Unless required by applicable law or agreed to in writing, software
+  ~  *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  ~  *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  ~  *  * License for the specific language governing permissions and limitations
+  ~  *  * under the License.
+  ~  *  *
+  ~  *  * SPDX-License-Identifier: Apache-2.0
+  ~  *  *****************************************************************************
+  ~  */
+  ~
+  -->
+
+<PMML version="4.1" xmlns="http://www.dmg.org/PMML-4_1">
+  <Header copyright="KNIME">
+    <Application name="KNIME" version="2.8.0"/>
+  </Header>
+  <DataDictionary numberOfFields="5">
+    <DataField dataType="double" name="sepal_length" optype="continuous">
+      <Interval closure="closedClosed" leftMargin="4.3" rightMargin="7.9"/>
+    </DataField>
+    <DataField dataType="double" name="sepal_width" optype="continuous">
+      <Interval closure="closedClosed" leftMargin="2.0" rightMargin="4.4"/>
+    </DataField>
+    <DataField dataType="double" name="petal_length" optype="continuous">
+      <Interval closure="closedClosed" leftMargin="1.0" rightMargin="6.9"/>
+    </DataField>
+    <DataField dataType="double" name="petal_width" optype="continuous">
+      <Interval closure="closedClosed" leftMargin="0.1" rightMargin="2.5"/>
+    </DataField>
+    <DataField dataType="string" name="class" optype="categorical">
+      <Value value="Iris-setosa"/>
+      <Value value="Iris-versicolor"/>
+      <Value value="Iris-virginica"/>
+    </DataField>
+  </DataDictionary>
+  <MiningModel functionName="regression">
+    <MiningSchema>
+      <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+      <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+      <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+      <MiningField invalidValueTreatment="asIs" name="petal_width" usageType="predicted"/>
+    </MiningSchema>
+    <Segmentation multipleModelMethod="average">
+      <Segment>
+        <True/>
+        <RegressionModel algorithmName="LinearRegression" functionName="regression" modelName="KNIME Linear Regression" targetFieldName="petal_width">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width" usageType="predicted"/>
+          </MiningSchema>
+          <RegressionTable intercept="-0.2612631757078866">
+            <NumericPredictor coefficient="-0.12844552419814823" name="sepal_length"/>
+            <NumericPredictor coefficient="0.2341799112639251" name="sepal_width"/>
+            <NumericPredictor coefficient="0.21734982270295325" name="petal_length"/>
+          </RegressionTable>
+        </RegressionModel>
+      </Segment>
+      <Segment>
+        <True/>
+        <RegressionModel algorithmName="LinearRegression" functionName="regression" modelName="KNIME Linear Regression" targetFieldName="petal_width">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width" usageType="predicted"/>
+          </MiningSchema>
+          <RegressionTable intercept="-0.3930616352499794">
+            <NumericPredictor coefficient="0.02280099594951679" name="sepal_length"/>
+            <NumericPredictor coefficient="0.12917818348615617" name="sepal_width"/>
+            <NumericPredictor coefficient="0.0721733869532653" name="petal_length"/>
+          </RegressionTable>
+        </RegressionModel>
+      </Segment>
+      <Segment>
+        <True/>
+        <RegressionModel algorithmName="LinearRegression" functionName="regression" modelName="KNIME Linear Regression" targetFieldName="petal_width">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width" usageType="predicted"/>
+          </MiningSchema>
+          <RegressionTable intercept="-0.2736242657356568">
+            <NumericPredictor coefficient="0.05751223965760003" name="sepal_length"/>
+            <NumericPredictor coefficient="-0.05650900346423323" name="sepal_width"/>
+            <NumericPredictor coefficient="0.29291490590827207" name="petal_length"/>
+          </RegressionTable>
+        </RegressionModel>
+      </Segment>
+      <Segment>
+        <True/>
+        <RegressionModel algorithmName="LinearRegression" functionName="regression" modelName="KNIME Linear Regression" targetFieldName="petal_width">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width" usageType="predicted"/>
+          </MiningSchema>
+          <RegressionTable intercept="0.1634306174970359">
+            <NumericPredictor coefficient="-0.12148861992789328" name="sepal_length"/>
+            <NumericPredictor coefficient="0.0031909781812589078" name="sepal_width"/>
+            <NumericPredictor coefficient="0.4456164044014663" name="petal_length"/>
+          </RegressionTable>
+        </RegressionModel>
+      </Segment>
+      <Segment>
+        <True/>
+        <RegressionModel algorithmName="LinearRegression" functionName="regression" modelName="KNIME Linear Regression" targetFieldName="petal_width">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width" usageType="predicted"/>
+          </MiningSchema>
+          <RegressionTable intercept="-0.25542194204682733">
+            <NumericPredictor coefficient="-0.08926505293714848" name="sepal_length"/>
+            <NumericPredictor coefficient="0.25870487205339165" name="sepal_width"/>
+            <NumericPredictor coefficient="0.32875834735439535" name="petal_length"/>
+          </RegressionTable>
+        </RegressionModel>
+      </Segment>
+      <Segment>
+        <True/>
+        <RegressionModel algorithmName="LinearRegression" functionName="regression" modelName="KNIME Linear Regression" targetFieldName="petal_width">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width" usageType="predicted"/>
+          </MiningSchema>
+          <RegressionTable intercept="-0.5301328047621565">
+            <NumericPredictor coefficient="-0.0762557378196001" name="sepal_length"/>
+            <NumericPredictor coefficient="0.22575239958411633" name="sepal_width"/>
+            <NumericPredictor coefficient="0.3973217834570438" name="petal_length"/>
+          </RegressionTable>
+        </RegressionModel>
+      </Segment>
+      <Segment>
+        <True/>
+        <RegressionModel algorithmName="LinearRegression" functionName="regression" modelName="KNIME Linear Regression" targetFieldName="petal_width">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width" usageType="predicted"/>
+          </MiningSchema>
+          <RegressionTable intercept="-0.1373949457001154">
+            <NumericPredictor coefficient="-0.1884617785725386" name="sepal_length"/>
+            <NumericPredictor coefficient="0.10266649077778128" name="sepal_width"/>
+            <NumericPredictor coefficient="0.541316149934348" name="petal_length"/>
+          </RegressionTable>
+        </RegressionModel>
+      </Segment>
+      <Segment>
+        <True/>
+        <RegressionModel algorithmName="LinearRegression" functionName="regression" modelName="KNIME Linear Regression" targetFieldName="petal_width">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width" usageType="predicted"/>
+          </MiningSchema>
+          <RegressionTable intercept="0.6799603103624046">
+            <NumericPredictor coefficient="-0.2378169217563646" name="sepal_length"/>
+            <NumericPredictor coefficient="0.42544518543524135" name="sepal_width"/>
+            <NumericPredictor coefficient="0.2985261914564409" name="petal_length"/>
+          </RegressionTable>
+        </RegressionModel>
+      </Segment>
+      <Segment>
+        <True/>
+        <RegressionModel algorithmName="LinearRegression" functionName="regression" modelName="KNIME Linear Regression" targetFieldName="petal_width">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width" usageType="predicted"/>
+          </MiningSchema>
+          <RegressionTable intercept="0.8840995724424381">
+            <NumericPredictor coefficient="-0.21393599312975187" name="sepal_length"/>
+            <NumericPredictor coefficient="0.36061380124724307" name="sepal_width"/>
+            <NumericPredictor coefficient="0.24470677026504928" name="petal_length"/>
+          </RegressionTable>
+        </RegressionModel>
+      </Segment>
+      <Segment>
+        <True/>
+        <RegressionModel algorithmName="LinearRegression" functionName="regression" modelName="KNIME Linear Regression" targetFieldName="petal_width">
+          <MiningSchema>
+            <MiningField invalidValueTreatment="asIs" name="sepal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="sepal_width"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_length"/>
+            <MiningField invalidValueTreatment="asIs" name="petal_width" usageType="predicted"/>
+          </MiningSchema>
+          <RegressionTable intercept="-1.2230186327633983">
+            <NumericPredictor coefficient="0.2053935517679642" name="sepal_length"/>
+            <NumericPredictor coefficient="0.5020438560980213" name="sepal_width"/>
+            <NumericPredictor coefficient="0.09063168691007094" name="petal_length"/>
+          </RegressionTable>
+        </RegressionModel>
+      </Segment>
+    </Segmentation>
+  </MiningModel>
+</PMML>

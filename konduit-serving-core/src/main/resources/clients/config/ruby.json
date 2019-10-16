@@ -1,0 +1,9 @@
+{
+  "gemName": "konduit_serving_client",
+  "moduleName": "KonduitServingCient",
+  "gemVersion": "1.1.0-beta",
+  "gemLicense": "Apache 2.0",
+  "gemHomepage": "http://skymind.ai/",
+  "gemSummary": "A ruby wrapper for konduit serving HTTP inference",
+  "gemAuthor": "Justin Long"
+}

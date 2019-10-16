@@ -1,0 +1,5 @@
+{
+  "apiPackage": "ai.konduit.serving.skil",
+  "modelPackage": "ai.konduit.serving.skil.model",
+  "modelPropertyNaming": "PascalCase"
+}

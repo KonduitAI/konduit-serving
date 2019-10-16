@@ -1,0 +1,5 @@
+{
+  "apiPackage": "ai.konduit.serving",
+  "modelPackage": "ai.konduit.serving.konduit.serving.model",
+  "modelPropertyNaming": "PascalCase"
+}

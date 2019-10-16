@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>konduit-serving</artifactId>
+        <groupId>ai.konduit.serving</groupId>
+        <version>1.2.1</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>konduit-serving-deb</artifactId>
+
+    <name>konduit-serving-deb</name>
+    <properties>
+        <jdeb.signPackage>false</jdeb.signPackage>
+        <prefix>/srv</prefix>
+        <resource.dir>src/main/resources</resource.dir>
+
+        <konduit-serving-server.deb.package.name>konduit</konduit-serving-server.deb.package.name>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-distro-bom</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M2</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.3,)</version>
+                                </requireMavenVersion>
+                                <requireOS>
+                                    <family>unix</family>
+                                </requireOS>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>jdeb</artifactId>
+                <groupId>org.vafer</groupId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jdeb</goal>
+                        </goals>
+                        <configuration>
+                            <deb>${build.directory}/${konduit-serving-server.deb.package.name}_${version}.deb</deb>
+                            <signPackage>${jdeb.signPackage}</signPackage>
+                            <dataSet>
+                                <!-- konduit subdirectories -->
+                                <data>
+                                    <src>src/main/resources/scripts/pre-start.sh</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>${prefix}/sbin</prefix>
+                                        <user>konduit</user>
+                                        <group>daemon</group>
+                                        <filemode>755</filemode>
+                                    </mapper>
+                                </data>
+
+
+                                <!-- konduit /etc related entries -->
+                                <data>
+                                    <src>${resource.dir}/etc/konduit/publickey.txt</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/etc/konduit</prefix>
+                                        <user>konduit</user>
+                                        <group>daemon</group>
+                                        <filemode>755</filemode>
+                                    </mapper>
+                                </data>
+
+
+                                <data>
+                                    <src>${resource.dir}/etc/konduit/konduit-serving-env.sh</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/etc/konduit</prefix>
+                                        <user>konduit</user>
+                                        <group>daemon</group>
+                                    </mapper>
+                                </data>
+
+                                <data>
+                                    <src>${resource.dir}/etc/konduit/logback.xml</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/etc/konduit</prefix>
+                                        <user>konduit</user>
+                                        <group>daemon</group>
+                                    </mapper>
+                                </data>
+
+
+
+                                <data>
+                                    <src>${resource.dir}/etc/profile.d/konduit-serving-env.sh</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/etc/profile.d</prefix>
+                                        <user>konduit</user>
+                                        <group>daemon</group>
+                                    </mapper>
+                                </data>
+
+                                <data>
+                                    <src>${resource.dir}/systemd/konduit.service</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/etc/systemd/system</prefix>
+                                        <user>konduit</user>
+                                        <group>daemon</group>
+                                    </mapper>
+                                </data>
+
+                            </dataSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.commonjava.maven.plugins</groupId>
+                <artifactId>directory-maven-plugin</artifactId>
+                <version>0.1</version>
+                <executions>
+                    <execution>
+                        <id>directories</id>
+                        <goals>
+                            <goal>directory-of</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <property>konduitdistro.dir</property>
+                            <project>
+                                <groupId>ai.konduit.serving</groupId>
+                                <artifactId>konduit-serving-deb</artifactId>
+                            </project>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

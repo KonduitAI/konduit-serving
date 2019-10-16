@@ -1,0 +1,7 @@
+{
+  "projectName": "konduit-serving-client",
+  "projectVersion": "1.1.0-beta",
+  "apiPackage": "ai/konduit/serving/konduit-serving",
+  "modelPackage": "ai/konduit/serving/konduit-serving/model",
+  "licenseName": "Apache 2.0"
+}

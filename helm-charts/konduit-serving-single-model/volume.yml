@@ -1,0 +1,14 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: config-volume
+  namespace: default
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+  # FIXME
+    path: "/C/Users/agibs/Documents/GitHub/konduit-serving/sample/docker"

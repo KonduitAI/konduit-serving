@@ -1,0 +1,5 @@
+{
+  "packageName": "Skymind.KONDUIT.SERVING",
+  "packageVersion": "1.1.0-beta",
+  "modelPropertyNaming": "PascalCase"
+}
