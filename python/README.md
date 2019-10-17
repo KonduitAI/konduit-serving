@@ -38,6 +38,12 @@ Install test dependencies using `pip install 'konduit[tests]'` if you want to ru
 
 On Windows, compiling the test dependencies requires Visual Studio Build Tools 14.0, which can be installed from [here](https://visualstudio.microsoft.com/downloads/). You may also need to install the Windows 8.1 / 10 SDK. See Python's [*WindowsCompilers*](https://wiki.python.org/moin/WindowsCompilers) page for details. 
 
+The tests also require `bert_mrpc_frozen.pb` to be placed in the `python/tests` folder. Run the following code in `python/tests`: 
+```
+curl https://deeplearning4jblob.blob.core.windows.net/testresources/bert_mrpc_frozen_v1.zip --output bert.zip
+unzip bert.zip 
+```
+
 The resulting JAR will be generated at the base of the `konduit` project.
 Copy it to the `tests` folder:
 
@@ -45,7 +51,7 @@ Copy it to the `tests` folder:
 cp konduit.jar python/tests
 ```
 
-To validate that this process worked, you can now run the tests with `pytest`:
+Run the tests with `pytest`:
 
 ```bash
 cd python/tests
