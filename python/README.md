@@ -10,12 +10,16 @@
 
 ## Installation
 
-To install this Python package from source, run `python setup.py install`. You can also
-install it from PyPI with `pip install konduit` (run `pip install 'konduit[tests]'` if you want to
-run tests as well). We recommend using **Python 3.7+**.
+To install this Python package from source, run `python setup.py install` in this directory. 
 
-To run any examples with `konduit` you need to build a Konduit Serving JAR first (this script uses
-Python 3.4+, but `konduit` itself is Python 2.7 compatible):
+You can also install it from PyPI with `pip install konduit`.
+
+We recommend using **Python 3.7+**.
+
+## Build Konduit Serving JAR 
+To run any examples with `konduit`, you need to build a Konduit Serving JAR first. 
+We provide a Python script `build_jar.py` at the base of this project to 
+build a Konduit Serving JAR `konduit.jar`: 
 
 ```bash
 cd ..
@@ -26,7 +30,13 @@ where `<your-platform>` is picked from `windows-x86_64`,`linux-x86_64`,`linux-x8
 `macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`, depending on your operating system
 and architecture.
 
+`build_jar.py` uses **Python 3.4+**, but `konduit` itself is Python 2.7 compatible.
+
 ## Running tests
+
+Install test dependencies using `pip install 'konduit[tests]'` if you want to run tests. 
+
+On Windows, compiling the test dependencies requires Visual Studio Build Tools 14.0, which can be installed from [here](https://visualstudio.microsoft.com/downloads/). You may also need to install the Windows 8.1 / 10 SDK. See Python's [*WindowsCompilers*](https://wiki.python.org/moin/WindowsCompilers) page for details. 
 
 The resulting JAR will be generated at the base of the `konduit` project.
 Copy it to the `tests` folder:
@@ -35,8 +45,7 @@ Copy it to the `tests` folder:
 cp konduit.jar python/tests
 ```
 
-
-To validate that this process worked you can now run:
+To validate that this process worked, you can now run the tests with `pytest`:
 
 ```bash
 cd python/tests
