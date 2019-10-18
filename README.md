@@ -207,7 +207,7 @@ with intel chips right now. For other chips, please file an issue.
 
 These arguments are as follows:
 
-1. -Djavacpp.platorm=windows-x86_64 (windows)
+1. -Djavacpp.platform=windows-x86_64
 2. -Djavacpp.platform=linux-x86_64
 3. -Djavacpp.platform=macosx-x86_64
 
