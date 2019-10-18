@@ -62,8 +62,9 @@ def test_server_start():
         'IteratorGetNext:4': np.load('../data/input-4.npy')
     }
 
-    print('Process started. Sleeping 30 seconds.')
-    time.sleep(100)
+    sleep_time = 100
+    print('Process started. Sleeping ' + sleep_time + ' seconds.')
+    time.sleep(sleep_time)
     assert is_port_in_use(port)
 
     try:

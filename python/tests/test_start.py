@@ -43,9 +43,11 @@ def test_server_start():
 
     server = Server(config=inference_config, extra_start_args='-Xmx8g', jar_path='konduit.jar')
     server.start()
-    print('Process started. Sleeping 30 seconds.')
 
-    time.sleep(30)
+    sleep_time = 100
+    print('Process started. Sleeping ' + sleep_time + ' seconds.')
+    time.sleep(sleep_time)
+
     assert is_port_in_use(port)
     print('Done sleeping. Assuming server alive. Killing process.')
     server.stop()
