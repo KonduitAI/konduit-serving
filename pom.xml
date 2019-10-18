@@ -37,6 +37,7 @@
         <module>konduit-serving-api</module>
         <module>konduit-serving-codegen</module>
         <module>konduit-serving-distro-bom</module>
+        <module>konduit-cli</module>
     </modules>
 
     <name>konduit-serving</name>
