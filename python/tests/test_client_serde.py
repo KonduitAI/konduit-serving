@@ -14,7 +14,6 @@ import random
 import numpy as np
 
 
-
 def test_multipart_encode():
     input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
     output_names = ["loss/Softmax"]
@@ -35,17 +34,18 @@ def test_multipart_encode():
     output = client._convert_multi_part_output(content=body, content_type=content_type)
     print(output)
 
+
 def test_python_serde():
     input_names = ['default']
     output_names = ['default']
 
     python_config = PythonConfig(
-        python_code='first += 2'
-        ,python_inputs=['first'],
+        python_code='first += 2',
+        python_inputs=['first'],
         python_outputs=['first']
     )
 
-    port = random.randint(1000,65535)
+    port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=port,
                                    input_data_type='NUMPY',

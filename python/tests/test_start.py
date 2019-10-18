@@ -26,10 +26,10 @@ def test_server_start():
         model_type='TENSORFLOW',
         model_loading_path='./bert_mrpc_frozen.pb'),
         tensor_data_types_config=TensorDataTypesConfig(
-        input_data_types={'IteratorGetNext:0': 'INT32',
-                          'IteratorGetNext:1': 'INT32',
-                          'IteratorGetNext:4': 'INT32'
-                          }))
+            input_data_types={'IteratorGetNext:0': 'INT32',
+                              'IteratorGetNext:1': 'INT32',
+                              'IteratorGetNext:4': 'INT32'
+                              }))
 
     model_pipeline_step = ModelPipelineStep(model_config=tensorflow_config,
                                             serving_config=serving_config,

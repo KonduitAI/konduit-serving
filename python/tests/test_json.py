@@ -11,9 +11,8 @@ from konduit.json_utils import json_with_type
 from jnius import autoclass
 import json
 
-
+StringJava = autoclass("java.lang.String")
 InferenceConfigurationJava = autoclass('ai.konduit.serving.InferenceConfiguration')
-
 
 def test_json_compare():
     parallel_inference_config = ParallelInferenceConfig(workers=1)
@@ -68,8 +67,8 @@ def test_python_serde():
 
 def assert_config_works(config):
     config_json = json_with_type(config)
-    json_str = str(json.dumps(config_json))
-    config = InferenceConfigurationJava.fromJson(json_str)
+    json_str = json.dumps(config_json)
+    config = InferenceConfigurationJava.fromJson(StringJava(json_str))
     test_json = config.toJson()
     test_json_dict = json.loads(test_json)
     config_json_dict = config_json

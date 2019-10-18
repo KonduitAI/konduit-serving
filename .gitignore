@@ -51,3 +51,4 @@ pipelines.pid
 # uberjar creation
 pipelines.jar
 konduit.jar
+python/tests/config.json

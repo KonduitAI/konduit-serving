@@ -15,6 +15,7 @@ import numpy as np
 import time
 import random
 
+
 def test_server_start():
 
     input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
@@ -62,7 +63,7 @@ def test_server_start():
     }
 
     print('Process started. Sleeping 30 seconds.')
-    time.sleep(30)
+    time.sleep(100)
     assert is_port_in_use(port)
 
     try:

@@ -21,15 +21,16 @@ from jnius import autoclass
 def test_build_tp():
     TransformProcessBuilder = autoclass('org.datavec.api.transform.TransformProcess$Builder')
     TransformProcess = autoclass('org.datavec.api.transform.TransformProcess')
+    StringJava = autoclass("java.lang.String")
 
     SchemaBuilder = autoclass('org.datavec.api.transform.schema.Schema$Builder')
-    schema = SchemaBuilder().addColumnString('first').build()
+    schema = SchemaBuilder().addColumnString(StringJava('first')).build()
     tp = TransformProcessBuilder(schema) \
-        .appendStringColumnTransform("first", "two") \
-    .build()
+        .appendStringColumnTransform(StringJava("first"), StringJava("two")) \
+        .build()
 
     tp_json = tp.toJson()
-    from_json = TransformProcess.fromJson(tp_json)
+    from_json = TransformProcess.fromJson(StringJava(tp_json))
     json_tp = json.dumps(tp_json)
     as_python_json = json.loads(tp_json)
     transform_process = TransformProcessPipelineStep(
@@ -57,7 +58,7 @@ def test_build_tp():
                                        pipeline_steps=[transform_process])
     as_json = json_with_type(inference)
     InferenceConfigurationJava = autoclass('ai.konduit.serving.InferenceConfiguration')
-    config = InferenceConfigurationJava.fromJson(json.dumps(as_json))
+    config = InferenceConfigurationJava.fromJson(StringJava(json.dumps(as_json)))
 
     server = Server(config=inference,
                     extra_start_args='-Xmx8g',

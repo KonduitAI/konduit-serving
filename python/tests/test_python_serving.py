@@ -57,7 +57,7 @@ def test_server_start():
         'default': np.load('../data/input-0.npy'),
     }
 
-    time.sleep(4)
+    time.sleep(10)
     assert is_port_in_use(port)
 
     try:
