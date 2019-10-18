@@ -14,7 +14,7 @@ import time
 import random
 
 def test_server_start():
-    port = random.randint(1000,65535)
+    port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=port,
                                    input_data_type='NUMPY',
@@ -44,8 +44,8 @@ def test_server_start():
     server = Server(config=inference_config, extra_start_args='-Xmx8g', jar_path='konduit.jar')
     server.start()
 
-    sleep_time = 100
-    print('Process started. Sleeping ' + sleep_time + ' seconds.')
+    sleep_time = 30
+    print('Process started. Sleeping ' + str(sleep_time) + ' seconds.')
     time.sleep(sleep_time)
 
     assert is_port_in_use(port)

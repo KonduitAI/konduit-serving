@@ -63,7 +63,7 @@ def test_server_start():
     }
 
     sleep_time = 100
-    print('Process started. Sleeping ' + sleep_time + ' seconds.')
+    print('Process started. Sleeping ' + str(sleep_time) + ' seconds.')
     time.sleep(sleep_time)
     assert is_port_in_use(port)
 
