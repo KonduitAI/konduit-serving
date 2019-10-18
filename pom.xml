@@ -674,6 +674,12 @@
                 <module>konduit-serving-orchestration</module>
             </modules>
         </profile>
+        <profile>
+            <id>examples</id>
+            <modules>
+                <module>konduit-serving-examples</module>
+            </modules>
+        </profile>
     </profiles>
 
 
