@@ -24,6 +24,7 @@ package ai.konduit.serving.util;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.SchemaType;
+import javafx.util.Pair;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.ColumnType;
 import org.datavec.api.transform.TransformProcess;
@@ -34,8 +35,11 @@ import org.datavec.api.writable.Writable;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.io.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Utils for a mix of data vec {@link Schema} manipulation
@@ -51,12 +55,9 @@ public class SchemaTypeUtils {
      * @return the record
      */
     public static List<Writable> getRecord(double...values) {
-        List<Writable> ret = new ArrayList<>();
-        for(int i = 0; i < values.length; i++) {
-            ret.add(new DoubleWritable(values[i]));
-        }
-
-        return ret;
+        return Arrays.stream(values)
+                .mapToObj(DoubleWritable::new)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -74,12 +75,9 @@ public class SchemaTypeUtils {
      * @return the input types for the given transform processes
      */
     public static SchemaType[][] inputTypes(TransformProcess[] transformProcesses) {
-        SchemaType[][] types = new SchemaType[transformProcesses.length][];
-        for(int i = 0; i < types.length; i++) {
-            types[i] = SchemaTypeUtils.typesForSchema(transformProcesses[i].getInitialSchema());
-        }
-
-        return types;
+        return Arrays.stream(transformProcesses)
+                .map(transformProcess -> SchemaTypeUtils.typesForSchema(transformProcess.getInitialSchema()))
+                .toArray(SchemaType[][]::new);
     }
 
     /**
@@ -88,14 +86,10 @@ public class SchemaTypeUtils {
      * @return the input types for the given transform processes
      */
     public static SchemaType[][] outputTypes(TransformProcess[] transformProcesses) {
-        SchemaType[][] types = new SchemaType[transformProcesses.length][];
-        for(int i = 0; i < types.length; i++) {
-            types[i] = SchemaTypeUtils.typesForSchema(transformProcesses[i].getFinalSchema());
-        }
-
-        return types;
+        return Arrays.stream(transformProcesses)
+                .map(transformProcess -> SchemaTypeUtils.typesForSchema(transformProcess.getFinalSchema()))
+                .toArray(SchemaType[][]::new);
     }
-
 
     /**
      * Extract an ordered list
@@ -105,12 +99,9 @@ public class SchemaTypeUtils {
      * of the columns in the schema
      */
     public static SchemaType[] typesForSchema(Schema schema) {
-        SchemaType[] ret = new SchemaType[schema.numColumns()];
-        for(int i = 0; i < ret.length; i++) {
-            ret[i] = schemaTypeForColumnType(schema.getType(i));
-        }
-
-        return ret;
+        return IntStream.range(0, schema.numColumns())
+                .mapToObj(i -> schemaTypeForColumnType(schema.getType(i)))
+                .toArray(SchemaType[]::new);
     }
 
     /**
@@ -119,14 +110,10 @@ public class SchemaTypeUtils {
      * @param schema the schema to decompose
      * @return the map of name to {@link SchemaType}
      */
-    public static Map<String,SchemaType> typeMappingsForSchema(Schema schema) {
-        Map<String,SchemaType> ret = new LinkedHashMap<>();
-        for(int i = 0; i < schema.numColumns(); i++) {
-            ret.put(schema.getName(i),schemaTypeForColumnType(schema.getType(i)));
-        }
-
-
-        return ret;
+    public static Map<String, SchemaType> typeMappingsForSchema(Schema schema) {
+        return IntStream.range(0, schema.numColumns())
+                .mapToObj(i -> new Pair<>(schema.getName(i), schemaTypeForColumnType(schema.getType(i))))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
     /**
@@ -187,7 +174,6 @@ public class SchemaTypeUtils {
                     throw new UnsupportedOperationException();
                 default:
                     throw new UnsupportedOperationException("Unknown type " + types[i]);
-
             }
         }
 
@@ -201,12 +187,9 @@ public class SchemaTypeUtils {
      * @return the underlying {@link INDArray}
      */
     public static Writable[] fromArrays(INDArray[] writables) {
-        Writable[] ret = new Writable[writables.length];
-        for(int i = 0; i < ret.length; i++) {
-            ret[i] = new NDArrayWritable(writables[i]);
-        }
-
-        return ret;
+        return Arrays.stream(writables)
+                .map(NDArrayWritable::new)
+                .toArray(Writable[]::new);
     }
 
     /**
@@ -216,13 +199,9 @@ public class SchemaTypeUtils {
      * @return the underlying {@link INDArray}
      */
     public static INDArray[] fromWritables(Writable[] writables) {
-        INDArray[] ret = new INDArray[writables.length];
-        for(int i = 0; i < ret.length; i++) {
-            NDArrayWritable ndArrayWritable = (NDArrayWritable) writables[i];
-            ret[i] = ndArrayWritable.get();
-        }
-
-        return ret;
+        return Arrays.stream(writables)
+                .map(writable -> ((NDArrayWritable) writable).get())
+                .toArray(INDArray[]::new);
     }
 
     /**
@@ -233,14 +212,11 @@ public class SchemaTypeUtils {
      * @return the equivalent output records
      */
     public static Record[] toRecords(INDArray[] input) {
-        Record[] ret = new Record[input.length];
-        for(int i = 0; i < ret.length; i++) {
-            ret[i] = new org.datavec.api.records.impl.Record(
-                    Arrays.asList(new NDArrayWritable(input[i]))
-                    ,null);
-        }
-
-        return ret;
+        return Arrays.stream(input)
+                .map(singleInput -> new org.datavec.api.records.impl.Record(
+                        Collections.singletonList(new NDArrayWritable(singleInput)),
+                        null))
+                .toArray(Record[]::new);
     }
 
     /**
@@ -253,23 +229,12 @@ public class SchemaTypeUtils {
      * @return the extracted {@link INDArray}
      */
     public static INDArray[] toArrays(Record[] records) {
-        INDArray[] ret = new INDArray[records[0].getRecord().size()];
-        int initialLength = ret.length;
-        //each ndarray
-        for(int i = 0; i < initialLength; i++) {
-            List<INDArray> accum = new ArrayList<>();
-            //for each record
-            for(Record record : records) {
-                NDArrayWritable writable = (NDArrayWritable) record.getRecord().get(i);
-                accum.add(writable.get());
-
-            }
-
-            ret[i] = Nd4j.concat(0,accum.toArray(new INDArray[0]));
-
-        }
-
-        return ret;
+        return IntStream.range(0, records[0].getRecord().size())
+                .mapToObj(i -> Nd4j.concat(0, Arrays.stream(records)
+                        .map(record -> ((NDArrayWritable) record.getRecord().get(i)).get())
+                        .toArray(INDArray[]::new))
+                )
+                .toArray(INDArray[]::new);
     }
 
 }

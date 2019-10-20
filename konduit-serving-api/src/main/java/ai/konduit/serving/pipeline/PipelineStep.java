@@ -81,22 +81,14 @@ public abstract class PipelineStep implements Serializable {
 
     //only process these names
     @Singular
-    private List<String> affectedInputNames,affectedOutputNames;
+    private List<String> affectedInputNames, affectedOutputNames;
     @Singular
-    private Map<String,List<String>> inputColumnNames,outputColumnNames;
+    private Map<String,List<String>> inputColumnNames, outputColumnNames;
 
     public List<String> getTargetInputStepInputNames() {
         return affectedInputNames != null ? affectedInputNames : inputNames;
     }
 
-
-    public Schema outputSchemaForName(String name) {
-        Preconditions.checkNotNull(outputSchemas,"No input schemas specified in configuration!");
-
-        if(!outputSchemas.containsKey(name))
-            return null;
-        return SchemaTypeUtils.toSchema(outputSchemas.get(name), outputColumnNames.get(name));
-    }
 
     public Schema inputSchemaForName(String name) {
         Preconditions.checkNotNull(inputSchemas,"No input schemas specified in configuration!");
@@ -107,10 +99,19 @@ public abstract class PipelineStep implements Serializable {
                 inputColumnNames.get(name));
     }
 
-    public SchemaType[] inputTypesForName(String name) {
-        if(!inputSchemas.containsKey(name)) {
+    public Schema outputSchemaForName(String name) {
+        Preconditions.checkNotNull(outputSchemas,"No output schemas specified in configuration!");
+
+        if(!outputSchemas.containsKey(name))
             return null;
-        }
+
+        return SchemaTypeUtils.toSchema(outputSchemas.get(name), outputColumnNames.get(name));
+    }
+
+    public SchemaType[] inputTypesForName(String name) {
+        if(!inputSchemas.containsKey(name))
+            return null;
+
         return inputSchemas.get(name);
     }
 

@@ -53,7 +53,6 @@ public enum TensorDataType {
     UINT32,
     UINT64;
 
-
     /**
      * Map a tensor data type to a proto value found in tensorflow.
      * Generally, this is just replacing DT_ with empty
@@ -65,8 +64,6 @@ public enum TensorDataType {
         String valueReplace = value.replace("DT_","");
         return TensorDataType.valueOf(valueReplace);
     }
-
-
 
     /**
      * Get the python name for the given data type
@@ -96,7 +93,6 @@ public enum TensorDataType {
             default: throw new IllegalArgumentException("Unsupported type " + tensorDataType.name());
         }
     }
-
 
     public static TensorDataType fromNd4jType(DataType dataType) {
         switch(dataType) {
@@ -132,5 +128,4 @@ public enum TensorDataType {
             default: return fromNd4jType(dataType);
         }
     }
-
 }

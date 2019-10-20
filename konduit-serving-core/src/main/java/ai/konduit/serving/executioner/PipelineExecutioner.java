@@ -55,6 +55,7 @@ import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.deeplearning4j.zoo.util.Labels;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.io.CollectionUtils;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 
 import java.io.ByteArrayOutputStream;
@@ -123,47 +124,36 @@ public class PipelineExecutioner {
             PipelineStepRunner pipelineStepRunner = pipeline.getSteps().get(i);
             Preconditions.checkNotNull(pipelineStep,"Pipeline step at " + i + " was null!");
             //only use the first input names that appear in the pipeline
-            if (inputNames == null && pipelineStep.getInputNames() != null && !pipelineStep.getInputNames().isEmpty()) {
-                inputNames = config.getPipelineSteps().get(i).getInputNames();
+            if (inputNames == null && !CollectionUtils.isEmpty(pipelineStep.getInputNames())) { // Checks for both null or empty collection
+                inputNames = pipelineStep.getInputNames();
             }
 
             //always have output names change to the last defined names in the pipeline
-            if (pipelineStep.getOutputNames() != null && !pipelineStep.getOutputNames().isEmpty()) {
-                outputNames = config.getPipelineSteps().get(i).getOutputNames();
+            if (!CollectionUtils.isEmpty(pipelineStep.getOutputNames())) { // Checks for both null or empty collection
+                outputNames = pipelineStep.getOutputNames();
             }
 
-
-            if(inputSchema == null && pipelineStep
-                    .getInputSchemas() != null &&
-                    !pipelineStep
-                            .getInputSchemas().isEmpty() &&
-                    pipelineStep
-                            .getInputSchemas().get("default") != null &&
+            if(inputSchema == null &&
+                    !CollectionUtils.isEmpty(pipelineStep.getInputSchemas()) && // Checks for both null or empty collection
+                    pipelineStep.getInputSchemas().get("default") != null &&
+                    !CollectionUtils.isEmpty(pipelineStep.getInputColumnNames()) && // Checks for both null or empty collection
                     pipelineStep.getInputColumnNames().get("default") != null) {
-                inputSchema = SchemaTypeUtils.toSchema(pipelineStep
-                                .getInputSchemas().get("default"),
-                        pipelineStep
-                                .getInputColumnNames().get("default"));
+                inputSchema = SchemaTypeUtils.toSchema(pipelineStep.getInputSchemas().get("default"),
+                        pipelineStep.getInputColumnNames().get("default"));
             }
 
-            if(outputSchema == null && pipelineStep
-                    .getOutputSchemas() != null &&
-                    pipelineStep
-                            .getOutputSchemas().get("default") != null
-                    &&
-                    !pipelineStep
-                            .getOutputSchemas().isEmpty() &&
+            if(outputSchema == null &&
+                    !CollectionUtils.isEmpty(pipelineStep.getOutputSchemas()) && // Checks for both null or empty collection
+                    pipelineStep.getOutputSchemas().get("default") != null &&
+                    !CollectionUtils.isEmpty(pipelineStep.getOutputColumnNames()) && // Checks for both null or empty collection
                     pipelineStep.getInputColumnNames().get("default") != null) {
-                outputSchema = SchemaTypeUtils.toSchema(pipelineStep
-                                .getOutputSchemas().get("default"),
-                        pipelineStep
-                                .getOutputColumnNames().get("default"));
-
+                outputSchema = SchemaTypeUtils.toSchema(pipelineStep.getOutputSchemas().get("default"),
+                        pipelineStep.getOutputColumnNames().get("default"));
             }
 
             if(pipelineStepRunner instanceof InferenceExecutionerPipelineStepRunner) {
-                ModelPipelineStep modelPipelineStepConfig = (ModelPipelineStep) pipelineStep;
-                modelConfig = modelPipelineStepConfig.getModelConfig();
+                ModelPipelineStep modelPipelineStep = (ModelPipelineStep) pipelineStep;
+                modelConfig = modelPipelineStep.getModelConfig();
                 tensorDataTypesConfig = modelConfig.getTensorDataTypesConfig();
             }
 
@@ -171,12 +161,9 @@ public class PipelineExecutioner {
                 ImageLoading imageLoadingConfig = (ImageLoading) pipelineStep;
                 objectDetectionConfig = imageLoadingConfig.getObjectDetectionConfig();
             }
-
-
         }
 
         initDataTypes();
-
 
         try {
             if(servingConfig.getOutputDataType() == Output.DataType.JSON) {
@@ -189,7 +176,6 @@ public class PipelineExecutioner {
             log.error("Error initializing output adapter.",e);
 
         }
-
 
         if (servingConfig.getInputDataType() == null) {
             throw new IllegalStateException("Please define an input data type!");

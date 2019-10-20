@@ -38,7 +38,6 @@ import java.util.Map;
  */
 public interface PipelineStepRunner {
 
-
     /**
      * Destroy the pipeline runner
      */
@@ -58,8 +57,6 @@ public interface PipelineStepRunner {
      */
     Map<String, SchemaType[]> outputTypes();
 
-
-
     /**
      * Transform a set of {@link INDArray}
      * via this operation.
@@ -67,7 +64,4 @@ public interface PipelineStepRunner {
      * @return the output from the transform
      */
     Record[] transform(Record[] input);
-
-
-
 }
