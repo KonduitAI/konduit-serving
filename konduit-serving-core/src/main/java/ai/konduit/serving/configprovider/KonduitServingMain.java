@@ -26,6 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
@@ -72,41 +73,64 @@ import static java.lang.System.setProperty;
  *
  * @author Adam Gibson
  */
+@Parameters(commandDescription = "Konduit server main class command line.")
 public class KonduitServingMain {
 
-    @Parameter(names = {"--configHost"},help = true, description = "The host for downloading the configuration from")
+    @Parameter(names = {"--configHost"},
+            description = "The host for downloading the configuration from.")
     private String configHost;
-    @Parameter(names = {"--configPort"},help = true, description = "The port for downloading the configuration from")
+
+    @Parameter(names = {"--configPort"},
+            description = "The port for downloading the configuration from.")
     private int configPort;
 
-    @Parameter(names = {"--configStoreType"},help = true, description = "The configuration store type (usually http " +
-            "or file) where the configuration is stored")
+    @Parameter(names = {"--configStoreType"},
+            description = "The configuration store type (usually http or file) where the configuration is stored.")
     private String configStoreType;
-    @Parameter(names = {"--configPath"},help = true, description = "The path to the configuration. With http, this " +
-            "will be the path after host:port. With files, this will be an absolute path.")
+
+    @Parameter(names = {"--configPath"},
+            description = "The path to the configuration. With http, this will be the path after host:port. With files, this will be an absolute path.")
     private String configPath = new File(System.getProperty("user.dir"), "config.json").getAbsolutePath();
 
-    @Parameter(names = {"--workerNode"},help = true, description = "Whether this is a worker node or not")
+    @Parameter(names = {"--workerNode"},
+            description = "Whether this is a worker node or not.")
     private boolean workerNode = true;
-    @Parameter(names = {"--ha"}, help = true, description = "Whether this node is deployed as Highly available or not.")
+
+    @Parameter(names = {"--ha"},
+            description = "Whether this node is deployed as Highly available or not.")
     private boolean ha = false;
-    @Parameter(names = {"--numInstances"}, help = true, description = "The number of instances to deploy of this verticle.")
+
+    @Parameter(names = {"--numInstances"}, description = "The number of instances to deploy of this verticle.")
     private int numInstances = 1;
-    @Parameter(names = {"--workerPoolSize"}, help = true, description = "The number of workers for use with this verticle.")
+
+    @Parameter(names = {"--workerPoolSize"},
+            description = "The number of workers for use with this verticle.")
     private int workerPoolSize = 20;
-    @Parameter(names = {"--verticleClassName"}, help = true, description = "The fully qualified class name to the verticle to be used.")
+
+    @Parameter(names = {"--verticleClassName"},
+            description = "The fully qualified class name to the verticle to be used.")
     private String verticleClassName = InferenceVerticle.class.getName();
-    @Parameter(names = "--vertxWorkingDirectory", help = true, description = "The absolute path to use for vertx. This defaults to the user's home directory.")
+
+    @Parameter(names = "--vertxWorkingDirectory",
+            description = "The absolute path to use for vertx. This defaults to the user's home directory.")
     private String vertxWorkingDirectory = System.getProperty("user.home");
 
-    @Parameter(names = "--pidFile", help = true, description = "The absolute path to the PID file. This defaults to the current directory: pipelines.pid.")
+    @Parameter(names = "--pidFile",
+            description = "The absolute path to the PID file. This defaults to the current directory: pipelines.pid.")
     private String pidFile = new File(System.getProperty("user.dir"), "konduit-serving.pid").getAbsolutePath();
 
-    @Parameter(names = {"--eventLoopTimeout"}, help = true, description = "The event loop timeout")
+    @Parameter(names = {"--eventLoopTimeout"},
+            description = "The event loop timeout")
     private long eventLoopTimeout = 120000;
 
-    @Parameter(names = {"--eventLoopExecutionTimeout"}, help = true, description = "The event loop timeout")
+    @Parameter(names = {"--eventLoopExecutionTimeout"},
+            description = "The event loop timeout.")
     private long eventLoopExecutionTimeout = 120000;
+
+    @Parameter(names = {"--help", "-h"},
+            description = "Show command usage help.",
+            help = true)
+    private boolean help;
 
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
 
@@ -204,7 +228,7 @@ public class KonduitServingMain {
             if(!tmpFile.exists()) {
                 throw new IllegalStateException("Path " + tmpFile.getAbsolutePath() + " does not exist!");
             }
-            else if(configPath.endsWith(".yml")) {
+            else if(configPath.endsWith(".yml") || configPath.endsWith(".yaml")) {
                 File configInputYaml = new File(configPath);
                 File tmpConfigJson = new File(configInputYaml.getParent(), UUID.randomUUID() + "-config.json");
                 log.info("Rewriting yml " + configPath + " to json " + tmpConfigJson + " . THis file will disappear after server is stopped.");
