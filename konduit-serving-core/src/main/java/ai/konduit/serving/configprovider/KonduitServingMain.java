@@ -33,6 +33,7 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
+import io.vertx.config.spi.utils.Processors;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
@@ -78,15 +79,15 @@ public class KonduitServingMain {
 
     @Parameter(names = {"--configHost"},
             description = "The host for downloading the configuration from.")
-    private String configHost;
+    private String configHost = null;
 
     @Parameter(names = {"--configPort"},
             description = "The port for downloading the configuration from.")
-    private int configPort;
+    private int configPort = 9008;
 
     @Parameter(names = {"--configStoreType"},
             description = "The configuration store type (usually http or file) where the configuration is stored.")
-    private String configStoreType;
+    private String configStoreType = "file";
 
     @Parameter(names = {"--configPath"},
             description = "The path to the configuration. With http, this will be the path after host:port. With files, this will be an absolute path.")
@@ -113,7 +114,7 @@ public class KonduitServingMain {
 
     @Parameter(names = "--vertxWorkingDirectory",
             description = "The absolute path to use for vertx. This defaults to the user's home directory.")
-    private String vertxWorkingDirectory = System.getProperty("user.home");
+    private String vertxWorkingDirectory = new File(System.getProperty("user.home"), ".vertxWorkingDirectory").getAbsolutePath();
 
     @Parameter(names = "--pidFile",
             description = "The absolute path to the PID file. This defaults to the current directory: pipelines.pid.")
@@ -130,7 +131,7 @@ public class KonduitServingMain {
     @Parameter(names = {"--help", "-h"},
             description = "Show command usage help.",
             help = true)
-    private boolean help;
+    private boolean help = false;
 
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
 
@@ -147,13 +148,34 @@ public class KonduitServingMain {
     public void runMain(String...args) {
         log.debug("Parsing args " + Arrays.toString(args));
         JCommander jCommander = new JCommander(this);
-        jCommander.parse(args);
+
+        if(help) {
+            jCommander.usage();
+            return;
+        }
+
+        try {
+            jCommander.parse(args);
+        } catch (Exception e) {
+            jCommander.usage();
+            log.error(e.getMessage(), e);
+        }
         JsonObject config = new JsonObject();
 
         File workingDir = new File(vertxWorkingDirectory);
-        if (!workingDir.canRead() || !workingDir.canWrite()) {
-            throw new IllegalStateException("Illegal Directory " + vertxWorkingDirectory + " unable to " +
-                    "write or read. Please specify a proper vertx working directory");
+        if(!workingDir.exists()) {
+            if(!workingDir.mkdirs()) {
+                throw new IllegalStateException(String.format("Unable to create directory specified by the path: %s", vertxWorkingDirectory));
+            }
+        }
+
+        if(workingDir.isDirectory()) {
+            if (!workingDir.canRead() || !workingDir.canWrite()){
+                throw new IllegalStateException("Illegal Directory " + vertxWorkingDirectory + " unable to " +
+                        "write or read. Please specify a proper vertx working directory.");
+            }
+        } else {
+            throw new IllegalStateException(String.format("Invalid directory path format %s for vertxWorkingDirectory.", vertxWorkingDirectory));
         }
 
         try {
@@ -201,8 +223,9 @@ public class KonduitServingMain {
         });
 
         if (verticleClassName == null) {
-            log.debug("Attempting to resolve verticle name");
+            log.debug("Attempting to resolve verticle name...");
             verticleClassName = InferenceVerticle.class.getName();
+            log.debug("Selected verticle class is: %s", verticleClassName);
         }
 
         String[] split = verticleClassName.split("\\.");
@@ -220,30 +243,28 @@ public class KonduitServingMain {
             }
         });
 
-        if (configHost != null)
-            config.put("host", configHost);
+        if (configHost != null) config.put("host", configHost);
 
         if (configPath != null) {
             File tmpFile = new File(configPath);
             if(!tmpFile.exists()) {
                 throw new IllegalStateException("Path " + tmpFile.getAbsolutePath() + " does not exist!");
-            }
-            else if(configPath.endsWith(".yml") || configPath.endsWith(".yaml")) {
+            } else if(configPath.endsWith(".yml") || configPath.endsWith(".yaml")) {
                 File configInputYaml = new File(configPath);
                 File tmpConfigJson = new File(configInputYaml.getParent(), UUID.randomUUID() + "-config.json");
                 log.info("Rewriting yml " + configPath + " to json " + tmpConfigJson + " . THis file will disappear after server is stopped.");
                 tmpConfigJson.deleteOnExit();
 
                 try {
-                    InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromYaml(
-                            FileUtils.readFileToString(tmpFile,
-                                    Charset.defaultCharset()));
+                    InferenceConfiguration inferenceConfiguration = InferenceConfiguration
+                            .fromYaml(FileUtils.readFileToString(tmpFile, Charset.defaultCharset()));
+
                     FileUtils.writeStringToFile(tmpConfigJson,
                             inferenceConfiguration.toJson(),
                             Charset.defaultCharset());
+
                     configPath = tmpConfigJson.getAbsolutePath();
                     log.info("Rewrote input config yaml to path " + tmpConfigJson.getAbsolutePath());
-
                 } catch (IOException e) {
                     log.error("Unable to rewrite configuration as json ", e);
                 }
@@ -251,7 +272,11 @@ public class KonduitServingMain {
             config.put("path", configPath);
         }
 
-        if (configStoreType != null && configStoreType.equals("file")) {
+        if(configStoreType == null) {
+            configStoreType = "file";
+        }
+
+        if (configStoreType.equals("file")) {
             log.debug("Using file storage type.");
             if (!new File(configPath).exists()) {
                 log.warn("No file found for config path. Exiting");
@@ -259,17 +284,14 @@ public class KonduitServingMain {
             }
         }
 
-        if(configStoreType == null) {
-            configStoreType = "file";
-        }
+        System.out.println(Processors.getSupportedFormats().toString());
 
-        ConfigStoreOptions httpStore = new ConfigStoreOptions()
+        ConfigStoreOptions configStoreOptions = new ConfigStoreOptions()
                 .setType(configStoreType)
                 .setOptional(false)
                 .setConfig(config);
 
-        ConfigRetrieverOptions options = new ConfigRetrieverOptions()
-                .addStore(httpStore);
+        ConfigRetrieverOptions options = new ConfigRetrieverOptions().addStore(configStoreOptions);
 
         ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
         AtomicBoolean deployed = new AtomicBoolean(false);

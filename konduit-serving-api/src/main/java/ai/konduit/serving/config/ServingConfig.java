@@ -23,6 +23,7 @@
 package ai.konduit.serving.config;
 
 import ai.konduit.serving.metrics.MetricType;
+import static ai.konduit.serving.metrics.MetricType.*;
 import lombok.*;
 
 import java.util.Arrays;
@@ -34,38 +35,36 @@ import java.util.List;
 @NoArgsConstructor
 public class ServingConfig {
 
-    private PubsubConfig pubSubConfig;
-
-    private int httpPort;
-
+    @Builder.Default
+    private int httpPort = 9008;
     @Builder.Default
     private String listenHost = "localhost";
+
     @Builder.Default
     private Input.DataType inputDataType = Input.DataType.JSON;
     @Builder.Default
     private Output.DataType outputDataType = Output.DataType.JSON;
-
     @Builder.Default
     private Output.PredictionType predictionType = Output.PredictionType.CLASSIFICATION;
 
-    @Builder.Default
-    private ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
 
     @Builder.Default
     private String uploadsDirectory = "file-uploads/";
-
     @Builder.Default
     private boolean logTimings = false;
+    @Builder.Default
+    private ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
+
+    private PubsubConfig pubSubConfig;
 
     @Builder.Default
     private List<MetricType> metricTypes = Arrays.asList(
-            MetricType.CLASS_LOADER,
-            MetricType.JVM_MEMORY,
-            MetricType.JVM_GC,
-            MetricType.PROCESSOR,
-            MetricType.JVM_THREAD,
-            MetricType.LOGGING_METRICS,
-            MetricType.NATIVE
+            CLASS_LOADER,
+            JVM_MEMORY,
+            JVM_GC,
+            PROCESSOR,
+            JVM_THREAD,
+            LOGGING_METRICS,
+            NATIVE
     );
-
 }

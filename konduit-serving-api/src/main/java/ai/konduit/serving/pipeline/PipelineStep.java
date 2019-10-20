@@ -95,8 +95,7 @@ public abstract class PipelineStep implements Serializable {
 
         if(!outputSchemas.containsKey(name))
             return null;
-        return SchemaTypeUtils.toSchema(outputSchemas.get(name),
-                outputColumnNames.get(name));
+        return SchemaTypeUtils.toSchema(outputSchemas.get(name), outputColumnNames.get(name));
     }
 
     public Schema inputSchemaForName(String name) {
@@ -112,7 +111,6 @@ public abstract class PipelineStep implements Serializable {
         if(!inputSchemas.containsKey(name)) {
             return null;
         }
-
         return inputSchemas.get(name);
     }
 
@@ -124,7 +122,6 @@ public abstract class PipelineStep implements Serializable {
         Preconditions.checkState(!inputNames.isEmpty(),"Input names must not be empty!");
         return inputNames.get(i);
     }
-
 
     public boolean processColumn(String name,int index) {
         if(inputColumnNames.isEmpty())
@@ -156,7 +153,6 @@ public abstract class PipelineStep implements Serializable {
     }
 
     public abstract String pipelineStepClazz();
-
 
     public enum StepType {
         PYTHON,

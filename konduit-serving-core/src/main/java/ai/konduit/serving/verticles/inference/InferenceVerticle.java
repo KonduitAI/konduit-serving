@@ -91,7 +91,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     private PipelineExecutioner pipelineExecutioner;
     private InferenceConfiguration inferenceConfiguration;
     //cached for columnar inputs, not used in binary endpoints
-    private Schema inputSchema,outputSchema = null;
+    private Schema inputSchema, outputSchema = null;
     private LongTaskTimer inferenceExecutionTimer,batchCreationTimer;
 
 
@@ -111,7 +111,6 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     @Override
     public void start() throws Exception {
         super.start();
-
     }
 
     @Override
@@ -132,7 +131,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         try {
             inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
         } catch (IOException e) {
-            throw new IllegalStateException("Passed in illegal configuration, unable to read InferenceConfiguration object",e);
+            throw new IllegalStateException("Passed in illegal configuration, unable to read InferenceConfiguration object", e);
         }
 
         MeterRegistry registry = BackendRegistries.getDefaultNow();
@@ -145,8 +144,9 @@ public class InferenceVerticle extends BaseRoutableVerticle {
             batchCreationTimer = LongTaskTimer
                     .builder("batch_creation")
                     .register(registry);
-
         }
+
+        Preconditions.checkNotNull(inferenceConfiguration.getServingConfig(),"Please define a serving configuration.");
 
         if(inferenceConfiguration.getServingConfig().getMetricTypes() != null && registry != null) {
             //don't add more than one type
@@ -182,43 +182,36 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                         }
                         break;
                 }
-
             }
         }
 
-        router.get("/healthcheck").handler(ctx -> {
-            ctx.response().end("Ok");
-        });
-
-        router.get("/metrics").handler(PrometheusScrapingHandler.create())
-                .failureHandler(failureHandler -> {
-                    if(failureHandler.failure() != null) {
-                        log.error("Failed to scrape metrics",failureHandler.failure());
-                    }
-                });
-
-
-
-        Preconditions.checkNotNull(inferenceConfiguration.getServingConfig(),"Please define a serving configuration.");
         router.post().handler(BodyHandler.create()
                 .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
                 .setDeleteUploadedFilesOnEnd(true)
                 .setMergeFormAttributes(true))
-                .failureHandler(failureHandlder -> {
-                    if(failureHandlder.statusCode() == 404) {
-                        log.warn("404 at route " + failureHandlder.request().path());
-                    }
-                    else if(failureHandlder.failed()) {
-                        if(failureHandlder.failure() != null) {
-                            log.error("Request failed with cause ",failureHandlder.failure());
-                        }
-                        else {
+                .failureHandler(failureHandler -> {
+                    if(failureHandler.statusCode() == 404) {
+                        log.warn("404 at route " + failureHandler.request().path());
+                    } else if(failureHandler.failed()) {
+                        if(failureHandler.failure() != null) {
+                            log.error("Request failed with cause ", failureHandler.failure());
+                        } else {
                             log.error("Request failed with unknown cause.");
                         }
 
                     }
                 });
 
+        router.get("/healthcheck").handler(ctx -> {
+            ctx.response().end("Ok");
+        });
+
+        router.get("/metrics").handler(PrometheusScrapingHandler.create())
+            .failureHandler(failureHandler -> {
+                if(failureHandler.failure() != null) {
+                    log.error("Failed to scrape metrics",failureHandler.failure());
+                }
+            });
 
 
         router.post("/:operation/:inputType")
@@ -243,10 +236,10 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                 for(PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
                     if(pipelineStep instanceof ModelPipelineStep) {
                         outputSchema = pipelineStep.outputSchemaForName("default");
-                    }
-                    else if(pipelineStep instanceof PythonPipelineStep) {
+                    } else if(pipelineStep instanceof PythonPipelineStep) {
                         outputSchema = pipelineStep.outputSchemaForName("default");
                     }
+
                     if(pipelineStep instanceof TransformProcessPipelineStep) {
                         outputSchema = pipelineStep.inputSchemaForName("default");
                     }

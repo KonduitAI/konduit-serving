@@ -63,7 +63,6 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-
 /**
  * A handler for parsing binary input
  * and then depending on the model loader
@@ -108,11 +107,9 @@ public class PipelineExecutioner {
         this.config = inferenceConfiguration;
     }
 
-
     public InferenceConfiguration config() {
         return config;
     }
-
 
     /**
      * Init the pipeline executioner.

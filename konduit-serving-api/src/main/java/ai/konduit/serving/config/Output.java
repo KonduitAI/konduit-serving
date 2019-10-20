@@ -31,7 +31,6 @@ public class Output {
         ARROW,
     }
 
-
     public enum PredictionType {
         CLASSIFICATION,
         YOLO,

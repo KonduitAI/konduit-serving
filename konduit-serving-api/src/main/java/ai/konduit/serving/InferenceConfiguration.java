@@ -43,7 +43,6 @@ public class InferenceConfiguration implements Serializable  {
     private List<PipelineStep> pipelineSteps;
     private ServingConfig servingConfig;
 
-
     /**
      * Returns a serving configuration if one is defined
      * or creaes a new one if it doesn't exist

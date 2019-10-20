@@ -49,7 +49,6 @@ public class Pipeline {
     @Getter
     private List<PipelineStepRunner> steps;
 
-
     /**
      * Create a pipeline from a list of pipeline steps.
      * All this does is calls a constructor present on each {@link PipelineStepRunner}
@@ -68,8 +67,8 @@ public class Pipeline {
                 Constructor constructor = clazz.getConstructor(PipelineStep.class);
                 PipelineStepRunner pipelineStepRunner = (PipelineStepRunner) constructor.newInstance(config);
                 builder = builder.step(pipelineStepRunner);
-            }catch(Exception e) {
-                throw new IllegalStateException("Unable to instantiate pipeline step from class " + config.pipelineStepClazz(),e);
+            } catch(Exception e) {
+                throw new IllegalStateException("Unable to instantiate pipeline step from class " + config.pipelineStepClazz(), e);
             }
         }
 
