@@ -74,38 +74,38 @@ import static java.lang.System.setProperty;
  */
 public class KonduitServingMain {
 
-    @Parameter(names = {"--configHost"},help = true,description = "The host for downloading the configuration from")
+    @Parameter(names = {"--configHost"},help = true, description = "The host for downloading the configuration from")
     private String configHost;
-    @Parameter(names = {"--configPort"},help = true,description = "The port for downloading the configuration from")
+    @Parameter(names = {"--configPort"},help = true, description = "The port for downloading the configuration from")
     private int configPort;
 
-    @Parameter(names = {"--configStoreType"},help = true,description = "The configuration store type (usually http " +
+    @Parameter(names = {"--configStoreType"},help = true, description = "The configuration store type (usually http " +
             "or file) where the configuration is stored")
     private String configStoreType;
-    @Parameter(names = {"--configPath"},help = true,description = "The path to the configuration. With http, this " +
+    @Parameter(names = {"--configPath"},help = true, description = "The path to the configuration. With http, this " +
             "will be the path after host:port. With files, this will be an absolute path.")
-    private String configPath = "/srv/";
+    private String configPath = new File(System.getProperty("user.dir"), "config.json").getAbsolutePath();
 
-    @Parameter(names = {"--workerNode"},help = true,description = "Whether this is a worker node or not")
+    @Parameter(names = {"--workerNode"},help = true, description = "Whether this is a worker node or not")
     private boolean workerNode = true;
-    @Parameter(names = {"--ha"},help = true,description = "Whether this node is deployed as Highly available or not.")
+    @Parameter(names = {"--ha"}, help = true, description = "Whether this node is deployed as Highly available or not.")
     private boolean ha = false;
-    @Parameter(names = {"--numInstances"},help = true,description = "The number of instances to deploy of this verticle.")
+    @Parameter(names = {"--numInstances"}, help = true, description = "The number of instances to deploy of this verticle.")
     private int numInstances = 1;
-    @Parameter(names = {"--workerPoolSize"},help = true,description = "The number of workers for use with this verticle.")
+    @Parameter(names = {"--workerPoolSize"}, help = true, description = "The number of workers for use with this verticle.")
     private int workerPoolSize = 20;
-    @Parameter(names = {"--verticleClassName"},help = true,description = "The fully qualified class name to the verticle to be used.")
+    @Parameter(names = {"--verticleClassName"}, help = true, description = "The fully qualified class name to the verticle to be used.")
     private String verticleClassName = InferenceVerticle.class.getName();
-    @Parameter(names = "--vertxWorkingDirectory",help = true,description = "The absolute path to use for vertx. This defaults to the user's home directory.")
+    @Parameter(names = "--vertxWorkingDirectory", help = true, description = "The absolute path to use for vertx. This defaults to the user's home directory.")
     private String vertxWorkingDirectory = System.getProperty("user.home");
 
-    @Parameter(names = "--pidFile",help = true,description = "The absolute path to the PID file. This defaults to the current directory: pipelines.pid.")
-    private String pidFile = new File(System.getProperty("user.dir"),"pipelines.pid").getAbsolutePath();
+    @Parameter(names = "--pidFile", help = true, description = "The absolute path to the PID file. This defaults to the current directory: pipelines.pid.")
+    private String pidFile = new File(System.getProperty("user.dir"), "konduit-serving.pid").getAbsolutePath();
 
-    @Parameter(names = {"--eventLoopTimeout"},help = true,description = "The event loop timeout")
+    @Parameter(names = {"--eventLoopTimeout"}, help = true, description = "The event loop timeout")
     private long eventLoopTimeout = 120000;
 
-    @Parameter(names = {"--eventLoopExecutionTimeout"},help = true,description = "The event loop timeout")
+    @Parameter(names = {"--eventLoopExecutionTimeout"}, help = true, description = "The event loop timeout")
     private long eventLoopExecutionTimeout = 120000;
 
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
@@ -143,10 +143,10 @@ public class KonduitServingMain {
             }
 
             log.info("Writing pid file to " + pidFile + " with pid " + pid);
-            FileUtils.writeStringToFile(write,String.valueOf(pid),Charset.defaultCharset());
+            FileUtils.writeStringToFile(write, String.valueOf(pid), Charset.defaultCharset());
             write.deleteOnExit();
-        }catch(Exception e) {
-            log.warn("Unable to write pid file.",e);
+        } catch(Exception e) {
+            log.warn("Unable to write pid file.", e);
         }
 
         setProperty("vertx.cwd", vertxWorkingDirectory);
@@ -170,8 +170,9 @@ public class KonduitServingMain {
                 .setBlockedThreadCheckInterval(eventLoopTimeout)
                 .setWorkerPoolSize(workerPoolSize)
                 .setMetricsOptions(micrometerMetricsOptions));
+
         vertx.exceptionHandler(handler -> {
-            log.error("Error occurred",handler.getCause());
+            log.error("Error occurred", handler.getCause());
             System.exit(1);
         });
 
@@ -214,13 +215,13 @@ public class KonduitServingMain {
                             FileUtils.readFileToString(tmpFile,
                                     Charset.defaultCharset()));
                     FileUtils.writeStringToFile(tmpConfigJson,
-                            inferenceConfiguration.toJson()
-                            ,Charset.defaultCharset());
+                            inferenceConfiguration.toJson(),
+                            Charset.defaultCharset());
                     configPath = tmpConfigJson.getAbsolutePath();
                     log.info("Rewrote input config yaml to path " + tmpConfigJson.getAbsolutePath());
 
                 } catch (IOException e) {
-                    log.error("Unable to rewrite configuration as json ",e);
+                    log.error("Unable to rewrite configuration as json ", e);
                 }
             }
             config.put("path", configPath);
@@ -251,7 +252,7 @@ public class KonduitServingMain {
 
         retriever.getConfig(ar -> {
             if (ar.failed()) {
-                log.error("Either unable to create configuration, or failed to download configuration",ar.cause());
+                log.error("Either unable to create configuration, or failed to download configuration", ar.cause());
                 System.exit(1);
                 // Failed to retrieve the configuration
             } else {
@@ -299,7 +300,7 @@ public class KonduitServingMain {
             new KonduitServingMain().runMain(args);
             log.debug("Exiting model server.");
          }catch(Exception e) {
-            log.error("Unable to start model server.",e);
+            log.error("Unable to start model server.", e);
             throw e;
         }
     }

@@ -41,7 +41,8 @@ model-revisions/
 .project
 
 # Konduit Serving project specific
-pipelines.pid
+konduit-serving.pid
+config.json
 .factorypath
 
 # eclipse related
