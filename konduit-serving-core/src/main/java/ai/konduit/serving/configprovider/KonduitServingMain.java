@@ -79,7 +79,6 @@ public class KonduitServingMain {
     @Parameter(names = {"--configPort"},help = true,description = "The port for downloading the configuration from")
     private int configPort;
 
-
     @Parameter(names = {"--configStoreType"},help = true,description = "The configuration store type (usually http " +
             "or file) where the configuration is stored")
     private String configStoreType;
@@ -100,7 +99,6 @@ public class KonduitServingMain {
     @Parameter(names = "--vertxWorkingDirectory",help = true,description = "The absolute path to use for vertx. This defaults to the user's home directory.")
     private String vertxWorkingDirectory = System.getProperty("user.home");
 
-    private  MeterRegistry registry = BackendRegistries.getDefaultNow();
     @Parameter(names = "--pidFile",help = true,description = "The absolute path to the PID file. This defaults to the current directory: pipelines.pid.")
     private String pidFile = new File(System.getProperty("user.dir"),"pipelines.pid").getAbsolutePath();
 
@@ -110,18 +108,14 @@ public class KonduitServingMain {
     @Parameter(names = {"--eventLoopExecutionTimeout"},help = true,description = "The event loop timeout")
     private long eventLoopExecutionTimeout = 120000;
 
-
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
 
     static {
         setProperty (LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
         LoggerFactory.getLogger (LoggerFactory.class); // Required for Logback to work in Vertx
-
-    }
-    public KonduitServingMain() {
     }
 
-
+    public KonduitServingMain() {}
 
     private Vertx vertx;
     private Verticle verticle;
@@ -138,9 +132,7 @@ public class KonduitServingMain {
                     "write or read. Please specify a proper vertx working directory");
         }
 
-
         try {
-
             long pid = getPid();
             File write = new File(pidFile);
             if(!write.getParentFile().exists()) {
@@ -163,9 +155,7 @@ public class KonduitServingMain {
         //logging using slf4j: defaults to jul
         setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory");
 
-        PrometheusMeterRegistry prometheusBackendRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        registry = prometheusBackendRegistry;
-
+        MeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
 
         MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
                 .setMicrometerRegistry(registry)
@@ -184,7 +174,6 @@ public class KonduitServingMain {
             log.error("Error occurred",handler.getCause());
             System.exit(1);
         });
-
 
         if (verticleClassName == null) {
             log.debug("Attempting to resolve verticle name");
@@ -205,7 +194,6 @@ public class KonduitServingMain {
                 return verticle;
             }
         });
-
 
         if (configHost != null)
             config.put("host", configHost);
@@ -235,7 +223,6 @@ public class KonduitServingMain {
                     log.error("Unable to rewrite configuration as json ",e);
                 }
             }
-
             config.put("path", configPath);
         }
 
@@ -287,17 +274,12 @@ public class KonduitServingMain {
 
                         }
                     });
-
                     deployed.set(true);
-
                 } else {
                     log.debug("Verticle already deployed.");
                 }
-
             }
         });
-
-
     }
 
     private int getPid() throws UnsatisfiedLinkError {
@@ -306,9 +288,7 @@ public class KonduitServingMain {
         }
         else if(org.apache.commons.lang3.SystemUtils.IS_OS_MAC) {
             return macosx.getpid();
-
-        }
-        else {
+        } else {
             return linux.getpid();
         }
     }
@@ -318,10 +298,9 @@ public class KonduitServingMain {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> log.debug("Shutting down model server.")));
             new KonduitServingMain().runMain(args);
             log.debug("Exiting model server.");
-        }catch(Exception e) {
+         }catch(Exception e) {
             log.error("Unable to start model server.",e);
             throw e;
         }
     }
-
 }
