@@ -10,8 +10,8 @@
         <version>1.2.1</version>
     </parent>
 
-    <artifactId>konduit-cli</artifactId>
-    <name>konduit-cli</name>
+    <artifactId>konduit-serving-cli</artifactId>
+    <name>konduit-serving-cli</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
