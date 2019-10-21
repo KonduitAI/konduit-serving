@@ -88,11 +88,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class InferenceVerticle extends BaseRoutableVerticle {
 
-    private PipelineExecutioner pipelineExecutioner;
-    private InferenceConfiguration inferenceConfiguration;
+    protected PipelineExecutioner pipelineExecutioner;
+    protected InferenceConfiguration inferenceConfiguration;
     //cached for columnar inputs, not used in binary endpoints
-    private Schema inputSchema,outputSchema = null;
-    private LongTaskTimer inferenceExecutionTimer,batchCreationTimer;
+    protected Schema inputSchema,outputSchema = null;
+    protected LongTaskTimer inferenceExecutionTimer,batchCreationTimer;
 
 
     public List<String> inputNames() {
