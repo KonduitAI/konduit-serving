@@ -1,6 +1,9 @@
+
+
 def _check_input_for_as_dict(input):
     if not hasattr(input.__class__, 'as_dict') and callable(getattr(input.__class__, 'as_dict')):
         raise AttributeError('Passed in object does not have an as_dict method.')
+
 
 def _invoke_setter_on(input_val,property_name,value):
     remove = '_' + type(input_val).__name__ + '__'
@@ -34,10 +37,12 @@ def json_with_type(input_config):
     input_dict['@type'] = input_config.__class__.__name__
     return input_dict
 
-def dict_with_type(input2):
+
+def dict_with_type(input_data):
     d = dict()
-    d['@type'] = input2.__class__.__name__
+    d['@type'] = input_data.__class__.__name__
     return d
+
 
 class DictWrapper:
     def __init__(self, input_dict):
@@ -46,13 +51,14 @@ class DictWrapper:
 
     def as_dict(self):
         ret = {}
-        for key,value in self.input_dict.items():
-            if hasattr(value,'as_dict'):
+        for key, value in self.input_dict.items():
+            if hasattr(value, 'as_dict'):
                 ret[key] = value.as_dict()
             else:
                 ret[key] = value
 
         return ret
+
 
 class ListWrapper:
     def __init__(self, input_list):
@@ -64,4 +70,3 @@ class ListWrapper:
 
     def __iter__(self):
         return self.input_list.__iter__()
-

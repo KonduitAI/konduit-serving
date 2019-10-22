@@ -10,15 +10,17 @@ class Server(object):
 
     def __init__(self,
                  config=InferenceConfiguration(),
-                 extra_start_args=[],
+                 extra_start_args=None,
                  config_path='config.json',
                  jar_path='konduit.jar'):
         self.config = config
         self.config_path = config_path
         self.jar_path = jar_path
         self.process = None
+        if extra_start_args is None:
+            extra_start_args = []
         # Handle singular element case
-        if extra_start_args is not None and type(extra_start_args) is not list:
+        if type(extra_start_args) is not list:
             self.extra_start_args = [extra_start_args]
         else:
             self.extra_start_args = extra_start_args
