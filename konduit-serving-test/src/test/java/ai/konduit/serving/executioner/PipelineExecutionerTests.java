@@ -77,7 +77,6 @@ public class PipelineExecutionerTests {
                 .inputNames(Arrays.asList(new String[]{"image_tensor"}))
                 .outputNames(Arrays.asList(new String[]{"detection_classes"}))
                 .modelConfig(modelConfig)
-                .servingConfig(servingConfig)
                 .build();
         
         
@@ -131,11 +130,9 @@ public class PipelineExecutionerTests {
                 .build();
         
         ModelPipelineStep modelStepConfig = ModelPipelineStep.builder()
-                 .modelConfig(modelConfig)
-                  .inputNames(Arrays.asList(new String[]{"image_tensor"}))
+                .modelConfig(modelConfig)
+                .inputNames(Arrays.asList(new String[]{"image_tensor"}))
                 .outputNames(Arrays.asList(new String[]{"detection_classes"}))
-             
-                .servingConfig(servingConfig)
                 .build();
         
         
