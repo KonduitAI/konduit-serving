@@ -4,7 +4,6 @@ from konduit.json_utils import json_with_type
 from jnius import autoclass
 import json
 
-init()
 
 StringJava = autoclass("java.lang.String")
 InferenceConfigurationJava = autoclass('ai.konduit.serving.InferenceConfiguration')

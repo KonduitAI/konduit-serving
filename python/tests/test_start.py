@@ -5,8 +5,6 @@ from konduit.utils import is_port_in_use
 import time
 import random
 
-init()
-
 
 def test_server_start():
     port = random.randint(1000, 65535)

@@ -9,8 +9,6 @@ import time
 import json
 from jnius import autoclass
 
-init()
-
 
 def test_build_tp():
     TransformProcessBuilder = autoclass('org.datavec.api.transform.TransformProcess$Builder')

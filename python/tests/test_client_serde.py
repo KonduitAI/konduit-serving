@@ -6,8 +6,6 @@ import json
 import random
 import numpy as np
 
-init()
-
 
 def test_multipart_encode():
     input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]

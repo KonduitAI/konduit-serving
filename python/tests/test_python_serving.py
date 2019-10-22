@@ -7,8 +7,6 @@ import numpy as np
 import time
 import random
 
-init()
-
 
 def test_server_start():
     input_names = ['default']
