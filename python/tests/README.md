@@ -17,7 +17,7 @@ Possible data types for the server configuration are listed in [`konduit.inferen
 
 ### [`test_transform_process.py`](test_transform_process.py)
 
-Checks if a TransformProcessPipelineStep can be performed. 
+Checks if a [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573) can be performed. 
 
 This tests builds [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). 
 
