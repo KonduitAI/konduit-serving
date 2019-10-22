@@ -11,11 +11,13 @@ from jnius import autoclass
 
 
 def test_build_tp():
-    TransformProcessBuilder = autoclass('org.datavec.api.transform.TransformProcess$Builder')
+    TransformProcessBuilder = autoclass(
+        'org.datavec.api.transform.TransformProcess$Builder')
     TransformProcess = autoclass('org.datavec.api.transform.TransformProcess')
     StringJava = autoclass("java.lang.String")
 
-    SchemaBuilder = autoclass('org.datavec.api.transform.schema.Schema$Builder')
+    SchemaBuilder = autoclass(
+        'org.datavec.api.transform.schema.Schema$Builder')
     schema = SchemaBuilder().addColumnString(StringJava('first')).build()
     tp = TransformProcessBuilder(schema) \
         .appendStringColumnTransform(StringJava("first"), StringJava("two")) \
@@ -45,10 +47,12 @@ def test_build_tp():
                                    log_timings=True)
 
     inference_config = InferenceConfiguration(serving_config=serving_config,
-                                       pipeline_steps=[transform_process])
+                                              pipeline_steps=[transform_process])
     as_json = json_with_type(inference_config)
-    inference_configuration_java = autoclass('ai.konduit.serving.InferenceConfiguration')
-    config = inference_configuration_java.fromJson(StringJava(json.dumps(as_json)))
+    inference_configuration_java = autoclass(
+        'ai.konduit.serving.InferenceConfiguration')
+    config = inference_configuration_java.fromJson(
+        StringJava(json.dumps(as_json)))
 
     server = Server(config=inference_config,
                     extra_start_args='-Xmx8g',
@@ -63,7 +67,6 @@ def test_build_tp():
                     url='http://localhost:' + str(port))
 
     data_input = {'first': 'value'}
-
 
     time.sleep(30)
     assert is_port_in_use(port)

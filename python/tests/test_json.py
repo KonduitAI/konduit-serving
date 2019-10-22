@@ -6,7 +6,9 @@ import json
 
 
 StringJava = autoclass("java.lang.String")
-InferenceConfigurationJava = autoclass('ai.konduit.serving.InferenceConfiguration')
+InferenceConfigurationJava = autoclass(
+    'ai.konduit.serving.InferenceConfiguration')
+
 
 def test_json_compare():
     parallel_inference_config = ParallelInferenceConfig(workers=1)
@@ -35,8 +37,7 @@ def test_python_serde():
     output_names = ['default']
 
     python_config = PythonConfig(
-        python_code='first += 2'
-        , python_inputs={'first': 'NDARRAY'},
+        python_code='first += 2', python_inputs={'first': 'NDARRAY'},
         python_outputs={'first': 'NDARRAY'}
     )
 

@@ -119,12 +119,14 @@ class Client(object):
         return ret
 
     def _convert_multi_part_output(self, content, content_type):
-        multipart_data = decoder.MultipartDecoder(content=content, content_type=content_type)
+        multipart_data = decoder.MultipartDecoder(
+            content=content, content_type=content_type)
         ret = {}
         for part in multipart_data.parts:
             # typically something like: b'form-data; name="input1"'
             name_with_form_data = str(part.headers[b'Content-Disposition'])
-            name_str = re.sub(r'([";\\\']|name=|form-data|b\\)', '', name_with_form_data).replace('b ', '')
+            name_str = re.sub(r'([";\\\']|name=|form-data|b\\)',
+                              '', name_with_form_data).replace('b ', '')
             if self.output_type.upper() == 'NUMPY':
                 ret[name_str] = Client._convert_binary_to_numpy(part.content)
             elif self.output_type.upper() == 'ARROW':
@@ -141,9 +143,11 @@ class Client(object):
     def _validate_multi_part(self, data_input={}):
 
         if self.input_type.capitalize() == 'JSON':
-            raise ValueError('Attempting to execute multi part request with input type specified as json.')
+            raise ValueError(
+                'Attempting to execute multi part request with input type specified as json.')
 
         for key, value in data_input.items():
             root_name = re.sub(r'\\[[0-9]+\\]', '', key)
             if root_name not in self.input_names:
-                raise ValueError('Specified root name ' + root_name + ' not found in input names.')
+                raise ValueError('Specified root name ' +
+                                 root_name + ' not found in input names.')

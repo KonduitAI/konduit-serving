@@ -33,7 +33,8 @@ def test_server_start():
     inference_config = InferenceConfiguration(serving_config=serving_config,
                                               pipeline_steps=[model_pipeline_step])
 
-    server = Server(config=inference_config, extra_start_args='-Xmx8g', jar_path='konduit.jar')
+    server = Server(config=inference_config,
+                    extra_start_args='-Xmx8g', jar_path='konduit.jar')
     server.start()
 
     sleep_time = 30
@@ -43,4 +44,3 @@ def test_server_start():
     assert is_port_in_use(port)
     print('Done sleeping. Assuming server alive. Killing process.')
     server.stop()
-

@@ -2,10 +2,11 @@
 
 def _check_input_for_as_dict(input):
     if not hasattr(input.__class__, 'as_dict') and callable(getattr(input.__class__, 'as_dict')):
-        raise AttributeError('Passed in object does not have an as_dict method.')
+        raise AttributeError(
+            'Passed in object does not have an as_dict method.')
 
 
-def _invoke_setter_on(input_val,property_name,value):
+def _invoke_setter_on(input_val, property_name, value):
     remove = '_' + type(input_val).__name__ + '__'
     real_property_name = property_name.replace(remove, '')
     setter_method = '_set_' + real_property_name
@@ -20,11 +21,11 @@ def _ensure_serializable(input_config):
 
     for property_name, value in vars(input_config).items():
         if type(value) is dict:
-            _invoke_setter_on(input_config,property_name,DictWrapper(value))
+            _invoke_setter_on(input_config, property_name, DictWrapper(value))
         elif type(value) is list:
             for item in value:
                 _ensure_serializable(item)
-            _invoke_setter_on(input_config,property_name,ListWrapper(value))
+            _invoke_setter_on(input_config, property_name, ListWrapper(value))
 
         elif hasattr(value, 'as_dict'):
             _ensure_serializable(value)

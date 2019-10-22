@@ -25,14 +25,18 @@ def test_server_start():
 
     python_pipeline_step = PythonPipelineStep(input_names=input_names,
                                               output_names=output_names,
-                                              input_schemas=({'default': ['NDArray']}),
-                                              output_schemas=({'default': ['NDArray']}),
-                                              input_column_names={'default': ['first']},
-                                              output_column_names={'default': ['first']},
+                                              input_schemas=(
+                                                  {'default': ['NDArray']}),
+                                              output_schemas=(
+                                                  {'default': ['NDArray']}),
+                                              input_column_names={
+                                                  'default': ['first']},
+                                              output_column_names={
+                                                  'default': ['first']},
                                               python_configs={'default': python_config})
 
     inference_config = InferenceConfiguration(serving_config=serving_config,
-                                       pipeline_steps=[python_pipeline_step])
+                                              pipeline_steps=[python_pipeline_step])
 
     server = Server(config=inference_config,
                     extra_start_args='-Xmx8g',
