@@ -85,7 +85,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 @SuperBuilder
-public class ModelConfig  implements Serializable {
+public class ModelConfig implements Serializable {
 
     @JsonProperty
     private TensorDataTypesConfig tensorDataTypesConfig;

@@ -35,6 +35,4 @@ public class MemMapConfig extends ModelConfig {
 
     private String memMapVectorPath;
 
-
-
 }

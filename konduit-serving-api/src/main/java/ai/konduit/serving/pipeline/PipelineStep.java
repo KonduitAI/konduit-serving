@@ -70,7 +70,7 @@ public abstract class PipelineStep implements Serializable {
     @Singular
     private Map<String, SchemaType[]> inputSchemas;
     @Singular
-    private Map<String,SchemaType[]> outputSchemas;
+    private Map<String, SchemaType[]> outputSchemas;
 
     @Singular
     private List<String> inputNames;
@@ -86,7 +86,6 @@ public abstract class PipelineStep implements Serializable {
     public List<String> getTargetInputStepInputNames() {
         return affectedInputNames != null ? affectedInputNames : inputNames;
     }
-
 
     public Schema inputSchemaForName(String name) {
         Preconditions.checkNotNull(inputSchemas,"No input schemas specified in configuration!");

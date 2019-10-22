@@ -123,14 +123,10 @@ public class PipelineExecutioner {
             PipelineStep pipelineStep = config.getPipelineSteps().get(i);
             PipelineStepRunner pipelineStepRunner = pipeline.getSteps().get(i);
             Preconditions.checkNotNull(pipelineStep,"Pipeline step at " + i + " was null!");
+
             //only use the first input names that appear in the pipeline
             if (inputNames == null && !CollectionUtils.isEmpty(pipelineStep.getInputNames())) { // Checks for both null or empty collection
                 inputNames = pipelineStep.getInputNames();
-            }
-
-            //always have output names change to the last defined names in the pipeline
-            if (!CollectionUtils.isEmpty(pipelineStep.getOutputNames())) { // Checks for both null or empty collection
-                outputNames = pipelineStep.getOutputNames();
             }
 
             if(inputSchema == null &&
@@ -142,11 +138,15 @@ public class PipelineExecutioner {
                         pipelineStep.getInputColumnNames().get("default"));
             }
 
-            if(outputSchema == null &&
-                    !CollectionUtils.isEmpty(pipelineStep.getOutputSchemas()) && // Checks for both null or empty collection
-                    pipelineStep.getOutputSchemas().get("default") != null &&
-                    !CollectionUtils.isEmpty(pipelineStep.getOutputColumnNames()) && // Checks for both null or empty collection
-                    pipelineStep.getInputColumnNames().get("default") != null) {
+            //always have output names change to the last defined names in the pipeline
+            if (!CollectionUtils.isEmpty(pipelineStep.getOutputNames())) { // Checks for both null or empty collection
+                outputNames = pipelineStep.getOutputNames();
+            }
+
+            if(!CollectionUtils.isEmpty(pipelineStep.getOutputSchemas()) && // Checks for both null or empty collection
+               pipelineStep.getOutputSchemas().get("default") != null &&
+               !CollectionUtils.isEmpty(pipelineStep.getOutputColumnNames()) && // Checks for both null or empty collection
+               pipelineStep.getInputColumnNames().get("default") != null) {
                 outputSchema = SchemaTypeUtils.toSchema(pipelineStep.getOutputSchemas().get("default"),
                         pipelineStep.getOutputColumnNames().get("default"));
             }

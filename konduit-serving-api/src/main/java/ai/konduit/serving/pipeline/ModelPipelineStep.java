@@ -34,14 +34,14 @@ import lombok.experimental.SuperBuilder;
 @Data
 public class ModelPipelineStep extends PipelineStep {
 
-    public ModelPipelineStep() {}
-
     private ModelConfig modelConfig;
 
     @Builder.Default
     private ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
 
     private NormalizationConfig normalizationConfig;
+
+    public ModelPipelineStep() {}
 
     @Override
     public String pipelineStepClazz() {
