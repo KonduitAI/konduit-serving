@@ -40,13 +40,11 @@ public class PythonWrapperTest {
     @Test
     public void testPythonWrapperBasics(){
         PythonExecutioner.init();
-        PythonExecutioner.acquireGIL();
         var list = new PythonObject(new ArrayList());
         list.attr("append").call("item1");
         list.attr("append").call("item2");
         String str = Python.str(list);
         assertEquals(str, "[\'item1\', \'item2\']");
-        PythonExecutioner.releaseGIL();
     }
 
 
