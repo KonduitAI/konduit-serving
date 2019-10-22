@@ -16,7 +16,8 @@ You can also install it from PyPI with `pip install konduit`.
 
 We recommend using **Python 3.7+**.
 
-## Build Konduit Serving JAR 
+## Build Konduit Serving JAR
+ 
 To run any examples with `konduit`, you need to build a Konduit Serving JAR first. 
 We provide a Python script `build_jar.py` at the base of this project to 
 build a Konduit Serving JAR `konduit.jar`: 
@@ -31,6 +32,12 @@ where `<your-platform>` is picked from `windows-x86_64`,`linux-x86_64`,`linux-x8
 and architecture.
 
 `build_jar.py` uses **Python 3.4+**, but `konduit` itself is Python 2.7 compatible.
+
+## Using Konduit
+
+To use konduit, make sure to export the environment variable `KONDUIT_JAR_PATH`. If you don't, this
+will path will default to `konduit.jar`. So if you have `konduit.jar` at the base of the Python script you
+want to execute, it will work without setting the above environment variable.
 
 ## Running tests
 

@@ -22,19 +22,25 @@
 
 package ai.konduit.serving.pipeline;
 
+import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.config.ServingConfig;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Data
-@NoArgsConstructor
 public class ModelPipelineStep extends PipelineStep {
 
+    public ModelPipelineStep() {}
+
     private ModelConfig modelConfig;
-    private ServingConfig servingConfig;
+
+    @Builder.Default
+    private ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
+
     private NormalizationConfig normalizationConfig;
 
     @Override

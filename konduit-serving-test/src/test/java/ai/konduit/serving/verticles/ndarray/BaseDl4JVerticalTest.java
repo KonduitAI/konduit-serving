@@ -114,7 +114,6 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
                 .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
-                .servingConfig(servingConfig)
                 .build();
         
         

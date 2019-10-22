@@ -140,7 +140,6 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .inputColumnName("default",SchemaTypeUtils.columnNames(inputSchema))
                 .outputColumnName("default",SchemaTypeUtils.columnNames(outputSchema))
                 .modelConfig(modelConfig)
-                .servingConfig(servingConfig)
                 .build();
 
 

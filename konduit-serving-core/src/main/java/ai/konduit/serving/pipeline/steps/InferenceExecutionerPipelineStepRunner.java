@@ -80,7 +80,7 @@ public class InferenceExecutionerPipelineStepRunner extends BasePipelineStepRunn
             }
 
             Preconditions.checkNotNull(modelPipelineStepConfig,"NO pipeline configuration found!");
-            Preconditions.checkNotNull(modelPipelineStepConfig.getServingConfig(),"No serving configuration found!");
+            Preconditions.checkNotNull(modelPipelineStepConfig.getParallelInferenceConfig(),"No parallel inference configuration found!");
             InitializedInferenceExecutionerConfig init = inferenceExecutionerFactory.create(modelPipelineStepConfig);
             Preconditions.checkNotNull(init,"Initialized inference executioner configuration should not be null!");
             inferenceExecutioner = init.getInferenceExecutioner();
