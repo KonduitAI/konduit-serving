@@ -1,5 +1,5 @@
 from konduit import *
-from konduit.json_utils import json_with_type
+from konduit.json_utils import config_to_dict_with_type
 from konduit.server import Server
 from konduit.client import Client
 from konduit.utils import is_port_in_use
@@ -46,7 +46,7 @@ def test_build_tp():
 
     inference_config = InferenceConfiguration(serving_config=serving_config,
                                               pipeline_steps=[transform_process])
-    as_json = json_with_type(inference_config)
+    as_json = config_to_dict_with_type(inference_config)
     inference_configuration_java_class = autoclass(
         'ai.konduit.serving.InferenceConfiguration')
     config = inference_configuration_java_class.fromJson(

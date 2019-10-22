@@ -1,5 +1,5 @@
 from konduit import *
-from konduit.json_utils import json_with_type
+from konduit.json_utils import config_to_dict_with_type
 
 from jnius import autoclass
 import json
@@ -58,7 +58,7 @@ def test_python_serde():
 
 
 def assert_config_works(config):
-    config_json = json_with_type(config)
+    config_json = config_to_dict_with_type(config)
     json_str = json.dumps(config_json)
     config = InferenceConfigurationJava.fromJson(StringJava(json_str))
     test_json = config.toJson()

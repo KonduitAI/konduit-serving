@@ -1,6 +1,6 @@
 from konduit import *
 from konduit.client import Client
-from konduit.json_utils import json_with_type
+from konduit.json_utils import config_to_dict_with_type
 
 import json
 import random
@@ -53,4 +53,4 @@ def test_python_serde():
     inference_config = InferenceConfiguration(serving_config=serving_config,
                                               pipeline_steps=[python_pipeline_step])
 
-    json.dumps(json_with_type(inference_config))
+    json.dumps(config_to_dict_with_type(inference_config))
