@@ -870,7 +870,6 @@ class ServingConfig(object):
         'inputDataType': {'type': str, 'subtype': None},
         'outputDataType': {'type': str, 'subtype': None},
         'predictionType': {'type': str, 'subtype': None},
-        'parallelInferenceConfig': {'type': ParallelInferenceConfig, 'subtype': None},
         'uploadsDirectory': {'type': str, 'subtype': None},
         'logTimings': {'type': bool, 'subtype': None},
         'metricTypes': {'type': list, 'subtype': str},
@@ -886,7 +885,6 @@ class ServingConfig(object):
             , input_data_type=None
             , output_data_type=None
             , prediction_type=None
-            , parallel_inference_config=None
             , uploads_directory=None
             , log_timings=None
             , metric_types=None
@@ -897,7 +895,6 @@ class ServingConfig(object):
         self.__input_data_type = input_data_type
         self.__output_data_type = output_data_type
         self.__prediction_type = prediction_type
-        self.__parallel_inference_config = parallel_inference_config
         self.__uploads_directory = uploads_directory
         self.__log_timings = log_timings
         self.__metric_types = metric_types
@@ -959,14 +956,6 @@ class ServingConfig(object):
             raise ValueError("Value {} not in _predictionType_enum list".format(value))
     prediction_type = property(_get_prediction_type, _set_prediction_type)
     
-    def _get_parallel_inference_config(self):
-        return self.__parallel_inference_config
-    def _set_parallel_inference_config(self, value):
-        if not isinstance(value, ParallelInferenceConfig):
-            raise TypeError("parallelInferenceConfig must be ParallelInferenceConfig")
-        self.__parallel_inference_config = value
-    parallel_inference_config = property(_get_parallel_inference_config, _set_parallel_inference_config)
-    
     def _get_uploads_directory(self):
         return self.__uploads_directory
     def _set_uploads_directory(self, value):
@@ -1007,8 +996,6 @@ class ServingConfig(object):
             d['outputDataType']  =  self.__output_data_type.as_dict() if hasattr(self.__output_data_type, 'as_dict') else self.__output_data_type
         if self.__prediction_type is not None:
             d['predictionType']  =  self.__prediction_type.as_dict() if hasattr(self.__prediction_type, 'as_dict') else self.__prediction_type
-        if self.__parallel_inference_config is not None:
-            d['parallelInferenceConfig']  =  self.__parallel_inference_config.as_dict() if hasattr(self.__parallel_inference_config, 'as_dict') else self.__parallel_inference_config
         if self.__uploads_directory is not None:
             d['uploadsDirectory']  =  self.__uploads_directory.as_dict() if hasattr(self.__uploads_directory, 'as_dict') else self.__uploads_directory
         if self.__log_timings is not None:
@@ -1588,7 +1575,7 @@ class ModelPipelineStep(PipelineStep):
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
         'modelConfig': {'type': ModelConfig, 'subtype': None},
-        'servingConfig': {'type': ServingConfig, 'subtype': None},
+        'parallelInferenceConfig': {'type': ParallelInferenceConfig, 'subtype': None},
         'normalizationConfig': {'type': NormalizationConfig, 'subtype': None},
         'targetInputStepInputNames': {'type': list, 'subtype': str},
         'targetInputStepOutputNames': {'type': list, 'subtype': str},
@@ -1612,7 +1599,7 @@ class ModelPipelineStep(PipelineStep):
             , input_column_names=None
             , output_column_names=None
             , model_config=None
-            , serving_config=None
+            , parallel_inference_config=None
             , normalization_config=None
             , target_input_step_input_names=None
             , target_input_step_output_names=None
@@ -1626,7 +1613,7 @@ class ModelPipelineStep(PipelineStep):
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__model_config = model_config
-        self.__serving_config = serving_config
+        self.__parallel_inference_config = parallel_inference_config
         self.__normalization_config = normalization_config
         self.__target_input_step_input_names = target_input_step_input_names
         self.__target_input_step_output_names = target_input_step_output_names
@@ -1711,13 +1698,13 @@ class ModelPipelineStep(PipelineStep):
         self.__model_config = value
     model_config = property(_get_model_config, _set_model_config)
     
-    def _get_serving_config(self):
-        return self.__serving_config
-    def _set_serving_config(self, value):
-        if not isinstance(value, ServingConfig):
-            raise TypeError("servingConfig must be ServingConfig")
-        self.__serving_config = value
-    serving_config = property(_get_serving_config, _set_serving_config)
+    def _get_parallel_inference_config(self):
+        return self.__parallel_inference_config
+    def _set_parallel_inference_config(self, value):
+        if not isinstance(value, ParallelInferenceConfig):
+            raise TypeError("parallelInferenceConfig must be ParallelInferenceConfig")
+        self.__parallel_inference_config = value
+    parallel_inference_config = property(_get_parallel_inference_config, _set_parallel_inference_config)
     
     def _get_normalization_config(self):
         return self.__normalization_config
@@ -1767,8 +1754,8 @@ class ModelPipelineStep(PipelineStep):
             d['outputColumnNames']  =  self.__output_column_names.as_dict() if hasattr(self.__output_column_names, 'as_dict') else self.__output_column_names
         if self.__model_config is not None:
             d['modelConfig']  =  self.__model_config.as_dict() if hasattr(self.__model_config, 'as_dict') else self.__model_config
-        if self.__serving_config is not None:
-            d['servingConfig']  =  self.__serving_config.as_dict() if hasattr(self.__serving_config, 'as_dict') else self.__serving_config
+        if self.__parallel_inference_config is not None:
+            d['parallelInferenceConfig']  =  self.__parallel_inference_config.as_dict() if hasattr(self.__parallel_inference_config, 'as_dict') else self.__parallel_inference_config
         if self.__normalization_config is not None:
             d['normalizationConfig']  =  self.__normalization_config.as_dict() if hasattr(self.__normalization_config, 'as_dict') else self.__normalization_config
         if self.__target_input_step_input_names is not None:
