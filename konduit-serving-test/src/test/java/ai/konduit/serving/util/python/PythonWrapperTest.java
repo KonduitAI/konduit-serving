@@ -69,7 +69,6 @@ public class PythonWrapperTest {
 
         // build model
         var model = keras.attr("models").attr("Sequential").call();
-        System.out.println("---ok----");
         Map denseArgs = new HashMap();
         denseArgs.put("units", 10);
         denseArgs.put("input_dim", 5);
