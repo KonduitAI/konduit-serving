@@ -197,7 +197,8 @@ public class PythonExecutioner {
         log.info("Resetting interpreter " + interpreterName);
         String oldInterpreter = currentInterpreter;
         setInterpreter(interpreterName);
-        exec(interpreterName);
+        exec("pass");
+        //exec(interpreterName); // ??
         setInterpreter(oldInterpreter);
     }
 
@@ -263,7 +264,7 @@ public class PythonExecutioner {
         Py_EndInterpreter(interpreters.remove(interpreterName));
     }
 
-    private static synchronized void acquireGIL() {
+    public static synchronized void acquireGIL() {
         log.info("acquireGIL()");
         log.info("CPython: PyEval_SaveThread()");
         mainThreadState = PyEval_SaveThread();
@@ -276,7 +277,7 @@ public class PythonExecutioner {
 
     }
 
-    private static synchronized void releaseGIL() {
+    public static synchronized void releaseGIL() {
         log.info("CPython: PyEval_SaveThread()");
         PyEval_SaveThread();
         log.info("CPython: PyEval_RestoreThread()");
