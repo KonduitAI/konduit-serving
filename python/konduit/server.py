@@ -1,5 +1,5 @@
 from konduit.inference import InferenceConfiguration
-from konduit.json_utils import json_with_type
+from konduit.json_utils import config_to_dict_with_type
 
 import json
 import subprocess
@@ -10,22 +10,24 @@ class Server(object):
 
     def __init__(self,
                  config=InferenceConfiguration(),
-                 extra_start_args=[],
+                 extra_start_args=None,
                  config_path='config.json',
                  jar_path='konduit.jar'):
         self.config = config
         self.config_path = config_path
         self.jar_path = jar_path
         self.process = None
+        if extra_start_args is None:
+            extra_start_args = []
         # Handle singular element case
-        if extra_start_args is not None and type(extra_start_args) is not list:
+        if type(extra_start_args) is not list:
             self.extra_start_args = [extra_start_args]
         else:
             self.extra_start_args = extra_start_args
 
     def start(self):
 
-        json_config = json_with_type(self.config)
+        json_config = config_to_dict_with_type(self.config)
         with open(self.config_path, 'w') as f:
             abs_path = os.path.abspath(self.config_path)
             print('Wrote config.json to path ' + abs_path)

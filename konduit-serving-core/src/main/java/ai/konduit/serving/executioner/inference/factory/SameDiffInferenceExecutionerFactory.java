@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.executioner.inference.factory;
 
+import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.executioner.inference.SameDiffInferenceExecutioner;
 import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
@@ -41,7 +42,7 @@ public class SameDiffInferenceExecutionerFactory implements InferenceExecutioner
     public InitializedInferenceExecutionerConfig create(ModelPipelineStep modelPipelineStepConfig) throws Exception {
         SameDiffConfig sameDiffconfig = null;
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
-        ServingConfig servingConfig = modelPipelineStepConfig.getServingConfig();
+        ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 
         try {
             sameDiffconfig = (SameDiffConfig) inferenceConfiguration;
@@ -61,7 +62,7 @@ public class SameDiffInferenceExecutionerFactory implements InferenceExecutioner
 
         modelLoader = new SameDiffModelLoader(new File(modelPath), modelPipelineStepConfig.getInputNames(), modelPipelineStepConfig.getOutputNames());
         SameDiffInferenceExecutioner inferenceExecutioner = new SameDiffInferenceExecutioner();
-        inferenceExecutioner.initialize(modelLoader, servingConfig.getParallelInferenceConfig());
+        inferenceExecutioner.initialize(modelLoader, parallelInferenceConfig);
         List<String> inputNames = modelPipelineStepConfig.getInputNames();
         List<String> outputNames = modelPipelineStepConfig.getOutputNames();
         if (inputNames.isEmpty() || outputNames.isEmpty()) {

@@ -93,9 +93,9 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
 
         PythonPipelineStep pythonStepConfig = PythonPipelineStep.builder()
                 .inputName("default")
-                .inputColumnName("default", Arrays.asList(new String[]{"first"}))
+                .inputColumnName("default", Arrays.asList("first"))
                 .inputSchema("default", new SchemaType[]{SchemaType.NDArray})
-                .outputColumnName("default", Arrays.asList(new String[]{"output"}))
+                .outputColumnName("default", Arrays.asList("output"))
                 .outputSchema("default", new SchemaType[]{SchemaType.NDArray})
                 .pythonConfig("default",pythonConfig)
                 .build();
@@ -105,7 +105,6 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
                 .httpPort(port)
                 .inputDataType(Input.DataType.NUMPY)
                 .predictionType(Output.PredictionType.RAW)
-                .parallelInferenceConfig(parallelInferenceConfig)
                 .build();
 
 
@@ -142,11 +141,5 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
         assertEquals(4,value.getDouble(0),1e-1);
 
     }
-
-
-
-
-
-
 
 }

@@ -85,7 +85,7 @@ public class CodeGen {
 
         StringBuffer pythonImports = new StringBuffer();
         pythonImports.append("import enum\n");
-        pythonImports.append("from konduit.json_utils import dict_with_type,DictWrapper,ListWrapper\n");
+        pythonImports.append("from konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n");
 
         File newModule = new File( projectBasePath + sep + "python" + sep + "konduit" + sep + "inference.py");
         newModule.delete();
@@ -158,7 +158,7 @@ public class CodeGen {
             }
 
             load = kwArgsAsUnderScore.toString();
-            load = load.replace("d = dict()","d = dict_with_type(self)");
+            load = load.replace("d = dict()","d = empty_type_dict(self)");
             //load = load.replaceFirst("import enum",imports.toString());
             FileUtils.writeStringToFile(newModule,load,Charset.defaultCharset(),true);
 
@@ -182,7 +182,7 @@ public class CodeGen {
         loadedModule = loadedModule.replace("'type': type","'type': dict");
         StringBuffer sb = new StringBuffer();
         sb.append("import enum\n");
-        sb.append("from konduit.json_utils import dict_with_type,DictWrapper,ListWrapper\n");
+        sb.append("from konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n");
         
         //dictionary wrapper for serialization
         sb.append(loadedModule);

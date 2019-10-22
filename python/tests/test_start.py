@@ -1,17 +1,10 @@
-from jnius_config import set_classpath
-try:
-    set_classpath('konduit.jar')
-except:
-    print("VM already running from previous test")
-
-
 from konduit import *
 from konduit.server import Server
-from konduit.client import Client
 from konduit.utils import is_port_in_use
 
 import time
 import random
+
 
 def test_server_start():
     port = random.randint(1000, 65535)
@@ -19,8 +12,7 @@ def test_server_start():
     serving_config = ServingConfig(http_port=port,
                                    input_data_type='NUMPY',
                                    output_data_type='NUMPY',
-                                   log_timings=True,
-                                   parallel_inference_config=parallel_inference_config)
+                                   log_timings=True)
 
     tensorflow_config = TensorFlowConfig(model_config_type=ModelConfigType(
         model_type='TENSORFLOW',
@@ -32,7 +24,7 @@ def test_server_start():
                               }))
 
     model_pipeline_step = ModelPipelineStep(model_config=tensorflow_config,
-                                            serving_config=serving_config,
+                                            parallel_inference_config=parallel_inference_config,
                                             input_names=["IteratorGetNext:0",
                                                          "IteratorGetNext:1",
                                                          "IteratorGetNext:4"],
@@ -41,7 +33,8 @@ def test_server_start():
     inference_config = InferenceConfiguration(serving_config=serving_config,
                                               pipeline_steps=[model_pipeline_step])
 
-    server = Server(config=inference_config, extra_start_args='-Xmx8g', jar_path='konduit.jar')
+    server = Server(config=inference_config,
+                    extra_start_args='-Xmx8g', jar_path='konduit.jar')
     server.start()
 
     sleep_time = 30
@@ -51,4 +44,3 @@ def test_server_start():
     assert is_port_in_use(port)
     print('Done sleeping. Assuming server alive. Killing process.')
     server.stop()
-

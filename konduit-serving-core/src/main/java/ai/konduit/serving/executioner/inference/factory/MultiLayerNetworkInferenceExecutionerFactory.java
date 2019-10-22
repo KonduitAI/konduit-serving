@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.executioner.inference.factory;
 
+import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.executioner.inference.MultiLayerNetworkInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.model.ModelConfig;
@@ -38,11 +39,11 @@ public class MultiLayerNetworkInferenceExecutionerFactory implements InferenceEx
     @Override
     public InitializedInferenceExecutionerConfig create(ModelPipelineStep modelPipelineStepConfig) throws Exception {
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
-        ServingConfig servingConfig = modelPipelineStepConfig.getServingConfig();
+        ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 
         MultiLayerNetworkInferenceExecutioner inferenceExecutioner = new MultiLayerNetworkInferenceExecutioner();
         MultiLayerNetworkModelLoader multiLayerNetworkModelLoader = new MultiLayerNetworkModelLoader(new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath()));
-        inferenceExecutioner.initialize(multiLayerNetworkModelLoader, servingConfig.getParallelInferenceConfig());
+        inferenceExecutioner.initialize(multiLayerNetworkModelLoader, parallelInferenceConfig);
         List<String> inputNames = Collections.singletonList("default");
         List<String> outputNames = Collections.singletonList("default");
         return new InitializedInferenceExecutionerConfig(inferenceExecutioner,inputNames,outputNames);
