@@ -67,13 +67,13 @@ public class PipelineExecutionerTests {
         
         
         ServingConfig servingConfig = ServingConfig.builder()
-                .parallelInferenceConfig(parallelInferenceConfig)
                 .predictionType(Output.PredictionType.RAW)
                 .inputDataType(Input.DataType.IMAGE)
                 .httpPort(port)
                 .build();
         
         ModelPipelineStep modelStepConfig = ModelPipelineStep.builder()
+                .parallelInferenceConfig(parallelInferenceConfig)
                 .inputNames(Arrays.asList(new String[]{"image_tensor"}))
                 .outputNames(Arrays.asList(new String[]{"detection_classes"}))
                 .modelConfig(modelConfig)
@@ -117,7 +117,6 @@ public class PipelineExecutionerTests {
                 .build();
         
         ServingConfig servingConfig = ServingConfig.builder()
-                .parallelInferenceConfig(parallelInferenceConfig)
                 .inputDataType(Input.DataType.IMAGE)
                 .predictionType(Output.PredictionType.YOLO)
                 .outputDataType(Output.DataType.JSON)
@@ -130,6 +129,7 @@ public class PipelineExecutionerTests {
                 .build();
         
         ModelPipelineStep modelStepConfig = ModelPipelineStep.builder()
+                .parallelInferenceConfig(parallelInferenceConfig)
                 .modelConfig(modelConfig)
                 .inputNames(Arrays.asList(new String[]{"image_tensor"}))
                 .outputNames(Arrays.asList(new String[]{"detection_classes"}))
