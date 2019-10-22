@@ -136,7 +136,7 @@ public class KonduitServingMain {
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
 
     static {
-        setProperty (LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
+        setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
         LoggerFactory.getLogger (LoggerFactory.class); // Required for Logback to work in Vertx
     }
 

@@ -29,12 +29,10 @@ import static junit.framework.TestCase.assertEquals;
 public class ImagePermuterTests {
 
     @Test(timeout = 60000)
-
     public void testPermuteOrder() {
         String startingOrder = "nchw";
         String destinationOrder = "nhwc";
         int[] determinePermuteOrder = ImagePermuter.determinePermuteOrder(startingOrder, destinationOrder);
         assertEquals(destinationOrder,ImagePermuter.applyPermuteOrderToString(startingOrder, determinePermuteOrder));
     }
-
 }

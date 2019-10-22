@@ -28,10 +28,7 @@ import org.datavec.api.transform.schema.Schema;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A {@link MultiOutputAdapter} for classification.
@@ -51,21 +48,18 @@ public class ClassificationMultiOutputAdapter implements MultiOutputAdapter<INDA
         if(classifierOutputAdapter == null || classifierOutputAdapter.getLabels().length != outputNames.size()) {
             Schema.Builder schemaBuilder = new Schema.Builder();
             Preconditions.checkNotNull(outputNames,"Output names not defined!");
-            for(int i = 0; i < outputNames.size(); i++) {
-                schemaBuilder.addColumnDouble(outputNames.get(i));
+            for (String outputName : outputNames) {
+                schemaBuilder.addColumnDouble(outputName);
             }
-
             classifierOutputAdapter = new ClassifierOutputAdapter(schemaBuilder.build());
         }
-        ret.put(outputNames.get(0),classifierOutputAdapter.adapt(array[0], routingContext));
+
+        ret.put(outputNames.get(0), classifierOutputAdapter.adapt(array[0], routingContext));
         return ret;
     }
 
     @Override
     public List<Class<? extends OutputAdapter<?>>> outputAdapterTypes() {
-        return Arrays.asList(ClassifierOutputAdapter.class);
+        return Collections.singletonList(ClassifierOutputAdapter.class);
     }
-
-
-
 }

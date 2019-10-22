@@ -92,7 +92,6 @@ public class ClassifierOutputAdapter implements OutputAdapter<ClassifierOutput> 
             labelIndices[i] = maxIdx;
         }
 
-
         return ClassifierOutput.builder()
                 .probabilities(values)
                 .labels(getLabels())

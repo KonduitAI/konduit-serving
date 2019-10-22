@@ -36,6 +36,4 @@ public class TensorFlowConfig extends ModelConfig {
     private String configProtoPath;
     private SavedModelConfig savedModelConfig;
     public final static String TENSORFLOW_EXECUTION_CONFIG_KEY = "tensorFlowConfig";
-
-
 }

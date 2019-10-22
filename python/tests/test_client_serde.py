@@ -17,7 +17,7 @@ import numpy as np
 def test_multipart_encode():
     input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
     output_names = ["loss/Softmax"]
-    port = random.randint(1000,65535)
+    port = random.randint(1000, 65535)
     client = Client(input_names=input_names,
                     output_names=output_names,
                     input_type='NUMPY',

@@ -61,6 +61,7 @@ public class Pipeline {
      */
     public static Pipeline getPipeline(List<PipelineStep> configurations) {
         PipelineBuilder builder = Pipeline.builder();
+
         for(PipelineStep config : configurations) {
             try {
                 Class<? extends PipelineStepRunner> clazz = (Class<? extends PipelineStepRunner>) Class.forName(config.pipelineStepClazz());

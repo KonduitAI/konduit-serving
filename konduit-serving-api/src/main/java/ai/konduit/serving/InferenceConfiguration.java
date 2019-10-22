@@ -41,7 +41,8 @@ public class InferenceConfiguration implements Serializable  {
 
     @Singular
     private List<PipelineStep> pipelineSteps;
-    private ServingConfig servingConfig;
+    @Builder.Default
+    private ServingConfig servingConfig = new ServingConfig();
 
     /**
      * Returns a serving configuration if one is defined

@@ -57,7 +57,6 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
     
     @Override
     public Handler<HttpServerRequest> getRequest() {
-        
         return req -> {
             req.bodyHandler(body -> {
                 try {
@@ -72,9 +71,7 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
             req.exceptionHandler(Throwable::printStackTrace);
         };
     }
-    
-    
-    
+
     @Override
     public JsonObject getConfigObject() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = getTrainedNetwork();
@@ -116,22 +113,16 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
                 .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
                 .servingConfig(servingConfig)
                 .build();
-        
-        
-        
+
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .pipelineStep(modelPipelineStep)
                 .build();
         return new JsonObject(inferenceConfiguration.toJson());
     }
-    
-    
+
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return InferenceVerticle.class;
     }
-    
-    
-    
 }

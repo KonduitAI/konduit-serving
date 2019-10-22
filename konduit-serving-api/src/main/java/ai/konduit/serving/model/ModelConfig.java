@@ -74,7 +74,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties({"map","empty"})
+@JsonIgnoreProperties({"map", "empty"})
 @JsonSubTypes({
         @JsonSubTypes.Type(value=PmmlConfig.class, name = "PmmlConfig"),
         @JsonSubTypes.Type(value=MemMapConfig.class, name = "MemMapConfig"),
@@ -93,7 +93,6 @@ public class ModelConfig  implements Serializable {
     @JsonProperty
     private ModelConfigType modelConfigType;
 
-
     public enum ModelType {
         COMPUTATION_GRAPH,
         MULTI_LAYER_NETWORK,
@@ -102,6 +101,4 @@ public class ModelConfig  implements Serializable {
         KERAS,
         SAMEDIFF
     }
-
-
 }

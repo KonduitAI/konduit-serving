@@ -67,7 +67,7 @@ import static com.jayway.restassured.RestAssured.given;
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
-    private Schema inputSchema,outputSchema;
+    private Schema inputSchema, outputSchema;
 
     @Before
     public void before(TestContext context) throws Exception {
@@ -92,8 +92,6 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
         }
     }
 
-
-
     @Override
     public JsonObject getConfigObject() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = getTrainedNetwork();
@@ -110,18 +108,15 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
             transformProcessBuilder.convertToDouble(inputSchema.getName(i));
         }
 
-
         TransformProcess transformProcess = transformProcessBuilder.build();
-
-
 
         TransformProcessPipelineStep transformStep = TransformProcessPipelineStep.builder()
                 .inputName("default")
-                .inputSchema("default",SchemaTypeUtils.typesForSchema(inputSchema))
-                .outputSchema("default",SchemaTypeUtils.typesForSchema(outputSchema))
-                .inputColumnName("default",SchemaTypeUtils.columnNames(inputSchema))
-                .outputColumnName("default",SchemaTypeUtils.columnNames(outputSchema))
-                .transformProcess("default",transformProcess)
+                .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
+                .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
+                .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
+                .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
+                .transformProcess("default", transformProcess)
                 .build();
 
         ServingConfig servingConfig = ServingConfig.builder()
@@ -135,15 +130,13 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .build();
 
         ModelPipelineStep modelStepConfig = ModelPipelineStep.builder()
-                .inputSchema("default",SchemaTypeUtils.typesForSchema(inputSchema))
-                .outputSchema("default",SchemaTypeUtils.typesForSchema(outputSchema))
-                .inputColumnName("default",SchemaTypeUtils.columnNames(inputSchema))
-                .outputColumnName("default",SchemaTypeUtils.columnNames(outputSchema))
+                .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
+                .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
+                .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
+                .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .modelConfig(modelConfig)
                 .servingConfig(servingConfig)
                 .build();
-
-
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
@@ -151,21 +144,19 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .pipelineStep(modelStepConfig)
                 .build();
 
-
         System.out.println(inferenceConfiguration.toJson());
         return new JsonObject(inferenceConfiguration.toJson());
-
     }
 
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) {
         JsonArray jsonArray = new JsonArray();
-        double[] vals = {5.1,3.5,1.4,0.2};
-        for(int i = 0; i < 4; i++) jsonArray.add(vals[i]);
+        double[] values = { 5.1, 3.5, 1.4, 0.2 };
+        for(int i = 0; i < 4; i++) jsonArray.add(values[i]);
 
         JsonObject wrapper = new JsonObject();
-        for(int i = 0; i < vals.length; i++) {
-            wrapper.put(inputSchema.getName(i),vals[i]);
+        for(int i = 0; i < values.length; i++) {
+            wrapper.put(inputSchema.getName(i),values[i]);
         }
 
         given().contentType(ContentType.JSON)
@@ -174,10 +165,10 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .post("/classification/csv")
                 .then().statusCode(200);
 
-
-
+        System.out.println(given().contentType(ContentType.JSON)
+                .body(wrapper.toString())
+                .port(port)
+                .post("/classification/csv")
+                .asString());
     }
-
-
-
 }

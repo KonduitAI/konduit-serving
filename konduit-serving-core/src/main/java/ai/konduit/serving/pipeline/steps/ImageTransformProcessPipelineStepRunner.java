@@ -53,8 +53,8 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
             String s = pipelineStep.getInputNames().get(i);
             if(imageLoadingConfig.getDimensionsConfigs().containsKey(s)) {
                 Long[] values = imageLoadingConfig.getDimensionsConfigs().get(s);
-                NativeImageLoader nativeImageLoader = new NativeImageLoader(values[0],values[1],values[2]);
-                imageLoaders.put(s,nativeImageLoader);
+                NativeImageLoader nativeImageLoader = new NativeImageLoader(values[0], values[1], values[2]);
+                imageLoaders.put(s, nativeImageLoader);
 
             }
             else {
@@ -64,8 +64,6 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
         }
 
         Preconditions.checkState(!imageLoaders.isEmpty(),"No image loaders specified.");
-
-
     }
 
     @Override
@@ -110,8 +108,7 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else if(writable instanceof NDArrayWritable) {
+        } else if(writable instanceof NDArrayWritable) {
             NDArrayWritable ndArrayWritable = (NDArrayWritable) writable;
             INDArray arr = ndArrayWritable.get();
             if(!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
@@ -120,8 +117,7 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
                         ,imageLoadingConfig.getImageProcessingRequiredLayout());
             }
             record.add(new NDArrayWritable(arr));
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Illegal type to load from " + writable.getClass());
         }
 

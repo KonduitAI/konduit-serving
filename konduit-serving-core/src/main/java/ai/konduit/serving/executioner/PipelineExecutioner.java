@@ -77,7 +77,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class PipelineExecutioner {
 
-    private  Pipeline pipeline;
+    private Pipeline pipeline;
     @Getter
     protected MultiOutputAdapter multiOutputAdapter;
     protected List<String> inputNames, outputNames;
@@ -168,13 +168,11 @@ public class PipelineExecutioner {
         try {
             if(servingConfig.getOutputDataType() == Output.DataType.JSON) {
                 multiOutputAdapter = outputAdapterFor(config().serving().getPredictionType(), objectDetectionConfig);
-            }
-            else {
+            } else {
                 log.info("Skipping initialization of multi input adapter due to binary output.");
             }
         } catch (Exception e) {
             log.error("Error initializing output adapter.",e);
-
         }
 
         if (servingConfig.getInputDataType() == null) {
@@ -185,9 +183,7 @@ public class PipelineExecutioner {
                 && (inputNames == null || inputNames.isEmpty())) {
             throw new IllegalStateException("No inputs defined! Please specify input names for your verticle via the model configuration.");
         }
-
     }
-
 
     public List<String> inputNames() {
         return inputNames;
@@ -197,19 +193,16 @@ public class PipelineExecutioner {
         return outputNames;
     }
 
-
     private MultiOutputAdapter outputAdapterFor(Output.PredictionType predictionType, ObjectDetectionConfig objectDetectionConfig) throws Exception {
         MultiOutputAdapter multiOutputAdapter;
         //custom labels input stream for custom labels for yolo and ssd
         InputStream customLabelsInputStream = null;
-
 
         if (objectDetectionConfig != null && objectDetectionConfig.getLabelsPath() != null) {
             customLabelsInputStream = new FileInputStream(objectDetectionConfig.getLabelsPath());
             ssdLabels = SSDOutputAdapter.getLabels(customLabelsInputStream, objectDetectionConfig.getNumLabels());
             yoloLabels = ssdLabels;
         }
-
 
         switch (predictionType) {
             case CLASSIFICATION:
@@ -250,8 +243,7 @@ public class PipelineExecutioner {
     }
 
     /**
-     * Perform inference for the
-     * endpoint using the inference executioner.
+     * Perform inference for the endpoint using the inference executioner.
      * @param ctx                the routing context to use representing the current request
      * @param responseOutputType the {@link Output.DataType} for the output
      * @param inputs             the inputs based on the input data
@@ -260,7 +252,6 @@ public class PipelineExecutioner {
         if(inputs == null || inputs.length < 1 || inputs[0] == null) {
             throw new IllegalStateException("No inputs specified!");
         }
-
 
         String batchId = UUID.randomUUID().toString();
         long nanos = System.nanoTime();
@@ -272,7 +263,6 @@ public class PipelineExecutioner {
             log.info("Post internal execution timing in ms " + millis);
         }
 
-
         if (multiOutputAdapter != null) {
             log.debug("Performing adaption.");
             Map<String, BatchOutput> adapt = null;
@@ -283,17 +273,16 @@ public class PipelineExecutioner {
                 ctx.response().setStatusCode(500);
                 ctx.response().setStatusMessage("Was unable to adapt output.");
                 ctx.response().end();
-                for(int i = 0; i < execute.length; i++) {
-                    if(execute[i].closeable())
-                        execute[i].close();
+                for (INDArray indArray : execute) {
+                    if (indArray.closeable())
+                        indArray.close();
                 }
                 return;
             }
 
             timedResponse(ctx, responseOutputType, batchId, execute, adapt);
-
         } else {
-            /**
+            /*
              * Note that this handles binary responses.
              */
             Map<String, BatchOutput> namedBatchOutput = new HashMap<>();
@@ -304,7 +293,6 @@ public class PipelineExecutioner {
             timedResponse(ctx, responseOutputType, batchId, execute, namedBatchOutput);
         }
     }
-
 
     /**
      * Perform inference
@@ -337,7 +325,7 @@ public class PipelineExecutioner {
         ArrowWritableRecordBatch convert = null;
         try {
             convert = mapConverter.convert(conversionSchema, jsonArray, transformProcess);
-        }catch(Exception e) {
+        } catch(Exception e) {
             log.error("Error performing conversion",e);
             throw e;
         }
@@ -361,16 +349,14 @@ public class PipelineExecutioner {
                     adapt = regressionMultiOutputAdapter.adapt(arrays, Arrays.asList("default"), ctx);
                     break;
                 case RAW:
-                    adapt = rawMultiOutputAdapter.adapt(arrays,Arrays.asList("default"),ctx);
+                    adapt = rawMultiOutputAdapter.adapt(arrays, Arrays.asList("default"), ctx);
                     break;
                 default:
                     throw new IllegalStateException("Illegal type for json.");
             }
 
-            writeResponse(adapt, Output.DataType.JSON,UUID.randomUUID().toString(),ctx);
-
-        }
-        else if(records.length == 1 &&  records[0].getRecord().get(0) instanceof Text) {
+            writeResponse(adapt, Output.DataType.JSON,UUID.randomUUID().toString(), ctx);
+        } else if(records.length == 1 &&  records[0].getRecord().get(0) instanceof Text) {
             if(outputDataType == Output.DataType.JSON) {
                 JsonObject writeJson = new JsonObject();
                 for(int i = 0; i < records[0].getRecord().size(); i++) {
@@ -379,13 +365,10 @@ public class PipelineExecutioner {
                     if(text.toString().charAt(0) == '{') {
                         JsonObject jsonObject1 = new JsonObject(text.toString());
                         writeJson.put(outputSchema.getName(i),jsonObject1);
-                    }
-                    else if(text.toString().charAt(0) == ']'){
+                    } else if(text.toString().charAt(0) == ']') {
                         JsonArray jsonObject = new JsonArray(text.toString());
                         writeJson.put(outputSchema.getName(i),jsonObject);
-                    }
-
-                    else {
+                    } else {
                         writeJson.put(outputSchema.getName(i),text.toString());
                     }
                 }
@@ -395,17 +378,12 @@ public class PipelineExecutioner {
                 ctx.response().putHeader("Content-Type", "application/json");
                 ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
                 ctx.response().end(write);
-            }
-            else if(outputDataType == Output.DataType.ARROW){
+            } else if(outputDataType == Output.DataType.ARROW){
                 writeArrowResponse(ctx, outputSchema, convert);
-            }
-            else {
+            } else {
                 throw new IllegalStateException("Illegal data type response " + outputDataType);
             }
-
-
-        }
-        else if(outputDataType == Output.DataType.JSON) {
+        } else if(outputDataType == Output.DataType.JSON) {
             JsonArray newArray = new JsonArray();
             for(Record record : records) {
                 JsonObject row = new JsonObject();
@@ -431,13 +409,11 @@ public class PipelineExecutioner {
 
                         }
                     }
-                }
-                else {
+                } else {
                     for(int i = 0; i < writables.size(); i++) {
                         row.put(String.valueOf(i),writables.get(i).toString());
                     }
                 }
-
                 newArray.add(row);
             }
 
@@ -446,13 +422,10 @@ public class PipelineExecutioner {
             ctx.response().putHeader("Content-Type", "application/json");
             ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
             ctx.response().end(write);
-
-        }
-        else if(outputDataType == Output.DataType.ARROW) {
+        } else if(outputDataType == Output.DataType.ARROW) {
             writeArrowResponse(ctx, outputSchema, convert);
         }
     }
-
 
     public void destroy() {
         pipeline.destroy();
@@ -515,9 +488,7 @@ public class PipelineExecutioner {
 
             JsonObject jsonObject = new JsonObject();
             for (Map.Entry<String, BatchOutput> entry : adapt.entrySet()) {
-
                 entry.getValue().setBatchId(batchId);
-
                 try {
                     jsonObject.put(entry.getKey(),
                             new JsonObject(ObjectMapperHolder.getJsonMapper()
@@ -548,35 +519,30 @@ public class PipelineExecutioner {
                 writeBinary(convertBatchOutput(entry.getValue(), responseOutputType), batchId, ctx);
             }
         }
-
     }
-
 
     private void writeBinary(Buffer buffer, String batchId, RoutingContext ctx) {
         try {
             ctx.response().putHeader("Content-Type", "application/octet-stream");
             ctx.response().putHeader("Content-Length", String.valueOf(buffer.length()));
             ctx.response().end(buffer);
-        }catch(Exception e) {
+        } catch(Exception e) {
             ctx.fail(e);
         }
-
     }
-
 
     private void initDataTypes() {
         if (tensorDataTypesConfig != null && tensorDataTypesConfig.getInputDataTypes() != null) {
-            Map<String,TensorDataType> types = tensorDataTypesConfig.getInputDataTypes();
+            Map<String, TensorDataType> types = tensorDataTypesConfig.getInputDataTypes();
             if(types != null && types.size() >= 1 && inputDataTypes == null)
                 inputDataTypes = initDataTypes(inputNames, types, "default");
         }
 
         if (tensorDataTypesConfig != null && tensorDataTypesConfig.getOutputDataTypes() != null) {
-            Map<String,TensorDataType> types = tensorDataTypesConfig.getOutputDataTypes();
+            Map<String, TensorDataType> types = tensorDataTypesConfig.getOutputDataTypes();
             if(types != null && types.size() >= 1 && outputDataTypes == null)
                 outputDataTypes = initDataTypes(outputNames, types, "output");
         }
-
     }
 
     private Map<String, TensorDataType> initDataTypes(List<String> namesValidation, Map<String, TensorDataType> types, String inputOrOutputType) {
@@ -584,7 +550,6 @@ public class PipelineExecutioner {
         Preconditions.checkNotNull(types,"Types must not be null!");
         Preconditions.checkNotNull(inputOrOutputType,"inputOrOutputType must not be null!");
 
-        Map<String,TensorDataType> ret;
         if (namesValidation == null) {
             log.warn("Unable to validate number of {} data types. No names specified", inputOrOutputType);
         } else if (types.size() != namesValidation.size()) {
@@ -592,9 +557,7 @@ public class PipelineExecutioner {
                     "of %s data types specified", namesValidation, inputOrOutputType));
         }
 
-        ret = new LinkedHashMap<>();
-        ret.putAll(types);
-        return ret;
+        return new LinkedHashMap<>(types);
     }
 
     /**
@@ -618,26 +581,18 @@ public class PipelineExecutioner {
                 } catch (java.io.IOException e) {
                     e.printStackTrace();
                 }
-
             }
 
             out.flush();
             out.close();
 
             return Buffer.buffer(baos.toByteArray());
-
-
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
 
-
-
-
         return null;
-
     }
-
 
     /**
      * Convert a batch output {@link NDArrayOutput}
@@ -648,10 +603,8 @@ public class PipelineExecutioner {
      */
     public static Buffer convertBatchOutput(BatchOutput batchOutput, Output.DataType responseOutputType) {
         NDArrayOutput ndArrayOutput = (NDArrayOutput) batchOutput;
-        return convertBatchOutput(ndArrayOutput.getNdArray(),responseOutputType);
+        return convertBatchOutput(ndArrayOutput.getNdArray(), responseOutputType);
     }
-
-
 
     /**
      * Convert a {@link INDArray}
@@ -677,11 +630,8 @@ public class PipelineExecutioner {
                 org.apache.arrow.flatbuf.Tensor tensor = org.nd4j.arrow.ArrowSerde.toTensor(input);
                 ret = Buffer.buffer(io.netty.buffer.Unpooled.wrappedBuffer(tensor.getByteBuffer()));
                 break;
-
         }
 
         return ret;
     }
-
-
 }

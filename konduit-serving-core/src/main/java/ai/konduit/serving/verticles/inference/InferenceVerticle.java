@@ -246,12 +246,11 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                 }
             }
 
-
             try {
                 LongTaskTimer.Sample start = null;
-                if(inferenceExecutionTimer != null) {
-                    start = inferenceExecutionTimer.start();
-                }
+
+                if(inferenceExecutionTimer != null) start = inferenceExecutionTimer.start();
+
                 pipelineExecutioner.doInference(
                         ctx,
                         outputAdapterType,
@@ -260,8 +259,8 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                         null,
                         outputSchema,
                         inferenceConfiguration.getServingConfig().getOutputDataType());
-                if(start != null)
-                    start.stop();
+
+                if(start != null) start.stop();
             } catch (Exception e) {
                 log.error("Unable to perform json inference",e);
                 ctx.response().setStatusCode(500);
@@ -269,8 +268,6 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                 ctx.response().end();
             }
         });
-
-
 
         router.post("/:operation/:inputType")
                 .consumes("multipart/form-data")

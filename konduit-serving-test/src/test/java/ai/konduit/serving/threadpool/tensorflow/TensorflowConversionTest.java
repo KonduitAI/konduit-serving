@@ -34,7 +34,6 @@ import static org.junit.Assert.fail;
 public class TensorflowConversionTest {
 
     @Test(timeout = 60000)
-
     public void testView() {
         INDArray matrix = Nd4j.linspace(1,8,8).reshape(2,4);
         INDArray view = matrix.slice(0);
@@ -54,24 +53,19 @@ public class TensorflowConversionTest {
     }
 
     @Test(timeout = 60000)
-
     public void testConversionFromNdArray() throws Exception {
-        INDArray arr = Nd4j.linspace(1,4,4);
+        INDArray arr = Nd4j.linspace(1, 4, 4);
         TensorflowConversion tensorflowConversion = TensorflowConversion.getInstance();
         TF_Tensor tf_tensor = tensorflowConversion.tensorFromNDArray(arr);
         INDArray fromTensor = tensorflowConversion.ndArrayFromTensor(tf_tensor);
-        assertEquals(arr,fromTensor);
+        assertEquals(arr, fromTensor);
         arr.addi(1.0);
         tf_tensor = tensorflowConversion.tensorFromNDArray(arr);
         fromTensor = tensorflowConversion.ndArrayFromTensor(tf_tensor);
-        assertEquals(arr,fromTensor);
-
-
+        assertEquals(arr, fromTensor);
     }
 
-
     @Test(timeout = 60000)
-
     public void testStringConversion() throws Exception {
         String[] strings = {"one", "two", "three"};
         INDArray arr = Nd4j.create(strings);
@@ -84,5 +78,4 @@ public class TensorflowConversionTest {
             assertEquals(arr.getString(i), fromTensor.getString(i));
         }
     }
-
 }

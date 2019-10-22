@@ -47,7 +47,6 @@ public class ServingConfig {
     @Builder.Default
     private Output.PredictionType predictionType = Output.PredictionType.CLASSIFICATION;
 
-
     @Builder.Default
     private String uploadsDirectory = "file-uploads/";
     @Builder.Default

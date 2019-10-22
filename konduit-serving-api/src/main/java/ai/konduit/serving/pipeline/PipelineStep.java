@@ -42,7 +42,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-/**
+/*
  * PipelineStep collects all ETL related properties (input schema,
  * normalization and transform steps, output schema, potential pre-
  * or post-processing etc.). This config is passed to the respective
@@ -61,9 +61,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value= TransformProcessPipelineStep.class, name = "TransformProcessPipelineStep"),
         @JsonSubTypes.Type(value= ArrayConcatenationStep.class, name = "ArrayConcatenationStep"),
         @JsonSubTypes.Type(value= PmmlPipelineStep.class, name = "PmmlPipelineStep"),
-        @JsonSubTypes.Type(value= CustomPipelineStep.class, name = "CustomPipelineStep"),
-
-
+        @JsonSubTypes.Type(value= CustomPipelineStep.class, name = "CustomPipelineStep")
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 @EqualsAndHashCode(callSuper = false)
@@ -83,7 +81,7 @@ public abstract class PipelineStep implements Serializable {
     @Singular
     private List<String> affectedInputNames, affectedOutputNames;
     @Singular
-    private Map<String,List<String>> inputColumnNames, outputColumnNames;
+    private Map<String, List<String>> inputColumnNames, outputColumnNames;
 
     public List<String> getTargetInputStepInputNames() {
         return affectedInputNames != null ? affectedInputNames : inputNames;
