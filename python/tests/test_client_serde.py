@@ -1,17 +1,12 @@
-from jnius_config import set_classpath
-try:
-    set_classpath('konduit.jar')
-except:
-    print("VM already running from previous test")
-
 from konduit import *
 from konduit.client import Client
 from konduit.json_utils import json_with_type
 
 import json
 import random
-
 import numpy as np
+
+init()
 
 
 def test_multipart_encode():
@@ -46,18 +41,16 @@ def test_python_serde():
     )
 
     port = random.randint(1000, 65535)
-    parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=port,
                                    input_data_type='NUMPY',
                                    output_data_type='NUMPY',
-                                   log_timings=True,
-                                   parallel_inference_config=parallel_inference_config)
+                                   log_timings=True)
 
     python_pipeline_step = PythonPipelineStep(input_names=input_names,
                                               output_names=output_names,
                                               python_configs={'default': python_config})
 
-    inference = InferenceConfiguration(serving_config=serving_config,
-                                       pipeline_steps=[python_pipeline_step])
+    inference_config = InferenceConfiguration(serving_config=serving_config,
+                                              pipeline_steps=[python_pipeline_step])
 
-    json.dumps(json_with_type(inference))
+    json.dumps(json_with_type(inference_config))

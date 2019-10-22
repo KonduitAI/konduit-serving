@@ -1,10 +1,3 @@
-from jnius_config import set_classpath
-try:
-    set_classpath('konduit.jar')
-except:
-    print("VM already running from previous test")
-
-
 from konduit import ParallelInferenceConfig, ServingConfig, TensorFlowConfig, ModelConfigType
 from konduit import TensorDataTypesConfig, ModelPipelineStep, InferenceConfiguration
 from konduit.server import Server
@@ -15,18 +8,19 @@ import numpy as np
 import time
 import random
 
+init()
+
 
 def test_server_start():
 
     input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
     output_names = ["loss/Softmax"]
-    port = random.randint(1000,65535)
+    port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=port,
                                    input_data_type='NUMPY',
                                    output_data_type='NUMPY',
-                                   log_timings=True,
-                                   parallel_inference_config=parallel_inference_config)
+                                   log_timings=True)
 
     tensorflow_config = TensorFlowConfig(
         model_config_type=
@@ -39,7 +33,7 @@ def test_server_start():
                               }))
 
     model_pipeline_step = ModelPipelineStep(model_config=tensorflow_config,
-                                            serving_config=serving_config,
+                                            parallel_inference_config=parallel_inference_config,
                                             input_names=input_names,
                                             output_names=output_names)
 

@@ -1,9 +1,3 @@
-from jnius_config import set_classpath
-try:
-    set_classpath('konduit.jar')
-except:
-    print("VM already running from previous test")
-
 from konduit import *
 from konduit.json_utils import json_with_type
 from konduit.server import Server
@@ -14,6 +8,8 @@ import random
 import time
 import json
 from jnius import autoclass
+
+init()
 
 
 def test_build_tp():
@@ -42,20 +38,18 @@ def test_build_tp():
     input_names = ['default']
     output_names = ['default']
     port = random.randint(1000, 65535)
-    parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=port,
                                    input_data_type='JSON',
                                    output_data_type='JSON',
-                                   log_timings=True,
-                                   parallel_inference_config=parallel_inference_config)
+                                   log_timings=True)
 
-    inference = InferenceConfiguration(serving_config=serving_config,
-                                       pipeline_steps=[transform_process])
-    as_json = json_with_type(inference)
-    InferenceConfigurationJava = autoclass('ai.konduit.serving.InferenceConfiguration')
-    config = InferenceConfigurationJava.fromJson(StringJava(json.dumps(as_json)))
+    inference_config = InferenceConfiguration(serving_config=serving_config,
+                                              pipeline_steps=[transform_process])
+    as_json = json_with_type(inference_config)
+    inference_configuration_java_class = autoclass('ai.konduit.serving.InferenceConfiguration')
+    config = inference_configuration_java_class.fromJson(StringJava(json.dumps(as_json)))
 
-    server = Server(config=inference,
+    server = Server(config=inference_config,
                     extra_start_args='-Xmx8g',
                     jar_path='konduit.jar')
     server.start()
