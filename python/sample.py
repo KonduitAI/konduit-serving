@@ -1,5 +1,5 @@
-from konduit.inference import *
-from konduit.json_utils import json_with_type
+from konduit import *
+from konduit.json_utils import config_to_dict_with_type
 from konduit.server import Server
 from konduit.client import Client
 
@@ -7,8 +7,6 @@ from jnius_config import set_classpath
 import json
 import os
 
-konduit_jar = os.path.join('tests', 'konduit.jar')
-set_classpath(konduit_jar)
 from jnius import autoclass
 
 
@@ -43,12 +41,11 @@ parallel_inference_config = ParallelInferenceConfig(workers=1)
 serving_config = ServingConfig(http_port=port,
                                input_data_type='JSON',
                                output_data_type='ARROW',
-                               log_timings=True,
-                               parallel_inference_config=parallel_inference_config)
+                               log_timings=True)
 
 inference = InferenceConfiguration(serving_config=serving_config,
                                    pipeline_steps=[transform_process])
-as_json = json_with_type(inference)
+as_json = config_to_dict_with_type(inference)
 server = Server(config=inference,
                 extra_start_args='-Xmx8g',
                 jar_path=konduit_jar)
