@@ -1,5 +1,5 @@
 import enum
-from konduit.json_utils import dict_with_type, DictWrapper, ListWrapper
+from konduit.json_utils import empty_type_dict, DictWrapper, ListWrapper
 
 
 class TensorDataTypesConfig(object):
@@ -36,7 +36,7 @@ class TensorDataTypesConfig(object):
         _get_output_data_types, _set_output_data_types)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__input_data_types is not None:
             d['inputDataTypes'] = self.__input_data_types.as_dict() if hasattr(
                 self.__input_data_types, 'as_dict') else self.__input_data_types
@@ -90,7 +90,7 @@ class PubsubConfig(object):
     content_type = property(_get_content_type, _set_content_type)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__http_method is not None:
             d['httpMethod'] = self.__http_method.as_dict() if hasattr(
                 self.__http_method, 'as_dict') else self.__http_method
@@ -177,7 +177,7 @@ class SavedModelConfig(object):
         _get_save_model_output_order, _set_save_model_output_order)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__saved_model_path is not None:
             d['savedModelPath'] = self.__saved_model_path.as_dict() if hasattr(
                 self.__saved_model_path, 'as_dict') else self.__saved_model_path
@@ -280,7 +280,7 @@ class ParallelInferenceConfig(object):
         _get_vertx_config_json, _set_vertx_config_json)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__queue_limit is not None:
             d['queueLimit'] = self.__queue_limit.as_dict() if hasattr(
                 self.__queue_limit, 'as_dict') else self.__queue_limit
@@ -342,7 +342,7 @@ class ModelConfigType(object):
         _get_model_loading_path, _set_model_loading_path)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__model_type is not None:
             d['modelType'] = self.__model_type.as_dict() if hasattr(
                 self.__model_type, 'as_dict') else self.__model_type
@@ -388,7 +388,7 @@ class ModelConfig(object):
         _get_model_config_type, _set_model_config_type)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__tensor_data_types_config is not None:
             d['tensorDataTypesConfig'] = self.__tensor_data_types_config.as_dict() if hasattr(
                 self.__tensor_data_types_config, 'as_dict') else self.__tensor_data_types_config
@@ -410,7 +410,7 @@ class TensorDataType(object):
         pass
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         return d
 
 
@@ -462,7 +462,7 @@ class PmmlConfig(object):
         _get_evaluator_factory_name, _set_evaluator_factory_name)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__tensor_data_types_config is not None:
             d['tensorDataTypesConfig'] = self.__tensor_data_types_config.as_dict() if hasattr(
                 self.__tensor_data_types_config, 'as_dict') else self.__tensor_data_types_config
@@ -547,7 +547,7 @@ class ObjectDetectionConfig(object):
     input_shape = property(_get_input_shape, _set_input_shape)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__threshold is not None:
             d['threshold'] = self.__threshold.as_dict() if hasattr(
                 self.__threshold, 'as_dict') else self.__threshold
@@ -578,7 +578,7 @@ class SchemaType(object):
         pass
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         return d
 
 
@@ -594,7 +594,7 @@ class Input(object):
         pass
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         return d
 
 
@@ -610,7 +610,7 @@ class Output(object):
         pass
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         return d
 
 
@@ -650,7 +650,7 @@ class SameDiffConfig(object):
         _get_model_config_type, _set_model_config_type)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__tensor_data_types_config is not None:
             d['tensorDataTypesConfig'] = self.__tensor_data_types_config.as_dict() if hasattr(
                 self.__tensor_data_types_config, 'as_dict') else self.__tensor_data_types_config
@@ -720,7 +720,7 @@ class TensorFlowConfig(object):
         _get_saved_model_config, _set_saved_model_config)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__tensor_data_types_config is not None:
             d['tensorDataTypesConfig'] = self.__tensor_data_types_config.as_dict() if hasattr(
                 self.__tensor_data_types_config, 'as_dict') else self.__tensor_data_types_config
@@ -850,7 +850,7 @@ class PythonConfig(object):
         _get_return_all_inputs, _set_return_all_inputs)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__tensor_data_types_config is not None:
             d['tensorDataTypesConfig'] = self.__tensor_data_types_config.as_dict() if hasattr(
                 self.__tensor_data_types_config, 'as_dict') else self.__tensor_data_types_config
@@ -1013,7 +1013,7 @@ class ServingConfig(object):
     metric_types = property(_get_metric_types, _set_metric_types)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__pub_sub_config is not None:
             d['pubSubConfig'] = self.__pub_sub_config.as_dict() if hasattr(
                 self.__pub_sub_config, 'as_dict') else self.__pub_sub_config
@@ -1191,7 +1191,7 @@ class PipelineStep(object):
         _get_target_input_step_output_names, _set_target_input_step_output_names)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__input_schemas is not None:
             d['inputSchemas'] = self.__input_schemas.as_dict() if hasattr(
                 self.__input_schemas, 'as_dict') else self.__input_schemas
@@ -1247,7 +1247,7 @@ class NormalizationConfig(object):
     config = property(_get_config, _set_config)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__config is not None:
             d['config'] = self.__config.as_dict() if hasattr(
                 self.__config, 'as_dict') else self.__config
@@ -1412,7 +1412,7 @@ class PythonPipelineStep(PipelineStep):
         _get_target_input_step_output_names, _set_target_input_step_output_names)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__input_schemas is not None:
             d['inputSchemas'] = self.__input_schemas.as_dict() if hasattr(
                 self.__input_schemas, 'as_dict') else self.__input_schemas
@@ -1608,7 +1608,7 @@ class TransformProcessPipelineStep(PipelineStep):
         _get_target_input_step_output_names, _set_target_input_step_output_names)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__input_schemas is not None:
             d['inputSchemas'] = self.__input_schemas.as_dict() if hasattr(
                 self.__input_schemas, 'as_dict') else self.__input_schemas
@@ -1828,7 +1828,7 @@ class ModelPipelineStep(PipelineStep):
         _get_target_input_step_output_names, _set_target_input_step_output_names)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__input_schemas is not None:
             d['inputSchemas'] = self.__input_schemas.as_dict() if hasattr(
                 self.__input_schemas, 'as_dict') else self.__input_schemas
@@ -2030,7 +2030,7 @@ class ArrayConcatenationStep(PipelineStep):
         _get_target_input_step_output_names, _set_target_input_step_output_names)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__input_schemas is not None:
             d['inputSchemas'] = self.__input_schemas.as_dict() if hasattr(
                 self.__input_schemas, 'as_dict') else self.__input_schemas
@@ -2214,7 +2214,7 @@ class JsonExpanderTransform(PipelineStep):
         _get_target_input_step_output_names, _set_target_input_step_output_names)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__input_schemas is not None:
             d['inputSchemas'] = self.__input_schemas.as_dict() if hasattr(
                 self.__input_schemas, 'as_dict') else self.__input_schemas
@@ -2480,7 +2480,7 @@ class ImageLoading(PipelineStep):
         _get_target_input_step_output_names, _set_target_input_step_output_names)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__input_schemas is not None:
             d['inputSchemas'] = self.__input_schemas.as_dict() if hasattr(
                 self.__input_schemas, 'as_dict') else self.__input_schemas
@@ -2571,7 +2571,7 @@ class InferenceConfiguration(object):
     serving_config = property(_get_serving_config, _set_serving_config)
 
     def as_dict(self):
-        d = dict_with_type(self)
+        d = empty_type_dict(self)
         if self.__pipeline_steps is not None:
             d['pipelineSteps'] = [p.as_dict() if hasattr(
                 p, 'as_dict') else p for p in self.__pipeline_steps]

@@ -1,5 +1,5 @@
 from konduit.inference import InferenceConfiguration
-from konduit.json_utils import json_with_type
+from konduit.json_utils import config_to_dict_with_type
 
 import json
 import subprocess
@@ -27,7 +27,7 @@ class Server(object):
 
     def start(self):
 
-        json_config = json_with_type(self.config)
+        json_config = config_to_dict_with_type(self.config)
         with open(self.config_path, 'w') as f:
             abs_path = os.path.abspath(self.config_path)
             print('Wrote config.json to path ' + abs_path)
