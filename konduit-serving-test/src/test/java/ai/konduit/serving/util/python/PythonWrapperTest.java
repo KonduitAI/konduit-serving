@@ -81,7 +81,6 @@ public class PythonWrapperTest {
         INDArray output =  model.attr("predict").call(input).toNumpy().getNd4jArray();
 
         assertArrayEquals(output.shape(), new long[]{12, 10});
-        PythonExecutioner.releaseGIL();
 
     }
 
