@@ -28,6 +28,7 @@ import ai.konduit.serving.util.python.PythonVariables;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.bytedeco.cpython.PyObject;
 import org.bytedeco.cpython.PyThreadState;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.numpy.global.numpy;
@@ -361,7 +362,7 @@ public class PythonExecutioner {
                 inputCode += varName + " = " + listStr + "\n";
             }
             else {
-                inputCode += varName + " + []\n";
+                inputCode += varName + " = []\n";
             }
 
         }
@@ -506,11 +507,15 @@ public class PythonExecutioner {
         log.info("CPython: PyRun_SimpleStringFlag()");
 
         int result = PyRun_SimpleStringFlags(code, null);
-        if (result != 0) {
+        if (result == -1) {
             log.info("CPython: PyErr_Print");
             PyErr_Print();
             throw new RuntimeException("exec failed");
         }
+    }
+
+    private static synchronized  void _exec_wrapped(String code){
+        _exec(getWrappedCode(code));
     }
 
     /**
@@ -520,7 +525,7 @@ public class PythonExecutioner {
 
     public static void exec(String code) {
         code = getWrappedCode(code);
-        if(code.contains("import numpy") && !getInterpreter().equals("main")) {
+        if(code.contains("import numpy") && !getInterpreter().equals("main")) {// FIXME
             throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
         }
 
@@ -530,6 +535,65 @@ public class PythonExecutioner {
         releaseGIL();
     }
 
+    private static boolean _hasGlobalVariable(String varName){
+        PyObject mainModule = PyImport_AddModule("__main__");
+        PyObject var = PyObject_GetAttrString(mainModule, varName);
+        boolean hasVar = var != null;
+        Py_DecRef(var);
+        return hasVar;
+    }
+
+    public static void execWithSetupAndRun(String code){
+        code = getWrappedCode(code);
+        if(code.contains("import numpy") && !getInterpreter().equals("main")) { // FIXME
+            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
+        }
+
+        acquireGIL();
+        _exec(code);
+        if (_hasGlobalVariable("setup") && _hasGlobalVariable("run")){
+            log.info("setup() and run() methods found.");
+            if (!_hasGlobalVariable("__setup_done__")){
+                log.info("Calling setup()...");
+                _exec("setup()");
+                _exec("__setup_done__ = True");
+            }
+            log.info("Calling run()...");
+            _exec("run()");
+        }
+        log.info("Exec done");
+        releaseGIL();
+    }
+
+    public static void execWithSetupAndRun(String code, PythonVariables pyOutputs) {
+        code = getWrappedCode(code);
+        if(code.contains("import numpy") && !getInterpreter().equals("main")) { // FIXME
+            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
+        }
+
+        acquireGIL();
+        _exec(code);
+        if (_hasGlobalVariable("setup") && _hasGlobalVariable("run")){
+            log.info("setup() and run() methods found.");
+            if (!_hasGlobalVariable("__setup_done__")){
+                log.info("Calling setup()...");
+                _exec("setup()");
+                _exec("__setup_done__ = True");
+            }
+            log.info("Calling run()...");
+            _exec("__out = run();for (k,v) in __out.items(): globals()[k]=v");
+        }
+        log.info("Exec done");
+        try {
+
+            _readOutputs(pyOutputs);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        releaseGIL();
+    }
 
     /**
      * Run the given code with the given python outputs
@@ -564,20 +628,54 @@ public class PythonExecutioner {
         exec(inputCode + code, pyOutputs);
     }
 
+    public static void execWithSetupAndRun(String code, PythonVariables pyInputs, PythonVariables pyOutputs) throws Exception{
+        String inputCode = inputCode(pyInputs);
+        code = inputCode +code;
+        code = getWrappedCode(code);
+        if(code.contains("import numpy") && !getInterpreter().equals("main")) { // FIXME
+            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
+        }
+        acquireGIL();
+        _exec(code);
+        if (_hasGlobalVariable("setup") && _hasGlobalVariable("run")){
+            log.info("setup() and run() methods found.");
+            if (!_hasGlobalVariable("__setup_done__")){
+                releaseGIL(); // required
+                acquireGIL();
+                log.info("Calling setup()...");
+                _exec("setup()");
+                _exec("__setup_done__ = True");
+            }else{
+                log.info("setup() already called once.");
+            }
+            log.info("Calling run()...");
+            releaseGIL(); // required
+            acquireGIL();
+            _exec("import inspect\n"+
+            "__out = run(**{k:globals()[k]for k in inspect.getfullargspec(run).args})\n"+
+            "globals().update(__out)");
+        }
+        releaseGIL();  // required
+        acquireGIL();
+        _exec(outputCode(pyOutputs));
+        log.info("Exec done");
+        try {
+
+            _readOutputs(pyOutputs);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        releaseGIL();
+    }
+
+
+
     private static String interpreterNameFromTransform(PythonTransform transform){
         return transform.getName().replace("-", "_");
     }
 
-    private static String[] splitSetupAndExecCode(String code){
-        String startToken = "#<SETUP>";
-        String endToken = "#</SETUP>";
-        if (code.contains(startToken) && code.contains(endToken)){
-            return code.split(endToken);
-        }
-        else{
-            return new String[]{null, code};
-        }
-    }
 
     /**
      * Run a {@link PythonTransform} with the given inputs
@@ -587,18 +685,13 @@ public class PythonExecutioner {
      * @throws Exception
      */
     public static PythonVariables exec(PythonTransform transform, PythonVariables inputs)throws Exception {
-        String split[] = splitSetupAndExecCode(transform.getCode());
         String name = interpreterNameFromTransform(transform);
-        if (!hasInterpreter(name) && split[0] != null){
-            setInterpreter(name);
-            exec(split[0]);
-
-        }
         setInterpreter(name);
         Preconditions.checkNotNull(transform.getOutputs(),"Transform outputs were null!");
-        exec(split[1], inputs, transform.getOutputs());
+        execWithSetupAndRun(transform.getCode(), inputs, transform.getOutputs());
         return transform.getOutputs();
     }
+
 
     /**
      * Run the code and return the outputs
@@ -606,7 +699,7 @@ public class PythonExecutioner {
      * @return all python variables
      */
     public static PythonVariables execAndReturnAllVariables(String code) {
-        exec(code + '\n' + outputCodeForAllVariables());
+        execWithSetupAndRun(code + '\n' + outputCodeForAllVariables());
         PythonVariables allVars = new PythonVariables();
         allVars.addDict(ALL_VARIABLES_KEY);
         try {
