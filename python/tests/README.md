@@ -1,40 +1,51 @@
 # Tests 
-This article discusses the tests for the Python SDK of Konduit.
+This article discusses the tests for Konduit's Python SDK.
 
 ## Pipeline steps 
 
 ### [`test_start.py`](https://github.com/KonduitAI/konduit-serving/blob/master/python/tests/test_start.py)
 
-Checks if a server configured with a TensorFlow model can be started, then stops it. Starts a server based on an [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with a single [ModelPipelineStep](https://github.com/KonduitAI/konduit-serving/blob/master/python/konduit/inference.py#L1579-L1778) built with a model trained in TensorFlow, configured using the [TensorFlowConfig](../konduit/inference.py#L656-L720) class. This server takes as input data type 'NUMPY' and outputs a 'NUMPY' object. 
+Checks if a server configured with a TensorFlow model can be started, then stops it. Starts a server based on an [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with a single [ModelPipelineStep](../konduit/inference.py#L1579-L1778) built with a model trained in TensorFlow, configured using the [TensorFlowConfig](../konduit/inference.py#L656-L720) class. This server takes as input data type 'NUMPY' and outputs a 'NUMPY' object. 
 
-Possible data types are listed in [`konduit.inference`](../konduit/inference.py#L863-L865) and should be specified in ServingConfig:
+Possible data types for the server configuration are listed in [`konduit.inference`](../konduit/inference.py#L863-L865) and should be specified in [ServingConfig](../konduit/inference.py#L861-L1018):
 - Accepted input data types are JSON, ARROW, IMAGE, ND4J (not yet implemented), NUMPY. 
 - Accepted output data types are NUMPY, JSON, ND4J (not yet implemented), ARROW
-- Prediction types supported are CLASSIFICATION, YOLO, SSD, RCNN, RAW, REGRESSION. 
 
 ### [`test_transform_process.py`](test_transform_process.py)
 
-Build [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573), then dumps a JSON of the configuration. Use [InferenceConfiguration](../konduit/inference.py#L2386-L2427) object in Server, Client queries Server and prints predicted output. 
+Checks if a TransformProcessPipelineStep can be performed. This tests builds [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). The transform process is defined by [TransformProcessBuilder](https://github.com/eclipse/deeplearning4j/blob/master/datavec/datavec-api/src/main/java/org/datavec/api/transform/TransformProcess.java#L611) (the Builder subclass of TransformProcess in DataVec), written to a JSON file and loaded again for use in a [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). 
+
+The [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573) is defined by a DataVec [TransformProcess](https://deeplearning4j.org/docs/latest/datavec-transforms), which in turn requires a [Schema](https://deeplearning4j.org/docs/latest/datavec-schema). 
+
+The [InferenceConfiguration](../konduit/inference.py#L2386-L2427) object is an argument to Server. The Client sends a query to the Server and prints the predicted output given a JSON file as input. 
+
+The input and output data types of this server are configured to be JSON. 
 
 ### [`test_transform_process_arrow.py`](test_transform_process_arrow.py)
 
-Similar to `test_transform_process.py`, but with Arrow output from client. 
+Similar to `test_transform_process.py`, checks if a DataVec transformation can be configured, but with the server configured to provide Arrow output instead of JSON. 
 
 ### [`test_python_serving.py`](test_python_serving.py)
 
 Tests whether Python pipelines can be served. Takes as input a NumPy array saved in `../data/input-0.npy` and performs a simple operation on the model inputs in a [PythonPipelineStep](../konduit/inference.py#L1221-L1394).
 
+The input and output data types of this server are configured to be NUMPY. 
+
 ### [`test_bert_serving.py`](test_bert_serving.py)
 
-Similar to `test_start.py`, but also prints the predicted output given NumPy arrays. 
+Similar to `test_start.py`, creates a configuration with a TensorFlow BERT model loaded with [TensorFlowConfig](../konduit/inference.py#L656-L720), but also prints the predicted output given NumPy arrays. 
+
+The input and output data types of this server are configured to be NUMPY. 
 
 ## Saving configurations 
 
 ### [`test_json.py`](test_json.py)
 
-Saves server configuration as JSON, loads it again, and checks if the loaded and existing configuration steps have equal length. 
+After configuring a server, saves server configuration as JSON, loads it again, and checks if the existing configuration steps has the same length as the configuration loaded from the JSON file. 
 
-`test_json_compare()` creates a configuration similar to `test_start.py`, while `test_python_serde()` creates a Python pipeline similar to `test_python_serving.py`.
+The servers are configured in two ways. 
+- Similar to `test_start.py`, `test_json_compare()` creates a configuration with a TensorFlow model loaded with [TensorFlowConfig](../konduit/inference.py#L656-L720), 
+- `test_python_serde()` configures a server with a [PythonPipelineStep](../konduit/inference.py#L1221-L1394) similar to `test_python_serving.py`.
 
 
 ## Client conversion and encoding 
@@ -49,4 +60,4 @@ Tests the following methods for the [Client](../konduit/client.py#L10-L139) clas
 - [`_convert_multi_part_output()`](../konduit/client.py#L110-L129) - converts output returned by the server into the output type requested by the client
 
 #### `test_python_serde()`
-Similar to `test_python_serving.py`. Dumps JSON.
+Similar to `test_python_serving.py`, configures a server with [PythonPipelineStep](../konduit/inference.py#L1221-L1394), then dumps a JSON file containing the configuration.
