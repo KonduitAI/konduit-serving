@@ -19,17 +19,17 @@ Possible data types for the server configuration are listed in [`konduit.inferen
 
 Checks if a TransformProcessPipelineStep can be performed. 
 
-This tests builds [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). The transform process is defined by [TransformProcessBuilder](https://github.com/eclipse/deeplearning4j/blob/master/datavec/datavec-api/src/main/java/org/datavec/api/transform/TransformProcess.java#L611) (the Builder subclass of TransformProcess in DataVec), written to a JSON file and loaded again for use in a [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). 
+This tests builds [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). 
 
-The [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573) is defined by a DataVec [TransformProcess](https://deeplearning4j.org/docs/latest/datavec-transforms), which in turn requires a [Schema](https://deeplearning4j.org/docs/latest/datavec-schema). 
+The transform process is defined by [TransformProcessBuilder](https://github.com/eclipse/deeplearning4j/blob/master/datavec/datavec-api/src/main/java/org/datavec/api/transform/TransformProcess.java#L611) (the Builder subclass of [TransformProcess](https://deeplearning4j.org/docs/latest/datavec-transforms) in DataVec), written to a JSON file and loaded again for use in a [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). [TransformProcess](https://deeplearning4j.org/docs/latest/datavec-transforms) in turn requires defining a [Schema](https://deeplearning4j.org/docs/latest/datavec-schema). 
 
-The [InferenceConfiguration](../konduit/inference.py#L2386-L2427) object is an argument to Server. The Client sends a query to the Server and prints the predicted output given a JSON file as input. 
+The [InferenceConfiguration](../konduit/inference.py#L2386-L2427) object is an argument to Server. Given a JSON file as input, the Client sends a query to the Server and prints the predicted output. 
 
 This server is configured for JSON input and output. 
 
 ### [`test_transform_process_arrow.py`](test_transform_process_arrow.py)
 
-Similar to `test_transform_process.py`, checks if a DataVec transformation can be configured, but with the server configured to provide Arrow output instead of JSON. 
+Similar to `test_transform_process.py`, checks if a DataVec transformation can be configured, but with the server configured to return Arrow output instead of JSON. 
 
 ### [`test_python_serving.py`](test_python_serving.py)
 
