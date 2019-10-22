@@ -7,7 +7,7 @@ This article discusses the tests for Konduit's Python SDK.
 
 Checks if a server configured with a TensorFlow model can be started, then stops it. Starts a server based on an [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with a single [ModelPipelineStep](../konduit/inference.py#L1579-L1778) built with a model trained in TensorFlow, configured using the [TensorFlowConfig](../konduit/inference.py#L656-L720) class. 
 
-This server is configured to accept input data type 'NUMPY' and ooutput data type 'NUMPY'. 
+This server is configured to accept input data type 'NUMPY' and output data type 'NUMPY'. 
 
 Possible data types for the server configuration are listed in [`konduit.inference`](../konduit/inference.py#L863-L865) and should be specified in [ServingConfig](../konduit/inference.py#L861-L1018):
 - Accepted input data types are JSON, ARROW, IMAGE, ND4J (not yet implemented), NUMPY. 
