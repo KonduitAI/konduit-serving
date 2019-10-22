@@ -5,17 +5,21 @@ This article discusses the tests for Konduit's Python SDK.
 
 ### [`test_start.py`](https://github.com/KonduitAI/konduit-serving/blob/master/python/tests/test_start.py)
 
-Checks if a server configured with a TensorFlow model can be started, then stops it. Starts a server based on an [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with a single [ModelPipelineStep](../konduit/inference.py#L1579-L1778) built with a model trained in TensorFlow, configured using the [TensorFlowConfig](../konduit/inference.py#L656-L720) class. 
+Checks if a server configured with a TensorFlow model can be started, then stops it. 
+
+Starts a server based on an [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with a single [ModelPipelineStep](../konduit/inference.py#L1579-L1778) built with a model trained in TensorFlow, configured using the [TensorFlowConfig](../konduit/inference.py#L656-L720) class. 
 
 This server is configured to accept input data type 'NUMPY' and output data type 'NUMPY'. 
 
 Possible data types for the server configuration are listed in [`konduit.inference`](../konduit/inference.py#L863-L865) and should be specified in [ServingConfig](../konduit/inference.py#L861-L1018):
-- Accepted input data types are JSON, ARROW, IMAGE, ND4J (not yet implemented), NUMPY. 
-- Accepted output data types are NUMPY, JSON, ND4J (not yet implemented), ARROW
+- Accepted input data types are JSON, ARROW, IMAGE, ND4J (not yet implemented) and NUMPY. 
+- Accepted output data types are NUMPY, JSON, ND4J (not yet implemented) and ARROW.
 
 ### [`test_transform_process.py`](test_transform_process.py)
 
-Checks if a TransformProcessPipelineStep can be performed. This tests builds [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). The transform process is defined by [TransformProcessBuilder](https://github.com/eclipse/deeplearning4j/blob/master/datavec/datavec-api/src/main/java/org/datavec/api/transform/TransformProcess.java#L611) (the Builder subclass of TransformProcess in DataVec), written to a JSON file and loaded again for use in a [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). 
+Checks if a TransformProcessPipelineStep can be performed. 
+
+This tests builds [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). The transform process is defined by [TransformProcessBuilder](https://github.com/eclipse/deeplearning4j/blob/master/datavec/datavec-api/src/main/java/org/datavec/api/transform/TransformProcess.java#L611) (the Builder subclass of TransformProcess in DataVec), written to a JSON file and loaded again for use in a [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). 
 
 The [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573) is defined by a DataVec [TransformProcess](https://deeplearning4j.org/docs/latest/datavec-transforms), which in turn requires a [Schema](https://deeplearning4j.org/docs/latest/datavec-schema). 
 
@@ -56,10 +60,10 @@ Two server configurations are defined:
 
 #### `test_multipart_encode()`
 Tests the following methods for the [Client](../konduit/client.py#L10-L139) class: 
-- [`_convert_numpy_to_binary()`](../konduit/client.py#L72-L76): converts inputs into a dictionary (key-value pairs) with binary data as values
-- [`_convert_multi_part_inputs()`](../konduit/client.py#L100-L108): encodes the dictionary from `convert_numpy_to_binary()` in a multipart request body
-- [`_encode_multi_part_input()`](../konduit/client.py#L85-L97): decodes the multipart response into binary data or, depending on the output type, converts into the corresponding output class
-- [`_convert_multi_part_output()`](../konduit/client.py#L110-L129): converts output returned by the server into the output type requested by the client
+- [`_convert_numpy_to_binary()`](../konduit/client.py#L72-L76): converts inputs into a dictionary (key-value pairs) with binary data as values.
+- [`_convert_multi_part_inputs()`](../konduit/client.py#L100-L108): encodes the dictionary from `convert_numpy_to_binary()` in a multipart request body.
+- [`_encode_multi_part_input()`](../konduit/client.py#L85-L97): decodes the multipart response into binary data or, depending on the output type, converts into the corresponding output class.
+- [`_convert_multi_part_output()`](../konduit/client.py#L110-L129): converts output returned by the server into the output type requested by the client.
 
 #### `test_python_serde()`
 Similar to `test_python_serving.py`, configures a server with [PythonPipelineStep](../konduit/inference.py#L1221-L1394), then dumps a JSON file containing the configuration.
