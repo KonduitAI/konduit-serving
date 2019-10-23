@@ -35,6 +35,7 @@ import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.http.ContentType;
+import com.sun.org.apache.regexp.internal.StringCharacterIterator;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -45,6 +46,8 @@ import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +59,8 @@ import org.nd4j.linalg.primitives.Pair;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.net.ServerSocket;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import static ai.konduit.serving.train.TrainUtils.getIrisOutputSchema;
 import static ai.konduit.serving.train.TrainUtils.getTrainedNetwork;
@@ -116,7 +121,6 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
         TransformProcessPipelineStep transformStepUnused = new TransformProcessPipelineStep()
                 .step("default", inputSchema, outputSchema, transformProcess);
 
-
         ServingConfig servingConfig = ServingConfig.builder()
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .inputDataType(Input.DataType.JSON)
@@ -160,9 +164,9 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .body(wrapper.toString())
                 .port(port)
                 .post("/classification/csv")
-                .then().statusCode(200);
-
-
-
+                .then()
+                .assertThat().statusCode(200)
+                .and()
+                .assertThat().body(new StringContainsInOrder(() -> Arrays.asList("default", "probabilities", "labels", "batchId").iterator()));
     }
 }
