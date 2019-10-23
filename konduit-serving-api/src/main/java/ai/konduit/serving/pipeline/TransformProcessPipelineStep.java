@@ -44,8 +44,7 @@ public class TransformProcessPipelineStep extends PipelineStep {
     @Getter
     @Setter
     @Singular
-    private Map<String,TransformProcess> transformProcesses;
-
+    private Map<String, TransformProcess> transformProcesses;
 
     public TransformProcessPipelineStep input(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.input(inputName, columnNames, types);
@@ -65,18 +64,15 @@ public class TransformProcessPipelineStep extends PipelineStep {
         return (TransformProcessPipelineStep) super.output(outputName, outputSchema);
     }
 
-
-
-
-        /**
-         * Create a TransformProcess Step with default input and output names
-         * just from input/output schema and the actual TransformProcess
-         *
-         * @param inputSchema DataVec Schema for data input
-         * @param outputSchema DataVec Schema for data output
-         * @param transformProcess DataVec TransformProcess
-         * @throws Exception key error
-         */
+    /**
+     * Create a TransformProcess Step with default input and output names
+     * just from input/output schema and the actual TransformProcess
+     *
+     * @param inputSchema DataVec Schema for data input
+     * @param outputSchema DataVec Schema for data output
+     * @param transformProcess DataVec TransformProcess
+     * @throws Exception key error
+     */
     public TransformProcessPipelineStep(Schema inputSchema, Schema outputSchema,
                                         TransformProcess transformProcess) throws Exception {
         String defaultName = "default";
@@ -95,7 +91,7 @@ public class TransformProcessPipelineStep extends PipelineStep {
      * @return this transform process step
      * @throws Exception key error
      */
-    public  TransformProcessPipelineStep step(String stepName, Schema inputSchema, Schema outputSchema,
+    public TransformProcessPipelineStep step(String stepName, Schema inputSchema, Schema outputSchema,
                                               TransformProcess transformProcess) throws Exception {
         this.input(stepName, inputSchema);
         this.output(stepName, outputSchema);
@@ -118,7 +114,6 @@ public class TransformProcessPipelineStep extends PipelineStep {
         transformProcesses.put(inputName, transformProcess);
         return this;
     }
-
 
     @Override
     public String pipelineStepClazz() {

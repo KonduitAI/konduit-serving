@@ -59,9 +59,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value= TransformProcessPipelineStep.class, name = "TransformProcessPipelineStep"),
         @JsonSubTypes.Type(value= ArrayConcatenationStep.class, name = "ArrayConcatenationStep"),
         @JsonSubTypes.Type(value= PmmlPipelineStep.class, name = "PmmlPipelineStep"),
-        @JsonSubTypes.Type(value= CustomPipelineStep.class, name = "CustomPipelineStep"),
-
-
+        @JsonSubTypes.Type(value= CustomPipelineStep.class, name = "CustomPipelineStep")
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 @EqualsAndHashCode(callSuper = false)
@@ -75,7 +73,6 @@ public abstract class PipelineStep implements Serializable {
 
     @Singular
     private Map<String,List<String>> inputColumnNames,outputColumnNames;
-
 
     private void setInputColumns(String inputName, List<String> columnNames) {
         Map<String, List<String>> inputCols = this.getInputColumnNames();
@@ -177,7 +174,6 @@ public abstract class PipelineStep implements Serializable {
         }
     }
 
-
     /**
      * Define a single output for a TransformProcess Step from explicit
      * column names and types for this output.
@@ -209,7 +205,6 @@ public abstract class PipelineStep implements Serializable {
                     " choose another naming convention for your next step.");
         }
     }
-
 
     /**
      * Define a single output for a TransformProcess Step.
@@ -278,7 +273,6 @@ public abstract class PipelineStep implements Serializable {
         return inputNames.get(i);
     }
 
-
     public boolean processColumn(String name,int index) {
         if(inputColumnNames.isEmpty())
             return true;
@@ -302,7 +296,6 @@ public abstract class PipelineStep implements Serializable {
 
     public abstract String pipelineStepClazz();
 
-
 //    public enum StepType {
 //        PYTHON,
 //        MODEL,
@@ -311,7 +304,4 @@ public abstract class PipelineStep implements Serializable {
 //        IMAGE_LOADING,
 //        OBJECT_DETECTION
 //    }
-
-
-
 }
