@@ -30,7 +30,7 @@ import org.datavec.api.writable.Writable;
 import org.datavec.local.transforms.LocalTransformExecutor;
 import org.nd4j.base.Preconditions;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -47,19 +47,20 @@ public class TransformProcessPipelineStepRunner extends BasePipelineStepRunner {
         this.transformProcesses = transformProcessPipelineStepConfig.getTransformProcesses();
     }
 
-
-
     @Override
     public Record[] transform(Record[] input) {
         Record[] ret = new Record[input.length];
         for(int i = 0; i < input.length; i++) {
-            if(pipelineStep.inputNameIsValidForStep(pipelineStep.inputNameAt(i))) {
-                TransformProcess toExecute = transformProcesses.get(pipelineStep.inputNameAt(i));
-                Preconditions.checkNotNull(toExecute,"No transform process found for name " + (pipelineStep.inputNameAt(i)));
-                ret[i] = new org.datavec.api.records.impl.Record(LocalTransformExecutor.execute(Arrays.asList(input[i].getRecord()),toExecute).get(0),null);
-
-            }
-            else {
+            String inputName = pipelineStep.inputNameAt(i);
+            if(pipelineStep.inputNameIsValidForStep(inputName)) {
+                TransformProcess toExecute = transformProcesses.get(inputName);
+                Preconditions.checkNotNull(toExecute,"No transform process found for name " + inputName);
+                ret[i] = new org.datavec.api.records.impl.Record(
+                        LocalTransformExecutor.execute(
+                                Collections.singletonList(input[i].getRecord()),
+                                toExecute).get(0),
+                        null);
+            } else {
                 ret[i] = input[i];
             }
         }

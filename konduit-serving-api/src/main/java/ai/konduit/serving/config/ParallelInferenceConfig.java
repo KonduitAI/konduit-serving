@@ -70,7 +70,5 @@ public class ParallelInferenceConfig implements Serializable {
                 .queueLimit(ParallelInference.DEFAULT_QUEUE_LIMIT)
                 .batchLimit(ParallelInference.DEFAULT_BATCH_LIMIT)
                 .workers(NUM_WORKERS).build();
-
     }
-
 }

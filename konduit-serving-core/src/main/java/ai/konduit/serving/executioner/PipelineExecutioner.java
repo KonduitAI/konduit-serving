@@ -139,7 +139,7 @@ public class PipelineExecutioner {
             }
 
             //always have output names change to the last defined names in the pipeline
-            if (!CollectionUtils.isEmpty(pipelineStep.getOutputNames())) { // Checks for both null or empty collection
+            if(!CollectionUtils.isEmpty(pipelineStep.getOutputNames())) { // Checks for both null or empty collection
                 outputNames = pipelineStep.getOutputNames();
             }
 
@@ -172,7 +172,7 @@ public class PipelineExecutioner {
                 log.info("Skipping initialization of multi input adapter due to binary output.");
             }
         } catch (Exception e) {
-            log.error("Error initializing output adapter.",e);
+            log.error("Error initializing output adapter.", e);
         }
 
         if (servingConfig.getInputDataType() == null) {
