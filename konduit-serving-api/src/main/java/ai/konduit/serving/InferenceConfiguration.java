@@ -46,7 +46,7 @@ public class InferenceConfiguration implements Serializable  {
 
     /**
      * Returns a serving configuration if one is defined
-     * or creaes a new one if it doesn't exist
+     * or creates a new one if it doesn't exist
      * @return the initialized or cached {@link ServingConfig}
      */
     public ServingConfig serving() {

@@ -110,14 +110,12 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
 
         TransformProcess transformProcess = transformProcessBuilder.build();
 
-        TransformProcessPipelineStep transformStep = TransformProcessPipelineStep.builder()
-                .inputName("default")
-                .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
-                .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
-                .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
-                .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
-                .transformProcess("default", transformProcess)
-                .build();
+        TransformProcessPipelineStep transformStep = new TransformProcessPipelineStep(inputSchema, outputSchema, transformProcess);
+
+        // This is equivalent to:
+        TransformProcessPipelineStep transformStepUnused = new TransformProcessPipelineStep()
+                .step("default", inputSchema, outputSchema, transformProcess);
+
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .predictionType(Output.PredictionType.CLASSIFICATION)
@@ -150,12 +148,12 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) {
         JsonArray jsonArray = new JsonArray();
-        double[] values = { 5.1, 3.5, 1.4, 0.2 };
-        for(int i = 0; i < 4; i++) jsonArray.add(values[i]);
+        double[] vals = {5.1,3.5,1.4,0.2};
+        for(int i = 0; i < 4; i++) jsonArray.add(vals[i]);
 
         JsonObject wrapper = new JsonObject();
-        for(int i = 0; i < values.length; i++) {
-            wrapper.put(inputSchema.getName(i),values[i]);
+        for(int i = 0; i < vals.length; i++) {
+            wrapper.put(inputSchema.getName(i),vals[i]);
         }
 
         given().contentType(ContentType.JSON)
@@ -164,10 +162,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .post("/classification/csv")
                 .then().statusCode(200);
 
-        System.out.println(given().contentType(ContentType.JSON)
-                .body(wrapper.toString())
-                .port(port)
-                .post("/classification/csv")
-                .asString());
+
+
     }
 }
