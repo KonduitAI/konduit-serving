@@ -17,7 +17,6 @@ class Client(object):
                  output_names=None,
                  url=''):
 
-        # avoid mutable arguments in signature
         if input_names is None:
             input_names = []
         assert isinstance(input_names, list), 'Input names should be a list!'
@@ -108,7 +107,9 @@ class Client(object):
         return ret.to_string(), ret.content_type
 
     @staticmethod
-    def _convert_multi_part_inputs(data_input={}):
+    def _convert_multi_part_inputs(data_input=None):
+        if data_input is None:
+            data_input = {}
         ret = {}
         for key, value in data_input.items():
             if isinstance(value, np.ndarray):
