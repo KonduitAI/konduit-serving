@@ -7,7 +7,7 @@ This article discusses the tests for Konduit's Python SDK.
 
 Checks if a server configured with a TensorFlow model can be started, then stops it. 
 
-Starts a server based on an [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with a single [ModelPipelineStep](../konduit/inference.py#L1579-L1778) built with a model trained in TensorFlow, configured using the [TensorFlowConfig](../konduit/inference.py#L656-L720) class. 
+Starts a server configured with an [InferenceConfiguration](../konduit/inference.py#L2386-L2427) with a single [ModelPipelineStep](../konduit/inference.py#L1579-L1778) built with a model trained in TensorFlow, configured using the [TensorFlowConfig](../konduit/inference.py#L656-L720) class. 
 
 This server is configured to accept input data type 'NUMPY' and output data type 'NUMPY'. 
 
@@ -23,7 +23,7 @@ This tests builds [InferenceConfiguration](../konduit/inference.py#L2386-L2427) 
 
 The transform process is defined by [TransformProcessBuilder](https://github.com/eclipse/deeplearning4j/blob/master/datavec/datavec-api/src/main/java/org/datavec/api/transform/TransformProcess.java#L611) (the Builder subclass of [TransformProcess](https://deeplearning4j.org/docs/latest/datavec-transforms) in DataVec), written to a JSON file and loaded again for use in a [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). [TransformProcess](https://deeplearning4j.org/docs/latest/datavec-transforms) in turn requires defining a [Schema](https://deeplearning4j.org/docs/latest/datavec-schema). 
 
-The [InferenceConfiguration](../konduit/inference.py#L2386-L2427) object is an argument to Server. Given a JSON file as input, the Client sends a query to the Server and prints the predicted output. 
+Given a JSON file as input, the Client sends a query to the Server and prints the predicted output. 
 
 This server is configured for JSON input and output. 
 
@@ -47,10 +47,10 @@ The input and output data types of this server are configured to be NUMPY.
 
 ### [`test_json.py`](test_json.py)
 
-After configuring a server, saves server configuration as JSON, loads it again, and checks if the existing configuration steps has the same length as the configuration loaded from the JSON file. 
+After configuring a server, saves server configuration as JSON, loads it again, and checks if the existing configuration steps have the same length as the configuration loaded from the JSON file. 
 
 Two server configurations are defined: 
-- Similar to `test_start.py`, `test_json_compare()` creates a configuration with a TensorFlow model loaded with [TensorFlowConfig](../konduit/inference.py#L656-L720), 
+- Similar to `test_start.py`, `test_json_compare()` configures a server with a TensorFlow model loaded with [TensorFlowConfig](../konduit/inference.py#L656-L720), 
 - `test_python_serde()` configures a server with a [PythonPipelineStep](../konduit/inference.py#L1221-L1394) similar to `test_python_serving.py`.
 
 
