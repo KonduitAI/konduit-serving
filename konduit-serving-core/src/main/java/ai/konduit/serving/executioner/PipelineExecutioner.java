@@ -369,8 +369,9 @@ public class PipelineExecutioner {
         Writable firstWritable = records[0].getRecord().get(0);
         if(firstWritable.getType() == WritableType.NDArray) {
             INDArray[] arrays = SchemaTypeUtils.toArrays(records);
-            Map<String, BatchOutput> adapt = null;
+            Map<String, BatchOutput> adapt;
             switch(outputAdapterType) {
+                // TODO: output adapters are meant to have only one output here, but they could be named differently
                 case CLASSIFICATION:
                     adapt = classificationMultiOutputAdapter.adapt(arrays, Arrays.asList("default"), ctx);
                     break;
