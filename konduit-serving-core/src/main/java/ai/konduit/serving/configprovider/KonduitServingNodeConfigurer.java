@@ -1,26 +1,56 @@
+/*
+ *
+ *  * ******************************************************************************
+ *  *  * Copyright (c) 2019 Konduit AI.
+ *  *  *
+ *  *  * This program and the accompanying materials are made available under the
+ *  *  * terms of the Apache License, Version 2.0 which is available at
+ *  *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *  *
+ *  *  * Unless required by applicable law or agreed to in writing, software
+ *  *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  *  * License for the specific language governing permissions and limitations
+ *  *  * under the License.
+ *  *  *
+ *  *  * SPDX-License-Identifier: Apache-2.0
+ *  *  *****************************************************************************
+ *
+ *
+ */
+
+
 package ai.konduit.serving.configprovider;
+
+import ai.konduit.serving.InferenceConfiguration;
+import com.beust.jcommander.Parameter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import io.vertx.micrometer.MicrometerMetricsOptions;
+import io.vertx.micrometer.backends.BackendRegistries;
+
+import java.io.File;
 
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
 import static java.lang.System.setProperty;
-import io.micrometer.core.instrument.MeterRegistry;
-import  io.vertx.micrometer.backends.BackendRegistries;
-import  io.vertx.core.logging.Logger;
-import  io.vertx.core.logging.LoggerFactory;
-import io.vertx.core.logging.SLF4JLogDelegateFactory;
-import  java.io.File;
-import  io.vertx.micrometer.MicrometerMetricsOptions;
-import  io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.vertx.config.ConfigRetriever;
-import io.vertx.config.ConfigRetrieverOptions;
-import io.vertx.config.ConfigStoreOptions;
-import io.vertx.core.VertxOptions;
-import com.beust.jcommander.Parameter;
-import  io.vertx.core.json.JsonObject;
-import io.vertx.core.Vertx;
-import io.vertx.core.DeploymentOptions;
 
 @lombok.NoArgsConstructor
 @lombok.Getter
+@lombok.Setter
+@lombok.AllArgsConstructor
+@lombok.Builder
+/**
+ *
+ */
 public class KonduitServingNodeConfigurer {
 
     @Parameter(names = {"--configHost"},help = true,description = "The host for downloading the configuration from")
@@ -77,6 +107,11 @@ public class KonduitServingNodeConfigurer {
     @Parameter(names = {"--eventLoopExecutionTimeout"},help = true,description = "The event loop timeout")
     private long eventLoopExecutionTimeout = 120000;
 
+    @lombok.Builder.Default
+    @Parameter(names = {"--isClustered"},help = true,description = "Whether an instance is clustered or not")
+    private boolean isClustered = false;
+
+
     private  ConfigStoreOptions httpStore;
     private  DeploymentOptions deploymentOptions;
     private  ConfigRetrieverOptions options;
@@ -90,40 +125,18 @@ public class KonduitServingNodeConfigurer {
     }
 
 
-
-
-
-    @lombok.Builder
-    public KonduitServingNodeConfigurer(long eventLoopExecutionTimeout,
-                                        long eventLoopTimeout,
-                                        int numInstances,
-                                        int workerPoolSize,
-                                        String vertxWorkingDirectory,
-                                        String pidFile,
-                                        String configPath,
-                                        String eventBusHost,
-                                        String verticleClassName,
-                                        String configHost,
-                                        int configPort,
-                                        int eventBusPort,
-                                        int eventBusConnectTimeout) {
-        this.verticleClassName = verticleClassName;
-        this.configHost = configHost;
-        this.configPort = configPort;
-        this.eventLoopExecutionTimeout = eventLoopExecutionTimeout;
-        this.eventLoopTimeout = eventLoopTimeout;
-        this.pidFile = pidFile;
-        this.eventBusHost = eventBusHost;
-        this.eventBusPort = eventBusPort;
-        this.eventBusConnectTimeout = eventBusConnectTimeout;
-        this.configPath= configPath;
-        this.numInstances = numInstances;
-        this.workerPoolSize = workerPoolSize;
-        this.vertxWorkingDirectory = vertxWorkingDirectory;
-
-    }
-
-
+    /**
+     * Initializes the {@link VertxOptions} for deployment and use in a
+     * {@link Vertx} instance.
+     * The following other initialization also happens:
+     * {@link #pidFile} gets written (temporarily)
+     * {@link #vertxWorkingDirectory} gets set (vertx.cwd) and {vertx.caseDirBase)
+     *  (vertx.disableFileCPResolving) gets set to true
+     *  (vertx.logger-delegate-factory-class-name) gets set to io.vertx.core.logging.SLF4JLogDelegateFactory
+     *  The {@link #registry} field and associated prometheus configuration gets setup
+     *  The {@link #vertxOptions} event but options also get set
+     *  Lastly the {@link #options} gets set for the configuration
+     */
     public void setupVertxOptions() {
         File workingDir = new File(vertxWorkingDirectory);
         if (!workingDir.canRead() || !workingDir.canWrite()) {
@@ -134,7 +147,7 @@ public class KonduitServingNodeConfigurer {
         try {
 
             long pid = getPid();
-            java.io.File write = new java.io.File(pidFile);
+            File write = new File(pidFile);
             if(!write.getParentFile().exists()) {
                 log.info("Creating parent directory for pid file");
                 if(!write.getParentFile().mkdirs()) {
@@ -176,7 +189,7 @@ public class KonduitServingNodeConfigurer {
                 .setMetricsOptions(micrometerMetricsOptions);
 
 
-        vertxOptions.getEventBusOptions().setClustered(true);
+        vertxOptions.getEventBusOptions().setClustered(isClustered);
         vertxOptions.getEventBusOptions().setPort(eventBusPort);
         vertxOptions.getEventBusOptions().setHost(eventBusHost);
         vertxOptions.getEventBusOptions().setLogActivity(true);
@@ -198,6 +211,12 @@ public class KonduitServingNodeConfigurer {
             }
         }
 
+        httpStore = new ConfigStoreOptions()
+                .setType(configStoreType)
+                .setOptional(false)
+                .setConfig(new JsonObject().put("path",configPath));
+
+
 
         options = new ConfigRetrieverOptions()
                 .addStore(httpStore);
@@ -205,14 +224,13 @@ public class KonduitServingNodeConfigurer {
     }
 
 
-    public void configureWithJson(io.vertx.core.json.JsonObject config) {
-        httpStore = new ConfigStoreOptions()
-                .setType(configStoreType)
-                .setOptional(false)
-                .setConfig(config);
-
-
-
+    /**
+     * Configure the deployment options
+     * and associated {@link InferenceConfiguration}
+     *
+     * @param config the configuration to use for setup
+     */
+    public void configureWithJson(JsonObject config) {
         deploymentOptions = new DeploymentOptions()
                 .setWorker(workerNode)
                 .setHa(ha).setInstances(numInstances)
@@ -224,18 +242,18 @@ public class KonduitServingNodeConfigurer {
             config.put("host", configHost);
 
         if (configPath != null) {
-            java.io.File tmpFile = new java.io.File(configPath);
+            File tmpFile = new File(configPath);
             if(!tmpFile.exists()) {
                 throw new IllegalStateException("Path " + tmpFile.getAbsolutePath() + " does not exist!");
             }
             else if(configPath.endsWith(".yml")) {
-                java.io.File configInputYaml = new java.io.File(configPath);
-                java.io.File tmpConfigJson = new java.io.File(configInputYaml.getParent(), java.util.UUID.randomUUID() + "-config.json");
+                File configInputYaml = new File(configPath);
+                File tmpConfigJson = new File(configInputYaml.getParent(), java.util.UUID.randomUUID() + "-config.json");
                 log.info("Rewriting yml " + configPath + " to json " + tmpConfigJson + " . THis file will disappear after server is stopped.");
                 tmpConfigJson.deleteOnExit();
 
                 try {
-                    ai.konduit.serving.InferenceConfiguration inferenceConfiguration = ai.konduit.serving.InferenceConfiguration.fromYaml(
+                    InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromYaml(
                             org.apache.commons.io.FileUtils.readFileToString(tmpFile,
                                     java.nio.charset.Charset.defaultCharset()));
                     org.apache.commons.io.FileUtils.writeStringToFile(tmpConfigJson,

@@ -37,15 +37,10 @@ import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_
 import static java.lang.System.setProperty;
 
 /**
- * Main class for running pipelines.
- * This command line is an interface on top of vertx's
- * {@link DeploymentOptions} and contains a mix of parameters
- * for configuration where to download configuration
- * files from using {@link ConfigRetriever}
- * and the deployment options for the verticle
- * using vertx's {@link DeploymentOptions}
- * The {@link #configStoreType} is passed to
- * {@link ConfigStoreOptions}
+ * Single node serving setup using
+ * {@link KonduitServingNodeConfigurer}
+ * for a single node {@link Vertx}
+ * instance
  *
  * @author Adam Gibson
  */
@@ -64,9 +59,16 @@ public class KonduitServingMain {
     public void runMain(String...args) {
         log.debug("Parsing args " + Arrays.toString(args));
         KonduitServingNodeConfigurer konduitServingNodeConfigurer = new KonduitServingNodeConfigurer();
+        //ensure clustering is off
+        konduitServingNodeConfigurer.setClustered(false);
         JCommander jCommander = new JCommander(konduitServingNodeConfigurer);
         jCommander.parse(args);
         konduitServingNodeConfigurer.setupVertxOptions();
+       runMain(konduitServingNodeConfigurer);
+    }
+
+
+    public void runMain(KonduitServingNodeConfigurer konduitServingNodeConfigurer) {
         Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
         ConfigRetriever configRetriever = ConfigRetriever.create(vertx,konduitServingNodeConfigurer.getOptions());
         configRetriever.getConfig(result -> {
