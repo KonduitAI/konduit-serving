@@ -94,7 +94,7 @@ class Client(object):
     def _encode_multi_part_input(parts=None):
         if parts is None:
             parts = {}
-        encoded_parts = [(k,v) for k,v in parts.items()]
+        encoded_parts = [(k, v) for k, v in parts.items()]
         ret = encoder.MultipartEncoder(encoded_parts)
         return ret.to_string(), ret.content_type
 
