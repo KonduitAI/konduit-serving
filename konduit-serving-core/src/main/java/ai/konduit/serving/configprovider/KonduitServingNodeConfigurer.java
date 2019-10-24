@@ -5,54 +5,131 @@ import static java.lang.System.setProperty;
 import io.micrometer.core.instrument.MeterRegistry;
 import  io.vertx.micrometer.backends.BackendRegistries;
 import  io.vertx.core.logging.Logger;
+import  io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import  java.io.File;
 import  io.vertx.micrometer.MicrometerMetricsOptions;
+import  io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.vertx.config.ConfigRetriever;
+import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
+import io.vertx.core.VertxOptions;
+import com.beust.jcommander.Parameter;
+import  io.vertx.core.json.JsonObject;
+import io.vertx.core.Vertx;
+import io.vertx.core.DeploymentOptions;
 
+@lombok.NoArgsConstructor
+@lombok.Getter
 public class KonduitServingNodeConfigurer {
 
+    @Parameter(names = {"--configHost"},help = true,description = "The host for downloading the configuration from")
     private String configHost;
+    @Parameter(names = {"--configPort"},help = true,description = "The port for downloading the configuration from")
     private int configPort;
-    private String configStoreType;
+
+
+    @lombok.Builder.Default
+    @Parameter(names = {"--eventBusHost"},help = true,description = "The event bus host for connecting to other vertx nodes.")
+    private String eventBusHost = "0.0.0.0";
+    @lombok.Builder.Default
+    @Parameter(names = {"--eventBusPort"},help = true,description = "The event bus port for connecting to other vertx nodes.")
+    private int eventBusPort = 0;
+    @lombok.Builder.Default
+    @Parameter(names = {"--eventBusConnectTimeout"},help = true,description = "The timeout for connecting to an event bus.")
+    private int eventBusConnectTimeout = 20000;
+
+    @Parameter(names = {"--configStoreType"},help = true,description = "The configuration store type (usually http " +
+            "or file) where the configuration is stored")
+    @lombok.Builder.Default
+    private String configStoreType = "file";
+
+    @lombok.Builder.Default
+    @Parameter(names = {"--configPath"},help = true,description = "The path to the configuration. With http, this " +
+            "will be the path after host:port. With files, this will be an absolute path.")
     private String configPath = "/srv/";
+    @lombok.Builder.Default
+    @Parameter(names = {"--workerNode"},help = true,description = "Whether this is a worker node or not")
     private boolean workerNode = true;
+    @lombok.Builder.Default
+    @Parameter(names = {"--ha"},help = true,description = "Whether this node is deployed as Highly available or not.")
     private boolean ha = false;
+    @lombok.Builder.Default
+    @Parameter(names = {"--numInstances"},help = true,description = "The number of instances to deploy of this verticle.")
     private int numInstances = 1;
+    @lombok.Builder.Default
+    @Parameter(names = {"--workerPoolSize"},help = true,description = "The number of workers for use with this verticle.")
     private int workerPoolSize = 20;
+    @lombok.Builder.Default
+    @Parameter(names = {"--verticleClassName"},help = true,description = "The fully qualified class name to the verticle to be used.")
     private String verticleClassName = ai.konduit.serving.verticles.inference.InferenceVerticle.class.getName();
+    @lombok.Builder.Default
+    @Parameter(names = "--vertxWorkingDirectory",help = true,description = "The absolute path to use for vertx. This defaults to the user's home directory.")
     private String vertxWorkingDirectory = System.getProperty("user.home");
 
     private MeterRegistry registry = io.vertx.micrometer.backends.BackendRegistries.getDefaultNow();
-    private String pidFile = new java.io.File(System.getProperty("user.dir"),"pipelines.pid").getAbsolutePath();
+    @lombok.Builder.Default
+    private String pidFile = new File(System.getProperty("user.dir"),"pipelines.pid").getAbsolutePath();
+    @lombok.Builder.Default
+    @Parameter(names = {"--eventLoopTimeout"},help = true,description = "The event loop timeout")
     private long eventLoopTimeout = 120000;
-
+    @lombok.Builder.Default
+    @Parameter(names = {"--eventLoopExecutionTimeout"},help = true,description = "The event loop timeout")
     private long eventLoopExecutionTimeout = 120000;
 
+    private  ConfigStoreOptions httpStore;
+    private  DeploymentOptions deploymentOptions;
+    private  ConfigRetrieverOptions options;
+    private  VertxOptions vertxOptions;
 
-    private static io.vertx.core.logging.Logger log = io.vertx.core.logging.LoggerFactory.getLogger(KonduitServingMain.class.getName());
+    private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
 
     static {
-        setProperty (LOGGER_DELEGATE_FACTORY_CLASS_NAME, io.vertx.core.logging.SLF4JLogDelegateFactory.class.getName());
-        io.vertx.core.logging.LoggerFactory.getLogger (io.vertx.core.logging.LoggerFactory.class); // Required for Logback to work in Vertx
+        setProperty (LOGGER_DELEGATE_FACTORY_CLASS_NAME,SLF4JLogDelegateFactory.class.getName());
+        LoggerFactory.getLogger (LoggerFactory.class); // Required for Logback to work in Vertx
     }
 
 
 
-    private io.vertx.core.Vertx vertx;
-    private io.vertx.core.Verticle verticle;
 
-    public void runMain(String...args) {
-        log.debug("Parsing args " + java.util.Arrays.toString(args));
-        com.beust.jcommander.JCommander jCommander = new com.beust.jcommander.JCommander(this);
-        jCommander.parse(args);
-        io.vertx.core.json.JsonObject config = new io.vertx.core.json.JsonObject();
 
-        java.io.File workingDir = new java.io.File(vertxWorkingDirectory);
+    @lombok.Builder
+    public KonduitServingNodeConfigurer(long eventLoopExecutionTimeout,
+                                        long eventLoopTimeout,
+                                        int numInstances,
+                                        int workerPoolSize,
+                                        String vertxWorkingDirectory,
+                                        String pidFile,
+                                        String configPath,
+                                        String eventBusHost,
+                                        String verticleClassName,
+                                        String configHost,
+                                        int configPort,
+                                        int eventBusPort,
+                                        int eventBusConnectTimeout) {
+        this.verticleClassName = verticleClassName;
+        this.configHost = configHost;
+        this.configPort = configPort;
+        this.eventLoopExecutionTimeout = eventLoopExecutionTimeout;
+        this.eventLoopTimeout = eventLoopTimeout;
+        this.pidFile = pidFile;
+        this.eventBusHost = eventBusHost;
+        this.eventBusPort = eventBusPort;
+        this.eventBusConnectTimeout = eventBusConnectTimeout;
+        this.configPath= configPath;
+        this.numInstances = numInstances;
+        this.workerPoolSize = workerPoolSize;
+        this.vertxWorkingDirectory = vertxWorkingDirectory;
+
+    }
+
+
+    public void setupVertxOptions() {
+        File workingDir = new File(vertxWorkingDirectory);
         if (!workingDir.canRead() || !workingDir.canWrite()) {
             throw new IllegalStateException("Illegal Directory " + vertxWorkingDirectory + " unable to " +
                     "write or read. Please specify a proper vertx working directory");
         }
-
 
         try {
 
@@ -78,49 +155,70 @@ public class KonduitServingNodeConfigurer {
         //logging using slf4j: defaults to jul
         setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory");
 
-        io.micrometer.prometheus.PrometheusMeterRegistry prometheusBackendRegistry = new io.micrometer.prometheus.PrometheusMeterRegistry(io.micrometer.prometheus.PrometheusConfig.DEFAULT);
+        PrometheusMeterRegistry prometheusBackendRegistry = new PrometheusMeterRegistry(io.micrometer.prometheus.PrometheusConfig.DEFAULT);
         registry = prometheusBackendRegistry;
 
 
-       MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
+        MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
                 .setMicrometerRegistry(registry)
                 .setPrometheusOptions(new io.vertx.micrometer.VertxPrometheusOptions()
                         .setEnabled(true));
-       BackendRegistries.setupBackend(micrometerMetricsOptions);
+        BackendRegistries.setupBackend(micrometerMetricsOptions);
 
         log.info("Setup micro meter options.");
 
-        vertx = io.vertx.core.Vertx.vertx(new io.vertx.core.VertxOptions()
+        BackendRegistries.setupBackend(micrometerMetricsOptions);
+
+        vertxOptions = new VertxOptions()
                 .setMaxEventLoopExecuteTime(eventLoopExecutionTimeout)
                 .setBlockedThreadCheckInterval(eventLoopTimeout)
                 .setWorkerPoolSize(workerPoolSize)
-                .setMetricsOptions(micrometerMetricsOptions));
-        vertx.exceptionHandler(handler -> {
-            log.error("Error occurred",handler.getCause());
-            System.exit(1);
-        });
+                .setMetricsOptions(micrometerMetricsOptions);
 
+
+        vertxOptions.getEventBusOptions().setClustered(true);
+        vertxOptions.getEventBusOptions().setPort(eventBusPort);
+        vertxOptions.getEventBusOptions().setHost(eventBusHost);
+        vertxOptions.getEventBusOptions().setLogActivity(true);
+        vertxOptions.getEventBusOptions().setConnectTimeout(eventBusConnectTimeout);
 
         if (verticleClassName == null) {
             log.debug("Attempting to resolve verticle name");
             verticleClassName = ai.konduit.serving.verticles.inference.InferenceVerticle.class.getName();
         }
 
-        String[] split = verticleClassName.split("\\.");
-        vertx.registerVerticleFactory(new io.vertx.core.spi.VerticleFactory() {
-            @Override
-            public String prefix() {
-                return split[split.length - 1];
-            }
 
-            @Override
-            public io.vertx.core.Verticle createVerticle(String s, ClassLoader classLoader) throws Exception {
-                verticle = (io.vertx.core.Verticle) classLoader.loadClass(verticleClassName).newInstance();
-                log.debug("Setup verticle " + verticle);
-                return verticle;
-            }
-        });
 
+
+        if (configStoreType != null && configStoreType.equals("file")) {
+            log.debug("Using file storage type.");
+            if (!new File(configPath).exists()) {
+                log.warn("No file found for config path. Exiting");
+                System.exit(1);
+            }
+        }
+
+
+        options = new ConfigRetrieverOptions()
+                .addStore(httpStore);
+
+    }
+
+
+    public void configureWithJson(io.vertx.core.json.JsonObject config) {
+        httpStore = new ConfigStoreOptions()
+                .setType(configStoreType)
+                .setOptional(false)
+                .setConfig(config);
+
+
+
+        deploymentOptions = new DeploymentOptions()
+                .setWorker(workerNode)
+                .setHa(ha).setInstances(numInstances)
+                .setConfig(config)
+                .setExtraClasspath(java.util.Arrays.asList(System.getProperty("java.class.path").split(":")))
+                .setWorkerPoolSize(workerPoolSize);
 
         if (configHost != null)
             config.put("host", configHost);
@@ -154,69 +252,9 @@ public class KonduitServingNodeConfigurer {
             config.put("path", configPath);
         }
 
-        if (configStoreType != null && configStoreType.equals("file")) {
-            log.debug("Using file storage type.");
-            if (!new java.io.File(configPath).exists()) {
-                log.warn("No file found for config path. Exiting");
-                System.exit(1);
-            }
-        }
-
-        if(configStoreType == null) {
-            configStoreType = "file";
-        }
-
-        io.vertx.config.ConfigStoreOptions httpStore = new io.vertx.config.ConfigStoreOptions()
-                .setType(configStoreType)
-                .setOptional(false)
-                .setConfig(config);
-
-        io.vertx.config.ConfigRetrieverOptions options = new io.vertx.config.ConfigRetrieverOptions()
-                .addStore(httpStore);
-
-        io.vertx.config.ConfigRetriever retriever = io.vertx.config.ConfigRetriever.create(vertx, options);
-        java.util.concurrent.atomic.AtomicBoolean deployed = new java.util.concurrent.atomic.AtomicBoolean(false);
-
-        /**
-         * How to handle config for signle node vs cluster?
-         */
-        retriever.getConfig(ar -> {
-            if (ar.failed()) {
-                log.error("Either unable to create configuration, or failed to download configuration",ar.cause());
-                System.exit(1);
-                // Failed to retrieve the configuration
-            } else {
-                io.vertx.core.json.JsonObject config2 = ar.result();
-                if (!deployed.get()) {
-                    io.vertx.core.DeploymentOptions deploymentOptions = new io.vertx.core.DeploymentOptions()
-                            .setConfig(config2).setWorker(workerNode)
-                            .setHa(ha).setInstances(numInstances)
-                            .setExtraClasspath(java.util.Arrays.asList(System.getProperty("java.class.path").split(":")))
-                            .setWorkerPoolSize(workerPoolSize);
-
-                    log.debug("Attempting to deploy verticle " + verticleClassName);
-                    vertx.deployVerticle(verticleClassName, deploymentOptions, handler -> {
-                        if (handler.failed()) {
-                            log.error("Failed to deploy verticle. Exiting. ", handler.cause());
-                            vertx.close();
-                        }
-                        else {
-                            log.info("Started verticle. ", handler.cause());
-
-                        }
-                    });
-
-                    deployed.set(true);
-
-                } else {
-                    log.debug("Verticle already deployed.");
-                }
-
-            }
-        });
-
-
     }
+
+
 
     private int getPid() throws UnsatisfiedLinkError {
         if(org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
