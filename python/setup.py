@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 setup(
     name='konduit',
-    version='0.1.1',
+    version='0.1.2',
     packages=find_packages(),
     install_requires=[
         'requests>=2.22.0',

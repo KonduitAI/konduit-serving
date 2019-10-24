@@ -1051,34 +1051,22 @@ class PipelineStep(object):
         'outputSchemas': {'type': dict, 'subtype': None},
         'inputNames': {'type': list, 'subtype': str},
         'outputNames': {'type': list, 'subtype': str},
-        'affectedInputNames': {'type': list, 'subtype': str},
-        'affectedOutputNames': {'type': list, 'subtype': str},
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
-        'targetInputStepInputNames': {'type': list, 'subtype': str},
-        'targetInputStepOutputNames': {'type': list, 'subtype': str},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
-        'affectedInputNames': 'table',
-        'affectedOutputNames': 'table',
-        'targetInputStepInputNames': 'table',
-        'targetInputStepOutputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, affected_input_names=None, affected_output_names=None, input_column_names=None, output_column_names=None, target_input_step_input_names=None, target_input_step_output_names=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
         self.__output_names = output_names
-        self.__affected_input_names = affected_input_names
-        self.__affected_output_names = affected_output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
-        self.__target_input_step_input_names = target_input_step_input_names
-        self.__target_input_step_output_names = target_input_step_output_names
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1120,30 +1108,6 @@ class PipelineStep(object):
         self.__output_names = value
     output_names = property(_get_output_names, _set_output_names)
 
-    def _get_affected_input_names(self):
-        return self.__affected_input_names
-
-    def _set_affected_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedInputNames list valeus must be str")
-        self.__affected_input_names = value
-    affected_input_names = property(
-        _get_affected_input_names, _set_affected_input_names)
-
-    def _get_affected_output_names(self):
-        return self.__affected_output_names
-
-    def _set_affected_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedOutputNames list valeus must be str")
-        self.__affected_output_names = value
-    affected_output_names = property(
-        _get_affected_output_names, _set_affected_output_names)
-
     def _get_input_column_names(self):
         return self.__input_column_names
 
@@ -1164,32 +1128,6 @@ class PipelineStep(object):
     output_column_names = property(
         _get_output_column_names, _set_output_column_names)
 
-    def _get_target_input_step_input_names(self):
-        return self.__target_input_step_input_names
-
-    def _set_target_input_step_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepInputNames list valeus must be str")
-        self.__target_input_step_input_names = value
-    target_input_step_input_names = property(
-        _get_target_input_step_input_names, _set_target_input_step_input_names)
-
-    def _get_target_input_step_output_names(self):
-        return self.__target_input_step_output_names
-
-    def _set_target_input_step_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepOutputNames list valeus must be str")
-        self.__target_input_step_output_names = value
-    target_input_step_output_names = property(
-        _get_target_input_step_output_names, _set_target_input_step_output_names)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1204,24 +1142,12 @@ class PipelineStep(object):
         if self.__output_names is not None:
             d['outputNames'] = [p.as_dict() if hasattr(p, 'as_dict')
                                 else p for p in self.__output_names]
-        if self.__affected_input_names is not None:
-            d['affectedInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_input_names]
-        if self.__affected_output_names is not None:
-            d['affectedOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_output_names]
         if self.__input_column_names is not None:
             d['inputColumnNames'] = self.__input_column_names.as_dict() if hasattr(
                 self.__input_column_names, 'as_dict') else self.__input_column_names
         if self.__output_column_names is not None:
             d['outputColumnNames'] = self.__output_column_names.as_dict() if hasattr(
                 self.__output_column_names, 'as_dict') else self.__output_column_names
-        if self.__target_input_step_input_names is not None:
-            d['targetInputStepInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_input_names]
-        if self.__target_input_step_output_names is not None:
-            d['targetInputStepOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_output_names]
         return d
 
 
@@ -1261,36 +1187,24 @@ class PythonPipelineStep(PipelineStep):
         'outputSchemas': {'type': dict, 'subtype': None},
         'inputNames': {'type': list, 'subtype': str},
         'outputNames': {'type': list, 'subtype': str},
-        'affectedInputNames': {'type': list, 'subtype': str},
-        'affectedOutputNames': {'type': list, 'subtype': str},
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
         'pythonConfigs': {'type': dict, 'subtype': None},
-        'targetInputStepInputNames': {'type': list, 'subtype': str},
-        'targetInputStepOutputNames': {'type': list, 'subtype': str},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
-        'affectedInputNames': 'table',
-        'affectedOutputNames': 'table',
-        'targetInputStepInputNames': 'table',
-        'targetInputStepOutputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, affected_input_names=None, affected_output_names=None, input_column_names=None, output_column_names=None, python_configs=None, target_input_step_input_names=None, target_input_step_output_names=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, python_configs=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
         self.__output_names = output_names
-        self.__affected_input_names = affected_input_names
-        self.__affected_output_names = affected_output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__python_configs = python_configs
-        self.__target_input_step_input_names = target_input_step_input_names
-        self.__target_input_step_output_names = target_input_step_output_names
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1331,30 +1245,6 @@ class PythonPipelineStep(PipelineStep):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
     output_names = property(_get_output_names, _set_output_names)
-
-    def _get_affected_input_names(self):
-        return self.__affected_input_names
-
-    def _set_affected_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedInputNames list valeus must be str")
-        self.__affected_input_names = value
-    affected_input_names = property(
-        _get_affected_input_names, _set_affected_input_names)
-
-    def _get_affected_output_names(self):
-        return self.__affected_output_names
-
-    def _set_affected_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedOutputNames list valeus must be str")
-        self.__affected_output_names = value
-    affected_output_names = property(
-        _get_affected_output_names, _set_affected_output_names)
 
     def _get_input_column_names(self):
         return self.__input_column_names
@@ -1385,32 +1275,6 @@ class PythonPipelineStep(PipelineStep):
         self.__python_configs = value
     python_configs = property(_get_python_configs, _set_python_configs)
 
-    def _get_target_input_step_input_names(self):
-        return self.__target_input_step_input_names
-
-    def _set_target_input_step_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepInputNames list valeus must be str")
-        self.__target_input_step_input_names = value
-    target_input_step_input_names = property(
-        _get_target_input_step_input_names, _set_target_input_step_input_names)
-
-    def _get_target_input_step_output_names(self):
-        return self.__target_input_step_output_names
-
-    def _set_target_input_step_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepOutputNames list valeus must be str")
-        self.__target_input_step_output_names = value
-    target_input_step_output_names = property(
-        _get_target_input_step_output_names, _set_target_input_step_output_names)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1425,12 +1289,6 @@ class PythonPipelineStep(PipelineStep):
         if self.__output_names is not None:
             d['outputNames'] = [p.as_dict() if hasattr(p, 'as_dict')
                                 else p for p in self.__output_names]
-        if self.__affected_input_names is not None:
-            d['affectedInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_input_names]
-        if self.__affected_output_names is not None:
-            d['affectedOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_output_names]
         if self.__input_column_names is not None:
             d['inputColumnNames'] = self.__input_column_names.as_dict() if hasattr(
                 self.__input_column_names, 'as_dict') else self.__input_column_names
@@ -1440,12 +1298,6 @@ class PythonPipelineStep(PipelineStep):
         if self.__python_configs is not None:
             d['pythonConfigs'] = self.__python_configs.as_dict() if hasattr(
                 self.__python_configs, 'as_dict') else self.__python_configs
-        if self.__target_input_step_input_names is not None:
-            d['targetInputStepInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_input_names]
-        if self.__target_input_step_output_names is not None:
-            d['targetInputStepOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_output_names]
         return d
 
 
@@ -1456,36 +1308,24 @@ class TransformProcessPipelineStep(PipelineStep):
         'outputSchemas': {'type': dict, 'subtype': None},
         'inputNames': {'type': list, 'subtype': str},
         'outputNames': {'type': list, 'subtype': str},
-        'affectedInputNames': {'type': list, 'subtype': str},
-        'affectedOutputNames': {'type': list, 'subtype': str},
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
         'transformProcesses': {'type': dict, 'subtype': None},
-        'targetInputStepInputNames': {'type': list, 'subtype': str},
-        'targetInputStepOutputNames': {'type': list, 'subtype': str},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
-        'affectedInputNames': 'table',
-        'affectedOutputNames': 'table',
-        'targetInputStepInputNames': 'table',
-        'targetInputStepOutputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, affected_input_names=None, affected_output_names=None, input_column_names=None, output_column_names=None, transform_processes=None, target_input_step_input_names=None, target_input_step_output_names=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, transform_processes=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
         self.__output_names = output_names
-        self.__affected_input_names = affected_input_names
-        self.__affected_output_names = affected_output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__transform_processes = transform_processes
-        self.__target_input_step_input_names = target_input_step_input_names
-        self.__target_input_step_output_names = target_input_step_output_names
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1526,30 +1366,6 @@ class TransformProcessPipelineStep(PipelineStep):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
     output_names = property(_get_output_names, _set_output_names)
-
-    def _get_affected_input_names(self):
-        return self.__affected_input_names
-
-    def _set_affected_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedInputNames list valeus must be str")
-        self.__affected_input_names = value
-    affected_input_names = property(
-        _get_affected_input_names, _set_affected_input_names)
-
-    def _get_affected_output_names(self):
-        return self.__affected_output_names
-
-    def _set_affected_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedOutputNames list valeus must be str")
-        self.__affected_output_names = value
-    affected_output_names = property(
-        _get_affected_output_names, _set_affected_output_names)
 
     def _get_input_column_names(self):
         return self.__input_column_names
@@ -1581,32 +1397,6 @@ class TransformProcessPipelineStep(PipelineStep):
     transform_processes = property(
         _get_transform_processes, _set_transform_processes)
 
-    def _get_target_input_step_input_names(self):
-        return self.__target_input_step_input_names
-
-    def _set_target_input_step_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepInputNames list valeus must be str")
-        self.__target_input_step_input_names = value
-    target_input_step_input_names = property(
-        _get_target_input_step_input_names, _set_target_input_step_input_names)
-
-    def _get_target_input_step_output_names(self):
-        return self.__target_input_step_output_names
-
-    def _set_target_input_step_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepOutputNames list valeus must be str")
-        self.__target_input_step_output_names = value
-    target_input_step_output_names = property(
-        _get_target_input_step_output_names, _set_target_input_step_output_names)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1621,12 +1411,6 @@ class TransformProcessPipelineStep(PipelineStep):
         if self.__output_names is not None:
             d['outputNames'] = [p.as_dict() if hasattr(p, 'as_dict')
                                 else p for p in self.__output_names]
-        if self.__affected_input_names is not None:
-            d['affectedInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_input_names]
-        if self.__affected_output_names is not None:
-            d['affectedOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_output_names]
         if self.__input_column_names is not None:
             d['inputColumnNames'] = self.__input_column_names.as_dict() if hasattr(
                 self.__input_column_names, 'as_dict') else self.__input_column_names
@@ -1636,12 +1420,6 @@ class TransformProcessPipelineStep(PipelineStep):
         if self.__transform_processes is not None:
             d['transformProcesses'] = self.__transform_processes.as_dict() if hasattr(
                 self.__transform_processes, 'as_dict') else self.__transform_processes
-        if self.__target_input_step_input_names is not None:
-            d['targetInputStepInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_input_names]
-        if self.__target_input_step_output_names is not None:
-            d['targetInputStepOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_output_names]
         return d
 
 
@@ -1652,40 +1430,28 @@ class ModelPipelineStep(PipelineStep):
         'outputSchemas': {'type': dict, 'subtype': None},
         'inputNames': {'type': list, 'subtype': str},
         'outputNames': {'type': list, 'subtype': str},
-        'affectedInputNames': {'type': list, 'subtype': str},
-        'affectedOutputNames': {'type': list, 'subtype': str},
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
         'modelConfig': {'type': ModelConfig, 'subtype': None},
         'parallelInferenceConfig': {'type': ParallelInferenceConfig, 'subtype': None},
         'normalizationConfig': {'type': NormalizationConfig, 'subtype': None},
-        'targetInputStepInputNames': {'type': list, 'subtype': str},
-        'targetInputStepOutputNames': {'type': list, 'subtype': str},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
-        'affectedInputNames': 'table',
-        'affectedOutputNames': 'table',
-        'targetInputStepInputNames': 'table',
-        'targetInputStepOutputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, affected_input_names=None, affected_output_names=None, input_column_names=None, output_column_names=None, model_config=None, parallel_inference_config=None, normalization_config=None, target_input_step_input_names=None, target_input_step_output_names=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, model_config=None, parallel_inference_config=None, normalization_config=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
         self.__output_names = output_names
-        self.__affected_input_names = affected_input_names
-        self.__affected_output_names = affected_output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__model_config = model_config
         self.__parallel_inference_config = parallel_inference_config
         self.__normalization_config = normalization_config
-        self.__target_input_step_input_names = target_input_step_input_names
-        self.__target_input_step_output_names = target_input_step_output_names
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1726,30 +1492,6 @@ class ModelPipelineStep(PipelineStep):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
     output_names = property(_get_output_names, _set_output_names)
-
-    def _get_affected_input_names(self):
-        return self.__affected_input_names
-
-    def _set_affected_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedInputNames list valeus must be str")
-        self.__affected_input_names = value
-    affected_input_names = property(
-        _get_affected_input_names, _set_affected_input_names)
-
-    def _get_affected_output_names(self):
-        return self.__affected_output_names
-
-    def _set_affected_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedOutputNames list valeus must be str")
-        self.__affected_output_names = value
-    affected_output_names = property(
-        _get_affected_output_names, _set_affected_output_names)
 
     def _get_input_column_names(self):
         return self.__input_column_names
@@ -1801,32 +1543,6 @@ class ModelPipelineStep(PipelineStep):
     normalization_config = property(
         _get_normalization_config, _set_normalization_config)
 
-    def _get_target_input_step_input_names(self):
-        return self.__target_input_step_input_names
-
-    def _set_target_input_step_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepInputNames list valeus must be str")
-        self.__target_input_step_input_names = value
-    target_input_step_input_names = property(
-        _get_target_input_step_input_names, _set_target_input_step_input_names)
-
-    def _get_target_input_step_output_names(self):
-        return self.__target_input_step_output_names
-
-    def _set_target_input_step_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepOutputNames list valeus must be str")
-        self.__target_input_step_output_names = value
-    target_input_step_output_names = property(
-        _get_target_input_step_output_names, _set_target_input_step_output_names)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1841,12 +1557,6 @@ class ModelPipelineStep(PipelineStep):
         if self.__output_names is not None:
             d['outputNames'] = [p.as_dict() if hasattr(p, 'as_dict')
                                 else p for p in self.__output_names]
-        if self.__affected_input_names is not None:
-            d['affectedInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_input_names]
-        if self.__affected_output_names is not None:
-            d['affectedOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_output_names]
         if self.__input_column_names is not None:
             d['inputColumnNames'] = self.__input_column_names.as_dict() if hasattr(
                 self.__input_column_names, 'as_dict') else self.__input_column_names
@@ -1862,12 +1572,6 @@ class ModelPipelineStep(PipelineStep):
         if self.__normalization_config is not None:
             d['normalizationConfig'] = self.__normalization_config.as_dict() if hasattr(
                 self.__normalization_config, 'as_dict') else self.__normalization_config
-        if self.__target_input_step_input_names is not None:
-            d['targetInputStepInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_input_names]
-        if self.__target_input_step_output_names is not None:
-            d['targetInputStepOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_output_names]
         return d
 
 
@@ -1878,36 +1582,24 @@ class ArrayConcatenationStep(PipelineStep):
         'outputSchemas': {'type': dict, 'subtype': None},
         'inputNames': {'type': list, 'subtype': str},
         'outputNames': {'type': list, 'subtype': str},
-        'affectedInputNames': {'type': list, 'subtype': str},
-        'affectedOutputNames': {'type': list, 'subtype': str},
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
         'concatDimensions': {'type': dict, 'subtype': None},
-        'targetInputStepInputNames': {'type': list, 'subtype': str},
-        'targetInputStepOutputNames': {'type': list, 'subtype': str},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
-        'affectedInputNames': 'table',
-        'affectedOutputNames': 'table',
-        'targetInputStepInputNames': 'table',
-        'targetInputStepOutputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, affected_input_names=None, affected_output_names=None, input_column_names=None, output_column_names=None, concat_dimensions=None, target_input_step_input_names=None, target_input_step_output_names=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, concat_dimensions=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
         self.__output_names = output_names
-        self.__affected_input_names = affected_input_names
-        self.__affected_output_names = affected_output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__concat_dimensions = concat_dimensions
-        self.__target_input_step_input_names = target_input_step_input_names
-        self.__target_input_step_output_names = target_input_step_output_names
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1948,30 +1640,6 @@ class ArrayConcatenationStep(PipelineStep):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
     output_names = property(_get_output_names, _set_output_names)
-
-    def _get_affected_input_names(self):
-        return self.__affected_input_names
-
-    def _set_affected_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedInputNames list valeus must be str")
-        self.__affected_input_names = value
-    affected_input_names = property(
-        _get_affected_input_names, _set_affected_input_names)
-
-    def _get_affected_output_names(self):
-        return self.__affected_output_names
-
-    def _set_affected_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedOutputNames list valeus must be str")
-        self.__affected_output_names = value
-    affected_output_names = property(
-        _get_affected_output_names, _set_affected_output_names)
 
     def _get_input_column_names(self):
         return self.__input_column_names
@@ -2003,32 +1671,6 @@ class ArrayConcatenationStep(PipelineStep):
     concat_dimensions = property(
         _get_concat_dimensions, _set_concat_dimensions)
 
-    def _get_target_input_step_input_names(self):
-        return self.__target_input_step_input_names
-
-    def _set_target_input_step_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepInputNames list valeus must be str")
-        self.__target_input_step_input_names = value
-    target_input_step_input_names = property(
-        _get_target_input_step_input_names, _set_target_input_step_input_names)
-
-    def _get_target_input_step_output_names(self):
-        return self.__target_input_step_output_names
-
-    def _set_target_input_step_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepOutputNames list valeus must be str")
-        self.__target_input_step_output_names = value
-    target_input_step_output_names = property(
-        _get_target_input_step_output_names, _set_target_input_step_output_names)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -2043,12 +1685,6 @@ class ArrayConcatenationStep(PipelineStep):
         if self.__output_names is not None:
             d['outputNames'] = [p.as_dict() if hasattr(p, 'as_dict')
                                 else p for p in self.__output_names]
-        if self.__affected_input_names is not None:
-            d['affectedInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_input_names]
-        if self.__affected_output_names is not None:
-            d['affectedOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_output_names]
         if self.__input_column_names is not None:
             d['inputColumnNames'] = self.__input_column_names.as_dict() if hasattr(
                 self.__input_column_names, 'as_dict') else self.__input_column_names
@@ -2058,12 +1694,6 @@ class ArrayConcatenationStep(PipelineStep):
         if self.__concat_dimensions is not None:
             d['concatDimensions'] = self.__concat_dimensions.as_dict() if hasattr(
                 self.__concat_dimensions, 'as_dict') else self.__concat_dimensions
-        if self.__target_input_step_input_names is not None:
-            d['targetInputStepInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_input_names]
-        if self.__target_input_step_output_names is not None:
-            d['targetInputStepOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_output_names]
         return d
 
 
@@ -2074,34 +1704,22 @@ class JsonExpanderTransform(PipelineStep):
         'outputSchemas': {'type': dict, 'subtype': None},
         'inputNames': {'type': list, 'subtype': str},
         'outputNames': {'type': list, 'subtype': str},
-        'affectedInputNames': {'type': list, 'subtype': str},
-        'affectedOutputNames': {'type': list, 'subtype': str},
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
-        'targetInputStepInputNames': {'type': list, 'subtype': str},
-        'targetInputStepOutputNames': {'type': list, 'subtype': str},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
-        'affectedInputNames': 'table',
-        'affectedOutputNames': 'table',
-        'targetInputStepInputNames': 'table',
-        'targetInputStepOutputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, affected_input_names=None, affected_output_names=None, input_column_names=None, output_column_names=None, target_input_step_input_names=None, target_input_step_output_names=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
         self.__output_names = output_names
-        self.__affected_input_names = affected_input_names
-        self.__affected_output_names = affected_output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
-        self.__target_input_step_input_names = target_input_step_input_names
-        self.__target_input_step_output_names = target_input_step_output_names
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -2142,30 +1760,6 @@ class JsonExpanderTransform(PipelineStep):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
     output_names = property(_get_output_names, _set_output_names)
-
-    def _get_affected_input_names(self):
-        return self.__affected_input_names
-
-    def _set_affected_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedInputNames list valeus must be str")
-        self.__affected_input_names = value
-    affected_input_names = property(
-        _get_affected_input_names, _set_affected_input_names)
-
-    def _get_affected_output_names(self):
-        return self.__affected_output_names
-
-    def _set_affected_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedOutputNames list valeus must be str")
-        self.__affected_output_names = value
-    affected_output_names = property(
-        _get_affected_output_names, _set_affected_output_names)
 
     def _get_input_column_names(self):
         return self.__input_column_names
@@ -2187,32 +1781,6 @@ class JsonExpanderTransform(PipelineStep):
     output_column_names = property(
         _get_output_column_names, _set_output_column_names)
 
-    def _get_target_input_step_input_names(self):
-        return self.__target_input_step_input_names
-
-    def _set_target_input_step_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepInputNames list valeus must be str")
-        self.__target_input_step_input_names = value
-    target_input_step_input_names = property(
-        _get_target_input_step_input_names, _set_target_input_step_input_names)
-
-    def _get_target_input_step_output_names(self):
-        return self.__target_input_step_output_names
-
-    def _set_target_input_step_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepOutputNames list valeus must be str")
-        self.__target_input_step_output_names = value
-    target_input_step_output_names = property(
-        _get_target_input_step_output_names, _set_target_input_step_output_names)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -2227,24 +1795,12 @@ class JsonExpanderTransform(PipelineStep):
         if self.__output_names is not None:
             d['outputNames'] = [p.as_dict() if hasattr(p, 'as_dict')
                                 else p for p in self.__output_names]
-        if self.__affected_input_names is not None:
-            d['affectedInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_input_names]
-        if self.__affected_output_names is not None:
-            d['affectedOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_output_names]
         if self.__input_column_names is not None:
             d['inputColumnNames'] = self.__input_column_names.as_dict() if hasattr(
                 self.__input_column_names, 'as_dict') else self.__input_column_names
         if self.__output_column_names is not None:
             d['outputColumnNames'] = self.__output_column_names.as_dict() if hasattr(
                 self.__output_column_names, 'as_dict') else self.__output_column_names
-        if self.__target_input_step_input_names is not None:
-            d['targetInputStepInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_input_names]
-        if self.__target_input_step_output_names is not None:
-            d['targetInputStepOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_output_names]
         return d
 
 
@@ -2255,8 +1811,6 @@ class ImageLoading(PipelineStep):
         'outputSchemas': {'type': dict, 'subtype': None},
         'inputNames': {'type': list, 'subtype': str},
         'outputNames': {'type': list, 'subtype': str},
-        'affectedInputNames': {'type': list, 'subtype': str},
-        'affectedOutputNames': {'type': list, 'subtype': str},
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
         'originalImageHeight': {'type': int, 'subtype': None},
@@ -2266,26 +1820,18 @@ class ImageLoading(PipelineStep):
         'imageProcessingInitialLayout': {'type': str, 'subtype': None},
         'imageTransformProcesses': {'type': dict, 'subtype': None},
         'objectDetectionConfig': {'type': ObjectDetectionConfig, 'subtype': None},
-        'targetInputStepInputNames': {'type': list, 'subtype': str},
-        'targetInputStepOutputNames': {'type': list, 'subtype': str},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
-        'affectedInputNames': 'table',
-        'affectedOutputNames': 'table',
-        'targetInputStepInputNames': 'table',
-        'targetInputStepOutputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, affected_input_names=None, affected_output_names=None, input_column_names=None, output_column_names=None, original_image_height=None, original_image_width=None, dimensions_configs=None, image_processing_required_layout=None, image_processing_initial_layout=None, image_transform_processes=None, object_detection_config=None, target_input_step_input_names=None, target_input_step_output_names=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, original_image_height=None, original_image_width=None, dimensions_configs=None, image_processing_required_layout=None, image_processing_initial_layout=None, image_transform_processes=None, object_detection_config=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
         self.__output_names = output_names
-        self.__affected_input_names = affected_input_names
-        self.__affected_output_names = affected_output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__original_image_height = original_image_height
@@ -2295,8 +1841,6 @@ class ImageLoading(PipelineStep):
         self.__image_processing_initial_layout = image_processing_initial_layout
         self.__image_transform_processes = image_transform_processes
         self.__object_detection_config = object_detection_config
-        self.__target_input_step_input_names = target_input_step_input_names
-        self.__target_input_step_output_names = target_input_step_output_names
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -2337,30 +1881,6 @@ class ImageLoading(PipelineStep):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
     output_names = property(_get_output_names, _set_output_names)
-
-    def _get_affected_input_names(self):
-        return self.__affected_input_names
-
-    def _set_affected_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedInputNames list valeus must be str")
-        self.__affected_input_names = value
-    affected_input_names = property(
-        _get_affected_input_names, _set_affected_input_names)
-
-    def _get_affected_output_names(self):
-        return self.__affected_output_names
-
-    def _set_affected_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("affectedOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("affectedOutputNames list valeus must be str")
-        self.__affected_output_names = value
-    affected_output_names = property(
-        _get_affected_output_names, _set_affected_output_names)
 
     def _get_input_column_names(self):
         return self.__input_column_names
@@ -2453,32 +1973,6 @@ class ImageLoading(PipelineStep):
     object_detection_config = property(
         _get_object_detection_config, _set_object_detection_config)
 
-    def _get_target_input_step_input_names(self):
-        return self.__target_input_step_input_names
-
-    def _set_target_input_step_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepInputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepInputNames list valeus must be str")
-        self.__target_input_step_input_names = value
-    target_input_step_input_names = property(
-        _get_target_input_step_input_names, _set_target_input_step_input_names)
-
-    def _get_target_input_step_output_names(self):
-        return self.__target_input_step_output_names
-
-    def _set_target_input_step_output_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("targetInputStepOutputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError(
-                "targetInputStepOutputNames list valeus must be str")
-        self.__target_input_step_output_names = value
-    target_input_step_output_names = property(
-        _get_target_input_step_output_names, _set_target_input_step_output_names)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -2493,12 +1987,6 @@ class ImageLoading(PipelineStep):
         if self.__output_names is not None:
             d['outputNames'] = [p.as_dict() if hasattr(p, 'as_dict')
                                 else p for p in self.__output_names]
-        if self.__affected_input_names is not None:
-            d['affectedInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_input_names]
-        if self.__affected_output_names is not None:
-            d['affectedOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__affected_output_names]
         if self.__input_column_names is not None:
             d['inputColumnNames'] = self.__input_column_names.as_dict() if hasattr(
                 self.__input_column_names, 'as_dict') else self.__input_column_names
@@ -2526,12 +2014,6 @@ class ImageLoading(PipelineStep):
         if self.__object_detection_config is not None:
             d['objectDetectionConfig'] = self.__object_detection_config.as_dict() if hasattr(
                 self.__object_detection_config, 'as_dict') else self.__object_detection_config
-        if self.__target_input_step_input_names is not None:
-            d['targetInputStepInputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_input_names]
-        if self.__target_input_step_output_names is not None:
-            d['targetInputStepOutputNames'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__target_input_step_output_names]
         return d
 
 

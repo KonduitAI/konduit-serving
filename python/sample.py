@@ -3,9 +3,7 @@ from konduit.json_utils import config_to_dict_with_type
 from konduit.server import Server
 from konduit.client import Client
 
-from jnius_config import set_classpath
 import json
-import os
 
 from jnius import autoclass
 
@@ -48,7 +46,7 @@ inference = InferenceConfiguration(serving_config=serving_config,
 as_json = config_to_dict_with_type(inference)
 server = Server(config=inference,
                 extra_start_args='-Xmx8g',
-                jar_path=konduit_jar)
+                jar_path='konduit_jar')
 process = server.start()
 print('Process started. Sleeping 10 seconds.')
 client = Client(input_names=input_names,

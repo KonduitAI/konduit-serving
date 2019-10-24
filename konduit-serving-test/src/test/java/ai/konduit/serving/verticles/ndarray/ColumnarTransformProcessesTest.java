@@ -93,7 +93,6 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
     }
 
 
-
     @Override
     public JsonObject getConfigObject() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = getTrainedNetwork();
@@ -110,19 +109,14 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
             transformProcessBuilder.convertToDouble(inputSchema.getName(i));
         }
 
-
         TransformProcess transformProcess = transformProcessBuilder.build();
 
+        TransformProcessPipelineStep transformStep = new TransformProcessPipelineStep(inputSchema, outputSchema, transformProcess);
 
+        // This is equivalent to:
+        TransformProcessPipelineStep transformStepUnused = new TransformProcessPipelineStep()
+                .step("default", inputSchema, outputSchema, transformProcess);
 
-        TransformProcessPipelineStep transformStep = TransformProcessPipelineStep.builder()
-                .inputName("default")
-                .inputSchema("default",SchemaTypeUtils.typesForSchema(inputSchema))
-                .outputSchema("default",SchemaTypeUtils.typesForSchema(outputSchema))
-                .inputColumnName("default",SchemaTypeUtils.columnNames(inputSchema))
-                .outputColumnName("default",SchemaTypeUtils.columnNames(outputSchema))
-                .transformProcess("default",transformProcess)
-                .build();
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .predictionType(Output.PredictionType.CLASSIFICATION)
