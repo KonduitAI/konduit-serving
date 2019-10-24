@@ -148,7 +148,7 @@ class Client(object):
                 'Attempting to execute multi part request with input type specified as json.')
 
         for key, value in data_input.items():
-            root_name = re.sub(r'\\[[0-9]+\\]', '', key)
+            root_name = re.sub('\\[[0-9]+\\]', '', key)
             if root_name not in self.input_names:
                 raise ValueError('Specified root name ' +
                                  root_name + ' not found in input names.')
