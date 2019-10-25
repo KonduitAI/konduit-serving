@@ -58,7 +58,7 @@ Two server configurations are defined:
 
 ### [`test_client_serde.py`](test_client_serde.py)
 
-This file tests serialization and deserialization ('serde') processes by the Client in Konduit Serving
+This file tests serialization and deserialization ('serde') by the Client.
 
 #### `test_multipart_encode()`
 Tests the following methods for the [Client](../konduit/client.py#L10-L139) class: 
