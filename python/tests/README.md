@@ -1,5 +1,5 @@
 # Tests 
-This article discusses the tests for Konduit's Python SDK.
+The following is a quick discussion of the test files for Konduit's Python SDK.
 
 ## Pipeline steps 
 
@@ -29,7 +29,7 @@ This server is configured for JSON input and output.
 
 ### [`test_transform_process_arrow.py`](test_transform_process_arrow.py)
 
-Similar to `test_transform_process.py`, checks if a DataVec transformation can be configured, but with the server configured to return Arrow output instead of JSON. 
+Similar to `test_transform_process.py`, checks if a DataVec transformation can be configured, but with the server configured to return [Arrow](https://arrow.apache.org/) output instead of JSON. 
 
 ### [`test_python_serving.py`](test_python_serving.py)
 
@@ -39,7 +39,7 @@ The input and output data types of this server are configured to be NUMPY.
 
 ### [`test_bert_serving.py`](test_bert_serving.py)
 
-Similar to `test_start.py`, creates a configuration with a TensorFlow BERT model loaded with [TensorFlowConfig](../konduit/inference.py#L656-L720), but also prints the predicted output given NumPy arrays. 
+Similar to `test_start.py`, creates a configuration with a TensorFlow BERT model loaded with [TensorFlowConfig](../konduit/inference.py#L656-L720), but also prints the predicted output, given NumPy arrays. 
 
 The input and output data types of this server are configured to be NUMPY. 
 
@@ -58,12 +58,17 @@ Two server configurations are defined:
 
 ### [`test_client_serde.py`](test_client_serde.py)
 
+This file tests serialization and deserialization ('serde') processes by the Client in Konduit Serving
+
 #### `test_multipart_encode()`
 Tests the following methods for the [Client](../konduit/client.py#L10-L139) class: 
-- [`_convert_numpy_to_binary()`](../konduit/client.py#L72-L76): converts inputs into a dictionary (key-value pairs) with binary data as values.
-- [`_convert_multi_part_inputs()`](../konduit/client.py#L100-L108): encodes the dictionary from `convert_numpy_to_binary()` in a multipart request body.
-- [`_encode_multi_part_input()`](../konduit/client.py#L85-L97): decodes the multipart response into binary data or, depending on the output type, converts into the corresponding output class.
-- [`_convert_multi_part_output()`](../konduit/client.py#L110-L129): converts output returned by the server into the output type requested by the client.
+- [`_convert_numpy_to_binary()`](../konduit/client.py#L72-L76): converts a NumPy array into binary data.
+- [`_convert_multi_part_inputs()`](../konduit/client.py#L100-L108): encodes a dictionary of key-value pairs from `convert_numpy_to_binary()` in a multipart request body. Values wiil be reformatted into binary format if they are not already in binary format.
+- [`_encode_multi_part_input()`](../konduit/client.py#L85-L97): encodes the output from `convert_multi_part_inputs()`.
+- [`_convert_multi_part_output()`](../konduit/client.py#L110-L129): decodes output returned by the server into the output type requested by the client.
 
 #### `test_python_serde()`
-Similar to `test_python_serving.py`, configures a server with [PythonPipelineStep](../konduit/inference.py#L1221-L1394), then dumps a JSON file containing the configuration.
+
+Tests serialization/deserialization of Python configuration dictionaries to JSON. 
+
+Similar to `test_python_serving.py`, this function configures a server with [PythonPipelineStep](../konduit/inference.py#L1221-L1394), converts the configuration into a Python dictionary, then converts it into a JSON file containing the configuration.
