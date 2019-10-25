@@ -63,7 +63,7 @@ This file tests serialization and deserialization ('serde') by the Client.
 #### `test_multipart_encode()`
 Tests the following methods for the [Client](../konduit/client.py) class: 
 - [`_convert_numpy_to_binary()`](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/client.py#L80-L85): converts a NumPy array into binary data.
-- [`_convert_multi_part_inputs()`](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/client.py#L101-L110): encodes a dictionary of key-value pairs from `convert_numpy_to_binary()` in a multipart request body. Values wiil be reformatted into binary format if they are not already in binary format.
+- [`_convert_multi_part_inputs()`](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/client.py#L101-L110): encodes a dictionary of key-value pairs from `convert_numpy_to_binary()` in a multipart request body. Values will be reformatted into binary format if they are not already in binary format.
 - [`_encode_multi_part_input()`](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/client.py#L93-L99): encodes the output from `convert_multi_part_inputs()`.
 - [`_convert_multi_part_output()`](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/client.py#L112-L132): decodes output returned by the server into the output type requested by the client.
 
