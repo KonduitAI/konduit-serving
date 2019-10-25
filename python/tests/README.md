@@ -69,6 +69,6 @@ Tests the following methods for the [Client](../konduit/client.py#L10-L139) clas
 
 #### `test_python_serde()`
 
-Tests serialization/deserialization of Python configuration dictionaries to JSON. 
+Tests serializing InferenceConfiguration to JSON.
 
 Similar to `test_python_serving.py`, this function configures a server with [PythonPipelineStep](../konduit/inference.py#L1221-L1394), converts the configuration into a Python dictionary, then converts it into a JSON file containing the configuration.
