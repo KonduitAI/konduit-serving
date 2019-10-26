@@ -23,12 +23,18 @@
 package ai.konduit.serving.orchestration;
 
 import ai.konduit.serving.configprovider.KonduitServingNodeConfigurer;
+import ai.konduit.serving.InferenceConfiguration;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.VertxOptions;
 import  com.beust.jcommander.JCommander;
-
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.config.ConfigRetriever;
+import io.vertx.core.eventbus.MessageConsumer;
 /**
  * Multi node/clustered setup using
  * {@link KonduitServingNodeConfigurer}
@@ -39,9 +45,10 @@ import  com.beust.jcommander.JCommander;
  */
 public class KonduitOrchestrationMain {
 
-    private static io.vertx.core.logging.Logger log = io.vertx.core.logging.LoggerFactory.getLogger(ai.konduit.serving.configprovider.KonduitServingMain.class.getName());
-
-
+    private static Logger log = LoggerFactory.getLogger(KonduitOrchestrationMain.class.getName());
+    private EventBus eventBus;
+    public final static String NODE_COMMUNICATION_TOPIC = "NodeCommunication";
+    private KonduitServingNodeConfigurer configurer;
 
     public static void main(String...args) {
         try {
@@ -56,31 +63,62 @@ public class KonduitOrchestrationMain {
 
     public void runMain(KonduitServingNodeConfigurer konduitServingNodeConfigurer) {
         //force clustering
+        this.configurer = konduitServingNodeConfigurer;
         konduitServingNodeConfigurer.setClustered(true);
 
         konduitServingNodeConfigurer.setupVertxOptions();
         Vertx.clusteredVertx(konduitServingNodeConfigurer.getVertxOptions(),vertxAsyncResult -> {
             Vertx vertx = vertxAsyncResult.result();
-            io.vertx.config.ConfigRetriever configRetriever = io.vertx.config.ConfigRetriever.create(vertx,konduitServingNodeConfigurer.getOptions());
+            ConfigRetriever configRetriever = io.vertx.config.ConfigRetriever.create(vertx,konduitServingNodeConfigurer.getOptions());
+            eventBus = vertx.eventBus();
+            //registers a handler to assert that all configurations are the same
+            registerHandler();
             configRetriever.getConfig(result -> {
                 if(result.failed()) {
                     log.error("Unable to retrieve configuration " + result.cause());
                 }
                 else {
-                    io.vertx.core.json.JsonObject result1 = result.result();
+                    JsonObject result1 = result.result();
                     konduitServingNodeConfigurer.configureWithJson(result1);
-                    vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(),konduitServingNodeConfigurer.getDeploymentOptions(),handler -> {
-                        if(handler.failed()) {
-                            log.error("Unable to deploy verticle {}",konduitServingNodeConfigurer.getVerticleClassName(),handler.cause());
-                        }
-                        else {
-                            log.info("Deployed verticle {}",konduitServingNodeConfigurer.getVerticleClassName());
-                        }
-                    });
+                    try {
+                        eventBus.send(NODE_COMMUNICATION_TOPIC,new io.vertx.core.json.JsonObject(konduitServingNodeConfigurer.getInferenceConfiguration().toJson()),replyHandler -> {
+                            vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(),konduitServingNodeConfigurer.getDeploymentOptions(),handler -> {
+                                if(handler.failed()) {
+                                    log.error("Unable to deploy verticle {}",konduitServingNodeConfigurer.getVerticleClassName(),handler.cause());
+                                }
+                                else {
+                                    log.info("Deployed verticle {}",konduitServingNodeConfigurer.getVerticleClassName());
+                                }
+                            });
+                        });
+                    } catch (org.nd4j.shade.jackson.core.JsonProcessingException e) {
+                        log.error("Unable to find")
+                    }
+
                 }
             });
         });
     }
+
+
+    private void registerHandler() {
+        MessageConsumer<JsonObject> messageConsumer = eventBus.consumer(NODE_COMMUNICATION_TOPIC);
+        messageConsumer.handler(message -> {
+            JsonObject jsonMessage = message.body();
+            try {
+                InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(jsonMessage.toString());
+                JsonObject jsonReply = new JsonObject().put("status",String.valueOf(inferenceConfiguration.equals(configurer.getInferenceConfiguration())));
+                message.reply(jsonReply);
+
+            } catch (java.io.IOException e) {
+                JsonObject jsonReply = new JsonObject().put("status","invalid");
+                message.reply(jsonReply);
+                e.printStackTrace();
+            }
+
+        });
+    }
+
 
     public void runMain(String... args) {
         log.debug("Parsing args " + java.util.Arrays.toString(args));

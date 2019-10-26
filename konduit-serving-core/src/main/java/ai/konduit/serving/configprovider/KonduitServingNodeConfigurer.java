@@ -116,6 +116,7 @@ public class KonduitServingNodeConfigurer {
     private  DeploymentOptions deploymentOptions;
     private  ConfigRetrieverOptions options;
     private  VertxOptions vertxOptions;
+    private ai.konduit.serving.InferenceConfiguration inferenceConfiguration;
 
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
 
@@ -253,7 +254,7 @@ public class KonduitServingNodeConfigurer {
                 tmpConfigJson.deleteOnExit();
 
                 try {
-                    InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromYaml(
+                    inferenceConfiguration = InferenceConfiguration.fromYaml(
                             org.apache.commons.io.FileUtils.readFileToString(tmpFile,
                                     java.nio.charset.Charset.defaultCharset()));
                     org.apache.commons.io.FileUtils.writeStringToFile(tmpConfigJson,
