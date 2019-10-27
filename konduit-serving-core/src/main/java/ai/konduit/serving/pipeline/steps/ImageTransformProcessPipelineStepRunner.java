@@ -25,6 +25,7 @@ package ai.konduit.serving.pipeline.steps;
 import ai.konduit.serving.pipeline.ImageLoading;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ImagePermuter;
+import javafx.util.Pair;
 import org.datavec.api.writable.BytesWritable;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Text;
@@ -36,9 +37,12 @@ import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRunner {
 
@@ -48,20 +52,18 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
     public ImageTransformProcessPipelineStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
 
-        imageLoaders = new HashMap<>();
         this.imageLoadingConfig = (ImageLoading) pipelineStep;
 
-        for(int i = 0; i < pipelineStep.getInputNames().size(); i++) {
-            String s = pipelineStep.getInputNames().get(i);
-            if(imageLoadingConfig.getDimensionsConfigs().containsKey(s)) {
-                Long[] values = imageLoadingConfig.getDimensionsConfigs().get(s);
-                NativeImageLoader nativeImageLoader = new NativeImageLoader(values[0], values[1], values[2]);
-                imageLoaders.put(s, nativeImageLoader);
-            } else {
-                NativeImageLoader nativeImageLoader = new NativeImageLoader();
-                imageLoaders.put(s, nativeImageLoader);
-            }
-        }
+        imageLoaders = imageLoadingConfig.getInputNames().stream()
+                .map(inputName -> {
+                    Long[] values = imageLoadingConfig.getDimensionsConfigs().getOrDefault(inputName, null);
+                    if(values != null) {
+                        return new Pair<>(inputName, new NativeImageLoader(values[0], values[1], values[2]));
+                    } else {
+                        return new Pair<>(inputName, new NativeImageLoader());
+                    }
+                })
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
         Preconditions.checkState(!imageLoaders.isEmpty(),"No image loaders specified.");
     }

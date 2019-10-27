@@ -37,7 +37,7 @@ public class BasicConfigurationImage {
                 .imageProcessingRequiredLayout("NHWC")
                 .updateOrderingBeforeTransform(false)
                 .inputName("default")
-                .dimensionsConfig("default", new Long[]{28L, 28L, 3L})
+                //.dimensionsConfig("default", new Long[]{28L, 28L, 3L})
                 .imageTransformProcess("default", imageTransformProcess)
                 .build();
 
