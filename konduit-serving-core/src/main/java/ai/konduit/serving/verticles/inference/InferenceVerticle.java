@@ -33,6 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 import ai.konduit.serving.InferenceConfiguration;
 import  ai.konduit.serving.configprovider.PipelineRouteDefiner;
 
+import java.io.IOException;
+
 /**
  * A {@link io.vertx.core.Verticle} that takes multi part file uploads
  * as inputs.
@@ -77,7 +79,8 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         this.context = context;
         this.vertx = vertx;
         try {
-            this.router = new PipelineRouteDefiner().defineRoutes(vertx, InferenceConfiguration.fromJson(context.config().encode()));
+            inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
+            this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
             setupWebServer();
         } catch (java.io.IOException e) {
             log.error("Unable to parse InferenceConfiguration",e);
