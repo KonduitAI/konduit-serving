@@ -27,7 +27,7 @@ target/
 .idea/
 
 unzip/
-
+*target*
 # Vert.xA
 .vertx/
 
@@ -51,3 +51,4 @@ pipelines.pid
 # uberjar creation
 pipelines.jar
 konduit.jar
+/konduit-serving-core/target/

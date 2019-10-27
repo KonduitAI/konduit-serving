@@ -38,6 +38,8 @@ import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 
+import org.apache.commons.io.FileUtils;
+import java.nio.charset.Charset;
 import java.io.File;
 
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
@@ -157,7 +159,7 @@ public class KonduitServingNodeConfigurer {
             }
 
             log.info("Writing pid file to " + pidFile + " with pid " + pid);
-            org.apache.commons.io.FileUtils.writeStringToFile(write,String.valueOf(pid), java.nio.charset.Charset.defaultCharset());
+            FileUtils.writeStringToFile(write,String.valueOf(pid), Charset.defaultCharset());
             write.deleteOnExit();
         }catch(Exception e) {
             log.warn("Unable to write pid file.",e);
@@ -244,6 +246,15 @@ public class KonduitServingNodeConfigurer {
 
         if (configPath != null) {
             File tmpFile = new File(configPath);
+            try {
+                inferenceConfiguration = InferenceConfiguration.fromJson(
+                        FileUtils.readFileToString(tmpFile,
+                                Charset.defaultCharset()));
+            } catch (java.io.IOException e) {
+                log.error("Unable to read inference configuration with path " + configPath,e);
+                return;
+            }
+
             if(!tmpFile.exists()) {
                 throw new IllegalStateException("Path " + tmpFile.getAbsolutePath() + " does not exist!");
             }
@@ -255,11 +266,11 @@ public class KonduitServingNodeConfigurer {
 
                 try {
                     inferenceConfiguration = InferenceConfiguration.fromYaml(
-                            org.apache.commons.io.FileUtils.readFileToString(tmpFile,
-                                    java.nio.charset.Charset.defaultCharset()));
-                    org.apache.commons.io.FileUtils.writeStringToFile(tmpConfigJson,
+                            FileUtils.readFileToString(tmpFile,
+                                    Charset.defaultCharset()));
+                    FileUtils.writeStringToFile(tmpConfigJson,
                             inferenceConfiguration.toJson()
-                            , java.nio.charset.Charset.defaultCharset());
+                            , Charset.defaultCharset());
                     configPath = tmpConfigJson.getAbsolutePath();
                     log.info("Rewrote input config yaml to path " + tmpConfigJson.getAbsolutePath());
 

@@ -22,19 +22,20 @@
 
 package ai.konduit.serving.orchestration;
 
-import ai.konduit.serving.configprovider.KonduitServingNodeConfigurer;
 import ai.konduit.serving.InferenceConfiguration;
-
+import ai.konduit.serving.configprovider.KonduitServingNodeConfigurer;
+import com.beust.jcommander.JCommander;
+import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.VertxOptions;
-import  com.beust.jcommander.JCommander;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.config.ConfigRetriever;
-import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.ext.web.Router;
+
 /**
  * Multi node/clustered setup using
  * {@link KonduitServingNodeConfigurer}
@@ -49,7 +50,8 @@ public class KonduitOrchestrationMain {
     private EventBus eventBus;
     public final static String NODE_COMMUNICATION_TOPIC = "NodeCommunication";
     private KonduitServingNodeConfigurer configurer;
-
+    private io.vertx.core.spi.cluster.ClusterManager clusterManager;
+    private io.vertx.ext.web.Router clusterEndPointRouter;
     public static void main(String...args) {
         try {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> log.debug("Shutting down model server.")));
@@ -73,6 +75,8 @@ public class KonduitOrchestrationMain {
             eventBus = vertx.eventBus();
             //registers a handler to assert that all configurations are the same
             registerHandler();
+            clusterManager = configurer.getVertxOptions().getClusterManager();
+
             configRetriever.getConfig(result -> {
                 if(result.failed()) {
                     log.error("Unable to retrieve configuration " + result.cause());
@@ -80,20 +84,31 @@ public class KonduitOrchestrationMain {
                 else {
                     JsonObject result1 = result.result();
                     konduitServingNodeConfigurer.configureWithJson(result1);
-                    try {
-                        eventBus.send(NODE_COMMUNICATION_TOPIC,new io.vertx.core.json.JsonObject(konduitServingNodeConfigurer.getInferenceConfiguration().toJson()),replyHandler -> {
-                            vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(),konduitServingNodeConfigurer.getDeploymentOptions(),handler -> {
-                                if(handler.failed()) {
-                                    log.error("Unable to deploy verticle {}",konduitServingNodeConfigurer.getVerticleClassName(),handler.cause());
-                                }
-                                else {
-                                    log.info("Deployed verticle {}",konduitServingNodeConfigurer.getVerticleClassName());
-                                }
-                            });
-                        });
-                    } catch (org.nd4j.shade.jackson.core.JsonProcessingException e) {
-                        log.error("Unable to find")
-                    }
+                    konduitServingNodeConfigurer.setVerticleClassName(ClusteredInferenceVerticle.class.getName());
+                    clusterEndPointRouter = Router.router(vertx);
+
+
+                    vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(),konduitServingNodeConfigurer.getDeploymentOptions(),handler -> {
+                        if(handler.failed()) {
+                            log.error("Unable to deploy verticle {}",konduitServingNodeConfigurer.getVerticleClassName(),handler.cause());
+                        }
+                        else {
+                            try {
+                                org.nd4j.base.Preconditions.checkNotNull(konduitServingNodeConfigurer.getInferenceConfiguration(),"Node configurer inference configuration was null!");
+                                eventBus.send(NODE_COMMUNICATION_TOPIC,new JsonObject(konduitServingNodeConfigurer.getInferenceConfiguration().toJson()), replyHandler -> {
+                                    if(replyHandler.failed()) {
+                                        log.error("Unable to get message reply",replyHandler.cause());
+                                    }
+                                    else {
+                                        log.info("Received cluster reply with ",replyHandler.result().toString());
+                                    }
+                                });
+                            } catch (org.nd4j.shade.jackson.core.JsonProcessingException e) {
+                               log.error("Unable to parse json from configuration",e);
+                            }
+                            log.info("Deployed verticle {}",konduitServingNodeConfigurer.getVerticleClassName());
+                        }
+                    });
 
                 }
             });
