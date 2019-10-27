@@ -2,13 +2,12 @@ package ai.konduit.serving.basic;
 
 import ai.konduit.serving.pipeline.ImageLoading;
 import ai.konduit.serving.pipeline.steps.ImageTransformProcessPipelineStepRunner;
-import ai.konduit.serving.util.image.NativeImageLoader;
 import org.datavec.api.records.Record;
+import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Text;
-import org.datavec.image.data.ImageWritable;
 import org.datavec.image.transform.ImageTransformProcess;
 
-import java.lang.annotation.Native;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class BasicConfigurationImage {
@@ -28,12 +27,17 @@ public class BasicConfigurationImage {
          */
 
         ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
-                .resizeImageTransform(28,28)
+                .scaleImageTransform(14.0f)
+                //.resizeImageTransform(28,28)
                 .build();
 
+
         ImageLoading imageLoading = ImageLoading.builder()
+                .imageProcessingInitialLayout("NCHW")
+                .imageProcessingRequiredLayout("NHWC")
+                .updateOrderingBeforeTransform(true)
                 .inputName("default")
-                .dimensionsConfig("default", new Long[]{640L, 480L, 3L})
+                .dimensionsConfig("default", new Long[]{28L, 28L, 3L})
                 .imageTransformProcess("default", imageTransformProcess)
                 .build();
 
@@ -46,6 +50,7 @@ public class BasicConfigurationImage {
                         null)
         });
 
+        System.out.println(Arrays.toString(((NDArrayWritable) output[0].getRecord().get(0)).get().shape()));
         System.out.println(output[0].getRecord().get(0));
     }
 }

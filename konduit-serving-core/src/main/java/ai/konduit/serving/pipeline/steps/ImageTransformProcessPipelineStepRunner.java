@@ -31,6 +31,7 @@ import org.datavec.api.writable.Text;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.data.ImageWritable;
 import org.datavec.image.loader.NativeImageLoader;
+import org.datavec.image.transform.ImageTransformProcess;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
@@ -58,7 +59,7 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
                 imageLoaders.put(s, nativeImageLoader);
             } else {
                 NativeImageLoader nativeImageLoader = new NativeImageLoader();
-                imageLoaders.put(s,nativeImageLoader);
+                imageLoaders.put(s, nativeImageLoader);
             }
         }
 
@@ -67,72 +68,49 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
 
     @Override
     public void processValidWritable(Writable writable, List<Writable> record, int inputIndex, Object... extraArgs) {
-        NativeImageLoader nativeImageLoader = getImageLoaderAtIndex(inputIndex);
+        String inputName = imageLoadingConfig.getInputNames().get(inputIndex);
 
-        if (writable instanceof ImageWritable) {
-            ImageWritable imageWritable = (ImageWritable) writable;
+        NativeImageLoader nativeImageLoader = imageLoaders.get(inputName);
+        ImageTransformProcess imageTransformProcess = imageLoadingConfig.getImageTransformProcesses().get(inputName);
 
-            try {
-                INDArray arr = nativeImageLoader.asMatrix(imageWritable.getFrame());
+        INDArray input;
 
-                if(!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
-                    arr = ImagePermuter.permuteOrder(arr,
-                            imageLoadingConfig.getImageProcessingInitialLayout(),
-                            imageLoadingConfig.getImageProcessingRequiredLayout());
-                }
-
-                record.add(new NDArrayWritable(arr));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (writable instanceof BytesWritable) {
-            BytesWritable bytesWritable = (BytesWritable) writable;
-
-            try {
-                INDArray arr = nativeImageLoader.asMatrix(bytesWritable.getContent());
-
-                if(!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
-                    arr = ImagePermuter.permuteOrder(arr,
-                            imageLoadingConfig.getImageProcessingInitialLayout(),
-                            imageLoadingConfig.getImageProcessingRequiredLayout());
-                }
-
-                record.add(new NDArrayWritable(arr));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (writable instanceof Text) {
-            try {
-                INDArray arr = nativeImageLoader.asMatrix(writable.toString());
-
-                if(!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
-                    arr = ImagePermuter.permuteOrder(arr,
-                            imageLoadingConfig.getImageProcessingInitialLayout(),
-                            imageLoadingConfig.getImageProcessingRequiredLayout());
-                }
-
-                record.add(new NDArrayWritable(arr));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if(writable instanceof NDArrayWritable) {
-            NDArrayWritable ndArrayWritable = (NDArrayWritable) writable;
-            INDArray arr = ndArrayWritable.get();
-
-            if(!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
-                arr = ImagePermuter.permuteOrder(arr,
-                        imageLoadingConfig.getImageProcessingInitialLayout(),
-                        imageLoadingConfig.getImageProcessingRequiredLayout());
+        try {
+            if (writable instanceof ImageWritable) {
+                input = nativeImageLoader.asMatrix(((ImageWritable) writable).getFrame());
+            } else if (writable instanceof BytesWritable) {
+                input = nativeImageLoader.asMatrix(((BytesWritable) writable).getContent());
+            } else if (writable instanceof Text) {
+                input = nativeImageLoader.asMatrix(writable.toString());
+            } else if (writable instanceof NDArrayWritable) {
+                input = ((NDArrayWritable) writable).get();
+            } else {
+                throw new IllegalArgumentException("Illegal type to load from " + writable.getClass());
             }
 
-            record.add(new NDArrayWritable(arr));
-        } else {
-            throw new IllegalArgumentException("Illegal type to load from " + writable.getClass());
+            INDArray output;
+
+           if(imageLoadingConfig.isUpdateOrderingBeforeTransform()) {
+               if (!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
+                   input = ImagePermuter.permuteOrder(input,
+                           imageLoadingConfig.getImageProcessingInitialLayout(),
+                           imageLoadingConfig.getImageProcessingRequiredLayout());
+               }
+
+               output = imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(input)));
+           } else {
+               output = imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(input)));
+
+               if (!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
+                   output = ImagePermuter.permuteOrder(output,
+                           imageLoadingConfig.getImageProcessingInitialLayout(),
+                           imageLoadingConfig.getImageProcessingRequiredLayout());
+               }
+           }
+
+           record.add(new NDArrayWritable(output));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-
-    public NativeImageLoader getImageLoaderAtIndex(int i) {
-        return imageLoaders.get(imageLoadingConfig.getInputNames().get(i));
-    }
-
 }

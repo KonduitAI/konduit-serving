@@ -37,8 +37,10 @@ public class ImageLoading extends PipelineStep implements Serializable {
     private int originalImageHeight;
     private int originalImageWidth;
 
+    private boolean updateOrderingBeforeTransform = false;
+
     @Singular
-    private Map<String,Long[]> dimensionsConfigs;
+    private Map<String, Long[]> dimensionsConfigs;
 
     private String imageProcessingRequiredLayout = "NCHW", imageProcessingInitialLayout = "NCHW";
 
