@@ -143,6 +143,11 @@
             <version>2.1.11</version>
         </dependency>
         <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-health-check</artifactId>
+            <version>${vertx-stack.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>dl4j-perf</artifactId>
             <version>${dl4j.version}</version>

@@ -27,6 +27,8 @@ import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.Vertx;
+import io.vertx.core.Context;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.spi.cluster.ClusterManager;
 
@@ -67,11 +69,12 @@ public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
     }
 
     @Override
-    public void init(io.vertx.core.Vertx vertx, io.vertx.core.Context context) {
+    public void init(Vertx vertx, Context context) {
         this.context = context;
         this.vertx = vertx;
         try {
             inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
+            //inference endpoints (pipeline execution, loading,..)
             this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
             //get the cluster manager to get node information
             VertxImpl impl = (VertxImpl) vertx;

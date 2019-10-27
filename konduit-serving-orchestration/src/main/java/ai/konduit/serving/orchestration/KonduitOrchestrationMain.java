@@ -110,6 +110,7 @@ public class KonduitOrchestrationMain {
                             } catch (JsonProcessingException e) {
                                 log.error("Unable to parse json from configuration",e);
                             }
+
                             log.info("Deployed verticle {}",konduitServingNodeConfigurer.getVerticleClassName());
                         }
                     });

@@ -32,6 +32,9 @@ import  ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.verticles.VerticleConstants;
+import  ai.konduit.serving.pipeline.ModelPipelineStep;
+import  ai.konduit.serving.pipeline.PythonPipelineStep;
+import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy.VertxBufferNumpyInputAdapter;
@@ -47,17 +50,20 @@ import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
 import io.micrometer.core.instrument.LongTaskTimer.Sample;
+import io.vertx.micrometer.backends.BackendRegistries;
 
 import  io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.healthchecks.HealthCheckHandler;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.List;
 import org.datavec.api.transform.schema.Schema;
 import  org.datavec.api.records.Record;
 
@@ -69,6 +75,7 @@ import  org.nd4j.base.Preconditions;
  * @author Adam Gibson
  */
 @lombok.extern.slf4j.Slf4j
+@lombok.Getter
 public class PipelineRouteDefiner {
 
     protected PipelineExecutioner pipelineExecutioner;
@@ -76,20 +83,46 @@ public class PipelineRouteDefiner {
     //cached for columnar inputs, not used in binary endpoints
     protected Schema inputSchema,outputSchema = null;
     protected LongTaskTimer inferenceExecutionTimer,batchCreationTimer;
+    protected HealthCheckHandler healthCheckHandler;
 
-    public java.util.List<String> inputNames() {
+    public List<String> inputNames() {
         return pipelineExecutioner.inputNames();
     }
 
-    public java.util.List<String> outputNames() {
+    public List<String> outputNames() {
         return pipelineExecutioner.outputNames();
     }
 
 
-    public io.vertx.ext.web.Router defineRoutes(Vertx vertx, InferenceConfiguration inferenceConfiguration) {
+    /**
+     * Define the routes and initialize the internal
+     * {@link PipelineExecutioner} based on the passed
+     *  in {@link InferenceConfiguration}.
+     *  Note this will also initialize the {@link PipelineExecutioner}
+     *  property on this class. If you need access to any of the internals,
+     *  they are available as getters.
+     *
+     * Metric definitions  get defined
+     * relative to what was configured in the {@link InferenceConfiguration}
+     * Everything implementing the {@link MeterBinder}
+     * interface can be configured here.
+     * Of note are a few specific ones for machine learning including:
+     * {@link NativeMetrics} and {@link ai.konduit.serving.gpu.GpuMetrics}
+     * which cover off heap memory allocation and gpu utilization among other things.
+     *
+     *
+     * Health checks are automatically added at /healthcheck endpoints
+     * @see <a href="https://vertx.io/docs/vertx-health-check/java/">Vertx health checks</a>
+     *
+     * @param vertx the input vertx instance for setting up
+     *              the returned {@link Router} instance and endpoints
+     * @param inferenceConfiguration the configuration to use for the {@link PipelineExecutioner}
+     * @return the router with the endpoints defined
+     */
+    public Router defineRoutes(Vertx vertx, InferenceConfiguration inferenceConfiguration) {
         Router router = Router.router(vertx);
 
-        MeterRegistry registry = io.vertx.micrometer.backends.BackendRegistries.getDefaultNow();
+        MeterRegistry registry = BackendRegistries.getDefaultNow();
         if(registry != null) {
             log.info("Using metrics registry " + registry.getClass().getName() + " for inference");
             inferenceExecutionTimer = LongTaskTimer
@@ -140,9 +173,8 @@ public class PipelineRouteDefiner {
             }
         }
 
-        router.get("/healthcheck").handler(ctx -> {
-            ctx.response().end("Ok");
-        });
+        healthCheckHandler = HealthCheckHandler.create(vertx);
+        router.get("/healthcheck*").handler(healthCheckHandler);
 
         router.get("/metrics").handler(io.vertx.micrometer.PrometheusScrapingHandler.create())
                 .failureHandler(failureHandler -> {
@@ -169,7 +201,6 @@ public class PipelineRouteDefiner {
                         else {
                             log.error("Request failed with unknown cause.");
                         }
-
                     }
                 });
 
@@ -181,27 +212,27 @@ public class PipelineRouteDefiner {
             PredictionType outputAdapterType = PredictionType.valueOf(ctx.pathParam("operation").toUpperCase());
             if(inputSchema == null) {
                 for(PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
-                    if(pipelineStep instanceof ai.konduit.serving.pipeline.ModelPipelineStep) {
+                    if(pipelineStep instanceof ModelPipelineStep) {
                         inputSchema = pipelineStep.inputSchemaForName("default");
                     }
-                    if(pipelineStep instanceof ai.konduit.serving.pipeline.PythonPipelineStep) {
+                    if(pipelineStep instanceof PythonPipelineStep) {
                         inputSchema = pipelineStep.inputSchemaForName("default");
                     }
-                    if(pipelineStep instanceof ai.konduit.serving.pipeline.TransformProcessPipelineStep) {
+                    if(pipelineStep instanceof TransformProcessPipelineStep) {
                         inputSchema = pipelineStep.inputSchemaForName("default");
                     }
                 }
             }
 
             if(outputSchema == null) {
-                for(ai.konduit.serving.pipeline.PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
-                    if(pipelineStep instanceof ai.konduit.serving.pipeline.ModelPipelineStep) {
+                for(PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
+                    if(pipelineStep instanceof ModelPipelineStep) {
                         outputSchema = pipelineStep.outputSchemaForName("default");
                     }
-                    else if(pipelineStep instanceof ai.konduit.serving.pipeline.PythonPipelineStep) {
+                    else if(pipelineStep instanceof PythonPipelineStep) {
                         outputSchema = pipelineStep.outputSchemaForName("default");
                     }
-                    if(pipelineStep instanceof ai.konduit.serving.pipeline.TransformProcessPipelineStep) {
+                    if(pipelineStep instanceof TransformProcessPipelineStep) {
                         outputSchema = pipelineStep.inputSchemaForName("default");
                     }
                 }
@@ -209,7 +240,7 @@ public class PipelineRouteDefiner {
 
 
             try {
-                io.micrometer.core.instrument.LongTaskTimer.Sample start = null;
+                LongTaskTimer.Sample start = null;
                 if(inferenceExecutionTimer != null) {
                     start = inferenceExecutionTimer.start();
                 }
@@ -230,8 +261,6 @@ public class PipelineRouteDefiner {
                 ctx.response().end();
             }
         });
-
-
 
         router.post("/:operation/:inputType")
                 .consumes("multipart/form-data")
@@ -280,7 +309,6 @@ public class PipelineRouteDefiner {
 
         });
 
-
         router.post("/:operation/:inputType")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed")
@@ -312,7 +340,7 @@ public class PipelineRouteDefiner {
                         start.stop();
                     long endNanos = System.nanoTime();
                     if(inferenceConfiguration.serving().isLogTimings()) {
-                        log.info("Timing for inference was " + java.util.concurrent.TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
+                        log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
 
                     blockingCall.complete();
@@ -417,18 +445,15 @@ public class PipelineRouteDefiner {
 
         if (pipelineExecutioner == null) {
             log.debug("Initializing inference executioner after starting verticle");
-
-
             //note that we initialize this after the verticle is started
             //due to needing to sometime initialize retraining routes
             try {
                 pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration);
                 pipelineExecutioner.init();
 
-            }catch(Exception e) {
+            } catch(Exception e) {
                 log.error("Failed to initialize. Shutting down.",e);
             }
-
 
         } else {
             log.debug("Web server and endpoint already initialized.");

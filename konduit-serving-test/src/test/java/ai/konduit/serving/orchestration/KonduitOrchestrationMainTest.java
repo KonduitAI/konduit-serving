@@ -33,7 +33,7 @@ public class KonduitOrchestrationMainTest {
                 .build();
         konduitOrchestrationMain.runMain(configurer);
 
-        Thread.sleep(10000);
+        Thread.sleep(20000);
 
         com.jayway.restassured.response.Response response = given().port(port)
                 .get("/nodes")
