@@ -37,22 +37,23 @@ public class PipelineSerializationTests {
                 .pipelineStep(new PythonPipelineStep())
                 .servingConfig(ServingConfig.builder().build())
                 .build();
+
         assertEquals(inferenceConfiguration,InferenceConfiguration.fromYaml(inferenceConfiguration.toYaml()));
     }
 
     @Test
     public void testPipelineSerialization() throws  Exception {
         ImageLoading imageLoadingConfig = ImageLoading.builder()
-                .dimensionsConfig("default",new Long[]{426L,426L,3L})
-                .dimensionsConfig("1",new Long[]{426L,426L,3L})
+                .dimensionsConfig("default", new Long[]{426L, 426L, 3L})
+                .dimensionsConfig("1", new Long[]{426L, 426L, 3L})
                 .build();
 
         InferenceConfiguration config = InferenceConfiguration.builder()
                 .pipelineStep(imageLoadingConfig)
                 .pipelineStep(imageLoadingConfig)
                 .build();
-        System.out.println(config.toJson());
 
+        System.out.println(config.toJson());
     }
 
 }

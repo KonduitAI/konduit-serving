@@ -27,8 +27,6 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class ImagePermuter {
 
-
-
     static int[] determinePermuteOrder(String startingOrder, String destinationOrder) {
         startingOrder = startingOrder.toLowerCase().trim();
         destinationOrder = destinationOrder.toLowerCase().trim();
@@ -66,6 +64,4 @@ public class ImagePermuter {
     public static INDArray permuteOrder(INDArray input,String startingOrder,String destinationOrder) {
         return input.permute(determinePermuteOrder(startingOrder,destinationOrder));
     }
-
-
 }

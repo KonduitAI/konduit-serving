@@ -32,14 +32,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public abstract  class BasePipelineStepRunner implements PipelineStepRunner {
+public abstract class BasePipelineStepRunner implements PipelineStepRunner {
 
     protected PipelineStep pipelineStep;
 
     public BasePipelineStepRunner(PipelineStep pipelineStep) {
         this.pipelineStep = pipelineStep;
     }
-
 
     /**
      * no-op
@@ -50,17 +49,17 @@ public abstract  class BasePipelineStepRunner implements PipelineStepRunner {
     public Record[] transform(Record[] input) {
         int batchSize = input.length;
         Record[] ret = new Record[input.length];
+
         for(int example = 0; example < batchSize; example++) {
             for(int name = 0; name < pipelineStep.getInputNames().size(); name++) {
                 String inputName = pipelineStep.inputNameAt(name);
+
                 if(pipelineStep.inputNameIsValidForStep(pipelineStep.inputNameAtIndex(name))) {
                     List<Writable> currRecord;
                     if(ret[example] == null) {
                         currRecord = new ArrayList<>();
                         ret[example] = new org.datavec.api.records.impl.Record(currRecord,null);
-
-                    }
-                    else {
+                    } else {
                         currRecord = ret[example].getRecord();
                     }
 
@@ -68,23 +67,17 @@ public abstract  class BasePipelineStepRunner implements PipelineStepRunner {
                     //Add filtering for column size equal to 1, to reduce boilerplate
                     if(pipelineStep.processColumn(inputName,name)) {
                         processValidWritable(currWritable,currRecord,name);
-                    }
-                    else {
+                    } else {
                         currRecord.add(input[example].getRecord().get(name));
                     }
-
-
-                }
-                else {
+                } else {
                     ret[example] = input[example];
                 }
             }
-
         }
 
         return ret;
     }
-
 
     @Override
     public Map<String, SchemaType[]> inputTypes() {
@@ -98,5 +91,4 @@ public abstract  class BasePipelineStepRunner implements PipelineStepRunner {
 
 
     public abstract void processValidWritable(Writable writable, List<Writable> record, int inputIndex, Object... extraArgs);
-
 }
