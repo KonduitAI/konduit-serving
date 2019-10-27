@@ -26,7 +26,9 @@ import ai.konduit.serving.InferenceConfiguration;
 import com.beust.jcommander.Parameter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheus.PrometheusConfig;
 import io.vertx.config.ConfigRetrieverOptions;
+import  io.vertx.micrometer.backends.BackendRegistries;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -36,23 +38,39 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import io.vertx.micrometer.MicrometerMetricsOptions;
-import io.vertx.micrometer.backends.BackendRegistries;
 
 import org.apache.commons.io.FileUtils;
 import java.nio.charset.Charset;
 import java.io.File;
+import java.io.IOException;
 
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
 import static java.lang.System.setProperty;
+
+import  ai.konduit.serving.verticles.inference.InferenceVerticle;
+import ai.konduit.serving.InferenceConfiguration;
+
+/**
+ * Core node configurer based on both command line and builder arguments.
+ * This contains the core initialization logic for initializing any peers
+ * in a konduit serving cluster. This includes all of the interaction with vertx
+ * such as metrics initialization, logging,..
+ * @see {@link #configureWithJson(JsonObject)}
+ * @see {@link #setupVertxOptions()}
+ *
+ * Generally, you call setup vertx options first.
+ * This provides the necessary configuration to create a vertx instance.
+ * After the vertx instance is created, then you can call configureWithJson
+ * to give you a completed object.
+ *
+ * @author Adam Gibson
+ */
 
 @lombok.NoArgsConstructor
 @lombok.Getter
 @lombok.Setter
 @lombok.AllArgsConstructor
 @lombok.Builder
-/**
- *
- */
 public class KonduitServingNodeConfigurer {
 
     @Parameter(names = {"--configHost"},help = true,description = "The host for downloading the configuration from")
@@ -94,12 +112,12 @@ public class KonduitServingNodeConfigurer {
     private int workerPoolSize = 20;
     @lombok.Builder.Default
     @Parameter(names = {"--verticleClassName"},help = true,description = "The fully qualified class name to the verticle to be used.")
-    private String verticleClassName = ai.konduit.serving.verticles.inference.InferenceVerticle.class.getName();
+    private String verticleClassName = InferenceVerticle.class.getName();
     @lombok.Builder.Default
     @Parameter(names = "--vertxWorkingDirectory",help = true,description = "The absolute path to use for vertx. This defaults to the user's home directory.")
     private String vertxWorkingDirectory = System.getProperty("user.home");
 
-    private MeterRegistry registry = io.vertx.micrometer.backends.BackendRegistries.getDefaultNow();
+    private MeterRegistry registry = BackendRegistries.getDefaultNow();
     @lombok.Builder.Default
     private String pidFile = new File(System.getProperty("user.dir"),"pipelines.pid").getAbsolutePath();
     @lombok.Builder.Default
@@ -118,7 +136,7 @@ public class KonduitServingNodeConfigurer {
     private  DeploymentOptions deploymentOptions;
     private  ConfigRetrieverOptions options;
     private  VertxOptions vertxOptions;
-    private ai.konduit.serving.InferenceConfiguration inferenceConfiguration;
+    private InferenceConfiguration inferenceConfiguration;
 
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
 
@@ -171,7 +189,7 @@ public class KonduitServingNodeConfigurer {
         //logging using slf4j: defaults to jul
         setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory");
 
-        PrometheusMeterRegistry prometheusBackendRegistry = new PrometheusMeterRegistry(io.micrometer.prometheus.PrometheusConfig.DEFAULT);
+        PrometheusMeterRegistry prometheusBackendRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         registry = prometheusBackendRegistry;
 
 
@@ -250,7 +268,7 @@ public class KonduitServingNodeConfigurer {
                 inferenceConfiguration = InferenceConfiguration.fromJson(
                         FileUtils.readFileToString(tmpFile,
                                 Charset.defaultCharset()));
-            } catch (java.io.IOException e) {
+            } catch (IOException e) {
                 log.error("Unable to read inference configuration with path " + configPath,e);
                 return;
             }
@@ -274,7 +292,7 @@ public class KonduitServingNodeConfigurer {
                     configPath = tmpConfigJson.getAbsolutePath();
                     log.info("Rewrote input config yaml to path " + tmpConfigJson.getAbsolutePath());
 
-                } catch (java.io.IOException e) {
+                } catch (IOException e) {
                     log.error("Unable to rewrite configuration as json ",e);
                 }
             }
@@ -283,8 +301,6 @@ public class KonduitServingNodeConfigurer {
         }
 
     }
-
-
 
     private int getPid() throws UnsatisfiedLinkError {
         if(org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
@@ -299,16 +315,6 @@ public class KonduitServingNodeConfigurer {
         }
     }
 
-    public static void main(String...args) {
-        try {
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> log.debug("Shutting down model server.")));
-            new KonduitServingMain().runMain(args);
-            log.debug("Exiting model server.");
-        }catch(Exception e) {
-            log.error("Unable to start model server.",e);
-            throw e;
-        }
-    }
 
 
 }
