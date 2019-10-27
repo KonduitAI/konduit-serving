@@ -1,3 +1,24 @@
+/*
+ *
+ *  * ******************************************************************************
+ *  *  * Copyright (c) 2019 Konduit AI.
+ *  *  *
+ *  *  * This program and the accompanying materials are made available under the
+ *  *  * terms of the Apache License, Version 2.0 which is available at
+ *  *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *  *
+ *  *  * Unless required by applicable law or agreed to in writing, software
+ *  *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  *  * License for the specific language governing permissions and limitations
+ *  *  * under the License.
+ *  *  *
+ *  *  * SPDX-License-Identifier: Apache-2.0
+ *  *  *****************************************************************************
+ *
+ *
+ */
+
 package ai.konduit.serving.orchestration;
 
 import ai.konduit.serving.InferenceConfiguration;
@@ -6,16 +27,27 @@ import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.impl.VertxImpl;
+import io.vertx.core.spi.cluster.ClusterManager;
 
 import org.nd4j.base.Preconditions;
 import java.util.List;
 
+/**
+ * Multi node version of {@link ai.konduit.serving.verticles.inference.InferenceVerticle}.
+ * Uses {@link ai.konduit.serving.configprovider.KonduitServingNodeConfigurer}
+ * to handle logic of loading a pipeline from a {@link InferenceConfiguration}
+ * and adds additional capabilities on top such as a {@link io.vertx.core.spi.cluster.ClusterManager}
+ * awareness allowing for HA, load balancing, and other capabilities
+ *
+ * @author Adam Gibson
+ */
 @lombok.extern.slf4j.Slf4j
 public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
 
 
     private InferenceConfiguration inferenceConfiguration;
-    private io.vertx.core.spi.cluster.ClusterManager clusterManager;
+    private ClusterManager clusterManager;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -42,7 +74,7 @@ public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
             inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
             this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
             //get the cluster manager to get node information
-            io.vertx.core.impl.VertxImpl impl = (io.vertx.core.impl.VertxImpl) vertx;
+            VertxImpl impl = (VertxImpl) vertx;
             clusterManager = impl.getClusterManager();
             this.router.get("/numnodes").handler(ctx -> {
                 List<String> nodes = clusterManager.getNodes();
