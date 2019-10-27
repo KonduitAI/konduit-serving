@@ -49,9 +49,6 @@ public class ServingConfig {
     private Output.PredictionType predictionType = Output.PredictionType.CLASSIFICATION;
 
     @Builder.Default
-    private ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
-
-    @Builder.Default
     private String uploadsDirectory = "file-uploads/";
 
     @Builder.Default
