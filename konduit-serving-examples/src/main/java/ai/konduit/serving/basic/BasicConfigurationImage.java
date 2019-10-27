@@ -35,7 +35,7 @@ public class BasicConfigurationImage {
         ImageLoading imageLoading = ImageLoading.builder()
                 .imageProcessingInitialLayout("NCHW")
                 .imageProcessingRequiredLayout("NHWC")
-                .updateOrderingBeforeTransform(true)
+                .updateOrderingBeforeTransform(false)
                 .inputName("default")
                 .dimensionsConfig("default", new Long[]{28L, 28L, 3L})
                 .imageTransformProcess("default", imageTransformProcess)

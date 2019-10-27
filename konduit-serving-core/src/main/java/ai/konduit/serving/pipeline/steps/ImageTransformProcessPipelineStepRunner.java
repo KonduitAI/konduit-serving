@@ -91,26 +91,24 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
             INDArray output;
 
            if(imageLoadingConfig.isUpdateOrderingBeforeTransform()) {
-               if (!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
-                   input = ImagePermuter.permuteOrder(input,
-                           imageLoadingConfig.getImageProcessingInitialLayout(),
-                           imageLoadingConfig.getImageProcessingRequiredLayout());
-               }
-
-               output = imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(input)));
+               output = imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(permuteImage(input))));
            } else {
-               output = imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(input)));
-
-               if (!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
-                   output = ImagePermuter.permuteOrder(output,
-                           imageLoadingConfig.getImageProcessingInitialLayout(),
-                           imageLoadingConfig.getImageProcessingRequiredLayout());
-               }
+               output = permuteImage(imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(input))));
            }
 
            record.add(new NDArrayWritable(output));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private INDArray permuteImage(INDArray input) {
+        if (!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
+            return ImagePermuter.permuteOrder(input,
+                    imageLoadingConfig.getImageProcessingInitialLayout(),
+                    imageLoadingConfig.getImageProcessingRequiredLayout());
+        } else {
+            return input;
         }
     }
 }
