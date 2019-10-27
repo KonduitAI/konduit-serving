@@ -28,6 +28,7 @@ target/
 
 unzip/
 *target*
+**/target/**
 # Vert.xA
 .vertx/
 
