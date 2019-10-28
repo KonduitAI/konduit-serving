@@ -43,7 +43,6 @@ import org.nd4j.linalg.factory.Nd4j;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -75,8 +74,8 @@ public class PythonPipelineTests {
                 .ndArrayScalarOpTransform("first", MathOp.Add,1.0).build();
 
         TransformProcessPipelineStep tpStep = new TransformProcessPipelineStep()
-                .input("default", new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
-                .output("default", new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
+                .setInput("default", new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
+                .setOutput("default", new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
                 .transformProcess("default", transformProcess);
         
         TransformProcessPipelineStepRunner transformProcessPipelineStep = new TransformProcessPipelineStepRunner(tpStep);
