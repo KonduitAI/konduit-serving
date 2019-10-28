@@ -45,7 +45,8 @@ def set_input_func(self, input_name, schema=None, column_names=None, types=None)
             column_names = SchemaTypeUtils.columnNames(schema)
             types = SchemaTypeUtils.typesForSchema(schema)
         if column_names is None or types is None:
-            raise Exception("Please provide either an input schema, or column names and types")
+            raise Exception(
+                "Please provide either an input schema, or column names and types")
         names.append(input_name)
         self._set_input_names(names)
 
@@ -67,7 +68,8 @@ def set_output_func(self, output_name, schema=None, column_names=None, types=Non
             column_names = SchemaTypeUtils.columnNames(schema)
             types = SchemaTypeUtils.typesForSchema(schema)
         if column_names is None or types is None:
-            raise Exception("Please provide either an output schema, or column names and types")
+            raise Exception(
+                "Please provide either an output schema, or column names and types")
         names.append(output_name)
         self._set_output_names(names)
 
@@ -117,7 +119,8 @@ def python_step_func(self, python_config, step_name=None, input_schema=None, inp
     if step_name is None:
         step_name = "default"
     self.set_input(step_name, input_schema, input_column_names, input_types)
-    self.set_output(step_name, output_schema, output_column_names, output_types)
+    self.set_output(step_name, output_schema,
+                    output_column_names, output_types)
     self.python_config(step_name, python_config)
 
     return self

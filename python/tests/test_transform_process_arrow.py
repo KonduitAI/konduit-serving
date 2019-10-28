@@ -32,7 +32,6 @@ def test_build_tp():
         .set_output("default", None, ['first'], ['String'])\
         .transform_process("default", as_python_json)
 
-
     input_names = ['default']
     output_names = ['default']
     port = random.randint(1000, 65535)
