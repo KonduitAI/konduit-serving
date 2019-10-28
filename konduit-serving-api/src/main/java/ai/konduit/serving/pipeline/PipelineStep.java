@@ -123,7 +123,7 @@ public abstract class PipelineStep implements Serializable {
      * @return this transform process step
      * @throws Exception key error
      */
-    public PipelineStep input(String inputName, String[] columnNames, SchemaType[] types)
+    public PipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types)
             throws Exception {
 
         List<String> names = getInputNames();
@@ -134,7 +134,6 @@ public abstract class PipelineStep implements Serializable {
 
             names.add(inputName);
             this.setInputNames(names);
-
 
             setInputColumns(inputName, Arrays.asList(columnNames));
             setInputTypes(inputName, types);
@@ -154,7 +153,7 @@ public abstract class PipelineStep implements Serializable {
      * @return this transform process step
      * @throws Exception key error
      */
-    public PipelineStep input(String inputName, Schema inputSchema) throws Exception {
+    public PipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
 
         List<String> names = getInputNames();
         if (names == null) {
@@ -189,7 +188,7 @@ public abstract class PipelineStep implements Serializable {
      * @return this transform process step
      * @throws Exception key error
      */
-    public PipelineStep output(String outputName, String[] columnNames, SchemaType[] types)
+    public PipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types)
             throws Exception {
 
         List<String> names = getOutputNames();
@@ -220,7 +219,7 @@ public abstract class PipelineStep implements Serializable {
      * @return this transform process step
      * @throws Exception key error
      */
-    public PipelineStep output(String outputName, Schema outputSchema) throws Exception {
+    public PipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
 
         List<String> names = getOutputNames();
         if (names == null) {
