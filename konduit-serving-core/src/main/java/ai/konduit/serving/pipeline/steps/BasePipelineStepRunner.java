@@ -22,13 +22,15 @@
 
 package ai.konduit.serving.pipeline.steps;
 
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.PipelineStepRunner;
-import ai.konduit.serving.config.SchemaType;
 import org.datavec.api.records.Record;
+import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +46,17 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
      * no-op
      */
     public void destroy() {}
+
+    @Override
+    public NDArrayWritable[][] transform(Writable[]... input) {
+        Record[] outputRecords = transform(Arrays.stream(input)
+                .map(writables -> new org.datavec.api.records.impl.Record(Arrays.asList(writables), null))
+                .toArray(Record[]::new));
+
+        return Arrays.stream(outputRecords)
+                .map(record -> record.getRecord().stream().map(writable -> (NDArrayWritable) writable).toArray(NDArrayWritable[]::new))
+                .toArray(NDArrayWritable[][]::new);
+    }
 
     @Override
     public Record[] transform(Record[] input) {

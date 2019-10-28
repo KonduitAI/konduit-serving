@@ -1,14 +1,13 @@
 package ai.konduit.serving.basic;
 
 import ai.konduit.serving.pipeline.ImageLoading;
-import ai.konduit.serving.pipeline.PipelineStepRunner;
-import ai.konduit.serving.pipeline.steps.BasePipelineStepRunner;
-import ai.konduit.serving.pipeline.steps.ImageTransformProcessPipelineStepRunner;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Text;
+import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
 import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.linalg.io.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,17 +39,15 @@ public class BasicConfigurationImage {
                 .imageProcessingRequiredLayout("NHWC")
                 .updateOrderingBeforeTransform(false)
                 .inputName("default")
-                .dimensionsConfig("default", new Long[]{28L, 28L, 3L})
+                .dimensionsConfig("default", new Long[]{ 28L, 28L, 3L })
                 .imageTransformProcess("default", imageTransformProcess)
                 .build();
 
-        Record[] output = imageLoading.getRunner().transform(new Record[] {
-                new org.datavec.api.records.impl.Record(
-                        Collections.singletonList(new Text( new ClassPathResource("images/COCO_train2014_000000000009.jpg").getFile().getAbsolutePath())),
-                        null)
-        });
+        String imagePath =  new ClassPathResource("images/COCO_train2014_000000000009.jpg").getFile().getAbsolutePath();
 
-        System.out.println(Arrays.toString(((NDArrayWritable) output[0].getRecord().get(0)).get().shape()));
-        System.out.println(output[0].getRecord().get(0));
+        NDArrayWritable[][] output = imageLoading.getRunner().transform(new Writable[]{new Text(imagePath)});
+
+        System.out.println(Arrays.toString(output[0][0].get().shape()));
+        System.out.println(output[0][0].get());
     }
 }
