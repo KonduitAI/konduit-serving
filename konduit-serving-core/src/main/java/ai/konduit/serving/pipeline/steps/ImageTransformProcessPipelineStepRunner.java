@@ -37,12 +37,9 @@ import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRunner {
 
@@ -93,9 +90,9 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
             INDArray output;
 
            if(imageLoadingConfig.isUpdateOrderingBeforeTransform()) {
-               output = imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(permuteImage(input))));
+               output = imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(permuteImageOrder(input))));
            } else {
-               output = permuteImage(imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(input))));
+               output = permuteImageOrder(imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(input))));
            }
 
            record.add(new NDArrayWritable(output));
@@ -104,7 +101,7 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
         }
     }
 
-    private INDArray permuteImage(INDArray input) {
+    private INDArray permuteImageOrder(INDArray input) {
         if (!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
             return ImagePermuter.permuteOrder(input,
                     imageLoadingConfig.getImageProcessingInitialLayout(),

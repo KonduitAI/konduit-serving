@@ -6,6 +6,7 @@ import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Text;
 import org.datavec.image.transform.ImageTransformProcess;
+import org.nd4j.linalg.io.ClassPathResource;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,7 +38,7 @@ public class BasicConfigurationImage {
                 .imageProcessingRequiredLayout("NHWC")
                 .updateOrderingBeforeTransform(false)
                 .inputName("default")
-                //.dimensionsConfig("default", new Long[]{28L, 28L, 3L})
+                .dimensionsConfig("default", new Long[]{28L, 28L, 3L})
                 .imageTransformProcess("default", imageTransformProcess)
                 .build();
 
@@ -46,7 +47,7 @@ public class BasicConfigurationImage {
 
         Record[] output = imageTransformProcessPipelineStepRunner.transform(new Record[] {
                 new org.datavec.api.records.impl.Record(
-                        Collections.singletonList(new Text("C:\\Users\\shams\\Desktop\\Tests\\Tensorflow20\\train2014\\COCO_train2014_000000000009.jpg")),
+                        Collections.singletonList(new Text( new ClassPathResource("images/COCO_train2014_000000000009.jpg").getFile().getAbsolutePath())),
                         null)
         });
 
