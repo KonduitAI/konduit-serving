@@ -14,21 +14,17 @@ def test_multipart_encode():
     port = random.randint(1000, 65535)
     client = Client(input_names=input_names,
                     output_names=output_names,
-                    input_type='NUMPY',
-                    endpoint_output_type='NUMPY',
                     url='http://localhost:' + str(port))
 
-    input = {
+    input_data = {
         'input1': Client._convert_numpy_to_binary(np.ones(1)),
         'input2': Client._convert_numpy_to_binary(np.ones(2))
     }
 
-
-    converted = Client._convert_multi_part_inputs(input)
+    converted = Client._convert_multi_part_inputs(input_data)
     body, content_type = Client._encode_multi_part_input(converted)
-    output = client._convert_multi_part_output(
-        content=body, content_type=content_type)
-    print(output)
+
+    client._convert_multi_part_output(content=body, content_type=content_type)
 
 
 def test_python_serde():
