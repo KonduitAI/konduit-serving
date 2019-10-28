@@ -1,6 +1,8 @@
 package ai.konduit.serving.basic;
 
 import ai.konduit.serving.pipeline.ImageLoading;
+import ai.konduit.serving.pipeline.PipelineStepRunner;
+import ai.konduit.serving.pipeline.steps.BasePipelineStepRunner;
 import ai.konduit.serving.pipeline.steps.ImageTransformProcessPipelineStepRunner;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;
@@ -42,10 +44,7 @@ public class BasicConfigurationImage {
                 .imageTransformProcess("default", imageTransformProcess)
                 .build();
 
-        ImageTransformProcessPipelineStepRunner imageTransformProcessPipelineStepRunner =
-                new ImageTransformProcessPipelineStepRunner(imageLoading);
-
-        Record[] output = imageTransformProcessPipelineStepRunner.transform(new Record[] {
+        Record[] output = imageLoading.getRunner().transform(new Record[] {
                 new org.datavec.api.records.impl.Record(
                         Collections.singletonList(new Text( new ClassPathResource("images/COCO_train2014_000000000009.jpg").getFile().getAbsolutePath())),
                         null)

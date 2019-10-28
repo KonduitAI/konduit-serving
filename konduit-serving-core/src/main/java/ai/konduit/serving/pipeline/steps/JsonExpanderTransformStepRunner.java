@@ -83,7 +83,6 @@ public class JsonExpanderTransformStepRunner extends BasePipelineStepRunner {
                 }
 
                 recordList.add(new org.datavec.api.records.impl.Record(writables,null));
-
             }
 
         }

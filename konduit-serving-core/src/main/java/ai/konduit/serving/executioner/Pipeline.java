@@ -94,7 +94,6 @@ public class Pipeline {
         return inputs;
     }
 
-
     /**
      * Runs a pipeline an a set of {@link INDArray}
      * See {@link SchemaTypeUtils#toArrays(Record[])}
@@ -107,7 +106,4 @@ public class Pipeline {
     public INDArray[] doPipelineArrays(Record[] inputs) {
         return SchemaTypeUtils.toArrays(doPipeline(inputs));
     }
-
-
-
 }

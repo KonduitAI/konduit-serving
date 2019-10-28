@@ -63,15 +63,9 @@ public class BasicConfiguration {
                 .step("default", inputSchema, outputSchema, transformProcess);
 
         /*
-         * TransformProcessPipelineStepRunner is the executor for the transform process step that we defined above.
-         * We'll put inputs to its execute function and get our desired output.
-         */
-        TransformProcessPipelineStepRunner transformProcessPipelineStepRunner = new TransformProcessPipelineStepRunner(transformProcessPipelineStep);
-
-        /*
          * Now creating a test record input
          */
-        Record[] output = transformProcessPipelineStepRunner.transform(
+        Record[] output = transformProcessPipelineStep.getRunner().transform(
                 new Record[] {
                         new org.datavec.api.records.impl.Record(
                                 Arrays.asList(

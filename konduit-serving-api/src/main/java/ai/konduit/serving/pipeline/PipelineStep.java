@@ -33,6 +33,7 @@ import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.util.*;
 
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
@@ -295,6 +296,20 @@ public abstract class PipelineStep implements Serializable {
     }
 
     public abstract String pipelineStepClazz();
+
+    /**
+     * Get the respective runner for the configuration
+     * @return the respective step runner
+     */
+    public PipelineStepRunner getRunner() {
+        try {
+            Class<? extends PipelineStepRunner> clazz = (Class<? extends PipelineStepRunner>) Class.forName(this.pipelineStepClazz());
+            Constructor constructor = clazz.getConstructor(PipelineStep.class);
+            return (PipelineStepRunner) constructor.newInstance(this);
+        } catch(Exception e) {
+            throw new IllegalStateException("Unable to instantiate pipeline step from class " + this.pipelineStepClazz(), e);
+        }
+    }
 
 //    public enum StepType {
 //        PYTHON,
