@@ -1,25 +1,35 @@
 package ai.konduit.serving.orchestration;
 
 import static com.jayway.restassured.RestAssured.given;
+import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.configprovider.KonduitServingNodeConfigurer;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+import   ai.konduit.serving.config.ServingConfig;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Hazelcast;
+import java.io.File;
+import  com.jayway.restassured.response.Response;
+import java.nio.charset.Charset;
 
 public class KonduitOrchestrationMainTest {
 
-    @org.junit.Test
+    @Test
     public void testClusterRun() throws Exception {
-        com.hazelcast.core.HazelcastInstance hzInstance = com.hazelcast.core.Hazelcast.newHazelcastInstance();
+        HazelcastInstance hzInstance = Hazelcast.newHazelcastInstance();
         Thread.sleep(10000);
 
         KonduitOrchestrationMain konduitOrchestrationMain = new KonduitOrchestrationMain();
         int port = getRandomPort();
 
-        ai.konduit.serving.config.ServingConfig servingConfig = ai.konduit.serving.config.ServingConfig.builder()
+        ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .build();
-        ai.konduit.serving.InferenceConfiguration inferenceConfiguration = ai.konduit.serving.InferenceConfiguration.builder()
+        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .build();
-        java.io.File tmpFile = new java.io.File("file.json");
-        org.apache.commons.io.FileUtils.writeStringToFile(tmpFile,inferenceConfiguration.toJson(), java.nio.charset.Charset.defaultCharset());
+        File tmpFile = new File("file.json");
+        FileUtils.writeStringToFile(tmpFile,inferenceConfiguration.toJson(),Charset.defaultCharset());
         tmpFile.deleteOnExit();
         /**
          * Need to work out what a "node" is: eg, what happens when you deploy 2 instances on vertx?
@@ -28,14 +38,14 @@ public class KonduitOrchestrationMainTest {
          * What should "nodes" return?
          */
 
-        ai.konduit.serving.configprovider.KonduitServingNodeConfigurer configurer  = ai.konduit.serving.configprovider.KonduitServingNodeConfigurer.builder()
+        KonduitServingNodeConfigurer configurer  = KonduitServingNodeConfigurer.builder()
                 .configPath(tmpFile.getAbsolutePath())
                 .build();
         konduitOrchestrationMain.runMain(configurer);
 
         Thread.sleep(20000);
 
-        com.jayway.restassured.response.Response response = given().port(port)
+        Response response = given().port(port)
                 .get("/nodes")
                 .then()
                 .statusCode(200).and()
