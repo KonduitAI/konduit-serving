@@ -21,15 +21,10 @@ tp_json = tp.toJson()
 from_json = TransformProcess.fromJson(tp_json)
 json_tp = json.dumps(tp_json)
 as_python_json = json.loads(tp_json)
-transform_process = TransformProcessPipelineStep(
-    transform_processes={'default': as_python_json},
-    input_names=['default'],
-    output_names=['default'],
-    input_schemas={'default': ['String']},
-    output_schemas={'default': ['String']},
-    input_column_names={'default': ['first']},
-    output_column_names={'default': ['first']}
-)
+transform_process = TransformProcessPipelineStep() \
+    .set_input("default", None, ['first'], ['String']) \
+    .set_output("default", None, ['first'], ['String']) \
+    .transform_process("default", as_python_json)
 
 input_names = ['default']
 output_names = ['default']
