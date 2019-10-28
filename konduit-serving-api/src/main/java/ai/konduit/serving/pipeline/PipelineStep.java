@@ -135,6 +135,7 @@ public abstract class PipelineStep implements Serializable {
             names.add(inputName);
             this.setInputNames(names);
 
+
             setInputColumns(inputName, Arrays.asList(columnNames));
             setInputTypes(inputName, types);
 
@@ -198,7 +199,7 @@ public abstract class PipelineStep implements Serializable {
         if (!names.contains(outputName)) {
 
             names.add(outputName);
-            this.setInputNames(names);
+            this.setOutputNames(names);
 
             setOutputColumns(outputName, Arrays.asList(columnNames));
             setOutputTypes(outputName, types);
@@ -228,7 +229,7 @@ public abstract class PipelineStep implements Serializable {
         if (!names.contains(outputName)) {
 
             names.add(outputName);
-            this.setInputNames(names);
+            this.setOutputNames(names);
 
             List<String> columnNames = SchemaTypeUtils.columnNames(outputSchema);
             setOutputColumns(outputName, columnNames);

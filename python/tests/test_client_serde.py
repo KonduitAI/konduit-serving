@@ -23,7 +23,6 @@ def test_multipart_encode():
         'input2': Client._convert_numpy_to_binary(np.ones(2))
     }
 
-    print(input)
 
     converted = Client._convert_multi_part_inputs(input)
     body, content_type = Client._encode_multi_part_input(converted)
