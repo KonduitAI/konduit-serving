@@ -131,7 +131,7 @@ public class PythonExecutioner {
                     Py_SetPath(sb.toString());
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Failed to set python path.", e);
             }
         }
         else {
@@ -197,7 +197,8 @@ public class PythonExecutioner {
         log.info("Resetting interpreter " + interpreterName);
         String oldInterpreter = currentInterpreter;
         setInterpreter(interpreterName);
-        exec(interpreterName);
+        exec("pass");
+        //exec(interpreterName); // ??
         setInterpreter(oldInterpreter);
     }
 
@@ -263,7 +264,7 @@ public class PythonExecutioner {
         Py_EndInterpreter(interpreters.remove(interpreterName));
     }
 
-    private static synchronized void acquireGIL() {
+    public static synchronized void acquireGIL() {
         log.info("acquireGIL()");
         log.info("CPython: PyEval_SaveThread()");
         mainThreadState = PyEval_SaveThread();
@@ -276,7 +277,7 @@ public class PythonExecutioner {
 
     }
 
-    private static synchronized void releaseGIL() {
+    public static synchronized void releaseGIL() {
         log.info("CPython: PyEval_SaveThread()");
         PyEval_SaveThread();
         log.info("CPython: PyEval_RestoreThread()");
@@ -507,7 +508,7 @@ public class PythonExecutioner {
         log.info("CPython: PyRun_SimpleStringFlag()");
 
         int result = PyRun_SimpleStringFlags(code, null);
-        if (result == -1) {
+        if (result != 0) {
             log.info("CPython: PyErr_Print");
             PyErr_Print();
             throw new RuntimeException("exec failed");
@@ -552,13 +553,13 @@ public class PythonExecutioner {
         acquireGIL();
         _exec(code);
         if (_hasGlobalVariable("setup") && _hasGlobalVariable("run")){
-            log.info("setup() and run() methods found.");
+            log.debug("setup() and run() methods found.");
             if (!_hasGlobalVariable("__setup_done__")){
-                log.info("Calling setup()...");
+                log.debug("Calling setup()...");
                 _exec("setup()");
                 _exec("__setup_done__ = True");
             }
-            log.info("Calling run()...");
+            log.debug("Calling run()...");
             _exec("run()");
         }
         log.info("Exec done");
@@ -574,13 +575,13 @@ public class PythonExecutioner {
         acquireGIL();
         _exec(code);
         if (_hasGlobalVariable("setup") && _hasGlobalVariable("run")){
-            log.info("setup() and run() methods found.");
+            log.debug("setup() and run() methods found.");
             if (!_hasGlobalVariable("__setup_done__")){
-                log.info("Calling setup()...");
+                log.debug("Calling setup()...");
                 _exec("setup()");
                 _exec("__setup_done__ = True");
             }
-            log.info("Calling run()...");
+            log.debug("Calling run()...");
             _exec("__out = run();for (k,v) in __out.items(): globals()[k]=v");
         }
         log.info("Exec done");
@@ -589,7 +590,7 @@ public class PythonExecutioner {
             _readOutputs(pyOutputs);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to read outputs", e);
         }
 
         releaseGIL();
@@ -608,7 +609,7 @@ public class PythonExecutioner {
             _readOutputs(pyOutputs);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to read outputs", e);
         }
 
         releaseGIL();
@@ -638,22 +639,22 @@ public class PythonExecutioner {
         acquireGIL();
         _exec(code);
         if (_hasGlobalVariable("setup") && _hasGlobalVariable("run")){
-            log.info("setup() and run() methods found.");
+            log.debug("setup() and run() methods found.");
             if (!_hasGlobalVariable("__setup_done__")){
                 releaseGIL(); // required
                 acquireGIL();
-                log.info("Calling setup()...");
+                log.debug("Calling setup()...");
                 _exec("setup()");
                 _exec("__setup_done__ = True");
             }else{
-                log.info("setup() already called once.");
+                log.debug("setup() already called once.");
             }
-            log.info("Calling run()...");
+            log.debug("Calling run()...");
             releaseGIL(); // required
             acquireGIL();
             _exec("import inspect\n"+
-            "__out = run(**{k:globals()[k]for k in inspect.getfullargspec(run).args})\n"+
-            "globals().update(__out)");
+                    "__out = run(**{k:globals()[k]for k in inspect.getfullargspec(run).args})\n"+
+                    "globals().update(__out)");
         }
         releaseGIL();  // required
         acquireGIL();
@@ -664,7 +665,7 @@ public class PythonExecutioner {
             _readOutputs(pyOutputs);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to read outputs", e);
         }
 
         releaseGIL();
@@ -705,7 +706,7 @@ public class PythonExecutioner {
         try {
             _readOutputs(allVars);
         }catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to read outputs", e);
         }
 
         return expandInnerDict(allVars, ALL_VARIABLES_KEY);
