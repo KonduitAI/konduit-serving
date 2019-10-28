@@ -28,6 +28,7 @@ import ai.konduit.serving.pipeline.PipelineStepRunner;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,14 +49,14 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
     public void destroy() {}
 
     @Override
-    public NDArrayWritable[][] transform(Writable[]... input) {
+    public INDArray[][] transform(Writable[]... input) {
         Record[] outputRecords = transform(Arrays.stream(input)
                 .map(writables -> new org.datavec.api.records.impl.Record(Arrays.asList(writables), null))
                 .toArray(Record[]::new));
 
         return Arrays.stream(outputRecords)
-                .map(record -> record.getRecord().stream().map(writable -> (NDArrayWritable) writable).toArray(NDArrayWritable[]::new))
-                .toArray(NDArrayWritable[][]::new);
+                .map(record -> record.getRecord().stream().map(writable -> ((NDArrayWritable) writable).get()).toArray(INDArray[]::new))
+                .toArray(INDArray[][]::new);
     }
 
     @Override

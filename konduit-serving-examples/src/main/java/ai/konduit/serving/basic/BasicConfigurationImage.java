@@ -6,6 +6,7 @@ import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Text;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.linalg.io.CollectionUtils;
 
@@ -45,9 +46,9 @@ public class BasicConfigurationImage {
 
         String imagePath =  new ClassPathResource("images/COCO_train2014_000000000009.jpg").getFile().getAbsolutePath();
 
-        NDArrayWritable[][] output = imageLoading.getRunner().transform(new Writable[]{new Text(imagePath)});
+        INDArray[][] output = imageLoading.getRunner().transform(new Writable[]{new Text(imagePath)});
 
-        System.out.println(Arrays.toString(output[0][0].get().shape()));
-        System.out.println(output[0][0].get());
+        System.out.println(Arrays.toString(output[0][0].shape()));
+        System.out.println(output[0][0]);
     }
 }
