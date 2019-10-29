@@ -22,7 +22,7 @@ services:
      - java
      - -cp
      - /srv/pipelines.jar
-     - ai.konduit.serving.configprovider.KonduitServerMain
+     - ai.konduit.serving.configprovider.KonduitServingMain
      - --configPath
      - /usr/share/config.json
 

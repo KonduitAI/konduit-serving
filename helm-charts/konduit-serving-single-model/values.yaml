@@ -14,7 +14,7 @@ volumeName: config-storage
 
 pathToMountTo: /usr/share
 
-mainClass: ai.konduit.serving.configprovider.KonduitServerMain
+mainClass: ai.konduit.serving.configprovider.KonduitServingMain
 
 image:
   repository: konduit/konduit-serving
