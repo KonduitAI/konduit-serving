@@ -3,17 +3,20 @@ from setuptools import find_packages
 
 setup(
     name='konduit',
-    version='0.1',
+    version='0.1.3',
     packages=find_packages(),
     install_requires=[
         'requests>=2.22.0',
         'numpy<=1.16.4',  # For compatibility with python 2
         'pyarrow==0.13.0',
         'requests-toolbelt>=0.9.1',
-        'pandas<=0.24.2'  # For compatibility with python 2
+        'pandas<=0.24.2',  # For compatibility with python 2
+        'Cython',
+        'pydl4j',
+        'pydatavec'
     ],
     extras_require={
-        'tests': ['Cython', 'pyjnius', 'pytest', 'pytest-pep8', 'pytest-cov', 'mock', 'pydatavec'],
+        'tests': ['pytest', 'pytest-pep8', 'pytest-cov', 'mock'],
         'codegen': ['jsonschema2popo']
     },
     include_package_data=True,
@@ -22,7 +25,7 @@ setup(
     long_description='konduit: Enterprise Runtime for Machine Learning Models',
     author='Max Pumperla',
     author_email='max@skymind.global',
-    url='https://github.com/KonduitAI/konduit',
+    url='https://github.com/KonduitAI/konduit-serving',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',

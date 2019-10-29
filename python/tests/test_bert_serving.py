@@ -1,10 +1,3 @@
-from jnius_config import set_classpath
-try:
-    set_classpath('konduit.jar')
-except:
-    print("VM already running from previous test")
-
-
 from konduit import ParallelInferenceConfig, ServingConfig, TensorFlowConfig, ModelConfigType
 from konduit import TensorDataTypesConfig, ModelPipelineStep, InferenceConfiguration
 from konduit.server import Server
@@ -15,22 +8,22 @@ import numpy as np
 import time
 import random
 
+
 def test_server_start():
 
-    input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
+    input_names = ["IteratorGetNext:0",
+                   "IteratorGetNext:1", "IteratorGetNext:4"]
     output_names = ["loss/Softmax"]
-    port = random.randint(1000,65535)
+    port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=port,
                                    input_data_type='NUMPY',
                                    output_data_type='NUMPY',
-                                   log_timings=True,
-                                   parallel_inference_config=parallel_inference_config)
+                                   log_timings=True)
 
     tensorflow_config = TensorFlowConfig(
-        model_config_type=
-        ModelConfigType(model_type='TENSORFLOW',
-                        model_loading_path='bert_mrpc_frozen.pb'),
+        model_config_type=ModelConfigType(model_type='TENSORFLOW',
+                                          model_loading_path='bert_mrpc_frozen.pb'),
         tensor_data_types_config=TensorDataTypesConfig(
             input_data_types={'IteratorGetNext:0': 'INT32',
                               'IteratorGetNext:1': 'INT32',
@@ -38,7 +31,7 @@ def test_server_start():
                               }))
 
     model_pipeline_step = ModelPipelineStep(model_config=tensorflow_config,
-                                            serving_config=serving_config,
+                                            parallel_inference_config=parallel_inference_config,
                                             input_names=input_names,
                                             output_names=output_names)
 
@@ -61,8 +54,9 @@ def test_server_start():
         'IteratorGetNext:4': np.load('../data/input-4.npy')
     }
 
-    print('Process started. Sleeping 30 seconds.')
-    time.sleep(30)
+    sleep_time = 100
+    print('Process started. Sleeping ' + str(sleep_time) + ' seconds.')
+    time.sleep(sleep_time)
     assert is_port_in_use(port)
 
     try:
@@ -72,4 +66,3 @@ def test_server_start():
     except Exception as e:
         print(e)
         server.stop()
-

@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.executioner.inference.factory;
 
+import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.executioner.inference.MultiComputationGraphInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.model.ModelConfig;
@@ -40,11 +41,11 @@ public class ComputationGraphInferenceExecutionerFactory implements InferenceExe
     @Override
     public InitializedInferenceExecutionerConfig create(ModelPipelineStep modelPipelineStepConfig) throws Exception {
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
-        ServingConfig servingConfig = modelPipelineStepConfig.getServingConfig();
+        ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 
         ComputationGraphModelLoader computationGraphModelLoader = new ComputationGraphModelLoader(new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath()));
         MultiComputationGraphInferenceExecutioner inferenceExecutioner = new MultiComputationGraphInferenceExecutioner();
-        inferenceExecutioner.initialize(computationGraphModelLoader, servingConfig.getParallelInferenceConfig());
+        inferenceExecutioner.initialize(computationGraphModelLoader, parallelInferenceConfig);
 
         ComputationGraph computationGraph2 = computationGraphModelLoader.loadModel();
         List<String> inputNames = computationGraph2.getConfiguration().getNetworkInputs();

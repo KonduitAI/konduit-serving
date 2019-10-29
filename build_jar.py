@@ -24,6 +24,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Build a Konduit JAR.')
 
     parser.add_argument('--os', type=str,
+                        required = True, 
+                        choices = ['windows-x86_64', 'linux-x86_64', 'linux-x86_64-gpu', 
+                                   'macosx-x86_64', 'linux-armhf', 'windows-x86_64-gpu'],
                         help='the javacpp.platform to use: windows-x86_64,linux-x86_64,linux-x86_64-gpu'
                             ' macosx-x86_64,linux-armhf,windows-x86_64-gpu ')
 

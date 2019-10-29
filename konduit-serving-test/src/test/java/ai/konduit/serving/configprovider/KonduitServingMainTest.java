@@ -104,7 +104,6 @@ public class KonduitServingMainTest {
                 ).build();
 
         ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
-                .servingConfig(servingConfig)
                 .inputName("default")
                 .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
                 .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))

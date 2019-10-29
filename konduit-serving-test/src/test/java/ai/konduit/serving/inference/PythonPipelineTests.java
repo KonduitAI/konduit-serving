@@ -57,9 +57,7 @@ public class PythonPipelineTests {
         Schema schema = new Schema.Builder()
                 .addColumnNDArray("first",new long[]{1,1})
                 .build();
-        
-        
-        
+
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCode("first += 2")
                 .pythonInput("first", PythonVariables.Type.NDARRAY.name())
@@ -67,31 +65,20 @@ public class PythonPipelineTests {
                 .returnAllInputs(false)
                 .build();
         
-        PythonPipelineStep config = PythonPipelineStep.builder()
-                .inputName("default")
-                .inputColumnName("default", Arrays.asList(new String[]{"first"}))
-                .inputSchema("default", new SchemaType[]{SchemaType.NDArray})
-                .pythonConfig("default",pythonConfig)
-                .build();
-        
+        PythonPipelineStep config = new PythonPipelineStep(
+                pythonConfig, new String[] {"first"}, new SchemaType[]{SchemaType.NDArray});
         PythonPipelineStepRunner pythonPipelineStep = new PythonPipelineStepRunner(config);
         
         
         TransformProcess transformProcess = new TransformProcess.Builder(schema)
-                .ndArrayScalarOpTransform("first", MathOp.Add,1.0)
-                .build();
+                .ndArrayScalarOpTransform("first", MathOp.Add,1.0).build();
+
+        TransformProcessPipelineStep tpStep = new TransformProcessPipelineStep()
+                .setInput("default", new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
+                .setOutput("default", new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
+                .transformProcess("default", transformProcess);
         
-        
-        TransformProcessPipelineStep transformProcessPipelineStepConfig =
-                TransformProcessPipelineStep.builder()
-                        .inputName("default")
-                        .inputColumnName("default",Arrays.asList(new String[]{"first"}))
-                        .inputSchema("default", new SchemaType[]{SchemaType.NDArray})
-                        .outputSchema("default",new SchemaType[]{SchemaType.NDArray})
-                        .transformProcess("default", transformProcess)
-                        .build();
-        
-        TransformProcessPipelineStepRunner transformProcessPipelineStep = new TransformProcessPipelineStepRunner(transformProcessPipelineStepConfig);
+        TransformProcessPipelineStepRunner transformProcessPipelineStep = new TransformProcessPipelineStepRunner(tpStep);
         
         
         List<Writable> record = new ArrayList<>();
@@ -106,7 +93,7 @@ public class PythonPipelineTests {
         assertEquals(1,indArrays.length);
         assertEquals(Nd4j.scalar(4.0),indArrays[0]);
         
-        Pipeline pipeline1 = Pipeline.getPipeline(Arrays.asList(config, transformProcessPipelineStepConfig));
+        Pipeline pipeline1 = Pipeline.getPipeline(Arrays.asList(config, tpStep));
         INDArray[] indArrays2 = pipeline1.doPipelineArrays(new Record[]{record1});
         assertEquals(1,indArrays2.length);
         assertEquals(Nd4j.scalar(4.0),indArrays2[0]);

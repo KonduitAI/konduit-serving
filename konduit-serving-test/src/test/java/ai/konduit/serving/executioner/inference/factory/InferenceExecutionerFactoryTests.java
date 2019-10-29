@@ -54,14 +54,9 @@ public class InferenceExecutionerFactoryTests {
                         .inputDataType("default", TensorDataType.INT32).build())
                 .configProtoPath(classPathResource.getFile().getAbsolutePath()).build();
         
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(1139)
-                .build();
-        
         ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
                 .inputName("default")
                 .outputName("output")
-                .servingConfig(servingConfig)
                 .modelConfig(tensorFlowConfig)
                 .build();
         
@@ -105,7 +100,6 @@ public class InferenceExecutionerFactoryTests {
         ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
                 .inputName("default")
                 .outputName("output")
-                .servingConfig(servingConfig)
                 .modelConfig(modelConfig)
                 .build();
 
@@ -137,7 +131,6 @@ public class InferenceExecutionerFactoryTests {
         ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
                 .inputName("default")
                 .outputName("output")
-                .servingConfig(servingConfig)
                 .modelConfig(tensorFlowConfig)
                 .build();
 
@@ -170,7 +163,6 @@ public class InferenceExecutionerFactoryTests {
         ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
                 .inputName("default")
                 .outputName("output")
-                .servingConfig(servingConfig)
                 .modelConfig(modelConfig)
                 .build();
 
@@ -201,7 +193,6 @@ public class InferenceExecutionerFactoryTests {
         ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
                 .inputName("default")
                 .outputName("output")
-                .servingConfig(servingConfig)
                 .modelConfig(modelConfig)
                 .build();
 

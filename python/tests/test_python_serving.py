@@ -1,9 +1,3 @@
-from jnius_config import set_classpath
-try:
-    set_classpath('konduit.jar')
-except:
-    print("VM already running from previous test")
-
 from konduit import *
 from konduit.server import Server
 from konduit.client import Client
@@ -18,31 +12,26 @@ def test_server_start():
     input_names = ['default']
     output_names = ['default']
     port = random.randint(1000, 65535)
-    parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=port,
                                    input_data_type='NUMPY',
                                    output_data_type='NUMPY',
-                                   log_timings=True,
-                                   parallel_inference_config=parallel_inference_config)
+                                   log_timings=True)
 
     python_config = PythonConfig(
-        python_code='first += 2'
-        , python_inputs={'first': 'NDARRAY'},
+        python_code='first += 2',
+        python_inputs={'first': 'NDARRAY'},
         python_outputs={'first': 'NDARRAY'},
     )
 
-    python_pipeline_step = PythonPipelineStep(input_names=input_names,
-                                              output_names=output_names,
-                                              input_schemas=({'default': ['NDArray']}),
-                                              output_schemas=({'default': ['NDArray']}),
-                                              input_column_names={'default': ['first']},
-                                              output_column_names={'default': ['first']},
-                                              python_configs={'default': python_config})
+    python_pipeline_step = PythonPipelineStep().step(
+        python_config=python_config, step_name="default", input_types=['NDArray'],
+        output_types=['NDArray'], input_column_names=['first'], output_column_names=['first']
+    )
 
-    inference = InferenceConfiguration(serving_config=serving_config,
-                                       pipeline_steps=[python_pipeline_step])
+    inference_config = InferenceConfiguration(serving_config=serving_config,
+                                              pipeline_steps=[python_pipeline_step])
 
-    server = Server(config=inference,
+    server = Server(config=inference_config,
                     extra_start_args='-Xmx8g',
                     jar_path='konduit.jar')
     server.start()
@@ -57,7 +46,7 @@ def test_server_start():
         'default': np.load('../data/input-0.npy'),
     }
 
-    time.sleep(4)
+    time.sleep(10)
     assert is_port_in_use(port)
 
     try:

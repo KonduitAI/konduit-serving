@@ -10,7 +10,7 @@ RUN apt-get update && apt-get -y dist-upgrade \
 ARG NB_USER="jovyan"
 USER $NB_USER
 
-RUN git clone https://github.com/KonduitAI/konduit  && \
+RUN git clone https://github.com/KonduitAI/konduit-serving  && \
      cd konduit && \
      python build_jar.py
 

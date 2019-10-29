@@ -49,8 +49,8 @@ public class TensorflowInferenceExecutionerFactory implements InferenceExecution
         log.debug("Loading model loader from configuration " + tensorFlowConfig);
         TensorflowModelLoader tensorflowModelLoader = TensorflowModelLoader.createFromConfig(modelPipelineStepConfig);
         TensorflowInferenceExecutioner inferenceExecutioner = new TensorflowInferenceExecutioner();
-        Preconditions.checkNotNull(modelPipelineStepConfig.getServingConfig(),"No serving config found on model pipeline step!");
-        inferenceExecutioner.initialize(tensorflowModelLoader, modelPipelineStepConfig.getServingConfig().getParallelInferenceConfig());
+        Preconditions.checkNotNull(modelPipelineStepConfig.getParallelInferenceConfig(),"No parallel inference config found on model pipeline step!");
+        inferenceExecutioner.initialize(tensorflowModelLoader, modelPipelineStepConfig.getParallelInferenceConfig());
 
         /**
          * Automatically infer from model

@@ -103,7 +103,6 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
                 .httpPort(port)
                 .inputDataType(Input.DataType.NUMPY)
                 .predictionType(Output.PredictionType.CLASSIFICATION)
-                .parallelInferenceConfig(parallelInferenceConfig)
                 .build();
 
 

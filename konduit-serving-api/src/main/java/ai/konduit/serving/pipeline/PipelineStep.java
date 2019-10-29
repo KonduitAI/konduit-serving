@@ -33,21 +33,19 @@ import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-/**
- * PipelineStep collects all ETL related properties (input schema,
+/** PipelineStep collects all ETL related properties (input schema,
  * normalization and transform steps, output schema, potential pre-
  * or post-processing etc.). This config is passed to the respective
  * verticle along with Model and Serving configurations.
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @SuperBuilder
 @JsonSubTypes({
         @JsonSubTypes.Type(value= ImageLoading.class, name = "ImageLoading"),
@@ -70,28 +68,183 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 public abstract class PipelineStep implements Serializable {
 
     @Singular
-    private Map<String, SchemaType[]> inputSchemas;
-    @Singular
-    private Map<String,SchemaType[]> outputSchemas;
+    private Map<String, SchemaType[]> inputSchemas, outputSchemas;
 
     @Singular
-    private List<String> inputNames;
-    @Singular
-    private List<String> outputNames;
+    private List<String> inputNames, outputNames;
 
-    //only process these names
-    @Singular
-    private List<String> affectedInputNames,affectedOutputNames;
     @Singular
     private Map<String,List<String>> inputColumnNames,outputColumnNames;
 
-    public List<String> getTargetInputStepInputNames() {
-        return affectedInputNames != null ? affectedInputNames : inputNames;
+
+    private void setInputColumns(String inputName, List<String> columnNames) {
+        Map<String, List<String>> inputCols = this.getInputColumnNames();
+        if (inputCols == null) {
+            inputCols = new HashMap<>();
+        }
+        inputCols.put(inputName, columnNames);
+        this.setInputColumnNames(inputCols);
+    }
+
+    private void setOutputColumns(String outputName, List<String> columnNames) {
+        Map<String, List<String>> outputCols = this.getOutputColumnNames();
+        if (outputCols == null) {
+            outputCols = new HashMap<>();
+        }
+        outputCols.put(outputName, columnNames);
+        this.setOutputColumnNames(outputCols);
+    }
+
+    private void setInputTypes(String inputName, SchemaType[] types) {
+        Map<String, SchemaType[]> schemas = this.getInputSchemas();
+        if (schemas == null) {
+            schemas = new HashMap<>();
+        }
+        schemas.put(inputName, types);
+        this.setInputSchemas(schemas);
+    }
+
+    private void setOutputTypes(String outputName, SchemaType[] types) {
+        Map<String, SchemaType[]> schemas = this.getOutputSchemas();
+        if (schemas == null) {
+            schemas = new HashMap<>();
+        }
+        schemas.put(outputName, types);
+        this.setOutputSchemas(schemas);
+    }
+
+    /**
+     * Define a single input for a TransformProcess Step from explicit
+     * column names and types for this input.
+     *
+     * @param inputName input name
+     * @param columnNames column names
+     * @param types schema types
+     * @return this transform process step
+     * @throws Exception key error
+     */
+    public PipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types)
+            throws Exception {
+
+        List<String> names = getInputNames();
+        if (names == null) {
+            names = new ArrayList<>();
+        }
+        if (!names.contains(inputName)) {
+
+            names.add(inputName);
+            this.setInputNames(names);
+
+            setInputColumns(inputName, Arrays.asList(columnNames));
+            setInputTypes(inputName, types);
+
+            return this;
+        } else {
+            throw new Exception("Input name " + inputName + "is already configured for this PipelineStep," +
+                    " choose another naming convention for your next step.");
+        }
+    }
+
+    /**
+     * Define a single input for a TransformProcess Step from a schema.
+     *
+     * @param inputName input name
+     * @param inputSchema input schema
+     * @return this transform process step
+     * @throws Exception key error
+     */
+    public PipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
+
+        List<String> names = getInputNames();
+        if (names == null) {
+            names = new ArrayList<>();
+        }
+        if (!names.contains(inputName)) {
+
+            names.add(inputName);
+            this.setInputNames(names);
+
+            List<String> columnNames = SchemaTypeUtils.columnNames(inputSchema);
+            setInputColumns(inputName, columnNames);
+
+            SchemaType[] types = SchemaTypeUtils.typesForSchema(inputSchema);
+            setInputTypes(inputName, types);
+
+            return this;
+        } else {
+            throw new Exception("Input name " + inputName + "is already configured for this PipelineStep," +
+                    " choose another naming convention for your next step.");
+        }
     }
 
 
+    /**
+     * Define a single output for a TransformProcess Step from explicit
+     * column names and types for this output.
+     *
+     * @param outputName output name
+     * @param columnNames column names
+     * @param types schema types
+     * @return this transform process step
+     * @throws Exception key error
+     */
+    public PipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types)
+            throws Exception {
+
+        List<String> names = getOutputNames();
+        if (names == null) {
+            names = new ArrayList<>();
+        }
+        if (!names.contains(outputName)) {
+
+            names.add(outputName);
+            this.setOutputNames(names);
+
+            setOutputColumns(outputName, Arrays.asList(columnNames));
+            setOutputTypes(outputName, types);
+
+            return this;
+        } else {
+            throw new Exception("Output name " + outputName + "is already configured for this PipelineStep," +
+                    " choose another naming convention for your next step.");
+        }
+    }
+
+
+    /**
+     * Define a single output for a TransformProcess Step.
+     *
+     * @param outputName output name
+     * @param outputSchema output schema
+     * @return this transform process step
+     * @throws Exception key error
+     */
+    public PipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
+
+        List<String> names = getOutputNames();
+        if (names == null) {
+            names = new ArrayList<>();
+        }
+        if (!names.contains(outputName)) {
+
+            names.add(outputName);
+            this.setOutputNames(names);
+
+            List<String> columnNames = SchemaTypeUtils.columnNames(outputSchema);
+            setOutputColumns(outputName, columnNames);
+
+            SchemaType[] types = SchemaTypeUtils.typesForSchema(outputSchema);
+            setOutputTypes(outputName, types);
+
+            return this;
+        } else {
+            throw new Exception("Output name " + outputName + "is already configured for this PipelineStep," +
+                    " choose another naming convention for your next step.");
+        }
+    }
+
     public Schema outputSchemaForName(String name) {
-        Preconditions.checkNotNull(outputSchemas,"No input schemas specified in configuration!");
+        Preconditions.checkNotNull(outputSchemas,"No output schemas specified in configuration!");
 
         if(!outputSchemas.containsKey(name))
             return null;
@@ -138,14 +291,6 @@ public abstract class PipelineStep implements Serializable {
         return inputColumnNames.get(name).contains(columnNameAtIndex);
     }
 
-    public int indexOfInputInputName(String inputName) {
-        return inputNames.indexOf(inputName);
-    }
-
-    public List<String> getTargetInputStepOutputNames() {
-        return affectedOutputNames != null ? affectedOutputNames : outputNames;
-    }
-
     public boolean inputNameIsValidForStep(String name) {
         int idx = inputNames.indexOf(name);
         return idx >= 0;
@@ -158,14 +303,14 @@ public abstract class PipelineStep implements Serializable {
     public abstract String pipelineStepClazz();
 
 
-    public enum StepType {
-        PYTHON,
-        MODEL,
-        TRANSFORM,
-        NORMALIZATION,
-        IMAGE_LOADING,
-        OBJECT_DETECTION
-    }
+//    public enum StepType {
+//        PYTHON,
+//        MODEL,
+//        TRANSFORM,
+//        NORMALIZATION,
+//        IMAGE_LOADING,
+//        OBJECT_DETECTION
+//    }
 
 
 
