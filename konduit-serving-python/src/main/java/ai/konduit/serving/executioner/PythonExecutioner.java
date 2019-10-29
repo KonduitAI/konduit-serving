@@ -264,7 +264,7 @@ public class PythonExecutioner {
         Py_EndInterpreter(interpreters.remove(interpreterName));
     }
 
-    public static synchronized void acquireGIL() {
+    private static synchronized void acquireGIL() {
         log.info("acquireGIL()");
         log.info("CPython: PyEval_SaveThread()");
         mainThreadState = PyEval_SaveThread();
@@ -277,7 +277,7 @@ public class PythonExecutioner {
 
     }
 
-    public static synchronized void releaseGIL() {
+    private static synchronized void releaseGIL() {
         log.info("CPython: PyEval_SaveThread()");
         PyEval_SaveThread();
         log.info("CPython: PyEval_RestoreThread()");
