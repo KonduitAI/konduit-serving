@@ -1,7 +1,6 @@
 /*
  *
  *  * ******************************************************************************
- *  *  * Copyright (c) 2015-2019 Skymind Inc.
  *  *  * Copyright (c) 2019 Konduit AI.
  *  *  *
  *  *  * This program and the accompanying materials are made available under the
@@ -20,42 +19,37 @@
  *
  */
 
-package ai.konduit.serving.verticles.inference;
+package ai.konduit.serving.orchestration;
 
-
-import ai.konduit.serving.executioner.PipelineExecutioner;
-import ai.konduit.serving.verticles.VerticleConstants;
-import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import lombok.extern.slf4j.Slf4j;
 import ai.konduit.serving.InferenceConfiguration;
-import  ai.konduit.serving.configprovider.PipelineRouteDefiner;
+import ai.konduit.serving.configprovider.PipelineRouteDefiner;
+import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
+import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.Vertx;
+import io.vertx.core.Context;
+import io.vertx.core.impl.VertxImpl;
+import io.vertx.core.spi.cluster.ClusterManager;
 
-import java.io.IOException;
+import org.nd4j.base.Preconditions;
+import java.util.List;
 
 /**
- * A {@link io.vertx.core.Verticle} that takes multi part file uploads
- * as inputs.
- *
- * Many computation graphs are usually multiple inputs
- * by name: Each part for a multi part file upload
- * should map on to a name. For example:
- * input_1 : part name: input_1
- * input_2 : part name: input_2
- *
- * The handler logic for this verticle is implemented
- * in {@link PipelineExecutioner}
- *
+ * Multi node version of {@link ai.konduit.serving.verticles.inference.InferenceVerticle}.
+ * Uses {@link ai.konduit.serving.configprovider.KonduitServingNodeConfigurer}
+ * to handle logic of loading a pipeline from a {@link InferenceConfiguration}
+ * and adds additional capabilities on top such as a {@link io.vertx.core.spi.cluster.ClusterManager}
+ * awareness allowing for HA, load balancing, and other capabilities
  *
  * @author Adam Gibson
  */
-@Slf4j
-public class InferenceVerticle extends BaseRoutableVerticle {
+@lombok.extern.slf4j.Slf4j
+public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
 
 
     private InferenceConfiguration inferenceConfiguration;
+    private ClusterManager clusterManager;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -80,7 +74,23 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         this.vertx = vertx;
         try {
             inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
+            //inference endpoints (pipeline execution, loading,..)
             this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+            //get the cluster manager to get node information
+            VertxImpl impl = (VertxImpl) vertx;
+            clusterManager = impl.getClusterManager();
+            this.router.get("/numnodes").handler(ctx -> {
+                List<String> nodes = clusterManager.getNodes();
+                ctx.response().putHeader("Content-Type","application/json");
+                ctx.response().end(new JsonObject().put("numnodes",nodes.size()).toBuffer());
+            });
+
+            this.router.get("/nodes").handler(ctx -> {
+                List<String> nodes = clusterManager.getNodes();
+                ctx.response().putHeader("Content-Type","application/json");
+                ctx.response().end(new JsonObject().put("nodes",new JsonArray(nodes)).toBuffer());
+            });
+
             setupWebServer();
         } catch (java.io.IOException e) {
             log.error("Unable to parse InferenceConfiguration",e);
@@ -89,9 +99,10 @@ public class InferenceVerticle extends BaseRoutableVerticle {
 
 
     protected void setupWebServer() {
+       Preconditions.checkNotNull(inferenceConfiguration,"Inference configuration undefined!");
         int portValue = inferenceConfiguration.getServingConfig().getHttpPort();
         if(portValue == 0) {
-            String portEnvValue = System.getenv(VerticleConstants.PORT_FROM_ENV);
+            String portEnvValue = System.getenv(ai.konduit.serving.verticles.VerticleConstants.PORT_FROM_ENV);
             if(portEnvValue != null) {
                 portValue = Integer.parseInt(portEnvValue);
             }

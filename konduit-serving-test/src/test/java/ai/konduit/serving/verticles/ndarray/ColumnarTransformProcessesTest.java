@@ -67,6 +67,7 @@ import static com.jayway.restassured.RestAssured.given;
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
+
     private Schema inputSchema,outputSchema;
 
     @Before
