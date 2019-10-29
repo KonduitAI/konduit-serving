@@ -31,7 +31,7 @@ item {
 item {
   name: "/m/07jdr"
   id: 7
-  display_name: "train"
+  display_name: "ai.konduit.serving.train.train"
 }
 item {
   name: "/m/07r04"

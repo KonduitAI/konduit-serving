@@ -192,7 +192,7 @@ public class TrainUtils {
         if (!new java.io.File(basePath + "/mnist_png").exists())
            DataUtilities.extractTarGz(localFilePath, basePath);
 
-        // vectorization of train data
+        // vectorization of ai.konduit.serving.train.train data
         java.io.File trainData = new java.io.File(basePath + "/mnist_png/training");
         org.datavec.api.split.FileSplit trainSplit = new org.datavec.api.split.FileSplit(trainData, org.datavec.image.loader.NativeImageLoader.ALLOWED_FORMATS, randNumGen);
         org.datavec.api.io.labels.ParentPathLabelGenerator labelMaker = new org.datavec.api.io.labels.ParentPathLabelGenerator(); // parent path as the image label
