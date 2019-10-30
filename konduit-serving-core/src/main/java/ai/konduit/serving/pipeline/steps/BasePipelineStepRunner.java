@@ -55,7 +55,9 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
                 .toArray(Record[]::new));
 
         return Arrays.stream(outputRecords)
-                .map(record -> record.getRecord().stream().map(writable -> ((NDArrayWritable) writable).get()).toArray(INDArray[]::new))
+                .map(record -> record.getRecord().stream()
+                        .map(writable -> ((NDArrayWritable) writable).get())
+                        .toArray(INDArray[]::new))
                 .toArray(INDArray[][]::new);
     }
 

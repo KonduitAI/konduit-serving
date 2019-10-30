@@ -35,6 +35,7 @@ public class BasicConfiguration {
         Schema inputSchema = new Schema.Builder()
                 .addColumnNDArray("x1", new long[]{10, 10}) // x1: 10x10 array
                 .addColumnNDArray("x2", new long[]{5, 5}) // x2: 5x5 array
+                .addColumnNDArray("x3", new long[]{2, 2})
                 .build();
 
         /*
@@ -44,6 +45,7 @@ public class BasicConfiguration {
         Schema outputSchema = new Schema.Builder()
                 .addColumnNDArray("y1", new long[]{10, 10}) // y1: 10x10 array
                 .addColumnNDArray("y2", new long[]{5, 5}) // y2: 5x5 array
+                .addColumnNDArray("y3", new long[]{2, 2}) // y3: 2x2 array
                 .build();
 
         /*
@@ -55,6 +57,7 @@ public class BasicConfiguration {
                 .ndArrayMathFunctionTransform("x2", MathFunction.SIN) // Applies sin() function to each element
                 .ndArrayMathFunctionTransform("x2", MathFunction.FLOOR) // Floors each element
                 .ndArrayScalarOpTransform("x2", MathOp.Add, 2) // Adds 2 to each element
+                .ndArrayScalarOpTransform("x3", MathOp.Add, 2)
                 .build();
 
         /*
@@ -68,11 +71,12 @@ public class BasicConfiguration {
          */
         INDArray[][] output = transformProcessPipelineStep.getRunner().transform(
                new Writable[] {
-                   new NDArrayWritable(Nd4j.rand(10, 10).muli(100)),
-                   new NDArrayWritable(Nd4j.rand(5, 5).muli(100))
+                       new NDArrayWritable(Nd4j.rand(10, 10).muli(100)),
+                       new NDArrayWritable(Nd4j.rand(5, 5).muli(100)),
+                       new NDArrayWritable(Nd4j.ones(2,2))
                }
         );
 
-        System.out.println(String.format("%s\n%s", output[0][0], output[0][1]));
+        System.out.println(String.format("%s\n%s\n%s", output[0][0], output[0][1], output[0][2]));
     }
 }

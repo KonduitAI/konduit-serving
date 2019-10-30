@@ -90,9 +90,9 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
             INDArray output;
 
            if(imageLoadingConfig.isUpdateOrderingBeforeTransform()) {
-               output = imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(permuteImageOrder(input))));
+               output = applyTransform(imageTransformProcess, nativeImageLoader, permuteImageOrder(input));
            } else {
-               output = permuteImageOrder(imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(input))));
+               output = permuteImageOrder(applyTransform(imageTransformProcess, nativeImageLoader, input));
            }
 
            record.add(new NDArrayWritable(output));
@@ -106,6 +106,14 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
             return ImagePermuter.permuteOrder(input,
                     imageLoadingConfig.getImageProcessingInitialLayout(),
                     imageLoadingConfig.getImageProcessingRequiredLayout());
+        } else {
+            return input;
+        }
+    }
+
+    private INDArray applyTransform(ImageTransformProcess imageTransformProcess, NativeImageLoader nativeImageLoader, INDArray input) throws IOException {
+        if (imageTransformProcess != null) {
+            return imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(input)));
         } else {
             return input;
         }

@@ -30,23 +30,24 @@ public class BasicConfigurationImage {
          */
 
         ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
-                .scaleImageTransform(14.0f)
+                .scaleImageTransform(20.0f)
                 //.resizeImageTransform(28,28)
                 .build();
 
-
         ImageLoading imageLoading = ImageLoading.builder()
                 .imageProcessingInitialLayout("NCHW")
-                .imageProcessingRequiredLayout("NHWC")
-                .updateOrderingBeforeTransform(false)
+                .imageProcessingRequiredLayout("NWHC")
                 .inputName("default")
-                .dimensionsConfig("default", new Long[]{ 28L, 28L, 3L })
+                .dimensionsConfig("default", new Long[]{ 240L, 320L, 3L }) // Height, width, channels
                 .imageTransformProcess("default", imageTransformProcess)
                 .build();
 
         String imagePath =  new ClassPathResource("images/COCO_train2014_000000000009.jpg").getFile().getAbsolutePath();
 
-        INDArray[][] output = imageLoading.getRunner().transform(new Writable[]{new Text(imagePath)});
+        INDArray[][] output = imageLoading.getRunner().transform(
+                new Writable[]{
+                        new Text(imagePath)
+                });
 
         System.out.println(Arrays.toString(output[0][0].shape()));
         System.out.println(output[0][0]);
