@@ -72,7 +72,7 @@ public interface PipelineStepRunner {
      * @param input the input array
      * @return the output from the transform
      */
-    Writable[][] transform(Object[]... input);
+    Writable[][] transform(Object[][] input);
 
     /**
      * Transform a set of {@link INDArray}

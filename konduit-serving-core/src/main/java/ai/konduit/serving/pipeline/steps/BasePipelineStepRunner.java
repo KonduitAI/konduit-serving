@@ -51,11 +51,16 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
 
     @Override
     public Writable[][] transform(Object... input) {
-        return transform(new Object[][]{input});
+        if(input[0] instanceof Object[]) {
+            Object[][] objects = Arrays.stream(input).map(innerInputs -> Arrays.stream((Object []) innerInputs).toArray(Object[]::new)).toArray(Object[][]::new);
+            return transform(objects);
+        } else {
+            return transform(new Object[][]{input});
+        }
     }
 
     @Override
-    public Writable[][] transform(Object[]... input){
+    public Writable[][] transform(Object[][] input){
         Record[] outputRecords = transform(Arrays.stream(input)
                 .map(writables -> new org.datavec.api.records.impl.Record(
                         Arrays.stream(writables).map(this::getWritableFromObject).collect(Collectors.toList()), null))
