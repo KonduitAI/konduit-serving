@@ -67,19 +67,6 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
     }
 
     @Override
-    public INDArray[][] transform(Writable[]... input) {
-        Record[] outputRecords = transform(Arrays.stream(input)
-                .map(writables -> new org.datavec.api.records.impl.Record(Arrays.asList(writables), null))
-                .toArray(Record[]::new));
-
-        return Arrays.stream(outputRecords)
-                .map(record -> record.getRecord().stream()
-                        .map(writable -> ((NDArrayWritable) writable).get())
-                        .toArray(INDArray[]::new))
-                .toArray(INDArray[][]::new);
-    }
-
-    @Override
     public Record[] transform(Record[] input) {
         int batchSize = input.length;
         Record[] ret = new Record[input.length];

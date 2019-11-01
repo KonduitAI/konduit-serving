@@ -5,9 +5,7 @@ import org.datavec.api.transform.MathFunction;
 import org.datavec.api.transform.MathOp;
 import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
-import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 public class BasicConfiguration {
@@ -66,12 +64,10 @@ public class BasicConfiguration {
         /*
          * Now creating a test record input
          */
-        INDArray[][] output = transformProcessPipelineStep.getRunner().transform(
-               new Writable[] {
-                       new NDArrayWritable(Nd4j.rand(10, 10).muli(100)),
-                       new NDArrayWritable(Nd4j.rand(5, 5).muli(100)),
-                       new NDArrayWritable(Nd4j.ones(2,2))
-               }
+        Writable[][] output = transformProcessPipelineStep.getRunner().transform(
+               Nd4j.rand(10, 10).muli(100),
+               Nd4j.rand(5, 5).muli(100),
+               Nd4j.ones(2,2)
         );
 
         System.out.println(String.format("%s\n%s\n%s", output[0][0], output[0][1], output[0][2]));

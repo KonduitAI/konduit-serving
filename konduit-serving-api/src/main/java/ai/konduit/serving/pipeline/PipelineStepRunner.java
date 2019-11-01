@@ -80,13 +80,5 @@ public interface PipelineStepRunner {
      * @param input the input array
      * @return the output from the transform
      */
-    INDArray[][] transform(Writable[]... input);
-
-    /**
-     * Transform a set of {@link INDArray}
-     * via this operation.
-     * @param input the input array
-     * @return the output from the transform
-     */
     Record[] transform(Record[] input);
 }

@@ -1,7 +1,7 @@
 package ai.konduit.serving.basic;
 
 import ai.konduit.serving.pipeline.ImageLoading;
-import org.datavec.api.writable.Text;
+import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -40,12 +40,11 @@ public class BasicConfigurationImage {
 
         String imagePath =  new ClassPathResource("images/COCO_train2014_000000000009.jpg").getFile().getAbsolutePath();
 
-        INDArray[][] output = imageLoading.getRunner().transform(
-                new Writable[]{
-                        new Text(imagePath)
-                });
+        Writable[][] output = imageLoading.getRunner().transform(imagePath);
 
-        System.out.println(Arrays.toString(output[0][0].shape()));
-        System.out.println(output[0][0]);
+        INDArray image = ((NDArrayWritable) output[0][0]).get();
+
+        System.out.println(Arrays.toString(image.shape()));
+        System.out.println(image);
     }
 }
