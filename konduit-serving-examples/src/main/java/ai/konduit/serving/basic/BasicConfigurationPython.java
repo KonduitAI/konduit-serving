@@ -13,13 +13,13 @@ import java.util.Arrays;
 
 public class BasicConfigurationPython {
     public static void main(String[] args) throws Exception {
-        String pythonPath = "C:/SKIL/miniconda/envs/py37/python37.zip;C:/SKIL/miniconda/envs/py37/DLLs;" +
-                "C:/SKIL/miniconda/envs/py37/lib;C:/SKIL/miniconda/envs/py37;" +
-                "C:/Users/shams/AppData/Roaming/Python/Python37/site-packages;" +
-                "C:/SKIL/miniconda/envs/py37/lib/site-packages;" +
-                "C:/SKIL/miniconda/envs/py37/lib/site-packages/win32;" +
-                "C:/SKIL/miniconda/envs/py37/lib/site-packages/win32/lib;" +
-                "C:/SKIL/miniconda/envs/py37/lib/site-packages/Pythonwin";
+        String pythonPath = "C:/miniconda/envs/py37/python37.zip;" +
+                "C:/miniconda/envs/py37/DLLs;" +
+                "C:/miniconda/envs/py37/lib;C:/miniconda/envs/py37;" +
+                "C:/miniconda/envs/py37/lib/site-packages;" +
+                "C:/miniconda/envs/py37/lib/site-packages/win32;" +
+                "C:/miniconda/envs/py37/lib/site-packages/win32/lib;" +
+                "C:/miniconda/envs/py37/lib/site-packages/Pythonwin";
 
         String pythonCodePath = new ClassPathResource("scripts/loadimage.py").getFile().getAbsolutePath();
         String imagePath =  new ClassPathResource("images/COCO_train2014_000000000009.jpg").getFile().getAbsolutePath();
