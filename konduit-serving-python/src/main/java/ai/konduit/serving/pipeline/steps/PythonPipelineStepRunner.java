@@ -54,7 +54,7 @@ import java.util.Map;
 public class PythonPipelineStepRunner extends BasePipelineStepRunner {
 
     private Map<String, PythonTransform> pythonTransform;
-    private Map<String,TransformProcess> transformProcesses;
+    private Map<String, TransformProcess> transformProcesses;
 
     public PythonPipelineStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
@@ -97,7 +97,7 @@ public class PythonPipelineStepRunner extends BasePipelineStepRunner {
             TransformProcess transformProcess = new TransformProcess.Builder(pythonConfig.inputSchemaForName(configEntry.getKey()))
                     .transform(pythonTransform)
                     .build();
-            this.transformProcesses.put(configEntry.getKey(),transformProcess);
+            this.transformProcesses.put(configEntry.getKey(), transformProcess);
         }
 
         PythonExecutioner.init();

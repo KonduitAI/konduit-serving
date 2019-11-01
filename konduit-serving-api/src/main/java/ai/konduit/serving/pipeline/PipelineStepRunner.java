@@ -24,11 +24,9 @@ package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.SchemaType;
 import org.datavec.api.records.Record;
-import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import java.util.List;
 import java.util.Map;
 
 
@@ -59,6 +57,22 @@ public interface PipelineStepRunner {
      * @return pipeline step
      */
     Map<String, SchemaType[]> outputTypes();
+
+    /**
+     * Transform a set of {@link Object}
+     * via this operation.
+     * @param input the input array
+     * @return the output from the transform
+     */
+    Writable[][] transform(Object... input);
+
+    /**
+     * Transform a set of {@link Object}
+     * via this operation.
+     * @param input the input array
+     * @return the output from the transform
+     */
+    Writable[][] transform(Object[]... input);
 
     /**
      * Transform a set of {@link INDArray}

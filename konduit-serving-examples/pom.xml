@@ -31,6 +31,12 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>ai.konduit.serving</groupId>
+      <artifactId>konduit-serving-python</artifactId>
+      <version>1.2.1</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
 </project>

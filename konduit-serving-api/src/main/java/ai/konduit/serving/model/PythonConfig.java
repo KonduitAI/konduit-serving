@@ -36,7 +36,7 @@ import java.util.Map;
 @SuperBuilder
 public class PythonConfig extends ModelConfig {
 
-    private String  pythonCode,pythonCodePath;
+    private String pythonCode, pythonCodePath;
     @Singular
     private Map<String,String>  pythonInputs;
     @Singular
@@ -49,5 +49,4 @@ public class PythonConfig extends ModelConfig {
     private static String defaultPythonPath;
 
     private boolean returnAllInputs;
-
 }

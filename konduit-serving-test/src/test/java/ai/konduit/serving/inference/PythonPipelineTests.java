@@ -22,14 +22,14 @@
 
 package ai.konduit.serving.inference;
 
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.executioner.Pipeline;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.PythonPipelineStep;
 import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
 import ai.konduit.serving.pipeline.steps.PythonPipelineStepRunner;
-import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.util.python.PythonVariables;
 import ai.konduit.serving.pipeline.steps.TransformProcessPipelineStepRunner;
+import ai.konduit.serving.util.python.PythonVariables;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.MathOp;
 import org.datavec.api.transform.TransformProcess;
@@ -43,7 +43,6 @@ import org.nd4j.linalg.factory.Nd4j;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -55,8 +54,9 @@ public class PythonPipelineTests {
     
     @Test
     public void testPipeline() throws Exception {
+
         Schema schema = new Schema.Builder()
-                .addColumnNDArray("first",new long[]{1,1})
+                .addColumnNDArray("first", new long[]{1, 1})
                 .build();
 
         PythonConfig pythonConfig = PythonConfig.builder()
@@ -69,8 +69,7 @@ public class PythonPipelineTests {
         PythonPipelineStep config = new PythonPipelineStep(
                 pythonConfig, new String[] {"first"}, new SchemaType[]{SchemaType.NDArray});
         PythonPipelineStepRunner pythonPipelineStep = new PythonPipelineStepRunner(config);
-        
-        
+
         TransformProcess transformProcess = new TransformProcess.Builder(schema)
                 .ndArrayScalarOpTransform("first", MathOp.Add,1.0).build();
 
@@ -80,14 +79,13 @@ public class PythonPipelineTests {
                 .transformProcess("default", transformProcess);
         
         TransformProcessPipelineStepRunner transformProcessPipelineStep = new TransformProcessPipelineStepRunner(tpStep);
-        
-        
+
         List<Writable> record = new ArrayList<>();
         
         record.add(new NDArrayWritable(Nd4j.scalar(1.0)));
         org.datavec.api.records.impl.Record record1 = new org.datavec.api.records.impl.Record(record,null);
         Pipeline pipeline = Pipeline.builder()
-                .steps(Arrays.asList(pythonPipelineStep,transformProcessPipelineStep))
+                .steps(Arrays.asList(pythonPipelineStep, transformProcessPipelineStep))
                 .build();
         
         INDArray[] indArrays = pipeline.doPipelineArrays(new Record[]{record1});
@@ -98,7 +96,6 @@ public class PythonPipelineTests {
         INDArray[] indArrays2 = pipeline1.doPipelineArrays(new Record[]{record1});
         assertEquals(1,indArrays2.length);
         assertEquals(Nd4j.scalar(4.0),indArrays2[0]);
-        
     }
     
 }

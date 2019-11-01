@@ -24,16 +24,12 @@ package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.datavec.api.transform.schema.Schema;
 
 import java.util.HashMap;
 import java.util.Map;
-import lombok.Singular;
-import org.datavec.api.transform.schema.Schema;
 
 @SuperBuilder
 @AllArgsConstructor
@@ -107,7 +103,7 @@ public class PythonPipelineStep extends PipelineStep {
      * @return this python step
      * @throws Exception key error
      */
-    public  PythonPipelineStep step(String stepName, PythonConfig pythonConfig,  Schema inputSchema,
+    public  PythonPipelineStep step(String stepName, PythonConfig pythonConfig, Schema inputSchema,
                                     Schema outputSchema) throws Exception {
         this.input(stepName, inputSchema);
         this.output(stepName, outputSchema);

@@ -1,7 +1,6 @@
 package ai.konduit.serving.basic;
 
 import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
-import org.datavec.api.records.Record;
 import org.datavec.api.transform.MathFunction;
 import org.datavec.api.transform.MathOp;
 import org.datavec.api.transform.TransformProcess;
@@ -10,8 +9,6 @@ import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-
-import java.util.Arrays;
 
 public class BasicConfiguration {
     public static void main(String[] args) throws Exception {
@@ -57,7 +54,7 @@ public class BasicConfiguration {
                 .ndArrayMathFunctionTransform("x2", MathFunction.SIN) // Applies sin() function to each element
                 .ndArrayMathFunctionTransform("x2", MathFunction.FLOOR) // Floors each element
                 .ndArrayScalarOpTransform("x2", MathOp.Add, 2) // Adds 2 to each element
-                .ndArrayScalarOpTransform("x3", MathOp.Add, 2)
+                .ndArrayScalarOpTransform("x1", MathOp.ScalarMin, 50)
                 .build();
 
         /*

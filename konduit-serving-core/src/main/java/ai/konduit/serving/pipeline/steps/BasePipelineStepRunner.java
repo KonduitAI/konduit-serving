@@ -26,14 +26,15 @@ import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.PipelineStepRunner;
 import org.datavec.api.records.Record;
-import org.datavec.api.writable.NDArrayWritable;
-import org.datavec.api.writable.Writable;
+import org.datavec.api.writable.*;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
+import javax.activation.UnsupportedDataTypeException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public abstract class BasePipelineStepRunner implements PipelineStepRunner {
 
@@ -47,6 +48,23 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
      * no-op
      */
     public void destroy() {}
+
+    @Override
+    public Writable[][] transform(Object... input) {
+        return transform(new Object[][]{input});
+    }
+
+    @Override
+    public Writable[][] transform(Object[]... input){
+        Record[] outputRecords = transform(Arrays.stream(input)
+                .map(writables -> new org.datavec.api.records.impl.Record(
+                        Arrays.stream(writables).map(this::getWritableFromObject).collect(Collectors.toList()), null))
+                .toArray(Record[]::new));
+
+        return Arrays.stream(outputRecords)
+                .map(record -> record.getRecord().toArray(new Writable[0]))
+                .toArray(Writable[][]::new);
+    }
 
     @Override
     public INDArray[][] transform(Writable[]... input) {
@@ -105,6 +123,31 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
         return pipelineStep.getOutputSchemas();
     }
 
-
     public abstract void processValidWritable(Writable writable, List<Writable> record, int inputIndex, Object... extraArgs);
+
+    private Writable getWritableFromObject(Object object){
+        Writable output = null;
+
+        try {
+            if (object instanceof INDArray) {
+                output = new NDArrayWritable((INDArray) object);
+            } else if (object instanceof String) {
+                output = new Text((String) object);
+            } else if (object instanceof Integer) {
+                output = new IntWritable((Integer) object);
+            } else if (object instanceof Float) {
+                output = new FloatWritable((Float) object);
+            } else if (object instanceof Double) {
+                output = new DoubleWritable((Double) object);
+            } else if (object instanceof Long) {
+                output = new LongWritable((Long) object);
+            } else {
+                throw new UnsupportedDataTypeException(String.format("Cannot convert %s to a writable", object.getClass().getName()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return output;
+    }
 }

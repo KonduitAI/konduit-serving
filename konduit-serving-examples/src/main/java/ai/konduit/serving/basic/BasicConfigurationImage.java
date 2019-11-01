@@ -1,17 +1,13 @@
 package ai.konduit.serving.basic;
 
 import ai.konduit.serving.pipeline.ImageLoading;
-import org.datavec.api.records.Record;
-import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Text;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
-import org.nd4j.linalg.io.CollectionUtils;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 public class BasicConfigurationImage {
     public static void main(String[] args) throws Exception {
@@ -36,7 +32,7 @@ public class BasicConfigurationImage {
 
         ImageLoading imageLoading = ImageLoading.builder()
                 .imageProcessingInitialLayout("NCHW")
-                .imageProcessingRequiredLayout("NWHC")
+                .imageProcessingRequiredLayout("NHWC")
                 .inputName("default")
                 .dimensionsConfig("default", new Long[]{ 240L, 320L, 3L }) // Height, width, channels
                 .imageTransformProcess("default", imageTransformProcess)
