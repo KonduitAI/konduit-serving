@@ -4,8 +4,12 @@ import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.PythonPipelineStep;
 import ai.konduit.serving.util.python.PythonVariables;
+import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
+
+import java.util.Arrays;
 
 public class BasicConfigurationPython {
     public static void main(String[] args) throws Exception {
@@ -24,17 +28,17 @@ public class BasicConfigurationPython {
                 .pythonPath(pythonPath)
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("x", PythonVariables.Type.STR.name())
-                .pythonOutput("y", PythonVariables.Type.STR.name())
-                .pythonOutput("y2", PythonVariables.Type.NDARRAY.name())
+                .pythonOutput("y", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonPipelineStep pythonPipelineStep = new PythonPipelineStep().step("default", pythonConfig,
                 new String[] {"x"}, new SchemaType[] {SchemaType.String},
-                new String[] {"y", "y2"}, new SchemaType[] {SchemaType.String, SchemaType.NDArray});
+                new String[] {"y"}, new SchemaType[] {SchemaType.NDArray});
 
         Writable[][] output = pythonPipelineStep.getRunner().transform(imagePath);
 
-        System.out.println(output[0][0]);
-        System.out.println(output[0][1]);
+        INDArray image = ((NDArrayWritable) output[0][0]).get();
+        System.out.println(Arrays.toString(image.shape()));
+        System.out.println(image);
     }
 }

@@ -1,5 +1,4 @@
-import cv2
+from PIL import Image
+import numpy as np
 
-y = x #cv2.imread(x)
-
-y2 = cv2.imread(x)
+y = np.asarray(Image.open(x)).astype('float64')
