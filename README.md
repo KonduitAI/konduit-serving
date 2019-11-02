@@ -133,7 +133,7 @@ arguments.
 9. Other vertx arguments: Due to this being a vertx application at its core,
 other vertx JVM arguments will also work. We specify a few that are important
 for our specific application (such as file upload directories for binary files)
-in the KonduitServerMain but allow vertx arguments as well for startup.
+in the KonduitServingMain but allow vertx arguments as well for startup.
 
 For your specific application, consider using the built-in monitoring capabilities for both CPU and GPU memory
 to identify what your ideal pipelines configuration should look like under load.
