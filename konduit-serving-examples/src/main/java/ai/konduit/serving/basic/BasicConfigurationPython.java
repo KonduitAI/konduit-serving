@@ -1,6 +1,5 @@
 package ai.konduit.serving.basic;
 
-import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.PythonPipelineStep;
 import ai.konduit.serving.util.python.PythonVariables;
@@ -31,9 +30,7 @@ public class BasicConfigurationPython {
                 .pythonOutput("y", PythonVariables.Type.NDARRAY.name())
                 .build();
 
-        PythonPipelineStep pythonPipelineStep = new PythonPipelineStep().step("default", pythonConfig,
-                new String[] {"x"}, new SchemaType[] {SchemaType.String},
-                new String[] {"y"}, new SchemaType[] {SchemaType.NDArray});
+        PythonPipelineStep pythonPipelineStep = new PythonPipelineStep().step("default", pythonConfig);
 
         Writable[][] output = pythonPipelineStep.getRunner().transform(imagePath);
 

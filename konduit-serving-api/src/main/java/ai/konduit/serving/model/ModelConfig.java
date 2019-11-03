@@ -81,7 +81,6 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value=SameDiffConfig.class, name = "SameDiffConfig"),
         @JsonSubTypes.Type(value=TensorFlowConfig.class, name = "TensorFlowConfig"),
         @JsonSubTypes.Type(value=PythonConfig.class, name = "PythonConfig"),
-
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 @SuperBuilder

@@ -25,8 +25,3 @@ RUN rm -rf /home/$NB_USER/.m2
 
 USER $NB_USER
 WORKDIR /home/$NB_USER/
-
-
-
-
-

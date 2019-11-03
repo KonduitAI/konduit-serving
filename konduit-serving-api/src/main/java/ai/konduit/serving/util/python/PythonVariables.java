@@ -66,7 +66,6 @@ public class PythonVariables implements Serializable {
     private Map<String, Type> vars = new LinkedHashMap<>();
     private Map<Type, Map> maps = new LinkedHashMap<>();
 
-
     /**
      * Returns a copy of the variable
      * schema in this array without the values
@@ -97,8 +96,6 @@ public class PythonVariables implements Serializable {
 
     }
 
-
-
     /**
      *
      * @return true if there are no variables.
@@ -106,7 +103,6 @@ public class PythonVariables implements Serializable {
     public boolean isEmpty() {
         return getVariables().length < 1;
     }
-
 
     /**
      *

@@ -24,10 +24,13 @@ package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.util.python.PythonVariables;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.datavec.api.transform.schema.Schema;
 
+import javax.activation.UnsupportedDataTypeException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -115,6 +118,38 @@ public class PythonPipelineStep extends PipelineStep {
     /**
      * Define a single, named step for a Python pipeline.
      *
+     * @param pythonConfig Konduit PythonConfig
+     * @throws Exception key error
+     */
+    public PythonPipelineStep step(PythonConfig pythonConfig)
+            throws Exception {
+        this.step("default", pythonConfig);
+
+        return this;
+    }
+
+    /**
+     * Define a single, named step for a Python pipeline.
+     *
+     * @param stepName input and output name for this step
+     * @param pythonConfig Konduit PythonConfig
+     * @throws Exception key error
+     */
+    public PythonPipelineStep step(String stepName, PythonConfig pythonConfig)
+            throws Exception {
+
+        this.step(stepName, pythonConfig,
+                pythonConfig.getPythonInputs().keySet().toArray(new String[0]),
+                pythonToDatavecVarTypes(pythonConfig.getPythonInputs().values().toArray(new String[0])),
+                pythonConfig.getPythonOutputs().keySet().toArray(new String[0]),
+                pythonToDatavecVarTypes(pythonConfig.getPythonOutputs().values().toArray(new String[0])));
+
+        return this;
+    }
+
+    /**
+     * Define a single, named step for a Python pipeline.
+     *
      * @param stepName input and output name for this step
      * @param pythonConfig Konduit PythonConfig
      * @param inputColumnNames input column names
@@ -169,7 +204,37 @@ public class PythonPipelineStep extends PipelineStep {
         return this;
     }
 
+    private SchemaType[] pythonToDatavecVarTypes(String [] pythonVarTypes) {
+        return Arrays.stream(pythonVarTypes)
+                .map(type -> pythonToDatavecVarTypes(PythonVariables.Type.valueOf(type)))
+                .toArray(SchemaType[]::new);
+    }
 
+    private SchemaType pythonToDatavecVarTypes(PythonVariables.Type pythonVarType) {
+        try {
+            switch (pythonVarType) {
+                case BOOL:
+                    return SchemaType.Boolean;
+                case STR:
+                    return SchemaType.String;
+                case INT:
+                    return SchemaType.Integer;
+                case FLOAT:
+                    return SchemaType.Float;
+                case NDARRAY:
+                    return SchemaType.NDArray;
+                case LIST:
+                case FILE:
+                case DICT:
+                default:
+                    throw new UnsupportedDataTypeException(String.format("Can't convert (%s) to SchemaType enum", pythonVarType.name()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
     @Override
     public String pipelineStepClazz() {

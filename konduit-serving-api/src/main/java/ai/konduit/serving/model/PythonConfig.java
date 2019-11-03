@@ -38,11 +38,11 @@ public class PythonConfig extends ModelConfig {
 
     private String pythonCode, pythonCodePath;
     @Singular
-    private Map<String,String>  pythonInputs;
+    private Map<String, String>  pythonInputs;
     @Singular
-    private Map<String,String> pythonOutputs;
+    private Map<String, String> pythonOutputs;
     @Singular
-    private Map<String,String> extraInputs;
+    private Map<String, String> extraInputs;
 
     private String pythonPath;
 
