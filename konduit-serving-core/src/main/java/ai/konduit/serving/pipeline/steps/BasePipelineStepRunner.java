@@ -51,7 +51,7 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
 
     @Override
     public Writable[][] transform(Object... input) {
-        if(input[0] instanceof Object[]) {
+        if(input.length > 0 && input[0] instanceof Object[]) {
             Object[][] objects = Arrays.stream(input).map(innerInputs -> Arrays.stream((Object []) innerInputs).toArray(Object[]::new)).toArray(Object[][]::new);
             return transform(objects);
         } else {

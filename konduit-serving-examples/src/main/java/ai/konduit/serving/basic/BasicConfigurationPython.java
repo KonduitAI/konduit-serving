@@ -30,7 +30,7 @@ public class BasicConfigurationPython {
                 .pythonOutput("y", PythonVariables.Type.NDARRAY.name())
                 .build();
 
-        PythonPipelineStep pythonPipelineStep = new PythonPipelineStep().step("default", pythonConfig);
+        PythonPipelineStep pythonPipelineStep = new PythonPipelineStep().step(pythonConfig);
 
         Writable[][] output = pythonPipelineStep.getRunner().transform(imagePath);
 

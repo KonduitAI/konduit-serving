@@ -138,11 +138,14 @@ public class PythonPipelineStep extends PipelineStep {
     public PythonPipelineStep step(String stepName, PythonConfig pythonConfig)
             throws Exception {
 
+        Map<String, String> pythonInputs = pythonConfig.getPythonInputs(),
+                            pythonOutputs = pythonConfig.getPythonOutputs();
+
         this.step(stepName, pythonConfig,
-                pythonConfig.getPythonInputs().keySet().toArray(new String[0]),
-                pythonToDatavecVarTypes(pythonConfig.getPythonInputs().values().toArray(new String[0])),
-                pythonConfig.getPythonOutputs().keySet().toArray(new String[0]),
-                pythonToDatavecVarTypes(pythonConfig.getPythonOutputs().values().toArray(new String[0])));
+                pythonInputs.keySet().toArray(new String[0]),
+                pythonToDatavecVarTypes(pythonInputs.values().toArray(new String[0])),
+                pythonOutputs.keySet().toArray(new String[0]),
+                pythonToDatavecVarTypes(pythonOutputs.values().toArray(new String[0])));
 
         return this;
     }
@@ -227,7 +230,7 @@ public class PythonPipelineStep extends PipelineStep {
                 case FILE:
                 case DICT:
                 default:
-                    throw new UnsupportedDataTypeException(String.format("Can't convert (%s) to SchemaType enum", pythonVarType.name()));
+                    throw new UnsupportedDataTypeException(String.format("Can't convert (%s) to (%s) enum", pythonVarType.name(), SchemaType.class.getName()));
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -50,6 +50,8 @@ config.json
 .classpath
 
 # uberjar creation
-pipelines.jar
 konduit.jar
 python/tests/config.json
+
+# notebooks
+.ipynb_checkpoints
