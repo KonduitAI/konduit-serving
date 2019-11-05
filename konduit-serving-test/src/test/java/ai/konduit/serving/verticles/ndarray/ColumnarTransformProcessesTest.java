@@ -115,7 +115,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
 
         // This is equivalent to:
         TransformProcessPipelineStep transformStepUnused = new TransformProcessPipelineStep()
-                .step("default", transformProcess, outputSchema);
+                .step(transformProcess, outputSchema);
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .predictionType(Output.PredictionType.CLASSIFICATION)
@@ -128,8 +128,8 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .build();
 
         ModelPipelineStep modelStepConfig = new ModelPipelineStep(modelConfig)
-                .input("default", inputSchema)
-                .output("default", outputSchema);
+                .input(inputSchema)
+                .output(outputSchema);
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)

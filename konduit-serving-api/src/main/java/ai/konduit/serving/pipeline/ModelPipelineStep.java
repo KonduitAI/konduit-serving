@@ -51,6 +51,24 @@ public class ModelPipelineStep extends PipelineStep {
         this.modelConfig = modelConfig;
     }
 
+    public ModelPipelineStep input(String[] columnNames, SchemaType[] types) throws Exception {
+        return (ModelPipelineStep) super.input("default", columnNames, types);
+    }
+
+    public ModelPipelineStep output(String[] columnNames, SchemaType[] types) throws Exception {
+        return (ModelPipelineStep) super.output("default", columnNames, types);
+    }
+
+    @Override
+    public ModelPipelineStep input(Schema inputSchema) throws Exception {
+        return (ModelPipelineStep) super.input("default", inputSchema);
+    }
+
+    @Override
+    public ModelPipelineStep output(Schema outputSchema) throws Exception {
+        return (ModelPipelineStep) super.output("default", outputSchema);
+    }
+
 
     public ModelPipelineStep input(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (ModelPipelineStep) super.input(inputName, columnNames, types);

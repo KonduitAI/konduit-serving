@@ -111,14 +111,28 @@ public abstract class PipelineStep implements Serializable {
         this.setOutputSchemas(schemas);
     }
 
+
     /**
-     * Define a single input for a TransformProcess Step from explicit
+     * Define a single input for a PipelineStep from column names and types.
+     * The input name will be "default" when using this method.
+     *
+     * @param columnNames column names
+     * @param types schema types
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+    public PipelineStep input(String[] columnNames, SchemaType[] types) throws Exception {
+        return this.input("default", columnNames, types);
+    }
+
+    /**
+     * Define a single input for a PipelineStep from explicit
      * column names and types for this input.
      *
      * @param inputName input name
      * @param columnNames column names
      * @param types schema types
-     * @return this transform process step
+     * @return this pipeline step
      * @throws Exception key error
      */
     public PipelineStep input(String inputName, String[] columnNames, SchemaType[] types)
@@ -144,11 +158,24 @@ public abstract class PipelineStep implements Serializable {
     }
 
     /**
-     * Define a single input for a TransformProcess Step from a schema.
+     * Define a single input for a PipelineStep from a schema.
+     * The input name will be "default" when using this method.
+     *
+     * @param inputSchema input schema
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+    public PipelineStep input(Schema inputSchema) throws Exception {
+        return this.input("default", inputSchema);
+    }
+
+
+    /**
+     * Define a single input for a PipelineStep from a schema.
      *
      * @param inputName input name
      * @param inputSchema input schema
-     * @return this transform process step
+     * @return this pipeline step
      * @throws Exception key error
      */
     public PipelineStep input(String inputName, Schema inputSchema) throws Exception {
@@ -175,14 +202,30 @@ public abstract class PipelineStep implements Serializable {
         }
     }
 
+
     /**
-     * Define a single output for a TransformProcess Step from explicit
+     * Define a single output for a PipelineStep from explicit
+     * column names and types for this output. The output name
+     * for this step will be "default".
+     *
+     * @param columnNames column names
+     * @param types schema types
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+    public PipelineStep output(String[] columnNames, SchemaType[] types)
+            throws Exception {
+        return this.output("default", columnNames, types);
+    }
+
+    /**
+     * Define a single output for a PipelineStep from explicit
      * column names and types for this output.
      *
      * @param outputName output name
      * @param columnNames column names
      * @param types schema types
-     * @return this transform process step
+     * @return this pipeline step
      * @throws Exception key error
      */
     public PipelineStep output(String outputName, String[] columnNames, SchemaType[] types)
@@ -208,11 +251,23 @@ public abstract class PipelineStep implements Serializable {
     }
 
     /**
-     * Define a single output for a TransformProcess Step.
+     * Define a single output for a PipelineStep from a schema.
+     * The output name for this step will be "default".
+     *
+     * @param outputSchema output schema
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+    public PipelineStep output(Schema outputSchema) throws Exception {
+        return this.output("default", outputSchema);
+    }
+
+    /**
+     * Define a single output for a PipelineStep.
      *
      * @param outputName output name
      * @param outputSchema output schema
-     * @return this transform process step
+     * @return this pipeline step
      * @throws Exception key error
      */
     public PipelineStep output(String outputName, Schema outputSchema) throws Exception {
@@ -310,13 +365,4 @@ public abstract class PipelineStep implements Serializable {
             throw new IllegalStateException("Unable to instantiate pipeline step from class " + this.pipelineStepClazz(), e);
         }
     }
-
-//    public enum StepType {
-//        PYTHON,
-//        MODEL,
-//        TRANSFORM,
-//        NORMALIZATION,
-//        IMAGE_LOADING,
-//        OBJECT_DETECTION
-//    }
 }
