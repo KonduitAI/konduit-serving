@@ -66,34 +66,30 @@ public class TransformProcessPipelineStep extends PipelineStep {
 
     /**
      * Create a TransformProcess Step with default input and output names
-     * just from input/output schema and the actual TransformProcess
+     * just from output schema and the actual TransformProcess. The
+     * input/initial schema can be inferred from the TransformProcess itself
      *
-     * @param inputSchema DataVec Schema for data input
-     * @param outputSchema DataVec Schema for data output
      * @param transformProcess DataVec TransformProcess
+     * @param outputSchema DataVec Schema for data output
      * @throws Exception key error
      */
-    public TransformProcessPipelineStep(Schema inputSchema, Schema outputSchema,
-                                        TransformProcess transformProcess) throws Exception {
-        String defaultName = "default";
-        this.input(defaultName, inputSchema);
-        this.output(defaultName, outputSchema);
-        this.transformProcess(defaultName, transformProcess);
+    public TransformProcessPipelineStep( TransformProcess transformProcess, Schema outputSchema) throws Exception {
+        this.step("default", transformProcess, outputSchema);
     }
 
     /**
      * Define a single, named step for a transform process.
      *
      * @param stepName input and output name for this step
-     * @param inputSchema DataVec Schema for data input
-     * @param outputSchema DataVec Schema for data output
      * @param transformProcess DataVec TransformProcess
+     * @param outputSchema DataVec Schema for data output
      * @return this transform process step
      * @throws Exception key error
      */
-    public TransformProcessPipelineStep step(String stepName, Schema inputSchema, Schema outputSchema,
-                                              TransformProcess transformProcess) throws Exception {
-        this.input(stepName, inputSchema);
+    public TransformProcessPipelineStep step(String stepName, TransformProcess transformProcess, Schema outputSchema
+                                              ) throws Exception {
+
+        this.input(stepName, transformProcess.getInitialSchema());
         this.output(stepName, outputSchema);
         this.transformProcess(stepName, transformProcess);
 

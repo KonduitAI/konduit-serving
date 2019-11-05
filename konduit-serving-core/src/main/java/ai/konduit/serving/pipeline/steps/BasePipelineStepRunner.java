@@ -100,7 +100,6 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
                 }
             }
         }
-
         return ret;
     }
 

@@ -29,7 +29,6 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.datavec.api.transform.schema.Schema;
 
-import javax.activation.UnsupportedDataTypeException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -230,7 +229,7 @@ public class PythonPipelineStep extends PipelineStep {
                 case FILE:
                 case DICT:
                 default:
-                    throw new UnsupportedDataTypeException(String.format("Can't convert (%s) to (%s) enum", pythonVarType.name(), SchemaType.class.getName()));
+                    throw new IllegalArgumentException(String.format("Can't convert (%s) to (%s) enum", pythonVarType.name(), SchemaType.class.getName()));
             }
         } catch (Exception e) {
             e.printStackTrace();
