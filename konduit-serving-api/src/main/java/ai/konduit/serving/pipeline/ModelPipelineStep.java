@@ -23,15 +23,21 @@
 package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.config.ServingConfig;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.datavec.api.transform.TransformProcess;
+import org.datavec.api.transform.schema.Schema;
+
+import java.util.HashMap;
 
 @SuperBuilder
 @Data
+@NoArgsConstructor
 public class ModelPipelineStep extends PipelineStep {
 
     private ModelConfig modelConfig;
@@ -41,7 +47,28 @@ public class ModelPipelineStep extends PipelineStep {
 
     private NormalizationConfig normalizationConfig;
 
-    public ModelPipelineStep() {}
+    public ModelPipelineStep(ModelConfig modelConfig) {
+        this.modelConfig = modelConfig;
+    }
+
+
+    public ModelPipelineStep input(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
+        return (ModelPipelineStep) super.input(inputName, columnNames, types);
+    }
+
+    public ModelPipelineStep output(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
+        return (ModelPipelineStep) super.output(outputName, columnNames, types);
+    }
+
+    @Override
+    public ModelPipelineStep input(String inputName, Schema inputSchema) throws Exception {
+        return (ModelPipelineStep) super.input(inputName, inputSchema);
+    }
+
+    @Override
+    public ModelPipelineStep output(String outputName, Schema outputSchema) throws Exception {
+        return (ModelPipelineStep) super.output(outputName, outputSchema);
+    }
 
     @Override
     public String pipelineStepClazz() {

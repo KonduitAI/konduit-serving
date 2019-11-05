@@ -73,7 +73,7 @@ public class TransformProcessPipelineStep extends PipelineStep {
      * @param outputSchema DataVec Schema for data output
      * @throws Exception key error
      */
-    public TransformProcessPipelineStep( TransformProcess transformProcess, Schema outputSchema) throws Exception {
+    public TransformProcessPipelineStep(TransformProcess transformProcess, Schema outputSchema) throws Exception {
         this.step("default", transformProcess, outputSchema);
     }
 

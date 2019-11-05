@@ -32,7 +32,6 @@ import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.train.TrainUtils;
-import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.http.ContentType;
 import io.vertx.core.DeploymentOptions;
@@ -128,13 +127,9 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .modelConfigType(ModelConfigType.multiLayerNetwork(modelSave.getAbsolutePath()))
                 .build();
 
-        ModelPipelineStep modelStepConfig = ModelPipelineStep.builder()
-                .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
-                .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
-                .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
-                .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
-                .modelConfig(modelConfig)
-                .build();
+        ModelPipelineStep modelStepConfig = new ModelPipelineStep(modelConfig)
+                .input("default", inputSchema)
+                .output("default", outputSchema);
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
