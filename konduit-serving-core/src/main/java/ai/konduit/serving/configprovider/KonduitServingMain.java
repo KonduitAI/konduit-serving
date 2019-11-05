@@ -83,7 +83,7 @@ public class KonduitServingMain {
 
     @Parameter(names = {"--configPort"},
             description = "The port for downloading the configuration from.")
-    private int configPort = 9008;
+    private int configPort = 9090;
 
     @Parameter(names = {"--configStoreType"},
             description = "The configuration store type (usually http or file) where the configuration is stored.")

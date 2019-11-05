@@ -35,8 +35,7 @@ import java.util.Map;
 public class ArrayConcatenationStep extends PipelineStep {
 
     @Singular
-    private Map<Integer,Integer> concatDimensions;
-
+    private Map<Integer, Integer> concatDimensions;
 
     @Override
     public String pipelineStepClazz() {

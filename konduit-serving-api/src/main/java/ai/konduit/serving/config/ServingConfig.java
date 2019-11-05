@@ -36,7 +36,7 @@ import java.util.List;
 public class ServingConfig {
 
     @Builder.Default
-    private int httpPort = 9008;
+    private int httpPort = 9090;
     @Builder.Default
     private String listenHost = "localhost";
 
@@ -45,7 +45,7 @@ public class ServingConfig {
     @Builder.Default
     private Output.DataType outputDataType = Output.DataType.JSON;
     @Builder.Default
-    private Output.PredictionType predictionType = Output.PredictionType.CLASSIFICATION;
+    private Output.PredictionType predictionType = Output.PredictionType.RAW;
 
     @Builder.Default
     private String uploadsDirectory = "file-uploads/";

@@ -79,22 +79,21 @@ public class KonduitServingMainArgs implements Serializable {
         }
 
         List<String> args = new ArrayList<>();
-        for(int i = 0; i < fields.length; i++) {
-            if (java.lang.reflect.Modifier.isStatic(fields[i].getModifiers())) {
+        for (Field field : fields) {
+            if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
 
             try {
-                Object o = fields[i].get(this);
-                if(o != null) {
-                    if(!(o instanceof Boolean)) {
-                        args.add("--" + fields[i].getName());
+                Object o = field.get(this);
+                if (o != null) {
+                    if (!(o instanceof Boolean)) {
+                        args.add("--" + field.getName());
                         args.add(String.valueOf(o));
-                    }
-                    else {
+                    } else {
                         Boolean bool = (Boolean) o;
-                        if(bool) {
-                            args.add("--" + fields[i].getName());
+                        if (bool) {
+                            args.add("--" + field.getName());
                         }
                     }
                 }
@@ -105,5 +104,4 @@ public class KonduitServingMainArgs implements Serializable {
 
         return args.toArray(new String[0]);
     }
-
 }

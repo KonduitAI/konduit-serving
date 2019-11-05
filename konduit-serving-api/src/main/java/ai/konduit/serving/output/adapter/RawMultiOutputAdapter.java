@@ -26,10 +26,7 @@ import ai.konduit.serving.output.types.BatchOutput;
 import io.vertx.ext.web.RoutingContext;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A {@link MultiOutputAdapter} for classification.
@@ -59,7 +56,7 @@ public class RawMultiOutputAdapter implements MultiOutputAdapter<INDArray[]> {
 
     @Override
     public List<Class<? extends OutputAdapter<?>>> outputAdapterTypes() {
-        return Arrays.asList(ClassifierOutputAdapter.class);
+        return Collections.singletonList(ClassifierOutputAdapter.class);
     }
 
 

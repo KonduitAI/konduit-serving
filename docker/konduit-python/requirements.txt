@@ -1,0 +1,10 @@
+keras
+tensorflow
+scipy
+pillow
+scikit-learn
+numpy
+Cython
+pyjnius
+konduit
+regex
