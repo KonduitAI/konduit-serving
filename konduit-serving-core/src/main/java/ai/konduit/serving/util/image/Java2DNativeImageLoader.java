@@ -115,14 +115,6 @@ public class Java2DNativeImageLoader extends NativeImageLoader {
     }
 
     /**
-     * @param array the input array
-     * @return  {@code asBufferedImage(array, Frame.DEPTH_UBYTE)}.
-     * /
-    public BufferedImage asBufferedImage(INDArray array) {
-        return asBufferedImage(array, Frame.DEPTH_UBYTE);
-    }
-
-    /**
      * Converts an INDArray to a BufferedImage. Only intended for images with rank 3.
      *
      * @param array to convert

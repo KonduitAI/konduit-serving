@@ -97,12 +97,10 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
 
-
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .pipelineStep(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
-
 
         return new JsonObject(inferenceConfiguration.toJson());
     }
