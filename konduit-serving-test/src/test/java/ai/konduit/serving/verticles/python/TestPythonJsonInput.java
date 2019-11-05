@@ -89,15 +89,7 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
                   .returnAllInputs(false)
                 .build();
 
-        PythonPipelineStep pythonStepConfig = PythonPipelineStep.builder()
-                .inputName("default")
-                .inputColumnName("default", Arrays.asList(new String[]{"first"}))
-                .inputSchema("default", new SchemaType[]{SchemaType.Integer})
-                .outputColumnName("default", Arrays.asList(new String[]{"output"}))
-                .outputSchema("default", new SchemaType[]{SchemaType.Integer})
-                .pythonConfig("default",pythonConfig)
-                .build();
-
+        PythonPipelineStep pythonStepConfig = new PythonPipelineStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
@@ -105,12 +97,10 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
 
-
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .pipelineStep(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
-
 
         return new JsonObject(inferenceConfiguration.toJson());
     }

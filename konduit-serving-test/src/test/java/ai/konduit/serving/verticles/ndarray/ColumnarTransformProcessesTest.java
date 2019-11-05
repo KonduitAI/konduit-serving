@@ -32,10 +32,8 @@ import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.train.TrainUtils;
-import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.http.ContentType;
-import com.sun.org.apache.regexp.internal.StringCharacterIterator;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -46,7 +44,6 @@ import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
-import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.After;
 import org.junit.Before;
@@ -60,7 +57,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.net.ServerSocket;
 import java.util.Arrays;
-import java.util.Iterator;
 
 import static ai.konduit.serving.train.TrainUtils.getIrisOutputSchema;
 import static ai.konduit.serving.train.TrainUtils.getTrainedNetwork;
@@ -72,7 +68,7 @@ import static com.jayway.restassured.RestAssured.given;
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
-    private Schema inputSchema, outputSchema;
+    private Schema inputSchema;
 
     @Before
     public void before(TestContext context) throws Exception {
@@ -104,7 +100,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
         ModelSerializer.writeModel(multiLayerNetwork.getFirst(),modelSave,true);
 
         inputSchema = TrainUtils.getIrisInputSchema();
-        outputSchema = getIrisOutputSchema();
+        Schema outputSchema = getIrisOutputSchema();
 
         Nd4j.getRandom().setSeed(42);
 
@@ -115,11 +111,11 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
 
         TransformProcess transformProcess = transformProcessBuilder.build();
 
-        TransformProcessPipelineStep transformStep = new TransformProcessPipelineStep(inputSchema, outputSchema, transformProcess);
+        TransformProcessPipelineStep transformStep = new TransformProcessPipelineStep(transformProcess, outputSchema);
 
         // This is equivalent to:
         TransformProcessPipelineStep transformStepUnused = new TransformProcessPipelineStep()
-                .step("default", inputSchema, outputSchema, transformProcess);
+                .step(transformProcess, outputSchema);
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .predictionType(Output.PredictionType.CLASSIFICATION)
@@ -131,13 +127,9 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .modelConfigType(ModelConfigType.multiLayerNetwork(modelSave.getAbsolutePath()))
                 .build();
 
-        ModelPipelineStep modelStepConfig = ModelPipelineStep.builder()
-                .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
-                .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
-                .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
-                .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
-                .modelConfig(modelConfig)
-                .build();
+        ModelPipelineStep modelStepConfig = new ModelPipelineStep(modelConfig)
+                .input(inputSchema)
+                .output(outputSchema);
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)

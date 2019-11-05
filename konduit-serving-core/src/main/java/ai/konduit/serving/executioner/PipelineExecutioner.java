@@ -245,7 +245,7 @@ public class PipelineExecutioner {
     /**
      * Perform inference for the endpoint using the inference executioner.
      * @param ctx                the routing context to use representing the current request
-     * @param responseOutputType the {@link Output.DataType} for the output
+     * @param responseOutputType the {@link ai.konduit.serving.config.Output.DataType} for the output
      * @param inputs             the inputs based on the input data
      */
     public void doInference(io.vertx.ext.web.RoutingContext ctx, Output.DataType responseOutputType, org.datavec.api.records.Record[] inputs) {
@@ -340,7 +340,7 @@ public class PipelineExecutioner {
         Writable firstWritable = records[0].getRecord().get(0);
         if(firstWritable.getType() == WritableType.NDArray) {
             INDArray[] arrays = SchemaTypeUtils.toArrays(records);
-            Map<String, BatchOutput> adapt = null;
+            Map<String, BatchOutput> adapt;
             switch(outputAdapterType) {
                 case CLASSIFICATION:
                     adapt = classificationMultiOutputAdapter.adapt(arrays, Arrays.asList("default"), ctx);
@@ -596,7 +596,7 @@ public class PipelineExecutioner {
 
     /**
      * Convert a batch output {@link NDArrayOutput}
-     * given a {@link Output.DataType}
+     * given a {@link ai.konduit.serving.config.Output.DataType}
      * @param batchOutput the batch output to convert
      * @param responseOutputType the response type
      * @return converted buffer
@@ -608,7 +608,7 @@ public class PipelineExecutioner {
 
     /**
      * Convert a {@link INDArray}
-     * given a {@link Output.DataType}
+     * given a {@link ai.konduit.serving.config.Output.DataType}
      * @param input the batch ndarray to convert
      * @param responseOutputType the response type
      * @return converted buffer

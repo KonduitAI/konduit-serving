@@ -35,7 +35,6 @@ import org.datavec.api.writable.Writable;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.io.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;

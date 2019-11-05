@@ -29,7 +29,6 @@ import org.datavec.api.records.Record;
 import org.datavec.api.writable.*;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import javax.activation.UnsupportedDataTypeException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -101,7 +100,6 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
                 }
             }
         }
-
         return ret;
     }
 
@@ -134,7 +132,7 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
             } else if (object instanceof Long) {
                 output = new LongWritable((Long) object);
             } else {
-                throw new UnsupportedDataTypeException(String.format("Cannot convert %s to a writable", object.getClass().getName()));
+                throw new IllegalArgumentException(String.format("Cannot convert %s to a writable", object.getClass().getName()));
             }
         } catch (Exception e) {
             e.printStackTrace();

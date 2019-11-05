@@ -29,7 +29,6 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.datavec.api.transform.schema.Schema;
 
-import javax.activation.UnsupportedDataTypeException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +42,10 @@ public class PythonPipelineStep extends PipelineStep {
     @Setter
     @Singular
     private Map<String, PythonConfig> pythonConfigs;
+
+    public PythonPipelineStep(PythonConfig pythonConfig) throws Exception {
+        this.step(pythonConfig);
+    }
 
     /**
      * Create a PythonConfig Step with default input and output names
@@ -95,6 +98,19 @@ public class PythonPipelineStep extends PipelineStep {
         this.pythonConfig(defaultName, pythonConfig);
     }
 
+    /**
+     * Define a single, named step for a Python pipeline.
+     *
+     * @param pythonConfig Konduit PythonConfig
+     * @param inputSchema DataVec Schema for data input
+     * @param outputSchema DataVec Schema for data output
+     * @return this python step
+     * @throws Exception key error
+     */
+    public  PythonPipelineStep step(PythonConfig pythonConfig, Schema inputSchema,
+                                    Schema outputSchema) throws Exception {
+        return this.step("default", pythonConfig, inputSchema, outputSchema);
+    }
 
     /**
      * Define a single, named step for a Python pipeline.
@@ -191,6 +207,16 @@ public class PythonPipelineStep extends PipelineStep {
         return this;
     }
 
+    /**
+     * Define a Python config for this step.
+     *
+     * @param pythonConfig Konduit PythonConfig
+     * @return this Python step
+     */
+    public PythonPipelineStep pythonConfig(PythonConfig pythonConfig) {
+        return this.pythonConfig("default", pythonConfig);
+    }
+
 
     /**
      * Define a Python config for this step.
@@ -230,7 +256,7 @@ public class PythonPipelineStep extends PipelineStep {
                 case FILE:
                 case DICT:
                 default:
-                    throw new UnsupportedDataTypeException(String.format("Can't convert (%s) to (%s) enum", pythonVarType.name(), SchemaType.class.getName()));
+                    throw new IllegalArgumentException(String.format("Can't convert (%s) to (%s) enum", pythonVarType.name(), SchemaType.class.getName()));
             }
         } catch (Exception e) {
             e.printStackTrace();
