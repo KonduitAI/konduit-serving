@@ -46,6 +46,24 @@ public class TransformProcessPipelineStep extends PipelineStep {
     @Singular
     private Map<String, TransformProcess> transformProcesses;
 
+    public TransformProcessPipelineStep input(String[] columnNames, SchemaType[] types) throws Exception {
+        return (TransformProcessPipelineStep) super.input("default", columnNames, types);
+    }
+
+    public TransformProcessPipelineStep output(String[] columnNames, SchemaType[] types) throws Exception {
+        return (TransformProcessPipelineStep) super.output("default", columnNames, types);
+    }
+
+    @Override
+    public TransformProcessPipelineStep input(Schema inputSchema) throws Exception {
+        return (TransformProcessPipelineStep) super.input("default", inputSchema);
+    }
+
+    @Override
+    public TransformProcessPipelineStep output(Schema outputSchema) throws Exception {
+        return (TransformProcessPipelineStep) super.output("default", outputSchema);
+    }
+
     public TransformProcessPipelineStep input(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.input(inputName, columnNames, types);
     }
@@ -66,38 +84,47 @@ public class TransformProcessPipelineStep extends PipelineStep {
 
     /**
      * Create a TransformProcess Step with default input and output names
-     * just from input/output schema and the actual TransformProcess
+     * just from output schema and the actual TransformProcess. The
+     * input/initial schema can be inferred from the TransformProcess itself
      *
-     * @param inputSchema DataVec Schema for data input
-     * @param outputSchema DataVec Schema for data output
      * @param transformProcess DataVec TransformProcess
+     * @param outputSchema DataVec Schema for data output
      * @throws Exception key error
      */
-    public TransformProcessPipelineStep(Schema inputSchema, Schema outputSchema,
-                                        TransformProcess transformProcess) throws Exception {
-        String defaultName = "default";
-        this.input(defaultName, inputSchema);
-        this.output(defaultName, outputSchema);
-        this.transformProcess(defaultName, transformProcess);
+    public TransformProcessPipelineStep(TransformProcess transformProcess, Schema outputSchema) throws Exception {
+        this.step("default", transformProcess, outputSchema);
     }
 
     /**
      * Define a single, named step for a transform process.
      *
      * @param stepName input and output name for this step
-     * @param inputSchema DataVec Schema for data input
-     * @param outputSchema DataVec Schema for data output
      * @param transformProcess DataVec TransformProcess
+     * @param outputSchema DataVec Schema for data output
      * @return this transform process step
      * @throws Exception key error
      */
-    public TransformProcessPipelineStep step(String stepName, Schema inputSchema, Schema outputSchema,
-                                              TransformProcess transformProcess) throws Exception {
-        this.input(stepName, inputSchema);
+    public TransformProcessPipelineStep step(String stepName, TransformProcess transformProcess, Schema outputSchema
+                                              ) throws Exception {
+
+        this.input(stepName, transformProcess.getInitialSchema());
         this.output(stepName, outputSchema);
         this.transformProcess(stepName, transformProcess);
 
         return this;
+    }
+
+    /**
+     * Define a single, named step for a transform process.
+     *
+     * @param transformProcess DataVec TransformProcess
+     * @param outputSchema DataVec Schema for data output
+     * @return this transform process step
+     * @throws Exception key error
+     */
+    public TransformProcessPipelineStep step( TransformProcess transformProcess, Schema outputSchema
+    ) throws Exception {
+        return this.step("default", transformProcess, outputSchema);
     }
 
     /**
@@ -113,6 +140,16 @@ public class TransformProcessPipelineStep extends PipelineStep {
         }
         transformProcesses.put(inputName, transformProcess);
         return this;
+    }
+
+    /**
+     * Define a transform process for this step. The name for this step will be "default"
+     *
+     * @param transformProcess DataVec transform process
+     * @return this transform process step
+     */
+    public TransformProcessPipelineStep transformProcess(TransformProcess transformProcess) {
+        return this.transformProcess("default", transformProcess);
     }
 
     @Override

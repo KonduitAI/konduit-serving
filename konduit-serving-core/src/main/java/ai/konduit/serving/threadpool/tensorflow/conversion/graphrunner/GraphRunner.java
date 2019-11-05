@@ -60,10 +60,7 @@ import static org.bytedeco.tensorflow.global.tensorflow.*;
  * {@link INDArray} memory replicated to TensorFlow.
  *
  * {@link INDArray} is used to hold the memory
- * while TensorFlow's c bindings are  used for running the graph.
- *
- *
- *
+ * while TensorFlow's C bindings are  used for running the graph.
  *
  * @author Adam Gibson
  */
@@ -226,24 +223,24 @@ public class GraphRunner implements Closeable {
     public Map<String, TF_Tensor> recastInputs(Map<String, TF_Tensor> inputs, List<String> inputOrder, Map<String,TensorDataType> inputDataTypes) {
         if(inputDataTypes == null || inputDataTypes.isEmpty()) {
             inputDataTypes = new LinkedHashMap<>();
-            for(int i = 0; i < inputOrder.size(); i++) {
-                TensorDataType tensorDataType = TensorDataType.values()[inputs.get(inputOrder.get(i)).dtype()];
-                Preconditions.checkNotNull(tensorDataType,"Data type of " + inputs.get(inputOrder.get(i)).dtype() + " was null!");
-                inputDataTypes.put(inputOrder.get(i),tensorDataType);
+            for (String s : inputOrder) {
+                TensorDataType tensorDataType = TensorDataType.values()[inputs.get(s).dtype()];
+                Preconditions.checkNotNull(tensorDataType, "Data type of " + inputs.get(s).dtype() + " was null!");
+                inputDataTypes.put(s, tensorDataType);
             }
         }
 
         Map<String, TF_Tensor> ret = new HashMap<>();
-        for(int i = 0; i < inputOrder.size(); i++) {
-            TF_Tensor currInput = inputs.get(inputOrder.get(i));
+        for (String s : inputOrder) {
+            TF_Tensor currInput = inputs.get(s);
             TensorDataType fromDType = TensorDataType.values()[currInput.dtype()];
-            if(fromDType != inputDataTypes.get(inputOrder.get(i))) {
+            if (fromDType != inputDataTypes.get(s)) {
                 TF_Tensor oldTensor = currInput;
-                currInput = castTensor(currInput, fromDType, inputDataTypes.get(inputOrder.get(i)));
+                currInput = castTensor(currInput, fromDType, inputDataTypes.get(s));
                 TF_DeleteTensor(oldTensor);
             }
 
-            ret.put(inputOrder.get(i),currInput);
+            ret.put(s, currInput);
         }
 
         return ret;
@@ -267,8 +264,8 @@ public class GraphRunner implements Closeable {
 
         if(inputDataTypes == null) {
             inputDataTypes = new LinkedHashMap<>();
-            for(int i = 0; i < inputOrder.size(); i++) {
-                inputDataTypes.put(inputOrder.get(i),TensorDataType.values()[inputs.get(inputOrder.get(i)).dtype()]);
+            for (String s : inputOrder) {
+                inputDataTypes.put(s, TensorDataType.values()[inputs.get(s).dtype()]);
             }
         }
 

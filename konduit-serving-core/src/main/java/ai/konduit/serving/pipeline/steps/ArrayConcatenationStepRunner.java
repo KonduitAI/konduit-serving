@@ -66,18 +66,17 @@ public class ArrayConcatenationStepRunner extends BasePipelineStepRunner {
         }
 
         Map<Integer,List<INDArray>> arrays = new LinkedHashMap<>();
-        for(int i = 0; i < input.length; i++) {
-            for(int j = 0 ; j < input[i].getRecord().size(); j++) {
+        for (Record record : input) {
+            for (int j = 0; j < record.getRecord().size(); j++) {
                 List<INDArray> nameArraysToConcat;
-                if(!arrays.containsKey(j)) {
+                if (!arrays.containsKey(j)) {
                     nameArraysToConcat = new ArrayList<>();
-                    arrays.put(j,nameArraysToConcat);
-                }
-                else {
+                    arrays.put(j, nameArraysToConcat);
+                } else {
                     nameArraysToConcat = arrays.get(j);
                 }
 
-                NDArrayWritable ndArrayWritable = (NDArrayWritable) input[i].getRecord().get(j);
+                NDArrayWritable ndArrayWritable = (NDArrayWritable) record.getRecord().get(j);
                 nameArraysToConcat.add(ndArrayWritable.get());
             }
         }
@@ -86,11 +85,7 @@ public class ArrayConcatenationStepRunner extends BasePipelineStepRunner {
         for(Map.Entry<Integer,List<INDArray>> entry : arrays.entrySet()) {
             INDArray[] toConcat = entry.getValue().toArray(new INDArray[0]);
             int concatDim;
-            if(concatDimensionsForIndex.containsKey(entry.getKey())) {
-                concatDim = concatDimensionsForIndex.get(entry.getKey());
-            }
-            else
-                concatDim = 0;
+            concatDim = concatDimensionsForIndex.getOrDefault(entry.getKey(), 0);
 
             ret[0].getRecord().set(entry.getKey(), new NDArrayWritable(Nd4j.concat(concatDim,toConcat)));
         }

@@ -50,7 +50,9 @@ config.json
 .classpath
 
 # uberjar creation
-pipelines.jar
 konduit.jar
 python/tests/config.json
 !docker/konduit-python/config.json
+
+# notebooks
+.ipynb_checkpoints

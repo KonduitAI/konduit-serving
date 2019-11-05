@@ -40,10 +40,7 @@ import org.nd4j.base.Preconditions;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Run python code as part of a {@link Pipeline}
@@ -117,10 +114,9 @@ public class PythonPipelineStepRunner extends BasePipelineStepRunner {
             if(transformProcesses.containsKey(pipelineStep.inputNameAt(i))) {
                 TransformProcess transformProcess = transformProcesses.get(pipelineStep.inputNameAt(i));
                 Preconditions.checkState(input[i].getRecord() != null && !input[i].getRecord().isEmpty(),"Record should not be empty!");
-                List<List<Writable>> execute = LocalTransformExecutor.execute(Arrays.asList(input[i].getRecord()),transformProcess );
+                List<List<Writable>> execute = LocalTransformExecutor.execute(Collections.singletonList(input[i].getRecord()), transformProcess);
                 ret[i] =  new org.datavec.api.records.impl.Record(execute.get(0),null);
-            }
-            else {
+            } else {
                 ret[i] = input[i];
             }
         }

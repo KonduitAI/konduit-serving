@@ -61,8 +61,8 @@ public class CustomImagePreProcessingScaler implements DataNormalization {
 
     /**
      * Preprocessor can take a range as minRange and maxRange
-     * @param a, default = 0
-     * @param b, default = 1
+     * @param a default = 0
+     * @param b default = 1
      * @param maxBits in the image, default = 8
      */
     public CustomImagePreProcessingScaler(double a, double b, int maxBits) {

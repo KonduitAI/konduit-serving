@@ -74,9 +74,9 @@ public class PythonPipelineTests {
                 .ndArrayScalarOpTransform("first", MathOp.Add,1.0).build();
 
         TransformProcessPipelineStep tpStep = new TransformProcessPipelineStep()
-                .input("default", new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
-                .output("default", new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
-                .transformProcess("default", transformProcess);
+                .input(new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
+                .output(new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
+                .transformProcess(transformProcess);
         
         TransformProcessPipelineStepRunner transformProcessPipelineStep = new TransformProcessPipelineStepRunner(tpStep);
 
