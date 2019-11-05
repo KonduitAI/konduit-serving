@@ -25,19 +25,15 @@ package ai.konduit.serving.pipeline;
 import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.config.ServingConfig;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
 
 import java.util.HashMap;
 
 @SuperBuilder
 @Data
-@NoArgsConstructor
 public class ModelPipelineStep extends PipelineStep {
 
     private ModelConfig modelConfig;
@@ -46,6 +42,8 @@ public class ModelPipelineStep extends PipelineStep {
     private ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
 
     private NormalizationConfig normalizationConfig;
+
+    public ModelPipelineStep() {}
 
     public ModelPipelineStep(ModelConfig modelConfig) {
         this.modelConfig = modelConfig;

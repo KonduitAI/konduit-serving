@@ -43,6 +43,10 @@ public class PythonPipelineStep extends PipelineStep {
     @Singular
     private Map<String, PythonConfig> pythonConfigs;
 
+    public PythonPipelineStep(PythonConfig pythonConfig) throws Exception {
+        this.step(pythonConfig);
+    }
+
     /**
      * Create a PythonConfig Step with default input and output names
      * from column names, schema types and the actual PythonConfig
@@ -94,6 +98,19 @@ public class PythonPipelineStep extends PipelineStep {
         this.pythonConfig(defaultName, pythonConfig);
     }
 
+    /**
+     * Define a single, named step for a Python pipeline.
+     *
+     * @param pythonConfig Konduit PythonConfig
+     * @param inputSchema DataVec Schema for data input
+     * @param outputSchema DataVec Schema for data output
+     * @return this python step
+     * @throws Exception key error
+     */
+    public  PythonPipelineStep step(PythonConfig pythonConfig, Schema inputSchema,
+                                    Schema outputSchema) throws Exception {
+        return this.step("default", pythonConfig, inputSchema, outputSchema);
+    }
 
     /**
      * Define a single, named step for a Python pipeline.
@@ -188,6 +205,16 @@ public class PythonPipelineStep extends PipelineStep {
         this.pythonConfig(stepName, pythonConfig);
 
         return this;
+    }
+
+    /**
+     * Define a Python config for this step.
+     *
+     * @param pythonConfig Konduit PythonConfig
+     * @return this Python step
+     */
+    public PythonPipelineStep pythonConfig(PythonConfig pythonConfig) {
+        return this.pythonConfig("default", pythonConfig);
     }
 
 
