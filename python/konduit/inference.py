@@ -4,7 +4,7 @@ from jnius import autoclass
 SchemaTypeUtils = autoclass("ai.konduit.serving.util.SchemaTypeUtils")
 
 
-def set_input_columns_func(self, input_name, column_names):
+def set_input_columns_func(self, column_names, input_name="default"):
     input_columns = self._get_input_column_names()
     if input_columns is None:
         input_columns = {}
@@ -12,7 +12,7 @@ def set_input_columns_func(self, input_name, column_names):
     self._set_input_column_names(input_columns)
 
 
-def set_output_columns_func(self, output_name, column_names):
+def set_output_columns_func(self, column_names, output_name="default"):
     output_columns = self._get_output_column_names()
     if output_columns is None:
         output_columns = {}
@@ -20,7 +20,7 @@ def set_output_columns_func(self, output_name, column_names):
     self._set_output_column_names(output_columns)
 
 
-def set_input_types_func(self, input_name, types):
+def set_input_types_func(self, types, input_name="default"):
     schemas = self._get_input_schemas()
     if schemas is None:
         schemas = {}
@@ -28,7 +28,7 @@ def set_input_types_func(self, input_name, types):
     self._set_input_schemas(schemas)
 
 
-def set_output_types_func(self, output_name, types):
+def set_output_types_func(self, types, output_name="default"):
     schemas = self._get_output_schemas()
     if schemas is None:
         schemas = {}
@@ -36,7 +36,7 @@ def set_output_types_func(self, output_name, types):
     self._set_output_schemas(schemas)
 
 
-def set_input_func(self, input_name, schema=None, column_names=None, types=None):
+def set_input_func(self, schema=None, column_names=None, types=None, input_name="default"):
     names = self._get_input_names()
     if names is None:
         names = []
@@ -59,7 +59,7 @@ def set_input_func(self, input_name, schema=None, column_names=None, types=None)
                         "please choose another name for your next step.")
 
 
-def set_output_func(self, output_name, schema=None, column_names=None, types=None):
+def set_output_func(self, schema=None, column_names=None, types=None, output_name="default"):
     names = self._get_output_names()
     if names is None:
         names = []
@@ -90,9 +90,7 @@ PipelineStep.set_input = set_input_func
 PipelineStep.set_output = set_output_func
 
 
-def step_func(self, input_schema, output_schema, transform_process, step_name=None):
-    if step_name is None:
-        step_name = "default"
+def step_func(self, input_schema, output_schema, transform_process, step_name="default"):
     self.set_input(step_name, input_schema)
     self.set_output(step_name, output_schema)
     self.transform_process(step_name, transform_process)
@@ -100,7 +98,7 @@ def step_func(self, input_schema, output_schema, transform_process, step_name=No
     return self
 
 
-def transform_process_func(self, input_name, transform_process):
+def transform_process_func(self, transform_process, input_name="default"):
     tps = self._get_transform_processes()
     if tps is None:
         tps = {}
@@ -114,10 +112,8 @@ TransformProcessPipelineStep.step = step_func
 TransformProcessPipelineStep.transform_process = transform_process_func
 
 
-def python_step_func(self, python_config, step_name=None, input_schema=None, input_column_names=None, input_types=None,
-                     output_schema=None, output_column_names=None, output_types=None):
-    if step_name is None:
-        step_name = "default"
+def python_step_func(self, python_config, step_name="default", input_schema=None, input_column_names=None,
+                     input_types=None, output_schema=None, output_column_names=None, output_types=None):
     self.set_input(step_name, input_schema, input_column_names, input_types)
     self.set_output(step_name, output_schema,
                     output_column_names, output_types)
@@ -126,7 +122,7 @@ def python_step_func(self, python_config, step_name=None, input_schema=None, inp
     return self
 
 
-def python_config_func(self, step_name, python_config):
+def python_config_func(self, python_config, step_name="default"):
     python_configs = self._get_python_configs()
     if python_configs is None:
         python_configs = {}
