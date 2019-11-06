@@ -12,4 +12,4 @@ mv konduit.jar docker/konduit-python/konduit.jar
 
 cd docker/konduit-python || exit
 
-docker build -t konduit-python .
+docker build -t konduit/konduit-python .

@@ -57,11 +57,11 @@ with open('script.py', 'r') as script_file:
     }
 
     pythonPipelineStep = PythonPipelineStep(input_names=["default"],
-                                            output_names=["default"],
-                                            input_schemas={"default": [value for _, value in inputs]},
-                                            output_schemas={"default": [value for _, value in outputs]},
                                             input_column_names={"default": [key for key, _ in inputs]},
-                                            output_column_names={"default":[key for key, _ in outputs]},
+                                            input_schemas={"default": [value for _, value in inputs]},
+                                            output_names=["default"],
+                                            output_column_names={"default": [key for key, _ in outputs]},
+                                            output_schemas={"default": [value for _, value in outputs]},
                                             python_configs={"default": pythonConfig})
 
     inference = InferenceConfiguration(serving_config=serving_config,

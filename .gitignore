@@ -52,7 +52,6 @@ config.json
 # uberjar creation
 konduit.jar
 python/tests/config.json
-!docker/konduit-python/config.json
 
 # notebooks
 .ipynb_checkpoints
