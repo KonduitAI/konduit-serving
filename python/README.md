@@ -10,34 +10,40 @@
 
 ## Installation
 
-To install this Python package from source, run `python setup.py install` in this directory. 
+install `kondut` from PyPI with `pip install konduit`. You can also install this Python package
+from source, run `pip install .` in this directory. We recommend using Python 3.7+.
 
-You can also install it from PyPI with `pip install konduit`.
-
-We recommend using **Python 3.7+**.
-
-## Build Konduit Serving JAR
- 
-To run any examples with `konduit`, you need to build a Konduit Serving JAR first. 
-We provide a Python script `build_jar.py` at the base of this project to 
-build a Konduit Serving JAR `konduit.jar`: 
+Once the package itself is installed, you have access to a command line interface (CLI) tool
+called `konduit-python`. This helper tool can build the Java dependencies needed for `konduit`
+for you under the hood. All you need to do is run:
 
 ```bash
-cd ..
-python build_jar.py --os <your-platform>
+konduit-python --os <your-platform>
 ```
 
 where `<your-platform>` is picked from `windows-x86_64`,`linux-x86_64`,`linux-x86_64-gpu`,
 `macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`, depending on your operating system
-and architecture.
+and architecture. This tool assumes that you have `git` installed on your system and that `python3` is
+available. If you don't want to use the CLI tool and have cloned this repository, you can also build
+the necessary jar on your own like this:
 
-`build_jar.py` uses **Python 3.4+**, but `konduit` itself is Python 2.7 compatible.
+```bash
+cd ..
+python3 build_jar.py --os <your-platform>
+```
 
 ## Using Konduit
 
-To use konduit, make sure to export the environment variable `KONDUIT_JAR_PATH`. If you don't, this
-will path will default to `konduit.jar`. So if you have `konduit.jar` at the base of the Python script you
-want to execute, it will work without setting the above environment variable.
+To use konduit, make sure to export the environment variable `KONDUIT_JAR_PATH`. If you used the CLI this
+will be set to `~/.konduit/konduit-serving/konduit.jar`. Make sure to put this in your `zshrc`, `bashrc`, or
+similar files on your respective system that you might be using, i.e. put
+
+```bash
+export KONDUIT_JAR_PATH="~/.konduit/konduit-serving/konduit.jar"
+```
+
+in there. If you don't export this variable, it will default to `konduit.jar`. So if you have `konduit.jar` at the 
+base of the Python script you want to execute, it will work without setting the above environment variable.
 
 ## Running tests
 

@@ -31,11 +31,11 @@ def git_clone_konduit(use_https=True):
 
 def build_jar(operating_sys):
     """Build the actual JAR, using our mvnw wrapper under the hood."""
-    # try:
-    #     subprocess.call(['python3', '--version'])
-    # except:
-    #     RuntimeError(
-    #         'No python3 found on your system. Make sure to install python3 first, then run konduit-python again')
+    try:
+        subprocess.call(['python3', '--version'])
+    except:
+        RuntimeError(
+            'No python3 found on your system. Make sure to install python3 first, then run konduit-python again')
     try:
         subprocess.call(['python3', opos.path.join(KONDUIT_DIR, 'build_jar.py'), '--os', operating_sys,
                          '--source', KONDUIT_DIR])
