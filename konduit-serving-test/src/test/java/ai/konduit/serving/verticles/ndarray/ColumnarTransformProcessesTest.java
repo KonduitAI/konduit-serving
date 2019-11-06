@@ -128,8 +128,8 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .build();
 
         ModelPipelineStep modelStepConfig = new ModelPipelineStep(modelConfig)
-                .input(inputSchema)
-                .output(outputSchema);
+                .setInput(inputSchema)
+                .setOutput(outputSchema);
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)

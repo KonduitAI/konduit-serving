@@ -121,8 +121,8 @@ public abstract class PipelineStep implements Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    public PipelineStep input(String[] columnNames, SchemaType[] types) throws Exception {
-        return this.input("default", columnNames, types);
+    public PipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
+        return this.setInput("default", columnNames, types);
     }
 
     /**
@@ -135,7 +135,7 @@ public abstract class PipelineStep implements Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    public PipelineStep input(String inputName, String[] columnNames, SchemaType[] types)
+    public PipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types)
             throws Exception {
 
         List<String> names = getInputNames();
@@ -165,8 +165,8 @@ public abstract class PipelineStep implements Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    public PipelineStep input(Schema inputSchema) throws Exception {
-        return this.input("default", inputSchema);
+    public PipelineStep setInput(Schema inputSchema) throws Exception {
+        return this.setInput("default", inputSchema);
     }
 
 
@@ -178,7 +178,7 @@ public abstract class PipelineStep implements Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    public PipelineStep input(String inputName, Schema inputSchema) throws Exception {
+    public PipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
 
         List<String> names = getInputNames();
         if (names == null) {
@@ -213,9 +213,9 @@ public abstract class PipelineStep implements Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    public PipelineStep output(String[] columnNames, SchemaType[] types)
+    public PipelineStep setOutput(String[] columnNames, SchemaType[] types)
             throws Exception {
-        return this.output("default", columnNames, types);
+        return this.setOutput("default", columnNames, types);
     }
 
     /**
@@ -228,7 +228,7 @@ public abstract class PipelineStep implements Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    public PipelineStep output(String outputName, String[] columnNames, SchemaType[] types)
+    public PipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types)
             throws Exception {
 
         List<String> names = getOutputNames();
@@ -258,8 +258,8 @@ public abstract class PipelineStep implements Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    public PipelineStep output(Schema outputSchema) throws Exception {
-        return this.output("default", outputSchema);
+    public PipelineStep setOutput(Schema outputSchema) throws Exception {
+        return this.setOutput("default", outputSchema);
     }
 
     /**
@@ -270,7 +270,7 @@ public abstract class PipelineStep implements Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    public PipelineStep output(String outputName, Schema outputSchema) throws Exception {
+    public PipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
 
         List<String> names = getOutputNames();
         if (names == null) {

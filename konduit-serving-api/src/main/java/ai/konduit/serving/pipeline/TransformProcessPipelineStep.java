@@ -23,7 +23,6 @@
 package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,40 +45,40 @@ public class TransformProcessPipelineStep extends PipelineStep {
     @Singular
     private Map<String, TransformProcess> transformProcesses;
 
-    public TransformProcessPipelineStep input(String[] columnNames, SchemaType[] types) throws Exception {
-        return (TransformProcessPipelineStep) super.input("default", columnNames, types);
+    public TransformProcessPipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
+        return (TransformProcessPipelineStep) super.setInput("default", columnNames, types);
     }
 
-    public TransformProcessPipelineStep output(String[] columnNames, SchemaType[] types) throws Exception {
-        return (TransformProcessPipelineStep) super.output("default", columnNames, types);
-    }
-
-    @Override
-    public TransformProcessPipelineStep input(Schema inputSchema) throws Exception {
-        return (TransformProcessPipelineStep) super.input("default", inputSchema);
+    public TransformProcessPipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
+        return (TransformProcessPipelineStep) super.setOutput("default", columnNames, types);
     }
 
     @Override
-    public TransformProcessPipelineStep output(Schema outputSchema) throws Exception {
-        return (TransformProcessPipelineStep) super.output("default", outputSchema);
-    }
-
-    public TransformProcessPipelineStep input(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (TransformProcessPipelineStep) super.input(inputName, columnNames, types);
-    }
-
-    public TransformProcessPipelineStep output(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (TransformProcessPipelineStep) super.output(outputName, columnNames, types);
+    public TransformProcessPipelineStep setInput(Schema inputSchema) throws Exception {
+        return (TransformProcessPipelineStep) super.setInput("default", inputSchema);
     }
 
     @Override
-    public TransformProcessPipelineStep input(String inputName, Schema inputSchema) throws Exception {
-        return (TransformProcessPipelineStep) super.input(inputName, inputSchema);
+    public TransformProcessPipelineStep setOutput(Schema outputSchema) throws Exception {
+        return (TransformProcessPipelineStep) super.setOutput("default", outputSchema);
+    }
+
+    public TransformProcessPipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
+        return (TransformProcessPipelineStep) super.setInput(inputName, columnNames, types);
+    }
+
+    public TransformProcessPipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
+        return (TransformProcessPipelineStep) super.setOutput(outputName, columnNames, types);
     }
 
     @Override
-    public TransformProcessPipelineStep output(String outputName, Schema outputSchema) throws Exception {
-        return (TransformProcessPipelineStep) super.output(outputName, outputSchema);
+    public TransformProcessPipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
+        return (TransformProcessPipelineStep) super.setInput(inputName, inputSchema);
+    }
+
+    @Override
+    public TransformProcessPipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
+        return (TransformProcessPipelineStep) super.setOutput(outputName, outputSchema);
     }
 
     /**
@@ -107,8 +106,8 @@ public class TransformProcessPipelineStep extends PipelineStep {
     public TransformProcessPipelineStep step(String stepName, TransformProcess transformProcess, Schema outputSchema
                                               ) throws Exception {
 
-        this.input(stepName, transformProcess.getInitialSchema());
-        this.output(stepName, outputSchema);
+        this.setInput(stepName, transformProcess.getInitialSchema());
+        this.setOutput(stepName, outputSchema);
         this.transformProcess(stepName, transformProcess);
 
         return this;
