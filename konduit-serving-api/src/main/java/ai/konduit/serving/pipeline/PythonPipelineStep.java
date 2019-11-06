@@ -61,8 +61,8 @@ public class PythonPipelineStep extends PipelineStep {
     public PythonPipelineStep(PythonConfig pythonConfig, String[] inputColumnNames, SchemaType[] inputTypes,
                               String[] outputColumnNames, SchemaType[] outputTypes) throws Exception {
         String defaultName = "default";
-        this.input(defaultName, inputColumnNames, inputTypes);
-        this.output(defaultName, outputColumnNames, outputTypes);
+        this.setInput(defaultName, inputColumnNames, inputTypes);
+        this.setOutput(defaultName, outputColumnNames, outputTypes);
         this.pythonConfig(defaultName, pythonConfig);
     }
 
@@ -93,8 +93,8 @@ public class PythonPipelineStep extends PipelineStep {
     public PythonPipelineStep(Schema inputSchema, Schema outputSchema,
                               PythonConfig pythonConfig) throws Exception {
         String defaultName = "default";
-        this.input(defaultName, inputSchema);
-        this.output(defaultName, outputSchema);
+        this.setInput(defaultName, inputSchema);
+        this.setOutput(defaultName, outputSchema);
         this.pythonConfig(defaultName, pythonConfig);
     }
 
@@ -124,8 +124,8 @@ public class PythonPipelineStep extends PipelineStep {
      */
     public  PythonPipelineStep step(String stepName, PythonConfig pythonConfig, Schema inputSchema,
                                     Schema outputSchema) throws Exception {
-        this.input(stepName, inputSchema);
-        this.output(stepName, outputSchema);
+        this.setInput(stepName, inputSchema);
+        this.setOutput(stepName, outputSchema);
         this.pythonConfig(stepName, pythonConfig);
 
         return this;
@@ -180,8 +180,8 @@ public class PythonPipelineStep extends PipelineStep {
     public PythonPipelineStep step(String stepName, PythonConfig pythonConfig, String[] inputColumnNames,
                                    SchemaType[] inputTypes, String[] outputColumnNames, SchemaType[] outputTypes)
             throws Exception {
-        this.input(stepName, inputColumnNames, inputTypes);
-        this.output(stepName, outputColumnNames, outputTypes);
+        this.setInput(stepName, inputColumnNames, inputTypes);
+        this.setOutput(stepName, outputColumnNames, outputTypes);
         this.pythonConfig(stepName, pythonConfig);
 
         return this;
@@ -200,8 +200,8 @@ public class PythonPipelineStep extends PipelineStep {
     public PythonPipelineStep step(String stepName, PythonConfig pythonConfig, String[] inputColumnNames,
                                    SchemaType[] inputTypes)
             throws Exception {
-        this.input(stepName, inputColumnNames, inputTypes);
-        this.output(stepName, new String[]{}, new SchemaType[]{});
+        this.setInput(stepName, inputColumnNames, inputTypes);
+        this.setOutput(stepName, new String[]{}, new SchemaType[]{});
         this.pythonConfig(stepName, pythonConfig);
 
         return this;

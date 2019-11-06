@@ -6,7 +6,8 @@ def has_as_dict_attribute(object):
     :param object: any Python object
     """
     if not hasattr(object.__class__, 'as_dict') and callable(getattr(object.__class__, 'as_dict')):
-        raise AttributeError('Passed in object does not have an as_dict method.')
+        raise AttributeError(
+            'Passed in object does not have an as_dict method.')
 
 
 def _invoke_setter_on(input_object, method_name, value):
@@ -76,6 +77,7 @@ class DictWrapper:
     """Wraps a Python dictionary. The `as_dict` method unrolls
     to a regular Python dict.
     """
+
     def __init__(self, input_dict):
         assert type(input_dict) is dict, 'Input type must be a dictionary!'
         self.input_dict = input_dict
@@ -96,6 +98,7 @@ class ListWrapper:
     be used. It's there for duck-type-style checks of Java
     classes.
     """
+
     def __init__(self, input_list):
         assert type(input_list) is list, 'Input type must be a list!'
         self.input_list = input_list

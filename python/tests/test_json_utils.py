@@ -48,4 +48,3 @@ def test_as_dict_checker():
 
     with pytest.raises(Exception):
         has_as_dict_attribute(FooNotCallable())
-

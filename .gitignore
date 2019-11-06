@@ -27,7 +27,10 @@ target/
 .idea/
 
 unzip/
-
+*target*
+**/target/**
+konduit-serving-api/target/
+..bfg-report
 # Vert.xA
 .vertx/
 

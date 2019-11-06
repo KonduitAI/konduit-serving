@@ -342,6 +342,7 @@ public class PipelineExecutioner {
             INDArray[] arrays = SchemaTypeUtils.toArrays(records);
             Map<String, BatchOutput> adapt;
             switch(outputAdapterType) {
+                // TODO: output adapters are meant to have only one output here, but they could be named differently
                 case CLASSIFICATION:
                     adapt = classificationMultiOutputAdapter.adapt(arrays, Arrays.asList("default"), ctx);
                     break;

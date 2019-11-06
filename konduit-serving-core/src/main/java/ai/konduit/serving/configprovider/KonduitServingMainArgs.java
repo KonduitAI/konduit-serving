@@ -48,6 +48,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class KonduitServingMainArgs implements Serializable {
+
     private String configHost;
     private int configPort;
     private String configStoreType;
@@ -63,8 +64,6 @@ public class KonduitServingMainArgs implements Serializable {
     @Builder.Default
     private int workerPoolSize = 1;
     private String verticleClassName;
-    @Builder.Default
-    private boolean allowRetrain = false;
     @Builder.Default
     private String vertxWorkingDirectory = System.getProperty("user.home");
     private InputDataType inputType;

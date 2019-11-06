@@ -179,7 +179,7 @@ public class PythonTransform implements Transform {
                 return getWritablesFromPyOutputs(out);
             }
             else {
-                PythonExecutioner.exec(code,pyInputs,outputs);
+                PythonExecutioner.execWithSetupAndRun(code,pyInputs,outputs);
                 return getWritablesFromPyOutputs(outputs);
             }
 

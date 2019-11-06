@@ -8,14 +8,8 @@ from requests_toolbelt.multipart import decoder, encoder
 
 
 class Client(object):
-    def __init__(self,
-                 timeout=60,
-                 input_type='JSON',
-                 endpoint_output_type='JSON',
-                 return_output_type=None,
-                 input_names=None,
-                 output_names=None,
-                 url=''):
+    def __init__(self, timeout=60, input_type='NUMPY', endpoint_output_type='NUMPY',
+                 return_output_type=None, input_names=None, output_names=None, url=None):
 
         if input_names is None:
             input_names = []
@@ -91,18 +85,10 @@ class Client(object):
         return ret
 
     @staticmethod
-    # FIXME: this is highly confusing. why is the default value a list?
-    def _encode_multi_part_input(parts=[]):
-        if type(parts) is dict:
-            new_parts = []
-            for key, value in parts.items():
-                new_parts.append((key, value))
-            parts = new_parts
-
-        encoded_parts = []
-        for key, value in parts:
-            add = (key, value if type(value) is tuple else value)
-            encoded_parts.append(add)
+    def _encode_multi_part_input(parts=None):
+        if parts is None:
+            parts = {}
+        encoded_parts = [(k, v) for k, v in parts.items()]
         ret = encoder.MultipartEncoder(encoded_parts)
         return ret.to_string(), ret.content_type
 
@@ -113,10 +99,8 @@ class Client(object):
         ret = {}
         for key, value in data_input.items():
             if isinstance(value, np.ndarray):
-                bytes_io = Client._convert_numpy_to_binary(value)
-                ret[key] = (key, bytes_io)
-            else:
-                ret[key] = value
+                value = Client._convert_numpy_to_binary(value)
+            ret[key] = value
         return ret
 
     def _convert_multi_part_output(self, content, content_type):
@@ -148,7 +132,7 @@ class Client(object):
                 'Attempting to execute multi part request with input type specified as json.')
 
         for key, value in data_input.items():
-            root_name = re.sub(r'\\[[0-9]+\\]', '', key)
+            root_name = re.sub('\\[[0-9]+\\]', '', key)
             if root_name not in self.input_names:
                 raise ValueError('Specified root name ' +
                                  root_name + ' not found in input names.')

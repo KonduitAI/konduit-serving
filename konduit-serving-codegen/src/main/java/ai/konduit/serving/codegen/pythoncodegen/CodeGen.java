@@ -87,7 +87,7 @@ public class CodeGen {
         pythonImports.append("import enum\n");
         pythonImports.append("from konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n");
 
-        File newModule = new File( projectBasePath + sep + "python" + sep + "konduit" + sep + "inference.py");
+        File newModule = new File( projectBasePath + sep + "python" + sep + "konduit" + sep + "base_inference.py");
         newModule.delete();
         Runtime runtime = Runtime.getRuntime();
         Pattern replace = Pattern.compile("class\\s[A-Za-z]+:");
