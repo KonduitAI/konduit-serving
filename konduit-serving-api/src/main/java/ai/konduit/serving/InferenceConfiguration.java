@@ -22,12 +22,14 @@
 
 package ai.konduit.serving;
 
-import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.pipeline.PipelineStep;
 import lombok.*;
 import org.datavec.api.transform.serde.JsonMappers;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
+import org.nd4j.shade.jackson.databind.DeserializationFeature;
 import org.nd4j.shade.jackson.databind.ObjectMapper;
+import org.nd4j.shade.jackson.databind.SerializationFeature;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -84,7 +86,7 @@ public class InferenceConfiguration implements Serializable  {
      */
     public static InferenceConfiguration fromYaml(String yaml)throws  IOException {
         ObjectMapper mapper = JsonMappers.getMapperYaml();
-        return mapper.readValue(yaml,InferenceConfiguration.class);
+        return mapper.readValue(yaml, InferenceConfiguration.class);
     }
 
 
@@ -96,8 +98,9 @@ public class InferenceConfiguration implements Serializable  {
      * @throws IOException I/O exception
      */
     public static InferenceConfiguration fromJson(String json) throws IOException {
-        return JsonMappers.getMapper().readValue(json, InferenceConfiguration.class);
+        ObjectMapper objectMapper = JsonMappers.getMapper();
+        objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+        objectMapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
+        return objectMapper.readValue(json, InferenceConfiguration.class);
     }
-
-
 }

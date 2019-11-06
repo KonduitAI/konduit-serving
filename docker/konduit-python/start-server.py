@@ -2,10 +2,14 @@ import random
 import re
 import sys
 import os
+import numpy as np
+import time
 
 from konduit import ServingConfig, PythonPipelineStep
 from konduit import InferenceConfiguration
 from konduit.server import Server
+from konduit.client import Client
+from konduit.utils import is_port_in_use
 
 
 def cleanup(value, key):
@@ -31,6 +35,16 @@ def get_individuals(read_input, key):
     return ret
 
 
+def schema_type(python_type):
+    return {
+        "NDARRAY": "NDArray",
+        "BOOL": "Boolean",
+        "STR": "String",
+        "INT": "Integer",
+        "FLOAT": "Float"
+    }.get(python_type, "NDArray")
+
+
 with open('script.py', 'r') as script_file:
     content = script_file.read()
 
@@ -50,6 +64,7 @@ with open('script.py', 'r') as script_file:
                                    log_timings=True)
 
     pythonConfig = {
+        "@type": "PythonConfig",
         "pythonPath": ";".join(path.strip() for path in sys.path if path.strip()),
         "pythonCodePath": os.path.abspath("script.py"),
         "pythonInputs": dict(inputs),
@@ -58,10 +73,10 @@ with open('script.py', 'r') as script_file:
 
     pythonPipelineStep = PythonPipelineStep(input_names=["default"],
                                             input_column_names={"default": [key for key, _ in inputs]},
-                                            input_schemas={"default": [value for _, value in inputs]},
+                                            input_schemas={"default": [schema_type(value) for _, value in inputs]},
                                             output_names=["default"],
                                             output_column_names={"default": [key for key, _ in outputs]},
-                                            output_schemas={"default": [value for _, value in outputs]},
+                                            output_schemas={"default": [schema_type(value) for _, value in outputs]},
                                             python_configs={"default": pythonConfig})
 
     inference = InferenceConfiguration(serving_config=serving_config,
@@ -72,3 +87,27 @@ with open('script.py', 'r') as script_file:
                     jar_path='konduit.jar')
 
     server.start()
+
+    client = Client(input_names=[key for key, _ in inputs],
+                    output_names=[key for key, _ in outputs],
+                    input_type='NUMPY',
+                    endpoint_output_type='NUMPY',
+                    url='http://localhost:' + str(port))
+
+    data_input = {
+        'x': np.ones([2, 2]),
+        'y': np.ones([2, 2])
+    }
+
+    sleep_time = 40
+    print('Process started. Sleeping ' + str(sleep_time) + ' seconds.')
+    time.sleep(sleep_time)
+    port_in_use = is_port_in_use(port)
+
+    try:
+        predicted = client.predict(data_input)
+        print(predicted)
+        server.stop()
+    except Exception as e:
+        print(e)
+        server.stop()
