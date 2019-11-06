@@ -37,6 +37,7 @@
         <module>konduit-serving-api</module>
         <module>konduit-serving-codegen</module>
         <module>konduit-serving-distro-bom</module>
+        <module>konduit-serving-orchestration</module>
     </modules>
 
     <name>konduit-serving</name>
@@ -666,12 +667,6 @@
             </activation>
             <modules>
                 <module>konduit-serving-native</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>orchestration</id>
-            <modules>
-                <module>konduit-serving-orchestration</module>
             </modules>
         </profile>
         <profile>
