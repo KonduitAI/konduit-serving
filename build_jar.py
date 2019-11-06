@@ -6,15 +6,6 @@ import re
 from distutils.util import strtobool
 
 
-with open('pom.xml', 'r') as pom:
-    content = pom.read()
-    regex = r"<version>(\d+.\d+.\d+)</version>"
-    results = re.findall(regex, content)
-
-
-PROJECT_VERSION=results[0]
-
-
 if __name__ == '__main__':
     '''
     Example:
@@ -58,9 +49,14 @@ if __name__ == '__main__':
     if strtobool(args.usePmml):
         command += ' -Ppmml'
 
+    with open(os.path.join(args.source, 'pom.xml'), 'r') as pom:
+        content = pom.read()
+        regex = r"<version>(\d+.\d+.\d+)</version>"
+        version = re.findall(regex, content)
+
     print('Running command: ' + command)
     subprocess.run(command, cwd=args.source, shell=True, check=True)
     copyfile(
-        os.path.join(args.source, 'konduit-serving-uberjar', 'target', 'konduit-serving-uberjar-{}-bin.jar'.format(PROJECT_VERSION)),
+        os.path.join(args.source, 'konduit-serving-uberjar', 'target', 'konduit-serving-uberjar-{}-bin.jar'.format(version[0])),
         args.target
     )
