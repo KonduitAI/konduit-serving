@@ -15,9 +15,9 @@ def test_build_tp():
         'org.datavec.api.transform.TransformProcess$Builder')
     TransformProcess = autoclass('org.datavec.api.transform.TransformProcess')
     StringJava = autoclass("java.lang.String")
-
     SchemaBuilder = autoclass(
         'org.datavec.api.transform.schema.Schema$Builder')
+
     schema = SchemaBuilder().addColumnString(StringJava('first')).build()
     tp = TransformProcessBuilder(schema) \
         .appendStringColumnTransform(StringJava("first"), StringJava("two")) \
@@ -46,7 +46,8 @@ def test_build_tp():
     as_json = config_to_dict_with_type(inference_config)
     inference_configuration_java = autoclass(
         'ai.konduit.serving.InferenceConfiguration')
-    config = inference_configuration_java.fromJson(
+
+    unused_config = inference_configuration_java.fromJson(
         StringJava(json.dumps(as_json)))
 
     server = Server(config=inference_config,
@@ -68,7 +69,6 @@ def test_build_tp():
 
     try:
         predicted = client.predict(data_input)
-
         print(predicted)
         server.stop()
     except Exception as e:
