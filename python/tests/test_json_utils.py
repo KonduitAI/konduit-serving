@@ -17,13 +17,13 @@ def test_dict_wrapper():
 
 
 def test_list_wrapper():
-    l = ['a', 'b', 'c']
-    lw = ListWrapper(l)
+    lst = ['a', 'b', 'c']
+    lw = ListWrapper(lst)
 
     # This is a national tragedy, but OK
     assert lw == lw.as_dict()
 
-    assert l == lw.as_list()
+    assert lst == lw.as_list()
 
     x = ''
     for i in lw:
