@@ -59,7 +59,7 @@ public class SameDiffInferenceExecutionerTests {
         Map<String,INDArray> indArrays = new LinkedHashMap<>();
         indArrays.put(input1.getVarName(),input1Arr);
         indArrays.put(input2.getVarName(),input2Arr);
-        Map<String, INDArray> outputs = sameDiff.execAll(indArrays);
+        Map<String, INDArray> outputs = sameDiff.outputAll(indArrays);
         assertEquals(3,outputs.size());
 
         ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();

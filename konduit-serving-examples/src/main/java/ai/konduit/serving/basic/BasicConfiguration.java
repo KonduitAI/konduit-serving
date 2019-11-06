@@ -59,7 +59,7 @@ public class BasicConfiguration {
          * Now we'll create the pipeline step for the transform process
          */
         TransformProcessPipelineStep transformProcessPipelineStep = new TransformProcessPipelineStep()
-                .step("default", inputSchema, outputSchema, transformProcess);
+                .step("default", transformProcess, outputSchema);
 
         /*
          * Now creating a test record input

@@ -71,37 +71,39 @@ with open('script.py', 'r') as script_file:
         "pythonOutputs": dict(outputs)
     }
 
-    pythonPipelineStep = PythonPipelineStep(input_names=["default"],
-                                            input_column_names={"default": [key for key, _ in inputs]},
-                                            input_schemas={"default": [schema_type(value) for _, value in inputs]},
-                                            output_names=["default"],
-                                            output_column_names={"default": [key for key, _ in outputs]},
-                                            output_schemas={"default": [schema_type(value) for _, value in outputs]},
-                                            python_configs={"default": pythonConfig})
+    default = "default"
+
+    pythonPipelineStep = PythonPipelineStep(input_names=[default],
+                                            input_column_names={default: [key for key, _ in inputs]},
+                                            input_schemas={default: [schema_type(value) for _, value in inputs]},
+                                            output_names=[default],
+                                            output_column_names={default: [key for key, _ in outputs]},
+                                            output_schemas={default: [schema_type(value) for _, value in outputs]},
+                                            python_configs={default: pythonConfig})
 
     inference = InferenceConfiguration(serving_config=serving_config,
                                        pipeline_steps=[pythonPipelineStep])
 
     server = Server(config=inference,
-                    extra_start_args='-Xmx8g',
+                    extra_start_args='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005',
                     jar_path='konduit.jar')
 
     server.start()
-
-    client = Client(input_names=[key for key, _ in inputs],
-                    output_names=[key for key, _ in outputs],
-                    input_type='NUMPY',
-                    endpoint_output_type='NUMPY',
-                    url='http://localhost:' + str(port))
-
-    data_input = {
-        'x': np.ones([2, 2]),
-        'y': np.ones([2, 2])
-    }
-
-    sleep_time = 40
+    sleep_time = 20
     print('Process started. Sleeping ' + str(sleep_time) + ' seconds.')
     time.sleep(sleep_time)
+
+    client = Client(input_names=["default:x", "default:y"],
+                    output_names=[default],
+                    input_type='NUMPY',
+                    endpoint_output_type='NUMPY',
+                    url='http://localhost:' + str(port), timeout=2000000)
+
+    data_input = {
+        'default:x': np.ones([2, 2]),
+        'default:y': np.ones([2, 2])
+    }
+
     port_in_use = is_port_in_use(port)
 
     try:

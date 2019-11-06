@@ -59,11 +59,9 @@ import java.util.*;
 @AllArgsConstructor
 public class BatchInputParser implements MultipartFileUploadHandler {
 
-    private Map<String,InputAdapter<Buffer, ?>> converters;
+    private Map<String, InputAdapter<Buffer, ?>> converters;
     private Map<String, ConverterArgs> converterArgs;
     private List<String> inputParts;
-
-
 
     /**
      * Create a batch from the {@link RoutingContext}
@@ -74,14 +72,12 @@ public class BatchInputParser implements MultipartFileUploadHandler {
      */
     public Record[] createBatch(RoutingContext routingContext) throws IOException {
         //partition the input content by name
-        Map<String,List<BatchPartInfo>> partInfo = partInfoForUploads(routingContext);
-        if(partInfo == null || partInfo.isEmpty()) {
+        Map<String, List<BatchPartInfo>> partInfo = partInfoForUploads(routingContext);
+        if(partInfo.isEmpty()) {
             throw new IllegalArgumentException("No parts resolved for file uploads!");
-        }
-        else if(!partInfo.containsKey(inputParts.get(0))) {
+        } else if(!partInfo.containsKey(inputParts.get(0))) {
             throw new IllegalArgumentException("Illegal part info resolved. Part info keys were " + partInfo.keySet() + " while input parts were " + inputParts);
         }
-
 
         int batchSize = partInfo.get(inputParts.get(0)).size();
         //batch size
@@ -97,7 +93,6 @@ public class BatchInputParser implements MultipartFileUploadHandler {
                 inputBatches[j].getRecord().add(null);
             }
         }
-
 
         Map<Integer,List<List<Writable>>> missingIndices = new LinkedHashMap<>();
         for(int i = 0; i < inputParts.size(); i++) {
@@ -118,8 +113,7 @@ public class BatchInputParser implements MultipartFileUploadHandler {
                     Writable writable = (Writable) convert;
                     inputBatches[j].getRecord().set(i,writable);
 
-                }
-                else {
+                } else {
                     ArrowWritableRecordBatch arrow = (ArrowWritableRecordBatch) convert;
                     missingIndices.put(j,arrow);
                 }
@@ -136,21 +130,17 @@ public class BatchInputParser implements MultipartFileUploadHandler {
                 }
             }
 
-            for(Map.Entry<Integer,List<List<Writable>>> entry : missingIndices.entrySet()) {
+            for(Map.Entry<Integer, List<List<Writable>>> entry : missingIndices.entrySet()) {
                 for(List<Writable> record : entry.getValue()) {
                     newRetRecords.add(new org.datavec.api.records.impl.Record(record,null));
                 }
             }
 
-
-            return newRetRecords.toArray(new Record[newRetRecords.size()]);
+            return newRetRecords.toArray(new Record[0]);
         }
 
         return inputBatches;
     }
-
-
-
 
     /**
      * Returns a list of {@link BatchPartInfo}
@@ -164,38 +154,36 @@ public class BatchInputParser implements MultipartFileUploadHandler {
      * @return a map indexing part name to a list of parts
      * for each input
      */
-    private Map<String,List<BatchPartInfo>> partInfoForUploads(RoutingContext ctx) {
+    private Map<String, List<BatchPartInfo>> partInfoForUploads(RoutingContext ctx) {
         if(ctx.fileUploads().isEmpty()) {
             throw new IllegalStateException("No files found for part info!");
-        }
-        else {
+        } else {
             log.debug("Found " + ctx.fileUploads().size() + " file uploads");
         }
 
-        Map<String,List<BatchPartInfo>> ret = new LinkedHashMap<>();
+        Map<String, List<BatchPartInfo>> ret = new LinkedHashMap<>();
         //parse each file upload all at once
         for(FileUpload upload : ctx.fileUploads()) {
             //the part name: inputName[index]
             String name = upload.name();
-            //likely a colon for a tensorflow name got passed in
+            //likely a colon for a TensorFlow name got passed in
             //verify against the name in the configuration and set it to that
             if(name.contains(" ")) {
                 name = name.replace(" ",":");
                 if(!inputParts.contains(name)) {
                     throw new IllegalStateException("Illegal name for multi part passed in " + upload.name());
-                }
-                else {
+                } else {
                     log.warn("Corrected input name "  + upload.name() + " to " + name);
                 }
             }
             //split the input name and the index
-            Pair<String,Integer> partNameAndIndex = partNameAndIndex(name);
+            Pair<String, Integer> partNameAndIndex = partNameAndIndex(name);
             //the part info for this particular file
             BatchPartInfo batchPartInfo = new BatchPartInfo(
-                    partNameAndIndex.getRight(),upload.uploadedFileName(),name);
-            //add the input name and accumulate the part info for each input
+                    partNameAndIndex.getRight(), upload.uploadedFileName(), name);
+            //add the input name and accumulate the part info for each sub input
             if (!ret.containsKey(partNameAndIndex.getFirst())) {
-                ret.put(partNameAndIndex.getFirst(),new ArrayList<>());
+                ret.put(partNameAndIndex.getFirst(), new ArrayList<>());
             }
 
             List<BatchPartInfo> batchPartInfos = ret.get(partNameAndIndex.getFirst());
@@ -229,7 +217,7 @@ public class BatchInputParser implements MultipartFileUploadHandler {
             throw new IllegalArgumentException("Illegal name for converter " + name + " not found!");
         }
 
-        return converters.get(name).convert(input,params, routingContext.data());
+        return converters.get(name).convert(input, params, routingContext.data());
     }
 
     /**
@@ -241,8 +229,6 @@ public class BatchInputParser implements MultipartFileUploadHandler {
     private Buffer loadBuffer(RoutingContext ctx, String uploadedFileName) {
         return ctx.vertx().fileSystem().readFileBlocking(uploadedFileName);
     }
-
-
 
     @Override
     public void onMultiPart(RoutingContext context, ResultListener[] listeners) throws IOException {
@@ -261,7 +247,7 @@ public class BatchInputParser implements MultipartFileUploadHandler {
 
         @Override
         public int compareTo(BatchPartInfo batchPartInfo) {
-            return Integer.compare(index,batchPartInfo.index);
+            return Integer.compare(index, batchPartInfo.index);
         }
     }
 
@@ -269,12 +255,12 @@ public class BatchInputParser implements MultipartFileUploadHandler {
         //inputName[partIndex]
         //1 part only
         if(name.indexOf('[') < 0) {
-            return Pair.of(name,0);
+            return Pair.of(name, 0);
         }
 
-        String outputName = name.substring(0,name.indexOf('['));
-        int partIndex = Integer.parseInt(name.substring(name.indexOf('[') + 1,name.lastIndexOf(']')));
-        return Pair.of(outputName,partIndex);
+        String outputName = name.substring(0, name.indexOf('['));
+        int partIndex = Integer.parseInt(name.substring(name.indexOf('[') + 1, name.lastIndexOf(']')));
+        return Pair.of(outputName, partIndex);
     }
 
 }

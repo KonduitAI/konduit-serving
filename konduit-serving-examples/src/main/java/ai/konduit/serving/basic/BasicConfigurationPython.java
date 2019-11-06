@@ -26,6 +26,7 @@ public class BasicConfigurationPython {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(pythonPath)
                 .pythonCodePath(pythonCodePath)
+                //.pythonCode("y = x + 2")
                 .pythonInput("x", PythonVariables.Type.STR.name())
                 .pythonOutput("y", PythonVariables.Type.NDARRAY.name())
                 .build();

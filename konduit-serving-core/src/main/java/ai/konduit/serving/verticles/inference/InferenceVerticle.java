@@ -289,12 +289,11 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                         start = batchCreationTimer.start();
                     }
 
-                    batch =  batchInputParser.createBatch(ctx);
+                    batch = batchInputParser.createBatch(ctx);
                     if(start != null)
                         start.stop();
                 } catch(Exception e) {
                     log.error("Unable to convert data for batch",e);
-
                 }
 
                 long endNanos = System.nanoTime();
@@ -310,7 +309,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                     log.debug("Created batch for request " );
                 }
 
-                ctx.put(VerticleConstants.CONVERTED_INFERENCE_DATA,batch);
+                ctx.put(VerticleConstants.CONVERTED_INFERENCE_DATA, batch);
                 handler.complete();
             },true, result -> ctx.next());
 

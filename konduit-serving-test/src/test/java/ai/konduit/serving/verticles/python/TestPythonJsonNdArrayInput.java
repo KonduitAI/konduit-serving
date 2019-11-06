@@ -45,7 +45,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.util.Arrays;
+import java.util.Collections;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
@@ -93,30 +93,27 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
 
         PythonPipelineStep pythonStepConfig = PythonPipelineStep.builder()
                 .inputName("default")
-                .inputColumnName("default", Arrays.asList("first"))
+                .inputColumnName("default", Collections.singletonList("first"))
                 .inputSchema("default", new SchemaType[]{SchemaType.NDArray})
-                .outputColumnName("default", Arrays.asList("output"))
+                .outputColumnName("default", Collections.singletonList("output"))
                 .outputSchema("default", new SchemaType[]{SchemaType.NDArray})
-                .pythonConfig("default",pythonConfig)
+                .pythonConfig("default", pythonConfig)
                 .build();
-
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .inputDataType(Input.DataType.NUMPY)
                 .predictionType(Output.PredictionType.RAW)
+                .parallelInferenceConfig(parallelInferenceConfig)
                 .build();
-
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .pipelineStep(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
 
-
         return new JsonObject(inferenceConfiguration.toJson());
     }
-
 
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
@@ -139,7 +136,5 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde,NDArrayOutput.class);
         INDArray value = nd.getNdArray();
         assertEquals(4,value.getDouble(0),1e-1);
-
     }
-
 }
