@@ -28,10 +28,7 @@ def test_multipart_encode():
 
 
 def test_python_serde():
-    input_names = ['default']
-    output_names = ['default']
-
-    python_config = PythonConfig(
+    python_configuration = PythonConfig(
         python_code='first += 2',
         python_inputs=['first'],
         python_outputs=['first']
@@ -43,9 +40,9 @@ def test_python_serde():
                                    output_data_type='NUMPY',
                                    log_timings=True)
 
-    python_pipeline_step = PythonPipelineStep(input_names=input_names,
-                                              output_names=output_names,
-                                              python_configs={'default': python_config})
+    python_pipeline_step = PythonPipelineStep(input_names=['default'],
+                                              output_names=['default'],
+                                              python_configs={'default': python_configuration})
 
     inference_config = InferenceConfiguration(serving_config=serving_config,
                                               pipeline_steps=[python_pipeline_step])

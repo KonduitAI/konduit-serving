@@ -13,11 +13,18 @@ setup(
         'pandas<=0.24.2',  # For compatibility with python 2
         'Cython',
         'pydl4j',
-        'pydatavec'
+        'pydatavec',
+        'click'
     ],
+    py_modules=['konduit', 'cli'],
     extras_require={
         'tests': ['pytest', 'pytest-pep8', 'pytest-cov', 'mock'],
         'codegen': ['jsonschema2popo']
+    },
+    entry_points={
+        'console_scripts': [
+            'konduit-python=cli:cli'
+        ]
     },
     include_package_data=True,
     license='Apache',

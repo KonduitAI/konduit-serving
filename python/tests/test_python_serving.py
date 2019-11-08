@@ -9,8 +9,6 @@ import random
 
 
 def test_server_start():
-    input_names = ['default']
-    output_names = ['default']
     port = random.randint(1000, 65535)
     serving_config = ServingConfig(http_port=port,
                                    input_data_type='NUMPY',
@@ -36,15 +34,13 @@ def test_server_start():
                     jar_path='konduit.jar')
     server.start()
     print('Process started. Sleeping 10 seconds.')
-    client = Client(input_names=input_names,
-                    output_names=output_names,
+    client = Client(input_names=['default'],
+                    output_names=['default'],
                     input_type='NUMPY',
                     endpoint_output_type='NUMPY',
                     url='http://localhost:' + str(port))
 
-    data_input = {
-        'default': np.load('../data/input-0.npy'),
-    }
+    data_input = {'default': np.load('../data/input-0.npy')}
 
     time.sleep(10)
     assert is_port_in_use(port)
