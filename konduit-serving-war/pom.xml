@@ -165,6 +165,16 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-rx-java2</artifactId>
             <version>${vertx-stack.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.reactivestreams</groupId>
+                    <artifactId>reactive-streams</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.reactivestreams</groupId>
+            <artifactId>reactive-streams</artifactId>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>

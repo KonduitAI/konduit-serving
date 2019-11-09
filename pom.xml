@@ -90,10 +90,16 @@
         <hdf5.version>1.10.5</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
         <cuda>10.1</cuda>
+        <reactive-streams.version>1.0.3</reactive-streams.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.reactivestreams</groupId>
+                <artifactId>reactive-streams</artifactId>
+                <version>${reactive-streams.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.bytedeco</groupId>
                 <artifactId>openblas</artifactId>
