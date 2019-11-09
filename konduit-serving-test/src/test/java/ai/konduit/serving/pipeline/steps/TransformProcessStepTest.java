@@ -1,6 +1,5 @@
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
@@ -8,7 +7,6 @@ import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import static ai.konduit.serving.train.TrainUtils.getIrisOutputSchema;
@@ -27,8 +25,8 @@ public class TransformProcessStepTest {
         TransformProcess tp = transformProcessBuilder.build();
 
         TransformProcessPipelineStep tpps = new TransformProcessPipelineStep()
-                .step("foo", inputSchema, outputSchema, tp)
-                .step("bar", inputSchema, outputSchema, tp);
+                .step("foo", tp, outputSchema)
+                .step("bar", tp, outputSchema);
 
         assert tpps.getInputNames().contains("foo");
         assert tpps.getInputNames().contains("bar");
@@ -36,7 +34,7 @@ public class TransformProcessStepTest {
         assert tpps.getOutputNames().contains("foo");
         assert tpps.getOutputNames().contains("bar");
 
-        TransformProcessPipelineStep tpps2 = new TransformProcessPipelineStep(inputSchema, outputSchema, tp);
+        TransformProcessPipelineStep tpps2 = new TransformProcessPipelineStep(tp, outputSchema);
 
         assert  tpps2.getTransformProcesses().get("default") == tp;
 

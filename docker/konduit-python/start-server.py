@@ -93,15 +93,15 @@ with open('script.py', 'r') as script_file:
     print('Process started. Sleeping ' + str(sleep_time) + ' seconds.')
     time.sleep(sleep_time)
 
-    client = Client(input_names=["default:x", "default:y"],
+    client = Client(input_names=[default],
                     output_names=[default],
                     input_type='NUMPY',
                     endpoint_output_type='NUMPY',
                     url='http://localhost:' + str(port), timeout=2000000)
 
     data_input = {
-        'default:x': np.ones([2, 2]),
-        'default:y': np.ones([2, 2])
+        'default[0]': np.ones([2, 2]),
+        'default[1]': np.ones([2, 2])
     }
 
     port_in_use = is_port_in_use(port)
