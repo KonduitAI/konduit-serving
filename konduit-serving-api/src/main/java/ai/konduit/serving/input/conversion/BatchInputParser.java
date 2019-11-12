@@ -188,6 +188,7 @@ public class BatchInputParser implements MultipartFileUploadHandler {
                     log.warn("Corrected input name "  + upload.name() + " to " + name);
                 }
             }
+
             //split the input name and the index
             Pair<String,Integer> partNameAndIndex = partNameAndIndex(name);
             //the part info for this particular file

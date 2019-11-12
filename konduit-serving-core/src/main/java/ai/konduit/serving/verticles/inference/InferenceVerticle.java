@@ -82,7 +82,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
             inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
             this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
             setupWebServer();
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             log.error("Unable to parse InferenceConfiguration",e);
         }
     }

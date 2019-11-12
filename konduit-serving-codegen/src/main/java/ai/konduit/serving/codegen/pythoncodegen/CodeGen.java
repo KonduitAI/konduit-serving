@@ -51,7 +51,6 @@ public class CodeGen {
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper,JsonSchemaConfig.html5EnabledSchema());
         Class<?>[] clazzes = {
                 TensorDataTypesConfig.class,
-                PubsubConfig.class,
                 SavedModelConfig.class,
                 ParallelInferenceConfig.class,
                 ModelConfigType.class,

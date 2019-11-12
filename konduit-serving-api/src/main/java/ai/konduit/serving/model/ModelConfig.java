@@ -24,7 +24,6 @@ package ai.konduit.serving.model;
 
 import ai.konduit.serving.output.types.ClassifierOutput;
 import ai.konduit.serving.config.Output;
-import ai.konduit.serving.config.PubsubConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -61,7 +60,6 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  *
  * It also covers modes of expected interaction including a real time
  * transactional pattern or a publish subscribe model.
- * The publish subscribe model for endpoints can be found in {@link PubsubConfig}
  *
  * We also support variants of each of these input types with _ERROR
  * which will be slower for inference, but will also ignore invalid rows

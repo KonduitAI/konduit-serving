@@ -46,61 +46,6 @@ class TensorDataTypesConfig(object):
         return d
 
 
-class PubsubConfig(object):
-
-    _types_map = {
-        'httpMethod': {'type': str, 'subtype': None},
-        'pubsubUrl': {'type': str, 'subtype': None},
-        'contentType': {'type': str, 'subtype': None},
-    }
-    _formats_map = {
-    }
-
-    def __init__(self, http_method=None, pubsub_url=None, content_type=None
-                 ):
-        self.__http_method = http_method
-        self.__pubsub_url = pubsub_url
-        self.__content_type = content_type
-
-    def _get_http_method(self):
-        return self.__http_method
-
-    def _set_http_method(self, value):
-        if not isinstance(value, str):
-            raise TypeError("httpMethod must be str")
-        self.__http_method = value
-    http_method = property(_get_http_method, _set_http_method)
-
-    def _get_pubsub_url(self):
-        return self.__pubsub_url
-
-    def _set_pubsub_url(self, value):
-        if not isinstance(value, str):
-            raise TypeError("pubsubUrl must be str")
-        self.__pubsub_url = value
-    pubsub_url = property(_get_pubsub_url, _set_pubsub_url)
-
-    def _get_content_type(self):
-        return self.__content_type
-
-    def _set_content_type(self, value):
-        if not isinstance(value, str):
-            raise TypeError("contentType must be str")
-        self.__content_type = value
-    content_type = property(_get_content_type, _set_content_type)
-
-    def as_dict(self):
-        d = empty_type_dict(self)
-        if self.__http_method is not None:
-            d['httpMethod'] = self.__http_method.as_dict() if hasattr(
-                self.__http_method, 'as_dict') else self.__http_method
-        if self.__pubsub_url is not None:
-            d['pubsubUrl'] = self.__pubsub_url.as_dict() if hasattr(
-                self.__pubsub_url, 'as_dict') else self.__pubsub_url
-        if self.__content_type is not None:
-            d['contentType'] = self.__content_type.as_dict() if hasattr(
-                self.__content_type, 'as_dict') else self.__content_type
-        return d
 
 
 class SavedModelConfig(object):
@@ -890,7 +835,6 @@ class ServingConfig(object):
     _predictionType_enum = enum.Enum(
         '_predictionType_enum', 'CLASSIFICATION YOLO SSD RCNN RAW REGRESSION', module=__name__)
     _types_map = {
-        'pubSubConfig': {'type': PubsubConfig, 'subtype': None},
         'httpPort': {'type': int, 'subtype': None},
         'listenHost': {'type': str, 'subtype': None},
         'inputDataType': {'type': str, 'subtype': None},
@@ -916,14 +860,6 @@ class ServingConfig(object):
         self.__log_timings = log_timings
         self.__metric_types = metric_types
 
-    def _get_pub_sub_config(self):
-        return self.__pub_sub_config
-
-    def _set_pub_sub_config(self, value):
-        if not isinstance(value, PubsubConfig):
-            raise TypeError("pubSubConfig must be PubsubConfig")
-        self.__pub_sub_config = value
-    pub_sub_config = property(_get_pub_sub_config, _set_pub_sub_config)
 
     def _get_http_port(self):
         return self.__http_port
@@ -1014,9 +950,6 @@ class ServingConfig(object):
 
     def as_dict(self):
         d = empty_type_dict(self)
-        if self.__pub_sub_config is not None:
-            d['pubSubConfig'] = self.__pub_sub_config.as_dict() if hasattr(
-                self.__pub_sub_config, 'as_dict') else self.__pub_sub_config
         if self.__http_port is not None:
             d['httpPort'] = self.__http_port.as_dict() if hasattr(
                 self.__http_port, 'as_dict') else self.__http_port
