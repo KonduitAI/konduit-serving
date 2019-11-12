@@ -67,7 +67,7 @@ public class SameDiffModelLoader implements ModelLoader<SameDiff> {
     public SameDiff loadModel() throws Exception {
         if(ModelGuesser.isTensorflowFile(pathToModel)) {
             log.debug("Loading tensorflow model from " + pathToModel.getAbsolutePath());
-            return TFGraphMapper.getInstance().importGraph(pathToModel);
+            return TFGraphMapper.importGraph(pathToModel);
         }
         else if(ModelGuesser.isSameDiffZipFile(pathToModel)) {
             return SameDiff.load(pathToModel,true);
