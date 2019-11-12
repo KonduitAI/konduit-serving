@@ -50,8 +50,8 @@ def set_input_func(self, schema=None, column_names=None, types=None, input_name=
         names.append(input_name)
         self._set_input_names(names)
 
-        self.set_input_columns(input_name, column_names)
-        self.set_input_types(input_name, types)
+        self.set_input_columns(input_name=input_name, column_names=column_names)
+        self.set_input_types(input_name=input_name, types=types)
 
         return self
     else:
@@ -73,8 +73,8 @@ def set_output_func(self, schema=None, column_names=None, types=None, output_nam
         names.append(output_name)
         self._set_output_names(names)
 
-        self.set_output_columns(output_name, column_names)
-        self.set_output_types(output_name, types)
+        self.set_output_columns(output_name=output_name, column_names=column_names)
+        self.set_output_types(output_name=output_name, types=types)
 
         return self
     else:
@@ -91,9 +91,9 @@ PipelineStep.set_output = set_output_func
 
 
 def step_func(self, input_schema, output_schema, transform_process, step_name="default"):
-    self.set_input(step_name, input_schema)
-    self.set_output(step_name, output_schema)
-    self.transform_process(step_name, transform_process)
+    self.set_input(input_name=step_name, schema=input_schema)
+    self.set_output(output_name=step_name, schema=output_schema)
+    self.transform_process(input_name=step_name, transform_process=transform_process)
 
     return self
 
@@ -114,10 +114,9 @@ TransformProcessPipelineStep.transform_process = transform_process_func
 
 def python_step_func(self, python_config, step_name="default", input_schema=None, input_column_names=None,
                      input_types=None, output_schema=None, output_column_names=None, output_types=None):
-    self.set_input(step_name, input_schema, input_column_names, input_types)
-    self.set_output(step_name, output_schema,
-                    output_column_names, output_types)
-    self.python_config(step_name, python_config)
+    self.set_input(schema=input_schema, column_names=input_column_names, types=input_types, input_name=step_name)
+    self.set_output(schema=output_schema, column_names=output_column_names, types=output_types, output_name=step_name)
+    self.python_config(python_config=python_config, step_name=step_name)
 
     return self
 
