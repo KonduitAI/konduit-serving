@@ -1,4 +1,3 @@
-from .inference import *
 import os
 jar = os.getenv('KONDUIT_JAR_PATH', 'konduit.jar')
 
@@ -8,3 +7,5 @@ try:
 except Exception as e:
     print("VM already running from previous test")
     print(e)
+
+from .inference import *
