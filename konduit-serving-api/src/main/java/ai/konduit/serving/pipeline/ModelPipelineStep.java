@@ -52,10 +52,12 @@ public class ModelPipelineStep extends PipelineStep {
         this.modelConfig = modelConfig;
     }
 
+    @Override
     public ModelPipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
         return (ModelPipelineStep) super.setInput("default", columnNames, types);
     }
 
+    @Override
     public ModelPipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
         return (ModelPipelineStep) super.setOutput("default", columnNames, types);
     }
@@ -70,10 +72,12 @@ public class ModelPipelineStep extends PipelineStep {
         return (ModelPipelineStep) super.setOutput("default", outputSchema);
     }
 
+    @Override
     public ModelPipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (ModelPipelineStep) super.setInput(inputName, columnNames, types);
     }
 
+    @Override
     public ModelPipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (ModelPipelineStep) super.setOutput(outputName, columnNames, types);
     }

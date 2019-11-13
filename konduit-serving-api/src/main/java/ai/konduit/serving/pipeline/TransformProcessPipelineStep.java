@@ -45,28 +45,35 @@ public class TransformProcessPipelineStep extends PipelineStep {
     @Singular
     private Map<String,TransformProcess> transformProcesses;
 
+    @Override
     public TransformProcessPipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.setInput("default", columnNames, types);
     }
 
+    @Override
     public TransformProcessPipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.setOutput("default", columnNames, types);
     }
 
+    @Override
     public TransformProcessPipelineStep setInput(Schema inputSchema) throws Exception {
         return (TransformProcessPipelineStep) super.setInput("default", inputSchema);
     }
 
+    @Override
     public TransformProcessPipelineStep setOutput(Schema outputSchema) throws Exception {
         return (TransformProcessPipelineStep) super.setOutput("default", outputSchema);
     }
 
-
-    public TransformProcessPipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
+    @Override
+    public TransformProcessPipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types)
+            throws Exception {
         return (TransformProcessPipelineStep) super.setInput(inputName, columnNames, types);
     }
 
-    public TransformProcessPipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
+    @Override
+    public TransformProcessPipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types)
+            throws Exception {
         return (TransformProcessPipelineStep) super.setOutput(outputName, columnNames, types);
     }
 
