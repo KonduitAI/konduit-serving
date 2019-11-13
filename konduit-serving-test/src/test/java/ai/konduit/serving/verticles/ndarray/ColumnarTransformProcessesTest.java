@@ -68,7 +68,7 @@ import static com.jayway.restassured.RestAssured.given;
 @NotThreadSafe
 public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
 
-    private Schema inputSchema,outputSchema;
+    private Schema inputSchema;
 
     @Before
     public void before(TestContext context) throws Exception {
@@ -101,7 +101,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
         ModelSerializer.writeModel(multiLayerNetwork.getFirst(),modelSave,true);
 
         inputSchema = TrainUtils.getIrisInputSchema();
-        outputSchema = getIrisOutputSchema();
+        Schema outputSchema = getIrisOutputSchema();
 
         Nd4j.getRandom().setSeed(42);
 
