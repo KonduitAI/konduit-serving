@@ -54,32 +54,30 @@ public class PythonPipelineTests {
     
     @Test
     public void testPipeline() throws Exception {
-        Schema schema = new Schema.Builder()
-                .addColumnNDArray("first",new long[]{1,1})
-                .build();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonCode("first += 2")
+                .pythonCode("a = 2; first += 2; second = first; c=42")
                 .pythonInput("first", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("first", PythonVariables.Type.NDARRAY.name())
+                .pythonOutput("second", PythonVariables.Type.NDARRAY.name())
                 .returnAllInputs(false)
                 .build();
         
         PythonPipelineStep config = new PythonPipelineStep(
                 pythonConfig, new String[] {"first"}, new SchemaType[]{SchemaType.NDArray});
         PythonPipelineStepRunner pythonPipelineStep = new PythonPipelineStepRunner(config);
-        
-        
+
+        Schema schema = new Schema.Builder()
+                .addColumnNDArray("second",new long[]{1,1})
+                .build();
         TransformProcess transformProcess = new TransformProcess.Builder(schema)
-                .ndArrayScalarOpTransform("first", MathOp.Add,1.0).build();
+                .ndArrayScalarOpTransform("second", MathOp.Add,1.0).build();
 
         TransformProcessPipelineStep tpStep = new TransformProcessPipelineStep()
-                .setInput("default", new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
-                .setOutput("default", new String[]{"first"}, new SchemaType[]{SchemaType.NDArray})
-                .transformProcess("default", transformProcess);
+                .setInput(new String[]{"second"}, new SchemaType[]{SchemaType.NDArray})
+                .setOutput(new String[]{"output"}, new SchemaType[]{SchemaType.NDArray})
+                .transformProcess(transformProcess);
         
         TransformProcessPipelineStepRunner transformProcessPipelineStep = new TransformProcessPipelineStepRunner(tpStep);
-        
         
         List<Writable> record = new ArrayList<>();
         

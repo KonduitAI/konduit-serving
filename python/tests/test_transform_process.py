@@ -27,9 +27,9 @@ def test_build_tp():
     json_tp = json.dumps(tp_json)
     as_python_json = json.loads(tp_json)
     transform_process = TransformProcessPipelineStep()\
-        .set_input("default", None, ['first'], ['String'])\
-        .set_output("default", None, ['first'], ['String'])\
-        .transform_process("default", as_python_json)
+        .set_input(None, ['first'], ['String'])\
+        .set_output(None, ['first'], ['String'])\
+        .transform_process(as_python_json)
 
     input_names = ['default']
     output_names = ['default']

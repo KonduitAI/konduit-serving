@@ -106,12 +106,12 @@ public abstract class BaseSameDiffTransform implements ArrayTransform {
             mapIndexes.put(this.inputs.get(i),ndArrayWritable.get());
         }
 
-        Map<String, INDArray> stringINDArrayMap = sameDiff.execAll(mapIndexes);
+        Map<String, INDArray> stringINDArrayMap = sameDiff.outputAll(mapIndexes);
         Record[] ret = new Record[stringINDArrayMap.size()];
 
         int count = 0;
         for(String key : stringINDArrayMap.keySet()) {
-            ret[count++] = new org.datavec.api.records.impl.Record(Arrays.asList(
+            ret[count++] = new org.datavec.api.records.impl.Record(Collections.singletonList(
                     new NDArrayWritable(stringINDArrayMap.get(key))),
                     null);
         }

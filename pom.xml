@@ -37,6 +37,7 @@
         <module>konduit-serving-api</module>
         <module>konduit-serving-codegen</module>
         <module>konduit-serving-distro-bom</module>
+        <module>konduit-serving-orchestration</module>
     </modules>
 
     <name>konduit-serving</name>
@@ -97,6 +98,21 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>openblas</artifactId>
+                <version>${openblas.javacpp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>openblas-plat</artifactId>
+                <version>${openblas.javacpp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>mkl</artifactId>
+                <version>${mkl.javacpp.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.datavec</groupId>

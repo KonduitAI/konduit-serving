@@ -1,7 +1,7 @@
-from konduit import *
-from konduit.json_utils import config_to_dict_with_type
-from konduit.server import Server
-from konduit.client import Client
+from python.konduit import *
+from python.konduit.json_utils import config_to_dict_with_type
+from python.konduit.server import Server
+from python.konduit.client import Client
 
 import json
 
