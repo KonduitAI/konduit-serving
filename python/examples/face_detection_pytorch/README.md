@@ -6,5 +6,5 @@ After that, simply run the following steps.
 ```bash
 git clone https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB
 pip install -r ./Ultra-Light-Fast-Generic-Face-Detector-1MB/requirements.txt
-python konduit.py
+python run_konduit.py
 ```

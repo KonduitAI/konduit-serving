@@ -33,6 +33,9 @@ class Client(object):
         self.url = url
 
     def predict(self, data_input=None):
+        if isinstance(data_input, np.ndarray):
+            # Note: this is only slightly dangerous, given the current state ;)
+            data_input = {'default': data_input}
         if data_input is None:
             data_input = {}
         if self.input_type.upper() == 'JSON':

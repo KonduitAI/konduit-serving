@@ -1,13 +1,6 @@
 import base64
-import sys
 import cv2
 import numpy as np
-
-
-def default_python_path(work_dir):
-    python_path = ':'.join(sys.path)
-    python_path += ':' + work_dir
-    return python_path
 
 
 def to_base_64(file_name):
