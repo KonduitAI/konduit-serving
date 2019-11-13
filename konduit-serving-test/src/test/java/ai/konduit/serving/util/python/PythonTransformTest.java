@@ -49,7 +49,7 @@ public class PythonTransformTest {
 
 
     @Test()
-    public void testStringConcat() throws Exception{
+    public void testStringConcat() {
         Builder schemaBuilder = new Builder();
         schemaBuilder
                 .addColumnString("col1")
@@ -77,7 +77,7 @@ public class PythonTransformTest {
     }
 
     @Test(timeout = 60000L)
-    public void testMixedTypes() throws Exception{
+    public void testMixedTypes() {
         Builder schemaBuilder = new Builder();
         schemaBuilder
                 .addColumnInteger("col1")
@@ -109,7 +109,7 @@ public class PythonTransformTest {
     }
 
     @Test(timeout = 60000L)
-    public void testNDArray() throws Exception{
+    public void testNDArray() {
         long[] shape = new long[]{3, 2};
         INDArray arr1 = Nd4j.rand(shape);
         INDArray arr2 = Nd4j.rand(shape);
@@ -144,7 +144,7 @@ public class PythonTransformTest {
     }
 
     @Test(timeout = 60000L)
-    public void testNDArray2() throws Exception{
+    public void testNDArray2() {
         long[] shape = new long[]{3, 2};
         INDArray arr1 = Nd4j.rand(shape);
         INDArray arr2 = Nd4j.rand(shape);
@@ -179,7 +179,7 @@ public class PythonTransformTest {
     }
 
     @Test(timeout = 60000L)
-    public void testNDArrayMixed() throws Exception{
+    public void testNDArrayMixed() {
         long[] shape = new long[]{3, 2};
         INDArray arr1 = Nd4j.rand(DataType.DOUBLE, shape);
         INDArray arr2 = Nd4j.rand(DataType.DOUBLE, shape);
@@ -234,7 +234,7 @@ public class PythonTransformTest {
     }
 
     @Test(timeout = 60000L)
-    public void testPythonFilterAndTransform() throws Exception{
+    public void testPythonFilterAndTransform() {
         Builder schemaBuilder = new Builder();
         schemaBuilder
                 .addColumnInteger("col1")
@@ -288,13 +288,13 @@ public class PythonTransformTest {
 
 
     @Test
-    public void testPythonTransformNoOutputSpecified() throws Exception {
+    public void testPythonTransformNoOutputSpecified() {
         PythonTransform pythonTransform = PythonTransform.builder()
                 .code("a += 2; b = 'hello world'")
                 .returnAllInputs(true)
                 .build();
         List<List<Writable>> inputs = new ArrayList<>();
-        inputs.add(Arrays.asList(new IntWritable(1)));
+        inputs.add(Collections.singletonList(new IntWritable(1)));
         Schema inputSchema = new Builder()
                 .addColumnInteger("a")
                 .build();
@@ -309,14 +309,14 @@ public class PythonTransformTest {
     }
 
     @Test
-    public void testNumpyTransform() throws Exception {
+    public void testNumpyTransform() {
         PythonTransform pythonTransform = PythonTransform.builder()
                 .code("a += 2; b = 'hello world'")
                 .returnAllInputs(true)
                 .build();
 
         List<List<Writable>> inputs = new ArrayList<>();
-        inputs.add(Arrays.asList(new NDArrayWritable(Nd4j.scalar(1).reshape(1,1))));
+        inputs.add(Collections.singletonList(new NDArrayWritable(Nd4j.scalar(1).reshape(1, 1))));
         Schema inputSchema = new Builder()
                 .addColumnNDArray("a",new long[]{1,1})
                 .build();

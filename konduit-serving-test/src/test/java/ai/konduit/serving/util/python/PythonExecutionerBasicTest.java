@@ -57,8 +57,6 @@ public class PythonExecutionerBasicTest {
 
         String z = pyOutputs.getStrValue("z");
 
-        System.out.println(z);
-
         assertEquals("Hello World", z);
     }
 

@@ -547,7 +547,8 @@ public class PythonExecutioner {
     public static void execWithSetupAndRun(String code){
         code = getWrappedCode(code);
         if(code.contains("import numpy") && !getInterpreter().equals("main")) { // FIXME
-            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
+            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter." +
+                    "See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
         }
 
         acquireGIL();
@@ -569,7 +570,8 @@ public class PythonExecutioner {
     public static void execWithSetupAndRun(String code, PythonVariables pyOutputs) {
         code = getWrappedCode(code);
         if(code.contains("import numpy") && !getInterpreter().equals("main")) { // FIXME
-            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
+            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. " +
+                    "See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
         }
 
         acquireGIL();
@@ -634,7 +636,8 @@ public class PythonExecutioner {
         code = inputCode +code;
         code = getWrappedCode(code);
         if(code.contains("import numpy") && !getInterpreter().equals("main")) { // FIXME
-            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
+            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter." +
+                    "See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
         }
         acquireGIL();
         _exec(code);
@@ -813,7 +816,8 @@ public class PythonExecutioner {
 
         String outputCode = "import json\n";
         String outputFunctions;
-        try(BufferedInputStream bufferedInputStream = new BufferedInputStream(new ClassPathResource("pythonexec/serialize_array.py").getInputStream())) {
+        try(BufferedInputStream bufferedInputStream = new BufferedInputStream(
+                new ClassPathResource("pythonexec/serialize_array.py").getInputStream())) {
             outputFunctions= IOUtils.toString(bufferedInputStream,Charset.defaultCharset());
             outputCode += outputFunctions;
             outputCode += "\n";
@@ -830,7 +834,8 @@ public class PythonExecutioner {
         if (varNames.length > 0)
             outputCode = outputCode.substring(0, outputCode.length() - 1);
         outputCode += "})";
-        outputCode += "\nwith open('" + getTempFile() + "', 'w') as " + fileVarName + ":" + fileVarName + ".write(" + outputVarName() + ")";
+        outputCode += "\nwith open('" + getTempFile() + "', 'w') as " + fileVarName + ":"
+                + fileVarName + ".write(" + outputVarName() + ")";
 
         return outputCode;
 
