@@ -57,10 +57,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  * which are {@link io.vertx.core.json.JsonArray} of {@link io.vertx.core.json.JsonObject}
  * as named key value pairs, or {@link io.vertx.core.json.JsonArray} of
  * {@link io.vertx.core.json.JsonArray} which are index based values.
- *
- * It also covers modes of expected interaction including a real time
- * transactional pattern or a publish subscribe model.
- *
+
  * We also support variants of each of these input types with _ERROR
  * which will be slower for inference, but will also ignore invalid rows
  * that are found. These _ERROR endpoints will output skipped rows
