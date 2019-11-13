@@ -28,8 +28,8 @@ import ai.konduit.serving.pipeline.PythonPipelineStep;
 import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
 import ai.konduit.serving.pipeline.steps.PythonPipelineStepRunner;
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.util.python.PythonVariables;
 import ai.konduit.serving.pipeline.steps.TransformProcessPipelineStepRunner;
+import ai.konduit.serving.util.python.PythonVariables;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.MathOp;
 import org.datavec.api.transform.TransformProcess;
@@ -62,8 +62,7 @@ public class PythonPipelineTests {
                 .returnAllInputs(false)
                 .build();
         
-        PythonPipelineStep config = new PythonPipelineStep(
-                pythonConfig, new String[] {"first"}, new SchemaType[]{SchemaType.NDArray});
+        PythonPipelineStep config = new PythonPipelineStep(pythonConfig);
         PythonPipelineStepRunner pythonPipelineStep = new PythonPipelineStepRunner(config);
 
         Schema schema = new Schema.Builder()
