@@ -45,6 +45,22 @@ public class TransformProcessPipelineStep extends PipelineStep {
     @Singular
     private Map<String,TransformProcess> transformProcesses;
 
+    public TransformProcessPipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
+        return (TransformProcessPipelineStep) super.setInput("default", columnNames, types);
+    }
+
+    public TransformProcessPipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
+        return (TransformProcessPipelineStep) super.setOutput("default", columnNames, types);
+    }
+
+    public TransformProcessPipelineStep setInput(Schema inputSchema) throws Exception {
+        return (TransformProcessPipelineStep) super.setInput("default", inputSchema);
+    }
+
+    public TransformProcessPipelineStep setOutput(Schema outputSchema) throws Exception {
+        return (TransformProcessPipelineStep) super.setOutput("default", outputSchema);
+    }
+
 
     public TransformProcessPipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.setInput(inputName, columnNames, types);
@@ -100,6 +116,20 @@ public class TransformProcessPipelineStep extends PipelineStep {
         this.setOutput(stepName, outputSchema);
         this.transformProcess(stepName, transformProcess);
 
+        return this;
+    }
+
+    /**
+     * Define a transform process for this step
+     *
+     * @param transformProcess DataVec transform process
+     * @return this transform process step
+     */
+    public TransformProcessPipelineStep transformProcess(TransformProcess transformProcess) {
+        if (transformProcesses == null) {
+            transformProcesses = new HashMap<>();
+        }
+        transformProcesses.put("default", transformProcess);
         return this;
     }
 
