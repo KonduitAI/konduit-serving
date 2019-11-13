@@ -62,9 +62,6 @@ import static org.bytedeco.tensorflow.global.tensorflow.*;
  * {@link INDArray} is used to hold the memory
  * while TensorFlow's c bindings are  used for running the graph.
  *
- *
- *
- *
  * @author Adam Gibson
  */
 @Slf4j
@@ -226,24 +223,24 @@ public class GraphRunner implements Closeable {
     public Map<String, TF_Tensor> recastInputs(Map<String, TF_Tensor> inputs, List<String> inputOrder, Map<String,TensorDataType> inputDataTypes) {
         if(inputDataTypes == null || inputDataTypes.isEmpty()) {
             inputDataTypes = new LinkedHashMap<>();
-            for(int i = 0; i < inputOrder.size(); i++) {
-                TensorDataType tensorDataType = TensorDataType.values()[inputs.get(inputOrder.get(i)).dtype()];
-                Preconditions.checkNotNull(tensorDataType,"Data type of " + inputs.get(inputOrder.get(i)).dtype() + " was null!");
-                inputDataTypes.put(inputOrder.get(i),tensorDataType);
+            for (String s : inputOrder) {
+                TensorDataType tensorDataType = TensorDataType.values()[inputs.get(s).dtype()];
+                Preconditions.checkNotNull(tensorDataType, "Data type of " + inputs.get(s).dtype() + " was null!");
+                inputDataTypes.put(s, tensorDataType);
             }
         }
 
         Map<String, TF_Tensor> ret = new HashMap<>();
-        for(int i = 0; i < inputOrder.size(); i++) {
-            TF_Tensor currInput = inputs.get(inputOrder.get(i));
+        for (String s : inputOrder) {
+            TF_Tensor currInput = inputs.get(s);
             TensorDataType fromDType = TensorDataType.values()[currInput.dtype()];
-            if(fromDType != inputDataTypes.get(inputOrder.get(i))) {
+            if (fromDType != inputDataTypes.get(s)) {
                 TF_Tensor oldTensor = currInput;
-                currInput = castTensor(currInput, fromDType, inputDataTypes.get(inputOrder.get(i)));
+                currInput = castTensor(currInput, fromDType, inputDataTypes.get(s));
                 TF_DeleteTensor(oldTensor);
             }
 
-            ret.put(inputOrder.get(i),currInput);
+            ret.put(s, currInput);
         }
 
         return ret;
@@ -267,8 +264,8 @@ public class GraphRunner implements Closeable {
 
         if(inputDataTypes == null) {
             inputDataTypes = new LinkedHashMap<>();
-            for(int i = 0; i < inputOrder.size(); i++) {
-                inputDataTypes.put(inputOrder.get(i),TensorDataType.values()[inputs.get(inputOrder.get(i)).dtype()]);
+            for (String s : inputOrder) {
+                inputDataTypes.put(s, TensorDataType.values()[inputs.get(s).dtype()]);
             }
         }
 
@@ -369,7 +366,6 @@ public class GraphRunner implements Closeable {
                 inputTensors[i] = tf_tensor;
             }
 
-
             //reset the position of the pointer for execution
             inputOut.position(0);
 
@@ -388,8 +384,6 @@ public class GraphRunner implements Closeable {
 
             //reset the position of the pointer for execution
             outputOut.position(0);
-
-
 
             //these are references to the nd4j ndarrays wrapped for tensorflow
             PointerPointer<TF_Tensor> inputTensorsPointer = new PointerPointer<>(inputTensors);
@@ -413,24 +407,15 @@ public class GraphRunner implements Closeable {
             long diff = TimeUnit.NANOSECONDS.toMillis((end - start));
             log.info("Session run  timing in ms " + diff);
 
-
-
-
-
-
             if (TF_GetCode(status) != TF_OK) {
                 throw new IllegalStateException("ERROR: Unable to run session " + TF_Message(status).getString());
             } else {
                 for(int i = 0; i < outputOrder.size(); i++) {
                     outputArrays.put(outputOrder.get(i),new TF_Tensor(outputTensorsPointer.get(i)));
                 }
-
             }
-
             return outputArrays;
-
         }
-
     }
 
 
@@ -445,8 +430,6 @@ public class GraphRunner implements Closeable {
      *
      * the inputs resolved from the graph do not match
      * the inputs passed in
-     *
-     *
      *
      * @param inputs the inputs to use for each
      *               {@link INDArray}
@@ -564,8 +547,7 @@ public class GraphRunner implements Closeable {
             org.tensorflow.framework.ConfigProto build = builder.build();
             org.nd4j.shade.protobuf.ByteString serialized = build.toByteString();
             byte[] binaryString = serialized.toByteArray();
-            org.tensorflow.framework.ConfigProto configProto = org.tensorflow.framework.ConfigProto.parseFrom(binaryString);
-            return configProto;
+            return ConfigProto.parseFrom(binaryString);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -609,8 +591,8 @@ public class GraphRunner implements Closeable {
             byte[] graphForDataType = graphForDataType(from,to);
             GraphRunner graphRunner = GraphRunner.builder()
                     .graphBytes(graphForDataType)
-                    .inputNames(Arrays.asList("input"))
-                    .outputNames(Arrays.asList("cast_output"))
+                    .inputNames(Collections.singletonList("input"))
+                    .outputNames(Collections.singletonList("cast_output"))
                     .build();
 
             recastGraphDefs.put(key,graphRunner);

@@ -107,17 +107,9 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
         
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
-                .modelConfig(modelConfig)
-                .inputName("default")
-                .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
-                .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
-                .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
-                .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
-                .build();
-        
-        
-        
+        ModelPipelineStep modelPipelineStep = new ModelPipelineStep(modelConfig)
+                .setInput(inputSchema).setOutput(outputSchema);
+
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .pipelineStep(modelPipelineStep)
