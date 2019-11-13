@@ -114,13 +114,38 @@ public abstract class PipelineStep implements Serializable {
     }
 
     /**
+     * Define a single input for a PipelineStep from column names and types.
+     * The input name will be "default" when using this method.
+     *
+     * @param columnNames column names
+     * @param types schema types
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+    public PipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
+        return this.setInput("default", columnNames, types);
+    }
+
+    /**
+     * Define a single input for a PipelineStep from a schema.
+     * The input name will be "default" when using this method.
+     *
+     * @param inputSchema input schema
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+    public PipelineStep setInput(Schema inputSchema) throws Exception {
+        return this.setInput("default", inputSchema);
+    }
+
+    /**
      * Define a single input for a TransformProcess Step from explicit
      * column names and types for this input.
      *
      * @param inputName input name
      * @param columnNames column names
      * @param types schema types
-     * @return this transform process step
+     * @return this pipeline step
      * @throws Exception key error
      */
     public PipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types)
@@ -150,7 +175,7 @@ public abstract class PipelineStep implements Serializable {
      *
      * @param inputName input name
      * @param inputSchema input schema
-     * @return this transform process step
+     * @return this pipeline step
      * @throws Exception key error
      */
     public PipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
@@ -177,6 +202,32 @@ public abstract class PipelineStep implements Serializable {
         }
     }
 
+    /**
+     * Define a single output for a PipelineStep from explicit
+     * column names and types for this output. The output name
+     * for this step will be "default".
+     *
+     * @param columnNames column names
+     * @param types schema types
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+    public PipelineStep setOutput(String[] columnNames, SchemaType[] types)
+            throws Exception {
+        return this.setOutput("default", columnNames, types);
+    }
+
+    /**
+     * Define a single output for a PipelineStep from a schema.
+     * The output name for this step will be "default".
+     *
+     * @param outputSchema output schema
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+    public PipelineStep setOutput(Schema outputSchema) throws Exception {
+        return this.setOutput("default", outputSchema);
+    }
 
     /**
      * Define a single output for a TransformProcess Step from explicit
@@ -185,7 +236,7 @@ public abstract class PipelineStep implements Serializable {
      * @param outputName output name
      * @param columnNames column names
      * @param types schema types
-     * @return this transform process step
+     * @return this pipeline step
      * @throws Exception key error
      */
     public PipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types)
@@ -216,7 +267,7 @@ public abstract class PipelineStep implements Serializable {
      *
      * @param outputName output name
      * @param outputSchema output schema
-     * @return this transform process step
+     * @return this pipeline step
      * @throws Exception key error
      */
     public PipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
@@ -301,17 +352,5 @@ public abstract class PipelineStep implements Serializable {
     }
 
     public abstract String pipelineStepClazz();
-
-
-//    public enum StepType {
-//        PYTHON,
-//        MODEL,
-//        TRANSFORM,
-//        NORMALIZATION,
-//        IMAGE_LOADING,
-//        OBJECT_DETECTION
-//    }
-
-
 
 }

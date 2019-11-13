@@ -60,10 +60,12 @@ public class ModelPipelineStep extends PipelineStep {
         return (ModelPipelineStep) super.setOutput("default", columnNames, types);
     }
 
+    @Override
     public ModelPipelineStep setInput(Schema inputSchema) throws Exception {
         return (ModelPipelineStep) super.setInput("default", inputSchema);
     }
 
+    @Override
     public ModelPipelineStep setOutput(Schema outputSchema) throws Exception {
         return (ModelPipelineStep) super.setOutput("default", outputSchema);
     }
