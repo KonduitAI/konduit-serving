@@ -33,7 +33,7 @@ def test_server_start():
     inference_config = InferenceConfiguration(serving_config=serving_config,
                                               pipeline_steps=[model_pipeline_step])
 
-    server = Server(config=inference_config,
+    server = Server(inference_config=inference_config,
                     extra_start_args='-Xmx8g', jar_path='konduit.jar')
     server.start()
 

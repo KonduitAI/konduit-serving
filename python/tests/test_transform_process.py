@@ -47,7 +47,7 @@ def test_build_tp():
     config = inference_configuration_java_class.fromJson(
         StringJava(json.dumps(as_json)))
 
-    server = Server(config=inference_config,
+    server = Server(inference_config=inference_config,
                     extra_start_args='-Xmx8g',
                     jar_path='konduit.jar')
     server.start()
