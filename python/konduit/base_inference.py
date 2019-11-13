@@ -46,8 +46,6 @@ class TensorDataTypesConfig(object):
         return d
 
 
-
-
 class SavedModelConfig(object):
 
     _types_map = {
@@ -858,7 +856,6 @@ class ServingConfig(object):
         self.__uploads_directory = uploads_directory
         self.__log_timings = log_timings
         self.__metric_types = metric_types
-
 
     def _get_http_port(self):
         return self.__http_port
