@@ -9,7 +9,7 @@ from requests_toolbelt.multipart import decoder, encoder
 
 class Client(object):
     def __init__(self, timeout=60, input_type='NUMPY', endpoint_output_type='NUMPY',
-                 return_output_type=None, input_names=None, output_names=None, url=None):
+                 return_output_type=None, input_names=['default'], output_names=['default'], url=None):
 
         if input_names is None:
             input_names = []

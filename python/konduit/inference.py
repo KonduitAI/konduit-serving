@@ -42,6 +42,7 @@ def set_input_func(self, schema=None, column_names=None, types=None, input_name=
         names = []
     if input_name not in names:
         if schema is not None:
+            print(schema)
             column_names = SchemaTypeUtils.columnNames(schema)
             types = SchemaTypeUtils.typesForSchema(schema)
         if column_names is None or types is None:
@@ -117,6 +118,18 @@ TransformProcessPipelineStep.transform_process = transform_process_func
 
 def python_step_func(self, python_config, step_name="default", input_schema=None, input_column_names=None,
                      input_types=None, output_schema=None, output_column_names=None, output_types=None):
+    # if nothing else is defined, we can derive all properties just from the Python configuration
+    if (input_schema is None and input_column_names is None and input_types is None \
+        and output_schema is None and output_column_names is None and output_types is None):
+        inputs = python_config._get_python_inputs()
+        outputs = python_config._get_python_outputs()
+        input_column_names = list(inputs.keys())
+        output_column_names = list(outputs.keys())
+        input_types = [konduit_type_mapping(v) for v in inputs.values()]
+        output_types = [konduit_type_mapping(v) for v in outputs.values()]
+
+    print(output_schema)
+
     self.set_input(schema=input_schema, column_names=input_column_names,
                    types=input_types, input_name=step_name)
     self.set_output(schema=output_schema, column_names=output_column_names,
@@ -134,6 +147,20 @@ def python_config_func(self, python_config, step_name="default"):
     self._set_python_configs(python_configs)
 
     return self
+
+
+def konduit_type_mapping(name):
+    map = {
+        "BOOL": "Boolean",
+        "STR": "String",
+        "INT": "Integer",
+        "FLOAT": "Float",
+        "NDARRAY": "NDArray"
+    }
+    if name not in map.keys():
+        raise Exception("Can't convert input type " + str(name))
+    else:
+        return map.get(name)
 
 
 PythonPipelineStep.step = python_step_func

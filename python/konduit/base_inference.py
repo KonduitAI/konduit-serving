@@ -846,7 +846,7 @@ class ServingConfig(object):
         'metricTypes': 'table',
     }
 
-    def __init__(self, http_port=None, listen_host=None, input_data_type=None, output_data_type=None, prediction_type=None, uploads_directory=None, log_timings=None, metric_types=None
+    def __init__(self, http_port=None, listen_host=None, input_data_type='NUMPY', output_data_type='NUMPY', prediction_type=None, uploads_directory=None, log_timings=True, metric_types=None
                  ):
         self.__http_port = http_port
         self.__listen_host = listen_host

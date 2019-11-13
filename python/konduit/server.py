@@ -1,26 +1,37 @@
+from konduit.base_inference import PipelineStep
 from konduit.inference import InferenceConfiguration
 from konduit.json_utils import config_to_dict_with_type
 
 import json
 import subprocess
 import os
-
+import time
 
 class Server(object):
-    def __init__(self, config=InferenceConfiguration(),
-                 extra_start_args=None, config_path='config.json',
+    def __init__(self, inference_config=None, serving_config=None, steps=None,
+                 extra_start_args='-Xmx8g', config_path='config.json',
                  jar_path='konduit.jar'):
         """Konduit Server
 
         Start and stop a server from a given inference configuration.
         Extra arguments with JVM options can be passed.
 
-        :param config: InferenceConfiguration instance
+        :param inference_config: InferenceConfiguration instance
+        :param serving_config: ServingConfig instance
+        :param steps: list (or single) PipelineSteps
         :param extra_start_args: list of string arguments to start the process with
         :param config_path: path to write the config object to (as json)
         :param jar_path: path to the konduit uberjar
         """
-        self.config = config
+
+        if inference_config:
+            self.config = inference_config
+        elif serving_config and steps:
+            if isinstance(steps, PipelineStep):
+                steps = [steps]
+            self.config = InferenceConfiguration(pipeline_steps=steps, serving_config=serving_config)
+        else:
+            self.config = InferenceConfiguration()
         self.config_path = config_path
         self.jar_path = jar_path
         self.process = None
@@ -33,7 +44,7 @@ class Server(object):
         else:
             self.extra_start_args = extra_start_args
 
-    def start(self):
+    def start(self, sleep=None):
         """Start the server"""
         json_config = config_to_dict_with_type(self.config)
         with open(self.config_path, 'w') as f:
@@ -44,6 +55,8 @@ class Server(object):
         args = self._process_extra_args(abs_path)
         process = subprocess.Popen(args=args)
         self.process = process
+        if sleep:
+            time.sleep(sleep)
         return process
 
     def stop(self):
