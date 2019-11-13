@@ -6,6 +6,11 @@
 
 ---
 
+<p align="center">
+    <a href='https://jenkins.konduit.ai/job/konduitai/job/konduit-serving/job/master/'>
+        <img src='https://jenkins.konduit.ai/job/konduitai/job/konduit-serving/job/master/badge/icon'></a>
+</p>
+
 ## Overview
 
 Konduit is a serving system and framework focused on deploying machine learning
