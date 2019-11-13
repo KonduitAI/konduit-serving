@@ -827,12 +827,10 @@ public class PythonExecutioner {
             outputCode += "\"" + varName + "\": " + varName + ",";
         }
 
-
         if (varNames.length > 0)
             outputCode = outputCode.substring(0, outputCode.length() - 1);
         outputCode += "})";
         outputCode += "\nwith open('" + getTempFile() + "', 'w') as " + fileVarName + ":" + fileVarName + ".write(" + outputVarName() + ")";
-
 
         return outputCode;
 
