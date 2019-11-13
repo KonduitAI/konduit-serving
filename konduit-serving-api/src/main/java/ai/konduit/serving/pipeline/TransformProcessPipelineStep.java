@@ -80,18 +80,15 @@ public class TransformProcessPipelineStep extends PipelineStep {
         return (TransformProcessPipelineStep) super.setOutput(outputName, outputSchema);
     }
 
-
-
-
-        /**
-         * Create a TransformProcess Step with default input and output names
-         * just from input/output schema and the actual TransformProcess
-         *
-         * @param inputSchema DataVec Schema for data input
-         * @param outputSchema DataVec Schema for data output
-         * @param transformProcess DataVec TransformProcess
-         * @throws Exception key error
-         */
+    /**
+     * Create a TransformProcess Step with default input and output names
+     * just from input/output schema and the actual TransformProcess
+     *
+     * @param inputSchema DataVec Schema for data input
+     * @param outputSchema DataVec Schema for data output
+     * @param transformProcess DataVec TransformProcess
+     * @throws Exception key error
+     */
     public TransformProcessPipelineStep(Schema inputSchema, Schema outputSchema,
                                         TransformProcess transformProcess) throws Exception {
         String defaultName = "default";

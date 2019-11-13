@@ -82,24 +82,13 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
-
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonCode("first += 2")
+                .pythonCode("first += 2; output = first")
                 .pythonInput("first", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("first", PythonVariables.Type.NDARRAY.name())
-                  .returnAllInputs(false)
+                .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
                 .build();
 
-        PythonPipelineStep pythonStepConfig = PythonPipelineStep.builder()
-                .inputName("default")
-                .inputColumnName("default", Arrays.asList("first"))
-                .inputSchema("default", new SchemaType[]{SchemaType.NDArray})
-                .outputColumnName("default", Arrays.asList("output"))
-                .outputSchema("default", new SchemaType[]{SchemaType.NDArray})
-                .pythonConfig("default",pythonConfig)
-                .build();
-
+        PythonPipelineStep pythonStepConfig = new PythonPipelineStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
@@ -107,16 +96,13 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
                 .predictionType(Output.PredictionType.RAW)
                 .build();
 
-
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .pipelineStep(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
 
-
         return new JsonObject(inferenceConfiguration.toJson());
     }
-
 
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {

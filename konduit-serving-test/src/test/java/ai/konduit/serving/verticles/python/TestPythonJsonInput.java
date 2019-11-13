@@ -42,7 +42,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.util.Arrays;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
@@ -80,24 +79,13 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
-
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonCode("first += 2")
-                .pythonInput("first", PythonVariables.Type.INT.name())
-                .pythonOutput("first", PythonVariables.Type.INT.name())
-                  .returnAllInputs(false)
+                .pythonCode("first += 2; second = first")
+                .pythonInput("first", "INT")
+                .pythonOutput("second", "INT")
                 .build();
 
-        PythonPipelineStep pythonStepConfig = PythonPipelineStep.builder()
-                .inputName("default")
-                .inputColumnName("default", Arrays.asList(new String[]{"first"}))
-                .inputSchema("default", new SchemaType[]{SchemaType.Integer})
-                .outputColumnName("default", Arrays.asList(new String[]{"output"}))
-                .outputSchema("default", new SchemaType[]{SchemaType.Integer})
-                .pythonConfig("default",pythonConfig)
-                .build();
-
+        PythonPipelineStep pythonStepConfig = new PythonPipelineStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
@@ -134,8 +122,8 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
         .body().asString();
         JsonArray arr = new JsonArray(body);
         JsonObject jsonObject1 = arr.getJsonObject(0);
-        assertTrue(jsonObject1.containsKey("output"));
-        assertEquals(4,jsonObject1.getInteger("output"),1e-1);
+        assertTrue(jsonObject1.containsKey("second"));
+        assertEquals(4,jsonObject1.getInteger("second"),1e-1);
 
     }
 }
