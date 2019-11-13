@@ -35,9 +35,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import static com.jayway.restassured.RestAssured.given;
 
-/*
- * Example of an asynchronous JUnit test for a Verticle.
- */
+
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class ColumnarVerticleTest extends BaseDl4JVerticalTest {
@@ -47,7 +45,6 @@ public class ColumnarVerticleTest extends BaseDl4JVerticalTest {
     }
 
     @Test(timeout = 60000)
-
     public void testInferenceResult(TestContext context) {
         JsonArray jsonArray = new JsonArray();
         double[] vals = {5.1,3.5,1.4,0.2};

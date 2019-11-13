@@ -34,8 +34,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ServingConfig {
 
-    private PubsubConfig pubSubConfig;
-
     private int httpPort;
 
     @Builder.Default
