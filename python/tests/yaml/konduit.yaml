@@ -16,8 +16,4 @@ steps:
     python_outputs:
       second: NDARRAY
 client:
-    input_names:
-      - default
-    output_names:
-      - default
     url: http://localhost:1337
