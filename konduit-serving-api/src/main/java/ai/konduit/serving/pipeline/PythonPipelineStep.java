@@ -24,18 +24,14 @@ package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import ai.konduit.serving.util.python.PythonVariables;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.datavec.api.transform.schema.Schema;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.Singular;
-import org.datavec.api.transform.schema.Schema;
-import java.util.Arrays;
-import ai.konduit.serving.util.python.PythonVariables;
 
 
 
@@ -53,26 +49,32 @@ public class PythonPipelineStep extends PipelineStep {
         this.step(pythonConfig);
     }
 
+    @Override
     public PythonPipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
         return (PythonPipelineStep) super.setInput("default", columnNames, types);
     }
 
+    @Override
     public PythonPipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
         return (PythonPipelineStep) super.setOutput("default", columnNames, types);
     }
 
+    @Override
     public PythonPipelineStep setInput(Schema inputSchema) throws Exception {
         return (PythonPipelineStep) super.setInput("default", inputSchema);
     }
 
+    @Override
     public PythonPipelineStep setOutput(Schema outputSchema) throws Exception {
         return (PythonPipelineStep) super.setOutput("default", outputSchema);
     }
 
+    @Override
     public PythonPipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (PythonPipelineStep) super.setInput(inputName, columnNames, types);
     }
 
+    @Override
     public PythonPipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (PythonPipelineStep) super.setOutput(outputName, columnNames, types);
     }
@@ -128,7 +130,7 @@ public class PythonPipelineStep extends PipelineStep {
      * @return this python step
      * @throws Exception key error
      */
-    public  PythonPipelineStep step(PythonConfig pythonConfig, Schema inputSchema,
+    public PythonPipelineStep step(PythonConfig pythonConfig, Schema inputSchema,
                                     Schema outputSchema) throws Exception {
         return this.step("default", pythonConfig, inputSchema, outputSchema);
     }

@@ -35,6 +35,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * A base implementation of the interface {@link PipelineStepRunner}.
+ *
+ * A runner can be thought of like an executor for a pipeline step
+ * configuration. The design expects {@link BasePipelineStepRunner#transform(Record[])},
+ * to be the main call that executes a step and process on the inputs.
+ *
+ * {@link BasePipelineStepRunner#transform(Object...)} and
+ * {@link BasePipelineStepRunner#transform(Object[][])}
+ * are there for providing some simplified APIs so that you don't have to create
+ * records each time you send inputs for processing.
+ */
 public abstract class BasePipelineStepRunner implements PipelineStepRunner {
 
     protected PipelineStep pipelineStep;
@@ -48,6 +60,12 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
      */
     public void destroy() {}
 
+    /**
+     * Transform a set of {@link Object}
+     * via this operation.
+     * @param input the input array
+     * @return the output from the transform
+     */
     @Override
     public Writable[][] transform(Object... input) {
         if(input.length > 0 && input[0] instanceof Object[]) {
@@ -58,6 +76,12 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
         }
     }
 
+    /**
+     * Transform a set of {@link Object}
+     * via this operation.
+     * @param input the input array
+     * @return the output from the transform
+     */
     @Override
     public Writable[][] transform(Object[][] input){
         Record[] outputRecords = transform(Arrays.stream(input)
@@ -70,6 +94,12 @@ public abstract class BasePipelineStepRunner implements PipelineStepRunner {
                 .toArray(Writable[][]::new);
     }
 
+    /**
+     * Transform a set of {@link INDArray}
+     * via this operation.
+     * @param input the input array
+     * @return the output from the transform
+     */
     @Override
     public Record[] transform(Record[] input) {
         int batchSize = input.length;

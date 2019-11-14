@@ -41,10 +41,12 @@ public class TransformProcessPipelineStep extends PipelineStep {
     @Singular
     private Map<String, TransformProcess> transformProcesses;
 
+    @Override
     public TransformProcessPipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.setInput("default", columnNames, types);
     }
 
+    @Override
     public TransformProcessPipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.setOutput("default", columnNames, types);
     }
@@ -59,10 +61,12 @@ public class TransformProcessPipelineStep extends PipelineStep {
         return (TransformProcessPipelineStep) super.setOutput("default", outputSchema);
     }
 
+    @Override
     public TransformProcessPipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.setInput(inputName, columnNames, types);
     }
 
+    @Override
     public TransformProcessPipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.setOutput(outputName, columnNames, types);
     }

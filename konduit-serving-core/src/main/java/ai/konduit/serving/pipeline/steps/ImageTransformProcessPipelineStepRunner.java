@@ -25,7 +25,6 @@ package ai.konduit.serving.pipeline.steps;
 import ai.konduit.serving.pipeline.ImageLoading;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ImagePermuter;
-import javafx.util.Pair;
 import org.datavec.api.writable.BytesWritable;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Text;
@@ -35,6 +34,7 @@ import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.transform.ImageTransformProcess;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.primitives.Pair;
 
 import java.io.IOException;
 import java.util.List;
