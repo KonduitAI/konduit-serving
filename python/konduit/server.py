@@ -6,6 +6,7 @@ import json
 import subprocess
 import os
 import time
+import logging
 
 class Server(object):
     def __init__(self, inference_config=None, serving_config=None, steps=None,
@@ -49,7 +50,7 @@ class Server(object):
         json_config = config_to_dict_with_type(self.config)
         with open(self.config_path, 'w') as f:
             abs_path = os.path.abspath(self.config_path)
-            print('Wrote config.json to path ' + abs_path)
+            logging.info('Wrote config.json to path ' + abs_path)
             json.dump(json_config, f)
 
         args = self._process_extra_args(abs_path)
@@ -87,5 +88,5 @@ class Server(object):
         args.append(absolute_path)
         args.append('--verticleClassName')
         args.append('ai.konduit.serving.verticles.inference.InferenceVerticle')
-        print('Running with args\n' + ' '.join(args))
+        logging.info('Running with args\n' + ' '.join(args))
         return args

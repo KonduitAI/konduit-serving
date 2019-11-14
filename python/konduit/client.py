@@ -5,6 +5,7 @@ import io
 import json
 from pyarrow.ipc import RecordBatchFileReader
 from requests_toolbelt.multipart import decoder, encoder
+import logging
 
 
 class Client(object):
@@ -71,7 +72,7 @@ class Client(object):
             else:
                 return self._convert_multi_part_output(content, content_type)
         except Exception as e:
-            print(e)
+            logging.info(e)
             return None
 
     @staticmethod

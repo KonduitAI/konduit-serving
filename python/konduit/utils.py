@@ -11,7 +11,7 @@ def is_port_in_use(port):
 
 def default_python_path(work_dir='.'):
     work_dir = os.path.abspath(work_dir)
-    python_path = ':'.join(sys.path)
-    python_path += ':' + work_dir
+    python_path = os.pathsep.join(sys.path)
+    python_path += os.pathsep + work_dir
     return python_path
 
