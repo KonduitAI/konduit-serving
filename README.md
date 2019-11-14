@@ -8,7 +8,41 @@
 
 <p align="center">
     <a href='https://jenkins.konduit.ai/job/konduitai/job/konduit-serving/job/master/'>
-        <img src='https://jenkins.konduit.ai/job/konduitai/job/konduit-serving/job/master/badge/icon'></a>
+        <img src='https://jenkins.konduit.ai/job/konduitai/job/konduit-serving/job/master/badge/icon'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=alert_status'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=bugs'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=code_smells'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=coverage'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=duplicated_lines_density'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=ncloc'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=sqale_rating'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=reliability_rating'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=security_rating'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving/'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=sqale_index'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=vulnerabilities'>
+    </a>
 </p>
 
 ## Overview
