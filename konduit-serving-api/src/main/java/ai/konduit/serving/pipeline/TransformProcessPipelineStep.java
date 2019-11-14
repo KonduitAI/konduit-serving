@@ -23,17 +23,13 @@
 package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.SchemaType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.datavec.api.transform.TransformProcess;
-
-import java.util.*;
-
-import lombok.Singular;
 import org.datavec.api.transform.schema.Schema;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -43,14 +39,12 @@ public class TransformProcessPipelineStep extends PipelineStep {
     @Getter
     @Setter
     @Singular
-    private Map<String,TransformProcess> transformProcesses;
+    private Map<String, TransformProcess> transformProcesses;
 
-    @Override
     public TransformProcessPipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.setInput("default", columnNames, types);
     }
 
-    @Override
     public TransformProcessPipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.setOutput("default", columnNames, types);
     }
@@ -65,15 +59,11 @@ public class TransformProcessPipelineStep extends PipelineStep {
         return (TransformProcessPipelineStep) super.setOutput("default", outputSchema);
     }
 
-    @Override
-    public TransformProcessPipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types)
-            throws Exception {
+    public TransformProcessPipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.setInput(inputName, columnNames, types);
     }
 
-    @Override
-    public TransformProcessPipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types)
-            throws Exception {
+    public TransformProcessPipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
         return (TransformProcessPipelineStep) super.setOutput(outputName, columnNames, types);
     }
 
@@ -89,34 +79,30 @@ public class TransformProcessPipelineStep extends PipelineStep {
 
     /**
      * Create a TransformProcess Step with default input and output names
-     * just from input/output schema and the actual TransformProcess
+     * just from output schema and the actual TransformProcess. The
+     * input/initial schema can be inferred from the TransformProcess itself
      *
-     * @param inputSchema DataVec Schema for data input
-     * @param outputSchema DataVec Schema for data output
      * @param transformProcess DataVec TransformProcess
+     * @param outputSchema DataVec Schema for data output
      * @throws Exception key error
      */
-    public TransformProcessPipelineStep(Schema inputSchema, Schema outputSchema,
-                                        TransformProcess transformProcess) throws Exception {
-        String defaultName = "default";
-        this.setInput(defaultName, inputSchema);
-        this.setOutput(defaultName, outputSchema);
-        this.transformProcess(defaultName, transformProcess);
+    public TransformProcessPipelineStep(TransformProcess transformProcess, Schema outputSchema) throws Exception {
+        this.step("default", transformProcess, outputSchema);
     }
 
     /**
      * Define a single, named step for a transform process.
      *
      * @param stepName input and output name for this step
-     * @param inputSchema DataVec Schema for data input
-     * @param outputSchema DataVec Schema for data output
      * @param transformProcess DataVec TransformProcess
+     * @param outputSchema DataVec Schema for data output
      * @return this transform process step
      * @throws Exception key error
      */
-    public  TransformProcessPipelineStep step(String stepName, Schema inputSchema, Schema outputSchema,
-                                              TransformProcess transformProcess) throws Exception {
-        this.setInput(stepName, inputSchema);
+    public TransformProcessPipelineStep step(String stepName, TransformProcess transformProcess, Schema outputSchema
+    ) throws Exception {
+
+        this.setInput(stepName, transformProcess.getInitialSchema());
         this.setOutput(stepName, outputSchema);
         this.transformProcess(stepName, transformProcess);
 
@@ -124,17 +110,16 @@ public class TransformProcessPipelineStep extends PipelineStep {
     }
 
     /**
-     * Define a transform process for this step
+     * Define a single, named step for a transform process.
      *
-     * @param transformProcess DataVec transform process
+     * @param transformProcess DataVec TransformProcess
+     * @param outputSchema DataVec Schema for data output
      * @return this transform process step
+     * @throws Exception key error
      */
-    public TransformProcessPipelineStep transformProcess(TransformProcess transformProcess) {
-        if (transformProcesses == null) {
-            transformProcesses = new HashMap<>();
-        }
-        transformProcesses.put("default", transformProcess);
-        return this;
+    public TransformProcessPipelineStep step( TransformProcess transformProcess, Schema outputSchema
+    ) throws Exception {
+        return this.step("default", transformProcess, outputSchema);
     }
 
     /**
@@ -152,6 +137,15 @@ public class TransformProcessPipelineStep extends PipelineStep {
         return this;
     }
 
+    /**
+     * Define a transform process for this step. The name for this step will be "default"
+     *
+     * @param transformProcess DataVec transform process
+     * @return this transform process step
+     */
+    public TransformProcessPipelineStep transformProcess(TransformProcess transformProcess) {
+        return this.transformProcess("default", transformProcess);
+    }
 
     @Override
     public String pipelineStepClazz() {
