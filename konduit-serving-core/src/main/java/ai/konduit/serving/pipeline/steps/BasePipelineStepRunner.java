@@ -22,17 +22,20 @@
 
 package ai.konduit.serving.pipeline.steps;
 
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.PipelineStepRunner;
-import ai.konduit.serving.config.SchemaType;
 import org.datavec.api.records.Record;
-import org.datavec.api.writable.Writable;
+import org.datavec.api.writable.*;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public abstract  class BasePipelineStepRunner implements PipelineStepRunner {
+public abstract class BasePipelineStepRunner implements PipelineStepRunner {
 
     protected PipelineStep pipelineStep;
 
@@ -40,27 +43,48 @@ public abstract  class BasePipelineStepRunner implements PipelineStepRunner {
         this.pipelineStep = pipelineStep;
     }
 
-
     /**
      * no-op
      */
     public void destroy() {}
 
     @Override
+    public Writable[][] transform(Object... input) {
+        if(input.length > 0 && input[0] instanceof Object[]) {
+            Object[][] objects = Arrays.stream(input).map(innerInputs -> Arrays.stream((Object []) innerInputs).toArray(Object[]::new)).toArray(Object[][]::new);
+            return transform(objects);
+        } else {
+            return transform(new Object[][]{input});
+        }
+    }
+
+    @Override
+    public Writable[][] transform(Object[][] input){
+        Record[] outputRecords = transform(Arrays.stream(input)
+                .map(writables -> new org.datavec.api.records.impl.Record(
+                        Arrays.stream(writables).map(this::getWritableFromObject).collect(Collectors.toList()), null))
+                .toArray(Record[]::new));
+
+        return Arrays.stream(outputRecords)
+                .map(record -> record.getRecord().toArray(new Writable[0]))
+                .toArray(Writable[][]::new);
+    }
+
+    @Override
     public Record[] transform(Record[] input) {
         int batchSize = input.length;
         Record[] ret = new Record[input.length];
+
         for(int example = 0; example < batchSize; example++) {
             for(int name = 0; name < pipelineStep.getInputNames().size(); name++) {
                 String inputName = pipelineStep.inputNameAt(name);
+
                 if(pipelineStep.inputNameIsValidForStep(pipelineStep.inputNameAtIndex(name))) {
                     List<Writable> currRecord;
                     if(ret[example] == null) {
                         currRecord = new ArrayList<>();
                         ret[example] = new org.datavec.api.records.impl.Record(currRecord,null);
-
-                    }
-                    else {
+                    } else {
                         currRecord = ret[example].getRecord();
                     }
 
@@ -68,23 +92,16 @@ public abstract  class BasePipelineStepRunner implements PipelineStepRunner {
                     //Add filtering for column size equal to 1, to reduce boilerplate
                     if(pipelineStep.processColumn(inputName,name)) {
                         processValidWritable(currWritable,currRecord,name);
-                    }
-                    else {
+                    } else {
                         currRecord.add(input[example].getRecord().get(name));
                     }
-
-
-                }
-                else {
+                } else {
                     ret[example] = input[example];
                 }
             }
-
         }
-
         return ret;
     }
-
 
     @Override
     public Map<String, SchemaType[]> inputTypes() {
@@ -96,7 +113,31 @@ public abstract  class BasePipelineStepRunner implements PipelineStepRunner {
         return pipelineStep.getOutputSchemas();
     }
 
-
     public abstract void processValidWritable(Writable writable, List<Writable> record, int inputIndex, Object... extraArgs);
 
+    private Writable getWritableFromObject(Object object){
+        Writable output = null;
+
+        try {
+            if (object instanceof INDArray) {
+                output = new NDArrayWritable((INDArray) object);
+            } else if (object instanceof String) {
+                output = new Text((String) object);
+            } else if (object instanceof Integer) {
+                output = new IntWritable((Integer) object);
+            } else if (object instanceof Float) {
+                output = new FloatWritable((Float) object);
+            } else if (object instanceof Double) {
+                output = new DoubleWritable((Double) object);
+            } else if (object instanceof Long) {
+                output = new LongWritable((Long) object);
+            } else {
+                throw new IllegalArgumentException(String.format("Cannot convert %s to a writable", object.getClass().getName()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return output;
+    }
 }
