@@ -25,8 +25,7 @@ package ai.konduit.serving.util.python;
 import org.datavec.api.transform.ColumnType;
 import org.datavec.api.transform.metadata.BooleanMetaData;
 import org.datavec.api.transform.schema.Schema;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.buffer.DataType;
 
@@ -196,24 +195,24 @@ public class PythonUtils {
         return pyvars2;
     }
 
-    public static long[] jsonArrayToLongArray(JSONArray jsonArray){
-        long[] longs = new long[jsonArray.size()];
-        for (int i=0; i<longs.length; i++){
-            longs[i] = (Long)jsonArray.get(i);
+    public static long[] jsonArrayToLongArray(org.json.JSONArray jsonArray) {
+        long[] longs = new long[jsonArray.length()];
+        for (int i = 0; i < longs.length; i++) {
+            longs[i] = (Long) jsonArray.get(i);
         }
         return longs;
     }
 
-    public static Map<String, Object> toMap(JSONObject jsonobj)  {
+    public static Map<String, Object> toMap(org.json.JSONObject jsonobj)  {
         Map<String, Object> map = new HashMap<>();
-        String[] keys = (String[])jsonobj.keySet().toArray(new String[jsonobj.keySet().size()]);
+        String[] keys = jsonobj.keySet().toArray(new String[jsonobj.keySet().size()]);
         for (String key: keys){
             Object value = jsonobj.get(key);
-            if (value instanceof JSONArray) {
-                value = toList((JSONArray) value);
-            } else if (value instanceof JSONObject) {
-                JSONObject jsonobj2 = (JSONObject)value;
-                if (jsonobj2.containsKey("_is_numpy_array")){
+            if (value instanceof org.json.JSONArray) {
+                value = toList((org.json.JSONArray) value);
+            } else if (value instanceof org.json.JSONObject) {
+                org.json.JSONObject jsonobj2 = (org.json.JSONObject)value;
+                if (jsonobj2.has("_is_numpy_array")) {
                     value = jsonToNumpyArray(jsonobj2);
                 }
                 else{
@@ -227,15 +226,15 @@ public class PythonUtils {
     }
 
 
-    public static List<Object> toList(JSONArray array) {
+    public static List<Object> toList(org.json.JSONArray array) {
         List<Object> list = new ArrayList<>();
-        for (int i = 0; i < array.size(); i++) {
+        for (int i = 0; i < array.length(); i++) {
             Object value = array.get(i);
-            if (value instanceof JSONArray) {
-                value = toList((JSONArray) value);
-            } else if (value instanceof JSONObject) {
-                JSONObject jsonobj2 = (JSONObject) value;
-                if (jsonobj2.containsKey("_is_numpy_array")) {
+            if (value instanceof org.json.JSONArray) {
+                value = toList((org.json.JSONArray) value);
+            } else if (value instanceof org.json.JSONObject) {
+                org.json.JSONObject jsonobj2 = (org.json.JSONObject) value;
+                if (jsonobj2.has("_is_numpy_array")) {
                     value = jsonToNumpyArray(jsonobj2);
                 } else {
                     value = toMap(jsonobj2);
@@ -247,22 +246,22 @@ public class PythonUtils {
     }
 
 
-    private static NumpyArray jsonToNumpyArray(JSONObject map){
+    private static NumpyArray jsonToNumpyArray(org.json.JSONObject map){
         String dtypeName = (String)map.get("dtype");
         DataType dtype;
-        if (dtypeName.equals("float64")){
+        if (dtypeName.equals("float64")) {
             dtype = DataType.DOUBLE;
         }
-        else if (dtypeName.equals("float32")){
+        else if (dtypeName.equals("float32")) {
             dtype = DataType.FLOAT;
         }
-        else if (dtypeName.equals("int16")){
+        else if (dtypeName.equals("int16")) {
             dtype = DataType.SHORT;
         }
-        else if (dtypeName.equals("int32")){
+        else if (dtypeName.equals("int32")) {
             dtype = DataType.INT;
         }
-        else if (dtypeName.equals("int64")){
+        else if (dtypeName.equals("int64")) {
             dtype = DataType.LONG;
         }
         else{

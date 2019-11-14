@@ -24,8 +24,7 @@
 package ai.konduit.serving.util.python;
 
 import lombok.Data;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.Serializable;
@@ -523,14 +522,14 @@ public class PythonVariables implements Serializable {
      * This variables set as its json representation (an array of json objects)
      * @return the json array output
      */
-    public JSONArray toJSON(){
-        JSONArray arr = new JSONArray();
+    public org.json.JSONArray toJSON(){
+        org.json.JSONArray arr = new org.json.JSONArray();
         for (String varName: getVariables()){
-            JSONObject var = new JSONObject();
+            org.json.JSONObject var = new org.json.JSONObject();
             var.put("name", varName);
             String varType = getType(varName).toString();
             var.put("type", varType);
-            arr.add(var);
+            arr.put(var);
         }
         return arr;
     }
@@ -557,31 +556,31 @@ public class PythonVariables implements Serializable {
      * @param jsonArray the input json array
      * @return the python variables based on the input json array
      */
-    public static PythonVariables fromJSON(JSONArray jsonArray){
+    public static PythonVariables fromJSON(org.json.JSONArray jsonArray){
         PythonVariables pyvars = new PythonVariables();
-        for (int i = 0; i < jsonArray.size(); i++) {
-            JSONObject input = (JSONObject) jsonArray.get(i);
+        for (int i = 0; i < jsonArray.length(); i++) {
+            org.json.JSONObject input = (org.json.JSONObject) jsonArray.get(i);
             String varName = (String)input.get("name");
             String varType = (String)input.get("type");
-            if (varType.equals("BOOL")){
+            if (varType.equals("BOOL")) {
                 pyvars.addBool(varName);
             }
-            else if (varType.equals("INT")){
+            else if (varType.equals("INT")) {
                 pyvars.addInt(varName);
             }
             else if (varType.equals("FlOAT")){
                 pyvars.addFloat(varName);
             }
-            else if (varType.equals("STR")){
+            else if (varType.equals("STR")) {
                 pyvars.addStr(varName);
             }
-            else if (varType.equals("LIST")){
+            else if (varType.equals("LIST")) {
                 pyvars.addList(varName);
             }
             else if (varType.equals("FILE")){
                 pyvars.addFile(varName);
             }
-            else if (varType.equals("NDARRAY")){
+            else if (varType.equals("NDARRAY")) {
                 pyvars.addNDArray(varName);
             }
             else if(varType.equals("DICT")) {
