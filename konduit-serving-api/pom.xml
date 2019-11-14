@@ -40,14 +40,6 @@
             <id>test</id>
             <dependencies>
                 <dependency>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>openblas</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>mkl</artifactId>
-                </dependency>
-                <dependency>
                     <groupId>org.nd4j</groupId>
                     <artifactId>nd4j-native</artifactId>
                     <version>${nd4j.version}</version>
@@ -66,16 +58,16 @@
                     <groupId>junit</groupId>
                     <artifactId>junit</artifactId>
                 </dependency>
-                <dependency>
-                    <groupId>com.googlecode.json-simple</groupId>
-                    <artifactId>json-simple</artifactId>
-                    <version>1.1</version>
-                </dependency>
             </dependencies>
         </profile>
     </profiles>
 
     <dependencies>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1</version>
+        </dependency>
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>openblas</artifactId>
