@@ -57,7 +57,19 @@ def get_step(step_config):
         python_config = PythonConfig(**step_config)
         step = PythonPipelineStep().step(python_config)
     elif step_type == 'TENSORFLOW':
-        pass
+        pi_config = pop_data(step_config, 'parallel_inference_config')
+        pic = ParallelInferenceConfig(**pi_config)
+        step_config['parallel_inference_config'] = pic
+        model_loading_path = pop_data(step_config, 'model_loading_path')
+        model_config_type = ModelConfigType(model_type=step_type, model_loading_path=model_loading_path)
+        input_data_types = pop_data(step_config, 'input_data_types')
+        tensor_data_types_config = TensorDataTypesConfig(input_data_types=input_data_types)
+        tensorflow_config = TensorFlowConfig(
+            model_config_type=model_config_type,
+            tensor_data_types_config=tensor_data_types_config
+        )
+        step_config['model_config'] = tensorflow_config
+        step = ModelPipelineStep(**step_config)
     else:
         raise Exception('Step type of type ' + step_type + ' currently not supported.')
     return step

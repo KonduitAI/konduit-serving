@@ -3,9 +3,16 @@ serving:
 steps:
   tensorflow_step:
     type: TENSORFLOW
-    python_path: .
-    python_code_path: ./simple.py
-    python_inputs:
-      first: NDARRAY
-    python_outputs:
-      second: NDARRAY
+    model_loading_path: bert_mrpc_frozen.pb
+    input_names:
+      - IteratorGetNext:0
+      - IteratorGetNext:1
+      - IteratorGetNext:4
+    output_names:
+      - loss/Softmax
+    parallel_inference_config:
+      workers: 1
+    input_data_types:
+      IteratorGetNext:0: INT32
+      IteratorGetNext:1: INT32
+      IteratorGetNext:4: INT32
