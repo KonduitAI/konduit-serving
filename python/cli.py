@@ -73,7 +73,7 @@ def build(os):
 
 @click.command()
 @click.option('--yaml', help='Relative or absolute path to your konduit serving YAML file.')
-@click.option('--start_server', default=True, help='Relative or absolute path to your konduit serving YAML file.')
+@click.option('--start_server', default=True, help='Whether to start the server instance after initialization.')
 def serve(yaml, start_server):
     """Serve a pipeline from a konduit.yaml"""
     # TODO: store the process ID for the server so we can reliable shut it down later.
