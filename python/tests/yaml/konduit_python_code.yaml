@@ -5,12 +5,12 @@ serving:
   log_timings: True
   extra_start_args: -Xmx8g
   jar_path: konduit.jar
-  sleep: 1
+  sleep: 10
 steps:
   python_step:
     type: PYTHON
     python_path: .
-    python_code_path: ./simple.py
+    python_code: "first+=2; second = first"
     python_inputs:
       first: NDARRAY
     python_outputs:

@@ -1,0 +1,11 @@
+serving:
+  http_port: 1337
+steps:
+  tensorflow_step:
+    type: TENSORFLOW
+    python_path: .
+    python_code_path: ./simple.py
+    python_inputs:
+      first: NDARRAY
+    python_outputs:
+      second: NDARRAY

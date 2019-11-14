@@ -11,12 +11,20 @@ def load_data(file_path):
     return data
 
 
+def pop_data(serving_data, name):
+    result = None
+    if name in serving_data:
+        result = serving_data.pop(name)
+    return result
+
+
 def create_server_from_file(file_path, start_server=True):
     data = load_data(file_path)
     serving_data = data.get('serving', None)
-    extra_start_args = serving_data.pop('extra_start_args')
-    sleep = serving_data.pop('sleep')
-    jar_path = serving_data.pop('jar_path')
+
+    extra_start_args = pop_data(serving_data, 'extra_start_args')
+    sleep = pop_data(serving_data, 'sleep')
+    jar_path = pop_data(serving_data, 'jar_path')
 
     serving_config = ServingConfig(**serving_data)
 
@@ -48,6 +56,8 @@ def get_step(step_config):
     if step_type == 'PYTHON':
         python_config = PythonConfig(**step_config)
         step = PythonPipelineStep().step(python_config)
+    elif step_type == 'TENSORFLOW':
+        pass
     else:
-        step = None
+        raise Exception('Step type of type ' + step_type + ' currently not supported.')
     return step
