@@ -19,11 +19,10 @@ net = create_Mb_Tiny_RFB_fd(len(class_names), is_test=True, device=test_device)
 predictor = create_Mb_Tiny_RFB_fd_predictor(net, candidate_size=candidate_size, device=test_device)
 net.load(model_path)
 
-# The variable "default" is sent from the konduit client in "konduit_server.py", i.e. in our example "encoded_image"
-image = default
+# The variable "image" is sent from the konduit client in "konduit_server.py", i.e. in our example "encoded_image"
 image = base64_to_ndarray(image)
-boxes, labels, probs = predictor.predict(image, candidate_size / 2, threshold)
+boxes, _, _ = predictor.predict(image, candidate_size / 2, threshold)
 
-# "default" is then picked up again from here and returned to the client
-default = str(len(boxes))
+# "image" is then picked up again from here and returned to the client
+image = str(len(boxes))
 

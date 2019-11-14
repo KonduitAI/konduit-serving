@@ -50,7 +50,8 @@ def set_input_func(self, schema=None, column_names=None, types=None, input_name=
         names.append(input_name)
         self._set_input_names(names)
 
-        self.set_input_columns(input_name=input_name, column_names=column_names)
+        self.set_input_columns(input_name=input_name,
+                               column_names=column_names)
         self.set_input_types(input_name=input_name, types=types)
 
         return self
@@ -73,7 +74,8 @@ def set_output_func(self, schema=None, column_names=None, types=None, output_nam
         names.append(output_name)
         self._set_output_names(names)
 
-        self.set_output_columns(output_name=output_name, column_names=column_names)
+        self.set_output_columns(output_name=output_name,
+                                column_names=column_names)
         self.set_output_types(output_name=output_name, types=types)
 
         return self
@@ -90,10 +92,11 @@ PipelineStep.set_input = set_input_func
 PipelineStep.set_output = set_output_func
 
 
-def step_func(self, input_schema, output_schema, transform_process, step_name="default"):
-    self.set_input(input_name=step_name, schema=input_schema)
-    self.set_output(output_name=step_name, schema=output_schema)
-    self.transform_process(input_name=step_name, transform_process=transform_process)
+def step_func(self, input_schema, output_schema, transform_process, input_name="default"):
+    self.set_input(input_name=input_name, schema=input_schema)
+    self.set_output(output_name=input_name, schema=output_schema)
+    self.transform_process(input_name=input_name,
+                           transform_process=transform_process)
 
     return self
 
@@ -112,23 +115,49 @@ TransformProcessPipelineStep.step = step_func
 TransformProcessPipelineStep.transform_process = transform_process_func
 
 
-def python_step_func(self, python_config, step_name="default", input_schema=None, input_column_names=None,
+def python_step_func(self, python_config, input_name="default", input_schema=None, input_column_names=None,
                      input_types=None, output_schema=None, output_column_names=None, output_types=None):
-    self.set_input(schema=input_schema, column_names=input_column_names, types=input_types, input_name=step_name)
-    self.set_output(schema=output_schema, column_names=output_column_names, types=output_types, output_name=step_name)
-    self.python_config(python_config=python_config, step_name=step_name)
+    # if nothing else is defined, we can derive all properties just from the Python configuration
+    if (input_schema is None and input_column_names is None and input_types is None \
+        and output_schema is None and output_column_names is None and output_types is None):
+        inputs = python_config._get_python_inputs()
+        outputs = python_config._get_python_outputs()
+        input_column_names = list(inputs.keys())
+        output_column_names = list(outputs.keys())
+        input_types = [konduit_type_mapping(v) for v in inputs.values()]
+        output_types = [konduit_type_mapping(v) for v in outputs.values()]
+
+    self.set_input(schema=input_schema, column_names=input_column_names,
+                   types=input_types, input_name=input_name)
+    self.set_output(schema=output_schema, column_names=output_column_names,
+                    types=output_types, output_name=input_name)
+    self.python_config(python_config=python_config, input_name=input_name)
 
     return self
 
 
-def python_config_func(self, python_config, step_name="default"):
+def python_config_func(self, python_config, input_name="default"):
     python_configs = self._get_python_configs()
     if python_configs is None:
         python_configs = {}
-    python_configs[step_name] = python_config
+    python_configs[input_name] = python_config
     self._set_python_configs(python_configs)
 
     return self
+
+
+def konduit_type_mapping(name):
+    map = {
+        "BOOL": "Boolean",
+        "STR": "String",
+        "INT": "Integer",
+        "FLOAT": "Float",
+        "NDARRAY": "NDArray"
+    }
+    if name not in map.keys():
+        raise Exception("Can't convert input type " + str(name))
+    else:
+        return map.get(name)
 
 
 PythonPipelineStep.step = python_step_func

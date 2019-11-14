@@ -46,8 +46,6 @@ class TensorDataTypesConfig(object):
         return d
 
 
-
-
 class SavedModelConfig(object):
 
     _types_map = {
@@ -848,7 +846,7 @@ class ServingConfig(object):
         'metricTypes': 'table',
     }
 
-    def __init__(self, http_port=None, listen_host=None, input_data_type=None, output_data_type=None, prediction_type=None, uploads_directory=None, log_timings=None, metric_types=None
+    def __init__(self, http_port=None, listen_host=None, input_data_type='NUMPY', output_data_type='NUMPY', prediction_type=None, uploads_directory=None, log_timings=True, metric_types=None
                  ):
         self.__http_port = http_port
         self.__listen_host = listen_host
@@ -858,7 +856,6 @@ class ServingConfig(object):
         self.__uploads_directory = uploads_directory
         self.__log_timings = log_timings
         self.__metric_types = metric_types
-
 
     def _get_http_port(self):
         return self.__http_port

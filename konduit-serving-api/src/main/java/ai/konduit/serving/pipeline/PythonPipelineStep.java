@@ -300,7 +300,8 @@ public class PythonPipelineStep extends PipelineStep {
                 case FILE:
                 case DICT:
                 default:
-                    throw new IllegalArgumentException(String.format("Can't convert (%s) to (%s) enum", pythonVarType.name(), SchemaType.class.getName()));
+                    throw new IllegalArgumentException(String.format("Can't convert (%s) to (%s) enum",
+                            pythonVarType.name(), SchemaType.class.getName()));
             }
         } catch (Exception e) {
             e.printStackTrace();

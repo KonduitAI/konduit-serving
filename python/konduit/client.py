@@ -5,11 +5,12 @@ import io
 import json
 from pyarrow.ipc import RecordBatchFileReader
 from requests_toolbelt.multipart import decoder, encoder
+import logging
 
 
 class Client(object):
     def __init__(self, timeout=60, input_type='NUMPY', endpoint_output_type='NUMPY',
-                 return_output_type=None, input_names=None, output_names=None, url=None):
+                 return_output_type=None, input_names=['default'], output_names=['default'], url=None):
 
         if input_names is None:
             input_names = []
@@ -33,6 +34,9 @@ class Client(object):
         self.url = url
 
     def predict(self, data_input=None):
+        if isinstance(data_input, np.ndarray):
+            # Note: this is only slightly dangerous, given the current state ;)
+            data_input = {'default': data_input}
         if data_input is None:
             data_input = {}
         if self.input_type.upper() == 'JSON':
@@ -68,7 +72,7 @@ class Client(object):
             else:
                 return self._convert_multi_part_output(content, content_type)
         except Exception as e:
-            print(e)
+            logging.info(e)
             return None
 
     @staticmethod
