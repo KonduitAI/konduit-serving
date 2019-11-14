@@ -1,6 +1,8 @@
+from konduit.load import create_server_from_file, create_client_from_file
 import os as opos
 import click
 import subprocess
+import numpy as np
 
 USER_PATH = opos.path.expanduser('~')
 KONDUIT_BASE_DIR = opos.path.join(USER_PATH, '.konduit')
@@ -69,6 +71,30 @@ def build(os):
     build_jar(os)
 
 
+@click.command()
+@click.option('--yaml', help='Relative or absolute path to your konduit serving YAML file.')
+@click.option('--start_server', default=True, help='Relative or absolute path to your konduit serving YAML file.')
+def serve(yaml, start_server):
+    """Serve a pipeline from a konduit.yaml"""
+    # TODO: store the process ID for the server so we can reliable shut it down later.
+    create_server_from_file(file_path=yaml, start_server=start_server)
+
+
+@click.command()
+@click.option('--yaml', help='Relative or absolute path to your konduit serving YAML file.')
+@click.option('--numpy_data', help='Path to your numpy data')
+@click.option('--stop_server', default=True, help='Stop the Konduit server after the prediction is done.')
+def predict_numpy(yaml, numpy_data, stop_server):
+    """Get predictions for your pipeline from numpy input."""
+    # TODO: Note that this is a very limited use case for demo purposes only. we need a more reliable
+    #  system going forward.
+    client = create_client_from_file(file_path=yaml)
+    print(client.predict(np.load(numpy_data)))
+    if stop_server:
+        pass
+        # SERVER.stop()
+
+
 @click.group()
 def cli():
     pass
@@ -76,3 +102,5 @@ def cli():
 
 cli.add_command(init)
 cli.add_command(build)
+cli.add_command(serve)
+cli.add_command(predict_numpy)
