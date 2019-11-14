@@ -1,0 +1,23 @@
+serving:
+  http_port: 1337
+  input_data_type: NUMPY
+  output_data_type: NUMPY
+  log_timings: True
+  extra_start_args: -Xmx8g
+  jar_path: konduit.jar
+  sleep: 10
+steps:
+  python_step:
+    type: PYTHON
+    python_path: .
+    python_code_path: ./simple.py
+    python_inputs:
+      first: NDARRAY
+    python_outputs:
+      second: NDARRAY
+client:
+    input_names:
+      - default
+    output_names:
+      - default
+    url: http://localhost:1337
