@@ -25,111 +25,97 @@ package ai.konduit.serving.pipeline.steps;
 import ai.konduit.serving.pipeline.ImageLoading;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ImagePermuter;
+import javafx.util.Pair;
 import org.datavec.api.writable.BytesWritable;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Text;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.data.ImageWritable;
 import org.datavec.image.loader.NativeImageLoader;
+import org.datavec.image.transform.ImageTransformProcess;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRunner {
 
-    private Map<String,NativeImageLoader> imageLoaders;
+    private Map<String, NativeImageLoader> imageLoaders;
     private ImageLoading imageLoadingConfig;
 
     public ImageTransformProcessPipelineStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
-        imageLoaders = new HashMap<>();
-        ImageLoading imageLoadingConfig = (ImageLoading) pipelineStep;
-        this.imageLoadingConfig = imageLoadingConfig;
-        for(int i = 0; i < pipelineStep.getInputNames().size(); i++) {
-            String s = pipelineStep.getInputNames().get(i);
-            if(imageLoadingConfig.getDimensionsConfigs().containsKey(s)) {
-                Long[] values = imageLoadingConfig.getDimensionsConfigs().get(s);
-                NativeImageLoader nativeImageLoader = new NativeImageLoader(values[0],values[1],values[2]);
-                imageLoaders.put(s,nativeImageLoader);
 
-            }
-            else {
-                NativeImageLoader nativeImageLoader = new NativeImageLoader();
-                imageLoaders.put(s,nativeImageLoader);
-            }
-        }
+        this.imageLoadingConfig = (ImageLoading) pipelineStep;
+
+        imageLoaders = imageLoadingConfig.getInputNames().stream()
+                .map(inputName -> {
+                    Long[] values = imageLoadingConfig.getDimensionsConfigs().getOrDefault(inputName, null);
+                    if(values != null) {
+                        return new Pair<>(inputName, new NativeImageLoader(values[0], values[1], values[2]));
+                    } else {
+                        return new Pair<>(inputName, new NativeImageLoader());
+                    }
+                })
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
         Preconditions.checkState(!imageLoaders.isEmpty(),"No image loaders specified.");
-
-
     }
 
     @Override
     public void processValidWritable(Writable writable, List<Writable> record, int inputIndex, Object... extraArgs) {
-        NativeImageLoader nativeImageLoader = transformRecord(inputIndex);
+        String inputName = imageLoadingConfig.getInputNames().get(inputIndex);
 
-        if (writable instanceof ImageWritable) {
-            ImageWritable imageWritable = (ImageWritable) writable;
-            try {
-                INDArray arr = nativeImageLoader.asMatrix(imageWritable.getFrame());
-                if(!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
-                    arr = ImagePermuter.permuteOrder(arr,
-                            imageLoadingConfig.getImageProcessingInitialLayout()
-                            ,imageLoadingConfig.getImageProcessingRequiredLayout());
-                }
-                record.add(new NDArrayWritable(arr));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (writable instanceof BytesWritable) {
-            BytesWritable bytesWritable = (BytesWritable) writable;
-            try {
-                INDArray arr = nativeImageLoader.asMatrix(bytesWritable.getContent());
-                if(!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
-                    arr = ImagePermuter.permuteOrder(arr,
-                            imageLoadingConfig.getImageProcessingInitialLayout()
-                            ,imageLoadingConfig.getImageProcessingRequiredLayout());
-                }
-                record.add(new NDArrayWritable(arr));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (writable instanceof Text) {
-            try {
-                INDArray arr = nativeImageLoader.asMatrix(writable.toString());
-                if(!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
-                    arr = ImagePermuter.permuteOrder(arr,
-                            imageLoadingConfig.getImageProcessingInitialLayout()
-                            ,imageLoadingConfig.getImageProcessingRequiredLayout());
-                }
-                record.add(new NDArrayWritable(arr));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else if(writable instanceof NDArrayWritable) {
-            NDArrayWritable ndArrayWritable = (NDArrayWritable) writable;
-            INDArray arr = ndArrayWritable.get();
-            if(!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
-                arr = ImagePermuter.permuteOrder(arr,
-                        imageLoadingConfig.getImageProcessingInitialLayout()
-                        ,imageLoadingConfig.getImageProcessingRequiredLayout());
-            }
-            record.add(new NDArrayWritable(arr));
-        }
-        else {
-            throw new IllegalArgumentException("Illegal type to load from " + writable.getClass());
-        }
+        NativeImageLoader nativeImageLoader = imageLoaders.get(inputName);
+        ImageTransformProcess imageTransformProcess = imageLoadingConfig.getImageTransformProcesses().get(inputName);
 
+        INDArray input;
+
+        try {
+            if (writable instanceof ImageWritable) {
+                input = nativeImageLoader.asMatrix(((ImageWritable) writable).getFrame());
+            } else if (writable instanceof BytesWritable) {
+                input = nativeImageLoader.asMatrix(((BytesWritable) writable).getContent());
+            } else if (writable instanceof Text) {
+                input = nativeImageLoader.asMatrix(writable.toString());
+            } else if (writable instanceof NDArrayWritable) {
+                input = ((NDArrayWritable) writable).get();
+            } else {
+                throw new IllegalArgumentException("Illegal type to load from " + writable.getClass());
+            }
+
+            INDArray output;
+
+            if(imageLoadingConfig.isUpdateOrderingBeforeTransform()) {
+                output = applyTransform(imageTransformProcess, nativeImageLoader, permuteImageOrder(input));
+            } else {
+                output = permuteImageOrder(applyTransform(imageTransformProcess, nativeImageLoader, input));
+            }
+
+            record.add(new NDArrayWritable(output));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public NativeImageLoader transformRecord(int i) {
-        NativeImageLoader nativeImageLoader = imageLoaders.get(imageLoadingConfig.getInputNames().get(i));
-        return nativeImageLoader;
+    private INDArray permuteImageOrder(INDArray input) {
+        if (!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
+            return ImagePermuter.permuteOrder(input,
+                    imageLoadingConfig.getImageProcessingInitialLayout(),
+                    imageLoadingConfig.getImageProcessingRequiredLayout());
+        } else {
+            return input;
+        }
     }
 
+    private INDArray applyTransform(ImageTransformProcess imageTransformProcess, NativeImageLoader nativeImageLoader, INDArray input) throws IOException {
+        if (imageTransformProcess != null) {
+            return imageTransformProcess.executeArray(new ImageWritable(nativeImageLoader.asFrame(input)));
+        } else {
+            return input;
+        }
+    }
 }

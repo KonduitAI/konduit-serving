@@ -37,11 +37,16 @@ public class ImageLoading extends PipelineStep implements Serializable {
     private int originalImageHeight;
     private int originalImageWidth;
 
+    private boolean updateOrderingBeforeTransform = false;
+
     @Singular
-    private Map<String,Long[]> dimensionsConfigs;
+    private Map<String, Long[]> dimensionsConfigs;
+
     private String imageProcessingRequiredLayout = "NCHW", imageProcessingInitialLayout = "NCHW";
+
     @Singular
-    private Map<String,ImageTransformProcess> imageTransformProcesses;
+    private Map<String, ImageTransformProcess> imageTransformProcesses;
+
     private ObjectDetectionConfig objectDetectionConfig;
 
     public boolean initialImageLayoutMatchesFinal() {
@@ -49,7 +54,6 @@ public class ImageLoading extends PipelineStep implements Serializable {
             return getImageProcessingInitialLayout().equals(getImageProcessingRequiredLayout());
         return true;
     }
-
 
     @Override
     public String pipelineStepClazz() {
