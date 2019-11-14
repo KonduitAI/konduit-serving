@@ -197,7 +197,7 @@ public abstract class PipelineStep implements Serializable {
 
             return this;
         } else {
-            throw new Exception("Input name " + inputName + "is already configured for this PipelineStep," +
+            throw new Exception("Input name " + inputName + " is already configured for this PipelineStep," +
                     " choose another naming convention for your next step.");
         }
     }

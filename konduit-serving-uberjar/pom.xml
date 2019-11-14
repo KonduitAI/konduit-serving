@@ -39,6 +39,21 @@
     <dependencies>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-orchestration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-distro-bom</artifactId>
             <version>${project.version}</version>
         </dependency>

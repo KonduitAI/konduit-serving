@@ -33,6 +33,7 @@ import org.nd4j.shade.jackson.databind.SerializationFeature;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -45,6 +46,10 @@ public class InferenceConfiguration implements Serializable  {
     private List<PipelineStep> pipelineSteps;
     @Builder.Default
     private ServingConfig servingConfig = new ServingConfig();
+
+    public InferenceConfiguration(PipelineStep... steps) {
+        this.pipelineSteps = Arrays.asList(steps);
+    }
 
     /**
      * Returns a serving configuration if one is defined

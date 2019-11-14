@@ -8,6 +8,8 @@ import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.Writable;
 import org.nd4j.linalg.factory.Nd4j;
 
+import java.util.Arrays;
+
 public class BasicConfiguration {
     public static void main(String[] args) throws Exception {
         /*
@@ -53,23 +55,32 @@ public class BasicConfiguration {
                 .ndArrayMathFunctionTransform("x2", MathFunction.FLOOR) // Floors each element
                 .ndArrayScalarOpTransform("x2", MathOp.Add, 2) // Adds 2 to each element
                 .ndArrayScalarOpTransform("x1", MathOp.ScalarMin, 50)
+                .ndArrayScalarOpTransform("x3", MathOp.Multiply, 232)
+                .ndArrayScalarOpTransform("x3", MathOp.Modulus, 15)
                 .build();
 
         /*
          * Now we'll create the pipeline step for the transform process
          */
         TransformProcessPipelineStep transformProcessPipelineStep = new TransformProcessPipelineStep()
-                .step("default", transformProcess, outputSchema);
+                .step("default", transformProcess, outputSchema)
+                .step("default2", transformProcess, outputSchema);
 
         /*
          * Now creating a test record input
          */
         Writable[][] output = transformProcessPipelineStep.getRunner().transform(
-               Nd4j.rand(10, 10).muli(100),
-               Nd4j.rand(5, 5).muli(100),
-               Nd4j.ones(2,2)
+                new Object[] {
+                        Nd4j.rand(10, 10).muli(100),
+                        Nd4j.rand(5, 5).muli(100),
+                        Nd4j.ones(2, 2)
+                }, new Object[] {
+                        Nd4j.rand(10, 10).muli(100),
+                        Nd4j.rand(5, 5).muli(100),
+                        Nd4j.ones(2, 2)
+                }
         );
 
-        System.out.println(String.format("%s\n%s\n%s", output[0][0], output[0][1], output[0][2]));
+        System.out.println(Arrays.deepToString(output));
     }
 }
