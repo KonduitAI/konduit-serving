@@ -32,7 +32,8 @@ import org.bytedeco.cpython.PyObject;
 import org.bytedeco.cpython.PyThreadState;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.numpy.global.numpy;
-import org.json.simple.parser.JSONParser;
+import org.json.JSONObject;
+import org.json.JSONArray;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.factory.Nd4j;
@@ -438,34 +439,32 @@ public class PythonExecutioner {
             return;
         }
 
-
-        JSONParser p = new JSONParser();
-        try{
-            org.json.JSONObject jobj = (org.json.JSONObject) p.parse(json);
-            for (String varName: pyOutputs.getVariables()){
+        try {
+            JSONObject jobj = new JSONObject(json);
+            for (String varName: pyOutputs.getVariables()) {
                 PythonVariables.Type type = pyOutputs.getType(varName);
-                if (type == PythonVariables.Type.NDARRAY){
-                    org.json.JSONObject varValue = (org.json.JSONObject)jobj.get(varName);
+                if (type == PythonVariables.Type.NDARRAY) {
+                    JSONObject varValue = (JSONObject)jobj.get(varName);
                     long address = (Long)varValue.get("address");
-                    org.json.JSONArray shapeJson = (org.json.JSONArray)varValue.get("shape");
-                    org.json.JSONArray stridesJson = (org.json.JSONArray)varValue.get("strides");
+                    org.json.JSONArray shapeJson = (JSONArray)varValue.get("shape");
+                    JSONArray stridesJson = (JSONArray)varValue.get("strides");
                     long[] shape = jsonArrayToLongArray(shapeJson);
                     long[] strides = jsonArrayToLongArray(stridesJson);
                     String dtypeName = (String)varValue.get("dtype");
                     DataType dtype;
-                    if (dtypeName.equals("float64")){
+                    if (dtypeName.equals("float64")) {
                         dtype = DataType.DOUBLE;
                     }
                     else if (dtypeName.equals("float32")){
                         dtype = DataType.FLOAT;
                     }
-                    else if (dtypeName.equals("int16")){
+                    else if (dtypeName.equals("int16")) {
                         dtype = DataType.SHORT;
                     }
-                    else if (dtypeName.equals("int32")){
+                    else if (dtypeName.equals("int32")) {
                         dtype = DataType.INT;
                     }
-                    else if (dtypeName.equals("int64")){
+                    else if (dtypeName.equals("int64")) {
                         dtype = DataType.LONG;
                     }
                     else{
@@ -474,18 +473,14 @@ public class PythonExecutioner {
 
                     pyOutputs.setValue(varName, new NumpyArray(address, shape, strides, dtype, true));
 
-                    //pyOutputs.setValue(varName, evalNDARRAY(varName));
-
                 }
                 else if (type == PythonVariables.Type.LIST) {
-                    org.json.JSONArray varValue = (org.json.JSONArray)jobj.get(varName);
+                    JSONArray varValue = (JSONArray) jobj.get(varName);
                     pyOutputs.setValue(varName, varValue);
-                    //pyOutputs.setValue(varName, evalLIST(varName));
                 }
                 else if (type == PythonVariables.Type.DICT) {
-                    Map map = toMap((org.json.JSONObject) jobj.get(varName));
+                    Map map = toMap((JSONObject) jobj.get(varName));
                     pyOutputs.setValue(varName, map);
-                    //pyOutputs.setValue(varName, evalDICT(varName));
 
                 }
                 else{
@@ -545,8 +540,7 @@ public class PythonExecutioner {
     public static void execWithSetupAndRun(String code){
         code = getWrappedCode(code);
         if(code.contains("import numpy") && !getInterpreter().equals("main")) { // FIXME
-            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter." +
-                    "See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
+            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
         }
 
         acquireGIL();
@@ -568,8 +562,7 @@ public class PythonExecutioner {
     public static void execWithSetupAndRun(String code, PythonVariables pyOutputs) {
         code = getWrappedCode(code);
         if(code.contains("import numpy") && !getInterpreter().equals("main")) { // FIXME
-            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. " +
-                    "See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
+            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
         }
 
         acquireGIL();
@@ -634,8 +627,7 @@ public class PythonExecutioner {
         code = inputCode +code;
         code = getWrappedCode(code);
         if(code.contains("import numpy") && !getInterpreter().equals("main")) { // FIXME
-            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter." +
-                    "See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
+            throw new IllegalArgumentException("Unable to execute numpy on sub interpreter. See https://mail.python.org/pipermail/python-dev/2019-January/156095.html for the reasons.");
         }
         acquireGIL();
         _exec(code);
@@ -814,8 +806,7 @@ public class PythonExecutioner {
 
         String outputCode = "import json\n";
         String outputFunctions;
-        try(BufferedInputStream bufferedInputStream = new BufferedInputStream(
-                new ClassPathResource("pythonexec/serialize_array.py").getInputStream())) {
+        try(BufferedInputStream bufferedInputStream = new BufferedInputStream(new ClassPathResource("pythonexec/serialize_array.py").getInputStream())) {
             outputFunctions= IOUtils.toString(bufferedInputStream,Charset.defaultCharset());
             outputCode += outputFunctions;
             outputCode += "\n";
@@ -829,11 +820,12 @@ public class PythonExecutioner {
             outputCode += "\"" + varName + "\": " + varName + ",";
         }
 
+
         if (varNames.length > 0)
             outputCode = outputCode.substring(0, outputCode.length() - 1);
         outputCode += "})";
-        outputCode += "\nwith open('" + getTempFile() + "', 'w') as " + fileVarName + ":"
-                + fileVarName + ".write(" + outputVarName() + ")";
+        outputCode += "\nwith open('" + getTempFile() + "', 'w') as " + fileVarName + ":" + fileVarName + ".write(" + outputVarName() + ")";
+
 
         return outputCode;
 
