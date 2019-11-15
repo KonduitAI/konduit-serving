@@ -1,20 +1,16 @@
 from konduit.load import create_server_from_file, create_client_from_file
+from konduit.config import *
+from konduit.server import stop_server_by_pid
+from konduit.utils import create_konduit_folders
+from konduit.load import store_pid, pop_pid
+
 import os as opos
 import click
 import subprocess
 import numpy as np
 
-USER_PATH = opos.path.expanduser('~')
-KONDUIT_BASE_DIR = opos.path.join(USER_PATH, '.konduit')
-KONDUIT_DIR = opos.path.join(KONDUIT_BASE_DIR, 'konduit-serving')
 
-
-def mkdir(x):
-    if not opos.path.isdir(x):
-        opos.mkdir(x)
-
-
-mkdir(KONDUIT_BASE_DIR)
+create_konduit_folders()
 
 
 def git_clone_konduit(use_https=True):
@@ -64,24 +60,27 @@ def init(os, https):
 
 
 @click.command()
-@click.option('--os', help='Your operating system. Choose from  `windows-x86_64`,`linux-x86_64`,`linux-x86_64-gpu`,' +
-                           '`macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`')
+@click.option('--os', required=True, help='Your operating system. Choose from  `windows-x86_64`,`linux-x86_64`,'
+                                          '`linux-x86_64-gpu`,' +
+                                          '`macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`')
 def build(os):
     """Build the underlying konduit.jar (again)."""
     build_jar(os)
 
 
 @click.command()
-@click.option('--yaml', help='Relative or absolute path to your konduit serving YAML file.')
+@click.option('--yaml', required=True, help='Relative or absolute path to your konduit serving YAML file.')
 @click.option('--start_server', default=True, help='Whether to start the server instance after initialization.')
 def serve(yaml, start_server):
     """Serve a pipeline from a konduit.yaml"""
     # TODO: store the process ID for the server so we can reliable shut it down later.
-    create_server_from_file(file_path=yaml, start_server=start_server)
+    server = create_server_from_file(file_path=yaml, start_server=start_server)
+    pid = server.process.pid
+    store_pid(yaml, pid)
 
 
 @click.command()
-@click.option('--yaml', help='Relative or absolute path to your konduit serving YAML file.')
+@click.option('--yaml', required=True, help='Relative or absolute path to your konduit serving YAML file.')
 @click.option('--numpy_data', help='Path to your numpy data')
 @click.option('--stop_server', default=True, help='Stop the Konduit server after the prediction is done.')
 def predict_numpy(yaml, numpy_data, stop_server):
@@ -91,8 +90,9 @@ def predict_numpy(yaml, numpy_data, stop_server):
     client = create_client_from_file(file_path=yaml)
     print(client.predict(np.load(numpy_data)))
     if stop_server:
-        pass
-        # SERVER.stop()
+        pid = pop_pid(yaml)
+        stop_server_by_pid(pid)
+
 
 
 @click.group()
