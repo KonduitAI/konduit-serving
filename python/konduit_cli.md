@@ -1,25 +1,25 @@
 # Konduit CLI for quick Python experiments
 
 Install with `python setup.py install` from this folder. This will expose a CLI tool called
-`konduit-python`. Assuming you have put a `konduit.jar` in the `tests` folder as described
+`konduit`. Assuming you have put a `konduit.jar` in the `tests` folder as described
 in the main `README.md`, you can test this tool as follows:
 
 ```bash
 cd tests
-konduit-python --help
+konduit --help
 ```
 
 which should prompt all currently available commands, i.e.
 
 ```bash
-Usage: konduit-python [OPTIONS] COMMAND [ARGS]...
+Usage: konduit [OPTIONS] COMMAND [ARGS]...
 
 Options:
   --help  Show this message and exit.
 
 Commands:
   build          Build the underlying konduit.jar (again).
-  init           Initialize the konduit-python CLI.
+  init           Initialize the konduit CLI.
   predict-numpy  Get predictions for your pipeline from numpy input.
   serve          Serve a pipeline from a konduit.yaml
 
@@ -27,13 +27,13 @@ Commands:
 
 For more help on individual commands you can do
 ```bash
-konduit-python serve --help
+konduit serve --help
 ```
 
 to get help for the `serve` command (and all others in the same way)
 
 ```bash
-Usage: konduit-python serve [OPTIONS]
+Usage: konduit serve [OPTIONS]
 
   Serve a pipeline from a konduit.yaml
 
@@ -79,12 +79,12 @@ what types of output it will generate. In essence, this configuration will run t
 just run:
 
 ```bash
-konduit-python serve --yaml yaml/konduit.yaml
+konduit serve --yaml yaml/konduit.yaml
 ```
 
 and to get predictions from it you can use:
 
 ```bash
-konduit-python predict-numpy --yaml yaml/konduit.yaml --numpy_data ../data/input-0.npy 
+konduit predict-numpy --yaml yaml/konduit.yaml --numpy_data ../data/input-0.npy 
 
 ```
