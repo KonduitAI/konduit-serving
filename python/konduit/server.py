@@ -7,6 +7,17 @@ import subprocess
 import os
 import time
 import logging
+import signal
+
+
+def stop_server_by_pid(pid):
+    """Stop a Konduit server with a given process ID
+
+    :param pid: process ID of a running Konduit Server
+    """
+    if pid:
+        os.kill(pid, signal.SIGTERM)
+
 
 class Server(object):
     def __init__(self, inference_config=None, serving_config=None, steps=None,
@@ -46,7 +57,10 @@ class Server(object):
             self.extra_start_args = extra_start_args
 
     def start(self, sleep=None):
-        """Start the server"""
+        """Start the Konduit server
+
+        :param sleep: optional number of seconds to sleep after triggering server start.
+        """
         json_config = config_to_dict_with_type(self.config)
         with open(self.config_path, 'w') as f:
             abs_path = os.path.abspath(self.config_path)
