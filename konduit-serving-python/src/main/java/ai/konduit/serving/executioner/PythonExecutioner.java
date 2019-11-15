@@ -32,8 +32,6 @@ import org.bytedeco.cpython.PyObject;
 import org.bytedeco.cpython.PyThreadState;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.numpy.global.numpy;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.buffer.DataType;
@@ -443,14 +441,14 @@ public class PythonExecutioner {
 
         JSONParser p = new JSONParser();
         try{
-            JSONObject jobj = (JSONObject) p.parse(json);
+            org.json.JSONObject jobj = (org.json.JSONObject) p.parse(json);
             for (String varName: pyOutputs.getVariables()){
                 PythonVariables.Type type = pyOutputs.getType(varName);
                 if (type == PythonVariables.Type.NDARRAY){
-                    JSONObject varValue = (JSONObject)jobj.get(varName);
+                    org.json.JSONObject varValue = (org.json.JSONObject)jobj.get(varName);
                     long address = (Long)varValue.get("address");
                     org.json.JSONArray shapeJson = (org.json.JSONArray)varValue.get("shape");
-                    JSONArray stridesJson = (JSONArray)varValue.get("strides");
+                    org.json.JSONArray stridesJson = (org.json.JSONArray)varValue.get("strides");
                     long[] shape = jsonArrayToLongArray(shapeJson);
                     long[] strides = jsonArrayToLongArray(stridesJson);
                     String dtypeName = (String)varValue.get("dtype");
@@ -480,7 +478,7 @@ public class PythonExecutioner {
 
                 }
                 else if (type == PythonVariables.Type.LIST) {
-                    JSONArray varValue = (JSONArray)jobj.get(varName);
+                    org.json.JSONArray varValue = (org.json.JSONArray)jobj.get(varName);
                     pyOutputs.setValue(varName, varValue);
                     //pyOutputs.setValue(varName, evalLIST(varName));
                 }
