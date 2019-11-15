@@ -449,7 +449,7 @@ public class PythonExecutioner {
                 if (type == PythonVariables.Type.NDARRAY){
                     JSONObject varValue = (JSONObject)jobj.get(varName);
                     long address = (Long)varValue.get("address");
-                    JSONArray shapeJson = (JSONArray)varValue.get("shape");
+                    org.json.JSONArray shapeJson = (org.json.JSONArray)varValue.get("shape");
                     JSONArray stridesJson = (JSONArray)varValue.get("strides");
                     long[] shape = jsonArrayToLongArray(shapeJson);
                     long[] strides = jsonArrayToLongArray(stridesJson);
@@ -485,7 +485,7 @@ public class PythonExecutioner {
                     //pyOutputs.setValue(varName, evalLIST(varName));
                 }
                 else if (type == PythonVariables.Type.DICT) {
-                    Map map = toMap((JSONObject) jobj.get(varName));
+                    Map map = toMap((org.json.JSONObject) jobj.get(varName));
                     pyOutputs.setValue(varName, map);
                     //pyOutputs.setValue(varName, evalDICT(varName));
 
