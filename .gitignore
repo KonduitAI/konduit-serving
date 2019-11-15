@@ -29,7 +29,6 @@ target/
 unzip/
 *target*
 **/target/**
-konduit-serving-api/target/
 ..bfg-report
 # Vert.xA
 .vertx/
@@ -44,7 +43,7 @@ model-revisions/
 .project
 
 # Konduit Serving project specific
-pipelines.pid
+konduit-serving.pid
 .factorypath
 
 # eclipse related
@@ -54,4 +53,3 @@ pipelines.pid
 # uberjar creation
 pipelines.jar
 konduit.jar
-/konduit-serving-core/target/
