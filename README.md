@@ -8,7 +8,7 @@
 
 <p align="center">
     <a href='https://jenkins.konduit.ai/job/konduitai/job/konduit-serving/job/master/'>
-        <img src='https://jenkins.konduit.ai/job/konduitai/job/konduit-serving/job/master/badge/icon'>
+        <img src='https://jenkins.konduit.ai/buildStatus/icon?job=konduitai%2Fkonduit-serving%2Fmaster'>
     </a>
     <a href='https://sonarcloud.io/dashboard?id=KonduitAI_konduit-serving'>
         <img src='https://sonarcloud.io/api/project_badges/measure?project=KonduitAI_konduit-serving&metric=alert_status'>
