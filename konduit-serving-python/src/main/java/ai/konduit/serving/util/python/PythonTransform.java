@@ -303,8 +303,15 @@ public class PythonTransform implements Transform {
                     break;
                 case DICT:
                     Map<?, ?> dictValue = pyOuts.getDictValue(name);
+                    Map noNullValues = new java.util.HashMap<>();
+                    for(Map.Entry entry : dictValue.entrySet()) {
+                        if(entry.getValue() != org.json.JSONObject.NULL) {
+                           noNullValues.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+
                     try {
-                        out.add(new Text(ObjectMapperHolder.getJsonMapper().writeValueAsString(dictValue)));
+                        out.add(new Text(ObjectMapperHolder.getJsonMapper().writeValueAsString(noNullValues)));
                     } catch (JsonProcessingException e) {
                         throw new IllegalStateException("Unable to serialize dictionary " + name + " to json!");
                     }

@@ -395,11 +395,24 @@ public class PythonVariables implements Serializable {
                 throw new RuntimeException("Unsupported type: " + value.getClass().toString());
             }
         }
-        else if (type == Type.LIST){
-            if (value instanceof List){
+        else if (type == Type.LIST) {
+            if (value instanceof List) {
                 value = ((List) value).toArray();
             }
-            listVariables.put(name, (Object[]) value);
+            else if(value instanceof org.json.JSONArray) {
+                org.json.JSONArray jsonArray = (org.json.JSONArray) value;
+                Object[] copyArr = new Object[jsonArray.length()];
+                for(int i = 0; i < copyArr.length; i++) {
+                    copyArr[i] = jsonArray.get(i);
+                }
+
+                value = copyArr;
+                listVariables.put(name,  copyArr);
+
+            }
+            else {
+                listVariables.put(name,  (Object[]) value);
+            }
         }
         else if(type == Type.DICT) {
             dictVariables.put(name,(Map<?,?>) value);
