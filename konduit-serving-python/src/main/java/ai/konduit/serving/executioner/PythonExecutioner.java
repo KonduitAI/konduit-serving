@@ -445,9 +445,9 @@ public class PythonExecutioner {
                 PythonVariables.Type type = pyOutputs.getType(varName);
                 if (type == PythonVariables.Type.NDARRAY) {
                     JSONObject varValue = (JSONObject)jobj.get(varName);
-                    long address = (Long)varValue.get("address");
-                    org.json.JSONArray shapeJson = (JSONArray)varValue.get("shape");
-                    JSONArray stridesJson = (JSONArray)varValue.get("strides");
+                    long address = (Long) varValue.getLong("address");
+                    JSONArray shapeJson = (JSONArray) varValue.get("shape");
+                    JSONArray stridesJson = (JSONArray) varValue.get("strides");
                     long[] shape = jsonArrayToLongArray(shapeJson);
                     long[] strides = jsonArrayToLongArray(stridesJson);
                     String dtypeName = (String)varValue.get("dtype");
@@ -455,7 +455,7 @@ public class PythonExecutioner {
                     if (dtypeName.equals("float64")) {
                         dtype = DataType.DOUBLE;
                     }
-                    else if (dtypeName.equals("float32")){
+                    else if (dtypeName.equals("float32")) {
                         dtype = DataType.FLOAT;
                     }
                     else if (dtypeName.equals("int16")) {

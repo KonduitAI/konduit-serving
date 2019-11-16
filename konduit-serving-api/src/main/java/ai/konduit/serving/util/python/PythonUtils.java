@@ -34,6 +34,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
+import org.json.JSONArray;
+
 /**
  * List of utilities for executing python transforms.
  *
@@ -185,10 +188,10 @@ public class PythonUtils {
             else if (value instanceof NumpyArray){
                 pyvars2.addNDArray(subkey, (NumpyArray)value);
             }
-            else if (value == null){
+            else if (value == null || value == org.json.JSONObject.NULL) {
                 pyvars2.addStr(subkey, "None"); // FixMe
             }
-            else{
+            else {
                 throw new RuntimeException("Unsupported type!" + value);
             }
         }
@@ -198,7 +201,7 @@ public class PythonUtils {
     public static long[] jsonArrayToLongArray(org.json.JSONArray jsonArray) {
         long[] longs = new long[jsonArray.length()];
         for (int i = 0; i < longs.length; i++) {
-            longs[i] = (Long) jsonArray.get(i);
+            longs[i] =  jsonArray.getLong(i);
         }
         return longs;
     }
@@ -210,7 +213,7 @@ public class PythonUtils {
             Object value = jsonobj.get(key);
             if (value instanceof org.json.JSONArray) {
                 value = toList((org.json.JSONArray) value);
-            } else if (value instanceof org.json.JSONObject) {
+            } else if (value instanceof JSONObject) {
                 org.json.JSONObject jsonobj2 = (org.json.JSONObject)value;
                 if (jsonobj2.has("_is_numpy_array")) {
                     value = jsonToNumpyArray(jsonobj2);
@@ -230,10 +233,10 @@ public class PythonUtils {
         List<Object> list = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {
             Object value = array.get(i);
-            if (value instanceof org.json.JSONArray) {
-                value = toList((org.json.JSONArray) value);
-            } else if (value instanceof org.json.JSONObject) {
-                org.json.JSONObject jsonobj2 = (org.json.JSONObject) value;
+            if (value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            } else if (value instanceof JSONObject) {
+                JSONObject jsonobj2 = (JSONObject) value;
                 if (jsonobj2.has("_is_numpy_array")) {
                     value = jsonToNumpyArray(jsonobj2);
                 } else {
@@ -246,7 +249,7 @@ public class PythonUtils {
     }
 
 
-    private static NumpyArray jsonToNumpyArray(org.json.JSONObject map){
+    private static NumpyArray jsonToNumpyArray(JSONObject map) {
         String dtypeName = (String)map.get("dtype");
         DataType dtype;
         if (dtypeName.equals("float64")) {
@@ -273,12 +276,14 @@ public class PythonUtils {
             shape[i] = (Long)shapeList.get(i);
         }
 
-        List strideList = (List)map.get("shape");
+        List<?> strideList = (List<?>) map.get("shape");
         long[] stride = new long[strideList.size()];
         for (int i = 0; i < stride.length; i++) {
-            stride[i] = (Long)strideList.get(i);
+            Number number = (Number) strideList.get(i);
+            stride[i] = number.longValue();
         }
-        long address = (Long)map.get("address");
+
+        long address = (Long) map.get("address");
         NumpyArray numpyArray = new NumpyArray(address, shape, stride, true,dtype);
         return numpyArray;
     }
