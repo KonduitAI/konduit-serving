@@ -116,7 +116,8 @@ public class PythonUtils {
 
         return ret;
     }
-    public static NumpyArray mapToNumpyArray(Map map){
+
+    public static NumpyArray mapToNumpyArray(Map map) {
         String dtypeName = (String)map.get("dtype");
         DataType dtype;
         if (dtypeName.equals("float64")){
@@ -161,7 +162,7 @@ public class PythonUtils {
             Object value = dict.get(subkey);
             if (value instanceof Map){
                 Map map = (Map)value;
-                if (map.containsKey("_is_numpy_array")){
+                if (map.containsKey("_is_numpy_array")) {
                     pyvars2.addNDArray(subkey, mapToNumpyArray(map));
 
                 }
@@ -170,7 +171,7 @@ public class PythonUtils {
                 }
 
             }
-            else if (value instanceof List){
+            else if (value instanceof List) {
                 pyvars2.addList(subkey, ((List) value).toArray());
             }
             else if (value instanceof String){
@@ -270,7 +271,7 @@ public class PythonUtils {
         else{
             throw new RuntimeException("Unsupported array type " + dtypeName + ".");
         }
-        List shapeList = (List)map.get("shape");
+        List shapeList = (List) map.get("shape");
         long[] shape = new long[shapeList.size()];
         for (int i = 0; i < shape.length; i++) {
             shape[i] = (Long)shapeList.get(i);
@@ -283,7 +284,8 @@ public class PythonUtils {
             stride[i] = number.longValue();
         }
 
-        long address = (Long) map.get("address");
+
+        long address =  map.getLong("address");
         NumpyArray numpyArray = new NumpyArray(address, shape, stride, true,dtype);
         return numpyArray;
     }

@@ -508,7 +508,7 @@ public class PythonExecutioner {
         }
     }
 
-    private static synchronized  void _exec_wrapped(String code){
+    private static synchronized  void _exec_wrapped(String code) {
         _exec(getWrappedCode(code));
     }
 
@@ -762,7 +762,7 @@ public class PythonExecutioner {
 
 
 
-    private static String getOutputCheckCode(PythonVariables pyOutputs){
+    private static String getOutputCheckCode(PythonVariables pyOutputs) {
         // make sure all outputs exist and are of expected types
         // helps avoid JVM crashes (most of the time)
         String code= "__error_message=''\n";
@@ -869,6 +869,7 @@ public class PythonExecutioner {
                 indentedCode.append("    " + split + "\n");
 
             }
+
             String out = base.replace("    pass",indentedCode);
             return out;
         } catch (IOException e) {
@@ -886,7 +887,7 @@ public class PythonExecutioner {
     }
 
 
-    private static String outputCodeForAllVariables(){
+    private static String outputCodeForAllVariables() {
         String outputCode = "";
         try(BufferedInputStream bufferedInputStream = new BufferedInputStream(new ClassPathResource("pythonexec/outputcode.py").getInputStream())) {
             outputCode  += IOUtils.toString(bufferedInputStream,Charset.defaultCharset()).replace("f2",fileVarName);
