@@ -23,7 +23,6 @@
 package ai.konduit.serving.input.conversion;
 
 import ai.konduit.serving.input.adapter.InputAdapter;
-import ai.konduit.serving.input.upload.MultipartFileUploadHandler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.RoutingContext;
@@ -57,7 +56,7 @@ import java.util.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BatchInputParser implements MultipartFileUploadHandler {
+public class BatchInputParser  {
 
     private Map<String,InputAdapter<Buffer, ?>> converters;
     private Map<String, ConverterArgs> converterArgs;
@@ -245,13 +244,6 @@ public class BatchInputParser implements MultipartFileUploadHandler {
 
 
 
-    @Override
-    public void onMultiPart(RoutingContext context, ResultListener[] listeners) throws IOException {
-        Record[] completedBatch = createBatch(context);
-        for(ResultListener resultListener : listeners) {
-            resultListener.onResult(context, (Object) completedBatch);
-        }
-    }
 
     @Data
     @AllArgsConstructor
