@@ -44,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static ai.konduit.serving.util.python.PythonUtils.schemaToPythonVariables;
+
 /**
  * Row-wise Transform that applies arbitrary python code on each row
  *
@@ -303,8 +305,15 @@ public class PythonTransform implements Transform {
                     break;
                 case DICT:
                     Map<?, ?> dictValue = pyOuts.getDictValue(name);
+                    Map noNullValues = new java.util.HashMap<>();
+                    for(Map.Entry entry : dictValue.entrySet()) {
+                        if(entry.getValue() != org.json.JSONObject.NULL) {
+                           noNullValues.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+
                     try {
-                        out.add(new Text(ObjectMapperHolder.getJsonMapper().writeValueAsString(dictValue)));
+                        out.add(new Text(ObjectMapperHolder.getJsonMapper().writeValueAsString(noNullValues)));
                     } catch (JsonProcessingException e) {
                         throw new IllegalStateException("Unable to serialize dictionary " + name + " to json!");
                     }
@@ -317,50 +326,11 @@ public class PythonTransform implements Transform {
                         throw new IllegalStateException("Unable to serialize list vlaue " + name + " to json!");
                     }
                     break;
-                    /*
-                    case DICT:
-                    Map<?,?> outMap = pyOuts.getDictValue(name);
-                    for(val entry : outMap.entrySet()) {
-                    addPrimitiveWritable(out,entry.getValue());
-                    }
-                    break;
-                    */
                 default:
                     throw new IllegalStateException("Unable to support type " + pyType.name());
             }
         }
         return out;
-    }
-
-
-
-    private PythonVariables schemaToPythonVariables(Schema schema) throws Exception {
-        PythonVariables pyVars = new PythonVariables();
-        int numCols = schema.numColumns();
-        for (int i = 0; i < numCols; i++) {
-            String colName = schema.getName(i);
-            ColumnType colType = schema.getType(i);
-            switch (colType){
-                case Long:
-                case Integer:
-                    pyVars.addInt(colName);
-                    break;
-                case Double:
-                case Float:
-                    pyVars.addFloat(colName);
-                    break;
-                case String:
-                    pyVars.addStr(colName);
-                    break;
-                case NDArray:
-                    pyVars.addNDArray(colName);
-                    break;
-                default:
-                    throw new Exception("Unsupported python input type: " + colType.toString());
-            }
-        }
-
-        return pyVars;
     }
 
 

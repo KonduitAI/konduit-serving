@@ -104,10 +104,27 @@ public class PythonExecutionerBasicTest {
         Assert.assertEquals(z.length, x.length + y.length);
 
         for (int i = 0; i < x.length; i++) {
-            Assert.assertEquals(x[i], z[i]);
+            if(x[i] instanceof Number) {
+                Number xNum = (Number) x[i];
+                Number zNum = (Number) z[i];
+                Assert.assertEquals(xNum.intValue(), zNum.intValue());
+            }
+            else {
+                Assert.assertEquals(x[i], z[i]);
+            }
+
         }
         for (int i = 0; i < y.length; i++){
-            Assert.assertEquals(y[i], z[x.length + i]);
+            if(y[i] instanceof Number) {
+                Number yNum = (Number) y[i];
+                Number zNum = (Number) z[x.length + i];
+                Assert.assertEquals(yNum.intValue(), zNum.intValue());
+            }
+            else {
+                Assert.assertEquals(y[i], z[x.length + i]);
+
+            }
+
         }
 
     }

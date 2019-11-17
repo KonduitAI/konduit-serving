@@ -371,15 +371,14 @@ public class PipelineExecutioner {
             INDArray[] arrays = SchemaTypeUtils.toArrays(records);
             Map<String, BatchOutput> adapt;
             switch(outputAdapterType) {
-                // TODO: output adapters are meant to have only one output here, but they could be named differently
                 case CLASSIFICATION:
-                    adapt = classificationMultiOutputAdapter.adapt(arrays, Arrays.asList("default"), ctx);
+                    adapt = classificationMultiOutputAdapter.adapt(arrays, outputNames(), ctx);
                     break;
                 case REGRESSION:
-                    adapt = regressionMultiOutputAdapter.adapt(arrays, Arrays.asList("default"), ctx);
+                    adapt = regressionMultiOutputAdapter.adapt(arrays,outputNames(), ctx);
                     break;
                 case RAW:
-                    adapt = rawMultiOutputAdapter.adapt(arrays,Arrays.asList("default"),ctx);
+                    adapt = rawMultiOutputAdapter.adapt(arrays,outputNames(),ctx);
                     break;
                 default:
                     throw new IllegalStateException("Illegal type for json.");

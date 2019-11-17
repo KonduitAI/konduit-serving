@@ -23,16 +23,6 @@
 
 package ai.konduit.serving.util.python;
 
-import lombok.Data;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.nd4j.linalg.api.ndarray.INDArray;
-
-import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Holds python variable names, types and values.
  * Also handles mapping from java types to python types.
@@ -40,8 +30,8 @@ import java.util.Map;
  * @author Fariz Rahman
  */
 
-@Data
-public class PythonVariables implements Serializable {
+@lombok.Data
+public class PythonVariables implements java.io.Serializable {
 
     public enum Type{
         BOOL,
@@ -55,16 +45,16 @@ public class PythonVariables implements Serializable {
 
     }
 
-    private Map<String, String> strVariables = new LinkedHashMap<>();
-    private Map<String, Long> intVariables = new LinkedHashMap<>();
-    private Map<String, Double> floatVariables = new LinkedHashMap<>();
-    private Map<String, Boolean> boolVariables = new LinkedHashMap<>();
-    private Map<String, NumpyArray> ndVars = new LinkedHashMap<>();
-    private Map<String, Object[]> listVariables = new LinkedHashMap<>();
-    private Map<String, String> fileVariables = new LinkedHashMap<>();
-    private Map<String,Map<?,?>> dictVariables = new LinkedHashMap<>();
-    private Map<String, Type> vars = new LinkedHashMap<>();
-    private Map<Type, Map> maps = new LinkedHashMap<>();
+    private java.util.Map<String, String> strVariables = new java.util.LinkedHashMap<>();
+    private java.util.Map<String, Long> intVariables = new java.util.LinkedHashMap<>();
+    private java.util.Map<String, Double> floatVariables = new java.util.LinkedHashMap<>();
+    private java.util.Map<String, Boolean> boolVariables = new java.util.LinkedHashMap<>();
+    private java.util.Map<String, NumpyArray> ndVars = new java.util.LinkedHashMap<>();
+    private java.util.Map<String, Object[]> listVariables = new java.util.LinkedHashMap<>();
+    private java.util.Map<String, String> fileVariables = new java.util.LinkedHashMap<>();
+    private java.util.Map<String, java.util.Map<?,?>> dictVariables = new java.util.LinkedHashMap<>();
+    private java.util.Map<String, ai.konduit.serving.util.python.PythonVariables.Type> vars = new java.util.LinkedHashMap<>();
+    private java.util.Map<ai.konduit.serving.util.python.PythonVariables.Type, java.util.Map> maps = new java.util.LinkedHashMap<>();
 
 
     /**
@@ -73,8 +63,8 @@ public class PythonVariables implements Serializable {
      * @return an empty variables clone
      * with no values
      */
-    public PythonVariables copySchema(){
-        PythonVariables ret = new PythonVariables();
+    public ai.konduit.serving.util.python.PythonVariables copySchema(){
+        ai.konduit.serving.util.python.PythonVariables ret = new ai.konduit.serving.util.python.PythonVariables();
         for (String varName: getVariables()){
             Type type = getType(varName);
             ret.add(varName, type);
@@ -86,14 +76,14 @@ public class PythonVariables implements Serializable {
      *
      */
     public PythonVariables() {
-        maps.put(Type.BOOL, boolVariables);
-        maps.put(Type.STR, strVariables);
-        maps.put(Type.INT, intVariables);
-        maps.put(Type.FLOAT, floatVariables);
-        maps.put(Type.NDARRAY, ndVars);
-        maps.put(Type.LIST, listVariables);
-        maps.put(Type.FILE, fileVariables);
-        maps.put(Type.DICT, dictVariables);
+        maps.put(ai.konduit.serving.util.python.PythonVariables.Type.BOOL, boolVariables);
+        maps.put(ai.konduit.serving.util.python.PythonVariables.Type.STR, strVariables);
+        maps.put(ai.konduit.serving.util.python.PythonVariables.Type.INT, intVariables);
+        maps.put(ai.konduit.serving.util.python.PythonVariables.Type.FLOAT, floatVariables);
+        maps.put(ai.konduit.serving.util.python.PythonVariables.Type.NDARRAY, ndVars);
+        maps.put(ai.konduit.serving.util.python.PythonVariables.Type.LIST, listVariables);
+        maps.put(ai.konduit.serving.util.python.PythonVariables.Type.FILE, fileVariables);
+        maps.put(ai.konduit.serving.util.python.PythonVariables.Type.DICT, dictVariables);
 
     }
 
@@ -160,7 +150,7 @@ public class PythonVariables implements Serializable {
      * @param name the field to add
      */
     public void addDict(String name) {
-        vars.put(name, Type.DICT);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.DICT);
         dictVariables.put(name,null);
     }
 
@@ -171,7 +161,7 @@ public class PythonVariables implements Serializable {
      * @param name the field to add
      */
     public void addBool(String name){
-        vars.put(name, Type.BOOL);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.BOOL);
         boolVariables.put(name, null);
     }
 
@@ -182,7 +172,7 @@ public class PythonVariables implements Serializable {
      * @param name the field to add
      */
     public void addStr(String name){
-        vars.put(name, Type.STR);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.STR);
         strVariables.put(name, null);
     }
 
@@ -193,7 +183,7 @@ public class PythonVariables implements Serializable {
      * @param name the field to add
      */
     public void addInt(String name){
-        vars.put(name, Type.INT);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.INT);
         intVariables.put(name, null);
     }
 
@@ -204,7 +194,7 @@ public class PythonVariables implements Serializable {
      * @param name the field to add
      */
     public void addFloat(String name){
-        vars.put(name, Type.FLOAT);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.FLOAT);
         floatVariables.put(name, null);
     }
 
@@ -215,7 +205,7 @@ public class PythonVariables implements Serializable {
      * @param name the field to add
      */
     public void addNDArray(String name){
-        vars.put(name, Type.NDARRAY);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.NDARRAY);
         ndVars.put(name, null);
     }
 
@@ -226,7 +216,7 @@ public class PythonVariables implements Serializable {
      * @param name the field to add
      */
     public void addList(String name){
-        vars.put(name, Type.LIST);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.LIST);
         listVariables.put(name, null);
     }
 
@@ -237,7 +227,7 @@ public class PythonVariables implements Serializable {
      * @param name the field to add
      */
     public void addFile(String name){
-        vars.put(name, Type.FILE);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.FILE);
         fileVariables.put(name, null);
     }
 
@@ -248,7 +238,7 @@ public class PythonVariables implements Serializable {
      * @param value the value to add
      */
     public void addBool(String name, boolean value) {
-        vars.put(name, Type.BOOL);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.BOOL);
         boolVariables.put(name, value);
     }
 
@@ -259,7 +249,7 @@ public class PythonVariables implements Serializable {
      * @param value the value to add
      */
     public void addStr(String name, String value) {
-        vars.put(name, Type.STR);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.STR);
         strVariables.put(name, value);
     }
 
@@ -270,7 +260,7 @@ public class PythonVariables implements Serializable {
      * @param value the value to add
      */
     public void addInt(String name, int value) {
-        vars.put(name, Type.INT);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.INT);
         intVariables.put(name, (long)value);
     }
 
@@ -281,7 +271,7 @@ public class PythonVariables implements Serializable {
      * @param value the value to add
      */
     public void addInt(String name, long value) {
-        vars.put(name, Type.INT);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.INT);
         intVariables.put(name, value);
     }
 
@@ -292,7 +282,7 @@ public class PythonVariables implements Serializable {
      * @param value the value to add
      */
     public void addFloat(String name, double value) {
-        vars.put(name, Type.FLOAT);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.FLOAT);
         floatVariables.put(name, value);
     }
 
@@ -303,7 +293,7 @@ public class PythonVariables implements Serializable {
      * @param value the value to add
      */
     public void addFloat(String name, float value) {
-        vars.put(name, Type.FLOAT);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.FLOAT);
         floatVariables.put(name, (double)value);
     }
 
@@ -315,7 +305,7 @@ public class PythonVariables implements Serializable {
      * @param value the value to add
      */
     public void addNDArray(String name, NumpyArray value) {
-        vars.put(name, Type.NDARRAY);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.NDARRAY);
         ndVars.put(name, value);
     }
 
@@ -326,8 +316,8 @@ public class PythonVariables implements Serializable {
      * @param name the field to add
      * @param value the value to add
      */
-    public void addNDArray(String name, INDArray value) {
-        vars.put(name, Type.NDARRAY);
+    public void addNDArray(String name, org.nd4j.linalg.api.ndarray.INDArray value) {
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.NDARRAY);
         ndVars.put(name, new NumpyArray(value));
     }
 
@@ -339,7 +329,7 @@ public class PythonVariables implements Serializable {
      * @param value the value to add
      */
     public void addList(String name, Object[] value) {
-        vars.put(name, Type.LIST);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.LIST);
         listVariables.put(name, value);
     }
 
@@ -351,7 +341,7 @@ public class PythonVariables implements Serializable {
      * @param value the value to add
      */
     public void addFile(String name, String value) {
-        vars.put(name, Type.FILE);
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.FILE);
         fileVariables.put(name, value);
     }
 
@@ -363,8 +353,8 @@ public class PythonVariables implements Serializable {
      * @param name the field to add
      * @param value the value to add
      */
-    public void addDict(String name, Map value) {
-        vars.put(name, Type.DICT);
+    public void addDict(String name, java.util.Map value) {
+        vars.put(name, ai.konduit.serving.util.python.PythonVariables.Type.DICT);
         dictVariables.put(name, value);
     }
     /**
@@ -374,38 +364,51 @@ public class PythonVariables implements Serializable {
      */
     public void setValue(String name, Object value) {
         Type type = vars.get(name);
-        if (type == Type.BOOL){
+        if (type == ai.konduit.serving.util.python.PythonVariables.Type.BOOL){
             boolVariables.put(name, (Boolean)value);
         }
-        else if (type == Type.INT){
+        else if (type == ai.konduit.serving.util.python.PythonVariables.Type.INT){
             Number number = (Number) value;
             intVariables.put(name, number.longValue());
         }
-        else if (type == Type.FLOAT){
+        else if (type == ai.konduit.serving.util.python.PythonVariables.Type.FLOAT){
             Number number = (Number) value;
             floatVariables.put(name, number.doubleValue());
         }
-        else if (type == Type.NDARRAY){
+        else if (type == ai.konduit.serving.util.python.PythonVariables.Type.NDARRAY){
             if (value instanceof  NumpyArray){
                 ndVars.put(name, (NumpyArray)value);
             }
-            else if (value instanceof  INDArray) {
-                ndVars.put(name, new NumpyArray((INDArray) value));
+            else if (value instanceof  org.nd4j.linalg.api.ndarray.INDArray) {
+                ndVars.put(name, new NumpyArray((org.nd4j.linalg.api.ndarray.INDArray) value));
             }
             else{
                 throw new RuntimeException("Unsupported type: " + value.getClass().toString());
             }
         }
-        else if (type == Type.LIST){
-            if (value instanceof List){
-                value = ((List) value).toArray();
+        else if (type == ai.konduit.serving.util.python.PythonVariables.Type.LIST) {
+            if (value instanceof java.util.List) {
+                value = ((java.util.List) value).toArray();
             }
-            listVariables.put(name, (Object[]) value);
+            else if(value instanceof org.json.JSONArray) {
+                org.json.JSONArray jsonArray = (org.json.JSONArray) value;
+                Object[] copyArr = new Object[jsonArray.length()];
+                for(int i = 0; i < copyArr.length; i++) {
+                    copyArr[i] = jsonArray.get(i);
+                }
+
+                value = copyArr;
+                listVariables.put(name,  copyArr);
+
+            }
+            else {
+                listVariables.put(name,  (Object[]) value);
+            }
         }
-        else if(type == Type.DICT) {
-            dictVariables.put(name,(Map<?,?>) value);
+        else if(type == ai.konduit.serving.util.python.PythonVariables.Type.DICT) {
+            dictVariables.put(name,(java.util.Map<?,?>) value);
         }
-        else if (type == Type.FILE){
+        else if (type == ai.konduit.serving.util.python.PythonVariables.Type.FILE){
             fileVariables.put(name, (String)value);
         }
         else{
@@ -422,7 +425,7 @@ public class PythonVariables implements Serializable {
      */
     public Object getValue(String name) {
         Type type = vars.get(name);
-        Map map = maps.get(type);
+        java.util.Map map = maps.get(type);
         return map.get(name);
     }
 
@@ -441,7 +444,7 @@ public class PythonVariables implements Serializable {
      * @param name the variable name
      * @return the dictionary value
      */
-    public Map<?,?> getDictValue(String name) {
+    public java.util.Map<?,?> getDictValue(String name) {
         return dictVariables.get(name);
     }
 
@@ -523,14 +526,14 @@ public class PythonVariables implements Serializable {
      * This variables set as its json representation (an array of json objects)
      * @return the json array output
      */
-    public JSONArray toJSON(){
-        JSONArray arr = new JSONArray();
+    public org.json.JSONArray toJSON(){
+        org.json.JSONArray arr = new org.json.JSONArray();
         for (String varName: getVariables()){
-            JSONObject var = new JSONObject();
+            org.json.JSONObject var = new org.json.JSONObject();
             var.put("name", varName);
             String varType = getType(varName).toString();
             var.put("type", varType);
-            arr.add(var);
+            arr.put(var);
         }
         return arr;
     }
@@ -542,10 +545,10 @@ public class PythonVariables implements Serializable {
      * @param inputTypes the input types to convert
      * @return the schema from the given map
      */
-    public static PythonVariables schemaFromMap(Map<String,String> inputTypes) {
-        PythonVariables ret = new PythonVariables();
-        for(Map.Entry<String,String> entry : inputTypes.entrySet()) {
-            ret.add(entry.getKey(), Type.valueOf(entry.getValue()));
+    public static ai.konduit.serving.util.python.PythonVariables schemaFromMap(java.util.Map<String,String> inputTypes) {
+        ai.konduit.serving.util.python.PythonVariables ret = new ai.konduit.serving.util.python.PythonVariables();
+        for(java.util.Map.Entry<String,String> entry : inputTypes.entrySet()) {
+            ret.add(entry.getKey(), ai.konduit.serving.util.python.PythonVariables.Type.valueOf(entry.getValue()));
         }
 
         return ret;
@@ -557,31 +560,31 @@ public class PythonVariables implements Serializable {
      * @param jsonArray the input json array
      * @return the python variables based on the input json array
      */
-    public static PythonVariables fromJSON(JSONArray jsonArray){
-        PythonVariables pyvars = new PythonVariables();
-        for (int i = 0; i < jsonArray.size(); i++) {
-            JSONObject input = (JSONObject) jsonArray.get(i);
+    public static ai.konduit.serving.util.python.PythonVariables fromJSON(org.json.JSONArray jsonArray){
+        ai.konduit.serving.util.python.PythonVariables pyvars = new ai.konduit.serving.util.python.PythonVariables();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            org.json.JSONObject input = (org.json.JSONObject) jsonArray.get(i);
             String varName = (String)input.get("name");
             String varType = (String)input.get("type");
-            if (varType.equals("BOOL")){
+            if (varType.equals("BOOL")) {
                 pyvars.addBool(varName);
             }
-            else if (varType.equals("INT")){
+            else if (varType.equals("INT")) {
                 pyvars.addInt(varName);
             }
             else if (varType.equals("FlOAT")){
                 pyvars.addFloat(varName);
             }
-            else if (varType.equals("STR")){
+            else if (varType.equals("STR")) {
                 pyvars.addStr(varName);
             }
-            else if (varType.equals("LIST")){
+            else if (varType.equals("LIST")) {
                 pyvars.addList(varName);
             }
             else if (varType.equals("FILE")){
                 pyvars.addFile(varName);
             }
-            else if (varType.equals("NDARRAY")){
+            else if (varType.equals("NDARRAY")) {
                 pyvars.addNDArray(varName);
             }
             else if(varType.equals("DICT")) {
