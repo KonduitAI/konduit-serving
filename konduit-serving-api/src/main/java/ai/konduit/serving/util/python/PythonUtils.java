@@ -44,6 +44,48 @@ import org.json.JSONArray;
  */
 public class PythonUtils {
 
+
+
+
+    /**
+     * Convert a {@link Schema}
+     * to {@link PythonVariables}
+     * @param schema the input schema
+     * @return the output {@link PythonVariables} where each
+     * name in the map is associated with a column name in the schema.
+     * A proper type is also chosen based on the schema
+     * @throws Exception
+     */
+    public static PythonVariables schemaToPythonVariables(Schema schema) throws Exception {
+        PythonVariables pyVars = new PythonVariables();
+        int numCols = schema.numColumns();
+        for (int i = 0; i < numCols; i++) {
+            String colName = schema.getName(i);
+            ColumnType colType = schema.getType(i);
+            switch (colType){
+                case Long:
+                case Integer:
+                    pyVars.addInt(colName);
+                    break;
+                case Double:
+                case Float:
+                    pyVars.addFloat(colName);
+                    break;
+                case String:
+                    pyVars.addStr(colName);
+                    break;
+                case NDArray:
+                    pyVars.addNDArray(colName);
+                    break;
+                default:
+                    throw new Exception("Unsupported python input type: " + colType.toString());
+            }
+        }
+
+        return pyVars;
+    }
+
+
     /**
      * Create a {@link Schema}
      * from {@link PythonVariables}.

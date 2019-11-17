@@ -52,7 +52,7 @@ public class NumpyArray {
     private DataType dtype;
     private INDArray nd4jArray;
     static {
-        //initialize
+        //ensure nd4j is initialized before use
         Nd4j.scalar(1.0);
         nativeOps =   NativeOpsHolder.getInstance().getDeviceNativeOps();
     }
@@ -105,25 +105,18 @@ public class NumpyArray {
         ptr = ptr.capacity(size);
         DataBuffer buff = Nd4j.createBuffer(ptr, size, dtype);
         int elemSize = buff.getElementSize();
-        long[] nd4jStrides = new long[strides.length];
-        for (int i = 0; i < strides.length; i++) {
-            nd4jStrides[i] = strides[i] / elemSize;
-        }
-
+        long[] nd4jStrides = java.util.Arrays.stream(strides).map(stride -> stride / elemSize).toArray();
         this.nd4jArray = Nd4j.create(buff, shape, nd4jStrides, 0, Shape.getOrder(shape,nd4jStrides,1), dtype);
 
     }
 
-    public NumpyArray(INDArray nd4jArray){
+    public NumpyArray(INDArray nd4jArray) {
         DataBuffer buff = nd4jArray.data();
         address = buff.pointer().address();
         shape = nd4jArray.shape();
         long[] nd4jStrides = nd4jArray.stride();
-        strides = new long[nd4jStrides.length];
         int elemSize = buff.getElementSize();
-        for(int i=0; i<strides.length; i++){
-            strides[i] = nd4jStrides[i] * elemSize;
-        }
+        strides = java.util.Arrays.stream(nd4jStrides).map(stride -> stride * elemSize).toArray();
         dtype = nd4jArray.dataType();
         this.nd4jArray = nd4jArray;
     }

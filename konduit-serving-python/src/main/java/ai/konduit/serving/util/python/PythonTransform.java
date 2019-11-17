@@ -44,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static ai.konduit.serving.util.python.PythonUtils.schemaToPythonVariables;
+
 /**
  * Row-wise Transform that applies arbitrary python code on each row
  *
@@ -333,33 +335,5 @@ public class PythonTransform implements Transform {
 
 
 
-    private PythonVariables schemaToPythonVariables(Schema schema) throws Exception {
-        PythonVariables pyVars = new PythonVariables();
-        int numCols = schema.numColumns();
-        for (int i = 0; i < numCols; i++) {
-            String colName = schema.getName(i);
-            ColumnType colType = schema.getType(i);
-            switch (colType){
-                case Long:
-                case Integer:
-                    pyVars.addInt(colName);
-                    break;
-                case Double:
-                case Float:
-                    pyVars.addFloat(colName);
-                    break;
-                case String:
-                    pyVars.addStr(colName);
-                    break;
-                case NDArray:
-                    pyVars.addNDArray(colName);
-                    break;
-                default:
-                    throw new Exception("Unsupported python input type: " + colType.toString());
-            }
-        }
-
-        return pyVars;
-    }
 
 }
