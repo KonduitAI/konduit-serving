@@ -45,7 +45,32 @@ import org.json.JSONArray;
 public class PythonUtils {
 
 
+    public static ai.konduit.serving.config.SchemaType pythonToDataVecVarTypes(PythonVariables.Type pythonVarType) {
+        try {
+            switch (pythonVarType) {
+                case BOOL:
+                    return ai.konduit.serving.config.SchemaType.Boolean;
+                case STR:
+                    return ai.konduit.serving.config.SchemaType.String;
+                case INT:
+                    return ai.konduit.serving.config.SchemaType.Integer;
+                case FLOAT:
+                    return ai.konduit.serving.config.SchemaType.Float;
+                case NDARRAY:
+                    return ai.konduit.serving.config.SchemaType.NDArray;
+                case LIST:
+                case FILE:
+                case DICT:
+                default:
+                    throw new IllegalArgumentException(String.format("Can't convert (%s) to (%s) enum",
+                            pythonVarType.name(), ai.konduit.serving.config.SchemaType.class.getName()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        return null;
+    }
 
     /**
      * Convert a {@link Schema}

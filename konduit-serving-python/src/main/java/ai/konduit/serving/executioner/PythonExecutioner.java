@@ -22,9 +22,9 @@
 
 package ai.konduit.serving.executioner;
 
-import ai.konduit.serving.util.python.NumpyArray;
 import ai.konduit.serving.util.python.PythonTransform;
-import ai.konduit.serving.util.python.PythonVariables;
+import  ai.konduit.serving.util.python.PythonVariables;
+import ai.konduit.serving.util.python.NumpyArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -269,9 +269,9 @@ public class PythonExecutioner {
         }
     }
 
-    public static PythonVariables defaultPythonVariableOutput() {
-        PythonVariables ret = new PythonVariables();
-        ret.add(ALL_VARIABLES_KEY, PythonVariables.Type.DICT);
+    public static ai.konduit.serving.util.python.PythonVariables defaultPythonVariableOutput() {
+        ai.konduit.serving.util.python.PythonVariables ret = new ai.konduit.serving.util.python.PythonVariables();
+        ret.add(ALL_VARIABLES_KEY, ai.konduit.serving.util.python.PythonVariables.Type.DICT);
         return ret;
     }
 

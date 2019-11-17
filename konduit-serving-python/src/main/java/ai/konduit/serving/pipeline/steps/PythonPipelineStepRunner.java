@@ -28,7 +28,6 @@ import ai.konduit.serving.util.python.PythonTransform;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.PythonPipelineStep;
-import ai.konduit.serving.util.python.PythonVariables;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.records.Record;
@@ -113,8 +112,8 @@ public class PythonPipelineStepRunner extends BasePipelineStepRunner {
             PythonTransform pythonTransform = PythonTransform.builder()
                     .code(code)
                     .returnAllInputs(currConfig.isReturnAllInputs())
-                    .inputs(currConfig.getPythonInputs() != null ? PythonVariables.schemaFromMap(currConfig.getPythonInputs()): null)
-                    .outputs(currConfig.getPythonOutputs() != null ? PythonVariables.schemaFromMap(currConfig.getPythonOutputs()) : null)
+                    .inputs(currConfig.getPythonInputs() != null ? ai.konduit.serving.util.python.PythonVariables.schemaFromMap(currConfig.getPythonInputs()): null)
+                    .outputs(currConfig.getPythonOutputs() != null ? ai.konduit.serving.util.python.PythonVariables.schemaFromMap(currConfig.getPythonOutputs()) : null)
                     .inputSchema(pythonConfig.inputSchemaForName(configEntry.getKey()))
                     .outputSchema(pythonConfig.outputSchemaForName(configEntry.getKey()))
                     .build();
