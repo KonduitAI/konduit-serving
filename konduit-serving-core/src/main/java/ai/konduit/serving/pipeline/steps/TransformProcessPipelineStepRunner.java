@@ -36,6 +36,14 @@ import java.util.Map;
 
 /**
  * Run transform processes for each input name.
+ * Using datavec's {@link LocalTransformExecutor}
+ * we run a {@link TransformProcess} on each specified input.
+ * Generally this will just be run on the "default"
+ * input name.
+ * A {@link TransformProcess} is typically for columnar data
+ * but can be used for binary data as well.
+ *
+ * @author Adam Gibson
  */
 public class TransformProcessPipelineStepRunner extends BasePipelineStepRunner {
 

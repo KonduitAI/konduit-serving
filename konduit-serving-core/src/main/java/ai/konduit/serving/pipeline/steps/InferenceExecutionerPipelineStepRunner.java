@@ -43,6 +43,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * An {@link InferenceExecutioner}
+ * is run as part of a pipeline step.
+ *
+ * For the kinds of {@link InferenceExecutioner}
+ * that can be run as part of a pipeline, please reference
+ * the {@link ai.konduit.serving.model.ModelConfigType}
+ * which contains all of the available types.
+ *
+ * This pipeline step is used for executing standalone models
+ * such as tensorflow,keras or dl4j.
+ *
+ * @author Adam Gibson
+ */
 public class InferenceExecutionerPipelineStepRunner extends BasePipelineStepRunner {
     @Getter
     private InferenceExecutioner inferenceExecutioner;
@@ -128,7 +142,8 @@ public class InferenceExecutionerPipelineStepRunner extends BasePipelineStepRunn
         return SchemaTypeUtils.toRecords(execution);
     }
 
-    public Record[] toNDArray(Record[] records) {
+
+    private Record[] toNDArray(Record[] records) {
         if(records[0].getRecord().size() > 1 && !recordIsAllNumeric(records[0])) {
             throw new IllegalArgumentException("Invalid record type passed in. This pipeline only accepts records with singular ndarray records representing 1 input array per name for input graphs or purely numeric arrays that can be converted to a matrix");
         }
