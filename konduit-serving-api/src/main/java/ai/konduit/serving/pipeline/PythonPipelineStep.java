@@ -173,12 +173,14 @@ public class PythonPipelineStep extends PipelineStep {
      *
      * @param stepName input and output name for this step
      * @param pythonConfig Konduit PythonConfig
-     * @param inputSchema DataVec Schema for data input
-     * @param outputSchema DataVec Schema for data output
+     * @param inputSchema {@link Schema} for data input
+     * @param outputSchema {@link Schema} for data output
      * @return this python step
      * @throws Exception key error
      */
-    public  PythonPipelineStep step(String stepName, PythonConfig pythonConfig,  Schema inputSchema,
+    public  PythonPipelineStep step(String stepName,
+                                    PythonConfig pythonConfig,
+                                    Schema inputSchema,
                                     Schema outputSchema) throws Exception {
         this.setInput(stepName, inputSchema);
         this.setOutput(stepName, outputSchema);
@@ -212,9 +214,9 @@ public class PythonPipelineStep extends PipelineStep {
      * Define a single, named step for a Python pipeline.
      *
      * @param stepName input and output name for this step
-     * @param pythonConfig Konduit PythonConfig
+     * @param pythonConfig Konduit {@link PythonConfig}
      * @param inputColumnNames input column names
-     * @param inputTypes inpput schema types
+     * @param inputTypes input schema types
 
      * @throws Exception key error
      */
@@ -231,7 +233,7 @@ public class PythonPipelineStep extends PipelineStep {
     /**
      * Define a Python config for this step.
      *
-     * @param pythonConfig Konduit PythonConfig
+     * @param pythonConfig Konduit {@link PythonConfig}
      * @return this Python step
      */
     public PythonPipelineStep pythonConfig(PythonConfig pythonConfig) {
@@ -261,7 +263,7 @@ public class PythonPipelineStep extends PipelineStep {
      * Define a single, named step for a Python pipeline.
      *
      * @param stepName input and output name for this step
-     * @param pythonConfig Konduit PythonConfig
+     * @param pythonConfig {@link PythonConfig}
      * @throws Exception key error
      */
     public PythonPipelineStep step(String stepName, PythonConfig pythonConfig)
@@ -272,38 +274,39 @@ public class PythonPipelineStep extends PipelineStep {
 
         this.step(stepName, pythonConfig,
                 pythonInputs.keySet().toArray(new String[0]),
-                pythonToDataVecVarTypes(pythonInputs.values().toArray(new String[0])),
+                pythonToDataVecVarTypes(pythonInputs.values().toArray(new String[pythonInputs.size()])),
                 pythonOutputs.keySet().toArray(new String[0]),
-                pythonToDataVecVarTypes(pythonOutputs.values().toArray(new String[0])));
+                pythonToDataVecVarTypes(pythonOutputs.values().toArray(new String[pythonOutputs.size()])));
 
         return this;
     }
 
-    private SchemaType[] pythonToDataVecVarTypes(String [] pythonVarTypes) {
+
+    private static SchemaType[] pythonToDataVecVarTypes(String [] pythonVarTypes) {
         return Arrays.stream(pythonVarTypes)
                 .map(type -> pythonToDataVecVarTypes(PythonVariables.Type.valueOf(type)))
                 .toArray(SchemaType[]::new);
     }
 
-    private SchemaType pythonToDataVecVarTypes(PythonVariables.Type pythonVarType) {
+    private static ai.konduit.serving.config.SchemaType pythonToDataVecVarTypes(PythonVariables.Type pythonVarType) {
         try {
             switch (pythonVarType) {
                 case BOOL:
-                    return SchemaType.Boolean;
+                    return ai.konduit.serving.config.SchemaType.Boolean;
                 case STR:
-                    return SchemaType.String;
+                    return ai.konduit.serving.config.SchemaType.String;
                 case INT:
-                    return SchemaType.Integer;
+                    return ai.konduit.serving.config.SchemaType.Integer;
                 case FLOAT:
-                    return SchemaType.Float;
+                    return ai.konduit.serving.config.SchemaType.Float;
                 case NDARRAY:
-                    return SchemaType.NDArray;
+                    return ai.konduit.serving.config.SchemaType.NDArray;
                 case LIST:
                 case FILE:
                 case DICT:
                 default:
                     throw new IllegalArgumentException(String.format("Can't convert (%s) to (%s) enum",
-                            pythonVarType.name(), SchemaType.class.getName()));
+                            pythonVarType.name(), ai.konduit.serving.config.SchemaType.class.getName()));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -311,6 +314,8 @@ public class PythonPipelineStep extends PipelineStep {
 
         return null;
     }
+
+
 
 
     @Override

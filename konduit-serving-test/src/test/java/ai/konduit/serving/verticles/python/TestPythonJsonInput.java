@@ -26,7 +26,6 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.*;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.PythonPipelineStep;
-import ai.konduit.serving.util.python.PythonVariables;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;

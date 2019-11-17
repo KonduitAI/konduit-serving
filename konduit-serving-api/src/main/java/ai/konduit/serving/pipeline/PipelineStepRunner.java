@@ -33,14 +33,31 @@ import java.util.Map;
 /**
  * Pipeline steps represent a component
  * in pre processing data ending
- * in data in an ndarray form.
+ * in data in an {@link INDArray} form.
+ *
+ * A runner is the actual implementation
+ * of the {@link PipelineStep}
+ * which is just a configuration interface
+ * for a runner.
+ *
+ * A runner takes in 1 or more input
+ * {@link Record} and returns 1 or more output {@link Record}.
+ *
+ * There are a  number of implementations. You can also create a custom one
+ * using the {@link CustomPipelineStep} and {@link CustomPipelineStepUDF}
+ * definitions. This is recommended as the easiest way of creating your own custom ones.
+ * Otherwise, we try to provide any number of off the shelf ones
+ * for running python scripts or machine learning models.
  *
  * @author Adam Gibson
  */
 public interface PipelineStepRunner {
 
     /**
-     * Destroy the pipeline runner
+     * Destroy the pipeline runner.
+     *
+     * This means cleaning up used resources.
+     * This method will be called when a pipeline needs to be finalized.
      */
     void destroy();
 

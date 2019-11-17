@@ -44,6 +44,73 @@ import org.json.JSONArray;
  */
 public class PythonUtils {
 
+
+    public static ai.konduit.serving.config.SchemaType pythonToDataVecVarTypes(PythonVariables.Type pythonVarType) {
+        try {
+            switch (pythonVarType) {
+                case BOOL:
+                    return ai.konduit.serving.config.SchemaType.Boolean;
+                case STR:
+                    return ai.konduit.serving.config.SchemaType.String;
+                case INT:
+                    return ai.konduit.serving.config.SchemaType.Integer;
+                case FLOAT:
+                    return ai.konduit.serving.config.SchemaType.Float;
+                case NDARRAY:
+                    return ai.konduit.serving.config.SchemaType.NDArray;
+                case LIST:
+                case FILE:
+                case DICT:
+                default:
+                    throw new IllegalArgumentException(String.format("Can't convert (%s) to (%s) enum",
+                            pythonVarType.name(), ai.konduit.serving.config.SchemaType.class.getName()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Convert a {@link Schema}
+     * to {@link PythonVariables}
+     * @param schema the input schema
+     * @return the output {@link PythonVariables} where each
+     * name in the map is associated with a column name in the schema.
+     * A proper type is also chosen based on the schema
+     * @throws Exception
+     */
+    public static PythonVariables schemaToPythonVariables(Schema schema) throws Exception {
+        PythonVariables pyVars = new PythonVariables();
+        int numCols = schema.numColumns();
+        for (int i = 0; i < numCols; i++) {
+            String colName = schema.getName(i);
+            ColumnType colType = schema.getType(i);
+            switch (colType){
+                case Long:
+                case Integer:
+                    pyVars.addInt(colName);
+                    break;
+                case Double:
+                case Float:
+                    pyVars.addFloat(colName);
+                    break;
+                case String:
+                    pyVars.addStr(colName);
+                    break;
+                case NDArray:
+                    pyVars.addNDArray(colName);
+                    break;
+                default:
+                    throw new Exception("Unsupported python input type: " + colType.toString());
+            }
+        }
+
+        return pyVars;
+    }
+
+
     /**
      * Create a {@link Schema}
      * from {@link PythonVariables}.
@@ -116,7 +183,8 @@ public class PythonUtils {
 
         return ret;
     }
-    public static NumpyArray mapToNumpyArray(Map map){
+
+    public static NumpyArray mapToNumpyArray(Map map) {
         String dtypeName = (String)map.get("dtype");
         DataType dtype;
         if (dtypeName.equals("float64")){
@@ -161,7 +229,7 @@ public class PythonUtils {
             Object value = dict.get(subkey);
             if (value instanceof Map){
                 Map map = (Map)value;
-                if (map.containsKey("_is_numpy_array")){
+                if (map.containsKey("_is_numpy_array")) {
                     pyvars2.addNDArray(subkey, mapToNumpyArray(map));
 
                 }
@@ -170,7 +238,7 @@ public class PythonUtils {
                 }
 
             }
-            else if (value instanceof List){
+            else if (value instanceof List) {
                 pyvars2.addList(subkey, ((List) value).toArray());
             }
             else if (value instanceof String){
@@ -270,7 +338,7 @@ public class PythonUtils {
         else{
             throw new RuntimeException("Unsupported array type " + dtypeName + ".");
         }
-        List shapeList = (List)map.get("shape");
+        List shapeList = (List) map.get("shape");
         long[] shape = new long[shapeList.size()];
         for (int i = 0; i < shape.length; i++) {
             shape[i] = (Long)shapeList.get(i);
@@ -283,7 +351,8 @@ public class PythonUtils {
             stride[i] = number.longValue();
         }
 
-        long address = (Long) map.get("address");
+
+        long address =  map.getLong("address");
         NumpyArray numpyArray = new NumpyArray(address, shape, stride, true,dtype);
         return numpyArray;
     }
