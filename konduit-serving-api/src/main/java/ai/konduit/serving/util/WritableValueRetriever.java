@@ -26,6 +26,14 @@ import org.datavec.api.writable.*;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
+/**
+ * Utilities for datavec's {@link Writable}
+ * this just perform basic conversion
+ * between unknown objects and {@link Writable}
+ * types.
+ *
+ * @author Adam Gibson
+ */
 public class WritableValueRetriever {
 
 

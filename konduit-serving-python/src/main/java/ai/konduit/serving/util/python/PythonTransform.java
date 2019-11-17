@@ -324,14 +324,6 @@ public class PythonTransform implements Transform {
                         throw new IllegalStateException("Unable to serialize list vlaue " + name + " to json!");
                     }
                     break;
-                    /*
-                    case DICT:
-                    Map<?,?> outMap = pyOuts.getDictValue(name);
-                    for(val entry : outMap.entrySet()) {
-                    addPrimitiveWritable(out,entry.getValue());
-                    }
-                    break;
-                    */
                 default:
                     throw new IllegalStateException("Unable to support type " + pyType.name());
             }
@@ -369,8 +361,5 @@ public class PythonTransform implements Transform {
 
         return pyVars;
     }
-
-
-
 
 }

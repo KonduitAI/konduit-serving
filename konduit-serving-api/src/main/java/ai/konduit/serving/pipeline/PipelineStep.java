@@ -43,6 +43,8 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  * normalization and transform steps, output schema, potential pre-
  * or post-processing etc.). This config is passed to the respective
  * verticle along with Model and Serving configurations.
+ *
+ * @author Adam Gibson
  */
 @Data
 @AllArgsConstructor
