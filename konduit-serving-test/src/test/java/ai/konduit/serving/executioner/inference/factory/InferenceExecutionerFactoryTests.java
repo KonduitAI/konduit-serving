@@ -124,10 +124,6 @@ public class InferenceExecutionerFactoryTests {
                         .inputDataType("default", TensorDataType.INT32).build())
                 .build();
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(1139)
-                .build();
-
         ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
                 .inputName("default")
                 .outputName("output")
@@ -149,7 +145,7 @@ public class InferenceExecutionerFactoryTests {
     public void testMultiLayerNetwork() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> trainedNetwork = TrainUtils.getTrainedNetwork();
         MultiLayerNetwork save = trainedNetwork.getLeft();
-        File tmpZip = new File("tmpmodelmln.zip");
+        File tmpZip = new File("dl4j_mln_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
         ModelConfig modelConfig = ModelConfig.builder()
@@ -179,7 +175,7 @@ public class InferenceExecutionerFactoryTests {
     public void testComputationGraph() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> trainedNetwork = TrainUtils.getTrainedNetwork();
         ComputationGraph save = trainedNetwork.getLeft().toComputationGraph();
-        File tmpZip = new File("tmpmodel.zip");
+        File tmpZip = new File("dl4j_cg_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
         ModelConfig modelConfig = ModelConfig.builder()
