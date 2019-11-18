@@ -1,4 +1,4 @@
-from konduit.load import create_server_from_file, create_client_from_file
+from konduit.load import server_from_file, client_from_file
 from konduit.config import *
 from konduit.server import stop_server_by_pid
 from konduit.utils import create_konduit_folders
@@ -74,7 +74,7 @@ def build(os):
 def serve(yaml, start_server):
     """Serve a pipeline from a konduit.yaml"""
     # TODO: store the process ID for the server so we can reliable shut it down later.
-    server = create_server_from_file(file_path=yaml, start_server=start_server)
+    server = server_from_file(file_path=yaml, start_server=start_server)
     pid = server.process.pid
     store_pid(yaml, pid)
 
@@ -87,7 +87,7 @@ def predict_numpy(yaml, numpy_data, stop_server):
     """Get predictions for your pipeline from numpy input."""
     # TODO: Note that this is a very limited use case for demo purposes only. we need a more reliable
     #  system going forward.
-    client = create_client_from_file(file_path=yaml)
+    client = client_from_file(file_path=yaml)
     print(client.predict(np.load(numpy_data)))
     if stop_server:
         pid = pop_pid(yaml)

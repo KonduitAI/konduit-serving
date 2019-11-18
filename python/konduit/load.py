@@ -77,7 +77,17 @@ def pop_data(serving_dictionary, dict_key):
     return result
 
 
-def create_server_from_file(file_path, start_server=True):
+def from_file(file_path, start_server=True):
+    """Create Konduit Server and Client from file
+
+    :param file_path: path to your konduit.yaml
+    :param start_server: whether to start the server instance or not (if not you can start it later).
+    :return: konduit.server.Server and konduit.client.Client instances
+    """
+    return server_from_file(file_path, start_server), client_from_file(file_path)
+
+
+def server_from_file(file_path, start_server=True):
     """Create a Konduit Server from a from a configuration file.
 
     :param file_path: path to your konduit.yaml
@@ -113,7 +123,7 @@ def create_server_from_file(file_path, start_server=True):
     return server
 
 
-def create_client_from_file(file_path):
+def client_from_file(file_path):
     """Create a Konduit client instance from a configuration file
 
     :param file_path: path to your konduit.yaml
