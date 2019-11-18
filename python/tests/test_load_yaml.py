@@ -19,20 +19,28 @@ def test_yaml_client_loading():
 
 def test_yaml_minimal_loading():
     file_path = 'yaml/konduit_minimal.yaml'
-    server = create_server_from_file(file_path, start_server=False)
+    server = create_server_from_file(file_path)
     client = create_client_from_file(file_path)
+    server.stop()
+
+
+def test_keras_serving():
+    file_path = 'yaml/konduit_keras.yaml'
+    server = create_server_from_file(file_path=file_path)
+    server.stop()
 
 
 def test_tensor_flow_serving():
     file_path = 'yaml/konduit_tensorflow.yaml'
-    server = create_server_from_file(file_path=file_path, start_server=False)
+    server = create_server_from_file(file_path=file_path)
+    server.stop()
 
 
-def test_yaml_server_python_prediction():
-    try:
-        file_path = 'yaml/konduit_python_code.yaml'
-        server = create_server_from_file(file_path)
-        client = create_client_from_file(file_path)
-        client.predict(np.load('../data/input-0.npy'))
-    finally:
-        server.stop()
+# def test_yaml_server_python_prediction():
+#     try:
+#         file_path = 'yaml/konduit_python_code.yaml'
+#         server = create_server_from_file(file_path)
+#         client = create_client_from_file(file_path)
+#         client.predict(np.load('../data/input-0.npy'))
+#     finally:
+#         server.stop()
