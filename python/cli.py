@@ -75,24 +75,26 @@ def serve(yaml, start_server):
     """Serve a pipeline from a konduit.yaml"""
     # TODO: store the process ID for the server so we can reliable shut it down later.
     server = server_from_file(file_path=yaml, start_server=start_server)
-    pid = server.process.pid
-    store_pid(yaml, pid)
+    store_pid(yaml, server.process.pid)
 
 
 @click.command()
 @click.option('--yaml', required=True, help='Relative or absolute path to your konduit serving YAML file.')
 @click.option('--numpy_data', help='Path to your numpy data')
-@click.option('--stop_server', default=True, help='Stop the Konduit server after the prediction is done.')
-def predict_numpy(yaml, numpy_data, stop_server):
+def predict_numpy(yaml, numpy_data):
     """Get predictions for your pipeline from numpy input."""
     # TODO: Note that this is a very limited use case for demo purposes only. we need a more reliable
     #  system going forward.
     client = client_from_file(file_path=yaml)
     print(client.predict(np.load(numpy_data)))
-    if stop_server:
-        pid = pop_pid(yaml)
-        stop_server_by_pid(pid)
 
+
+@click.command()
+@click.option('--yaml', required=True, help='Relative or absolute path to your konduit serving YAML file.')
+def stop_server(yaml):
+    """Stop the Konduit server associated with a given YAML file."""
+    pid = pop_pid(yaml)
+    stop_server_by_pid(pid)
 
 
 @click.group()
@@ -104,3 +106,4 @@ cli.add_command(init)
 cli.add_command(build)
 cli.add_command(serve)
 cli.add_command(predict_numpy)
+cli.add_command(stop_server)
