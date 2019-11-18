@@ -8,6 +8,8 @@ import yaml
 import os
 import json
 
+MODEL_TYPES = ['TENSORFLOW', 'KERAS', 'COMPUTATION_GRAPH', 'MULTI_LAYER_NETWORK', 'PMML', 'SAMEDIFF']
+
 
 # This creates all base folders under the hood and will be run once you import this module
 create_konduit_folders()
@@ -88,6 +90,9 @@ def create_server_from_file(file_path, start_server=True):
     extra_start_args = pop_data(serving_data, 'extra_start_args')
     sleep = pop_data(serving_data, 'sleep')
     jar_path = pop_data(serving_data, 'jar_path')
+    config_path = pop_data(serving_data, 'config_path')
+    if not config_path:
+        config_path = 'config.json'
 
     serving_config = ServingConfig(**serving_data)
 
@@ -100,7 +105,8 @@ def create_server_from_file(file_path, start_server=True):
         serving_config=serving_config,
         steps=steps,
         extra_start_args=extra_start_args,
-        jar_path=jar_path
+        jar_path=jar_path,
+        config_path=config_path
     )
     if start_server:
         server.start(sleep=sleep)
@@ -128,8 +134,8 @@ def get_step(step_config):
     step_type = step_config.pop('type')
     if step_type == 'PYTHON':
         step = get_python_step(step_config)
-    elif step_type == 'TENSORFLOW':
-        step = get_tensor_flow_step(step_config)
+    elif step_type in MODEL_TYPES:  # TODO other types
+        step = get_model_step(step_config, step_type)
     else:
         raise Exception('Step type of type ' + step_type + ' currently not supported.')
     return step
@@ -146,24 +152,48 @@ def get_python_step(step_config):
     return step
 
 
-def get_tensor_flow_step(step_config):
-    """Get a ModelPipelineStep from a TensorFlow configuration object
+def get_model_step(step_config, step_type):
+    """Get a ModelPipelineStep from a configuration object
 
     :param step_config: python dictionary with properties to create a PipelineStep
+    :param step_type: type of the step (TENSORFLOW, KERAS, COMPUTATION_GRAPH, MULTI_LAYER_NETWORK, PMML or SAMEDIFF)
     :return: konduit.inference.ModelPipelineStep instance.
     """
-    step_type = 'TENSORFLOW'
-    pi_config = pop_data(step_config, 'parallel_inference_config')
-    pic = ParallelInferenceConfig(**pi_config)
-    step_config['parallel_inference_config'] = pic
-    model_loading_path = pop_data(step_config, 'model_loading_path')
-    model_config_type = ModelConfigType(model_type=step_type, model_loading_path=model_loading_path)
-    input_data_types = pop_data(step_config, 'input_data_types')
-    tensor_data_types_config = TensorDataTypesConfig(input_data_types=input_data_types)
-    tensorflow_config = TensorFlowConfig(
-        model_config_type=model_config_type,
-        tensor_data_types_config=tensor_data_types_config
+    model_config_type = ModelConfigType(
+        model_type=step_type,
+        model_loading_path=pop_data(step_config, 'model_loading_path')
     )
-    step_config['model_config'] = tensorflow_config
+
+    if step_type == 'TENSORFLOW':  # TF has to extra properties, all others are identical
+        model_config = TensorFlowConfig(
+            config_proto_path=pop_data(step_config, 'config_proto_path'),
+            saved_model_config=pop_data(step_config, 'saved_model_config'),
+            model_config_type=model_config_type,
+            tensor_data_types_config=get_tensor_data_types(step_config)
+        )
+    else:
+        model_config = ModelConfig(
+            model_config_type=model_config_type,
+            tensor_data_types_config=get_tensor_data_types(step_config)
+        )
+    step_config['model_config'] = model_config
+    step_config = extract_parallel_inference(step_config)
     step = ModelPipelineStep(**step_config)
     return step
+
+
+def get_tensor_data_types(step_config):
+    input_data_types = pop_data(step_config, 'input_data_types')
+    output_data_types = pop_data(step_config, 'output_data_types')
+    return TensorDataTypesConfig(
+        input_data_types=input_data_types,
+        output_data_types=output_data_types
+    )
+
+
+def extract_parallel_inference(step_config):
+    pi_config = pop_data(step_config, 'parallel_inference_config')
+    if pi_config:
+        pic = ParallelInferenceConfig(**pi_config)
+        step_config['parallel_inference_config'] = pic
+    return step_config

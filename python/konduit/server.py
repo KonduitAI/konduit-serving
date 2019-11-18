@@ -95,8 +95,9 @@ class Server(object):
         # Pass extra jvm arguments such as memory.
         if self.extra_start_args:
             args.extend(self.extra_start_args)
-        args.append('-cp')
-        args.append(self.jar_path)
+        if self.jar_path:
+            args.append('-cp')
+            args.append(self.jar_path)
         args.append('ai.konduit.serving.configprovider.KonduitServingMain')
         args.append('--configPath')
         args.append(absolute_path)
