@@ -7,6 +7,8 @@ from .utils import create_konduit_folders
 import yaml
 import os
 import json
+import logging
+
 
 MODEL_TYPES = ['TENSORFLOW', 'KERAS', 'COMPUTATION_GRAPH', 'MULTI_LAYER_NETWORK', 'PMML', 'SAMEDIFF']
 
@@ -24,14 +26,13 @@ def store_pid(file_path, pid):
     """
     yaml_path = os.path.abspath(file_path)
     pid_dict = {yaml_path: pid}
-    if os.path.isfile(KONDUIT_PID_STORAGE):
-        with open(KONDUIT_PID_STORAGE, 'w') as f:
+    with open(KONDUIT_PID_STORAGE, 'w') as f:
+        try:
             previous = json.load(f)
             new = previous.copy()
             new.update(pid_dict)
             json.dump(new, f)
-    else:
-        with open(KONDUIT_PID_STORAGE, 'w') as f:
+        except:
             json.dump(pid_dict, f)
 
 
@@ -43,12 +44,17 @@ def pop_pid(file_path):
     :return: the process ID belonging to that Konduit server instance.
     """
     pid = None
-    with open(KONDUIT_PID_STORAGE, 'w') as f:
+    with open(KONDUIT_PID_STORAGE, 'r+') as f:
         yaml_path = os.path.abspath(file_path)
-        previous = json.load(f)
-        if yaml_path in previous:
-            pid = previous.pop(yaml_path)
-        json.dump(previous, f)
+        try:
+            previous = json.load(f)
+            if yaml_path in previous:
+                pid = previous.pop(yaml_path)
+            f.seek(0)
+            f.write(json.dumps(previous))
+            f.truncate()
+        except:
+            logging.warning("Process ID not found, file is empty.")
     return pid
 
 
