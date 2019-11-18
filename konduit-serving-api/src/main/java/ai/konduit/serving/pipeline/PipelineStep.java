@@ -22,8 +22,8 @@
 
 package ai.konduit.serving.pipeline;
 
-import ai.konduit.serving.model.MemMapConfig;
 import ai.konduit.serving.config.SchemaType;
+import ai.konduit.serving.model.MemMapConfig;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -33,6 +33,7 @@ import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.util.*;
 
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
@@ -42,6 +43,8 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  * normalization and transform steps, output schema, potential pre-
  * or post-processing etc.). This config is passed to the respective
  * verticle along with Model and Serving configurations.
+ *
+ * @author Adam Gibson
  */
 @Data
 @AllArgsConstructor
@@ -353,4 +356,17 @@ public abstract class PipelineStep implements Serializable {
 
     public abstract String pipelineStepClazz();
 
+    /**
+     * Get the respective runner for the configuration
+     * @return the respective step runner
+     */
+    public PipelineStepRunner getRunner() {
+        try {
+            Class<? extends PipelineStepRunner> clazz = (Class<? extends PipelineStepRunner>) Class.forName(this.pipelineStepClazz());
+            Constructor constructor = clazz.getConstructor(PipelineStep.class);
+            return (PipelineStepRunner) constructor.newInstance(this);
+        } catch(Exception e) {
+            throw new IllegalStateException("Unable to instantiate pipeline step from class " + this.pipelineStepClazz(), e);
+        }
+    }
 }

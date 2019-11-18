@@ -44,6 +44,7 @@ import java.util.List;
  * rather than straight {@link org.nd4j.linalg.api.ndarray.INDArray} like
  * most deep learning pipelines will be.
  *
+ * @author Adam Gibson
  *
  */
 public class JsonExpanderTransformStepRunner extends BasePipelineStepRunner {

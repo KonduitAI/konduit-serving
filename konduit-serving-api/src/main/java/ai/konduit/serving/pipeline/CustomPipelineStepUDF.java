@@ -24,9 +24,31 @@ package ai.konduit.serving.pipeline;
 
 import org.datavec.api.records.Record;
 
+/**
+ * A user defined function for use with the
+ * {@link CustomPipelineStep}. This is where
+ * a user defines an extension for use within a
+ * {@link CustomPipelineStep}.
+ *
+ * A user defined function should take in an
+ * array of {@link Record} and output an array of {@link Record}
+ * the records should be 1 input per name and 1 output per output name.
+ * Generally, this will just be an array of length 1 reflecting the
+ * "default" input name and "default" output name.
+ *
+ * Multiple names are generally used for more complex neural networks.
+ *
+ * @author Adam Gibson
+ */
 public interface CustomPipelineStepUDF {
 
 
+    /**
+     * The user defined function where a user can define custom behavior
+     * for a {@link CustomPipelineStep}
+     * @param input the input records (generally 1 record per input name for the pipeline step)
+     * @return the output records (generally 1 record per output name for the pipeline step)
+     */
     Record[] udf(Record[] input);
 
 }

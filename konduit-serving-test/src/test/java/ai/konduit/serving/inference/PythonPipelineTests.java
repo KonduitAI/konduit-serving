@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.inference;
 
+import ai.konduit.serving.util.python.PythonVariables;
 import ai.konduit.serving.executioner.Pipeline;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.PythonPipelineStep;
@@ -29,7 +30,6 @@ import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
 import ai.konduit.serving.pipeline.steps.PythonPipelineStepRunner;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.steps.TransformProcessPipelineStepRunner;
-import ai.konduit.serving.util.python.PythonVariables;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.MathOp;
 import org.datavec.api.transform.TransformProcess;

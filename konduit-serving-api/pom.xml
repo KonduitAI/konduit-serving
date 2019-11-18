@@ -40,14 +40,6 @@
             <id>test</id>
             <dependencies>
                 <dependency>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>openblas</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>mkl</artifactId>
-                </dependency>
-                <dependency>
                     <groupId>org.nd4j</groupId>
                     <artifactId>nd4j-native</artifactId>
                     <version>${nd4j.version}</version>

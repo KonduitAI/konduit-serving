@@ -44,7 +44,7 @@ import java.util.Map;
  * {@link InferenceExecutionerPipelineStepRunner}
  * that takes in 1 array per named input.
  *
- *
+ * @author Adam Gibson
  */
 public class ArrayConcatenationStepRunner extends BasePipelineStepRunner {
 

@@ -6,6 +6,45 @@
 
 ---
 
+<p align="center">
+    <a href='https://jenkins.konduit.ai/job/konduitai/job/konduit-serving/job/master/'>
+        <img src='https://jenkins.konduit.ai/buildStatus/icon?job=konduitai%2Fkonduit-serving%2Fmaster'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=ai.konduit.serving:konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=ai.konduit.serving:konduit-serving&metric=alert_status'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=ai.konduit.serving:konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=ai.konduit.serving:konduit-serving&metric=bugs'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=ai.konduit.serving:konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=ai.konduit.serving:konduit-serving&metric=code_smells'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=ai.konduit.serving:konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=ai.konduit.serving:konduit-serving&metric=coverage'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=ai.konduit.serving:konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=ai.konduit.serving:konduit-serving&metric=duplicated_lines_density'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=ai.konduit.serving:konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=ai.konduit.serving:konduit-serving&metric=ncloc'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=ai.konduit.serving:konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=ai.konduit.serving:konduit-serving&metric=sqale_rating'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=ai.konduit.serving:konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=ai.konduit.serving:konduit-serving&metric=reliability_rating'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=ai.konduit.serving:konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=ai.konduit.serving:konduit-serving&metric=security_rating'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=ai.konduit.serving:konduit-serving/'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=ai.konduit.serving:konduit-serving&metric=sqale_index'>
+    </a>
+    <a href='https://sonarcloud.io/dashboard?id=ai.konduit.serving:konduit-serving'>
+        <img src='https://sonarcloud.io/api/project_badges/measure?project=ai.konduit.serving:konduit-serving&metric=vulnerabilities'>
+    </a>
+</p>
+
 ## Overview
 
 Konduit is a serving system and framework focused on deploying machine learning

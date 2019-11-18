@@ -25,6 +25,23 @@ package ai.konduit.serving.util;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
+/**
+ * Utilities for rearranging image {@link INDArray}
+ * channels based on a commonly used idea of:
+ * N: Number of Images
+ * C: Channel in an image
+ * W: Width
+ * H: Height
+ *
+ * NCHW is used to describe the expected layout of an image as input
+ * in to a deep learning framework.
+ * Different frameworks require different input formats specified
+ * as some form of NCHW.
+ *
+ * Methods related to manipulating images and image layout should go here.
+ *
+ * @author Adam Gibson
+ */
 public class ImagePermuter {
 
 
@@ -63,6 +80,15 @@ public class ImagePermuter {
         return sb.toString();
     }
 
+    /**
+     * Permute the order given the input string
+     * starting order and the target destination order.
+     * Only nchw are supported.
+     * @param input the input array
+     * @param startingOrder the starting order (string must be some permutation of nchw)
+     * @param destinationOrder the destination order (string must be some permutation of nchw)
+     * @return the output {@link INDArray} rearranged
+     */
     public static INDArray permuteOrder(INDArray input,String startingOrder,String destinationOrder) {
         return input.permute(determinePermuteOrder(startingOrder,destinationOrder));
     }

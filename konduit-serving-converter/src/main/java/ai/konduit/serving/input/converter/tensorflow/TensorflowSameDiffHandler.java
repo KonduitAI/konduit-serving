@@ -56,7 +56,7 @@ public class TensorflowSameDiffHandler implements Handler<RoutingContext> {
         File kerasFile = getTmpFileWithContext(event);
 
         try {
-            SameDiff sameDiff = TFGraphMapper.getInstance().importGraph(kerasFile);
+            SameDiff sameDiff = TFGraphMapper.importGraph(kerasFile);
             ByteBuffer byteBuffer = sameDiff.asFlatBuffers(true);
             Buffer buffer = Buffer.buffer(Unpooled.wrappedBuffer(byteBuffer));
             File newFile = new File("tmpFile-" + UUID.randomUUID().toString() + ".xml");
