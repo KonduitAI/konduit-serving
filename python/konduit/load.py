@@ -9,6 +9,10 @@ import os
 import json
 
 
+# This creates all base folders under the hood and will be run once you import this module
+create_konduit_folders()
+
+
 def store_pid(file_path, pid):
     """ Store the process ID for a running Konduit Server, given a configuration file that
     the server has been started from.
@@ -16,14 +20,17 @@ def store_pid(file_path, pid):
     :param file_path: path to your Konduit configuration file
     :param pid: process ID of the Konduit server you created before.
     """
-    create_konduit_folders()
-    with open(KONDUIT_PID_STORAGE, 'w') as f:
-        yaml_path = os.path.abspath(file_path)
-        previous = json.load(f)
-        new_pid = {yaml_path: pid}
-        new = previous.copy()
-        new.update(new_pid)
-        json.dump(new, f)
+    yaml_path = os.path.abspath(file_path)
+    pid_dict = {yaml_path: pid}
+    if os.path.isfile(KONDUIT_PID_STORAGE):
+        with open(KONDUIT_PID_STORAGE, 'w') as f:
+            previous = json.load(f)
+            new = previous.copy()
+            new.update(pid_dict)
+            json.dump(new, f)
+    else:
+        with open(KONDUIT_PID_STORAGE, 'w') as f:
+            json.dump(pid_dict, f)
 
 
 def pop_pid(file_path):
@@ -120,22 +127,43 @@ def get_step(step_config):
     """
     step_type = step_config.pop('type')
     if step_type == 'PYTHON':
-        python_config = PythonConfig(**step_config)
-        step = PythonPipelineStep().step(python_config)
+        step = get_python_step(step_config)
     elif step_type == 'TENSORFLOW':
-        pi_config = pop_data(step_config, 'parallel_inference_config')
-        pic = ParallelInferenceConfig(**pi_config)
-        step_config['parallel_inference_config'] = pic
-        model_loading_path = pop_data(step_config, 'model_loading_path')
-        model_config_type = ModelConfigType(model_type=step_type, model_loading_path=model_loading_path)
-        input_data_types = pop_data(step_config, 'input_data_types')
-        tensor_data_types_config = TensorDataTypesConfig(input_data_types=input_data_types)
-        tensorflow_config = TensorFlowConfig(
-            model_config_type=model_config_type,
-            tensor_data_types_config=tensor_data_types_config
-        )
-        step_config['model_config'] = tensorflow_config
-        step = ModelPipelineStep(**step_config)
+        step = get_tensor_flow_step(step_config)
     else:
         raise Exception('Step type of type ' + step_type + ' currently not supported.')
+    return step
+
+
+def get_python_step(step_config):
+    """Get a PythonPipelineStep from a configuration object
+
+    :param step_config: python dictionary with properties to create a PipelineStep
+    :return: konduit.inference.PythonPipelineStep instance.
+    """
+    python_config = PythonConfig(**step_config)
+    step = PythonPipelineStep().step(python_config)
+    return step
+
+
+def get_tensor_flow_step(step_config):
+    """Get a ModelPipelineStep from a TensorFlow configuration object
+
+    :param step_config: python dictionary with properties to create a PipelineStep
+    :return: konduit.inference.ModelPipelineStep instance.
+    """
+    step_type = 'TENSORFLOW'
+    pi_config = pop_data(step_config, 'parallel_inference_config')
+    pic = ParallelInferenceConfig(**pi_config)
+    step_config['parallel_inference_config'] = pic
+    model_loading_path = pop_data(step_config, 'model_loading_path')
+    model_config_type = ModelConfigType(model_type=step_type, model_loading_path=model_loading_path)
+    input_data_types = pop_data(step_config, 'input_data_types')
+    tensor_data_types_config = TensorDataTypesConfig(input_data_types=input_data_types)
+    tensorflow_config = TensorFlowConfig(
+        model_config_type=model_config_type,
+        tensor_data_types_config=tensor_data_types_config
+    )
+    step_config['model_config'] = tensorflow_config
+    step = ModelPipelineStep(**step_config)
     return step
