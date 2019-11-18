@@ -4,14 +4,14 @@ Install with `python setup.py install` from this folder. This will expose a CLI 
 `konduit`. Assuming you have put a `konduit.jar` in the `tests` folder as described
 in the main `README.md`, you can test this tool as follows:
 
-```bash
+```shell script
 cd tests
 konduit --help
 ```
 
 which should prompt all currently available commands, i.e.
 
-```bash
+```text
 Usage: konduit [OPTIONS] COMMAND [ARGS]...
 
 Options:
@@ -19,26 +19,26 @@ Options:
 
 Commands:
   build          Build the underlying konduit.jar (again).
-  init           Initialize the konduit CLI.
+  init           Initialize the konduit-python CLI.
   predict-numpy  Get predictions for your pipeline from numpy input.
   serve          Serve a pipeline from a konduit.yaml
-
+  stop-server    Stop the Konduit server associated with a given config...
 ```
 
 For more help on individual commands you can do
-```bash
+```shell script
 konduit serve --help
 ```
 
 to get help for the `serve` command (and all others in the same way)
 
-```bash
+```text
 Usage: konduit serve [OPTIONS]
 
   Serve a pipeline from a konduit.yaml
 
 Options:
-  --yaml TEXT          Relative or absolute path to your konduit serving YAML
+  --config TEXT          Relative or absolute path to your konduit serving YAML
                        file.
   --start_server TEXT  Whether to start the server instance after 
                        initialization.
@@ -78,13 +78,19 @@ what types of output it will generate. In essence, this configuration will run t
 `simple.py` on input data that you can specify. To serve this Konduit pipeline you can
 just run:
 
-```bash
-konduit serve --yaml yaml/konduit.yaml
+```shell script
+konduit serve --config yaml/konduit.yaml
 ```
 
 and to get predictions from it you can use:
 
-```bash
-konduit predict-numpy --yaml yaml/konduit.yaml --numpy_data ../data/input-0.npy 
+```shell script
+konduit predict-numpy --config yaml/konduit.yaml --numpy_data ../data/input-0.npy 
 
 ```
+
+Finally, to shut down the Konduit server again after you're donw with it, simply use
+
+```shell script
+konduit stop-server --config yaml/konduit.yaml
+``` 

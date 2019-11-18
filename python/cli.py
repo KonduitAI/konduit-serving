@@ -8,7 +8,7 @@ import os as opos
 import click
 import subprocess
 import numpy as np
-
+import logging
 
 create_konduit_folders()
 
@@ -69,32 +69,33 @@ def build(os):
 
 
 @click.command()
-@click.option('--yaml', required=True, help='Relative or absolute path to your konduit serving YAML file.')
+@click.option('--config', required=True, help='Relative or absolute path to your konduit serving config file.')
 @click.option('--start_server', default=True, help='Whether to start the server instance after initialization.')
-def serve(yaml, start_server):
+def serve(config, start_server):
     """Serve a pipeline from a konduit.yaml"""
-    # TODO: store the process ID for the server so we can reliable shut it down later.
-    server = server_from_file(file_path=yaml, start_server=start_server)
-    store_pid(yaml, server.process.pid)
+    server = server_from_file(file_path=config, start_server=start_server)
+    store_pid(config, server.process.pid)
+    logging.info(">>> Started a Konduit server with PID " + str(server.process.pid))
 
 
 @click.command()
-@click.option('--yaml', required=True, help='Relative or absolute path to your konduit serving YAML file.')
+@click.option('--config', required=True, help='Relative or absolute path to your konduit serving config file.')
 @click.option('--numpy_data', help='Path to your numpy data')
-def predict_numpy(yaml, numpy_data):
+def predict_numpy(config, numpy_data):
     """Get predictions for your pipeline from numpy input."""
     # TODO: Note that this is a very limited use case for demo purposes only. we need a more reliable
     #  system going forward.
-    client = client_from_file(file_path=yaml)
+    client = client_from_file(file_path=config)
     print(client.predict(np.load(numpy_data)))
 
 
 @click.command()
-@click.option('--yaml', required=True, help='Relative or absolute path to your konduit serving YAML file.')
-def stop_server(yaml):
-    """Stop the Konduit server associated with a given YAML file."""
-    pid = pop_pid(yaml)
+@click.option('--config', required=True, help='Relative or absolute path to your konduit serving config file.')
+def stop_server(config):
+    """Stop the Konduit server associated with a given config file."""
+    pid = pop_pid(config)
     stop_server_by_pid(pid)
+    logging.info(">>> Stopped running Konduit server with PID " + str(pid))
 
 
 @click.group()
