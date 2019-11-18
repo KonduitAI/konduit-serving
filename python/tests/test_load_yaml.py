@@ -30,6 +30,30 @@ def test_keras_serving():
     server.stop()
 
 
+def test_tf_simple_serving():
+    file_path = 'yaml/konduit_tf_simple.yaml'
+    server = create_server_from_file(file_path=file_path)
+    server.stop()
+
+
+def test_dl4j_mln_serving():
+    file_path = 'yaml/konduit_dl4j_mln.yaml'
+    server = create_server_from_file(file_path=file_path)
+    server.stop()
+
+
+def test_dl4j_cg_serving():
+    file_path = 'yaml/konduit_dl4j_cg.yaml'
+    server = create_server_from_file(file_path=file_path)
+    server.stop()
+
+
+def test_dl4j_samediff_serving():
+    file_path = 'yaml/konduit_samediff.yaml'
+    server = create_server_from_file(file_path=file_path)
+    server.stop()
+
+
 def test_tensor_flow_serving():
     file_path = 'yaml/konduit_tensorflow.yaml'
     server = create_server_from_file(file_path=file_path)
