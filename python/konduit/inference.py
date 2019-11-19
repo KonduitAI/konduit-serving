@@ -1,7 +1,13 @@
 from konduit.base_inference import *
 from jnius import autoclass
 
-SchemaTypeUtils = autoclass("ai.konduit.serving.util.SchemaTypeUtils")
+try:
+    SchemaTypeUtils = autoclass("ai.konduit.serving.util.SchemaTypeUtils")
+except:
+    raise Exception("We couldn't initialize the Java classes used by Konduit. "
+                    "Make sure to have a konduit.jar available on your PATH, "
+                    "for instance by setting the environment variable KONDUIT_JAR_PATH "
+                    "to point to such a JAR.")
 
 
 def set_input_columns_func(self, column_names, input_name="default"):

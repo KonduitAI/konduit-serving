@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 setup(
     name='konduit',
-    version='0.1.3',
+    version='0.1.4',
     packages=find_packages(),
     install_requires=[
         'requests>=2.22.0',
@@ -14,7 +14,8 @@ setup(
         'Cython',
         'pydl4j',
         'pydatavec',
-        'click'
+        'click',
+        'pyyaml'
     ],
     py_modules=['konduit', 'cli'],
     extras_require={
@@ -23,7 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'konduit-python=cli:cli'
+            'konduit=cli:cli'
         ]
     },
     include_package_data=True,
