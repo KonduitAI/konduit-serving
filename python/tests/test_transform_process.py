@@ -19,20 +19,17 @@ def test_build_tp():
     SchemaBuilder = autoclass(
         'org.datavec.api.transform.schema.Schema$Builder')
     schema = SchemaBuilder().addColumnString(StringJava('first')).build()
-    tp = TransformProcessBuilder(schema).appendStringColumnTransform(
-        StringJava("first"), StringJava("two")).build()
+    tp = TransformProcessBuilder(schema).appendStringColumnTransform(StringJava("first"), StringJava("two")).build()
 
     tp_json = tp.toJson()
-    from_json = TransformProcess.fromJson(StringJava(tp_json))
-    json_tp = json.dumps(tp_json)
+    TransformProcess.fromJson(StringJava(tp_json))
+    json.dumps(tp_json)
     as_python_json = json.loads(tp_json)
     transform_process = TransformProcessPipelineStep()\
         .set_input(None, ['first'], ['String'])\
         .set_output(None, ['first'], ['String'])\
         .transform_process(as_python_json)
 
-    input_names = ['default']
-    output_names = ['default']
     port = random.randint(1000, 65535)
     serving_config = ServingConfig(http_port=port,
                                    input_data_type='JSON',
@@ -52,9 +49,7 @@ def test_build_tp():
                     jar_path='konduit.jar')
     server.start()
     print('Process started. Sleeping 10 seconds.')
-    client = Client(input_names=input_names,
-                    output_names=output_names,
-                    return_output_type='JSON',
+    client = Client(return_output_type='JSON',
                     input_type='JSON',
                     endpoint_output_type='RAW',
                     url='http://localhost:' + str(port))

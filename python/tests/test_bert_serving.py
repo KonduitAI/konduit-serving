@@ -11,8 +11,7 @@ import random
 
 def test_server_start():
 
-    input_names = ["IteratorGetNext:0",
-                   "IteratorGetNext:1", "IteratorGetNext:4"]
+    input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
     output_names = ["loss/Softmax"]
     port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)
