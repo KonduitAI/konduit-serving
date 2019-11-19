@@ -48,7 +48,7 @@ Options:
 ## Basic usage
 
 You should be in the `tests` folder still. There are a lot of YAML files in the `yaml` folder
-to test Konduit with. Let's say we want to serve te pipeline described in `yaml/konduit.yaml`.
+to test Konduit with. Let's say we want to serve the pipeline described in `yaml/konduit.yaml`.
 Let's have a look at it first:
 
 ```yaml

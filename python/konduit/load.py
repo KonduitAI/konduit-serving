@@ -1,8 +1,6 @@
 from . import *
 from .server import Server
 from .client import Client
-from .config import KONDUIT_PID_STORAGE
-from .utils import create_konduit_folders
 
 import yaml
 import os
@@ -10,11 +8,11 @@ import json
 import logging
 
 
+USER_PATH = os.path.expanduser('~')
+KONDUIT_BASE_DIR = os.path.join(USER_PATH, '.konduit')
+KONDUIT_DIR = os.path.join(KONDUIT_BASE_DIR, 'konduit-serving')
+KONDUIT_PID_STORAGE = os.path.join(KONDUIT_DIR, 'pid.json')
 MODEL_TYPES = ['TENSORFLOW', 'KERAS', 'COMPUTATION_GRAPH', 'MULTI_LAYER_NETWORK', 'PMML', 'SAMEDIFF']
-
-
-# This creates all base folders under the hood and will be run once you import this module
-create_konduit_folders()
 
 
 def store_pid(file_path, pid):
