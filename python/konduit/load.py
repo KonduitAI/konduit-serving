@@ -56,14 +56,18 @@ def pop_pid(file_path):
     return pid
 
 
-def load_data(file_path):
+def load_data(file_path, use_yaml=True):
     """Load data from a given YAML file into a Python dictionary.
 
     :param file_path: path to your YAML file.
+    :param use_yaml: use yaml or json
     :return: contents of the file as Python dict.
     """
     with open(file_path, 'r') as f:
-        data = yaml.safe_load(f)
+        if use_yaml:
+            data = yaml.safe_load(f)
+        else:
+            data = json.load(f)
     return data
 
 
@@ -81,24 +85,26 @@ def pop_data(serving_dictionary, dict_key):
     return result
 
 
-def from_file(file_path, start_server=True):
+def from_file(file_path, start_server=True, use_yaml=True):
     """Create Konduit Server and Client from file
 
     :param file_path: path to your konduit.yaml
     :param start_server: whether to start the server instance or not (if not you can start it later).
+    :param use_yaml: use yaml or json
     :return: konduit.server.Server and konduit.client.Client instances
     """
-    return server_from_file(file_path, start_server), client_from_file(file_path)
+    return server_from_file(file_path, start_server, use_yaml), client_from_file(file_path, use_yaml)
 
 
-def server_from_file(file_path, start_server=True):
+def server_from_file(file_path, start_server=True, use_yaml=True):
     """Create a Konduit Server from a from a configuration file.
 
     :param file_path: path to your konduit.yaml
     :param start_server: whether to start the server instance or not (if not you can start it later).
+    :param use_yaml: use yaml or json
     :return: konduit.server.Server instance
     """
-    data = load_data(file_path)
+    data = load_data(file_path, use_yaml)
     serving_data = data.get('serving', None)
 
     extra_start_args = pop_data(serving_data, 'extra_start_args')
@@ -127,13 +133,14 @@ def server_from_file(file_path, start_server=True):
     return server
 
 
-def client_from_file(file_path):
+def client_from_file(file_path, use_yaml=True):
     """Create a Konduit client instance from a configuration file
 
     :param file_path: path to your konduit.yaml
+    :param use_yaml: use yaml or json
     :return: konduit.client.Client instance
     """
-    data = load_data(file_path)
+    data = load_data(file_path, use_yaml)
     client_data = data.get('client', None)
     client = Client(**client_data)
     return client
