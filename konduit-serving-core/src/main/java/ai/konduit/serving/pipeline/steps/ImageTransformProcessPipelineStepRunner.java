@@ -22,7 +22,7 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.ImageLoading;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ImagePermuter;
 import org.datavec.api.writable.BytesWritable;
@@ -44,16 +44,16 @@ import java.util.stream.Collectors;
 public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRunner {
 
     private Map<String, NativeImageLoader> imageLoaders;
-    private ImageLoading imageLoadingConfig;
+    private ImageLoadingStep imageLoadingStepConfig;
 
     public ImageTransformProcessPipelineStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
 
-        this.imageLoadingConfig = (ImageLoading) pipelineStep;
+        this.imageLoadingStepConfig = (ImageLoadingStep) pipelineStep;
 
-        imageLoaders = imageLoadingConfig.getInputNames().stream()
+        imageLoaders = imageLoadingStepConfig.getInputNames().stream()
                 .map(inputName -> {
-                    Long[] values = imageLoadingConfig.getDimensionsConfigs().getOrDefault(inputName, null);
+                    Long[] values = imageLoadingStepConfig.getDimensionsConfigs().getOrDefault(inputName, null);
                     if(values != null) {
                         return new Pair<>(inputName, new NativeImageLoader(values[0], values[1], values[2]));
                     } else {
@@ -67,10 +67,10 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
 
     @Override
     public void processValidWritable(Writable writable, List<Writable> record, int inputIndex, Object... extraArgs) {
-        String inputName = imageLoadingConfig.getInputNames().get(inputIndex);
+        String inputName = imageLoadingStepConfig.getInputNames().get(inputIndex);
 
         NativeImageLoader nativeImageLoader = imageLoaders.get(inputName);
-        ImageTransformProcess imageTransformProcess = imageLoadingConfig.getImageTransformProcesses().get(inputName);
+        ImageTransformProcess imageTransformProcess = imageLoadingStepConfig.getImageTransformProcesses().get(inputName);
 
         INDArray input;
 
@@ -89,7 +89,7 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
 
             INDArray output;
 
-            if(imageLoadingConfig.isUpdateOrderingBeforeTransform()) {
+            if(imageLoadingStepConfig.isUpdateOrderingBeforeTransform()) {
                 output = applyTransform(imageTransformProcess, nativeImageLoader, permuteImageOrder(input));
             } else {
                 output = permuteImageOrder(applyTransform(imageTransformProcess, nativeImageLoader, input));
@@ -102,10 +102,10 @@ public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRun
     }
 
     private INDArray permuteImageOrder(INDArray input) {
-        if (!imageLoadingConfig.initialImageLayoutMatchesFinal()) {
+        if (!imageLoadingStepConfig.initialImageLayoutMatchesFinal()) {
             return ImagePermuter.permuteOrder(input,
-                    imageLoadingConfig.getImageProcessingInitialLayout(),
-                    imageLoadingConfig.getImageProcessingRequiredLayout());
+                    imageLoadingStepConfig.getImageProcessingInitialLayout(),
+                    imageLoadingStepConfig.getImageProcessingRequiredLayout());
         } else {
             return input;
         }

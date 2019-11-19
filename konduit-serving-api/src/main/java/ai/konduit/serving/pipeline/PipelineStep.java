@@ -24,6 +24,9 @@ package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.MemMapConfig;
+import ai.konduit.serving.pipeline.config.NormalizationConfig;
+import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
+import ai.konduit.serving.pipeline.step.*;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -51,19 +54,18 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @NoArgsConstructor
 @SuperBuilder
 @JsonSubTypes({
-        @JsonSubTypes.Type(value= ImageLoading.class, name = "ImageLoading"),
+        @JsonSubTypes.Type(value= ModelStep.class, name = "ModelStep"),
+        @JsonSubTypes.Type(value= PythonStep.class, name = "PythonStep"),
+        @JsonSubTypes.Type(value= PmmlStep.class, name = "PmmlStep"),
+        @JsonSubTypes.Type(value= TransformProcessStep.class, name = "TransformProcessStep"),
+        @JsonSubTypes.Type(value= CustomPipelineStep.class, name = "CustomPipelineStep"),
+        @JsonSubTypes.Type(value= ImageLoadingStep.class, name = "ImageLoadingStep"),
+        @JsonSubTypes.Type(value= JsonExpanderTransformStep.class, name = "JsonExpanderTransformStep"),
+        @JsonSubTypes.Type(value= ArrayConcatenationStep.class, name = "ArrayConcatenationStep"),
+
         @JsonSubTypes.Type(value= MemMapConfig.class, name = "MemMapConfig"),
-        @JsonSubTypes.Type(value= ModelPipelineStep.class, name = "ModelPipelineStep"),
         @JsonSubTypes.Type(value= NormalizationConfig.class, name = "NormalizationConfig"),
         @JsonSubTypes.Type(value= ObjectDetectionConfig.class, name = "ObjectDetectionConfig"),
-        @JsonSubTypes.Type(value= ModelPipelineStep.class, name = "ModelPipelineStep"),
-        @JsonSubTypes.Type(value= PythonPipelineStep.class, name = "PythonPipelineStep"),
-        @JsonSubTypes.Type(value= ModelPipelineStep.class, name = "ModelPipelineStep"),
-        @JsonSubTypes.Type(value= TransformProcessPipelineStep.class, name = "TransformProcessPipelineStep"),
-        @JsonSubTypes.Type(value= ArrayConcatenationStep.class, name = "ArrayConcatenationStep"),
-        @JsonSubTypes.Type(value= PmmlPipelineStep.class, name = "PmmlPipelineStep"),
-        @JsonSubTypes.Type(value= CustomPipelineStep.class, name = "CustomPipelineStep"),
-
 
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)

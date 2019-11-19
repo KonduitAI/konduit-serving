@@ -22,7 +22,7 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.ArrayConcatenationStep;
+import ai.konduit.serving.pipeline.step.ArrayConcatenationStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;

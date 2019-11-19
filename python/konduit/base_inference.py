@@ -1109,7 +1109,7 @@ class NormalizationConfig(object):
         return d
 
 
-class PythonPipelineStep(PipelineStep):
+class PythonStep(PipelineStep):
 
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
@@ -1230,7 +1230,7 @@ class PythonPipelineStep(PipelineStep):
         return d
 
 
-class TransformProcessPipelineStep(PipelineStep):
+class TransformProcessStep(PipelineStep):
 
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
@@ -1352,7 +1352,7 @@ class TransformProcessPipelineStep(PipelineStep):
         return d
 
 
-class ModelPipelineStep(PipelineStep):
+class ModelStep(PipelineStep):
 
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
@@ -1626,7 +1626,7 @@ class ArrayConcatenationStep(PipelineStep):
         return d
 
 
-class JsonExpanderTransform(PipelineStep):
+class JsonExpanderTransformStep(PipelineStep):
 
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
@@ -1733,7 +1733,7 @@ class JsonExpanderTransform(PipelineStep):
         return d
 
 
-class ImageLoading(PipelineStep):
+class ImageLoadingStep(PipelineStep):
 
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
@@ -1968,7 +1968,7 @@ class InferenceConfiguration(object):
         if not isinstance(value, list) and not isinstance(value, ListWrapper):
             raise TypeError("pipelineSteps must be list")
         if not all(isinstance(i, PipelineStep) for i in value):
-            raise TypeError("pipelineSteps list valeus must be PipelineStep")
+            raise TypeError("pipelineSteps list values must be PipelineStep")
         self.__pipeline_steps = value
     pipeline_steps = property(_get_pipeline_steps, _set_pipeline_steps)
 

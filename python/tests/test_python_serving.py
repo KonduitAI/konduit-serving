@@ -18,7 +18,7 @@ def test_server_start():
         python_outputs={'first': 'NDARRAY'},
     )
 
-    step = PythonPipelineStep().step(python_config)
+    step = PythonStep().step(python_config)
     server = Server(steps=step, serving_config=serving_config)
     server.start()
     

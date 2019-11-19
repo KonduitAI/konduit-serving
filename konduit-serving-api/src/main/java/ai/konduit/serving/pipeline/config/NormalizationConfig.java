@@ -20,25 +20,29 @@
  *
  */
 
-package ai.konduit.serving.pipeline;
+package ai.konduit.serving.pipeline.config;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @SuperBuilder
-public class ObjectDetectionConfig  implements Serializable {
-    @Builder.Default
-    private double threshold = 0.5;
-    private int numLabels;
-    private String labelsPath;
-    public static final double[][] DEFAULT_PRIOR_BOXES = {{0.57273, 0.677385}, {1.87446, 2.06253}, {3.33843, 5.47434}, {7.88282, 3.52778}, {9.77052, 9.16828}};
-    @Builder.Default
-    private double[][] priors = DEFAULT_PRIOR_BOXES;
-    @Builder.Default
-    private int[] inputShape = {3, 608, 608};
+public class NormalizationConfig   implements Serializable {
+
+    private Map<String,String> config = new HashMap<>();
+
+    public void put(String key, String value) {
+        config.put(key, value);
+    }
+
 
 }
