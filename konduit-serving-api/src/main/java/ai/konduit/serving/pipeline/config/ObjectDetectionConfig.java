@@ -20,7 +20,7 @@
  *
  */
 
-package ai.konduit.serving.pipeline;
+package ai.konduit.serving.pipeline.config;
 
 import lombok.Builder;
 import lombok.Data;

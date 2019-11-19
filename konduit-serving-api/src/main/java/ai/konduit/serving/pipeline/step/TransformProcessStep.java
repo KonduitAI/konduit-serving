@@ -20,9 +20,10 @@
  *
  */
 
-package ai.konduit.serving.pipeline;
+package ai.konduit.serving.pipeline.step;
 
 import ai.konduit.serving.config.SchemaType;
+import ai.konduit.serving.pipeline.PipelineStep;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.datavec.api.transform.TransformProcess;

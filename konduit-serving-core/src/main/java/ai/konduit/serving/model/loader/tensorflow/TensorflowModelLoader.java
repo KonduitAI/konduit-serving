@@ -25,7 +25,7 @@ package ai.konduit.serving.model.loader.tensorflow;
 import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.model.TensorFlowConfig;
 import ai.konduit.serving.model.loader.ModelLoader;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelPipelineStep;
 import ai.konduit.serving.model.SavedModelConfig;
 import io.vertx.core.buffer.Buffer;
 import lombok.Builder;

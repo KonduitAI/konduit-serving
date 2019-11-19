@@ -25,7 +25,7 @@ package ai.konduit.serving.pipeline.steps;
 import ai.konduit.serving.executioner.inference.InferenceExecutioner;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.factory.InferenceExecutionerFactory;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelPipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.util.SchemaTypeUtils;

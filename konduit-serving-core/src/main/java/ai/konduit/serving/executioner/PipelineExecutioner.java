@@ -29,11 +29,15 @@ import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.model.TensorDataTypesConfig;
 import ai.konduit.serving.output.types.BatchOutput;
 import ai.konduit.serving.output.types.NDArrayOutput;
+import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.output.adapter.*;
 import ai.konduit.serving.pipeline.*;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
+import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ArrowUtils;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.util.SchemaTypeUtils;
@@ -170,9 +174,9 @@ public class PipelineExecutioner {
                 tensorDataTypesConfig = modelConfig.getTensorDataTypesConfig();
             }
 
-            if(pipelineStep instanceof ImageLoading) {
-                ImageLoading imageLoadingConfig = (ImageLoading) pipelineStep;
-                objectDetectionConfig = imageLoadingConfig.getObjectDetectionConfig();
+            if(pipelineStep instanceof ImageLoadingStep) {
+                ImageLoadingStep imageLoadingStepConfig = (ImageLoadingStep) pipelineStep;
+                objectDetectionConfig = imageLoadingStepConfig.getObjectDetectionConfig();
             }
 
 

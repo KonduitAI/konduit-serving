@@ -20,8 +20,9 @@
  *
  */
 
-package ai.konduit.serving.pipeline;
+package ai.konduit.serving.pipeline.step;
 
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

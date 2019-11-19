@@ -20,10 +20,11 @@
  *
  */
 
-package ai.konduit.serving.pipeline;
+package ai.konduit.serving.pipeline.step;
 
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.python.PythonVariables;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

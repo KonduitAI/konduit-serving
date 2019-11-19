@@ -26,8 +26,8 @@ package ai.konduit.serving.verticles.ndarray;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
-import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
@@ -110,7 +110,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
 
         TransformProcess transformProcess = transformProcessBuilder.build();
 
-        TransformProcessPipelineStep transformStep = new TransformProcessPipelineStep(
+        TransformProcessStep transformStep = new TransformProcessStep(
                 transformProcess, outputSchema);
 
         ServingConfig servingConfig = ServingConfig.builder()

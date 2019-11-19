@@ -27,8 +27,7 @@ import ai.konduit.serving.executioner.inference.MultiLayerNetworkInferenceExecut
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.loader.dl4j.mln.MultiLayerNetworkModelLoader;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
-import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.pipeline.step.ModelPipelineStep;
 
 import java.io.File;
 import java.util.Collections;

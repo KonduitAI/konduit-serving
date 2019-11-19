@@ -22,20 +22,20 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.ImageLoading;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
-import ai.konduit.serving.pipeline.PythonPipelineStep;
-import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
+import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import org.junit.Test;
 
 public class StepConfigClassTester {
 
     @Test
     public void testPipelineClasses() throws Exception {
-        Class.forName(new ImageLoading().pipelineStepClazz());
+        Class.forName(new ImageLoadingStep().pipelineStepClazz());
         Class.forName(new ModelPipelineStep().pipelineStepClazz());
-        Class.forName(new PythonPipelineStep().pipelineStepClazz());
-        Class.forName(new TransformProcessPipelineStep().pipelineStepClazz());
+        Class.forName(new PythonStep().pipelineStepClazz());
+        Class.forName(new TransformProcessStep().pipelineStepClazz());
 
     }
 

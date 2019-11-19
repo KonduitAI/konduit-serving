@@ -32,9 +32,9 @@ import  ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.verticles.VerticleConstants;
-import  ai.konduit.serving.pipeline.ModelPipelineStep;
-import  ai.konduit.serving.pipeline.PythonPipelineStep;
-import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy.VertxBufferNumpyInputAdapter;
@@ -215,10 +215,10 @@ public class PipelineRouteDefiner {
                     if(pipelineStep instanceof ModelPipelineStep) {
                         inputSchema = pipelineStep.inputSchemaForName("default");
                     }
-                    if(pipelineStep instanceof PythonPipelineStep) {
+                    if(pipelineStep instanceof PythonStep) {
                         inputSchema = pipelineStep.inputSchemaForName("default");
                     }
-                    if(pipelineStep instanceof TransformProcessPipelineStep) {
+                    if(pipelineStep instanceof TransformProcessStep) {
                         inputSchema = pipelineStep.inputSchemaForName("default");
                     }
                 }
@@ -229,10 +229,10 @@ public class PipelineRouteDefiner {
                     if(pipelineStep instanceof ModelPipelineStep) {
                         outputSchema = pipelineStep.outputSchemaForName("default");
                     }
-                    else if(pipelineStep instanceof PythonPipelineStep) {
+                    else if(pipelineStep instanceof PythonStep) {
                         outputSchema = pipelineStep.outputSchemaForName("default");
                     }
-                    if(pipelineStep instanceof TransformProcessPipelineStep) {
+                    if(pipelineStep instanceof TransformProcessStep) {
                         outputSchema = pipelineStep.inputSchemaForName("default");
                     }
                 }

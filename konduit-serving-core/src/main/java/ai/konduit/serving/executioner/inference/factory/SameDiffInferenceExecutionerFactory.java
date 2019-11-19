@@ -29,8 +29,7 @@ import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerC
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.model.SameDiffConfig;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
-import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.pipeline.step.ModelPipelineStep;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;

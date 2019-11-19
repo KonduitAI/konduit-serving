@@ -24,7 +24,7 @@ package ai.konduit.serving.executioner.inference.factory;
 
 import ai.konduit.serving.executioner.inference.InferenceExecutioner;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelPipelineStep;
 
 /**
  * Creates {@link InferenceExecutioner}

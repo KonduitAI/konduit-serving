@@ -28,8 +28,7 @@ import ai.konduit.serving.executioner.inference.PmmlInferenceExecutioner;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.PmmlConfig;
 import ai.konduit.serving.model.loader.pmml.PmmlModelLoader;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
-import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.pipeline.step.ModelPipelineStep;
 import org.jpmml.evaluator.ModelEvaluatorFactory;
 
 import java.io.File;

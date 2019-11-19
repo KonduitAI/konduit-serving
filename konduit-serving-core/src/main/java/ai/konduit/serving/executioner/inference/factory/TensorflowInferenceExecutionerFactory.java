@@ -27,7 +27,7 @@ import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.model.TensorFlowConfig;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelPipelineStep;
 import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.base.Preconditions;

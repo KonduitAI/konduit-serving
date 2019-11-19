@@ -20,7 +20,7 @@
  *
  */
 
-package ai.konduit.serving.pipeline;
+package ai.konduit.serving.pipeline.step;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
