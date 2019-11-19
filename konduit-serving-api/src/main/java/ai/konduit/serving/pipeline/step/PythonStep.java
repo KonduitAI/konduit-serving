@@ -38,55 +38,55 @@ import java.util.Map;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PythonPipelineStep extends PipelineStep {
+public class PythonStep extends PipelineStep {
 
     @Getter
     @Setter
     @Singular
     private Map<String, PythonConfig> pythonConfigs;
 
-    public PythonPipelineStep(PythonConfig pythonConfig) throws Exception {
+    public PythonStep(PythonConfig pythonConfig) throws Exception {
         this.step(pythonConfig);
     }
 
     @Override
-    public PythonPipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonPipelineStep) super.setInput("default", columnNames, types);
+    public PythonStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
+        return (PythonStep) super.setInput("default", columnNames, types);
     }
 
     @Override
-    public PythonPipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonPipelineStep) super.setOutput("default", columnNames, types);
+    public PythonStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
+        return (PythonStep) super.setOutput("default", columnNames, types);
     }
 
     @Override
-    public PythonPipelineStep setInput(Schema inputSchema) throws Exception {
-        return (PythonPipelineStep) super.setInput("default", inputSchema);
+    public PythonStep setInput(Schema inputSchema) throws Exception {
+        return (PythonStep) super.setInput("default", inputSchema);
     }
 
     @Override
-    public PythonPipelineStep setOutput(Schema outputSchema) throws Exception {
-        return (PythonPipelineStep) super.setOutput("default", outputSchema);
+    public PythonStep setOutput(Schema outputSchema) throws Exception {
+        return (PythonStep) super.setOutput("default", outputSchema);
     }
 
     @Override
-    public PythonPipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonPipelineStep) super.setInput(inputName, columnNames, types);
+    public PythonStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
+        return (PythonStep) super.setInput(inputName, columnNames, types);
     }
 
     @Override
-    public PythonPipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonPipelineStep) super.setOutput(outputName, columnNames, types);
+    public PythonStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
+        return (PythonStep) super.setOutput(outputName, columnNames, types);
     }
 
     @Override
-    public PythonPipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
-        return (PythonPipelineStep) super.setInput(inputName, inputSchema);
+    public PythonStep setInput(String inputName, Schema inputSchema) throws Exception {
+        return (PythonStep) super.setInput(inputName, inputSchema);
     }
 
     @Override
-    public PythonPipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
-        return (PythonPipelineStep) super.setOutput(outputName, outputSchema);
+    public PythonStep setOutput(String outputName, Schema outputSchema) throws Exception {
+        return (PythonStep) super.setOutput(outputName, outputSchema);
     }
 
     /**
@@ -100,8 +100,8 @@ public class PythonPipelineStep extends PipelineStep {
      * @param outputTypes output schema types
      * @throws Exception key error
      */
-    public PythonPipelineStep(PythonConfig pythonConfig, String[] inputColumnNames, SchemaType[] inputTypes,
-                              String[] outputColumnNames, SchemaType[] outputTypes) throws Exception {
+    public PythonStep(PythonConfig pythonConfig, String[] inputColumnNames, SchemaType[] inputTypes,
+                      String[] outputColumnNames, SchemaType[] outputTypes) throws Exception {
         String defaultName = "default";
         this.setInput(defaultName, inputColumnNames, inputTypes);
         this.setOutput(defaultName, outputColumnNames, outputTypes);
@@ -114,7 +114,7 @@ public class PythonPipelineStep extends PipelineStep {
      * @param pythonConfig Konduit PythonConfig
      * @throws Exception key error
      */
-    public PythonPipelineStep step(PythonConfig pythonConfig)
+    public PythonStep step(PythonConfig pythonConfig)
             throws Exception {
         this.step("default", pythonConfig);
 
@@ -130,8 +130,8 @@ public class PythonPipelineStep extends PipelineStep {
      * @return this python step
      * @throws Exception key error
      */
-    public PythonPipelineStep step(PythonConfig pythonConfig, Schema inputSchema,
-                                    Schema outputSchema) throws Exception {
+    public PythonStep step(PythonConfig pythonConfig, Schema inputSchema,
+                           Schema outputSchema) throws Exception {
         return this.step("default", pythonConfig, inputSchema, outputSchema);
     }
 
@@ -144,7 +144,7 @@ public class PythonPipelineStep extends PipelineStep {
      * @param inputTypes input schema types
      * @throws Exception key error
      */
-    public PythonPipelineStep(PythonConfig pythonConfig, String[] inputColumnNames, SchemaType[] inputTypes)
+    public PythonStep(PythonConfig pythonConfig, String[] inputColumnNames, SchemaType[] inputTypes)
             throws Exception {
         this(pythonConfig, inputColumnNames, inputTypes, new String[]{}, new SchemaType[]{});
     }
@@ -159,8 +159,8 @@ public class PythonPipelineStep extends PipelineStep {
      * @param pythonConfig Konduit PythonConfig
      * @throws Exception key error
      */
-    public PythonPipelineStep(Schema inputSchema, Schema outputSchema,
-                              PythonConfig pythonConfig) throws Exception {
+    public PythonStep(Schema inputSchema, Schema outputSchema,
+                      PythonConfig pythonConfig) throws Exception {
         String defaultName = "default";
         this.setInput(defaultName, inputSchema);
         this.setOutput(defaultName, outputSchema);
@@ -178,10 +178,10 @@ public class PythonPipelineStep extends PipelineStep {
      * @return this python step
      * @throws Exception key error
      */
-    public  PythonPipelineStep step(String stepName,
-                                    PythonConfig pythonConfig,
-                                    Schema inputSchema,
-                                    Schema outputSchema) throws Exception {
+    public PythonStep step(String stepName,
+                           PythonConfig pythonConfig,
+                           Schema inputSchema,
+                           Schema outputSchema) throws Exception {
         this.setInput(stepName, inputSchema);
         this.setOutput(stepName, outputSchema);
         this.pythonConfig(stepName, pythonConfig);
@@ -200,8 +200,8 @@ public class PythonPipelineStep extends PipelineStep {
      * @param outputTypes output schema types
      * @throws Exception key error
      */
-    public PythonPipelineStep step(String stepName, PythonConfig pythonConfig, String[] inputColumnNames,
-                                   SchemaType[] inputTypes, String[] outputColumnNames, SchemaType[] outputTypes)
+    public PythonStep step(String stepName, PythonConfig pythonConfig, String[] inputColumnNames,
+                           SchemaType[] inputTypes, String[] outputColumnNames, SchemaType[] outputTypes)
             throws Exception {
         this.setInput(stepName, inputColumnNames, inputTypes);
         this.setOutput(stepName, outputColumnNames, outputTypes);
@@ -220,8 +220,8 @@ public class PythonPipelineStep extends PipelineStep {
 
      * @throws Exception key error
      */
-    public PythonPipelineStep step(String stepName, PythonConfig pythonConfig, String[] inputColumnNames,
-                                   SchemaType[] inputTypes)
+    public PythonStep step(String stepName, PythonConfig pythonConfig, String[] inputColumnNames,
+                           SchemaType[] inputTypes)
             throws Exception {
         this.setInput(stepName, inputColumnNames, inputTypes);
         this.setOutput(stepName, new String[]{}, new SchemaType[]{});
@@ -236,7 +236,7 @@ public class PythonPipelineStep extends PipelineStep {
      * @param pythonConfig Konduit {@link PythonConfig}
      * @return this Python step
      */
-    public PythonPipelineStep pythonConfig(PythonConfig pythonConfig) {
+    public PythonStep pythonConfig(PythonConfig pythonConfig) {
         if (pythonConfigs == null) {
             pythonConfigs = new HashMap<>();
         }
@@ -251,7 +251,7 @@ public class PythonPipelineStep extends PipelineStep {
      * @param pythonConfig Konduit PythonConfig
      * @return this Python step
      */
-    public PythonPipelineStep pythonConfig(String inputName, PythonConfig pythonConfig) {
+    public PythonStep pythonConfig(String inputName, PythonConfig pythonConfig) {
         if (pythonConfigs == null) {
             pythonConfigs = new HashMap<>();
         }
@@ -266,7 +266,7 @@ public class PythonPipelineStep extends PipelineStep {
      * @param pythonConfig {@link PythonConfig}
      * @throws Exception key error
      */
-    public PythonPipelineStep step(String stepName, PythonConfig pythonConfig)
+    public PythonStep step(String stepName, PythonConfig pythonConfig)
             throws Exception {
 
         Map<String, String> pythonInputs = pythonConfig.getPythonInputs(),

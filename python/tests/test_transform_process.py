@@ -25,7 +25,7 @@ def test_build_tp():
     TransformProcess.fromJson(StringJava(tp_json))
     json.dumps(tp_json)
     as_python_json = json.loads(tp_json)
-    transform_process = TransformProcessPipelineStep()\
+    transform_process = TransformProcessStep()\
         .set_input(None, ['first'], ['String'])\
         .set_output(None, ['first'], ['String'])\
         .transform_process(as_python_json)

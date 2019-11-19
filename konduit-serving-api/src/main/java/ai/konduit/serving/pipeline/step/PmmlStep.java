@@ -26,20 +26,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-/**
- * See: ai.konduit.serving.pipeline.steps.JsonExpanderTransformStepRunner
- * for associated documentation.
- *
- *
- */
 @SuperBuilder
-@Data
 @NoArgsConstructor
-public class JsonExpanderTransform extends PipelineStep {
-
+@Data
+public class PmmlStep extends ModelPipelineStep {
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.steps.JsonExpanderTransformStepRunner";
+        return "ai.konduit.serving.pipeline.PmmlInferenceExecutionerPipelineStepRunner";
     }
 }

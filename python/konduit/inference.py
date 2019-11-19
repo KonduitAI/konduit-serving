@@ -117,8 +117,8 @@ def transform_process_func(self, transform_process, input_name="default"):
     return self
 
 
-TransformProcessPipelineStep.step = step_func
-TransformProcessPipelineStep.transform_process = transform_process_func
+TransformProcessStep.step = step_func
+TransformProcessStep.transform_process = transform_process_func
 
 
 def python_step_func(self, python_config, input_name="default", input_schema=None, input_column_names=None,
@@ -166,5 +166,5 @@ def konduit_type_mapping(name):
         return map.get(name)
 
 
-PythonPipelineStep.step = python_step_func
-PythonPipelineStep.python_config = python_config_func
+PythonStep.step = python_step_func
+PythonStep.python_config = python_config_func

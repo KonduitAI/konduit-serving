@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.pipeline;
 
+import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.datavec.image.transform.ImageTransformProcess;
@@ -32,7 +33,7 @@ import java.util.Map;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-public class ImageLoading extends PipelineStep implements Serializable {
+public class ImageLoadingStep extends PipelineStep implements Serializable {
 
     private int originalImageHeight;
     private int originalImageWidth;

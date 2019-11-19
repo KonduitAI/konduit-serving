@@ -40,9 +40,9 @@ def test_python_serde():
                                    output_data_type='NUMPY',
                                    log_timings=True)
 
-    python_pipeline_step = PythonPipelineStep(input_names=['default'],
-                                              output_names=['default'],
-                                              python_configs={'default': python_configuration})
+    python_pipeline_step = PythonStep(input_names=['default'],
+                                      output_names=['default'],
+                                      python_configs={'default': python_configuration})
 
     inference_config = InferenceConfiguration(serving_config=serving_config,
                                               pipeline_steps=[python_pipeline_step])

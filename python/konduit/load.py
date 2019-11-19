@@ -162,7 +162,7 @@ def get_python_step(step_config):
     :return: konduit.inference.PythonPipelineStep instance.
     """
     python_config = PythonConfig(**step_config)
-    step = PythonPipelineStep().step(python_config)
+    step = PythonStep().step(python_config)
     return step
 
 
@@ -192,7 +192,7 @@ def get_model_step(step_config, step_type):
         )
     step_config['model_config'] = model_config
     step_config = extract_parallel_inference(step_config)
-    step = ModelPipelineStep(**step_config)
+    step = ModelStep(**step_config)
     return step
 
 

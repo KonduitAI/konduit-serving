@@ -25,15 +25,11 @@ package ai.konduit.serving.pipeline;
 import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.pipeline.config.NormalizationConfig;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
-
-import java.util.HashMap;
 
 @SuperBuilder
 @Data
