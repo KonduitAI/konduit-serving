@@ -7,7 +7,7 @@ The following is a quick discussion of the test files for Konduit's Python SDK.
 
 Checks if a server configured with a TensorFlow model can be started, then stops it. 
 
-Starts a server configured with an [InferenceConfiguration](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L2020-L2063) with a single [ModelPipelineStep](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L1426-L1575) built with a model trained in TensorFlow, configured using the [TensorFlowConfig](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L663-L736) class. 
+Starts a server configured with an [InferenceConfiguration](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L2020-L2063) with a single [ModelStep](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L1426-L1575) built with a model trained in TensorFlow, configured using the [TensorFlowConfig](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L663-L736) class. 
 
 This server is configured to accept input data type 'NUMPY' and output data type 'NUMPY'. 
 

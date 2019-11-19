@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.model.SameDiffConfig;
-import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
@@ -95,7 +95,7 @@ public class SameDiffVerticleNumpyTest extends BaseVerticleTest {
                                 .build()
                 )                .build();
         
-        ModelPipelineStep config = ModelPipelineStep.builder()
+        ModelStep config = ModelStep.builder()
                 .modelConfig(modelConfig)
                 .inputNames(Arrays.asList("x","y"))
                 .outputNames(Arrays.asList("output"))

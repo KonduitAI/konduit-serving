@@ -27,7 +27,7 @@ import ai.konduit.serving.model.*;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
-import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.train.TrainUtils;
 import org.deeplearning4j.nn.graph.ComputationGraph;
@@ -54,7 +54,7 @@ public class InferenceExecutionerFactoryTests {
                         .inputDataType("default", TensorDataType.INT32).build())
                 .configProtoPath(classPathResource.getFile().getAbsolutePath()).build();
         
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
+        ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
                 .modelConfig(tensorFlowConfig)
@@ -97,7 +97,7 @@ public class InferenceExecutionerFactoryTests {
                 .httpPort(1139)
                 .build();
 
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
+        ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
                 .modelConfig(modelConfig)
@@ -124,7 +124,7 @@ public class InferenceExecutionerFactoryTests {
                         .inputDataType("default", TensorDataType.INT32).build())
                 .build();
 
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
+        ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
                 .modelConfig(tensorFlowConfig)
@@ -156,7 +156,7 @@ public class InferenceExecutionerFactoryTests {
                 .httpPort(1139)
                 .build();
 
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
+        ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
                 .modelConfig(modelConfig)
@@ -186,7 +186,7 @@ public class InferenceExecutionerFactoryTests {
                 .httpPort(1139)
                 .build();
         
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
+        ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
                 .modelConfig(modelConfig)

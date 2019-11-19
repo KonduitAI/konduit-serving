@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.output.types.ClassifierOutput;
-import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
@@ -106,7 +106,7 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
         
-        ModelPipelineStep modelPipelineStep = new ModelPipelineStep(modelConfig)
+        ModelStep modelPipelineStep = new ModelStep(modelConfig)
                 .setInput(inputSchema).setOutput(outputSchema);
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()

@@ -29,7 +29,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @Data
-public class PmmlStep extends ModelPipelineStep {
+public class PmmlStep extends ModelStep {
 
     @Override
     public String pipelineStepClazz() {

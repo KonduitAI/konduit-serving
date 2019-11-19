@@ -24,7 +24,7 @@ package ai.konduit.serving.executioner;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
-import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
@@ -72,7 +72,7 @@ public class PipelineExecutionerTests {
                 .httpPort(port)
                 .build();
         
-        ModelPipelineStep modelStepConfig = ModelPipelineStep.builder()
+        ModelStep modelStepConfig = ModelStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)
                 .inputNames(Arrays.asList(new String[]{"image_tensor"}))
                 .outputNames(Arrays.asList(new String[]{"detection_classes"}))
@@ -128,7 +128,7 @@ public class PipelineExecutionerTests {
                  .modelConfigType(ModelConfigType.tensorFlow(path))
                 .build();
         
-        ModelPipelineStep modelStepConfig = ModelPipelineStep.builder()
+        ModelStep modelStepConfig = ModelStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)
                 .modelConfig(modelConfig)
                 .inputNames(Arrays.asList(new String[]{"image_tensor"}))

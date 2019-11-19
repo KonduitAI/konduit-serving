@@ -59,7 +59,7 @@ such as labels in a classification example.
 
 For instance, if you want to run arbitrary Python code for pre-processing purposes,
 you can use a`PythonPipelineStep`. To perform inference on a (mix of) TensorFlow,
-Keras, DL4J or PMML models, use `ModelPipelineStep`. Konduit Serving also contains
+Keras, DL4J or PMML models, use `ModelStep`. Konduit Serving also contains
 functionality for other preprocessing tasks, such as DataVec transform processes,
 or image transforms.
 

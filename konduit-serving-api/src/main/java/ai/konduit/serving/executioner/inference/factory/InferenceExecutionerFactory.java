@@ -24,7 +24,7 @@ package ai.konduit.serving.executioner.inference.factory;
 
 import ai.konduit.serving.executioner.inference.InferenceExecutioner;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
-import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 
 /**
  * Creates {@link InferenceExecutioner}
@@ -43,6 +43,6 @@ public interface InferenceExecutionerFactory {
      * @return the initialized {@link InitializedInferenceExecutionerConfig}
      * @throws Exception in an initialization error happens
      */
-    InitializedInferenceExecutionerConfig create(ModelPipelineStep modelPipelineStepConfig) throws Exception;
+    InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception;
 
 }

@@ -36,7 +36,7 @@ import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.output.adapter.*;
 import ai.konduit.serving.pipeline.*;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
-import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ArrowUtils;
 import ai.konduit.serving.util.ObjectMapperHolder;
@@ -169,7 +169,7 @@ public class PipelineExecutioner {
             }
 
             if(pipelineStepRunner instanceof InferenceExecutionerPipelineStepRunner) {
-                ModelPipelineStep modelPipelineStepConfig = (ModelPipelineStep) pipelineStep;
+                ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
                 modelConfig = modelPipelineStepConfig.getModelConfig();
                 tensorDataTypesConfig = modelConfig.getTensorDataTypesConfig();
             }

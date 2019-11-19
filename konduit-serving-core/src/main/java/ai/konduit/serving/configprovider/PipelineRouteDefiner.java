@@ -32,7 +32,7 @@ import  ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.verticles.VerticleConstants;
-import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.config.Output;
@@ -212,7 +212,7 @@ public class PipelineRouteDefiner {
             PredictionType outputAdapterType = PredictionType.valueOf(ctx.pathParam("operation").toUpperCase());
             if(inputSchema == null) {
                 for(PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
-                    if(pipelineStep instanceof ModelPipelineStep) {
+                    if(pipelineStep instanceof ModelStep) {
                         inputSchema = pipelineStep.inputSchemaForName("default");
                     }
                     if(pipelineStep instanceof PythonStep) {
@@ -226,7 +226,7 @@ public class PipelineRouteDefiner {
 
             if(outputSchema == null) {
                 for(PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
-                    if(pipelineStep instanceof ModelPipelineStep) {
+                    if(pipelineStep instanceof ModelStep) {
                         outputSchema = pipelineStep.outputSchemaForName("default");
                     }
                     else if(pipelineStep instanceof PythonStep) {

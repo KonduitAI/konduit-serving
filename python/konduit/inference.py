@@ -3,11 +3,11 @@ from jnius import autoclass
 
 try:
     SchemaTypeUtils = autoclass("ai.konduit.serving.util.SchemaTypeUtils")
-except:
+except Exception as e:
     raise Exception("We couldn't initialize the Java classes used by Konduit. "
                     "Make sure to have a konduit.jar available on your PATH, "
                     "for instance by setting the environment variable KONDUIT_JAR_PATH "
-                    "to point to such a JAR.")
+                    "to point to such a JAR.\n", e)
 
 
 def set_input_columns_func(self, column_names, input_name="default"):
@@ -124,8 +124,8 @@ TransformProcessStep.transform_process = transform_process_func
 def python_step_func(self, python_config, input_name="default", input_schema=None, input_column_names=None,
                      input_types=None, output_schema=None, output_column_names=None, output_types=None):
     # if nothing else is defined, we can derive all properties just from the Python configuration
-    if (input_schema is None and input_column_names is None and input_types is None \
-        and output_schema is None and output_column_names is None and output_types is None):
+    if (input_schema is None and input_column_names is None and input_types is None
+            and output_schema is None and output_column_names is None and output_types is None):
         inputs = python_config._get_python_inputs()
         outputs = python_config._get_python_outputs()
         input_column_names = list(inputs.keys())
@@ -153,17 +153,17 @@ def python_config_func(self, python_config, input_name="default"):
 
 
 def konduit_type_mapping(name):
-    map = {
+    type_map = {
         "BOOL": "Boolean",
         "STR": "String",
         "INT": "Integer",
         "FLOAT": "Float",
         "NDARRAY": "NDArray"
     }
-    if name not in map.keys():
+    if name not in type_map.keys():
         raise Exception("Can't convert input type " + str(name))
     else:
-        return map.get(name)
+        return type_map.get(name)
 
 
 PythonStep.step = python_step_func

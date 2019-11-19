@@ -72,7 +72,7 @@ public class CodeGen {
                 NormalizationConfig.class,
                 PythonStep.class,
                 TransformProcessStep.class,
-                ModelPipelineStep.class,
+                ModelStep.class,
                 ArrayConcatenationStep.class,
                 JsonExpanderTransformStep.class,
                 ImageLoadingStep.class,

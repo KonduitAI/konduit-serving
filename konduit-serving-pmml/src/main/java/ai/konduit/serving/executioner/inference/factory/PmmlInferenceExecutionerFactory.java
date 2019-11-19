@@ -28,7 +28,7 @@ import ai.konduit.serving.executioner.inference.PmmlInferenceExecutioner;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.PmmlConfig;
 import ai.konduit.serving.model.loader.pmml.PmmlModelLoader;
-import ai.konduit.serving.pipeline.step.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import org.jpmml.evaluator.ModelEvaluatorFactory;
 
 import java.io.File;
@@ -36,7 +36,7 @@ import java.io.File;
 public class PmmlInferenceExecutionerFactory implements InferenceExecutionerFactory {
 
     @Override
-    public InitializedInferenceExecutionerConfig create(ModelPipelineStep modelPipelineStepConfig) throws Exception {
+    public InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception {
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
         ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 

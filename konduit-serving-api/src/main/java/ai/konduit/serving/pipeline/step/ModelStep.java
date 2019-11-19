@@ -34,7 +34,7 @@ import org.datavec.api.transform.schema.Schema;
 
 @SuperBuilder
 @Data
-public class ModelPipelineStep extends PipelineStep {
+public class ModelStep extends PipelineStep {
 
     private ModelConfig modelConfig;
 
@@ -43,50 +43,50 @@ public class ModelPipelineStep extends PipelineStep {
 
     private NormalizationConfig normalizationConfig;
 
-    public ModelPipelineStep() {}
+    public ModelStep() {}
 
-    public ModelPipelineStep(ModelConfig modelConfig) {
+    public ModelStep(ModelConfig modelConfig) {
         this.modelConfig = modelConfig;
     }
 
     @Override
-    public ModelPipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (ModelPipelineStep) super.setInput("default", columnNames, types);
+    public ModelStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
+        return (ModelStep) super.setInput("default", columnNames, types);
     }
 
     @Override
-    public ModelPipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (ModelPipelineStep) super.setOutput("default", columnNames, types);
+    public ModelStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
+        return (ModelStep) super.setOutput("default", columnNames, types);
     }
 
     @Override
-    public ModelPipelineStep setInput(Schema inputSchema) throws Exception {
-        return (ModelPipelineStep) super.setInput("default", inputSchema);
+    public ModelStep setInput(Schema inputSchema) throws Exception {
+        return (ModelStep) super.setInput("default", inputSchema);
     }
 
     @Override
-    public ModelPipelineStep setOutput(Schema outputSchema) throws Exception {
-        return (ModelPipelineStep) super.setOutput("default", outputSchema);
+    public ModelStep setOutput(Schema outputSchema) throws Exception {
+        return (ModelStep) super.setOutput("default", outputSchema);
     }
 
     @Override
-    public ModelPipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (ModelPipelineStep) super.setInput(inputName, columnNames, types);
+    public ModelStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
+        return (ModelStep) super.setInput(inputName, columnNames, types);
     }
 
     @Override
-    public ModelPipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (ModelPipelineStep) super.setOutput(outputName, columnNames, types);
+    public ModelStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
+        return (ModelStep) super.setOutput(outputName, columnNames, types);
     }
 
     @Override
-    public ModelPipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
-        return (ModelPipelineStep) super.setInput(inputName, inputSchema);
+    public ModelStep setInput(String inputName, Schema inputSchema) throws Exception {
+        return (ModelStep) super.setInput(inputName, inputSchema);
     }
 
     @Override
-    public ModelPipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
-        return (ModelPipelineStep) super.setOutput(outputName, outputSchema);
+    public ModelStep setOutput(String outputName, Schema outputSchema) throws Exception {
+        return (ModelStep) super.setOutput(outputName, outputSchema);
     }
 
     @Override

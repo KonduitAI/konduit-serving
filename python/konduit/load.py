@@ -51,8 +51,8 @@ def pop_pid(file_path):
             f.seek(0)
             f.write(json.dumps(previous))
             f.truncate()
-        except:
-            logging.warning("Process ID not found, file is empty.")
+        except Exception as e:
+            logging.warning("Process ID not found, file is empty.", e)
     return pid
 
 
@@ -148,7 +148,7 @@ def get_step(step_config):
     step_type = step_config.pop('type')
     if step_type == 'PYTHON':
         step = get_python_step(step_config)
-    elif step_type in MODEL_TYPES:  # TODO other types
+    elif step_type in MODEL_TYPES:
         step = get_model_step(step_config, step_type)
     else:
         raise Exception('Step type of type ' + step_type + ' currently not supported.')
@@ -167,11 +167,11 @@ def get_python_step(step_config):
 
 
 def get_model_step(step_config, step_type):
-    """Get a ModelPipelineStep from a configuration object
+    """Get a ModelStep from a configuration object
 
     :param step_config: python dictionary with properties to create a PipelineStep
     :param step_type: type of the step (TENSORFLOW, KERAS, COMPUTATION_GRAPH, MULTI_LAYER_NETWORK, PMML or SAMEDIFF)
-    :return: konduit.inference.ModelPipelineStep instance.
+    :return: konduit.inference.ModelStep instance.
     """
     model_config_type = ModelConfigType(
         model_type=step_type,
