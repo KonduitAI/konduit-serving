@@ -23,7 +23,7 @@
 package ai.konduit.serving.executioner.inference;
 
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
-import ai.konduit.serving.pipeline.steps.TransformProcessStepRunner;
+import ai.konduit.serving.pipeline.steps.TransformProcessPipelineStepRunner;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import org.datavec.api.records.Record;
@@ -67,7 +67,7 @@ public class PipelineTests {
                 .transformProcess("default", transformProcess)
                 .build();
         
-        TransformProcessStepRunner step = new TransformProcessStepRunner(config);
+        TransformProcessPipelineStepRunner step = new TransformProcessPipelineStepRunner(config);
         
         List<Writable> ret = new ArrayList<>();
         ret.add(new Text("appended"));
@@ -103,7 +103,7 @@ public class PipelineTests {
                 .transformProcess("default", transformProcess)
                 .build();
         
-        TransformProcessStepRunner step = new TransformProcessStepRunner(config);
+        TransformProcessPipelineStepRunner step = new TransformProcessPipelineStepRunner(config);
         
         List<Writable> ret = new ArrayList<>();
         ret.add(new NDArrayWritable(Nd4j.scalar(1.0)));

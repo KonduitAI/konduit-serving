@@ -107,9 +107,8 @@ public class PipelineRouteDefiner {
      * Everything implementing the {@link MeterBinder}
      * interface can be configured here.
      * Of note are a few specific ones for machine learning including:
-     * {@link NativeMetrics} and {@link ai.konduit.serving.gpu.GpuMetrics}
-     * which cover off heap memory allocation and gpu utilization among other things.
-     *
+     * {@link NativeMetrics}
+     * which covers off heap memory allocation among other things.
      *
      * Health checks are automatically added at /healthcheck endpoints
      * @see <a href="https://vertx.io/docs/vertx-health-check/java/">Vertx health checks</a>

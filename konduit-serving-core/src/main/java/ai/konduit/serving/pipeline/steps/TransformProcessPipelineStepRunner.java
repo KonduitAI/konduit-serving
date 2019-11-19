@@ -45,11 +45,11 @@ import java.util.Map;
  *
  * @author Adam Gibson
  */
-public class TransformProcessStepRunner extends BasePipelineStepRunner {
+public class TransformProcessPipelineStepRunner extends BasePipelineStepRunner {
 
     private Map<String,TransformProcess> transformProcesses;
 
-    public TransformProcessStepRunner(PipelineStep pipelineStep) {
+    public TransformProcessPipelineStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
         TransformProcessStep transformProcessStepConfig = (TransformProcessStep) pipelineStep;
         this.transformProcesses = transformProcessStepConfig.getTransformProcesses();
