@@ -156,10 +156,10 @@ def get_step(step_config):
 
 
 def get_python_step(step_config):
-    """Get a PythonPipelineStep from a configuration object
+    """Get a PythonStep from a configuration object
 
     :param step_config: python dictionary with properties to create a PipelineStep
-    :return: konduit.inference.PythonPipelineStep instance.
+    :return: konduit.inference.PythonStep instance.
     """
     python_config = PythonConfig(**step_config)
     step = PythonStep().step(python_config)

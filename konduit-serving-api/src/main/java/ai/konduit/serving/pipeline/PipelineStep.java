@@ -56,7 +56,6 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @JsonSubTypes({
         @JsonSubTypes.Type(value= ModelStep.class, name = "ModelStep"),
         @JsonSubTypes.Type(value= PythonStep.class, name = "PythonStep"),
-        @JsonSubTypes.Type(value= ModelStep.class, name = "ModelStep"),
         @JsonSubTypes.Type(value= PmmlStep.class, name = "PmmlStep"),
         @JsonSubTypes.Type(value= TransformProcessStep.class, name = "TransformProcessStep"),
         @JsonSubTypes.Type(value= CustomPipelineStep.class, name = "CustomPipelineStep"),

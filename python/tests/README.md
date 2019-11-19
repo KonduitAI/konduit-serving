@@ -17,11 +17,11 @@ Possible data types for the server configuration are listed in [`konduit.inferen
 
 ### [`test_transform_process.py`](test_transform_process.py)
 
-Checks if a [TransformProcessPipelineStep](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L1304-L1423) can be performed. 
+Checks if a [TransformProcessStep](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L1304-L1423) can be performed. 
 
-This tests builds [InferenceConfiguration](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L2020-L2063) with [TransformProcessPipelineStep](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L1304-L1423). 
+This tests builds [InferenceConfiguration](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L2020-L2063) with [TransformProcessStep](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L1304-L1423). 
 
-The transform process is defined by [TransformProcessBuilder](https://github.com/eclipse/deeplearning4j/blob/master/datavec/datavec-api/src/main/java/org/datavec/api/transform/TransformProcess.java#L611) (the Builder subclass of [TransformProcess](https://deeplearning4j.org/docs/latest/datavec-transforms) in DataVec), written to a JSON file and loaded again for use in a [TransformProcessPipelineStep](../konduit/inference.py#L1400-L1573). [TransformProcess](https://deeplearning4j.org/docs/latest/datavec-transforms) in turn requires defining a [Schema](https://deeplearning4j.org/docs/latest/datavec-schema). 
+The transform process is defined by [TransformProcessBuilder](https://github.com/eclipse/deeplearning4j/blob/master/datavec/datavec-api/src/main/java/org/datavec/api/transform/TransformProcess.java#L611) (the Builder subclass of [TransformProcess](https://deeplearning4j.org/docs/latest/datavec-transforms) in DataVec), written to a JSON file and loaded again for use in a [TransformProcessStep](../konduit/inference.py#L1400-L1573). [TransformProcess](https://deeplearning4j.org/docs/latest/datavec-transforms) in turn requires defining a [Schema](https://deeplearning4j.org/docs/latest/datavec-schema). 
 
 Given a JSON file as input, the Client sends a query to the Server and prints the predicted output. 
 

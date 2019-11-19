@@ -154,6 +154,6 @@ public class TransformProcessStep extends PipelineStep {
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.steps.TransformProcessPipelineStepRunner";
+        return "ai.konduit.serving.pipeline.steps.TransformProcessStepRunner";
     }
 }

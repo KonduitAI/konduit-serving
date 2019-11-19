@@ -59,6 +59,6 @@ public class ImageLoadingStep extends PipelineStep implements Serializable {
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.steps.ImageTransformProcessPipelineStepRunner";
+        return "ai.konduit.serving.pipeline.steps.ImageTransformProcessStepRunner";
     }
 }
