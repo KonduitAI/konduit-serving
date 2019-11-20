@@ -25,6 +25,13 @@ def test_yaml_minimal_loading():
     server.stop()
 
 
+def test_json_minimal_loading():
+    file_path = 'yaml/konduit_minimal.json'
+    server = server_from_file(file_path, use_yaml=False)
+    client = client_from_file(file_path, use_yaml=False)
+    server.stop()
+
+
 def test_keras_serving():
     file_path = 'yaml/konduit_keras.yaml'
     server = server_from_file(file_path=file_path)
