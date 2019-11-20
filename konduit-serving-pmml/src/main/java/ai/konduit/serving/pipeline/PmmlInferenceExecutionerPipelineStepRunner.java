@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.pipeline;
 
+import ai.konduit.serving.pipeline.step.PmmlStep;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.util.WritableValueRetriever;
 import ai.konduit.serving.executioner.inference.PmmlInferenceExecutioner;
@@ -46,23 +47,23 @@ public class PmmlInferenceExecutionerPipelineStepRunner extends BasePipelineStep
 
     public PmmlInferenceExecutionerPipelineStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
-        PmmlPipelineStep pmmlPipelineStepConfig = (PmmlPipelineStep) pipelineStep;
+        PmmlStep pmmlStepConfig = (PmmlStep) pipelineStep;
         PmmlInferenceExecutionerFactory inferenceExecutionerFactory = new PmmlInferenceExecutionerFactory();
         try {
-            pmmlInferenceExecutioner = (PmmlInferenceExecutioner) inferenceExecutionerFactory.create(pmmlPipelineStepConfig).getInferenceExecutioner();
+            pmmlInferenceExecutioner = (PmmlInferenceExecutioner) inferenceExecutionerFactory.create(pmmlStepConfig).getInferenceExecutioner();
             evaluator = pmmlInferenceExecutioner.model();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Preconditions.checkState(pmmlPipelineStepConfig.getOutputSchemas() != null &&
-                !pmmlPipelineStepConfig.getOutputSchemas().isEmpty(),"No output schemas found!");
-        Preconditions.checkState(pmmlPipelineStepConfig.getInputSchemas() != null &&
-                !pmmlPipelineStepConfig.getInputSchemas().isEmpty(),"No input schemas found!");
-        Preconditions.checkState(pmmlPipelineStepConfig.getInputColumnNames() != null &&
-                !pmmlPipelineStepConfig.getInputColumnNames().isEmpty(),"No input column names  found!");
-        Preconditions.checkState(pmmlPipelineStepConfig.getOutputColumnNames() != null &&
-                !pmmlPipelineStepConfig.getOutputColumnNames().isEmpty(),"No output names found!");
+        Preconditions.checkState(pmmlStepConfig.getOutputSchemas() != null &&
+                !pmmlStepConfig.getOutputSchemas().isEmpty(),"No output schemas found!");
+        Preconditions.checkState(pmmlStepConfig.getInputSchemas() != null &&
+                !pmmlStepConfig.getInputSchemas().isEmpty(),"No input schemas found!");
+        Preconditions.checkState(pmmlStepConfig.getInputColumnNames() != null &&
+                !pmmlStepConfig.getInputColumnNames().isEmpty(),"No input column names  found!");
+        Preconditions.checkState(pmmlStepConfig.getOutputColumnNames() != null &&
+                !pmmlStepConfig.getOutputColumnNames().isEmpty(),"No output names found!");
 
 
     }

@@ -20,8 +20,10 @@
  *
  */
 
-package ai.konduit.serving.pipeline;
+package ai.konduit.serving.pipeline.step;
 
+import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.datavec.image.transform.ImageTransformProcess;
@@ -32,7 +34,7 @@ import java.util.Map;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-public class ImageLoading extends PipelineStep implements Serializable {
+public class ImageLoadingStep extends PipelineStep implements Serializable {
 
     private int originalImageHeight;
     private int originalImageWidth;
@@ -57,6 +59,6 @@ public class ImageLoading extends PipelineStep implements Serializable {
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.steps.ImageTransformProcessPipelineStepRunner";
+        return "ai.konduit.serving.pipeline.steps.ImageTransformProcessStepRunner";
     }
 }

@@ -20,26 +20,20 @@
  *
  */
 
-package ai.konduit.serving.pipeline;
+package ai.konduit.serving.pipeline.step;
 
+import ai.konduit.serving.pipeline.PipelineStep;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
-/**
- * See: ai.konduit.serving.pipeline.steps.JsonExpanderTransformStepRunner
- * for associated documentation.
- *
- *
- */
-@SuperBuilder
 @Data
-@NoArgsConstructor
-public class JsonExpanderTransform extends PipelineStep {
+@Builder
+public class CustomPipelineStep extends PipelineStep {
 
+    private String customUdfClazz;
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.steps.JsonExpanderTransformStepRunner";
+        return "ai.konduit.serving.pipeline.step.CustomPipelineStepRunner";
     }
 }

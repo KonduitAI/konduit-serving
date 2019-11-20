@@ -1,6 +1,6 @@
 package ai.konduit.serving.basic;
 
-import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
+import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import org.datavec.api.transform.MathFunction;
 import org.datavec.api.transform.MathOp;
 import org.datavec.api.transform.TransformProcess;
@@ -48,14 +48,14 @@ public class BasicConfiguration {
         /*
          * Now we'll create the pipeline step for the transform process
          */
-        TransformProcessPipelineStep transformProcessPipelineStep = new TransformProcessPipelineStep()
+        TransformProcessStep transformProcessStep = new TransformProcessStep()
                 .step("input1", transformProcess, outputSchema)
                 .step("input2", transformProcess, outputSchema);
 
         /*
          * Now creating a test record input
          */
-        Writable[][] output = transformProcessPipelineStep.getRunner().transform(
+        Writable[][] output = transformProcessStep.getRunner().transform(
                 new Object[] {
                         Nd4j.rand(10, 10).muli(100),
                         Nd4j.rand(5, 5).muli(100),

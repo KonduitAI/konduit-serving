@@ -27,8 +27,7 @@ import ai.konduit.serving.executioner.inference.MultiComputationGraphInferenceEx
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.loader.dl4j.cg.ComputationGraphModelLoader;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
-import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import lombok.extern.slf4j.Slf4j;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 
@@ -39,7 +38,7 @@ import java.util.List;
 public class ComputationGraphInferenceExecutionerFactory implements InferenceExecutionerFactory {
 
     @Override
-    public InitializedInferenceExecutionerConfig create(ModelPipelineStep modelPipelineStepConfig) throws Exception {
+    public InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception {
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
         ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 

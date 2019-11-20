@@ -20,29 +20,27 @@
  *
  */
 
-package ai.konduit.serving.pipeline;
+package ai.konduit.serving.pipeline.step;
 
-import lombok.AllArgsConstructor;
+import ai.konduit.serving.pipeline.PipelineStep;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+/**
+ * See: ai.konduit.serving.pipeline.steps.JsonExpanderTransformStepRunner
+ * for associated documentation.
+ *
+ *
+ */
 @SuperBuilder
-public class NormalizationConfig   implements Serializable {
+@Data
+@NoArgsConstructor
+public class JsonExpanderTransformStep extends PipelineStep {
 
-    private Map<String,String> config = new HashMap<>();
 
-    public void put(String key, String value) {
-        config.put(key, value);
+    @Override
+    public String pipelineStepClazz() {
+        return "ai.konduit.serving.pipeline.steps.JsonExpanderTransformStepRunner";
     }
-
-
 }

@@ -22,7 +22,7 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.CustomPipelineStep;
+import ai.konduit.serving.pipeline.step.CustomPipelineStep;
 import ai.konduit.serving.pipeline.CustomPipelineStepUDF;
 import ai.konduit.serving.pipeline.PipelineStep;
 import org.datavec.api.records.Record;

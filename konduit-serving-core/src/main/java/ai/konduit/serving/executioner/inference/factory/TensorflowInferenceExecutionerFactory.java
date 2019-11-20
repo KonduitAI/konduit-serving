@@ -27,7 +27,7 @@ import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.model.TensorFlowConfig;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.base.Preconditions;
@@ -38,7 +38,7 @@ import java.util.List;
 public class TensorflowInferenceExecutionerFactory implements InferenceExecutionerFactory {
 
     @Override
-    public InitializedInferenceExecutionerConfig create(ModelPipelineStep modelPipelineStepConfig) throws Exception {
+    public InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception {
         TensorFlowConfig tensorFlowConfig = null;
         try {
             tensorFlowConfig = (TensorFlowConfig) modelPipelineStepConfig.getModelConfig();

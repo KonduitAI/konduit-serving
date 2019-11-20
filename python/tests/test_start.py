@@ -23,12 +23,12 @@ def test_server_start():
                               'IteratorGetNext:4': 'INT32'
                               }))
 
-    model_pipeline_step = ModelPipelineStep(model_config=tensorflow_config,
-                                            parallel_inference_config=parallel_inference_config,
-                                            input_names=["IteratorGetNext:0",
+    model_pipeline_step = ModelStep(model_config=tensorflow_config,
+                                    parallel_inference_config=parallel_inference_config,
+                                    input_names=["IteratorGetNext:0",
                                                          "IteratorGetNext:1",
                                                          "IteratorGetNext:4"],
-                                            output_names=["loss/Softmax"])
+                                    output_names=["loss/Softmax"])
 
     inference_config = InferenceConfiguration(serving_config=serving_config,
                                               pipeline_steps=[model_pipeline_step])

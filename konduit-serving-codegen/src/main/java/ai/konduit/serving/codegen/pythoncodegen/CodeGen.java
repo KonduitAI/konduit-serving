@@ -25,7 +25,10 @@ package ai.konduit.serving.codegen.pythoncodegen;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.*;
 import ai.konduit.serving.model.*;
-import ai.konduit.serving.pipeline.*;
+import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.config.NormalizationConfig;
+import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
+import ai.konduit.serving.pipeline.step.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -67,12 +70,12 @@ public class CodeGen {
                 ServingConfig.class,
                 PipelineStep.class,
                 NormalizationConfig.class,
-                PythonPipelineStep.class,
-                TransformProcessPipelineStep.class,
-                ModelPipelineStep.class,
+                PythonStep.class,
+                TransformProcessStep.class,
+                ModelStep.class,
                 ArrayConcatenationStep.class,
-                JsonExpanderTransform.class,
-                ImageLoading.class,
+                JsonExpanderTransformStep.class,
+                ImageLoadingStep.class,
                 InferenceConfiguration.class
         };
 

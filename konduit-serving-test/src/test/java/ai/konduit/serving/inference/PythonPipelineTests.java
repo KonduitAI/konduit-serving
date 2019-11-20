@@ -25,8 +25,8 @@ package ai.konduit.serving.inference;
 import ai.konduit.serving.util.python.PythonVariables;
 import ai.konduit.serving.executioner.Pipeline;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.pipeline.PythonPipelineStep;
-import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
+import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.pipeline.steps.PythonPipelineStepRunner;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.steps.TransformProcessPipelineStepRunner;
@@ -62,7 +62,7 @@ public class PythonPipelineTests {
                 .returnAllInputs(false)
                 .build();
         
-        PythonPipelineStep config = new PythonPipelineStep(pythonConfig);
+        PythonStep config = new PythonStep(pythonConfig);
         PythonPipelineStepRunner pythonPipelineStep = new PythonPipelineStepRunner(config);
 
         Schema schema = new Schema.Builder()
@@ -71,7 +71,7 @@ public class PythonPipelineTests {
         TransformProcess transformProcess = new TransformProcess.Builder(schema)
                 .ndArrayScalarOpTransform("second", MathOp.Add,1.0).build();
 
-        TransformProcessPipelineStep tpStep = new TransformProcessPipelineStep()
+        TransformProcessStep tpStep = new TransformProcessStep()
                 .setInput(new String[]{"second"}, new SchemaType[]{SchemaType.NDArray})
                 .setOutput(new String[]{"output"}, new SchemaType[]{SchemaType.NDArray})
                 .transformProcess(transformProcess);
