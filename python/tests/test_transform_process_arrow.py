@@ -11,10 +11,14 @@ from jnius import autoclass
 import pydatavec
 
 
-def test_build_tp():
+def load_java_tp(tp_json):
+    """Just used for testing, users won't need this."""
     StringJava = autoclass("java.lang.String")
     JTransformProcess = autoclass('org.datavec.api.transform.TransformProcess')
+    JTransformProcess.fromJson(StringJava(tp_json))
 
+
+def test_build_tp():
     schema = pydatavec.Schema()
     schema.add_string_column('first')
     tp = pydatavec.TransformProcess(schema)
@@ -22,8 +26,7 @@ def test_build_tp():
     java_tp = tp.to_java()
 
     tp_json = java_tp.toJson()
-    JTransformProcess.fromJson(StringJava(tp_json))
-
+    load_java_tp(tp_json)
     json_tp = json.dumps(tp_json)
 
     as_python_json = json.loads(tp_json)
