@@ -25,7 +25,7 @@ package ai.konduit.serving.pipeline.steps;
 import ai.konduit.serving.executioner.inference.InferenceExecutioner;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.factory.InferenceExecutionerFactory;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.util.SchemaTypeUtils;
@@ -63,7 +63,7 @@ public class InferenceExecutionerPipelineStepRunner extends BasePipelineStepRunn
 
     public InferenceExecutionerPipelineStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
-        ModelPipelineStep modelPipelineStepConfig = (ModelPipelineStep) pipelineStep;
+        ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
         InferenceExecutionerFactory inferenceExecutionerFactory;
         try {
             Preconditions.checkNotNull(modelPipelineStepConfig.getModelConfig().getModelConfigType(),"No model state was specified!");

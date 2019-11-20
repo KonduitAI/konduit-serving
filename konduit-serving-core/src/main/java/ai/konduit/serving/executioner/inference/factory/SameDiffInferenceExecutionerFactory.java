@@ -29,8 +29,7 @@ import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerC
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.model.SameDiffConfig;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
-import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -39,7 +38,7 @@ import java.util.List;
 @Slf4j
 public class SameDiffInferenceExecutionerFactory implements InferenceExecutionerFactory {
     @Override
-    public InitializedInferenceExecutionerConfig create(ModelPipelineStep modelPipelineStepConfig) throws Exception {
+    public InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception {
         SameDiffConfig sameDiffconfig = null;
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
         ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();

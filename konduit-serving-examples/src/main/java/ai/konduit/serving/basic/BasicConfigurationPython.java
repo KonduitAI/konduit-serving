@@ -1,7 +1,7 @@
 package ai.konduit.serving.basic;
 
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.pipeline.PythonPipelineStep;
+import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.python.PythonVariables;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
@@ -37,7 +37,7 @@ public class BasicConfigurationPython {
                 .pythonOutput("y", PythonVariables.Type.NDARRAY.name())
                 .build();
 
-        PythonPipelineStep pythonPipelineStep = new PythonPipelineStep().step(pythonConfig);
+        PythonStep pythonPipelineStep = new PythonStep().step(pythonConfig);
 
         Writable[][] output = pythonPipelineStep.getRunner().transform(npyFile);
 

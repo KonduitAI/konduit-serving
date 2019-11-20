@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.*;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
-import ai.konduit.serving.pipeline.PythonPipelineStep;
+import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -86,7 +86,7 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
                 .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
                 .build();
 
-        PythonPipelineStep pythonStepConfig = new PythonPipelineStep(pythonConfig);
+        PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)

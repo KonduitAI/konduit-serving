@@ -22,7 +22,7 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.JsonExpanderTransform;
+import ai.konduit.serving.pipeline.step.JsonExpanderTransformStep;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
@@ -33,11 +33,11 @@ import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
-public class JsonExpanderTransformStepRunnerTest {
+public class JsonExpanderTransformStepStepRunnerTest {
 
     @Test
     public void testJsonExpansionObject() {
-        JsonExpanderTransformStepRunner runner = new JsonExpanderTransformStepRunner(new JsonExpanderTransform());
+        JsonExpanderTransformStepRunner runner = new JsonExpanderTransformStepRunner(new JsonExpanderTransformStep());
         Record[] input = new Record[1];
         JsonObject jsonObject = new JsonObject();
         jsonObject.put("first",1.0);
@@ -55,7 +55,7 @@ public class JsonExpanderTransformStepRunnerTest {
 
     @Test
     public void testJsonExpansionObjectArray() {
-        JsonExpanderTransformStepRunner runner = new JsonExpanderTransformStepRunner(new JsonExpanderTransform());
+        JsonExpanderTransformStepRunner runner = new JsonExpanderTransformStepRunner(new JsonExpanderTransformStep());
         Record[] input = new Record[1];
         JsonArray inputArraysJson = new JsonArray();
         JsonObject jsonObject = new JsonObject();

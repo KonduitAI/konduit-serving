@@ -20,26 +20,19 @@
  *
  */
 
-package ai.konduit.serving.pipeline;
+package ai.konduit.serving.pipeline.step;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 
-import java.util.Map;
-
-@Data
 @SuperBuilder
 @NoArgsConstructor
-public class ArrayConcatenationStep extends PipelineStep {
-
-    @Singular
-    private Map<Integer,Integer> concatDimensions;
-
+@Data
+public class PmmlStep extends ModelStep {
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.steps.ArrayConcatenationStepRunner";
+        return "ai.konduit.serving.pipeline.PmmlInferenceExecutionerPipelineStepRunner";
     }
 }

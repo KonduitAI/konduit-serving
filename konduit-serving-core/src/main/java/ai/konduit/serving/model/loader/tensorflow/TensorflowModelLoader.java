@@ -25,7 +25,7 @@ package ai.konduit.serving.model.loader.tensorflow;
 import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.model.TensorFlowConfig;
 import ai.konduit.serving.model.loader.ModelLoader;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.model.SavedModelConfig;
 import io.vertx.core.buffer.Buffer;
 import lombok.Builder;
@@ -127,7 +127,7 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
      *                                the model loader with
      * @return the created tensorflow model loader
      */
-    public static TensorflowModelLoader createFromConfig(ModelPipelineStep modelPipelineStepConfig) {
+    public static TensorflowModelLoader createFromConfig(ModelStep modelPipelineStepConfig) {
         TensorFlowConfig config = (TensorFlowConfig) modelPipelineStepConfig.getModelConfig();
         String sessionConfigPath = config.getConfigProtoPath();
         SavedModelConfig savedModelConfig = config.getSavedModelConfig();

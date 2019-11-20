@@ -25,7 +25,7 @@ package ai.konduit.serving.configprovider;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
@@ -103,7 +103,7 @@ public class KonduitServingMainTest {
                                 .build()
                 ).build();
 
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
+        ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
                 .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))

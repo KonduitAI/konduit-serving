@@ -27,7 +27,7 @@ import ai.konduit.serving.executioner.Pipeline;
 import ai.konduit.serving.util.python.PythonTransform;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.PipelineStep;
-import ai.konduit.serving.pipeline.PythonPipelineStep;
+import ai.konduit.serving.pipeline.step.PythonStep;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.records.Record;
@@ -47,7 +47,7 @@ import java.util.Map;
 /**
  * Run python code as part of a {@link Pipeline}
  * For configuration options see the
- * {@link PythonPipelineStep}.
+ * {@link PythonStep}.
  *
  * The python pipeline step runner allows a definition of
  * 1 python script per input.
@@ -82,7 +82,7 @@ public class PythonPipelineStepRunner extends BasePipelineStepRunner {
 
     public PythonPipelineStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
-        PythonPipelineStep pythonConfig = (PythonPipelineStep) pipelineStep;
+        PythonStep pythonConfig = (PythonStep) pipelineStep;
         pythonTransform = new HashMap<>();
         transformProcesses = new HashMap<>();
         boolean setPath = false;

@@ -17,7 +17,7 @@ def test_python_script_prediction():
         python_inputs={'first': 'NDARRAY'}, python_outputs={'second': 'NDARRAY'}
     )
 
-    step = PythonPipelineStep().step(python_config)
+    step = PythonStep().step(python_config)
     server = Server(steps=step, serving_config=serving_config)
     server.start(sleep=10)
     

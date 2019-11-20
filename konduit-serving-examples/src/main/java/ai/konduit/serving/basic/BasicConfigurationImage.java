@@ -1,6 +1,6 @@
 package ai.konduit.serving.basic;
 
-import ai.konduit.serving.pipeline.ImageLoading;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
@@ -18,7 +18,7 @@ public class BasicConfigurationImage {
                 //.resizeImageTransform(28,28)
                 .build();
 
-        ImageLoading imageLoading = ImageLoading.builder()
+        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
                 .imageProcessingInitialLayout("NCHW")
                 .imageProcessingRequiredLayout("NHWC")
                 .inputName("default")
@@ -28,7 +28,7 @@ public class BasicConfigurationImage {
 
         String imagePath =  new ClassPathResource("images/COCO_train2014_000000000009.jpg").getFile().getAbsolutePath();
 
-        Writable[][] output = imageLoading.getRunner().transform(imagePath);
+        Writable[][] output = imageLoadingStep.getRunner().transform(imagePath);
 
         INDArray image = ((NDArrayWritable) output[0][0]).get();
 

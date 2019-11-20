@@ -1,0 +1,16 @@
+# Minimal Konduit serving YAML
+serving:
+  http_port: 1337
+
+steps:
+  python_step:
+    type: PYTHON
+    python_path: .
+    python_code_path: ./simple.py
+    python_inputs:
+      first: NDARRAY
+    python_outputs:
+      second: NDARRAY
+
+client:
+    url: http://localhost:1337

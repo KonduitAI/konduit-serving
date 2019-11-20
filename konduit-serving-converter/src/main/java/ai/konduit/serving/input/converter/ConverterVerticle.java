@@ -42,7 +42,7 @@ import java.io.File;
  * This {@link io.vertx.core.Verticle} expects 2 arguments in its json configuration:
  *
  * uploadKey: This is the field in the configuration that should contain
- * the uplload directory. The default value for this is just
+ * the upload directory. The default value for this is just
  * the current working directory/upload.
  *
  * unzipKey: The place to unzip files to.

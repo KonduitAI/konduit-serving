@@ -16,7 +16,7 @@ python_config = PythonConfig(
 
 # Configure a Python pipeline step for your Python code. Internally, konduit will take Strings as input and output
 # for this example.
-python_pipeline_step = PythonPipelineStep().step(python_config)
+python_pipeline_step = PythonStep().step(python_config)
 serving_config = ServingConfig(http_port=1337, input_data_type='JSON', output_data_type='JSON')
 
 # Start a konduit server and wait for it to start

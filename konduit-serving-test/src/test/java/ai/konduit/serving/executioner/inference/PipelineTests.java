@@ -22,7 +22,7 @@
 
 package ai.konduit.serving.executioner.inference;
 
-import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
+import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.pipeline.steps.TransformProcessPipelineStepRunner;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.util.SchemaTypeUtils;
@@ -58,7 +58,7 @@ public class PipelineTests {
                 .build();
         
         
-        TransformProcessPipelineStep config = TransformProcessPipelineStep.builder()
+        TransformProcessStep config = TransformProcessStep.builder()
                 .inputName("default")
                 .inputSchema("default",new SchemaType[]{SchemaType.String})
                 .outputSchema("default",new SchemaType[]{SchemaType.String})
@@ -97,7 +97,7 @@ public class PipelineTests {
                 .ndArrayScalarOpTransform("first", MathOp.Add,1.0)
                 .build();
         
-        TransformProcessPipelineStep config = TransformProcessPipelineStep.builder()
+        TransformProcessStep config = TransformProcessStep.builder()
                 .inputName("default")
                 .inputColumnName("default",Arrays.asList(new String[]{"first"}))
                 .transformProcess("default", transformProcess)
