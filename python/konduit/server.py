@@ -28,6 +28,12 @@ class Server(object):
         Start and stop a server from a given inference configuration.
         Extra arguments with JVM options can be passed.
 
+        Example:
+
+        >>> import konduit
+        >>> server = konduit.Server()
+        >>> server.start()
+
         :param inference_config: InferenceConfiguration instance
         :param serving_config: ServingConfig instance
         :param steps: list (or single) PipelineSteps
