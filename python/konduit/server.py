@@ -32,7 +32,6 @@ class Server(object):
 
         >>> import konduit
         >>> server = konduit.Server()
-        >>> server.start()
 
         :param inference_config: InferenceConfiguration instance
         :param serving_config: ServingConfig instance

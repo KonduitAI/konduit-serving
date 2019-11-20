@@ -71,6 +71,12 @@ cd python/tests
 python -m pytest .
 ```
 
+to also run documentation tests with `doctest` for an individual file, simply run:
+
+```python
+ python -m doctest ../konduit/server.py -v
+```
+
 ## Developing `konduit` from source
 
 `konduit` is largely generated from Java source files. Specifically, the large `inference.py` file is generated
