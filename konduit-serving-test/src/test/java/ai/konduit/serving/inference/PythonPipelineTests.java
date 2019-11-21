@@ -27,9 +27,9 @@ import ai.konduit.serving.executioner.Pipeline;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
-import ai.konduit.serving.pipeline.steps.PythonPipelineStepRunner;
+import ai.konduit.serving.pipeline.steps.PythonStepRunner;
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.pipeline.steps.TransformProcessPipelineStepRunner;
+import ai.konduit.serving.pipeline.steps.TransformProcessStepRunner;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.MathOp;
 import org.datavec.api.transform.TransformProcess;
@@ -63,7 +63,7 @@ public class PythonPipelineTests {
                 .build();
         
         PythonStep config = new PythonStep(pythonConfig);
-        PythonPipelineStepRunner pythonPipelineStep = new PythonPipelineStepRunner(config);
+        PythonStepRunner pythonPipelineStep = new PythonStepRunner(config);
 
         Schema schema = new Schema.Builder()
                 .addColumnNDArray("second",new long[]{1,1})
@@ -76,7 +76,7 @@ public class PythonPipelineTests {
                 .setOutput(new String[]{"output"}, new SchemaType[]{SchemaType.NDArray})
                 .transformProcess(transformProcess);
         
-        TransformProcessPipelineStepRunner transformProcessPipelineStep = new TransformProcessPipelineStepRunner(tpStep);
+        TransformProcessStepRunner transformProcessPipelineStep = new TransformProcessStepRunner(tpStep);
         
         List<Writable> record = new ArrayList<>();
         

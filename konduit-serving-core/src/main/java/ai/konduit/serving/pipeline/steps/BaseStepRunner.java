@@ -39,19 +39,19 @@ import java.util.stream.Collectors;
  * A base implementation of the interface {@link PipelineStepRunner}.
  *
  * A runner can be thought of like an executor for a pipeline step
- * configuration. The design expects {@link BasePipelineStepRunner#transform(Record[])},
+ * configuration. The design expects {@link BaseStepRunner#transform(Record[])},
  * to be the main call that executes a step and process on the inputs.
  *
- * {@link BasePipelineStepRunner#transform(Object...)} and
- * {@link BasePipelineStepRunner#transform(Object[][])}
+ * {@link BaseStepRunner#transform(Object...)} and
+ * {@link BaseStepRunner#transform(Object[][])}
  * are there for providing some simplified APIs so that you don't have to create
  * records each time you send inputs for processing.
  */
-public abstract class BasePipelineStepRunner implements PipelineStepRunner {
+public abstract class BaseStepRunner implements PipelineStepRunner {
 
     protected PipelineStep pipelineStep;
 
-    public BasePipelineStepRunner(PipelineStep pipelineStep) {
+    public BaseStepRunner(PipelineStep pipelineStep) {
         this.pipelineStep = pipelineStep;
     }
 

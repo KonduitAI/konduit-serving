@@ -75,12 +75,12 @@ import java.util.Map;
  * @author Adam Gibson
  */
 @Slf4j
-public class PythonPipelineStepRunner extends BasePipelineStepRunner {
+public class PythonStepRunner extends BaseStepRunner {
 
     private Map<String, PythonTransform> pythonTransform;
     private Map<String,TransformProcess> transformProcesses;
 
-    public PythonPipelineStepRunner(PipelineStep pipelineStep) {
+    public PythonStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
         PythonStep pythonConfig = (PythonStep) pipelineStep;
         pythonTransform = new HashMap<>();
