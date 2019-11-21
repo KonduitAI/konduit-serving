@@ -41,12 +41,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ImageTransformProcessPipelineStepRunner extends BasePipelineStepRunner {
+public class ImageTransformProcessStepRunner extends BaseStepRunner {
 
     private Map<String, NativeImageLoader> imageLoaders;
     private ImageLoadingStep imageLoadingStepConfig;
 
-    public ImageTransformProcessPipelineStepRunner(PipelineStep pipelineStep) {
+    public ImageTransformProcessStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
 
         this.imageLoadingStepConfig = (ImageLoadingStep) pipelineStep;
