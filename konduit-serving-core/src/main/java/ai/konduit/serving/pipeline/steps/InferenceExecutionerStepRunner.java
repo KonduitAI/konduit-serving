@@ -57,11 +57,11 @@ import java.util.Map;
  *
  * @author Adam Gibson
  */
-public class InferenceExecutionerPipelineStepRunner extends BasePipelineStepRunner {
+public class InferenceExecutionerStepRunner extends BaseStepRunner {
     @Getter
     private InferenceExecutioner inferenceExecutioner;
 
-    public InferenceExecutionerPipelineStepRunner(PipelineStep pipelineStep) {
+    public InferenceExecutionerStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
         ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
         InferenceExecutionerFactory inferenceExecutionerFactory;
