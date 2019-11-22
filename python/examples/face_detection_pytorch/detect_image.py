@@ -23,6 +23,6 @@ net.load(model_path)
 image = base64_to_ndarray(image)
 boxes, _, _ = predictor.predict(image, candidate_size / 2, threshold)
 
-# "image" is then picked up again from here and returned to the client
-image = str(len(boxes))
+# "num_boxes" is then picked up again from here and returned to the client
+num_boxes = str(len(boxes))
 

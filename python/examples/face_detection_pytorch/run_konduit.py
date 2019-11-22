@@ -11,16 +11,16 @@ from utils import to_base_64
 work_dir = os.path.abspath('.')
 python_config = PythonConfig(
     python_path=default_python_path(work_dir), python_code_path=os.path.join(work_dir, 'detect_image.py'),
-    python_inputs={'image': 'STR'}, python_outputs={'image': 'STR'},
+    python_inputs={'image': 'STR'}, python_outputs={'num_boxes': 'STR'},
 )
 
 # Configure a Python pipeline step for your Python code. Internally, konduit will take Strings as input and output
 # for this example.
-python_pipeline_step = PythonStep().step(python_config)
+python_pipeline_step = PythonStep(input_names=['image'], output_names=['num_boxes']).step(python_config)
 serving_config = ServingConfig(http_port=1337, input_data_type='JSON', output_data_type='JSON')
 
 # Start a konduit server and wait for it to start
-server = Server(serving_config=serving_config, steps=[python_pipeline_step])
+server = Server(serving_config=serving_config, steps=[python_pipeline_step], jar_path=os.environ['KONDUIT_JAR_PATH'])
 server.start(sleep=10)
 
 # Initialize a konduit client that takes in and outputs JSON
