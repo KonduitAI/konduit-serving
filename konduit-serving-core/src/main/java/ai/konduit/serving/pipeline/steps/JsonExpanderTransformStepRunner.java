@@ -47,7 +47,7 @@ import java.util.List;
  * @author Adam Gibson
  *
  */
-public class JsonExpanderTransformStepRunner extends BasePipelineStepRunner {
+public class JsonExpanderTransformStepRunner extends BaseStepRunner {
 
     public JsonExpanderTransformStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);

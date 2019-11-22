@@ -27,7 +27,7 @@ import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.util.WritableValueRetriever;
 import ai.konduit.serving.executioner.inference.PmmlInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.factory.PmmlInferenceExecutionerFactory;
-import ai.konduit.serving.pipeline.steps.BasePipelineStepRunner;
+import ai.konduit.serving.pipeline.steps.BaseStepRunner;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.Text;
@@ -40,12 +40,12 @@ import org.nd4j.shade.jackson.core.JsonProcessingException;
 import java.util.*;
 
 
-public class PmmlInferenceExecutionerPipelineStepRunner extends BasePipelineStepRunner {
+public class PmmlInferenceExecutionerStepRunner extends BaseStepRunner {
 
     private PmmlInferenceExecutioner pmmlInferenceExecutioner;
     private Evaluator evaluator;
 
-    public PmmlInferenceExecutionerPipelineStepRunner(PipelineStep pipelineStep) {
+    public PmmlInferenceExecutionerStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
         PmmlStep pmmlStepConfig = (PmmlStep) pipelineStep;
         PmmlInferenceExecutionerFactory inferenceExecutionerFactory = new PmmlInferenceExecutionerFactory();

@@ -312,7 +312,7 @@ profile, and the output will be found in model-server-uber-jar/target.
 Konduit Serving supports customization via 2 ways: Python code or implementing your own
 [PipelineStep](konduit-serving-api/src/main/java/ai/konduit/serving/pipeline/PipelineStep.java)
 via the [CustomPipelineStep](konduit-serving-api/src/main/java/ai/konduit/serving/pipeline/step/CustomPipelineStep.java)
-and associated [PipelineStepRunner](konduit-serving-core/src/main/java/ai/konduit/serving/pipeline/steps/CustomPipelineStepRunner.java#L40)
+and associated [PipelineStepRunner](konduit-serving-core/src/main/java/ai/konduit/serving/pipeline/steps/CustomStepRunner.java#L40)
 in Java.
 
 Custom pipeline steps are generally recommended for performance reasons.

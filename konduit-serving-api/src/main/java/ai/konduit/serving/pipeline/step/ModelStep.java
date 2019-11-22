@@ -91,6 +91,6 @@ public class ModelStep extends PipelineStep {
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.steps.InferenceExecutionerPipelineStepRunner";
+        return "ai.konduit.serving.pipeline.steps.InferenceExecutionerStepRunner";
     }
 }
