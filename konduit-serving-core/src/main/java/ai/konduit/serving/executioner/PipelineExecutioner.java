@@ -41,7 +41,7 @@ import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ArrowUtils;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.util.SchemaTypeUtils;
-import ai.konduit.serving.pipeline.steps.InferenceExecutionerPipelineStepRunner;
+import ai.konduit.serving.pipeline.steps.InferenceExecutionerStepRunner;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -168,7 +168,7 @@ public class PipelineExecutioner {
 
             }
 
-            if(pipelineStepRunner instanceof InferenceExecutionerPipelineStepRunner) {
+            if(pipelineStepRunner instanceof InferenceExecutionerStepRunner) {
                 ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
                 modelConfig = modelPipelineStepConfig.getModelConfig();
                 tensorDataTypesConfig = modelConfig.getTensorDataTypesConfig();

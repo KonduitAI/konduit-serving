@@ -321,6 +321,6 @@ public class PythonStep extends PipelineStep {
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.steps.PythonPipelineStepRunner";
+        return "ai.konduit.serving.pipeline.steps.PythonStepRunner";
     }
 }

@@ -32,11 +32,11 @@ import java.util.List;
 
 import static java.lang.Class.forName;
 
-public class CustomPipelineStepRunner extends BasePipelineStepRunner {
+public class CustomStepRunner extends BaseStepRunner {
 
     private CustomPipelineStepUDF customPipelineStepUDF;
 
-    public CustomPipelineStepRunner(PipelineStep pipelineStep) {
+    public CustomStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
         CustomPipelineStep customPipelineStep = (CustomPipelineStep) pipelineStep;
         try {
