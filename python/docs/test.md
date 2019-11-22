@@ -15,3 +15,9 @@ import java.lang.String;
 
 String str = "foo";
 ```
+
+```java
+import ai.konduit.serving.InferenceConfiguration;
+
+InferenceConfiguration config = new InferenceConfiguration();
+```

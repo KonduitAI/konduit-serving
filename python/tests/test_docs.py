@@ -1,6 +1,3 @@
-import pydl4j
-pydl4j.add_classpath('./target/test.jar')
-
 from konduit import *
 
 
@@ -39,7 +36,7 @@ def is_markdown(f):
 
 
 def get_files(input_dir):
-    return [os.path.join(dp, f) for dp, dn, filenames in os.walk(input_dir) for f in filenames if is_markdown(f)]
+    return [os.path.join(dp, f) for dp, dn, file_names in os.walk(input_dir) for f in file_names if is_markdown(f)]
 
 
 def exec_python_code(code_blocks):
@@ -53,33 +50,52 @@ def exec_python_code(code_blocks):
             raise e
 
 
-def exec_java_code(code_blocks):
-    for block in code_blocks:
+def make_folders():
+    if not os.path.isdir('./ai'):
+        os.mkdir('./ai')
+    if not os.path.isdir('./ai/konduit'):
+        os.mkdir('./ai/konduit')
+    if not os.path.isdir('./ai/konduit/serving'):
+        os.mkdir('./ai/konduit/serving')
+
+
+def write_java_files(code_blocks):
+    make_folders()
+    for i, block in enumerate(code_blocks):
         lines = block.split('\n')
         import_lines = [l for l in lines if l.startswith('import ')]
         code_lines = [l for l in lines if not l.startswith('import ')]
 
-        code = "package org.test;\n\n" + '\n'.join(import_lines) \
-               + "\n\npublic class BasicsTest {\n" \
-               + "\tpublic BasicsTest() {}\n" \
+        code = "package ai.konduit.serving;\n\n" + '\n'.join(import_lines) \
+               + "\n\npublic class BasicsTest" + str(i) + " {\n" \
+               + "\tpublic BasicsTest" + str(i) + " () {}\n" \
                + "\tpublic boolean smokeTest() { return true; };\n" \
                + "\tpublic void testCode() {\n\t\t" + '\n\t\t'.join(code_lines) + "\n\t}\n}"
 
-        if not os.path.isdir('./org'):
-            os.mkdir('./org')
-        if not os.path.isdir('./org/test'):
-            os.mkdir('./org/test')
-
-        with open('org/test/BasicsTest.java', 'w') as f:
+        # write all java source files
+        with open('ai/konduit/serving/BasicsTest' + str(i) + '.java', 'w') as f:
             f.write(code)
 
-        subprocess.call(["./build_jar.sh"])
 
-        basic_test = autoclass('org.test.BasicsTest')()
+def exec_java_code(code_blocks):
+
+    for i, block in enumerate(code_blocks):
+        basic_test_class = autoclass('ai.konduit.serving.BasicsTest' + str(i))
+        basic_test = basic_test_class()
         basic_test.smokeTest()
         basic_test.testCode()
 
-        os.remove('./org/test/BasicsTest.java')
+
+def clean_java_files(code_blocks):
+    for i, block in enumerate(code_blocks):
+        try:
+            os.remove('./ai/konduit/serving/BasicsTest' + str(i) + '.java')
+        except:
+            pass
+        try:
+            os.remove('./ai/konduit/serving/BasicsTest' + str(i) + '.class')
+        except:
+            pass
 
 
 def test_docs():
@@ -90,3 +106,16 @@ def test_docs():
 
         java_blocks = markdown_blocks(file_path, 'java')
         exec_java_code(java_blocks)
+        clean_java_files(java_blocks)
+
+
+def prepare_docs_jar():
+    files = get_files('../docs')
+    for file_path in files:
+        java_blocks = markdown_blocks(file_path, 'java')
+        write_java_files(java_blocks)
+
+
+if __name__ == "__main__":
+    print("prepare java files")
+    prepare_docs_jar()
