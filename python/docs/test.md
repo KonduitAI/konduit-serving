@@ -1,13 +1,17 @@
 # Doc test example
 
+Basic Python test:
+
 ```python
 import konduit
 
 server = konduit.Server()
 ```
 
-```java
-import ai.konduit.serving.InferenceConfiguration;
+Basic Java test:
 
-InferenceConfiguration configuration = new InferenceConfiguration();
+```java
+import java.lang.String;
+
+String str = "foo";
 ```
