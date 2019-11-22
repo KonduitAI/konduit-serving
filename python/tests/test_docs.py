@@ -1,5 +1,7 @@
-import os
-import re
+import pydl4j
+pydl4j.add_classpath('/home/max/code/konduit/konduit-serving/python/tests/target/test.jar')
+
+from konduit import *
 
 
 def markdown_blocks(file_path, language='python', safe=True):
@@ -40,7 +42,7 @@ def get_files(input_dir):
     return [os.path.join(dp, f) for dp, dn, filenames in os.walk(input_dir) for f in filenames if is_markdown(f)]
 
 
-def exec_python_blocks(code_blocks):
+def exec_python_code(code_blocks):
     for block in code_blocks:
         try:
             exec(block)
@@ -51,8 +53,40 @@ def exec_python_blocks(code_blocks):
             raise e
 
 
+def exec_java_code(code_blocks):
+    for block in code_blocks:
+        lines = block.split('\n')
+        import_lines = [l for l in lines if l.startswith('import ')]
+        code_lines = [l for l in lines if not l.startswith('import ')]
+
+        code = "package org.test;\n\n" + '\n'.join(import_lines) \
+               + "\n\npublic class BasicsTest {\n" \
+               + "\tpublic BasicsTest() {}\n" \
+               + "\tpublic boolean smokeTest() { return true; };\n" \
+               + "\tpublic void testCode() {\n\t\t" + '\n\t\t'.join(code_lines) + "\n\t}\n}"
+
+        if not os.path.isdir('./org'):
+            os.mkdir('./org')
+        if not os.path.isdir('./org/test'):
+            os.mkdir('./org/test')
+
+        with open('org/test/BasicsTest.java', 'w') as f:
+            f.write(code)
+
+        subprocess.call(["./build_jar.sh"])
+
+        basic_test = autoclass('org.test.BasicsTest')()
+        basic_test.smokeTest()
+        basic_test.testCode()
+
+        os.remove('./org/test/BasicsTest.java')
+
+
 def test_docs():
     files = get_files('../docs')
     for file_path in files:
-        code_blocks = markdown_blocks(file_path, 'python')
-        exec_python_blocks(code_blocks)
+        python_blocks = markdown_blocks(file_path, 'python')
+        exec_python_code(python_blocks)
+
+        java_blocks = markdown_blocks(file_path, 'java')
+        exec_java_code(java_blocks)
