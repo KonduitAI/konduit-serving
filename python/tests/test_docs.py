@@ -1,5 +1,5 @@
 import pydl4j
-pydl4j.add_classpath('/home/max/code/konduit/konduit-serving/python/tests/target/test.jar')
+pydl4j.add_classpath('./target/test.jar')
 
 from konduit import *
 
