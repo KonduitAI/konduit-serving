@@ -29,15 +29,19 @@ import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.model.TensorDataTypesConfig;
 import ai.konduit.serving.output.types.BatchOutput;
 import ai.konduit.serving.output.types.NDArrayOutput;
+import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.output.adapter.*;
 import ai.konduit.serving.pipeline.*;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ArrowUtils;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.util.SchemaTypeUtils;
-import ai.konduit.serving.pipeline.steps.InferenceExecutionerPipelineStepRunner;
+import ai.konduit.serving.pipeline.steps.InferenceExecutionerStepRunner;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -164,15 +168,15 @@ public class PipelineExecutioner {
 
             }
 
-            if(pipelineStepRunner instanceof InferenceExecutionerPipelineStepRunner) {
-                ModelPipelineStep modelPipelineStepConfig = (ModelPipelineStep) pipelineStep;
+            if(pipelineStepRunner instanceof InferenceExecutionerStepRunner) {
+                ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
                 modelConfig = modelPipelineStepConfig.getModelConfig();
                 tensorDataTypesConfig = modelConfig.getTensorDataTypesConfig();
             }
 
-            if(pipelineStep instanceof ImageLoading) {
-                ImageLoading imageLoadingConfig = (ImageLoading) pipelineStep;
-                objectDetectionConfig = imageLoadingConfig.getObjectDetectionConfig();
+            if(pipelineStep instanceof ImageLoadingStep) {
+                ImageLoadingStep imageLoadingStepConfig = (ImageLoadingStep) pipelineStep;
+                objectDetectionConfig = imageLoadingStepConfig.getObjectDetectionConfig();
             }
 
 

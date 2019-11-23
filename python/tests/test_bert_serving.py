@@ -1,5 +1,5 @@
 from konduit import ParallelInferenceConfig, ServingConfig, TensorFlowConfig, ModelConfigType
-from konduit import TensorDataTypesConfig, ModelPipelineStep, InferenceConfiguration
+from konduit import TensorDataTypesConfig, ModelStep, InferenceConfiguration
 from konduit.server import Server
 from konduit.client import Client
 from konduit.utils import is_port_in_use
@@ -11,8 +11,7 @@ import random
 
 def test_server_start():
 
-    input_names = ["IteratorGetNext:0",
-                   "IteratorGetNext:1", "IteratorGetNext:4"]
+    input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
     output_names = ["loss/Softmax"]
     port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)
@@ -30,10 +29,10 @@ def test_server_start():
                               'IteratorGetNext:4': 'INT32'
                               }))
 
-    model_pipeline_step = ModelPipelineStep(model_config=tensorflow_config,
-                                            parallel_inference_config=parallel_inference_config,
-                                            input_names=input_names,
-                                            output_names=output_names)
+    model_pipeline_step = ModelStep(model_config=tensorflow_config,
+                                    parallel_inference_config=parallel_inference_config,
+                                    input_names=input_names,
+                                    output_names=output_names)
 
     inference = InferenceConfiguration(serving_config=serving_config,
                                        pipeline_steps=[model_pipeline_step])

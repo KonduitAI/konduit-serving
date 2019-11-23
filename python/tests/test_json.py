@@ -19,12 +19,12 @@ def test_json_compare():
     tensorflow_config = TensorFlowConfig(model_config_type=ModelConfigType(model_type='TENSORFLOW',
                                                                            model_loading_path='model.pb'))
 
-    model_pipeline_step = ModelPipelineStep(model_config=tensorflow_config,
-                                            parallel_inference_config=parallel_inference_config,
-                                            input_names=["IteratorGetNext:0",
+    model_pipeline_step = ModelStep(model_config=tensorflow_config,
+                                    parallel_inference_config=parallel_inference_config,
+                                    input_names=["IteratorGetNext:0",
                                                          "IteratorGetNext:1",
                                                          "IteratorGetNext:4"],
-                                            output_names=["loss/Softmax"])
+                                    output_names=["loss/Softmax"])
 
     inference = InferenceConfiguration(serving_config=serving_config,
                                        pipeline_steps=[model_pipeline_step])
@@ -47,9 +47,9 @@ def test_python_serde():
                                    output_data_type='NUMPY',
                                    log_timings=True)
 
-    python_pipeline_step = PythonPipelineStep(input_names=input_names,
-                                              output_names=output_names,
-                                              python_configs=DictWrapper({'default': python_config}))
+    python_pipeline_step = PythonStep(input_names=input_names,
+                                      output_names=output_names,
+                                      python_configs=DictWrapper({'default': python_config}))
 
     inference = InferenceConfiguration(serving_config=serving_config,
                                        pipeline_steps=[python_pipeline_step])

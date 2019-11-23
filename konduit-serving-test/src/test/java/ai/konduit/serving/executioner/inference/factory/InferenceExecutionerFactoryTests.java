@@ -27,7 +27,7 @@ import ai.konduit.serving.model.*;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.train.TrainUtils;
 import org.deeplearning4j.nn.graph.ComputationGraph;
@@ -54,7 +54,7 @@ public class InferenceExecutionerFactoryTests {
                         .inputDataType("default", TensorDataType.INT32).build())
                 .configProtoPath(classPathResource.getFile().getAbsolutePath()).build();
         
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
+        ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
                 .modelConfig(tensorFlowConfig)
@@ -97,7 +97,7 @@ public class InferenceExecutionerFactoryTests {
                 .httpPort(1139)
                 .build();
 
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
+        ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
                 .modelConfig(modelConfig)
@@ -124,11 +124,7 @@ public class InferenceExecutionerFactoryTests {
                         .inputDataType("default", TensorDataType.INT32).build())
                 .build();
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(1139)
-                .build();
-
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
+        ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
                 .modelConfig(tensorFlowConfig)
@@ -149,7 +145,7 @@ public class InferenceExecutionerFactoryTests {
     public void testMultiLayerNetwork() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> trainedNetwork = TrainUtils.getTrainedNetwork();
         MultiLayerNetwork save = trainedNetwork.getLeft();
-        File tmpZip = new File("tmpmodelmln.zip");
+        File tmpZip = new File("dl4j_mln_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
         ModelConfig modelConfig = ModelConfig.builder()
@@ -160,7 +156,7 @@ public class InferenceExecutionerFactoryTests {
                 .httpPort(1139)
                 .build();
 
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
+        ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
                 .modelConfig(modelConfig)
@@ -179,7 +175,7 @@ public class InferenceExecutionerFactoryTests {
     public void testComputationGraph() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> trainedNetwork = TrainUtils.getTrainedNetwork();
         ComputationGraph save = trainedNetwork.getLeft().toComputationGraph();
-        File tmpZip = new File("tmpmodel.zip");
+        File tmpZip = new File("dl4j_cg_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
         ModelConfig modelConfig = ModelConfig.builder()
@@ -190,7 +186,7 @@ public class InferenceExecutionerFactoryTests {
                 .httpPort(1139)
                 .build();
         
-        ModelPipelineStep modelPipelineStep = ModelPipelineStep.builder()
+        ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
                 .modelConfig(modelConfig)

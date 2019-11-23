@@ -25,7 +25,7 @@ package ai.konduit.serving.verticles.python;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.*;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.pipeline.PythonPipelineStep;
+import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -84,7 +84,7 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
                 .pythonOutput("second", "INT")
                 .build();
 
-        PythonPipelineStep pythonStepConfig = new PythonPipelineStep(pythonConfig);
+        PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)

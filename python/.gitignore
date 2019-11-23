@@ -65,7 +65,7 @@ examples/*.csv
 
 .pytest_cache
 
-# virtual environments
+# Python virtual environments
 venv/
 venv2/
 

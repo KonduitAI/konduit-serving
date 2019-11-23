@@ -14,7 +14,7 @@ test_device = test_device
 
 class_names = [name.strip() for name in open(label_path).readlines()]
 
-model_path = os.path.join(work_dir, "models/pretrained/Mb_Tiny_RFB_FD_train_input_320.pth")
+model_path = os.path.join(work_dir, "models/pretrained/version-RFB-320.pth")
 net = create_Mb_Tiny_RFB_fd(len(class_names), is_test=True, device=test_device)
 predictor = create_Mb_Tiny_RFB_fd_predictor(net, candidate_size=candidate_size, device=test_device)
 net.load(model_path)
