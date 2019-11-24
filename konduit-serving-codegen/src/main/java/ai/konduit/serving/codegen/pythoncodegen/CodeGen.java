@@ -107,6 +107,7 @@ public class CodeGen {
             StringBuffer command = new StringBuffer();
 
             command.append(String.format("jsonschema2popo -o %s %s\n", pythonFile.getAbsolutePath(), classJson.getAbsolutePath())); // schemaJsonFile
+
             Process p = runtime.exec(command.toString());
             p.waitFor(10, TimeUnit.SECONDS);
             if(p.exitValue() != 0) {
@@ -139,7 +140,7 @@ public class CodeGen {
                         && !splitLine.contains("ValueError")
                         && !splitLine.contains("class")
                         && !splitLine.contains("isinstance")
-                        && !splitLine.contains("enum")){
+                        && !splitLine.contains("enum")) {
                     splitLine = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, splitLine);
 
                 }

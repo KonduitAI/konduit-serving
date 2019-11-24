@@ -34,7 +34,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class PmmlConfig extends ModelConfig {
 
-    private String evaluatorFactoryName =DEFAULT_EVALUATOR_FACTORY;
+    private String evaluatorFactoryName = DEFAULT_EVALUATOR_FACTORY;
     public final static String DEFAULT_EVALUATOR_FACTORY = "org.jpmml.evaluator.ModelEvaluatorFactory";
 
     public String evaluatorFactoryName() {

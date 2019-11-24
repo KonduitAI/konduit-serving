@@ -115,7 +115,7 @@ public class MemMapRouteDefiner {
      * @param inferenceConfiguration the {@link InferenceConfiguration}
      *                               to use for configuration.
      */
-    public io.vertx.ext.web.Router defineRoutes(Vertx vertx, InferenceConfiguration inferenceConfiguration) {
+    public Router defineRoutes(Vertx vertx, InferenceConfiguration inferenceConfiguration) {
         Long initialSize = inferenceConfiguration.getMemMapConfig().getInitialMemmapSize();
         Router router = Router.router(vertx);
         memMapConfig = inferenceConfiguration.getMemMapConfig();

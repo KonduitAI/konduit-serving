@@ -22,6 +22,8 @@
 
 package ai.konduit.serving.pipeline;
 
+import lombok.extern.slf4j.Slf4j;
+
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.util.WritableValueRetriever;
 import ai.konduit.serving.executioner.inference.PmmlInferenceExecutioner;
@@ -38,7 +40,15 @@ import org.nd4j.shade.jackson.core.JsonProcessingException;
 
 import java.util.*;
 
-
+/**
+ * A {@link PipelineStepRunner}
+ * for a {@link PmmlInferenceExecutioner}
+ * This handles loading pmml files
+ * and running them through the inference executioner.
+ *
+ * @author Adam Gibson
+ */
+@Slf4j
 public class PmmlInferenceExecutionerPipelineStepRunner extends BasePipelineStepRunner {
 
     private PmmlInferenceExecutioner pmmlInferenceExecutioner;
@@ -52,7 +62,7 @@ public class PmmlInferenceExecutionerPipelineStepRunner extends BasePipelineStep
             pmmlInferenceExecutioner = (PmmlInferenceExecutioner) inferenceExecutionerFactory.create(pmmlPipelineStepConfig).getInferenceExecutioner();
             evaluator = pmmlInferenceExecutioner.model();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Unable to load inference executioner",e);
         }
 
         Preconditions.checkState(pmmlPipelineStepConfig.getOutputSchemas() != null &&

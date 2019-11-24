@@ -56,12 +56,20 @@ import org.deeplearning4j.zoo.util.Labels;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
+import org.nd4j.arrow.ArrowSerde;
+import org.nd4j.serde.binary.BinarySerde;
+import org.nd4j.linalg.factory.Nd4j;
 
+import java.nio.ByteBuffer;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import io.netty.buffer.Unpooled;
+
+import org.apache.arrow.flatbuf.Tensor;
 
 
 /**
@@ -340,7 +348,8 @@ public class PipelineExecutioner {
                             String input,
                             Schema conversionSchema,
                             TransformProcess transformProcess,
-                            Schema outputSchema, Output.DataType outputDataType) {
+                            Schema outputSchema,
+                            Output.DataType outputDataType) {
 
         Preconditions.checkNotNull(input,"Input data was null!");
 
@@ -407,13 +416,13 @@ public class PipelineExecutioner {
                     }
                 }
 
-                log.info("Writing json response.");
+                log.debug("Writing json response.");
                 String write = writeJson.encodePrettily();
                 ctx.response().putHeader("Content-Type", "application/json");
                 ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
                 ctx.response().end(write);
             }
-            else if(outputDataType == Output.DataType.ARROW){
+            else if(outputDataType == Output.DataType.ARROW) {
                 writeArrowResponse(ctx, outputSchema, convert);
             }
             else {
@@ -458,7 +467,7 @@ public class PipelineExecutioner {
                 newArray.add(row);
             }
 
-            log.info("Writing json response.");
+            log.debug("Writing json response.");
             String write = newArray.encodePrettily();
             ctx.response().putHeader("Content-Type", "application/json");
             ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
@@ -559,17 +568,17 @@ public class PipelineExecutioner {
         } else {
             if (adapt.size() > 1) {
                 Buffer buffer = zipBuffer(adapt, responseOutputType);
-                writeBinary(buffer, batchId, ctx);
+                writeBinary(buffer, ctx);
             } else {
                 Map.Entry<String, BatchOutput> entry = adapt.entrySet().iterator().next();
-                writeBinary(convertBatchOutput(entry.getValue(), responseOutputType), batchId, ctx);
+                writeBinary(convertBatchOutput(entry.getValue(), responseOutputType), ctx);
             }
         }
 
     }
 
 
-    private void writeBinary(Buffer buffer, String batchId, RoutingContext ctx) {
+    private void writeBinary(io.vertx.core.buffer.Buffer buffer, io.vertx.ext.web.RoutingContext ctx) {
         try {
             ctx.response().putHeader("Content-Type", "application/octet-stream");
             ctx.response().putHeader("Content-Length", String.valueOf(buffer.length()));
@@ -645,11 +654,8 @@ public class PipelineExecutioner {
 
 
         } catch (java.io.IOException e) {
-            e.printStackTrace();
+            log.error("Unable to zip buffer",e);
         }
-
-
-
 
         return null;
 
@@ -684,17 +690,19 @@ public class PipelineExecutioner {
 
         switch(responseOutputType) {
             case NUMPY:
-                ret = Buffer.buffer(io.netty.buffer.Unpooled.wrappedBuffer(java.nio.ByteBuffer.wrap(org.nd4j.linalg.factory.Nd4j.toNpyByteArray(input))));
+                ret = Buffer.buffer(Unpooled.wrappedBuffer(ByteBuffer.wrap(Nd4j.toNpyByteArray(input))));
                 break;
             case ND4J:
-                java.nio.ByteBuffer byteBuffer2 = org.nd4j.serde.binary.BinarySerde.toByteBuffer(input);
-                ret = Buffer.buffer(io.netty.buffer.Unpooled.wrappedBuffer(byteBuffer2));
+                ByteBuffer byteBuffer2 = BinarySerde.toByteBuffer(input);
+                ret = Buffer.buffer(Unpooled.wrappedBuffer(byteBuffer2));
                 break;
             case ARROW:
-                org.apache.arrow.flatbuf.Tensor tensor = org.nd4j.arrow.ArrowSerde.toTensor(input);
-                ret = Buffer.buffer(io.netty.buffer.Unpooled.wrappedBuffer(tensor.getByteBuffer()));
+                Tensor tensor = ArrowSerde.toTensor(input);
+                ret = Buffer.buffer(Unpooled.wrappedBuffer(tensor.getByteBuffer()));
                 break;
-
+            case JSON:
+                ret = Buffer.buffer(input.toStringFull());
+                break;
         }
 
         return ret;

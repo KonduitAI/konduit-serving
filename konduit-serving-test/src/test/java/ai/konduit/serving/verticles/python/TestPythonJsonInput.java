@@ -106,7 +106,6 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
         this.context = context;
-
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
