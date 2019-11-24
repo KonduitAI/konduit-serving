@@ -23,7 +23,6 @@
 package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.model.MemMapConfig;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -52,7 +51,6 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @SuperBuilder
 @JsonSubTypes({
         @JsonSubTypes.Type(value= ImageLoading.class, name = "ImageLoading"),
-        @JsonSubTypes.Type(value= MemMapConfig.class, name = "MemMapConfig"),
         @JsonSubTypes.Type(value= ModelPipelineStep.class, name = "ModelPipelineStep"),
         @JsonSubTypes.Type(value= NormalizationConfig.class, name = "NormalizationConfig"),
         @JsonSubTypes.Type(value= ObjectDetectionConfig.class, name = "ObjectDetectionConfig"),

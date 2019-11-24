@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  *
  */
 public class CodeGen {
-    public static void main( String[] args ) throws Exception {
+    public static void main( String[] args) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper,JsonSchemaConfig.html5EnabledSchema());
         Class<?>[] clazzes = {
@@ -73,6 +73,7 @@ public class CodeGen {
                 ArrayConcatenationStep.class,
                 JsonExpanderTransform.class,
                 ImageLoading.class,
+                MemMapConfig.class,
                 InferenceConfiguration.class
         };
 
@@ -182,7 +183,7 @@ public class CodeGen {
         StringBuffer sb = new StringBuffer();
         sb.append("import enum\n");
         sb.append("from konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n");
-        
+
         //dictionary wrapper for serialization
         sb.append(loadedModule);
         FileUtils.writeStringToFile(newModule, sb.toString(),Charset.defaultCharset(),false);
