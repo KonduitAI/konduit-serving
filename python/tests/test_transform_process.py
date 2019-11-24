@@ -7,32 +7,26 @@ from konduit.utils import is_port_in_use
 import random
 import time
 import json
-from jnius import autoclass
+import pydatavec
+from .utils import load_java_tp, inference_from_json
 
 
 def test_build_tp():
-    TransformProcessBuilder = autoclass(
-        'org.datavec.api.transform.TransformProcess$Builder')
-    TransformProcess = autoclass('org.datavec.api.transform.TransformProcess')
-    StringJava = autoclass("java.lang.String")
+    schema = pydatavec.Schema()
+    schema.add_string_column('first')
+    tp = pydatavec.TransformProcess(schema)
+    tp.append_string('first', 'two')
+    java_tp = tp.to_java()
 
-    SchemaBuilder = autoclass(
-        'org.datavec.api.transform.schema.Schema$Builder')
-    schema = SchemaBuilder().addColumnString(StringJava('first')).build()
-    tp = TransformProcessBuilder(schema).appendStringColumnTransform(
-        StringJava("first"), StringJava("two")).build()
-
-    tp_json = tp.toJson()
-    from_json = TransformProcess.fromJson(StringJava(tp_json))
-    json_tp = json.dumps(tp_json)
+    tp_json = java_tp.toJson()
+    load_java_tp(tp_json)
+    _ = json.dumps(tp_json)
     as_python_json = json.loads(tp_json)
-    transform_process = TransformProcessPipelineStep()\
+    transform_process = TransformProcessStep()\
         .set_input(None, ['first'], ['String'])\
         .set_output(None, ['first'], ['String'])\
         .transform_process(as_python_json)
 
-    input_names = ['default']
-    output_names = ['default']
     port = random.randint(1000, 65535)
     serving_config = ServingConfig(http_port=port,
                                    input_data_type='JSON',
@@ -42,19 +36,14 @@ def test_build_tp():
     inference_config = InferenceConfiguration(serving_config=serving_config,
                                               pipeline_steps=[transform_process])
     as_json = config_to_dict_with_type(inference_config)
-    inference_configuration_java_class = autoclass(
-        'ai.konduit.serving.InferenceConfiguration')
-    config = inference_configuration_java_class.fromJson(
-        StringJava(json.dumps(as_json)))
+    inference_from_json(as_json)
 
     server = Server(inference_config=inference_config,
                     extra_start_args='-Xmx8g',
                     jar_path='konduit.jar')
     server.start()
     print('Process started. Sleeping 10 seconds.')
-    client = Client(input_names=input_names,
-                    output_names=output_names,
-                    return_output_type='JSON',
+    client = Client(return_output_type='JSON',
                     input_type='JSON',
                     endpoint_output_type='RAW',
                     url='http://localhost:' + str(port))

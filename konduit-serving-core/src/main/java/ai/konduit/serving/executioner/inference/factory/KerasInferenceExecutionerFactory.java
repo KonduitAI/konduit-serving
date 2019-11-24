@@ -31,8 +31,7 @@ import ai.konduit.serving.model.loader.ModelGuesser;
 import ai.konduit.serving.model.loader.ModelLoader;
 import ai.konduit.serving.model.loader.dl4j.cg.ComputationGraphModelLoader;
 import ai.konduit.serving.model.loader.dl4j.mln.MultiLayerNetworkModelLoader;
-import ai.konduit.serving.pipeline.ModelPipelineStep;
-import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import lombok.extern.slf4j.Slf4j;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 
@@ -45,7 +44,7 @@ import java.util.List;
 public class KerasInferenceExecutionerFactory implements InferenceExecutionerFactory {
 
     @Override
-    public InitializedInferenceExecutionerConfig create(ModelPipelineStep modelPipelineStepConfig) throws Exception {
+    public InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception {
         ModelLoader kerasLoader;
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
         ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();

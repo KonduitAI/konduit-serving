@@ -25,11 +25,11 @@ package ai.konduit.serving.inference;
 import ai.konduit.serving.util.python.PythonVariables;
 import ai.konduit.serving.executioner.Pipeline;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.pipeline.PythonPipelineStep;
-import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
-import ai.konduit.serving.pipeline.steps.PythonPipelineStepRunner;
+import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.pipeline.step.TransformProcessStep;
+import ai.konduit.serving.pipeline.steps.PythonStepRunner;
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.pipeline.steps.TransformProcessPipelineStepRunner;
+import ai.konduit.serving.pipeline.steps.TransformProcessStepRunner;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.MathOp;
 import org.datavec.api.transform.TransformProcess;
@@ -62,8 +62,8 @@ public class PythonPipelineTests {
                 .returnAllInputs(false)
                 .build();
         
-        PythonPipelineStep config = new PythonPipelineStep(pythonConfig);
-        PythonPipelineStepRunner pythonPipelineStep = new PythonPipelineStepRunner(config);
+        PythonStep config = new PythonStep(pythonConfig);
+        PythonStepRunner pythonPipelineStep = new PythonStepRunner(config);
 
         Schema schema = new Schema.Builder()
                 .addColumnNDArray("second",new long[]{1,1})
@@ -71,12 +71,12 @@ public class PythonPipelineTests {
         TransformProcess transformProcess = new TransformProcess.Builder(schema)
                 .ndArrayScalarOpTransform("second", MathOp.Add,1.0).build();
 
-        TransformProcessPipelineStep tpStep = new TransformProcessPipelineStep()
+        TransformProcessStep tpStep = new TransformProcessStep()
                 .setInput(new String[]{"second"}, new SchemaType[]{SchemaType.NDArray})
                 .setOutput(new String[]{"output"}, new SchemaType[]{SchemaType.NDArray})
                 .transformProcess(transformProcess);
         
-        TransformProcessPipelineStepRunner transformProcessPipelineStep = new TransformProcessPipelineStepRunner(tpStep);
+        TransformProcessStepRunner transformProcessPipelineStep = new TransformProcessStepRunner(tpStep);
         
         List<Writable> record = new ArrayList<>();
         

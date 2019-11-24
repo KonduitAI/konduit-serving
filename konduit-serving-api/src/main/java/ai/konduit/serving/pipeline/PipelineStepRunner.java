@@ -23,6 +23,7 @@
 package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.SchemaType;
+import ai.konduit.serving.pipeline.step.CustomPipelineStep;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.Writable;
 import org.nd4j.linalg.api.ndarray.INDArray;

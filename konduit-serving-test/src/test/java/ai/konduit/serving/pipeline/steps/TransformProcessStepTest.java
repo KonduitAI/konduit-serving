@@ -1,6 +1,6 @@
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
+import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import org.datavec.api.transform.TransformProcess;
@@ -24,7 +24,7 @@ public class TransformProcessStepTest {
         }
         TransformProcess tp = transformProcessBuilder.build();
 
-        TransformProcessPipelineStep tpps = new TransformProcessPipelineStep()
+        TransformProcessStep tpps = new TransformProcessStep()
                 .step("foo", tp, outputSchema)
                 .step("bar", tp, outputSchema);
 
@@ -34,7 +34,7 @@ public class TransformProcessStepTest {
         assert tpps.getOutputNames().contains("foo");
         assert tpps.getOutputNames().contains("bar");
 
-        TransformProcessPipelineStep tpps2 = new TransformProcessPipelineStep(tp, outputSchema);
+        TransformProcessStep tpps2 = new TransformProcessStep(tp, outputSchema);
 
         assert  tpps2.getTransformProcesses().get("default") == tp;
 

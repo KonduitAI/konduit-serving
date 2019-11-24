@@ -22,7 +22,7 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.ArrayConcatenationStep;
+import ai.konduit.serving.pipeline.step.ArrayConcatenationStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;
@@ -41,12 +41,12 @@ import java.util.Map;
  * for each input.
  *
  * This is meant to be used mainly right before a
- * {@link InferenceExecutionerPipelineStepRunner}
+ * {@link InferenceExecutionerStepRunner}
  * that takes in 1 array per named input.
  *
  * @author Adam Gibson
  */
-public class ArrayConcatenationStepRunner extends BasePipelineStepRunner {
+public class ArrayConcatenationStepRunner extends BaseStepRunner {
 
     private Map<Integer,Integer> concatDimensionsForIndex;
 

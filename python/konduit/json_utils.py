@@ -1,13 +1,12 @@
 
 
-def has_as_dict_attribute(object):
+def has_as_dict_attribute(python_object):
     """Checks if an object has a callable "as_dict" attribute
 
-    :param object: any Python object
+    :param python_object: any Python object
     """
-    if not hasattr(object.__class__, 'as_dict') and callable(getattr(object.__class__, 'as_dict')):
-        raise AttributeError(
-            'Passed in object does not have an as_dict method.')
+    if not hasattr(python_object.__class__, 'as_dict') and callable(getattr(python_object.__class__, 'as_dict')):
+        raise AttributeError('Passed in Python object does not have an as_dict method.')
 
 
 def _invoke_setter_on(input_object, method_name, value):

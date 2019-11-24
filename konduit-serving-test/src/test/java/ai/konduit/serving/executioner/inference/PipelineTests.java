@@ -22,8 +22,8 @@
 
 package ai.konduit.serving.executioner.inference;
 
-import ai.konduit.serving.pipeline.TransformProcessPipelineStep;
-import ai.konduit.serving.pipeline.steps.TransformProcessPipelineStepRunner;
+import ai.konduit.serving.pipeline.step.TransformProcessStep;
+import ai.konduit.serving.pipeline.steps.TransformProcessStepRunner;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import org.datavec.api.records.Record;
@@ -58,7 +58,7 @@ public class PipelineTests {
                 .build();
         
         
-        TransformProcessPipelineStep config = TransformProcessPipelineStep.builder()
+        TransformProcessStep config = TransformProcessStep.builder()
                 .inputName("default")
                 .inputSchema("default",new SchemaType[]{SchemaType.String})
                 .outputSchema("default",new SchemaType[]{SchemaType.String})
@@ -67,7 +67,7 @@ public class PipelineTests {
                 .transformProcess("default", transformProcess)
                 .build();
         
-        TransformProcessPipelineStepRunner step = new TransformProcessPipelineStepRunner(config);
+        TransformProcessStepRunner step = new TransformProcessStepRunner(config);
         
         List<Writable> ret = new ArrayList<>();
         ret.add(new Text("appended"));
@@ -97,13 +97,13 @@ public class PipelineTests {
                 .ndArrayScalarOpTransform("first", MathOp.Add,1.0)
                 .build();
         
-        TransformProcessPipelineStep config = TransformProcessPipelineStep.builder()
+        TransformProcessStep config = TransformProcessStep.builder()
                 .inputName("default")
                 .inputColumnName("default",Arrays.asList(new String[]{"first"}))
                 .transformProcess("default", transformProcess)
                 .build();
         
-        TransformProcessPipelineStepRunner step = new TransformProcessPipelineStepRunner(config);
+        TransformProcessStepRunner step = new TransformProcessStepRunner(config);
         
         List<Writable> ret = new ArrayList<>();
         ret.add(new NDArrayWritable(Nd4j.scalar(1.0)));

@@ -24,6 +24,8 @@ package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
+import ai.konduit.serving.pipeline.step.PythonStep;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -33,8 +35,8 @@ public class PipelineSerializationTests {
     @Test
     public void testFromYaml() throws Exception {
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
-                .pipelineStep(new PythonPipelineStep())
-                .pipelineStep(new PythonPipelineStep())
+                .pipelineStep(new PythonStep())
+                .pipelineStep(new PythonStep())
                 .servingConfig(ServingConfig.builder().build())
                 .build();
         assertEquals(inferenceConfiguration,InferenceConfiguration.fromYaml(inferenceConfiguration.toYaml()));
@@ -42,14 +44,14 @@ public class PipelineSerializationTests {
 
     @Test
     public void testPipelineSerialization() throws  Exception {
-        ImageLoading imageLoadingConfig = ImageLoading.builder()
+        ImageLoadingStep imageLoadingStepConfig = ImageLoadingStep.builder()
                 .dimensionsConfig("default",new Long[]{426L,426L,3L})
                 .dimensionsConfig("1",new Long[]{426L,426L,3L})
                 .build();
 
         InferenceConfiguration config = InferenceConfiguration.builder()
-                .pipelineStep(imageLoadingConfig)
-                .pipelineStep(imageLoadingConfig)
+                .pipelineStep(imageLoadingStepConfig)
+                .pipelineStep(imageLoadingStepConfig)
                 .build();
         System.out.println(config.toJson());
 

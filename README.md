@@ -58,8 +58,8 @@ model in a deployment. These steps generally include:
 such as labels in a classification example.
 
 For instance, if you want to run arbitrary Python code for pre-processing purposes,
-you can use a`PythonPipelineStep`. To perform inference on a (mix of) TensorFlow,
-Keras, DL4J or PMML models, use `ModelPipelineStep`. Konduit Serving also contains
+you can use a`PythonStep`. To perform inference on a (mix of) TensorFlow,
+Keras, DL4J or PMML models, use `ModelStep`. Konduit Serving also contains
 functionality for other preprocessing tasks, such as DataVec transform processes,
 or image transforms.
 
@@ -311,8 +311,8 @@ profile, and the output will be found in model-server-uber-jar/target.
 
 Konduit Serving supports customization via 2 ways: Python code or implementing your own
 [PipelineStep](konduit-serving-api/src/main/java/ai/konduit/serving/pipeline/PipelineStep.java)
-via the [CustomPipelineStep](konduit-serving-api/src/main/java/ai/konduit/serving/pipeline/PipelineStep.java)
-and associated [PipelineStepRunner](konduit-serving-core/src/main/java/ai/konduit/serving/pipeline/steps/CustomPipelineStepRunner.java#L40)
+via the [CustomPipelineStep](konduit-serving-api/src/main/java/ai/konduit/serving/pipeline/step/CustomPipelineStep.java)
+and associated [PipelineStepRunner](konduit-serving-core/src/main/java/ai/konduit/serving/pipeline/steps/CustomStepRunner.java#L40)
 in Java.
 
 Custom pipeline steps are generally recommended for performance reasons.

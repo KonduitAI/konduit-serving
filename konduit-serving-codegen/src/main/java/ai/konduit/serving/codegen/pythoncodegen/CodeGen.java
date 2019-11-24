@@ -25,7 +25,10 @@ package ai.konduit.serving.codegen.pythoncodegen;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.*;
 import ai.konduit.serving.model.*;
-import ai.konduit.serving.pipeline.*;
+import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.config.NormalizationConfig;
+import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
+import ai.konduit.serving.pipeline.step.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -46,7 +49,7 @@ import java.util.regex.Pattern;
  *
  */
 public class CodeGen {
-    public static void main( String[] args) throws Exception {
+    public static void main( String[] args ) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper,JsonSchemaConfig.html5EnabledSchema());
         Class<?>[] clazzes = {
@@ -67,13 +70,12 @@ public class CodeGen {
                 ServingConfig.class,
                 PipelineStep.class,
                 NormalizationConfig.class,
-                PythonPipelineStep.class,
-                TransformProcessPipelineStep.class,
-                ModelPipelineStep.class,
+                PythonStep.class,
+                TransformProcessStep.class,
+                ModelStep.class,
                 ArrayConcatenationStep.class,
-                JsonExpanderTransform.class,
-                ImageLoading.class,
-                MemMapConfig.class,
+                JsonExpanderTransformStep.class,
+                ImageLoadingStep.class,
                 InferenceConfiguration.class
         };
 
@@ -107,7 +109,6 @@ public class CodeGen {
             StringBuffer command = new StringBuffer();
 
             command.append(String.format("jsonschema2popo -o %s %s\n", pythonFile.getAbsolutePath(), classJson.getAbsolutePath())); // schemaJsonFile
-
             Process p = runtime.exec(command.toString());
             p.waitFor(10, TimeUnit.SECONDS);
             if(p.exitValue() != 0) {
@@ -140,7 +141,7 @@ public class CodeGen {
                         && !splitLine.contains("ValueError")
                         && !splitLine.contains("class")
                         && !splitLine.contains("isinstance")
-                        && !splitLine.contains("enum")) {
+                        && !splitLine.contains("enum")){
                     splitLine = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, splitLine);
 
                 }
@@ -184,7 +185,7 @@ public class CodeGen {
         StringBuffer sb = new StringBuffer();
         sb.append("import enum\n");
         sb.append("from konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n");
-
+        
         //dictionary wrapper for serialization
         sb.append(loadedModule);
         FileUtils.writeStringToFile(newModule, sb.toString(),Charset.defaultCharset(),false);
