@@ -102,7 +102,8 @@ public class PmmlIrisTest extends BaseVerticleTest {
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .inputDataType(DataType.JSON)
-                .predictionType(PredictionType.CLASSIFICATION)
+                .outputDataType(ai.konduit.serving.config.Output.DataType.JSON)
+                .predictionType(ai.konduit.serving.config.Output.PredictionType.RAW)
                 .build();
 
         PmmlPipelineStep pmmlPipelineStep = PmmlPipelineStep.builder()
@@ -120,7 +121,7 @@ public class PmmlIrisTest extends BaseVerticleTest {
                         SchemaType.Double,
                 })
                 .outputColumnName("default",Arrays.asList("class"))
-                .outputSchema("default",new SchemaType[]{ai.konduit.serving.config.SchemaType.String})
+                .outputSchema("default",new SchemaType[]{SchemaType.String})
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()

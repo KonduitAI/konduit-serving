@@ -406,7 +406,7 @@ public class PipelineExecutioner {
                         JsonObject jsonObject1 = new JsonObject(text.toString());
                         writeJson.put(outputSchema.getName(i),jsonObject1);
                     }
-                    else if(text.toString().charAt(0) == ']'){
+                    else if(text.toString().charAt(0) == '[') {
                         JsonArray jsonObject = new JsonArray(text.toString());
                         writeJson.put(outputSchema.getName(i),jsonObject);
                     }
