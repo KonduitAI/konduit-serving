@@ -33,9 +33,7 @@ import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.config.Input.DataType;
 import ai.konduit.serving.config.SchemaType;
 import org.nd4j.linalg.dataset.DataSet;
-import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.Output;
-import  ai.konduit.serving.pipeline.PmmlPipelineStep;
 import ai.konduit.serving.InferenceConfiguration;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -106,7 +104,7 @@ public class PmmlIrisTest extends BaseVerticleTest {
                 .predictionType(ai.konduit.serving.config.Output.PredictionType.RAW)
                 .build();
 
-        PmmlPipelineStep pmmlPipelineStep = PmmlPipelineStep.builder()
+        ai.konduit.serving.pipeline.step.PmmlStep pmmlPipelineStep = ai.konduit.serving.pipeline.step.PmmlStep.builder()
                 .modelConfig(pmmlConfig)
                 .inputColumnName("default", Arrays.asList(
                         "sepal_length",
