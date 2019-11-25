@@ -121,13 +121,14 @@ public class MemMapRouteDefiner {
         memMapConfig = inferenceConfiguration.getMemMapConfig();
 
         String path =  inferenceConfiguration.getMemMapConfig().getUnkVectorPath();
-        try {
-            byte[] content = FileUtils.readFileToByteArray(new File(path));
-            unkVector = Nd4j.createNpyFromByteArray(content);
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to load unknown vector: " + path);
-        }
-
+       if(path != null) {
+           try {
+               byte[] content = FileUtils.readFileToByteArray(new File(path));
+               unkVector = Nd4j.createNpyFromByteArray(content);
+           } catch (IOException e) {
+               throw new IllegalStateException("Unable to load unknown vector: " + path);
+           }
+       }
 
 
         arr = new ThreadLocal<>();

@@ -74,7 +74,6 @@ public class MemMapArrayResultRangeJsonVerticleTest extends ai.konduit.serving.v
     }
 
     @Test(timeout = 60000)
-
     public void testArrayResultJson(TestContext context) {
         HttpClient httpClient = vertx.createHttpClient();
         JsonArray jsonArray = new JsonArray();

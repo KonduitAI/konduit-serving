@@ -33,6 +33,6 @@ public class PmmlStep extends ModelStep {
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.PmmlInferenceExecutionerPipelineStepRunner";
+        return "ai.konduit.serving.pipeline.PmmlInferenceExecutionerStepRunner";
     }
 }

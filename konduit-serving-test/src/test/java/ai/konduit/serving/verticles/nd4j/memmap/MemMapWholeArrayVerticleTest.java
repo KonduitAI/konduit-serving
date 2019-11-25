@@ -83,7 +83,6 @@ public class MemMapWholeArrayVerticleTest extends BaseMemMapTest {
 
 
     @Test(timeout = 60000)
-
     public void testArrayResultRangeJson(TestContext context) {
         HttpClient httpClient = vertx.createHttpClient();
         JsonArray jsonArray = new JsonArray();
