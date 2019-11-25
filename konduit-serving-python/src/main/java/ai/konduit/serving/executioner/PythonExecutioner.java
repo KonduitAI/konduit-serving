@@ -607,13 +607,13 @@ public class PythonExecutioner {
         acquireGIL();
         _exec(code);
         if (_hasGlobalVariable("setup") && _hasGlobalVariable("run")){
-            log.debug("setup() and run() methods found.");
+            log.info("setup() and run() methods found.");
             if (!_hasGlobalVariable("__setup_done__")){
                 log.debug("Calling setup()...");
                 _exec("setup()");
                 _exec("__setup_done__ = True");
             }
-            log.debug("Calling run()...");
+            log.info("Calling run()...");
             _exec("run()");
         }
         log.info("Exec done");
@@ -754,6 +754,13 @@ public class PythonExecutioner {
         String name = interpreterNameFromTransform(transform);
         setInterpreter(name);
         Preconditions.checkNotNull(transform.getOutputs(),"Transform outputs were null!");
+        exec(transform.getCode(), inputs, transform.getOutputs());
+        return transform.getOutputs();
+    }
+    public static PythonVariables execWithSetupAndRun(PythonTransform transform, PythonVariables inputs)throws Exception {
+        String name = interpreterNameFromTransform(transform);
+        setInterpreter(name);
+        Preconditions.checkNotNull(transform.getOutputs(),"Transform outputs were null!");
         execWithSetupAndRun(transform.getCode(), inputs, transform.getOutputs());
         return transform.getOutputs();
     }
@@ -765,6 +772,18 @@ public class PythonExecutioner {
      * @return all python variables
      */
     public static PythonVariables execAndReturnAllVariables(String code) {
+        exec(code + '\n' + outputCodeForAllVariables());
+        PythonVariables allVars = new PythonVariables();
+        allVars.addDict(ALL_VARIABLES_KEY);
+        try {
+            _readOutputs(allVars);
+        }catch (IOException e) {
+            log.error("Failed to read outputs", e);
+        }
+
+        return expandInnerDict(allVars, ALL_VARIABLES_KEY);
+    }
+    public static PythonVariables execWithSetupRunAndReturnAllVariables(String code) {
         execWithSetupAndRun(code + '\n' + outputCodeForAllVariables());
         PythonVariables allVars = new PythonVariables();
         allVars.addDict(ALL_VARIABLES_KEY);
@@ -787,6 +806,10 @@ public class PythonExecutioner {
     public static PythonVariables execAndReturnAllVariables(String code, PythonVariables pyInputs) throws Exception {
         String inputCode = inputCode(pyInputs);
         return execAndReturnAllVariables(inputCode + code);
+    }
+    public static PythonVariables execWithSetupRunAndReturnAllVariables(String code, PythonVariables pyInputs) throws Exception {
+        String inputCode = inputCode(pyInputs);
+        return execWithSetupRunAndReturnAllVariables(inputCode + code);
     }
 
 
@@ -999,7 +1022,7 @@ public class PythonExecutioner {
             throw new IllegalStateException("Unable to read python file pythonexec/outputcode.py from classpath");
         }
 
-        outputCode += String.format("vars =  {key:value for (key,value) in locals().items() if not key.startswith('_') and key is not '%s' and key is not 'loc' and type(value) in (list, dict, str, int, float, bool) or value is None}\n",fileVarName);
+        outputCode += String.format("vars =  {key:value for (key,value) in locals().items() if not key.startswith('_') and key is not '%s' and key is not 'loc' and type(value) in (list, dict, str, int, float, bool, type(None))}\n",fileVarName);
         outputCode += String.format("with open('" + getTempFile() + "', 'w') as %s:json.dump({",fileVarName);
         outputCode +=String.format( "\"" + ALL_VARIABLES_KEY + "\"" + ": vars}, %s)\n",fileVarName);
         return outputCode;
