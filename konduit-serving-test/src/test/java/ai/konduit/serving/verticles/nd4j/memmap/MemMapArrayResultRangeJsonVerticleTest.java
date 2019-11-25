@@ -43,6 +43,8 @@ import org.nd4j.serde.binary.BinarySerde;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 
+import static junit.framework.TestCase.assertTrue;
+
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class MemMapArrayResultRangeJsonVerticleTest extends BaseVerticleTest {
@@ -121,6 +123,7 @@ public class MemMapArrayResultRangeJsonVerticleTest extends BaseVerticleTest {
         INDArray arr = Nd4j.linspace(1,4,4);
         File tmpFile = new File(temporary.getRoot(),"tmpfile.bin");
         BinarySerde.writeArrayToDisk(arr,tmpFile);
+        assertTrue(tmpFile.exists());
         config.put(MemMapVerticle.ARRAY_URL,tmpFile.getAbsolutePath());
         return config;
     }

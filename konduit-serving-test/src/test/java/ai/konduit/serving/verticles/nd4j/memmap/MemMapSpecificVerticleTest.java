@@ -44,6 +44,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 
 import static com.jayway.restassured.RestAssured.given;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 
@@ -113,12 +114,14 @@ public class MemMapSpecificVerticleTest extends BaseVerticleTest {
         JsonObject config = new JsonObject();
         File unkVectorPath = temporary.newFile();
         Nd4j.writeAsNumpy(unkVector,unkVectorPath);
+        assertTrue(unkVectorPath.exists());
         config.put(VerticleConstants.MEM_MAP_VECTOR_PATH,unkVectorPath.getAbsolutePath());
         config.put("httpPort",String.valueOf(port));
         INDArray arr = Nd4j.linspace(1,8,8).reshape(2,4);
         File tmpFile = new File(temporary.getRoot(),"tmpfile.npy");
         byte[] save = Nd4j.toNpyByteArray(arr);
         FileUtils.writeByteArrayToFile(tmpFile,save);
+        assertTrue(tmpFile.exists());
         config.put(MemMapVerticle.ARRAY_URL,tmpFile.getAbsolutePath());
         return config;
     }
