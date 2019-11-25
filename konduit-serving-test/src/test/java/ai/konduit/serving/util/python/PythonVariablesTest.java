@@ -24,12 +24,15 @@ package ai.konduit.serving.util.python;
 
 import ai.konduit.serving.executioner.PythonExecutioner;
 import org.junit.Test;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNull;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class PythonVariablesTest {
@@ -54,17 +57,24 @@ public class PythonVariablesTest {
                 PythonVariables.Type.BOOL,
                 PythonVariables.Type.DICT,
                 PythonVariables.Type.LIST,
+                PythonVariables.Type.LIST,
                 PythonVariables.Type.FILE,
                 PythonVariables.Type.NDARRAY
         };
 
+        NumpyArray npArr = new NumpyArray(Nd4j.scalar(1.0));
         Object[] values = {
                 1L,1.0,"1",true, Collections.singletonMap("1",1),
-                new Object[]{1},"type", new NumpyArray(Nd4j.scalar(1.0))
+                new Object[]{1}, Arrays.asList(1),"type", npArr
+        };
+
+        Object[] expectedValues = {
+                1L,1.0,"1",true, Collections.singletonMap("1",1),
+                new Object[]{1}, new Object[]{1},"type", npArr
         };
 
         for(int i = 0; i < types.length; i++) {
-            testInsertGet(pythonVariables,types[i].name(),values[i],types[i],values[i]);
+            testInsertGet(pythonVariables,types[i].name() + i,values[i],types[i],expectedValues[i]);
         }
 
         assertEquals(types.length,pythonVariables.getVariables().length);
@@ -76,7 +86,17 @@ public class PythonVariablesTest {
         assertNull(pythonVariables.getValue(key));
         pythonVariables.setValue(key,value);
         assertNotNull(pythonVariables.getValue(key));
-        assertEquals(expectedValue,pythonVariables.getValue(key));
+        Object actualValue = pythonVariables.getValue(key);
+        if (expectedValue instanceof Object[]){
+            assert actualValue instanceof Object[];
+            Object[] actualArr = (Object[])actualValue;
+            Object[] expectedArr = (Object[])expectedValue;
+            assertArrayEquals(expectedArr, actualArr);
+        }
+        else{
+            assertEquals(expectedValue,pythonVariables.getValue(key));
+        }
+
     }
 
 
