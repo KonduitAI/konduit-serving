@@ -744,12 +744,6 @@
             </modules>
         </profile>
         <profile>
-            <id>orchestration</id>
-            <modules>
-                <module>konduit-serving-orchestration</module>
-            </modules>
-        </profile>
-        <profile>
             <id>release</id>
             <build>
                 <pluginManagement>
