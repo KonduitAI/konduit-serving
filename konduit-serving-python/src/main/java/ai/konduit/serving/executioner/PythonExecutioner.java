@@ -607,13 +607,13 @@ public class PythonExecutioner {
         acquireGIL();
         _exec(code);
         if (_hasGlobalVariable("setup") && _hasGlobalVariable("run")){
-            log.info("setup() and run() methods found.");
+            log.debug("setup() and run() methods found.");
             if (!_hasGlobalVariable("__setup_done__")){
                 log.debug("Calling setup()...");
                 _exec("setup()");
                 _exec("__setup_done__ = True");
             }
-            log.info("Calling run()...");
+            log.debug("Calling run()...");
             _exec("run()");
         }
         log.info("Exec done");
