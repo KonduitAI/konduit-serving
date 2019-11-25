@@ -63,7 +63,7 @@
     </build>
     <profiles>
         <profile>
-            <id>pipelines</id>
+            <id>konduit-serving</id>
             <dependencies>
                 <dependency>
                     <groupId>ai.konduit.serving</groupId>

@@ -117,7 +117,7 @@ public interface JsonArrayConverter {
      * Convert a {@link JsonArray}
      * given an input inputSchema to an {@link ArrowWritableRecordBatch}
      * representing a schemaed input for use with nd4j based
-     * pipelines where data in memory is represented by arrow.
+     * konduit-serving where data in memory is represented by arrow.
      *
      *  The {@link ArrowWritableRecordBatch} is an implementation of
      *  the expected input format for {@link org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator}

@@ -260,7 +260,6 @@ public class SchemaTypeUtils {
             List<INDArray> accum = new ArrayList<>();
             //for each record
             for(Record record : records) {
-                Writable curr = record.getRecord().get(i);
                 NDArrayWritable writable = (NDArrayWritable) record.getRecord().get(i);
                 accum.add(writable.get());
 

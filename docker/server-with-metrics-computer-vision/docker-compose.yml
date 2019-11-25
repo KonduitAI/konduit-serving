@@ -25,7 +25,7 @@ services:
      - -Dai.konduit.serving.python.javacpp.path.append=none
      - -Dvertx.options.maxEventLoopExecuteTime=10000000000000
      - -cp
-     - /srv/pipelines.jar
+     - /srv/konduit-serving.jar
      - ai.konduit.serving.configprovider.KonduitServingMain
      - --configPath
      - /usr/share/input-data/config.json

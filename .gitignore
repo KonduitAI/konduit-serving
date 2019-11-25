@@ -51,5 +51,5 @@ konduit-serving.pid
 .classpath
 
 # uberjar creation
-pipelines.jar
+konduit-serving.jar
 konduit.jar
