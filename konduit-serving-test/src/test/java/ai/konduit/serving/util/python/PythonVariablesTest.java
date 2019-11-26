@@ -34,6 +34,7 @@ import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PythonVariablesTest {
 
@@ -88,7 +89,7 @@ public class PythonVariablesTest {
         assertNotNull(pythonVariables.getValue(key));
         Object actualValue = pythonVariables.getValue(key);
         if (expectedValue instanceof Object[]){
-            assert actualValue instanceof Object[];
+            assertTrue(actualValue instanceof Object[]);
             Object[] actualArr = (Object[])actualValue;
             Object[] expectedArr = (Object[])expectedValue;
             assertArrayEquals(expectedArr, actualArr);
