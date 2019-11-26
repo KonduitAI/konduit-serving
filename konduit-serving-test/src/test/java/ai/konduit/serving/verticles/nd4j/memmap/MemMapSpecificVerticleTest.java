@@ -22,19 +22,18 @@
 
 package ai.konduit.serving.verticles.nd4j.memmap;
 
-import ai.konduit.serving.verticles.VerticleConstants;
-import ai.konduit.serving.verticles.BaseVerticleTest;
+import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.config.MemMapConfig;
+
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Handler;
-import io.vertx.core.http.HttpServerRequest;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -49,53 +48,20 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class MemMapSpecificVerticleTest extends BaseVerticleTest {
+public class MemMapSpecificVerticleTest extends BaseMemMapTest {
+
     private INDArray unkVector = Nd4j.linspace(1,4,4).addi(2);
 
-    @Override
-    public Class<? extends AbstractVerticle> getVerticalClazz() {
-        return MemMapVerticle.class;
-    }
-
-    @After
-    public void after(TestContext context) {
-        vertx.close(context.asyncAssertSuccess());
-    }
-
-
-
-    @Override
-    public Handler<HttpServerRequest> getRequest() {
-        Handler<HttpServerRequest> ret = new Handler<HttpServerRequest>() {
-            @Override
-            public void handle(HttpServerRequest req) {
-                //should be json body of classification
-                req.bodyHandler(body -> {
-                    System.out.println("Finish body" + body);
-                });
-
-                req.exceptionHandler(exception -> {
-                    exception.printStackTrace();
-                });
-
-
-
-
-            }
-        };
-
-        return ret;
-    }
 
 
     @Test(timeout = 60000)
-
     public void testArrayResultRangeJson(TestContext context) {
         JsonArray jsonArray = new JsonArray();
         jsonArray.add(-1);
         jsonArray.add(1);
         Response response = given().contentType(ContentType.JSON)
-                .content(jsonArray.toString())
+                .body(jsonArray.toString())
+                .header("Content-Type","application/json")
                 .port(port)
                 .post("/array/indices/numpy")
                 .andReturn();
@@ -110,16 +76,24 @@ public class MemMapSpecificVerticleTest extends BaseVerticleTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        JsonObject config = new JsonObject();
         File unkVectorPath = temporary.newFile();
         Nd4j.writeAsNumpy(unkVector,unkVectorPath);
-        config.put(VerticleConstants.MEM_MAP_VECTOR_PATH,unkVectorPath.getAbsolutePath());
-        config.put("httpPort",String.valueOf(port));
         INDArray arr = Nd4j.linspace(1,8,8).reshape(2,4);
         File tmpFile = new File(temporary.getRoot(),"tmpfile.npy");
         byte[] save = Nd4j.toNpyByteArray(arr);
         FileUtils.writeByteArrayToFile(tmpFile,save);
-        config.put(MemMapVerticle.ARRAY_URL,tmpFile.getAbsolutePath());
-        return config;
+        InferenceConfiguration inferenceConfiguration =
+                InferenceConfiguration.builder()
+                        .servingConfig(ServingConfig.builder()
+                                .httpPort(port)
+                                .build())
+                        .memMapConfig(MemMapConfig.builder()
+                                .unkVectorPath(unkVectorPath.getAbsolutePath())
+                                .arrayPath(tmpFile.getAbsolutePath())
+                                .build())
+                        .build();
+
+
+        return new JsonObject(inferenceConfiguration.toJson());
     }
 }

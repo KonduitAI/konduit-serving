@@ -4,10 +4,10 @@ After=multi-user.target
 
 [Service]
 Type=forking
-User=pipelines
+User=konduit-serving
 Group=daemon
 Restart=on-success
-EnvironmentFile=/etc/pipelines/konduit-serving-env.sh
+EnvironmentFile=/etc/konduit-serving/konduit-serving-env.sh
 PermissionsStartOnly=true
 ExecStartPre=/bin/sh ${KONDUIT_SERVING_HOME}/sbin/pre-start.sh
 ExecStart=/usr/bin/env bash ${KONDUIT_SERVING_HOME}/sbin/start-konduit-serving-daemon
