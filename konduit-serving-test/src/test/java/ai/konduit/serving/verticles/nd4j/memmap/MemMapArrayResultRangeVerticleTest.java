@@ -23,6 +23,8 @@
 package ai.konduit.serving.verticles.nd4j.memmap;
 
 import ai.konduit.serving.verticles.BaseVerticleTest;
+import ai.konduit.serving.verticles.inference.InferenceVerticle;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
@@ -45,18 +47,7 @@ import java.io.File;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class MemMapArrayResultRangeVerticleTest extends BaseVerticleTest {
-
-    @Override
-    public Class<? extends AbstractVerticle> getVerticalClazz() {
-        return MemMapVerticle.class;
-    }
-
-    @After
-    public void after(TestContext context) {
-        vertx.close(context.asyncAssertSuccess());
-    }
-
+public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verticles.nd4j.memmap.BaseMemMapTest {
 
 
     @Override
@@ -119,14 +110,5 @@ public class MemMapArrayResultRangeVerticleTest extends BaseVerticleTest {
 
 
 
-    @Override
-    public JsonObject getConfigObject() throws Exception {
-        JsonObject config = new JsonObject();
-        config.put("httpPort",String.valueOf(port));
-        INDArray arr = Nd4j.linspace(1,4,4);
-        File tmpFile = new File(temporary.getRoot(),"tmpfile.bin");
-        BinarySerde.writeArrayToDisk(arr,tmpFile);
-        config.put(MemMapVerticle.ARRAY_URL,tmpFile.getAbsolutePath());
-        return config;
-    }
+
 }

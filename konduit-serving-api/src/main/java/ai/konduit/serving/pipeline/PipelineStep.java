@@ -23,9 +23,9 @@
 package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.model.MemMapConfig;
 import ai.konduit.serving.pipeline.config.NormalizationConfig;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
+import ai.konduit.serving.config.MemMapConfig;
 import ai.konduit.serving.pipeline.step.*;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.*;
@@ -62,7 +62,6 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value= ImageLoadingStep.class, name = "ImageLoadingStep"),
         @JsonSubTypes.Type(value= JsonExpanderTransformStep.class, name = "JsonExpanderTransformStep"),
         @JsonSubTypes.Type(value= ArrayConcatenationStep.class, name = "ArrayConcatenationStep"),
-
         @JsonSubTypes.Type(value= MemMapConfig.class, name = "MemMapConfig"),
         @JsonSubTypes.Type(value= NormalizationConfig.class, name = "NormalizationConfig"),
         @JsonSubTypes.Type(value= ObjectDetectionConfig.class, name = "ObjectDetectionConfig"),

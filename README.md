@@ -48,7 +48,7 @@
 ## Overview
 
 Konduit is a serving system and framework focused on deploying machine learning
-pipelines to production. The core abstraction is an idea called a "pipeline step".
+konduit-serving to production. The core abstraction is an idea called a "pipeline step".
 An individual step is meant to perform a task as part of using a machine learning
 model in a deployment. These steps generally include:
 
@@ -69,13 +69,13 @@ Konduit was built with the goal of providing proper low level interop
 with native math libraries such as TensorFlow and our very own DL4J's
 core math library libnd4j.
 
-At the core of pipelines are the [JavaCPP Presets](https://github.com/bytedeco/javacpp-presets),
+At the core of konduit-serving are the [JavaCPP Presets](https://github.com/bytedeco/javacpp-presets),
 [vertx](http://vertx.io) and [Deeplearning4j](http://deeplearning4j.org)
 for running Keras models in Java.
 
 Konduit Serving (like some of the other libraries of a similar concept such as [Seldon](http://seldon.io/) or [MLflow](http://mlflow.org/))
 provides building blocks for developers to write their own production
-ML pipelines from pre-processing to model serving, exposable 
+ML konduit-serving from pre-processing to model serving, exposable 
 as a simple REST API.
 
 Combining JavaCPP's low-level access to C-like apis from
@@ -92,7 +92,7 @@ When dealing with deep learning, we can handle proper inference on the GPU
 Extending that to Python SDK, we know when to return a raw Arrow record and return it as a pandas DataFrame!
 
 We also strive to provide a Python-first SDK that makes it easy to integrate
-pipelines into a Python-first workflow.
+konduit-serving into a Python-first workflow.
 
 Optionally, for the Java community, a vertx based model server and pipeline development
 framework allow a thin abstraction that is embeddable in a Java microservice.
@@ -175,7 +175,7 @@ for our specific application (such as file upload directories for binary files)
 in the KonduitServingMain but allow vertx arguments as well for startup.
 
 For your specific application, consider using the built-in monitoring capabilities for both CPU and GPU memory
-to identify what your ideal pipelines configuration should look like under load.
+to identify what your ideal konduit-serving configuration should look like under load.
 
 ### Core workflow:
 
@@ -199,7 +199,7 @@ Dependencies:
 2. [mvnw](https://stackoverflow.com/questions/38723833/what-is-the-purpose-of-mvnw-and-mvnw-cmd-files/41239572) will download and setup
 Maven automatically 
 
-In order to build pipelines, you need to configure:
+In order to build konduit-serving, you need to configure:
 
 1. Chip (`-Dchip=YOURCHIP`)
 2. OS   (`-Djavacpp.platform=YOUR PLATFORM`)
@@ -230,7 +230,7 @@ Untested but should work (please let us know if you would like to try setting th
 - Android
 - IOS via [gluon](http://gluonhq.com/)
 
-Packaging pipelines for a particular operating system typically will depend on
+Packaging konduit-serving for a particular operating system typically will depend on
 the target system's supported chips.
 For example, we can target Linux with ARM or Intel architecture.
 
@@ -260,7 +260,7 @@ relative to the selected profiles/modules desired for inclusion
 with the package. Output size of the binary depends on a few core variables:
 
 Many of the packaging options depend on the [konduit-serving-distro-bom](konduit-serving-distro-bom)
-or pipelines bill of materials module.
+or konduit-serving bill of materials module.
  This module contains all of the module inclusion behavior
  and all of the various dependencies that end up in the output.
  
@@ -279,7 +279,7 @@ Modules are described below
 -  WAR file(Java Servlet Application Servers): `-Pwar`
 -  TAR file: `-Ptar`
 -  Kubernetes: See the [helm charts](helm-charts) directory
-for sample charts on building a pipelines module for Kubernetes.
+for sample charts on building a konduit-serving module for Kubernetes.
 
 
 For now, there are no hosted packages beyond what is working in pip at the moment.
@@ -291,14 +291,14 @@ Hosted repositories for the packaging formats listed above will be published lat
 - Python support: `-Ppython`
 - PMML support: `-Ppmml`
 
-In order to configure pipelines for your platform, you use a Maven-based build profile.
+In order to configure konduit-serving for your platform, you use a Maven-based build profile.
 An example running on CPU:
 
 ```bash
 ./mvnw -Ppython -Ppmml -Dchip=cpu -Djavacpp.platform=windows-x86_64 -Puberjar clean install -Dmaven.test.skip=true
 ```
 
-This will automatically download and setup a pipelines uber jar file (see the uber jar sub directory)
+This will automatically download and setup a konduit-serving uber jar file (see the uber jar sub directory)
 containing all dependencies needed to run the platform.
 
 The output will be in the target directory of whatever packaging mechanism you specify
@@ -322,14 +322,14 @@ it may not matter.
 
 ## Orchestration
 
-Running multiple versions of a pipelines server with an orchestrations system with load balancing
+Running multiple versions of a konduit-serving server with an orchestrations system with load balancing
 etc will heavily rely on vertx functionality. Konduit Serving is fairly small in scope right now.
 
 Vertx has support for many different kinds of typical clustering patterns 
 such as an [API gateway](https://github.com/sczyh30/vertx-blueprint-microservice/blob/master/api-gateway/src/main/java/io/vertx/blueprint/microservice/gateway/APIGatewayVerticle.java), [circuit breaker](https://github.com/vert-x3/vertx-examples/tree/master/circuit-breaker-examples)
 
 Depending on what the user is looking to do, we could support some built in patterns in the future
-(for example basic [load balanced pipelines](https://github.com/aesteve/vertx-load-balancer/tree/master/src/main/java/io/vertx/examples/loadbalancer)).
+(for example basic [load balanced konduit-serving](https://github.com/aesteve/vertx-load-balancer/tree/master/src/main/java/io/vertx/examples/loadbalancer)).
 
 Vertx itself allows for different patterns that could be implemented in either vertx itself
 or in Kubernetes.
@@ -342,7 +342,7 @@ Examples can be found [here](https://github.com/vert-x3/vertx-examples/tree/mast
 A recommended architecture for fault tolerance is to have an API gateway + load balancer
 setup with multiple versions of the same pipeline on a named endpoint.
 That named endpoint would represent a load balanced pipeline instance
-where 1 of many pipelines maybe served.
+where 1 of many konduit-serving maybe served.
 
 In a proper cluster, you would address each instance (an InferenceVerticle in this case representing a worker)
 as: `/pipeline1/some/inference/endpoint`

@@ -15,16 +15,6 @@
 
     <profiles>
         <profile>
-            <id>python</id>
-            <dependencies>
-                <dependency>
-                    <groupId>ai.konduit.serving</groupId>
-                    <artifactId>konduit-serving-python</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
             <id>native</id>
             <dependencies>
                 <dependency>
@@ -44,20 +34,20 @@
                 </dependency>
             </dependencies>
         </profile>
-        <profile>
-            <id>pmml</id>
-            <dependencies>
-                <dependency>
-                    <groupId>ai.konduit.serving</groupId>
-                    <artifactId>konduit-serving-pmml</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
     </profiles>
 
 
     <dependencies>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-python</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-pmml</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-native</artifactId>
