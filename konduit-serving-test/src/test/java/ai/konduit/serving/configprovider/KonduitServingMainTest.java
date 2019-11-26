@@ -115,7 +115,7 @@ public class KonduitServingMainTest {
         
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .pipelineStep(modelPipelineStep)
+                .step(modelPipelineStep)
                 .build();
 
 

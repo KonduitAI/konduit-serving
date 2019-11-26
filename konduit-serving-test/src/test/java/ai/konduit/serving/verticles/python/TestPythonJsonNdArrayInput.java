@@ -95,7 +95,7 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
-                .pipelineStep(pythonStepConfig)
+                .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
 

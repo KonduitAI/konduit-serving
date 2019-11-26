@@ -1949,28 +1949,28 @@ class ImageLoadingStep(PipelineStep):
 class InferenceConfiguration(object):
 
     _types_map = {
-        'pipelineSteps': {'type': list, 'subtype': PipelineStep},
+        'steps': {'type': list, 'subtype': PipelineStep},
         'servingConfig': {'type': ServingConfig, 'subtype': None},
     }
     _formats_map = {
-        'pipelineSteps': 'table',
+        'steps': 'table',
     }
 
-    def __init__(self, pipeline_steps=None, serving_config=None
+    def __init__(self, steps=None, serving_config=None
                  ):
-        self.__pipeline_steps = pipeline_steps
+        self.__steps = steps
         self.__serving_config = serving_config
 
-    def _get_pipeline_steps(self):
-        return self.__pipeline_steps
+    def _get_steps(self):
+        return self.__steps
 
-    def _set_pipeline_steps(self, value):
+    def _set_steps(self, value):
         if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("pipelineSteps must be list")
+            raise TypeError("steps must be list")
         if not all(isinstance(i, PipelineStep) for i in value):
-            raise TypeError("pipelineSteps list values must be PipelineStep")
-        self.__pipeline_steps = value
-    pipeline_steps = property(_get_pipeline_steps, _set_pipeline_steps)
+            raise TypeError("steps list values must be PipelineStep")
+        self.__steps = value
+    steps = property(_get_steps, _set_steps)
 
     def _get_serving_config(self):
         return self.__serving_config
@@ -1983,9 +1983,9 @@ class InferenceConfiguration(object):
 
     def as_dict(self):
         d = empty_type_dict(self)
-        if self.__pipeline_steps is not None:
-            d['pipelineSteps'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__pipeline_steps]
+        if self.__steps is not None:
+            d['steps'] = [p.as_dict() if hasattr(
+                p, 'as_dict') else p for p in self.__steps]
         if self.__serving_config is not None:
             d['servingConfig'] = self.__serving_config.as_dict() if hasattr(
                 self.__serving_config, 'as_dict') else self.__serving_config

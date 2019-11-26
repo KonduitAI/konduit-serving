@@ -150,7 +150,6 @@ def exec_java_code(code_blocks, file_path):
             class_name = re.search(class_regex, block).group(1)
         else:
             class_name = 'BasicsTest' + markdown_root + str(i)
-            args = None
         basic_test_class = autoclass('ai.konduit.serving.' + class_name)
         basic_test = basic_test_class()
         if is_self_contained_example(block):

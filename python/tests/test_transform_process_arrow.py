@@ -37,8 +37,7 @@ def test_build_tp():
                                    output_data_type='ARROW',
                                    log_timings=True)
 
-    inference_config = InferenceConfiguration(serving_config=serving_config,
-                                              pipeline_steps=[transform_process])
+    inference_config = InferenceConfiguration(serving_config=serving_config, steps=[transform_process])
     as_json = config_to_dict_with_type(inference_config)
     inference_from_json(as_json)
 

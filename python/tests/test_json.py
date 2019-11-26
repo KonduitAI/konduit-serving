@@ -27,7 +27,7 @@ def test_json_compare():
                                     output_names=["loss/Softmax"])
 
     inference = InferenceConfiguration(serving_config=serving_config,
-                                       pipeline_steps=[model_pipeline_step])
+                                       steps=[model_pipeline_step])
 
     assert_config_works(inference)
 
@@ -52,7 +52,7 @@ def test_python_serde():
                                       python_configs=DictWrapper({'default': python_config}))
 
     inference = InferenceConfiguration(serving_config=serving_config,
-                                       pipeline_steps=[python_pipeline_step])
+                                       steps=[python_pipeline_step])
 
     assert_config_works(inference)
 
@@ -64,6 +64,6 @@ def assert_config_works(config):
     test_json = config.toJson()
     test_json_dict = json.loads(test_json)
     config_json_dict = config_json
-    test_pipeline_steps = test_json_dict['pipelineSteps']
-    config_pipeline_steps = config_json_dict['pipelineSteps']
+    test_pipeline_steps = test_json_dict['steps']
+    config_pipeline_steps = config_json_dict['steps']
     assert len(test_pipeline_steps) == len(config_pipeline_steps)

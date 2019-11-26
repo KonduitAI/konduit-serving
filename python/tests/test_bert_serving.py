@@ -35,7 +35,7 @@ def test_server_start():
                                     output_names=output_names)
 
     inference = InferenceConfiguration(serving_config=serving_config,
-                                       pipeline_steps=[model_pipeline_step])
+                                       steps=[model_pipeline_step])
 
     server = Server(inference_config=inference,
                     extra_start_args='-Xmx8g',

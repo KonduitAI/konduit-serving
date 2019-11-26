@@ -40,7 +40,7 @@ import java.util.List;
 public class InferenceConfiguration implements Serializable  {
 
     @Singular
-    private List<PipelineStep> pipelineSteps;
+    private List<PipelineStep> steps;
     private ServingConfig servingConfig;
 
 

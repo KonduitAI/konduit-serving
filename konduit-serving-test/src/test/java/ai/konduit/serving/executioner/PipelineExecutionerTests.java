@@ -82,7 +82,7 @@ public class PipelineExecutionerTests {
         
         
         InferenceConfiguration configuration = InferenceConfiguration.builder()
-                .pipelineStep(modelStepConfig)
+                .step(modelStepConfig)
                 .servingConfig(servingConfig)
                 .build();
         
@@ -140,8 +140,8 @@ public class PipelineExecutionerTests {
         
         InferenceConfiguration configuration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .pipelineStep(imageLoadingStepConfig)
-                .pipelineStep(modelStepConfig)
+                .step(imageLoadingStepConfig)
+                .step(modelStepConfig)
                 .build();
         
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);

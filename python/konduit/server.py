@@ -46,7 +46,7 @@ class Server(object):
         elif serving_config and steps:
             if isinstance(steps, PipelineStep):
                 steps = [steps]
-            self.config = InferenceConfiguration(pipeline_steps=steps, serving_config=serving_config)
+            self.config = InferenceConfiguration(steps=steps, serving_config=serving_config)
         else:
             self.config = InferenceConfiguration()
         self.config_path = config_path

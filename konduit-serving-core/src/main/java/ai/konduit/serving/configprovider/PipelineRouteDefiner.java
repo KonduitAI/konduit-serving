@@ -210,7 +210,7 @@ public class PipelineRouteDefiner {
                 .produces("application/json").handler(ctx -> {
             PredictionType outputAdapterType = PredictionType.valueOf(ctx.pathParam("operation").toUpperCase());
             if(inputSchema == null) {
-                for(PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
+                for(PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
                     if(pipelineStep instanceof ModelStep) {
                         inputSchema = pipelineStep.inputSchemaForName("default");
                     }
@@ -224,7 +224,7 @@ public class PipelineRouteDefiner {
             }
 
             if(outputSchema == null) {
-                for(PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
+                for(PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
                     if(pipelineStep instanceof ModelStep) {
                         outputSchema = pipelineStep.outputSchemaForName("default");
                     }

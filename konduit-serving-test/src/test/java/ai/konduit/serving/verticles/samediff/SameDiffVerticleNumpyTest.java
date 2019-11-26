@@ -103,7 +103,7 @@ public class SameDiffVerticleNumpyTest extends BaseVerticleTest {
         
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .pipelineStep(config)
+                .step(config)
                 .build();
         
         return new JsonObject(inferenceConfiguration.toJson());

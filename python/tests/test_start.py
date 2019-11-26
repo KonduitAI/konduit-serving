@@ -31,7 +31,7 @@ def test_server_start():
                                     output_names=["loss/Softmax"])
 
     inference_config = InferenceConfiguration(serving_config=serving_config,
-                                              pipeline_steps=[model_pipeline_step])
+                                              steps=[model_pipeline_step])
 
     server = Server(inference_config=inference_config,
                     extra_start_args='-Xmx8g', jar_path='konduit.jar')

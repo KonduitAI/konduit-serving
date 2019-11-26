@@ -111,7 +111,7 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .pipelineStep(modelPipelineStep)
+                .step(modelPipelineStep)
                 .build();
         return new JsonObject(inferenceConfiguration.toJson());
     }

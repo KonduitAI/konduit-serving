@@ -124,19 +124,19 @@ public class PipelineExecutioner {
     public void init() {
         ServingConfig servingConfig = config.getServingConfig();
         //initialize input and output data types
-        this.pipeline = Pipeline.getPipeline(config.getPipelineSteps());
-        for (int i = 0; i < config.getPipelineSteps().size(); i++) {
-            PipelineStep pipelineStep = config.getPipelineSteps().get(i);
+        this.pipeline = Pipeline.getPipeline(config.getSteps());
+        for (int i = 0; i < config.getSteps().size(); i++) {
+            PipelineStep pipelineStep = config.getSteps().get(i);
             PipelineStepRunner pipelineStepRunner = pipeline.getSteps().get(i);
             Preconditions.checkNotNull(pipelineStep,"Pipeline step at " + i + " was null!");
             //only use the first input names that appear in the pipeline
             if (inputNames == null && pipelineStep.getInputNames() != null && !pipelineStep.getInputNames().isEmpty()) {
-                inputNames = config.getPipelineSteps().get(i).getInputNames();
+                inputNames = config.getSteps().get(i).getInputNames();
             }
 
             //always have output names change to the last defined names in the pipeline
             if (pipelineStep.getOutputNames() != null && !pipelineStep.getOutputNames().isEmpty()) {
-                outputNames = config.getPipelineSteps().get(i).getOutputNames();
+                outputNames = config.getSteps().get(i).getOutputNames();
             }
 
 

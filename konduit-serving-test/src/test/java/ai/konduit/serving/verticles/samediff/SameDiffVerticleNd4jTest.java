@@ -105,7 +105,7 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
         
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .pipelineStep(modelPipelineConfig)
+                .step(modelPipelineConfig)
                 .build();
         
         return new JsonObject(inferenceConfiguration.toJson());
