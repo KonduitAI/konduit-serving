@@ -348,8 +348,7 @@ class TensorDataType(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):
@@ -516,8 +515,7 @@ class SchemaType(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):
@@ -532,8 +530,7 @@ class Input(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):
@@ -548,8 +545,7 @@ class Output(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):

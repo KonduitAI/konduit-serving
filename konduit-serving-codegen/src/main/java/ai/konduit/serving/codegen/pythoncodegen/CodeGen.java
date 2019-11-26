@@ -83,15 +83,13 @@ public class CodeGen {
 
         String sep = File.separator;
 
-        String codegenBasePath = System.getProperty("user.dir");
-        String projectBasePath = codegenBasePath.replace(sep + "model-server-codegen", "");
+        String codeGenBasePath = System.getProperty("user.dir");
+        String projectBasePath = codeGenBasePath.replace(sep + "model-server-codegen", "");
 
-        StringBuffer pythonImports = new StringBuffer();
-        pythonImports.append("import enum\n");
-        pythonImports.append("from konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n");
-
-        File newModule = new File( projectBasePath + sep + "python" + sep + "konduit" + sep + "base_inference.py");
-        newModule.delete();
+        File newModule = new File(
+                projectBasePath + sep + "python" + sep + "konduit" + sep + "base_inference.py");
+        boolean moduleDeleted = newModule.delete();
+        System.out.println(moduleDeleted);
         Runtime runtime = Runtime.getRuntime();
         Pattern replace = Pattern.compile("class\\s[A-Za-z]+:");
 
@@ -103,14 +101,16 @@ public class CodeGen {
             objectNode.put("title",clazz.getSimpleName());
             File classJson = new File("schema-%s.json", clazz.getSimpleName());
             if(classJson.exists()) {
-                classJson.delete();
+                boolean deleted = classJson.delete();
+                System.out.println(deleted);
             }
             FileUtils.writeStringToFile(classJson, objectMapper.writeValueAsString(jsonNode), Charset.defaultCharset());
-            File pythonFile = new File(String.format(projectBasePath + sep + "python" + sep +"%s.py",clazz.getSimpleName().toLowerCase()));
-            StringBuffer command = new StringBuffer();
+            File pythonFile = new File(String.format(projectBasePath + sep + "python"
+                    + sep +"%s.py",clazz.getSimpleName().toLowerCase()));
 
-            command.append(String.format("jsonschema2popo -o %s %s\n", pythonFile.getAbsolutePath(), classJson.getAbsolutePath())); // schemaJsonFile
-            Process p = runtime.exec(command.toString());
+            Process p = runtime.exec(String.format("jsonschema2popo -o %s %s\n", pythonFile.getAbsolutePath(),
+                    classJson.getAbsolutePath())
+            );
             p.waitFor(10, TimeUnit.SECONDS);
             if(p.exitValue() != 0) {
                 String errorMessage = "";
@@ -118,19 +118,22 @@ public class CodeGen {
                     errorMessage += IOUtils.toString(is,Charset.defaultCharset());
 
                 }
-                throw new IllegalStateException("Json schema conversion in python threw an error with output " + errorMessage);
+                throw new IllegalStateException("Json schema conversion in python threw an error with output "
+                        + errorMessage);
             }
             p.destroy();
 
             //change class names
             String load = FileUtils.readFileToString(pythonFile, Charset.defaultCharset());
             if(PipelineStep.class.isAssignableFrom(clazz) && !clazz.equals(PipelineStep.class))
-                load = load.replaceFirst(replace.pattern(),"\nclass " + clazz.getSimpleName() + "(PipelineStep):");
+                load = load.replaceFirst(replace.pattern(),"\nclass "
+                        + clazz.getSimpleName() + "(PipelineStep):");
             else
-                load = load.replaceFirst(replace.pattern(),"\nclass " + clazz.getSimpleName() + "(object):");
+                load = load.replaceFirst(replace.pattern(),"\nclass "
+                        + clazz.getSimpleName() + "(object):");
 
             //change keywords args to underscores
-            StringBuffer kwArgsAsUnderScore = new StringBuffer();
+            StringBuilder kwArgsAsUnderScore = new StringBuilder();
             String[] split = load.split("\n");
             for(String splitLine : split) {
                 if(splitLine.contains("=None")) {
@@ -148,7 +151,7 @@ public class CodeGen {
                 }
                 else if(splitLine.contains("'") && splitLine.contains("=") && !splitLine.contains("enum")) {
                     String[] split2 = splitLine.split("=");
-                    StringBuffer newSplitLine = new StringBuffer();
+                    StringBuilder newSplitLine = new StringBuilder();
                     newSplitLine.append(split2[0]);
                     newSplitLine.append(" = ");
                     String changed = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, split2[1]);
@@ -157,7 +160,7 @@ public class CodeGen {
                 }
 
                 splitLine = splitLine.replace("_none","None");
-                kwArgsAsUnderScore.append(splitLine + "\n");
+                kwArgsAsUnderScore.append(splitLine).append("\n");
             }
 
             load = kwArgsAsUnderScore.toString();
@@ -166,31 +169,51 @@ public class CodeGen {
             FileUtils.writeStringToFile(newModule,load,Charset.defaultCharset(),true);
 
             // Clean up JSON files after code generation.
-            pythonFile.delete();
+            boolean pythonDeleted = pythonFile.delete();
+            System.out.println(pythonDeleted);
             if(classJson.exists()) {
                 boolean deleteStatus = classJson.delete();
-                System.out.println(classJson.toString() + " intermediate JSON file was deleted " + (deleteStatus ? "successfully" : "unsuccessfully"));            }
+                System.out.println(classJson.toString() + " intermediate JSON file was deleted "
+                        + (deleteStatus ? "successfully" : "unsuccessfully"));
+            }
         }
 
         String loadedModule = FileUtils.readFileToString(newModule, Charset.defaultCharset());
         loadedModule = loadedModule.replace("import enum","");
         loadedModule = loadedModule.replace("#!/usr/bin/env/python","");
         loadedModule = loadedModule.replace("def __init__(self\n" +
-                "            ):","def __init__(self\n" +
-                "            ):\npass");
-        loadedModule = loadedModule.replace("if not isinstance(value, type)","if not isinstance(value, dict) and not isinstance(value,DictWrapper)");
-        loadedModule = loadedModule.replace("if not isinstance(value, type)","if not isinstance(value, list) and not isinstance(value,ListWrapper)");
-        loadedModule = loadedModule.replace(" if not isinstance(value, dict)"," if not isinstance(value, dict) and not isinstance(value,DictWrapper)");
-        loadedModule = loadedModule.replace(" if not isinstance(value, list)"," if not isinstance(value, list) and not isinstance(value,ListWrapper)");
+                "            ):","def __init__(self):\n\t\tpass");
+        loadedModule = loadedModule.replace("if not isinstance(value, type)",
+                "if not isinstance(value, dict) and not isinstance(value, DictWrapper)");
+        loadedModule = loadedModule.replace("if not isinstance(value, type)",
+                "if not isinstance(value, list) and not isinstance(value, ListWrapper)");
+        loadedModule = loadedModule.replace("if not isinstance(value, dict)",
+                "if not isinstance(value, dict) and not isinstance(value, DictWrapper)");
+        loadedModule = loadedModule.replace("if not isinstance(value, list)",
+                "if not isinstance(value, list) and not isinstance(value, ListWrapper)");
         loadedModule = loadedModule.replace("'type': type","'type': dict");
-        StringBuffer sb = new StringBuffer();
-        sb.append("import enum\n");
-        sb.append("from konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n");
-        
-        //dictionary wrapper for serialization
-        sb.append(loadedModule);
-        FileUtils.writeStringToFile(newModule, sb.toString(),Charset.defaultCharset(),false);
+
+        // Modify some constructor defaults to leverage Python's strengths
+        loadedModule = loadedModule.replace("input_data_type=None", "input_data_type='NUMPY'");
+        loadedModule = loadedModule.replace("output_data_type=None", "output_data_type='NUMPY'");
+        loadedModule = loadedModule.replace("log_timings=None", "log_timings=True");
 
 
+        String sb = "import enum\nfrom konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n" +
+                loadedModule;
+
+        FileUtils.writeStringToFile(newModule, sb,Charset.defaultCharset(),false);
+
+        Process p = runtime.exec("autopep8 --in-place " + newModule);
+        p.waitFor(8, TimeUnit.SECONDS);
+        if(p.exitValue() != 0) {
+            String errorMessage = "";
+            try(InputStream is = p.getInputStream()) {
+                errorMessage += IOUtils.toString(is,Charset.defaultCharset());
+
+            }
+            throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
+        }
+        p.destroy();
     }
 }
