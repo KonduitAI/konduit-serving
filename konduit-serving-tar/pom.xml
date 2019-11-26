@@ -36,8 +36,8 @@
     <name>konduit-serving-tar</name>
 
     <properties>
-        <pipelines.src.dir>../../${project.build.directory}</pipelines.src.dir>
-        <pipelines.base.dir>${project.build.directory}/konduit-serving-distro-${project.version}-dist/</pipelines.base.dir>
+        <konduit-serving.src.dir>../../${project.build.directory}</konduit-serving.src.dir>
+        <konduit-serving.base.dir>${project.build.directory}/konduit-serving-distro-${project.version}-dist/</konduit-serving.base.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

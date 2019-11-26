@@ -1,6 +1,6 @@
 # GPU Module
 
-This module contains cuda support for pipelines.
+This module contains cuda support for konduit-serving.
 This includes:
 
 1. Tensorflow on cuda

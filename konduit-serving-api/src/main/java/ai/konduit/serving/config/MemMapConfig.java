@@ -1,7 +1,7 @@
 /*
  *
  *  * ******************************************************************************
- *  *  * Copyright (c) 2015-2019 Skymind Inc.
+ *  *  *
  *  *  * Copyright (c) 2019 Konduit AI.
  *  *  *
  *  *  * This program and the accompanying materials are made available under the
@@ -20,20 +20,32 @@
  *
  */
 
-package ai.konduit.serving.model;
 
-import lombok.AllArgsConstructor;
+package ai.konduit.serving.config;
+
 import lombok.Data;
+import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+
+import java.io.Serializable;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
-public class MemMapConfig extends ModelConfig {
+public class MemMapConfig implements Serializable {
 
-    private String memMapVectorPath;
+    public final static String ARRAY_URL = "arrayPath";
+    public final static String INITIAL_MEM_MAP_SIZE = "initialMemmapSize";
+    public final static long DEFAULT_INITIAL_SIZE = 1000000000;
+    public final static String WORKSPACE_NAME = "memMapWorkspace";
+
+    private String arrayPath,unkVectorPath;
+    @Builder.Default
+    private long initialMemmapSize = DEFAULT_INITIAL_SIZE;
+    @Builder.Default
+    private String workSpaceName = WORKSPACE_NAME;
 
 
 

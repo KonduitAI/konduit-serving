@@ -129,7 +129,9 @@ public abstract class BaseVerticleTest {
     }
 
 
-    public abstract Class<? extends AbstractVerticle> getVerticalClazz();
+    public Class<? extends AbstractVerticle> getVerticalClazz() {
+        return ai.konduit.serving.verticles.inference.InferenceVerticle.class;
+    }
 
     public int getRandomPort() throws IOException {
         ServerSocket pubSubSocket = new ServerSocket(0);
