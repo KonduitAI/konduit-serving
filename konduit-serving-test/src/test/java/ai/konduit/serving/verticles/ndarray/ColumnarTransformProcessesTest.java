@@ -110,8 +110,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
 
         TransformProcess transformProcess = transformProcessBuilder.build();
 
-        TransformProcessStep transformStep = new TransformProcessStep(
-                transformProcess, outputSchema);
+        TransformProcessStep transformStep = new TransformProcessStep(transformProcess, outputSchema);
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .predictionType(Output.PredictionType.CLASSIFICATION)
