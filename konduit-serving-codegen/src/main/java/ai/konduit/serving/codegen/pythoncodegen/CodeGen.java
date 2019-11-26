@@ -76,7 +76,8 @@ public class CodeGen {
                 ArrayConcatenationStep.class,
                 JsonExpanderTransformStep.class,
                 ImageLoadingStep.class,
-                InferenceConfiguration.class
+                MemMapConfig.class,
+                InferenceConfiguration.class,
         };
 
 
