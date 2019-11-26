@@ -89,7 +89,7 @@ public class KonduitServingMainTest {
         Schema outputSchema = outputSchemaBuilder.build();
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .inputDataType(Input.DataType.JSON)
+                .inputDataFormat(Input.DataFormat.JSON)
                 .httpPort(getAvailablePort())
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();

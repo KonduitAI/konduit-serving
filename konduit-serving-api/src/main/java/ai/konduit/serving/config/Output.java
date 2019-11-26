@@ -24,7 +24,7 @@ package ai.konduit.serving.config;
 
 public class Output {
 
-    public enum DataType {
+    public enum DataFormat {
         NUMPY,
         JSON,
         ND4J,

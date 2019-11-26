@@ -88,7 +88,7 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .inputDataType(Input.DataType.NUMPY)
+                .inputDataFormat(Input.DataFormat.NUMPY)
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
 

@@ -81,8 +81,8 @@ public class SameDiffVerticleNumpyTest extends BaseVerticleTest {
         sameDiff.asFlatFile(tmpSameDiffFile);
         
         ServingConfig servingConfig = ServingConfig.builder()
-                .inputDataType(Input.DataType.NUMPY)
-                .outputDataType(Output.DataType.NUMPY)
+                .inputDataFormat(Input.DataFormat.NUMPY)
+                .outputDataFormat(Output.DataFormat.NUMPY)
                 .predictionType(Output.PredictionType.RAW)
                 .httpPort(port)
                 .build();
