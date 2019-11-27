@@ -159,7 +159,6 @@ class Client(object):
         return ret
 
     def _validate_multi_part(self, data_input={}):
-
         if self.input_format.capitalize() == 'JSON':
             raise ValueError(
                 'Attempting to execute multi part request with input type specified as json.')
