@@ -40,7 +40,7 @@ class Server(object):
         :param config_path: path to write the config object to (as json)
         :param jar_path: path to the konduit uberjar
         """
-	if jar_path is None:
+        if jar_path is None:
             jar_path = os.getenv('KONDUIT_JAR_PATH', 'konduit.jar')
 
         if inference_config:
