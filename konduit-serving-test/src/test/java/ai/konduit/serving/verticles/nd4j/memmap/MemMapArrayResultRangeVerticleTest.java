@@ -85,7 +85,7 @@ public class MemMapArrayResultRangeVerticleTest extends BaseVerticleTest {
     }
 
 
-    @Test(timeout = 60000)
+    @Test(timeout = 600000)
 
     public void testArrayResultRange(TestContext context) {
         HttpClient httpClient = vertx.createHttpClient();
