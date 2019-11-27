@@ -117,6 +117,7 @@ public class KonduitServingNodeConfigurer {
 
     private MeterRegistry registry = BackendRegistries.getDefaultNow();
     @lombok.Builder.Default
+    @Parameter(names = "--pidFile",help = true,description = "The absolute path to use for creating the pid file. This defaults to the <current_dir>/konduit-serving.pid")
     private String pidFile = new File(System.getProperty("user.dir"),"konduit-serving.pid").getAbsolutePath();
     @lombok.Builder.Default
     @Parameter(names = {"--eventLoopTimeout"},help = true,description = "The event loop timeout")

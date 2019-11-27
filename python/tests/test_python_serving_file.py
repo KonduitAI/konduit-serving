@@ -21,7 +21,7 @@ def test_python_script_prediction():
     server = Server(steps=step, serving_config=serving_config)
     server.start()
     
-    client = Client(url='http://localhost:' + str(port))
+    client = Client(port=port)
 
     if is_port_in_use(port):
         input_array = np.load('../data/input-0.npy')

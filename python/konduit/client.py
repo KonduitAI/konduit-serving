@@ -6,38 +6,34 @@ import json
 from pyarrow.ipc import RecordBatchFileReader
 from requests_toolbelt.multipart import decoder, encoder
 import logging
+from konduit.utils import validate_server
 
 
 class Client(object):
-    def __init__(self, timeout=60, input_type='NUMPY', endpoint_output_type='NUMPY',
-                 return_output_type=None, url=None):
+    def __init__(self, timeout=60, input_names=None, output_names=None,
+                 input_type='NUMPY', endpoint_output_type='NUMPY',
+                 return_output_type=None, host="http://localhost", port=None):
 
-        try:
-            r = requests.get("{}/healthcheck".format(url))
-            if r.status_code != 204:
-                logging.error("The server health checks failed. Please verify that the server is running without any "
-                              "issues...")
-                exit(-1)
-        except Exception as ex:
-            logging.error("{}\nUnable to connect to the server or the server health checks have failed. Please "
-                          "verify that the server is running without any issues...".format(str(ex)))
-            exit(-1)
-
-        try:
-            response = requests.get("{}/config".format(url))
-            config = response.json()
-            logging.info("Retrieved config is".format(config))
-            steps = config['pipelineSteps']
-            input_names = steps[0]['inputNames']
-            output_names = steps[-1]['outputNames']
-        except Exception as ex:
-            logging.error("{}\nUnable to get configuration from the server. Please verify that the server is running "
-                          "without any issues...".format(str(ex)))
-            exit(-1)
-
+        url = "{}:{}".format(host, port)
 
         if input_names is None:
-            input_names = []
+            if not validate_server(url):
+                logging.error("Unable to connect to the server at {}".format(url))
+                exit(-1)
+            else:
+                try:
+                    response = requests.get("{}/config".format(url))
+                    config = response.json()
+                    logging.info("Retrieved config is".format(config))
+                    steps = config['pipelineSteps']
+                    input_names = steps[0]['inputNames']
+                    if output_names is None:
+                        output_names = steps[-1]['outputNames']
+                except Exception as ex:
+                    logging.error("{}\nUnable to get configuration from the server. Please verify that the server is "
+                                  "running without any issues...".format(str(ex)))
+                    exit(-1)
+
         assert isinstance(input_names, list), 'Input names should be a list!'
         assert len(input_names) > 0, 'Input names must not be empty!'
 

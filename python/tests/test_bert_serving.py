@@ -42,7 +42,7 @@ def test_server_start():
     server.start()
     client = Client(input_type='NUMPY',
                     endpoint_output_type='NUMPY',
-                    url='http://localhost:' + str(port))
+                    port=port)
 
     data_input = {
         'IteratorGetNext:0': np.load('../data/input-0.npy'),
@@ -59,3 +59,5 @@ def test_server_start():
     except Exception as e:
         print(e)
         server.stop()
+
+test_server_start()

@@ -25,7 +25,7 @@ server.start()
 
 # Initialize a konduit client that takes in and outputs JSON
 client = Client(input_type='JSON', return_output_type='JSON',
-                endpoint_output_type='RAW',url='http://localhost:1337')
+                endpoint_output_type='RAW', port=1337)
 
 # encode the image from a file to base64 and get back a prediction from the konduit server
 encoded_image = to_base_64(os.path.abspath('./Ultra-Light-Fast-Generic-Face-Detector-1MB/imgs/1.jpg'))

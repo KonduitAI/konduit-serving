@@ -97,8 +97,7 @@ port = 65322
 client = Client(return_output_type='ARROW',
                 input_type='JSON',
                 endpoint_output_type='RAW',
-                return_output_type='ARROW',
-                url='http://pipeline:' + str(port))
+                port=port)
 
 data_input = {'first': 'value'}
 

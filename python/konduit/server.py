@@ -94,14 +94,32 @@ class Server(object):
 
         # Check if the server is up or not.
         request_timeout = 5
-        tries = int(self.start_timeout/request_timeout + 1)
+        tries = int(self.start_timeout / request_timeout + 1)
 
         started = False
+
+        print("Starting server", end='')
 
         for i in range(tries):
             # This url returns status 204 with no content when the server is up.
             try:
-                print("Checking server integrity. Tries: {} of {}".format(i + 1, tries))
+                """
+                This would look like the following on success:
+                ------
+                Starting server...
+                
+                Server has started successfully.
+                ------ 
+                
+                and like this on failure
+                ------
+                Starting server...
+                
+                The server wasn't able to start.
+                ------ 
+                """
+                print(".", end='')
+                logging.debug("Checking server integrity. Tries: {} of {}".format(i + 1, tries))
 
                 r = requests.get("http://localhost:{}/healthcheck".format(self.config.serving_config.http_port),
                                  timeout=request_timeout)
@@ -112,9 +130,9 @@ class Server(object):
                 logging.debug("{}\nChecking server integrity again...".format(str(ex)))
 
         if started:
-            print("Server has started successfully.")
+            print("\n\nServer has started successfully.")
         else:
-            print("The server wasn't able to start.")
+            print("\n\nThe server wasn't able to start.")
             self.stop()
 
         return process
@@ -144,6 +162,8 @@ class Server(object):
             args.append('-cp')
             args.append(self.jar_path)
         args.append('ai.konduit.serving.configprovider.KonduitServingMain')
+        args.append('--pidFile')
+        args.append(os.path.abspath(self.pid_file_path))
         args.append('--configPath')
         args.append(absolute_path)
         args.append('--verticleClassName')
