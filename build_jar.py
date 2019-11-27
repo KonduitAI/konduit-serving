@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     print('Running command: ' + command)
     subprocess.run(command, cwd=args.source, shell=True, check=True)
-    copyfile(
-        os.path.join(args.source, 'konduit-serving-uberjar', 'target', 'konduit-serving-uberjar-{}-bin.jar'.format(version[0])),
-        args.target
+    copyfile(os.path.join(args.source, 'konduit-serving-uberjar', 'target',
+                          'konduit-serving-uberjar-{}-bin.jar'.format(version[0])), args.target
     )
+    copyfile(args.target, os.path.join('python', 'tests', args.target))

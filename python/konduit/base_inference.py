@@ -348,8 +348,7 @@ class TensorDataType(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):
@@ -516,8 +515,7 @@ class SchemaType(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):
@@ -532,8 +530,7 @@ class Input(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):
@@ -548,8 +545,7 @@ class Output(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):
@@ -982,13 +978,14 @@ class PipelineStep(object):
         'outputNames': {'type': list, 'subtype': str},
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
+        'runner': {'type': None, 'subtype': None},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -996,6 +993,7 @@ class PipelineStep(object):
         self.__output_names = output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
+        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1057,6 +1055,13 @@ class PipelineStep(object):
     output_column_names = property(
         _get_output_column_names, _set_output_column_names)
 
+    def _get_runner(self):
+        return self.__runner
+
+    def _set_runner(self, value):
+        self.__runner = value
+    runner = property(_get_runner, _set_runner)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1077,6 +1082,9 @@ class PipelineStep(object):
         if self.__output_column_names is not None:
             d['outputColumnNames'] = self.__output_column_names.as_dict() if hasattr(
                 self.__output_column_names, 'as_dict') else self.__output_column_names
+        if self.__runner is not None:
+            d['runner'] = self.__runner.as_dict() if hasattr(
+                self.__runner, 'as_dict') else self.__runner
         return d
 
 
@@ -1119,13 +1127,14 @@ class PythonStep(PipelineStep):
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
         'pythonConfigs': {'type': dict, 'subtype': None},
+        'runner': {'type': None, 'subtype': None},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, python_configs=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, python_configs=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1134,6 +1143,7 @@ class PythonStep(PipelineStep):
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__python_configs = python_configs
+        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1204,6 +1214,13 @@ class PythonStep(PipelineStep):
         self.__python_configs = value
     python_configs = property(_get_python_configs, _set_python_configs)
 
+    def _get_runner(self):
+        return self.__runner
+
+    def _set_runner(self, value):
+        self.__runner = value
+    runner = property(_get_runner, _set_runner)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1227,6 +1244,9 @@ class PythonStep(PipelineStep):
         if self.__python_configs is not None:
             d['pythonConfigs'] = self.__python_configs.as_dict() if hasattr(
                 self.__python_configs, 'as_dict') else self.__python_configs
+        if self.__runner is not None:
+            d['runner'] = self.__runner.as_dict() if hasattr(
+                self.__runner, 'as_dict') else self.__runner
         return d
 
 
@@ -1240,13 +1260,14 @@ class TransformProcessStep(PipelineStep):
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
         'transformProcesses': {'type': dict, 'subtype': None},
+        'runner': {'type': None, 'subtype': None},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, transform_processes=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, transform_processes=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1255,6 +1276,7 @@ class TransformProcessStep(PipelineStep):
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__transform_processes = transform_processes
+        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1326,6 +1348,13 @@ class TransformProcessStep(PipelineStep):
     transform_processes = property(
         _get_transform_processes, _set_transform_processes)
 
+    def _get_runner(self):
+        return self.__runner
+
+    def _set_runner(self, value):
+        self.__runner = value
+    runner = property(_get_runner, _set_runner)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1349,6 +1378,9 @@ class TransformProcessStep(PipelineStep):
         if self.__transform_processes is not None:
             d['transformProcesses'] = self.__transform_processes.as_dict() if hasattr(
                 self.__transform_processes, 'as_dict') else self.__transform_processes
+        if self.__runner is not None:
+            d['runner'] = self.__runner.as_dict() if hasattr(
+                self.__runner, 'as_dict') else self.__runner
         return d
 
 
@@ -1364,13 +1396,14 @@ class ModelStep(PipelineStep):
         'modelConfig': {'type': ModelConfig, 'subtype': None},
         'parallelInferenceConfig': {'type': ParallelInferenceConfig, 'subtype': None},
         'normalizationConfig': {'type': NormalizationConfig, 'subtype': None},
+        'runner': {'type': None, 'subtype': None},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, model_config=None, parallel_inference_config=None, normalization_config=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, model_config=None, parallel_inference_config=None, normalization_config=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1381,6 +1414,7 @@ class ModelStep(PipelineStep):
         self.__model_config = model_config
         self.__parallel_inference_config = parallel_inference_config
         self.__normalization_config = normalization_config
+        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1472,6 +1506,13 @@ class ModelStep(PipelineStep):
     normalization_config = property(
         _get_normalization_config, _set_normalization_config)
 
+    def _get_runner(self):
+        return self.__runner
+
+    def _set_runner(self, value):
+        self.__runner = value
+    runner = property(_get_runner, _set_runner)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1501,6 +1542,9 @@ class ModelStep(PipelineStep):
         if self.__normalization_config is not None:
             d['normalizationConfig'] = self.__normalization_config.as_dict() if hasattr(
                 self.__normalization_config, 'as_dict') else self.__normalization_config
+        if self.__runner is not None:
+            d['runner'] = self.__runner.as_dict() if hasattr(
+                self.__runner, 'as_dict') else self.__runner
         return d
 
 
@@ -1514,13 +1558,14 @@ class ArrayConcatenationStep(PipelineStep):
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
         'concatDimensions': {'type': dict, 'subtype': None},
+        'runner': {'type': None, 'subtype': None},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, concat_dimensions=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, concat_dimensions=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1529,6 +1574,7 @@ class ArrayConcatenationStep(PipelineStep):
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__concat_dimensions = concat_dimensions
+        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1600,6 +1646,13 @@ class ArrayConcatenationStep(PipelineStep):
     concat_dimensions = property(
         _get_concat_dimensions, _set_concat_dimensions)
 
+    def _get_runner(self):
+        return self.__runner
+
+    def _set_runner(self, value):
+        self.__runner = value
+    runner = property(_get_runner, _set_runner)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1623,6 +1676,9 @@ class ArrayConcatenationStep(PipelineStep):
         if self.__concat_dimensions is not None:
             d['concatDimensions'] = self.__concat_dimensions.as_dict() if hasattr(
                 self.__concat_dimensions, 'as_dict') else self.__concat_dimensions
+        if self.__runner is not None:
+            d['runner'] = self.__runner.as_dict() if hasattr(
+                self.__runner, 'as_dict') else self.__runner
         return d
 
 
@@ -1635,13 +1691,14 @@ class JsonExpanderTransformStep(PipelineStep):
         'outputNames': {'type': list, 'subtype': str},
         'inputColumnNames': {'type': dict, 'subtype': None},
         'outputColumnNames': {'type': dict, 'subtype': None},
+        'runner': {'type': None, 'subtype': None},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1649,6 +1706,7 @@ class JsonExpanderTransformStep(PipelineStep):
         self.__output_names = output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
+        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1710,6 +1768,13 @@ class JsonExpanderTransformStep(PipelineStep):
     output_column_names = property(
         _get_output_column_names, _set_output_column_names)
 
+    def _get_runner(self):
+        return self.__runner
+
+    def _set_runner(self, value):
+        self.__runner = value
+    runner = property(_get_runner, _set_runner)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1730,6 +1795,9 @@ class JsonExpanderTransformStep(PipelineStep):
         if self.__output_column_names is not None:
             d['outputColumnNames'] = self.__output_column_names.as_dict() if hasattr(
                 self.__output_column_names, 'as_dict') else self.__output_column_names
+        if self.__runner is not None:
+            d['runner'] = self.__runner.as_dict() if hasattr(
+                self.__runner, 'as_dict') else self.__runner
         return d
 
 
@@ -1744,18 +1812,20 @@ class ImageLoadingStep(PipelineStep):
         'outputColumnNames': {'type': dict, 'subtype': None},
         'originalImageHeight': {'type': int, 'subtype': None},
         'originalImageWidth': {'type': int, 'subtype': None},
+        'updateOrderingBeforeTransform': {'type': bool, 'subtype': None},
         'dimensionsConfigs': {'type': dict, 'subtype': None},
         'imageProcessingRequiredLayout': {'type': str, 'subtype': None},
         'imageProcessingInitialLayout': {'type': str, 'subtype': None},
         'imageTransformProcesses': {'type': dict, 'subtype': None},
         'objectDetectionConfig': {'type': ObjectDetectionConfig, 'subtype': None},
+        'runner': {'type': None, 'subtype': None},
     }
     _formats_map = {
         'inputNames': 'table',
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, original_image_height=None, original_image_width=None, dimensions_configs=None, image_processing_required_layout=None, image_processing_initial_layout=None, image_transform_processes=None, object_detection_config=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, original_image_height=None, original_image_width=None, update_ordering_before_transform=None, dimensions_configs=None, image_processing_required_layout=None, image_processing_initial_layout=None, image_transform_processes=None, object_detection_config=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1765,11 +1835,13 @@ class ImageLoadingStep(PipelineStep):
         self.__output_column_names = output_column_names
         self.__original_image_height = original_image_height
         self.__original_image_width = original_image_width
+        self.__update_ordering_before_transform = update_ordering_before_transform
         self.__dimensions_configs = dimensions_configs
         self.__image_processing_required_layout = image_processing_required_layout
         self.__image_processing_initial_layout = image_processing_initial_layout
         self.__image_transform_processes = image_transform_processes
         self.__object_detection_config = object_detection_config
+        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1851,6 +1923,16 @@ class ImageLoadingStep(PipelineStep):
     original_image_width = property(
         _get_original_image_width, _set_original_image_width)
 
+    def _get_update_ordering_before_transform(self):
+        return self.__update_ordering_before_transform
+
+    def _set_update_ordering_before_transform(self, value):
+        if not isinstance(value, bool):
+            raise TypeError("updateOrderingBeforeTransform must be bool")
+        self.__update_ordering_before_transform = value
+    update_ordering_before_transform = property(
+        _get_update_ordering_before_transform, _set_update_ordering_before_transform)
+
     def _get_dimensions_configs(self):
         return self.__dimensions_configs
 
@@ -1902,6 +1984,13 @@ class ImageLoadingStep(PipelineStep):
     object_detection_config = property(
         _get_object_detection_config, _set_object_detection_config)
 
+    def _get_runner(self):
+        return self.__runner
+
+    def _set_runner(self, value):
+        self.__runner = value
+    runner = property(_get_runner, _set_runner)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1928,6 +2017,9 @@ class ImageLoadingStep(PipelineStep):
         if self.__original_image_width is not None:
             d['originalImageWidth'] = self.__original_image_width.as_dict() if hasattr(
                 self.__original_image_width, 'as_dict') else self.__original_image_width
+        if self.__update_ordering_before_transform is not None:
+            d['updateOrderingBeforeTransform'] = self.__update_ordering_before_transform.as_dict() if hasattr(
+                self.__update_ordering_before_transform, 'as_dict') else self.__update_ordering_before_transform
         if self.__dimensions_configs is not None:
             d['dimensionsConfigs'] = self.__dimensions_configs.as_dict() if hasattr(
                 self.__dimensions_configs, 'as_dict') else self.__dimensions_configs
@@ -1943,6 +2035,81 @@ class ImageLoadingStep(PipelineStep):
         if self.__object_detection_config is not None:
             d['objectDetectionConfig'] = self.__object_detection_config.as_dict() if hasattr(
                 self.__object_detection_config, 'as_dict') else self.__object_detection_config
+        if self.__runner is not None:
+            d['runner'] = self.__runner.as_dict() if hasattr(
+                self.__runner, 'as_dict') else self.__runner
+        return d
+
+
+class MemMapConfig(object):
+
+    _types_map = {
+        'arrayPath': {'type': str, 'subtype': None},
+        'unkVectorPath': {'type': str, 'subtype': None},
+        'initialMemmapSize': {'type': int, 'subtype': None},
+        'workSpaceName': {'type': str, 'subtype': None},
+    }
+    _formats_map = {
+    }
+
+    def __init__(self, array_path=None, unk_vector_path=None, initial_memmap_size=None, work_space_name=None
+                 ):
+        self.__array_path = array_path
+        self.__unk_vector_path = unk_vector_path
+        self.__initial_memmap_size = initial_memmap_size
+        self.__work_space_name = work_space_name
+
+    def _get_array_path(self):
+        return self.__array_path
+
+    def _set_array_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("arrayPath must be str")
+        self.__array_path = value
+    array_path = property(_get_array_path, _set_array_path)
+
+    def _get_unk_vector_path(self):
+        return self.__unk_vector_path
+
+    def _set_unk_vector_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("unkVectorPath must be str")
+        self.__unk_vector_path = value
+    unk_vector_path = property(_get_unk_vector_path, _set_unk_vector_path)
+
+    def _get_initial_memmap_size(self):
+        return self.__initial_memmap_size
+
+    def _set_initial_memmap_size(self, value):
+        if not isinstance(value, int):
+            raise TypeError("initialMemmapSize must be int")
+        self.__initial_memmap_size = value
+    initial_memmap_size = property(
+        _get_initial_memmap_size, _set_initial_memmap_size)
+
+    def _get_work_space_name(self):
+        return self.__work_space_name
+
+    def _set_work_space_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("workSpaceName must be str")
+        self.__work_space_name = value
+    work_space_name = property(_get_work_space_name, _set_work_space_name)
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__array_path is not None:
+            d['arrayPath'] = self.__array_path.as_dict() if hasattr(
+                self.__array_path, 'as_dict') else self.__array_path
+        if self.__unk_vector_path is not None:
+            d['unkVectorPath'] = self.__unk_vector_path.as_dict() if hasattr(
+                self.__unk_vector_path, 'as_dict') else self.__unk_vector_path
+        if self.__initial_memmap_size is not None:
+            d['initialMemmapSize'] = self.__initial_memmap_size.as_dict() if hasattr(
+                self.__initial_memmap_size, 'as_dict') else self.__initial_memmap_size
+        if self.__work_space_name is not None:
+            d['workSpaceName'] = self.__work_space_name.as_dict() if hasattr(
+                self.__work_space_name, 'as_dict') else self.__work_space_name
         return d
 
 
@@ -1951,15 +2118,17 @@ class InferenceConfiguration(object):
     _types_map = {
         'pipelineSteps': {'type': list, 'subtype': PipelineStep},
         'servingConfig': {'type': ServingConfig, 'subtype': None},
+        'memMapConfig': {'type': MemMapConfig, 'subtype': None},
     }
     _formats_map = {
         'pipelineSteps': 'table',
     }
 
-    def __init__(self, pipeline_steps=None, serving_config=None
+    def __init__(self, pipeline_steps=None, serving_config=None, mem_map_config=None
                  ):
         self.__pipeline_steps = pipeline_steps
         self.__serving_config = serving_config
+        self.__mem_map_config = mem_map_config
 
     def _get_pipeline_steps(self):
         return self.__pipeline_steps
@@ -1968,7 +2137,7 @@ class InferenceConfiguration(object):
         if not isinstance(value, list) and not isinstance(value, ListWrapper):
             raise TypeError("pipelineSteps must be list")
         if not all(isinstance(i, PipelineStep) for i in value):
-            raise TypeError("pipelineSteps list values must be PipelineStep")
+            raise TypeError("pipelineSteps list valeus must be PipelineStep")
         self.__pipeline_steps = value
     pipeline_steps = property(_get_pipeline_steps, _set_pipeline_steps)
 
@@ -1981,6 +2150,15 @@ class InferenceConfiguration(object):
         self.__serving_config = value
     serving_config = property(_get_serving_config, _set_serving_config)
 
+    def _get_mem_map_config(self):
+        return self.__mem_map_config
+
+    def _set_mem_map_config(self, value):
+        if not isinstance(value, MemMapConfig):
+            raise TypeError("memMapConfig must be MemMapConfig")
+        self.__mem_map_config = value
+    mem_map_config = property(_get_mem_map_config, _set_mem_map_config)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__pipeline_steps is not None:
@@ -1989,4 +2167,7 @@ class InferenceConfiguration(object):
         if self.__serving_config is not None:
             d['servingConfig'] = self.__serving_config.as_dict() if hasattr(
                 self.__serving_config, 'as_dict') else self.__serving_config
+        if self.__mem_map_config is not None:
+            d['memMapConfig'] = self.__mem_map_config.as_dict() if hasattr(
+                self.__mem_map_config, 'as_dict') else self.__mem_map_config
         return d

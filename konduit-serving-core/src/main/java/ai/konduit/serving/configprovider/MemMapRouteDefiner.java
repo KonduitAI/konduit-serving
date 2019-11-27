@@ -1,7 +1,7 @@
 /*
  *
  *  * ******************************************************************************
- *  *  * Copyright (c) 2015-2019 Skymind Inc.
+ *  *
  *  *  * Copyright (c) 2019 Konduit AI.
  *  *  *
  *  *  * This program and the accompanying materials are made available under the
@@ -20,79 +20,115 @@
  *
  */
 
-package ai.konduit.serving.verticles.nd4j.memmap;
+package ai.konduit.serving.configprovider;
 
-import ai.konduit.serving.verticles.VerticleConstants;
-import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
-import io.netty.buffer.Unpooled;
-import io.vertx.core.Context;
-import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.BodyHandler;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.bytedeco.javacpp.BytePointer;
+
 import org.bytedeco.javacpp.Pointer;
-import org.nd4j.linalg.api.memory.MemoryWorkspace;
-import org.nd4j.linalg.api.memory.conf.WorkspaceConfiguration;
-import org.nd4j.linalg.api.memory.enums.LocationPolicy;
+import org.bytedeco.javacpp.BytePointer;
+
+import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.MemMapConfig;
+
+import java.util.List;
+import java.util.ArrayList;
+import  java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
+
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.indexing.INDArrayIndex;
+import org.nd4j.linalg.api.memory.conf.WorkspaceConfiguration;
+import org.nd4j.linalg.api.memory.enums.LocationPolicy;
+import org.nd4j.linalg.api.memory.MemoryWorkspace;
 import org.nd4j.linalg.indexing.NDArrayIndex;
-import org.nd4j.serde.binary.BinarySerde;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.nd4j.serde.binary.BinarySerde;
+import  org.nd4j.linalg.indexing.INDArrayIndex;
+
+import io.vertx.core.Vertx;
+import io.vertx.ext.web.Router;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.core.json.JsonArray;
+import io.vertx.ext.web.handler.BodyHandler;
+
+import io.netty.buffer.Unpooled;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * A verticle for memory mapped arrays.
- * Useful for returning json or binary (numpy or nd4j via {@link BinarySerde}
- * views of a big memory mapped ndarray.
  *
+ * MemMap Route Definer handles implementing
+ * endpoints for returning views of a large
+ * memory mapped {@link INDArray}
+ * loaded via nd4j's {@link LocationPolicy#MMAP}
+ * this means that nd4j will use a memory mapped
+ * workspace for loading an array from disk.
+ *
+ * This route definer keeps a {@link ThreadLocal}
+ * of {@link INDArray} in memory using nd4j's
+ * workspace described above.
+ * When this class is initialized, an array will
+ * be loaded from disk based on the passed in {@link MemMapConfig}
  *
  * @author Adam Gibson
  */
 @Slf4j
-public class MemMapVerticle extends BaseRoutableVerticle {
+public class MemMapRouteDefiner {
 
-    public final static String ARRAY_URL = "arrayPath";
-    public final static String INITIAL_MEM_MAP_SIZE = "initialMemmapSize";
-    public final static long DEFAULT_INITIAL_SIZE = 1000000000;
-    public final static String WORKSPACE_NAME = "memMapWorkspace";
     private INDArray unkVector;
     private ThreadLocal<INDArray> arr;
-
+    private MemMapConfig memMapConfig;
 
     private WorkspaceConfiguration mmap;
 
-    @Override
-    public void init(Vertx vertx, Context context) {
-        super.init(vertx, context);
-        router = Router.router(vertx);
-        router.route().handler(BodyHandler.create());
+    /**
+     * Define the routes implementing
+     * memory mapped operations.
+     * This will also load the array from disk
+     * and use the {@link MemMapConfig}
+     * specified to initialize the array.
+     *
+     * The routes defined are as follows:
+     * /array/:arrayType -> where arrayType is a parameter value of json or binary.
+     * If json is specified {@link #writeArrayJson(INDArray, RoutingContext)}
+     * is called otherwise {@link #writeArrayBinary(INDArray, RoutingContext)} is called.
+     *
+     * This will return the whole array in memory. Note this is likely to be big.
+     *
+     * /array/indices/:arrayType : where arrayType is a parameter value of json or binary.
+     * If json is specified {@link #writeArrayJson(INDArray, RoutingContext)}
+     * is called otherwise {@link #writeArrayBinary(INDArray, RoutingContext)} is called.
+     * Indices expects a post body of a json array containing a list of indices to return.
+     * The indices will be used to determine what slices to return from an {@link INDArray}
+     *
+     *
+     * /array/range/:from/:to/:arrayType where arrayType is a parameter value of json or binary.
+     *       If json is specified {@link #writeArrayJson(INDArray, RoutingContext)}
+     *       is called otherwise {@link #writeArrayBinary(INDArray, RoutingContext)} is called.
+     *        from and to are integers representing a range. Similarly to indices
+     *        this will return the slices from the range to the given range.
+     *
+     * @param vertx the vertx instance to use to define the routes
+     * @param inferenceConfiguration the {@link InferenceConfiguration}
+     *                               to use for configuration.
+     */
+    public Router defineRoutes(Vertx vertx, InferenceConfiguration inferenceConfiguration) {
+        Long initialSize = inferenceConfiguration.getMemMapConfig().getInitialMemmapSize();
+        Router router = Router.router(vertx);
+        memMapConfig = inferenceConfiguration.getMemMapConfig();
 
-        String configValue = config().getValue(INITIAL_MEM_MAP_SIZE,String.valueOf(DEFAULT_INITIAL_SIZE)).toString();
-        Long initialSize = Long.parseLong(configValue);
-        if(!config().containsKey(ARRAY_URL)) {
-            throw new IllegalStateException("No array found! Please specify an arrayPath");
-        }
-
-
-        if(context.config().containsKey(VerticleConstants.MEM_MAP_VECTOR_PATH)) {
-            String path =  context.config().getString(VerticleConstants.MEM_MAP_VECTOR_PATH);
-            try {
-                byte[] content = FileUtils.readFileToByteArray(new File(path));
-                unkVector = Nd4j.createNpyFromByteArray(content);
-            } catch (IOException e) {
-                throw new IllegalStateException("Unable to load unknown vector: " + path);
-            }
-        }
+        String path =  inferenceConfiguration.getMemMapConfig().getUnkVectorPath();
+       if(path != null) {
+           try {
+               byte[] content = FileUtils.readFileToByteArray(new File(path));
+               unkVector = Nd4j.createNpyFromByteArray(content);
+           } catch (IOException e) {
+               throw new IllegalStateException("Unable to load unknown vector: " + path);
+           }
+       }
 
 
         arr = new ThreadLocal<>();
@@ -100,6 +136,26 @@ public class MemMapVerticle extends BaseRoutableVerticle {
                 .initialSize(initialSize)
                 .policyLocation(LocationPolicy.MMAP)
                 .build();
+
+        router.post().handler(BodyHandler.create()
+                .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
+                .setDeleteUploadedFilesOnEnd(true)
+                .setMergeFormAttributes(true))
+                .failureHandler(failureHandlder -> {
+                    if(failureHandlder.statusCode() == 404) {
+                        log.warn("404 at route " + failureHandlder.request().path());
+                    }
+                    else if(failureHandlder.failed()) {
+                        if(failureHandlder.failure() != null) {
+                            log.error("Request failed with cause ",failureHandlder.failure());
+                        }
+                        else {
+                            log.error("Request failed with unknown cause.");
+                        }
+                    }
+                });
+
+
 
 
         router.post("/array/:arrayType")
@@ -134,19 +190,18 @@ public class MemMapVerticle extends BaseRoutableVerticle {
                         writeArrayBinary(write,ctx);
                 });
 
-        setupWebServer();
-
+        return router;
     }
 
 
 
-    private void writeArrayJson(INDArray write,RoutingContext ctx) {
+    private void writeArrayJson(INDArray write, io.vertx.ext.web.RoutingContext ctx) {
         ctx.response().putHeader("Content-Type","application/json");
         ctx.response().setChunked(false);
         ctx.response().end(write.toString());
     }
 
-    private void writeArrayBinary(INDArray write, RoutingContext ctx) {
+    private void writeArrayBinary(INDArray write,RoutingContext ctx) {
         if(write.length() == 1) {
             write = write.reshape(new int[]{1,1});
         }
@@ -177,6 +232,7 @@ public class MemMapVerticle extends BaseRoutableVerticle {
                 break;
         }
 
+        ctx.response().putHeader("Content-Type","application/octet-stream");
         ctx.response().setChunked(false);
         ctx.response().end(writeBuffer);
 
@@ -212,7 +268,7 @@ public class MemMapVerticle extends BaseRoutableVerticle {
     }
 
     private INDArray getOrSetArrForContext() {
-        String path = config().getString(ARRAY_URL);
+        String path = memMapConfig.getArrayPath();
 
 
         File loadFrom = new File(path);
@@ -221,7 +277,7 @@ public class MemMapVerticle extends BaseRoutableVerticle {
         }
 
         if(arr.get() == null) {
-            try (MemoryWorkspace ws = Nd4j.getWorkspaceManager().getAndActivateWorkspace(mmap, WORKSPACE_NAME)) {
+            try (MemoryWorkspace ws = Nd4j.getWorkspaceManager().getAndActivateWorkspace(mmap, memMapConfig.getWorkSpaceName())) {
                 if(path.endsWith("npy"))
                     arr.set((Nd4j.createFromNpyFile(loadFrom)));
                 else {
@@ -238,6 +294,7 @@ public class MemMapVerticle extends BaseRoutableVerticle {
     private INDArray getArrayFromContext(RoutingContext ctx) {
         ctx.response().setStatusCode(200);
         ctx.response().setChunked(false);
+        String testBody = ctx.getBodyAsString();
         JsonArray bodyAsJson = ctx.getBodyAsJsonArray();
 
         if(bodyAsJson == null) {
