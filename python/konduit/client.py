@@ -10,7 +10,18 @@ import logging
 
 class Client(object):
     def __init__(self, timeout=60, input_type='NUMPY', endpoint_output_type='NUMPY',
-                 return_output_type=None, input_names=['default'], output_names=['default'], url=None):
+                 return_output_type=None, url=None):
+
+        try:
+            response = requests.get("{}/config".format(url).replace("//", "/"))
+            config = response.json()
+            logging.info("Retrieved config is".format(config))
+            steps = config['pipelineSteps']
+            input_names = steps[0]['inputNames']
+            output_names = steps[-1]['outputNames']
+        except Exception as ex:
+            logging.error(str(ex))
+
 
         if input_names is None:
             input_names = []
