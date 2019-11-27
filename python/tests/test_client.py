@@ -5,7 +5,7 @@ import pytest
 
 def test_multipart_regex():
 
-    client = Client(input_names=['partname'], output_names=['nobody_cares'])
+    client = Client()
 
     test_data = {
         'partname[0]': 'foo',

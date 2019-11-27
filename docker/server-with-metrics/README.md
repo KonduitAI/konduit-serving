@@ -94,9 +94,7 @@ input_names = ['default']
 output_names = ['default']
 port = 65322
 
-client = Client(input_names=input_names,
-                output_names=output_names,
-                return_output_type='ARROW',
+client = Client(return_output_type='ARROW',
                 input_type='JSON',
                 endpoint_output_type='RAW',
                 return_output_type='ARROW',

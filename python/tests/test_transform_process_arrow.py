@@ -47,9 +47,7 @@ def test_build_tp():
                     jar_path='konduit.jar')
     server.start()
     print('Process started. Sleeping 10 seconds.')
-    client = Client(input_names=input_names,
-                    output_names=output_names,
-                    return_output_type='ARROW',
+    client = Client(return_output_type='ARROW',
                     input_type='JSON',
                     endpoint_output_type='RAW',
                     url='http://localhost:' + str(port))
