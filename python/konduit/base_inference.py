@@ -822,17 +822,17 @@ class PythonConfig(object):
 
 class ServingConfig(object):
 
-    _inputDataType_enum = enum.Enum(
-        '_inputDataType_enum', 'NUMPY JSON ND4J IMAGE ARROW', module=__name__)
-    _outputDataType_enum = enum.Enum(
-        '_outputDataType_enum', 'NUMPY JSON ND4J ARROW', module=__name__)
+    _inputDataFormat_enum = enum.Enum(
+        '_inputDataFormat_enum', 'NUMPY JSON ND4J IMAGE ARROW', module=__name__)
+    _outputDataFormat_enum = enum.Enum(
+        '_outputDataFormat_enum', 'NUMPY JSON ND4J ARROW', module=__name__)
     _predictionType_enum = enum.Enum(
         '_predictionType_enum', 'CLASSIFICATION YOLO SSD RCNN RAW REGRESSION', module=__name__)
     _types_map = {
         'httpPort': {'type': int, 'subtype': None},
         'listenHost': {'type': str, 'subtype': None},
-        'inputDataType': {'type': str, 'subtype': None},
-        'outputDataType': {'type': str, 'subtype': None},
+        'inputDataFormat': {'type': str, 'subtype': None},
+        'outputDataFormat': {'type': str, 'subtype': None},
         'predictionType': {'type': str, 'subtype': None},
         'uploadsDirectory': {'type': str, 'subtype': None},
         'logTimings': {'type': bool, 'subtype': None},
@@ -842,12 +842,12 @@ class ServingConfig(object):
         'metricTypes': 'table',
     }
 
-    def __init__(self, http_port=None, listen_host=None, input_data_type='NUMPY', output_data_type='NUMPY', prediction_type=None, uploads_directory=None, log_timings=True, metric_types=None
+    def __init__(self, http_port=None, listen_host=None, input_data_format='NUMPY', output_data_format='NUMPY', prediction_type=None, uploads_directory=None, log_timings=True, metric_types=None
                  ):
         self.__http_port = http_port
         self.__listen_host = listen_host
-        self.__input_data_type = input_data_type
-        self.__output_data_type = output_data_type
+        self.__input_data_format = input_data_format
+        self.__output_data_format = output_data_format
         self.__prediction_type = prediction_type
         self.__uploads_directory = uploads_directory
         self.__log_timings = log_timings
@@ -871,31 +871,33 @@ class ServingConfig(object):
         self.__listen_host = value
     listen_host = property(_get_listen_host, _set_listen_host)
 
-    def _get_input_data_type(self):
-        return self.__input_data_type
+    def _get_input_data_format(self):
+        return self.__input_data_format
 
-    def _set_input_data_type(self, value):
+    def _set_input_data_format(self, value):
         if not isinstance(value, str):
-            raise TypeError("inputDataType must be str")
-        if value in self._inputDataType_enum.__members__:
+            raise TypeError("inputDataFormat must be str")
+        if value in self._inputDataFormat_enum.__members__:
             self.__type = value
         else:
             raise ValueError(
-                "Value {} not in _inputDataType_enum list".format(value))
-    input_data_type = property(_get_input_data_type, _set_input_data_type)
+                "Value {} not in _inputDataFormat_enum list".format(value))
+    input_data_format = property(
+        _get_input_data_format, _set_input_data_format)
 
-    def _get_output_data_type(self):
-        return self.__output_data_type
+    def _get_output_data_format(self):
+        return self.__output_data_format
 
-    def _set_output_data_type(self, value):
+    def _set_output_data_format(self, value):
         if not isinstance(value, str):
-            raise TypeError("outputDataType must be str")
-        if value in self._outputDataType_enum.__members__:
+            raise TypeError("outputDataFormat must be str")
+        if value in self._outputDataFormat_enum.__members__:
             self.__type = value
         else:
             raise ValueError(
-                "Value {} not in _outputDataType_enum list".format(value))
-    output_data_type = property(_get_output_data_type, _set_output_data_type)
+                "Value {} not in _outputDataFormat_enum list".format(value))
+    output_data_format = property(
+        _get_output_data_format, _set_output_data_format)
 
     def _get_prediction_type(self):
         return self.__prediction_type
@@ -948,12 +950,12 @@ class ServingConfig(object):
         if self.__listen_host is not None:
             d['listenHost'] = self.__listen_host.as_dict() if hasattr(
                 self.__listen_host, 'as_dict') else self.__listen_host
-        if self.__input_data_type is not None:
-            d['inputDataType'] = self.__input_data_type.as_dict() if hasattr(
-                self.__input_data_type, 'as_dict') else self.__input_data_type
-        if self.__output_data_type is not None:
-            d['outputDataType'] = self.__output_data_type.as_dict() if hasattr(
-                self.__output_data_type, 'as_dict') else self.__output_data_type
+        if self.__input_data_format is not None:
+            d['inputDataFormat'] = self.__input_data_format.as_dict() if hasattr(
+                self.__input_data_format, 'as_dict') else self.__input_data_format
+        if self.__output_data_format is not None:
+            d['outputDataFormat'] = self.__output_data_format.as_dict() if hasattr(
+                self.__output_data_format, 'as_dict') else self.__output_data_format
         if self.__prediction_type is not None:
             d['predictionType'] = self.__prediction_type.as_dict() if hasattr(
                 self.__prediction_type, 'as_dict') else self.__prediction_type
@@ -2116,30 +2118,30 @@ class MemMapConfig(object):
 class InferenceConfiguration(object):
 
     _types_map = {
-        'pipelineSteps': {'type': list, 'subtype': PipelineStep},
+        'steps': {'type': list, 'subtype': PipelineStep},
         'servingConfig': {'type': ServingConfig, 'subtype': None},
         'memMapConfig': {'type': MemMapConfig, 'subtype': None},
     }
     _formats_map = {
-        'pipelineSteps': 'table',
+        'steps': 'table',
     }
 
-    def __init__(self, pipeline_steps=None, serving_config=None, mem_map_config=None
+    def __init__(self, steps=None, serving_config=None, mem_map_config=None
                  ):
-        self.__pipeline_steps = pipeline_steps
+        self.__steps = steps
         self.__serving_config = serving_config
         self.__mem_map_config = mem_map_config
 
-    def _get_pipeline_steps(self):
-        return self.__pipeline_steps
+    def _get_steps(self):
+        return self.__steps
 
-    def _set_pipeline_steps(self, value):
+    def _set_steps(self, value):
         if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("pipelineSteps must be list")
+            raise TypeError("steps must be list")
         if not all(isinstance(i, PipelineStep) for i in value):
-            raise TypeError("pipelineSteps list valeus must be PipelineStep")
-        self.__pipeline_steps = value
-    pipeline_steps = property(_get_pipeline_steps, _set_pipeline_steps)
+            raise TypeError("steps list valeus must be PipelineStep")
+        self.__steps = value
+    steps = property(_get_steps, _set_steps)
 
     def _get_serving_config(self):
         return self.__serving_config
@@ -2161,9 +2163,9 @@ class InferenceConfiguration(object):
 
     def as_dict(self):
         d = empty_type_dict(self)
-        if self.__pipeline_steps is not None:
-            d['pipelineSteps'] = [p.as_dict() if hasattr(
-                p, 'as_dict') else p for p in self.__pipeline_steps]
+        if self.__steps is not None:
+            d['steps'] = [p.as_dict() if hasattr(p, 'as_dict')
+                          else p for p in self.__steps]
         if self.__serving_config is not None:
             d['servingConfig'] = self.__serving_config.as_dict() if hasattr(
                 self.__serving_config, 'as_dict') else self.__serving_config

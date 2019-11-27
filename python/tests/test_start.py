@@ -10,8 +10,8 @@ def test_server_start():
     port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=port,
-                                   input_data_type='NUMPY',
-                                   output_data_type='NUMPY',
+                                   input_data_format='NUMPY',
+                                   output_data_format='NUMPY',
                                    log_timings=True)
 
     tensorflow_config = TensorFlowConfig(model_config_type=ModelConfigType(
@@ -26,12 +26,12 @@ def test_server_start():
     model_pipeline_step = ModelStep(model_config=tensorflow_config,
                                     parallel_inference_config=parallel_inference_config,
                                     input_names=["IteratorGetNext:0",
-                                                         "IteratorGetNext:1",
-                                                         "IteratorGetNext:4"],
+                                                 "IteratorGetNext:1",
+                                                 "IteratorGetNext:4"],
                                     output_names=["loss/Softmax"])
 
     inference_config = InferenceConfiguration(serving_config=serving_config,
-                                              pipeline_steps=[model_pipeline_step])
+                                              steps=[model_pipeline_step])
 
     server = Server(inference_config=inference_config,
                     extra_start_args='-Xmx8g', jar_path='konduit.jar')

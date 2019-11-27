@@ -87,7 +87,8 @@ public class PythonStepRunner extends BaseStepRunner {
         transformProcesses = new HashMap<>();
         boolean setPath = false;
         for(Map.Entry<String,PythonConfig> configEntry : pythonConfig.getPythonConfigs().entrySet()) {
-            Preconditions.checkState(pipelineStep.hasInputName(configEntry.getKey()),"Invalid input name specified for transform " + configEntry.getKey());
+            Preconditions.checkState(pipelineStep.hasInputName(configEntry.getKey()),
+                    "Invalid input name specified for transform " + configEntry.getKey());
             PythonConfig currConfig = configEntry.getValue();
             if(currConfig.getPythonPath() != null && !setPath) {
                 log.info("Over riding python path " + currConfig.getPythonPath());

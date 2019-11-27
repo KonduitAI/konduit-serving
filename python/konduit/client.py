@@ -9,26 +9,55 @@ import logging
 
 
 class Client(object):
-    def __init__(self, timeout=60, input_type='NUMPY', endpoint_output_type='NUMPY',
-                 return_output_type=None, input_names=['default'], output_names=['default'], url=None):
+    def __init__(self, url=None, input_data_format='NUMPY', output_data_format=None,
+                 return_output_data_format=None, input_names=None, output_names=None, timeout=60):
+        """Konduit Client
+
+        This client is used to connect to a Konduit Server instance.
+
+        :param url: URL on which to find the server, used to send all requests. This URL needs to include the port of
+               the running server as well, e.g. url='http://localhost:1337'.
+        :param input_data_format: The format in which the input data is accepted by endpoints. Defaults to 'NUMPY',
+               but can be 'JSON', 'ND4J', 'IMAGE' and 'ARROW' as well.
+        :param output_data_format: The output format returned from the Konduit server. If not specified, this format
+               will default to the input format specified.
+        :param return_output_data_format: The output format returned by the `predict` method of this client. If not
+               specified, we assume the return output format is the same as the input format. This output format can
+               be 'NUMPY', 'JSON', 'ARROW' and 'RAW'. 'ND4J' will be implemented at a later stage.
+        :param input_names: The names of all inputs of the Konduit pipeline deployed for the Server corresponding to
+               this client.
+        :param output_names: The names of all inputs of the Konduit pipeline deployed for the Server corresponding to
+               this client.
+        :param timeout: Request time-out in seconds.
+        """
+        if not url:
+            logging.warning("You initialized your Client instance without specifying a 'url' argument. "
+                            "The 'predict' method will fail to return valid results this way. Please "
+                            "set the 'url' to the full URL to connect against yout")
 
         if input_names is None:
-            input_names = []
+            input_names = ['default']
         assert isinstance(input_names, list), 'Input names should be a list!'
         assert len(input_names) > 0, 'Input names must not be empty!'
 
         if output_names is None:
-            output_names = []
+            output_names = ['default']
         assert isinstance(output_names, list), 'Output names should be a list!'
         assert len(output_names) > 0, 'Output names must not be empty!'
 
-        if return_output_type is None:
-            self.return_output_type = input_type
+        # if not specified, we output the format we put in.
+        if not output_data_format:
+            output_data_format = input_data_format
+
+        # the format returned to the client is identical to the input format, unless explicitly specified.
+        if return_output_data_format:
+            self.return_output_data_format = return_output_data_format
         else:
-            self.return_output_type = return_output_type
+            self.return_output_data_format = input_data_format
+
         self.timeout = timeout
-        self.input_type = input_type
-        self.output_type = endpoint_output_type
+        self.input_format = input_data_format
+        self.output_format = output_data_format
         self.input_names = input_names
         self.output_names = output_names
         self.url = url
@@ -39,14 +68,14 @@ class Client(object):
             data_input = {'default': data_input}
         if data_input is None:
             data_input = {}
-        if self.input_type.upper() == 'JSON':
-            resp = requests.post(self.url + '/' + self.output_type.lower() + '/' + self.input_type.lower(),
+        if self.input_format.upper() == 'JSON':
+            resp = requests.post(self.url + '/' + self.output_format.lower() + '/' + self.input_format.lower(),
                                  json=data_input, timeout=self.timeout)
 
         else:
             self._validate_multi_part(data_input)
             data_input = self._convert_multi_part_inputs(data_input=data_input)
-            resp = requests.post(self.url + '/' + self.output_type.lower() + '/' + self.input_type.lower(),
+            resp = requests.post(self.url + '/' + self.output_format.lower() + '/' + self.input_format.lower(),
                                  files=data_input,
                                  timeout=self.timeout)
         if 'content-type' not in resp.headers.keys():
@@ -58,16 +87,16 @@ class Client(object):
             if self.output_names is None or len(self.output_names) < 2:
                 bytes_content = io.BytesIO(content)
                 bytes_content.seek(0)
-                if self.return_output_type.upper() == 'NUMPY':
+                if self.return_output_data_format.upper() == 'NUMPY':
                     return np.load(bytes_content)
-                elif self.return_output_type.upper() == 'ARROW':
+                elif self.return_output_data_format.upper() == 'ARROW':
                     reader = RecordBatchFileReader(bytes_content)
                     return reader.read_pandas()
-                elif self.return_output_type.upper() == 'JSON':
+                elif self.return_output_data_format.upper() == 'JSON':
                     return json.load(bytes_content)
-                elif self.return_output_type.upper() == 'ND4J':
+                elif self.return_output_data_format.upper() == 'ND4J':
                     raise NotImplementedError('Nd4j not implemented yet.')
-                elif self.return_output_type.upper() == 'RAW':
+                elif self.return_output_data_format.upper() == 'RAW':
                     return content
             else:
                 return self._convert_multi_part_output(content, content_type)
@@ -116,14 +145,14 @@ class Client(object):
             name_with_form_data = str(part.headers[b'Content-Disposition'])
             name_str = re.sub(r'([";\\\']|name=|form-data|b\\)',
                               '', name_with_form_data).replace('b ', '')
-            if self.output_type.upper() == 'NUMPY':
+            if self.output_format.upper() == 'NUMPY':
                 ret[name_str] = Client._convert_binary_to_numpy(part.content)
-            elif self.output_type.upper() == 'ARROW':
+            elif self.output_format.upper() == 'ARROW':
                 reader = RecordBatchFileReader(part.content)
                 ret[name_str] = reader.read_pandas()
-            elif self.output_type.upper() == 'JSON':
+            elif self.output_format.upper() == 'JSON':
                 return json.load(part.content)
-            elif self.output_type.upper() == 'ND4J':
+            elif self.output_format.upper() == 'ND4J':
                 raise NotImplementedError('Nd4j not implemented yet.')
             else:
                 ret[name_str] = part.content
@@ -131,7 +160,7 @@ class Client(object):
 
     def _validate_multi_part(self, data_input={}):
 
-        if self.input_type.capitalize() == 'JSON':
+        if self.input_format.capitalize() == 'JSON':
             raise ValueError(
                 'Attempting to execute multi part request with input type specified as json.')
 

@@ -28,4 +28,3 @@ boxes, _, _ = predictor.predict(image, candidate_size / 2, threshold)
 
 # "num_boxes" is then picked up again from here and returned to the client
 num_boxes = str(len(boxes))
-

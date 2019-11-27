@@ -39,9 +39,9 @@ public class ServingConfig {
     @Builder.Default
     private String listenHost = "localhost";
     @Builder.Default
-    private Input.DataType inputDataType = Input.DataType.JSON;
+    private Input.DataFormat inputDataFormat = Input.DataFormat.JSON;
     @Builder.Default
-    private Output.DataType outputDataType = Output.DataType.JSON;
+    private Output.DataFormat outputDataFormat = Output.DataFormat.JSON;
 
     @Builder.Default
     private Output.PredictionType predictionType = Output.PredictionType.CLASSIFICATION;

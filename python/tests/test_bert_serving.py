@@ -16,8 +16,8 @@ def test_server_start():
     port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=port,
-                                   input_data_type='NUMPY',
-                                   output_data_type='NUMPY',
+                                   input_data_format='NUMPY',
+                                   output_data_format='NUMPY',
                                    log_timings=True)
 
     tensorflow_config = TensorFlowConfig(
@@ -35,7 +35,7 @@ def test_server_start():
                                     output_names=output_names)
 
     inference = InferenceConfiguration(serving_config=serving_config,
-                                       pipeline_steps=[model_pipeline_step])
+                                       steps=[model_pipeline_step])
 
     server = Server(inference_config=inference,
                     extra_start_args='-Xmx8g',
@@ -43,8 +43,8 @@ def test_server_start():
     server.start()
     client = Client(input_names=input_names,
                     output_names=output_names,
-                    input_type='NUMPY',
-                    endpoint_output_type='NUMPY',
+                    input_data_format='NUMPY',
+                    output_data_format='NUMPY',
                     url='http://localhost:' + str(port))
 
     data_input = {
