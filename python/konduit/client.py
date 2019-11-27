@@ -9,7 +9,7 @@ import logging
 
 
 class Client(object):
-    def __init__(self, url, input_data_format='NUMPY', output_data_format=None,
+    def __init__(self, url=None, input_data_format='NUMPY', output_data_format=None,
                  return_output_data_format=None, input_names=None, output_names=None, timeout=60):
         """Konduit Client
 
@@ -30,6 +30,11 @@ class Client(object):
                this client.
         :param timeout: Request time-out in seconds.
         """
+        if not url:
+            logging.warning("You initialized your Client instance without specifying a 'url' argument. "
+                            "The 'predict' method will fail to return valid results this way. Please "
+                            "set the 'url' to the full URL to connect against yout")
+
         if input_names is None:
             input_names = ['default']
         assert isinstance(input_names, list), 'Input names should be a list!'
