@@ -22,7 +22,7 @@ def stop_server_by_pid(pid):
 class Server(object):
     def __init__(self, inference_config=None, serving_config=None, steps=None,
                  extra_start_args='-Xmx8g', config_path='config.json',
-                 jar_path=os.environ['KONDUIT_JAR_PATH']):
+                 jar_path=None):
         """Konduit Server
 
         Start and stop a server from a given inference configuration.
@@ -35,6 +35,8 @@ class Server(object):
         :param config_path: path to write the config object to (as json)
         :param jar_path: path to the konduit uberjar
         """
+	if jar_path is None:
+            jar_path = os.getenv('KONDUIT_JAR_PATH', 'konduit.jar')
 
         if inference_config:
             self.config = inference_config
