@@ -56,7 +56,6 @@ def test_build_tp():
 
     data_input = {'first': 'value'}
 
-    time.sleep(30)
     assert is_port_in_use(port)
 
     try:

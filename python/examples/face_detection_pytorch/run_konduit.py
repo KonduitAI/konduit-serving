@@ -21,7 +21,7 @@ serving_config = ServingConfig(http_port=1337, input_data_type='JSON', output_da
 
 # Start a konduit server and wait for it to start
 server = Server(serving_config=serving_config, steps=[python_pipeline_step])
-server.start(sleep=10)
+server.start()
 
 # Initialize a konduit client that takes in and outputs JSON
 client = Client(input_type='JSON', return_output_type='JSON',

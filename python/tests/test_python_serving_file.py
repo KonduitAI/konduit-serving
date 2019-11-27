@@ -19,7 +19,7 @@ def test_python_script_prediction():
 
     step = PythonStep().step(python_config)
     server = Server(steps=step, serving_config=serving_config)
-    server.start(sleep=10)
+    server.start()
     
     client = Client(url='http://localhost:' + str(port))
 

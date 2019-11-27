@@ -1,12 +1,11 @@
-from konduit import ParallelInferenceConfig, ServingConfig, TensorFlowConfig, ModelConfigType
-from konduit import TensorDataTypesConfig, ModelStep, InferenceConfiguration
-from konduit.server import Server
-from konduit.client import Client
-from konduit.utils import is_port_in_use
+import random
 
 import numpy as np
-import time
-import random
+from konduit import ParallelInferenceConfig, ServingConfig, TensorFlowConfig, ModelConfigType
+from konduit import TensorDataTypesConfig, ModelStep, InferenceConfiguration
+from konduit.client import Client
+from konduit.server import Server
+from konduit.utils import is_port_in_use
 
 
 def test_server_start():
@@ -53,9 +52,6 @@ def test_server_start():
         'IteratorGetNext:4': np.load('../data/input-4.npy')
     }
 
-    sleep_time = 100
-    print('Process started. Sleeping ' + str(sleep_time) + ' seconds.')
-    time.sleep(sleep_time)
     assert is_port_in_use(port)
 
     try:
