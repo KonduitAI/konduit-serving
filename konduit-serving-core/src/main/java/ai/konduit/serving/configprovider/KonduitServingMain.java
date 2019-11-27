@@ -24,8 +24,6 @@ package ai.konduit.serving.configprovider;
 
 import com.beust.jcommander.JCommander;
 import io.vertx.config.ConfigRetriever;
-import io.vertx.config.ConfigStoreOptions;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -53,8 +51,8 @@ public class KonduitServingMain {
         LoggerFactory.getLogger (LoggerFactory.class); // Required for Logback to work in Vertx
 
     }
-    public KonduitServingMain() {
-    }
+
+    public KonduitServingMain() { }
 
     public void runMain(String...args) {
         log.debug("Parsing args " + Arrays.toString(args));
@@ -64,9 +62,8 @@ public class KonduitServingMain {
         JCommander jCommander = new JCommander(konduitServingNodeConfigurer);
         jCommander.parse(args);
         konduitServingNodeConfigurer.setupVertxOptions();
-       runMain(konduitServingNodeConfigurer);
+        runMain(konduitServingNodeConfigurer);
     }
-
 
     public void runMain(KonduitServingNodeConfigurer konduitServingNodeConfigurer) {
         Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());

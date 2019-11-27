@@ -21,56 +21,52 @@
  */
 
 package ai.konduit.serving.configprovider;
-import ai.konduit.serving.metrics.MetricType;
-import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.InferenceConfiguration;
-import io.micrometer.core.instrument.LongTaskTimer;
-import  io.micrometer.core.instrument.MeterRegistry;
-import  ai.konduit.serving.metrics.NativeMetrics;
-import ai.konduit.serving.pipeline.PipelineStep;
-import  ai.konduit.serving.input.conversion.BatchInputParser;
-import ai.konduit.serving.input.adapter.InputAdapter;
+import ai.konduit.serving.config.Input;
+import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
-import ai.konduit.serving.verticles.VerticleConstants;
+import ai.konduit.serving.executioner.PipelineExecutioner;
+import ai.konduit.serving.input.adapter.InputAdapter;
+import ai.konduit.serving.input.conversion.BatchInputParser;
+import ai.konduit.serving.metrics.MetricType;
+import ai.konduit.serving.metrics.NativeMetrics;
+import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
+import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.image.VertxBufferImageInputAdapter;
+import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.nd4j.VertxBufferNd4jInputAdapter;
+import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy.VertxBufferNumpyInputAdapter;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
-import ai.konduit.serving.config.Output;
-import ai.konduit.serving.config.Input;
-import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy.VertxBufferNumpyInputAdapter;
-import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.nd4j.VertxBufferNd4jInputAdapter;
-import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.image.VertxBufferImageInputAdapter;
-import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
-
+import ai.konduit.serving.verticles.VerticleConstants;
+import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.LongTaskTimer.Sample;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
-import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
-import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
-import io.micrometer.core.instrument.LongTaskTimer.Sample;
-import io.vertx.micrometer.backends.BackendRegistries;
-
-import  io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.RoutingContext;
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.healthchecks.HealthCheckHandler;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.List;
-import org.datavec.api.transform.schema.Schema;
-import org.datavec.api.records.Record;
-
-import  org.nd4j.base.Preconditions;
-
-import lombok.extern.slf4j.Slf4j;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.datavec.api.records.Record;
+import org.datavec.api.transform.schema.Schema;
+import org.nd4j.base.Preconditions;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handles setting up a router for doing pipeline based inference.
@@ -177,6 +173,26 @@ public class PipelineRouteDefiner {
 
         healthCheckHandler = HealthCheckHandler.create(vertx);
         router.get("/healthcheck*").handler(healthCheckHandler);
+
+        router.get("/config")
+                .produces("application/json").handler(ctx -> {
+            try {
+                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().end(vertx.getOrCreateContext().config().encode());
+            } catch (Exception e) {
+                ctx.fail(500, e);
+            }
+        });
+
+        router.get("/config/pretty")
+                .produces("application/json").handler(ctx -> {
+            try {
+                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().end(vertx.getOrCreateContext().config().encodePrettily());
+            } catch (Exception e) {
+                ctx.fail(500, e);
+            }
+        });
 
         router.get("/metrics").handler(io.vertx.micrometer.PrometheusScrapingHandler.create())
                 .failureHandler(failureHandler -> {
@@ -443,7 +459,6 @@ public class PipelineRouteDefiner {
             });
 
         });
-
 
         if (pipelineExecutioner == null) {
             log.debug("Initializing inference executioner after starting verticle");
