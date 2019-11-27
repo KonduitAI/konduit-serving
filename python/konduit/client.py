@@ -10,7 +10,7 @@ from konduit.utils import validate_server
 
 
 class Client(object):
-    def __init__(self, url=None, input_data_format='NUMPY', output_data_format=None,
+    def __init__(self, input_data_format='NUMPY', output_data_format=None,
                  return_output_data_format=None, input_names=None, output_names=None, timeout=60,
                  host="http://localhost", port=None):
         """Konduit Client
