@@ -31,7 +31,7 @@
 
 
     <build>
-        <finalName>pipelines</finalName>
+        <finalName>konduit-serving</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

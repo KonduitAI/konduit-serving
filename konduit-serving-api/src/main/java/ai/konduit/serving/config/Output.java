@@ -22,6 +22,12 @@
 
 package ai.konduit.serving.config;
 
+/**
+ * Enums for specifying different kinds of
+ * outputs available to the server.
+ *
+ * @author Adam Gibson
+ */
 public class Output {
 
     public enum DataFormat {
@@ -32,6 +38,10 @@ public class Output {
     }
 
 
+    /**
+     * Used by {@link ai.konduit.serving.output.adapter.OutputAdapter}.
+     * This is for specifying modifications of outputs.
+     */
     public enum PredictionType {
         CLASSIFICATION,
         YOLO,

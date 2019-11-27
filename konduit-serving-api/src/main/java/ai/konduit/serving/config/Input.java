@@ -22,6 +22,13 @@
 
 package ai.konduit.serving.config;
 
+/**
+ * Used for specifying various kinds of
+ * configuration about inputs
+ * for the server.
+ *
+ * @author Adam gibson
+ */
 public class Input {
 
     public enum DataFormat {

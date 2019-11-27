@@ -32,6 +32,7 @@ import io.vertx.core.Vertx;
 import lombok.extern.slf4j.Slf4j;
 import ai.konduit.serving.InferenceConfiguration;
 import  ai.konduit.serving.configprovider.PipelineRouteDefiner;
+import ai.konduit.serving.configprovider.MemMapRouteDefiner;
 
 import java.io.IOException;
 
@@ -45,7 +46,7 @@ import java.io.IOException;
  * input_1 : part name: input_1
  * input_2 : part name: input_2
  *
- * The handler logic for this verticle is implemented
+ * The handler logic for this {@link io.vertx.core.Verticle} is implemented
  * in {@link PipelineExecutioner}
  *
  *
@@ -81,6 +82,14 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         try {
             inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
             this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+            //define the memory map endpoints if the user specifies the memory map configuration
+            if(inferenceConfiguration.getMemMapConfig() != null) {
+                this.router = new MemMapRouteDefiner().defineRoutes(vertx,inferenceConfiguration);
+            }
+            else {
+                this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+
+            }
             setupWebServer();
         } catch (IOException e) {
             log.error("Unable to parse InferenceConfiguration",e);

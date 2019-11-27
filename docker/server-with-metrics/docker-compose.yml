@@ -21,7 +21,7 @@ services:
     entrypoint:
      - java
      - -cp
-     - /srv/pipelines.jar
+     - /srv/konduit-serving.jar
      - ai.konduit.serving.configprovider.KonduitServingMain
      - --configPath
      - /usr/share/config.json

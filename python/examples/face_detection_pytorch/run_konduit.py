@@ -30,6 +30,7 @@ client = Client(input_data_format='JSON', output_data_format='RAW',
 # encode the image from a file to base64 and get back a prediction from the konduit server
 encoded_image = to_base_64(os.path.abspath('./Ultra-Light-Fast-Generic-Face-Detector-1MB/imgs/1.jpg'))
 predicted = client.predict({'image': encoded_image})
+# the actual output can be found under "num_boxes"
 print(predicted['num_boxes'])
 
 server.stop()

@@ -18,7 +18,7 @@ called `konduit-python`. This helper tool can build the Java dependencies needed
 for you under the hood. All you need to do is run:
 
 ```shell script
-konduit-python --os <your-platform>
+konduit init --os <your-platform>
 ```
 
 where `<your-platform>` is picked from `windows-x86_64`,`linux-x86_64`,`linux-x86_64-gpu`,
@@ -78,7 +78,7 @@ python -m pytest .
 
 to also run documentation tests with `doctest` for an individual file, simply run:
 
-```python
+```shell script
  python -m doctest ../konduit/server.py -v
 ```
 
@@ -98,9 +98,9 @@ That means you first need to install this tool with (note that this requires you
 which you could install in a virtual environment):
 
 ```shell script
-pip install jsonschema2popo
+pip install jsonschema2popo autopep8
 ```
 
 and then you have to put `jsonschema2popo` on your `PATH`, so that you can use it from anywhere. To test
-the installation, simply type `jsonschema2popo` in your console. If the command is recognized
-by your shell, you should be able to build `konduit` from source.
+the installation, simply type `jsonschema2popo` in your console. `autopep8` is used internally for linting.
+If the command `jsonschema2popo` is recognized by your shell, you should be able to build `konduit` from source.

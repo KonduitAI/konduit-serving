@@ -65,17 +65,20 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.List;
 import org.datavec.api.transform.schema.Schema;
-import  org.datavec.api.records.Record;
+import org.datavec.api.records.Record;
 
 import  org.nd4j.base.Preconditions;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.Getter;
 
 /**
  * Handles setting up a router for doing pipeline based inference.
  *
  * @author Adam Gibson
  */
-@lombok.extern.slf4j.Slf4j
-@lombok.Getter
+@Slf4j
+@Getter
 public class PipelineRouteDefiner {
 
     protected PipelineExecutioner pipelineExecutioner;

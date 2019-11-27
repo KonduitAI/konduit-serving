@@ -5,7 +5,7 @@ then
     if systemctl is-enabled konduit.serving.service
     then
         echo "stopping Konduit service"
-        systemctl stop pipelines
+        systemctl stop konduit-serving
     fi
 fi
 

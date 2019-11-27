@@ -348,8 +348,7 @@ class TensorDataType(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):
@@ -516,8 +515,7 @@ class SchemaType(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):
@@ -532,8 +530,7 @@ class Input(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):
@@ -548,8 +545,7 @@ class Output(object):
     _formats_map = {
     }
 
-    def __init__(self
-                 ):
+    def __init__(self):
         pass
 
     def as_dict(self):
@@ -2044,6 +2040,77 @@ class ImageLoadingStep(PipelineStep):
         if self.__runner is not None:
             d['runner'] = self.__runner.as_dict() if hasattr(
                 self.__runner, 'as_dict') else self.__runner
+
+
+class MemMapConfig(object):
+
+    _types_map = {
+        'arrayPath': {'type': str, 'subtype': None},
+        'unkVectorPath': {'type': str, 'subtype': None},
+        'initialMemmapSize': {'type': int, 'subtype': None},
+        'workSpaceName': {'type': str, 'subtype': None},
+    }
+    _formats_map = {
+    }
+
+    def __init__(self, array_path=None, unk_vector_path=None, initial_memmap_size=None, work_space_name=None
+                 ):
+        self.__array_path = array_path
+        self.__unk_vector_path = unk_vector_path
+        self.__initial_memmap_size = initial_memmap_size
+        self.__work_space_name = work_space_name
+
+    def _get_array_path(self):
+        return self.__array_path
+
+    def _set_array_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("arrayPath must be str")
+        self.__array_path = value
+    array_path = property(_get_array_path, _set_array_path)
+
+    def _get_unk_vector_path(self):
+        return self.__unk_vector_path
+
+    def _set_unk_vector_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("unkVectorPath must be str")
+        self.__unk_vector_path = value
+    unk_vector_path = property(_get_unk_vector_path, _set_unk_vector_path)
+
+    def _get_initial_memmap_size(self):
+        return self.__initial_memmap_size
+
+    def _set_initial_memmap_size(self, value):
+        if not isinstance(value, int):
+            raise TypeError("initialMemmapSize must be int")
+        self.__initial_memmap_size = value
+    initial_memmap_size = property(
+        _get_initial_memmap_size, _set_initial_memmap_size)
+
+    def _get_work_space_name(self):
+        return self.__work_space_name
+
+    def _set_work_space_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("workSpaceName must be str")
+        self.__work_space_name = value
+    work_space_name = property(_get_work_space_name, _set_work_space_name)
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__array_path is not None:
+            d['arrayPath'] = self.__array_path.as_dict() if hasattr(
+                self.__array_path, 'as_dict') else self.__array_path
+        if self.__unk_vector_path is not None:
+            d['unkVectorPath'] = self.__unk_vector_path.as_dict() if hasattr(
+                self.__unk_vector_path, 'as_dict') else self.__unk_vector_path
+        if self.__initial_memmap_size is not None:
+            d['initialMemmapSize'] = self.__initial_memmap_size.as_dict() if hasattr(
+                self.__initial_memmap_size, 'as_dict') else self.__initial_memmap_size
+        if self.__work_space_name is not None:
+            d['workSpaceName'] = self.__work_space_name.as_dict() if hasattr(
+                self.__work_space_name, 'as_dict') else self.__work_space_name
         return d
 
 
@@ -2052,15 +2119,17 @@ class InferenceConfiguration(object):
     _types_map = {
         'steps': {'type': list, 'subtype': PipelineStep},
         'servingConfig': {'type': ServingConfig, 'subtype': None},
+        'memMapConfig': {'type': MemMapConfig, 'subtype': None},
     }
     _formats_map = {
         'steps': 'table',
     }
 
-    def __init__(self, steps=None, serving_config=None
+    def __init__(self, pipeline_steps=None, serving_config=None, mem_map_config=None
                  ):
         self.__steps = steps
         self.__serving_config = serving_config
+        self.__mem_map_config = mem_map_config
 
     def _get_steps(self):
         return self.__steps
@@ -2082,6 +2151,15 @@ class InferenceConfiguration(object):
         self.__serving_config = value
     serving_config = property(_get_serving_config, _set_serving_config)
 
+    def _get_mem_map_config(self):
+        return self.__mem_map_config
+
+    def _set_mem_map_config(self, value):
+        if not isinstance(value, MemMapConfig):
+            raise TypeError("memMapConfig must be MemMapConfig")
+        self.__mem_map_config = value
+    mem_map_config = property(_get_mem_map_config, _set_mem_map_config)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__steps is not None:
@@ -2090,4 +2168,7 @@ class InferenceConfiguration(object):
         if self.__serving_config is not None:
             d['servingConfig'] = self.__serving_config.as_dict() if hasattr(
                 self.__serving_config, 'as_dict') else self.__serving_config
+        if self.__mem_map_config is not None:
+            d['memMapConfig'] = self.__mem_map_config.as_dict() if hasattr(
+                self.__mem_map_config, 'as_dict') else self.__mem_map_config
         return d
