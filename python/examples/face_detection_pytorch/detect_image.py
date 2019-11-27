@@ -1,5 +1,6 @@
 import os
 import sys
+import numpy as np
 from vision.ssd.config.fd_config import define_img_size
 from vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
 from utils import base64_to_ndarray
@@ -27,5 +28,4 @@ image = base64_to_ndarray(image)
 boxes, _, _ = predictor.predict(image, candidate_size / 2, threshold)
 
 # "image" is then picked up again from here and returned to the client
-image = str(len(boxes))
-
+num_boxes = np.array([len(boxes)])

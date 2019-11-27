@@ -43,8 +43,8 @@ def test_server_start():
     server.start()
     client = Client(input_names=input_names,
                     output_names=output_names,
-                    input_type='NUMPY',
-                    endpoint_output_type='NUMPY',
+                    input_data_format='NUMPY',
+                    output_data_format='NUMPY',
                     url='http://localhost:' + str(port))
 
     data_input = {

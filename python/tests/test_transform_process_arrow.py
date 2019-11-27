@@ -48,9 +48,9 @@ def test_build_tp():
     print('Process started. Sleeping 10 seconds.')
     client = Client(input_names=input_names,
                     output_names=output_names,
-                    return_output_type='ARROW',
-                    input_type='JSON',
-                    endpoint_output_type='RAW',
+                    return_output_data_format='ARROW',
+                    input_data_format='JSON',
+                    output_data_format='RAW',
                     url='http://localhost:' + str(port))
 
     data_input = {'first': 'value'}
