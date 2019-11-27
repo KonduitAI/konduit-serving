@@ -25,7 +25,9 @@ class Server(object):
                  jar_path=None):
         """Konduit Server
 
-        Start and stop a server from a given inference configuration.
+        Start and stop a server from a given inference configuration. Alternatively,
+        you can provide a serving configuration and a list of steps, instead of an
+        inference config.
         Extra arguments with JVM options can be passed.
 
         Example:

@@ -8,6 +8,33 @@ from requests_toolbelt.multipart import decoder, encoder
 import logging
 
 
+def client_from_server(server, output_data_format=None):
+    """Get a Konduit Client instance from a Konduit Server instance.
+    :param server: konduit.Server
+    :param output_data_format: output data format, same as in Client signature.
+    :return: konduit.Client
+    """
+    serving_config = server.config._get_serving_config()
+    steps = server.config._get_steps()
+    input_names = []
+    output_names = []
+    for step in steps:
+        input_names += step._get_input_names()
+        output_names += step._get_output_names()
+
+    port = serving_config._get_http_port()
+    host = serving_config._get_listen_host()
+    if not host:
+        host = 'http://localhost'
+    url = "{}:{}".format(host, port)
+    input_data_format = serving_config._get_input_data_format()
+    return_output_data_format = serving_config._get_output_data_format()
+
+    return Client(url=url, input_data_format=input_data_format, return_output_data_format=return_output_data_format,
+                  output_data_format=output_data_format,
+                  input_names=input_names, output_names=output_names)
+
+
 class Client(object):
     def __init__(self, url=None, input_data_format='NUMPY', output_data_format=None,
                  return_output_data_format=None, input_names=None, output_names=None, timeout=60):
@@ -64,7 +91,6 @@ class Client(object):
 
     def predict(self, data_input=None):
         if isinstance(data_input, np.ndarray):
-            # Note: this is only slightly dangerous, given the current state ;)
             data_input = {'default': data_input}
         if data_input is None:
             data_input = {}
@@ -73,10 +99,10 @@ class Client(object):
                                  json=data_input, timeout=self.timeout)
 
         else:
-            self._validate_multi_part(data_input)
-            data_input = self._convert_multi_part_inputs(data_input=data_input)
+            self._validate_multi_part(data_input=data_input)
+            converted_input = self._convert_multi_part_inputs(data_input=data_input)
             resp = requests.post(self.url + '/' + self.output_format.lower() + '/' + self.input_format.lower(),
-                                 files=data_input,
+                                 files=converted_input,
                                  timeout=self.timeout)
         if 'content-type' not in resp.headers.keys():
             resp.headers['content-type'] = None
@@ -137,8 +163,7 @@ class Client(object):
         return ret
 
     def _convert_multi_part_output(self, content, content_type):
-        multipart_data = decoder.MultipartDecoder(
-            content=content, content_type=content_type)
+        multipart_data = decoder.MultipartDecoder(content=content, content_type=content_type)
         ret = {}
         for part in multipart_data.parts:
             # typically something like: b'form-data; name="input1"'
@@ -158,10 +183,10 @@ class Client(object):
                 ret[name_str] = part.content
         return ret
 
-    def _validate_multi_part(self, data_input={}):
+    def _validate_multi_part(self, data_input):
         if self.input_format.capitalize() == 'JSON':
             raise ValueError(
-                'Attempting to execute multi part request with input type specified as json.')
+                'Attempting to execute multi part request with input type specified as JSON.')
 
         for key, value in data_input.items():
             root_name = re.sub('\\[[0-9]+\\]', '', key)

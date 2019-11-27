@@ -128,10 +128,18 @@ def python_step_func(self, python_config, input_name="default", input_schema=Non
             and output_schema is None and output_column_names is None and output_types is None):
         inputs = python_config._get_python_inputs()
         outputs = python_config._get_python_outputs()
-        input_column_names = list(inputs.keys())
-        output_column_names = list(outputs.keys())
-        input_types = [konduit_type_mapping(v) for v in inputs.values()]
-        output_types = [konduit_type_mapping(v) for v in outputs.values()]
+        if isinstance(inputs, list):
+            input_column_names = inputs
+            input_types = ['NDArray' for i in inputs]
+        else:
+            input_column_names = list(inputs.keys())
+            input_types = [konduit_type_mapping(v) for v in inputs.values()]
+        if isinstance(outputs, list):
+            output_column_names = outputs
+            output_types = ['NDArray' for i in outputs]
+        else:
+            output_column_names = list(outputs.keys())
+            output_types = [konduit_type_mapping(v) for v in outputs.values()]
 
     self.set_input(schema=input_schema, column_names=input_column_names,
                    types=input_types, input_name=input_name)
