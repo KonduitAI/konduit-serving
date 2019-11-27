@@ -11,7 +11,7 @@ from utils import to_base_64
 work_dir = os.path.abspath('.')
 python_config = PythonConfig(
     python_path=default_python_path(work_dir), python_code_path=os.path.join(work_dir, 'detect_image.py'),
-    python_inputs={'image': 'STR'}, python_outputs={'image': 'STR'},
+    python_inputs={'image': 'STR'}, python_outputs={'num_boxes': 'STR'},
 )
 
 # Configure a Python pipeline step for your Python code. Internally, konduit will take Strings as input and output
@@ -31,6 +31,5 @@ client = Client(input_type='JSON', return_output_type='JSON',
 encoded_image = to_base_64(os.path.abspath('./Ultra-Light-Fast-Generic-Face-Detector-1MB/imgs/1.jpg'))
 predicted = client.predict({'image': encoded_image})
 print(predicted)
-# print(predicted.get('image') == encoded_image)
 
 server.stop()
