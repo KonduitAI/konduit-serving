@@ -1,6 +1,7 @@
 import os
 import sys
-import numpy as np
+work_dir = os.path.abspath('./Ultra-Light-Fast-Generic-Face-Detector-1MB')
+sys.path.append(work_dir)
 from vision.ssd.config.fd_config import define_img_size
 from vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
 from utils import base64_to_ndarray
@@ -11,8 +12,6 @@ candidate_size = 1500
 define_img_size(640)
 test_device = 'cpu'
 
-work_dir = os.path.abspath('./Ultra-Light-Fast-Generic-Face-Detector-1MB')
-sys.path.append(work_dir)
 label_path = os.path.join(work_dir, "models/voc-model-labels.txt")
 test_device = test_device
 
@@ -27,5 +26,5 @@ net.load(model_path)
 image = base64_to_ndarray(image)
 boxes, _, _ = predictor.predict(image, candidate_size / 2, threshold)
 
-# "image" is then picked up again from here and returned to the client
-num_boxes = np.array([len(boxes)])
+# "num_boxes" is then picked up again from here and returned to the client
+num_boxes = str(len(boxes))
