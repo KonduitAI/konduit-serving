@@ -13,7 +13,7 @@ class Client(object):
                  return_output_type=None, url=None):
 
         try:
-            response = requests.get("{}/config".format(url).replace("//", "/"))
+            response = requests.get("{}/config".format(url))
             config = response.json()
             logging.info("Retrieved config is".format(config))
             steps = config['pipelineSteps']
