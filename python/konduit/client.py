@@ -49,7 +49,7 @@ class Client(object):
                     response = requests.get("{}/config".format(url))
                     config = response.json()
                     logging.info("Retrieved config is".format(config))
-                    steps = config['pipelineSteps']
+                    steps = config['steps']
                     input_names = steps[0]['inputNames']
                     if output_names is None:
                         output_names = steps[-1]['outputNames']
