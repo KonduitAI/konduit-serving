@@ -68,7 +68,7 @@ public class PipelineExecutionerTests {
         
         ServingConfig servingConfig = ServingConfig.builder()
                 .predictionType(Output.PredictionType.RAW)
-                .inputDataType(Input.DataType.IMAGE)
+                .inputDataFormat(Input.DataFormat.IMAGE)
                 .httpPort(port)
                 .build();
         
@@ -82,7 +82,7 @@ public class PipelineExecutionerTests {
         
         
         InferenceConfiguration configuration = InferenceConfiguration.builder()
-                .pipelineStep(modelStepConfig)
+                .step(modelStepConfig)
                 .servingConfig(servingConfig)
                 .build();
         
@@ -117,9 +117,9 @@ public class PipelineExecutionerTests {
                 .build();
         
         ServingConfig servingConfig = ServingConfig.builder()
-                .inputDataType(Input.DataType.IMAGE)
+                .inputDataFormat(Input.DataFormat.IMAGE)
                 .predictionType(Output.PredictionType.YOLO)
-                .outputDataType(Output.DataType.JSON)
+                .outputDataFormat(Output.DataFormat.JSON)
                 .httpPort(port)
                 .build();
         
@@ -140,8 +140,8 @@ public class PipelineExecutionerTests {
         
         InferenceConfiguration configuration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .pipelineStep(imageLoadingStepConfig)
-                .pipelineStep(modelStepConfig)
+                .step(imageLoadingStepConfig)
+                .step(modelStepConfig)
                 .build();
         
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);

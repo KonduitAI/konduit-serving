@@ -22,7 +22,7 @@ def stop_server_by_pid(pid):
 class Server(object):
     def __init__(self, inference_config=None, serving_config=None, steps=None,
                  extra_start_args='-Xmx8g', config_path='config.json',
-                 jar_path='konduit.jar', pid_file_path='konduit-serving.pid',
+                 jar_path=None, pid_file_path='konduit-serving.pid',
                  start_timeout=120):
         """Konduit Server
 
@@ -41,13 +41,15 @@ class Server(object):
         :param config_path: path to write the config object to (as json)
         :param jar_path: path to the konduit uberjar
         """
+        if jar_path is None:
+            jar_path = os.getenv('KONDUIT_JAR_PATH', 'konduit.jar')
 
         if inference_config:
             self.config = inference_config
         elif serving_config and steps:
             if isinstance(steps, PipelineStep):
                 steps = [steps]
-            self.config = InferenceConfiguration(pipeline_steps=steps, serving_config=serving_config)
+            self.config = InferenceConfiguration(steps=steps, serving_config=serving_config)
         else:
             self.config = InferenceConfiguration()
         self.config_path = config_path
@@ -158,9 +160,8 @@ class Server(object):
         # Pass extra jvm arguments such as memory.
         if self.extra_start_args:
             args.extend(self.extra_start_args)
-        if self.jar_path:
-            args.append('-cp')
-            args.append(self.jar_path)
+        args.append('-cp')
+        args.append(self.jar_path)
         args.append('ai.konduit.serving.configprovider.KonduitServingMain')
         args.append('--pidFile')
         args.append(os.path.abspath(self.pid_file_path))

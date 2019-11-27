@@ -33,12 +33,11 @@ def test_build_tp():
     port = random.randint(1000, 65535)
 
     serving_config = ServingConfig(http_port=port,
-                                   input_data_type='JSON',
-                                   output_data_type='ARROW',
+                                   input_data_format='JSON',
+                                   output_data_format='ARROW',
                                    log_timings=True)
 
-    inference_config = InferenceConfiguration(serving_config=serving_config,
-                                              pipeline_steps=[transform_process])
+    inference_config = InferenceConfiguration(serving_config=serving_config, steps=[transform_process])
     as_json = config_to_dict_with_type(inference_config)
     inference_from_json(as_json)
 
@@ -47,9 +46,9 @@ def test_build_tp():
                     jar_path='konduit.jar')
     server.start()
     print('Process started. Sleeping 10 seconds.')
-    client = Client(return_output_type='ARROW',
-                    input_type='JSON',
-                    endpoint_output_type='RAW',
+    client = Client(return_output_data_format='ARROW',
+                    input_data_format='JSON',
+                    output_data_format='RAW',
                     port=port)
 
     data_input = {'first': 'value'}

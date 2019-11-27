@@ -114,7 +114,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .predictionType(Output.PredictionType.CLASSIFICATION)
-                .inputDataType(Input.DataType.JSON)
+                .inputDataFormat(Input.DataFormat.JSON)
                 .httpPort(port)
                 .build();
 
@@ -128,8 +128,8 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .pipelineStep(transformStep)
-                .pipelineStep(modelStepConfig)
+                .step(transformStep)
+                .step(modelStepConfig)
                 .build();
 
 

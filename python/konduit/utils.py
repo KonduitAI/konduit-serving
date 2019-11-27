@@ -6,10 +6,10 @@ import requests
 import logging
 
 
-def is_port_in_use(port):
+def is_port_in_use(port, base_url='localhost'):
     """is this port already in use for a Konduit server?"""
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        return s.connect_ex(('localhost', port)) == 0
+        return s.connect_ex((base_url, port)) == 0
 
 
 def default_python_path(work_dir='.'):

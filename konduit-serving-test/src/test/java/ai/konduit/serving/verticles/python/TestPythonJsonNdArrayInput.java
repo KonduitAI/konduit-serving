@@ -90,12 +90,12 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .inputDataType(Input.DataType.NUMPY)
+                .inputDataFormat(Input.DataFormat.NUMPY)
                 .predictionType(Output.PredictionType.RAW)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
-                .pipelineStep(pythonStepConfig)
+                .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
 

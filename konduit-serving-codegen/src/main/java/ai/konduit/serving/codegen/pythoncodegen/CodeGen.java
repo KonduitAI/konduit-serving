@@ -199,8 +199,8 @@ public class CodeGen {
         loadedModule = loadedModule.replace("'type': type","'type': dict");
 
         // Modify some constructor defaults to leverage Python's strengths
-        loadedModule = loadedModule.replace("input_data_type=None", "input_data_type='NUMPY'");
-        loadedModule = loadedModule.replace("output_data_type=None", "output_data_type='NUMPY'");
+        loadedModule = loadedModule.replace("input_data_format=None", "input_data_format='NUMPY'");
+        loadedModule = loadedModule.replace("output_data_format=None", "output_data_format='NUMPY'");
         loadedModule = loadedModule.replace("log_timings=None", "log_timings=True");
 
 
