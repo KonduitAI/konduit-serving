@@ -2040,6 +2040,7 @@ class ImageLoadingStep(PipelineStep):
         if self.__runner is not None:
             d['runner'] = self.__runner.as_dict() if hasattr(
                 self.__runner, 'as_dict') else self.__runner
+        return d
 
 
 class MemMapConfig(object):
@@ -2125,7 +2126,7 @@ class InferenceConfiguration(object):
         'steps': 'table',
     }
 
-    def __init__(self, pipeline_steps=None, serving_config=None, mem_map_config=None
+    def __init__(self, steps=None, serving_config=None, mem_map_config=None
                  ):
         self.__steps = steps
         self.__serving_config = serving_config
