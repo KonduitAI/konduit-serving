@@ -13,6 +13,17 @@ class Client(object):
                  return_output_type=None, url=None):
 
         try:
+            r = requests.get("{}/healthcheck".format(url))
+            if r.status_code != 204:
+                logging.error("The server health checks failed. Please verify that the server is running without any "
+                              "issues...")
+                exit(-1)
+        except Exception as ex:
+            logging.error("{}\nUnable to connect to the server or the server health checks have failed. Please "
+                          "verify that the server is running without any issues...".format(str(ex)))
+            exit(-1)
+
+        try:
             response = requests.get("{}/config".format(url))
             config = response.json()
             logging.info("Retrieved config is".format(config))
@@ -20,7 +31,9 @@ class Client(object):
             input_names = steps[0]['inputNames']
             output_names = steps[-1]['outputNames']
         except Exception as ex:
-            logging.error(str(ex))
+            logging.error("{}\nUnable to get configuration from the server. Please verify that the server is running "
+                          "without any issues...".format(str(ex)))
+            exit(-1)
 
 
         if input_names is None:

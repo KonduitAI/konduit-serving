@@ -101,7 +101,7 @@ class Server(object):
         for i in range(tries):
             # This url returns status 204 with no content when the server is up.
             try:
-                logging.info("Checking server integrity. Tries: {} of {}".format(i + 1, tries))
+                print("Checking server integrity. Tries: {} of {}".format(i + 1, tries))
 
                 r = requests.get("http://localhost:{}/healthcheck".format(self.config.serving_config.http_port),
                                  timeout=request_timeout)
@@ -109,12 +109,12 @@ class Server(object):
                     started = True
                     break
             except Exception as ex:
-                logging.error("{}\nChecking server integrity again...".format(str(ex)))
+                logging.debug("{}\nChecking server integrity again...".format(str(ex)))
 
         if started:
-            logging.info("Server has started successfully.")
+            print("Server has started successfully.")
         else:
-            logging.error("The server wasn't able to start.")
+            print("The server wasn't able to start.")
             self.stop()
 
         return process
