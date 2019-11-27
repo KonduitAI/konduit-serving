@@ -17,8 +17,6 @@ class Client(object):
 
         This client is used to connect to a Konduit Server instance.
 
-        :param url: URL on which to find the server, used to send all requests. This URL needs to include the port of
-               the running server as well, e.g. url='http://localhost:1337'.
         :param input_data_format: The format in which the input data is accepted by endpoints. Defaults to 'NUMPY',
                but can be 'JSON', 'ND4J', 'IMAGE' and 'ARROW' as well.
         :param output_data_format: The output format returned from the Konduit server. If not specified, this format
@@ -31,6 +29,8 @@ class Client(object):
         :param output_names: The names of all inputs of the Konduit pipeline deployed for the Server corresponding to
                this client.
         :param timeout: Request time-out in seconds.
+        :param host: The server host. e.g. 'http://localhost'.
+        :param port: The port on which the server is listening to. e.g. '1337'.
         """
 
         if not host or not port:

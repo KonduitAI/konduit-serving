@@ -69,8 +69,7 @@ class Server(object):
     def start(self, kill_existing_server=True):
         """Start the Konduit server
 
-        :param kill_existing_server: whether to kill any previously started server if it wasn't stop
-        :param sleep: optional number of seconds to sleep after triggering server start.
+        :param kill_existing_server: whether to kill any previously started server if it wasn't stop.
         """
         if kill_existing_server:
             if os.path.exists(self.pid_file_path):
