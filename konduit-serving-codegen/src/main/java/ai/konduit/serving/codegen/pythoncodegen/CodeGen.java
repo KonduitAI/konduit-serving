@@ -197,7 +197,7 @@ public class CodeGen {
         loadedModule = loadedModule.replace("input_data_format=None", "input_data_format='NUMPY'");
         loadedModule = loadedModule.replace("output_data_format=None", "output_data_format='NUMPY'");
         loadedModule = loadedModule.replace("log_timings=None", "log_timings=True");
-
+        loadedModule = loadedModule.replace("prediction_type=None", "prediction_type='RAW'");
 
         String sb = "import enum\nfrom konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n" +
                 loadedModule;
