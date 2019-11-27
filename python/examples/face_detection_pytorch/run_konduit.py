@@ -5,7 +5,6 @@ from konduit.utils import default_python_path
 
 import os
 from utils import to_base_64
-import cv2
 
 
 # Set the working directory to this folder and register the "detect_image.py" script as code to be executed by konduit.
@@ -21,7 +20,7 @@ python_pipeline_step = PythonStep().step(python_config)
 serving_config = ServingConfig(http_port=1337, input_data_type='JSON', output_data_type='JSON')
 
 # Start a konduit server and wait for it to start
-server = Server(serving_config=serving_config, steps=[python_pipeline_step], jar_path=os.environ['KONDUIT_JAR_PATH'])
+server = Server(serving_config=serving_config, steps=[python_pipeline_step])
 server.start(sleep=10)
 
 # Initialize a konduit client that takes in and outputs JSON

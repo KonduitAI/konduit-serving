@@ -22,7 +22,7 @@ def stop_server_by_pid(pid):
 class Server(object):
     def __init__(self, inference_config=None, serving_config=None, steps=None,
                  extra_start_args='-Xmx8g', config_path='config.json',
-                 jar_path=None):
+                 jar_path=os.environ['KONDUIT_JAR_PATH']):
         """Konduit Server
 
         Start and stop a server from a given inference configuration.
