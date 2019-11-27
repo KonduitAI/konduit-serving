@@ -16,8 +16,8 @@ def test_server_start():
     port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=port,
-                                   input_data_type='NUMPY',
-                                   output_data_type='NUMPY',
+                                   input_data_format='NUMPY',
+                                   output_data_format='NUMPY',
                                    log_timings=True)
 
     tensorflow_config = TensorFlowConfig(

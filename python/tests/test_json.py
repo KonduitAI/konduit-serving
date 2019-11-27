@@ -13,8 +13,8 @@ InferenceConfigurationJava = autoclass(
 def test_json_compare():
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=1300,
-                                   input_data_type='NUMPY',
-                                   output_data_type='NUMPY')
+                                   input_data_format='NUMPY',
+                                   output_data_format='NUMPY')
 
     tensorflow_config = TensorFlowConfig(model_config_type=ModelConfigType(model_type='TENSORFLOW',
                                                                            model_loading_path='model.pb'))
@@ -43,8 +43,8 @@ def test_python_serde():
 
     port = 1300
     serving_config = ServingConfig(http_port=port,
-                                   input_data_type='NUMPY',
-                                   output_data_type='NUMPY',
+                                   input_data_format='NUMPY',
+                                   output_data_format='NUMPY',
                                    log_timings=True)
 
     python_pipeline_step = PythonStep(input_names=input_names,
