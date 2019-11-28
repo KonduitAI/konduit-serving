@@ -23,7 +23,12 @@
 package ai.konduit.serving.codegen.pythoncodegen;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.*;
+import ai.konduit.serving.config.Input;
+import ai.konduit.serving.config.MemMapConfig;
+import ai.konduit.serving.config.ParallelInferenceConfig;
+import ai.konduit.serving.config.SchemaType;
+import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.config.NormalizationConfig;

@@ -108,7 +108,6 @@ def server_from_file(file_path, start_server=True, use_yaml=True):
     serving_data = data.get('serving', None)
 
     extra_start_args = pop_data(serving_data, 'extra_start_args')
-    sleep = pop_data(serving_data, 'sleep')
     jar_path = pop_data(serving_data, 'jar_path')
     config_path = pop_data(serving_data, 'config_path')
     if not config_path:
@@ -129,7 +128,7 @@ def server_from_file(file_path, start_server=True, use_yaml=True):
         config_path=config_path
     )
     if start_server:
-        server.start(sleep=sleep)
+        server.start()
     return server
 
 

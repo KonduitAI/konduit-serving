@@ -23,40 +23,33 @@
 package ai.konduit.serving.configprovider;
 
 
-import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.javacpp.BytePointer;
-
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.MemMapConfig;
-
-import java.util.List;
-import java.util.ArrayList;
-import  java.io.File;
-import java.io.IOException;
-
+import io.netty.buffer.Unpooled;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
+import io.vertx.ext.healthchecks.HealthCheckHandler;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Pointer;
+import org.nd4j.linalg.api.memory.MemoryWorkspace;
 import org.nd4j.linalg.api.memory.conf.WorkspaceConfiguration;
 import org.nd4j.linalg.api.memory.enums.LocationPolicy;
-import org.nd4j.linalg.api.memory.MemoryWorkspace;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.INDArrayIndex;
 import org.nd4j.linalg.indexing.NDArrayIndex;
-
-
 import org.nd4j.serde.binary.BinarySerde;
-import  org.nd4j.linalg.indexing.INDArrayIndex;
 
-import io.vertx.core.Vertx;
-import io.vertx.ext.web.Router;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.core.json.JsonArray;
-import io.vertx.ext.web.handler.BodyHandler;
-
-import io.netty.buffer.Unpooled;
-
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -156,6 +149,27 @@ public class MemMapRouteDefiner {
                 });
 
 
+        router.get("/healthcheck*").handler(HealthCheckHandler.create(vertx));
+
+        router.get("/config")
+                .produces("application/json").handler(ctx -> {
+            try {
+                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().end(vertx.getOrCreateContext().config().encode());
+            } catch (Exception e) {
+                ctx.fail(500, e);
+            }
+        });
+
+        router.get("/config/pretty")
+                .produces("application/json").handler(ctx -> {
+            try {
+                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().end(vertx.getOrCreateContext().config().encodePrettily());
+            } catch (Exception e) {
+                ctx.fail(500, e);
+            }
+        });
 
 
         router.post("/array/:arrayType")

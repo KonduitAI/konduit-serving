@@ -1,13 +1,13 @@
+import json
+import logging
+import os
+import signal
+import subprocess
+import requests
+
 from konduit.base_inference import PipelineStep
 from konduit.inference import InferenceConfiguration
 from konduit.json_utils import config_to_dict_with_type
-
-import json
-import subprocess
-import os
-import time
-import logging
-import signal
 
 
 def stop_server_by_pid(pid):
@@ -22,7 +22,8 @@ def stop_server_by_pid(pid):
 class Server(object):
     def __init__(self, inference_config=None, serving_config=None, steps=None,
                  extra_start_args='-Xmx8g', config_path='config.json',
-                 jar_path=None):
+                 jar_path=None, pid_file_path='konduit-serving.pid',
+                 start_timeout=120):
         """Konduit Server
 
         Start and stop a server from a given inference configuration.
@@ -53,6 +54,8 @@ class Server(object):
             self.config = InferenceConfiguration()
         self.config_path = config_path
         self.jar_path = jar_path
+        self.pid_file_path = pid_file_path
+        self.start_timeout = start_timeout
         self.process = None
         if extra_start_args is None:
             extra_start_args = []
@@ -63,11 +66,23 @@ class Server(object):
         else:
             self.extra_start_args = extra_start_args
 
-    def start(self, sleep=None):
+    def start(self, kill_existing_server=True):
         """Start the Konduit server
 
-        :param sleep: optional number of seconds to sleep after triggering server start.
+        :param kill_existing_server: whether to kill any previously started server if it wasn't stop.
         """
+        if kill_existing_server:
+            if os.path.exists(self.pid_file_path):
+                with open(self.pid_file_path, 'rb') as pid_file:
+                    pid = int(pid_file.readline().strip())
+                    try:
+                        stop_server_by_pid(pid)
+                    except OSError:
+                        logging.debug("Attempt to kill existing process by pid: '{}' failed. The process might not "
+                                      "exist. ".format(pid))
+
+                os.remove(self.pid_file_path)
+
         json_config = config_to_dict_with_type(self.config)
         with open(self.config_path, 'w') as f:
             abs_path = os.path.abspath(self.config_path)
@@ -77,8 +92,50 @@ class Server(object):
         args = self._process_extra_args(abs_path)
         process = subprocess.Popen(args=args)
         self.process = process
-        if sleep:
-            time.sleep(sleep)
+
+        # Check if the server is up or not.
+        request_timeout = 5
+        tries = int(self.start_timeout / request_timeout + 1)
+
+        started = False
+
+        print("Starting server", end='')
+
+        for i in range(tries):
+            # This url returns status 204 with no content when the server is up.
+            try:
+                """
+                This would look like the following on success:
+                ------
+                Starting server...
+                
+                Server has started successfully.
+                ------ 
+                
+                and like this on failure
+                ------
+                Starting server...
+                
+                The server wasn't able to start.
+                ------ 
+                """
+                print(".", end='')
+                logging.debug("Checking server integrity. Tries: {} of {}".format(i + 1, tries))
+
+                r = requests.get("http://localhost:{}/healthcheck".format(self.config.serving_config.http_port),
+                                 timeout=request_timeout)
+                if r.status_code == 204:
+                    started = True
+                    break
+            except Exception as ex:
+                logging.debug("{}\nChecking server integrity again...".format(str(ex)))
+
+        if started:
+            print("\n\nServer has started successfully.")
+        else:
+            print("\n\nThe server wasn't able to start.")
+            self.stop()
+
         return process
 
     def stop(self):
@@ -105,6 +162,8 @@ class Server(object):
         args.append('-cp')
         args.append(self.jar_path)
         args.append('ai.konduit.serving.configprovider.KonduitServingMain')
+        args.append('--pidFile')
+        args.append(os.path.abspath(self.pid_file_path))
         args.append('--configPath')
         args.append(absolute_path)
         args.append('--verticleClassName')
