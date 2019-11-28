@@ -6,6 +6,7 @@ import json
 from pyarrow.ipc import RecordBatchFileReader
 from requests_toolbelt.multipart import decoder, encoder
 import logging
+from konduit.utils import validate_server
 
 
 def client_from_server(server, output_data_format=None):
@@ -36,14 +37,13 @@ def client_from_server(server, output_data_format=None):
 
 
 class Client(object):
-    def __init__(self, url=None, input_data_format='NUMPY', output_data_format=None,
-                 return_output_data_format=None, input_names=None, output_names=None, timeout=60):
+    def __init__(self, input_data_format='NUMPY', output_data_format=None,
+                 return_output_data_format=None, input_names=None, output_names=None, timeout=60,
+                 host="http://localhost", port=None):
         """Konduit Client
 
         This client is used to connect to a Konduit Server instance.
 
-        :param url: URL on which to find the server, used to send all requests. This URL needs to include the port of
-               the running server as well, e.g. url='http://localhost:1337'.
         :param input_data_format: The format in which the input data is accepted by endpoints. Defaults to 'NUMPY',
                but can be 'JSON', 'ND4J', 'IMAGE' and 'ARROW' as well.
         :param output_data_format: The output format returned from the Konduit server. If not specified, this format
@@ -56,14 +56,35 @@ class Client(object):
         :param output_names: The names of all inputs of the Konduit pipeline deployed for the Server corresponding to
                this client.
         :param timeout: Request time-out in seconds.
+        :param host: The server host. e.g. 'http://localhost'.
+        :param port: The port on which the server is listening to. e.g. '1337'.
         """
-        if not url:
-            logging.warning("You initialized your Client instance without specifying a 'url' argument. "
+
+        if not host or not port:
+            logging.warning("You initialized your Client instance without specifying a 'host' or 'port' argument. "
                             "The 'predict' method will fail to return valid results this way. Please "
-                            "set the 'url' to the full URL to connect against yout")
+                            "set the 'host' and 'port' to the full URL to connect against yout")
+
+        url = "{}:{}".format(host, port)
 
         if input_names is None:
-            input_names = ['default']
+            if not validate_server(url):
+                logging.error("Unable to connect to the server at {}".format(url))
+                exit(-1)
+            else:
+                try:
+                    response = requests.get("{}/config".format(url))
+                    config = response.json()
+                    logging.info("Retrieved config is".format(config))
+                    steps = config['steps']
+                    input_names = steps[0]['inputNames']
+                    if output_names is None:
+                        output_names = steps[-1]['outputNames']
+                except Exception as ex:
+                    logging.error("{}\nUnable to get configuration from the server. Please verify that the server is "
+                                  "running without any issues...".format(str(ex)))
+                    exit(-1)
+
         assert isinstance(input_names, list), 'Input names should be a list!'
         assert len(input_names) > 0, 'Input names must not be empty!'
 
