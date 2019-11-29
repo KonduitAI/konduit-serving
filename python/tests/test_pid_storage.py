@@ -1,8 +1,10 @@
 from konduit.load import server_from_file
 from konduit.load import store_pid, pop_pid
 from konduit.server import stop_server_by_pid
+import pytest
 
 
+@pytest.mark.unit
 def test_pid_storage():
     file_path = 'yaml/konduit.yaml'
     store_pid(file_path, 123)
@@ -10,6 +12,7 @@ def test_pid_storage():
     assert pid == 123
 
 
+@pytest.mark.unit
 def test_pid_creation_removal():
     file_path = 'yaml/konduit.yaml'
     running_server = server_from_file(file_path, start_server=True)

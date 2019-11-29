@@ -4,8 +4,10 @@ from konduit.utils import is_port_in_use
 
 import time
 import random
+import pytest
 
 
+@pytest.mark.integration
 def test_server_start():
     port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)

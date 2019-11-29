@@ -5,8 +5,10 @@ from konduit.utils import is_port_in_use, default_python_path
 
 import numpy as np
 import os
+import pytest
 
 
+@pytest.mark.integration
 def test_python_script_prediction():
     port = 1337
     serving_config = ServingConfig(http_port=port)

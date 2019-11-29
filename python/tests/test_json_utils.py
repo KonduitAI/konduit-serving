@@ -3,12 +3,14 @@ from konduit.json_utils import *
 import pytest
 
 
+@pytest.mark.unit
 def test_empty_dict_type():
     d1 = empty_type_dict(InferenceConfiguration())
     d2 = {"@type": "InferenceConfiguration"}
     assert d1 == d2
 
 
+@pytest.mark.unit
 def test_dict_wrapper():
     d = {"foo": {"bar": "baz"}}
     dw = DictWrapper(d)
@@ -16,6 +18,7 @@ def test_dict_wrapper():
     assert d == dw.as_dict()
 
 
+@pytest.mark.unit
 def test_list_wrapper():
     lst = ['a', 'b', 'c']
     lw = ListWrapper(lst)
@@ -31,8 +34,8 @@ def test_list_wrapper():
     assert x == 'c'
 
 
+@pytest.mark.unit
 def test_as_dict_checker():
-
     class FooCallable(object):
         def __init__(self):
             pass

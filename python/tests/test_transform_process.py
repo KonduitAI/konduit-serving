@@ -9,8 +9,10 @@ import time
 import json
 import pydatavec
 from .utils import load_java_tp, inference_from_json
+import pytest
 
 
+@pytest.mark.integration
 def test_build_tp():
     schema = pydatavec.Schema()
     schema.add_string_column('first')

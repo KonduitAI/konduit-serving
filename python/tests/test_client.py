@@ -4,6 +4,7 @@ import pytest
 import random
 
 
+@pytest.mark.unit
 def test_client_from_server():
     port = random.randint(1000, 65535)
     serving_config = ServingConfig(http_port=port)
@@ -24,8 +25,8 @@ def test_client_from_server():
         server.stop()
 
 
+@pytest.mark.unit
 def test_multipart_regex():
-
     client = Client(input_names=['partname'], output_names=['nobody_cares'])
 
     test_data = {

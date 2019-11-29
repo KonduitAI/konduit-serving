@@ -1,6 +1,7 @@
 from konduit import *
 import glob
 import re
+import pytest
 
 
 def markdown_blocks(file_path, language='python'):
@@ -167,6 +168,7 @@ def clean_java_files(ext=''):
             continue
 
 
+@pytest.mark.unit
 def test_docs():
     """This is the main unit test for testing documentation code snippets
     contained in markdown files."""

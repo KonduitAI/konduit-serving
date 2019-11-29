@@ -5,8 +5,10 @@ from konduit.json_utils import config_to_dict_with_type
 import json
 import random
 import numpy as np
+import pytest
 
 
+@pytest.mark.unit
 def test_multipart_encode():
     input_names = ["IteratorGetNext:0",
                    "IteratorGetNext:1", "IteratorGetNext:4"]
@@ -27,6 +29,7 @@ def test_multipart_encode():
     client._convert_multi_part_output(content=body, content_type=content_type)
 
 
+@pytest.mark.unit
 def test_python_serde():
     python_configuration = PythonConfig(
         python_code='first += 2',

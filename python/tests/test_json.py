@@ -3,6 +3,7 @@ from konduit.json_utils import config_to_dict_with_type
 
 from jnius import autoclass
 import json
+import pytest
 
 
 StringJava = autoclass("java.lang.String")
@@ -10,6 +11,7 @@ InferenceConfigurationJava = autoclass(
     'ai.konduit.serving.InferenceConfiguration')
 
 
+@pytest.mark.unit
 def test_json_compare():
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=1300,
@@ -22,8 +24,8 @@ def test_json_compare():
     model_pipeline_step = ModelStep(model_config=tensorflow_config,
                                     parallel_inference_config=parallel_inference_config,
                                     input_names=["IteratorGetNext:0",
-                                                         "IteratorGetNext:1",
-                                                         "IteratorGetNext:4"],
+                                                 "IteratorGetNext:1",
+                                                 "IteratorGetNext:4"],
                                     output_names=["loss/Softmax"])
 
     inference = InferenceConfiguration(serving_config=serving_config,
@@ -32,6 +34,7 @@ def test_json_compare():
     assert_config_works(inference)
 
 
+@pytest.mark.unit
 def test_python_serde():
     input_names = ['default']
     output_names = ['default']

@@ -7,8 +7,10 @@ from konduit.utils import is_port_in_use
 import numpy as np
 import time
 import random
+import pytest
 
 
+@pytest.mark.integration
 def test_server_start():
 
     input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
