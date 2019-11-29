@@ -2,7 +2,6 @@ from konduit import *
 from konduit.server import Server
 from konduit.utils import is_port_in_use
 
-import time
 import random
 import pytest
 
@@ -38,10 +37,6 @@ def test_server_start():
     server = Server(inference_config=inference_config,
                     extra_start_args='-Xmx8g', jar_path='konduit.jar')
     server.start()
-
-    sleep_time = 30
-    print('Process started. Sleeping ' + str(sleep_time) + ' seconds.')
-    time.sleep(sleep_time)
 
     assert is_port_in_use(port)
     print('Done sleeping. Assuming server alive. Killing process.')

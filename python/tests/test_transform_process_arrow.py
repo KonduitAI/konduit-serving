@@ -48,16 +48,13 @@ def test_build_tp():
                     jar_path='konduit.jar')
     server.start()
     print('Process started. Sleeping 10 seconds.')
-    client = Client(input_names=input_names,
-                    output_names=output_names,
-                    return_output_data_format='ARROW',
+    client = Client(return_output_data_format='ARROW',
                     input_data_format='JSON',
                     output_data_format='RAW',
-                    url='http://localhost:' + str(port))
+                    port=port)
 
     data_input = {'first': 'value'}
 
-    time.sleep(30)
     assert is_port_in_use(port)
 
     try:

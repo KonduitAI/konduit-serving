@@ -1,11 +1,13 @@
+import random
+
+import numpy as np
 from konduit import ParallelInferenceConfig, ServingConfig, TensorFlowConfig, ModelConfigType
 from konduit import TensorDataTypesConfig, ModelStep, InferenceConfiguration
-from konduit.server import Server
 from konduit.client import Client
+from konduit.server import Server
 from konduit.utils import is_port_in_use
 
 import numpy as np
-import time
 import random
 import pytest
 
@@ -43,11 +45,9 @@ def test_server_start():
                     extra_start_args='-Xmx8g',
                     jar_path='konduit.jar')
     server.start()
-    client = Client(input_names=input_names,
-                    output_names=output_names,
-                    input_data_format='NUMPY',
+    client = Client(input_data_format='NUMPY',
                     output_data_format='NUMPY',
-                    url='http://localhost:' + str(port))
+                    port=port)
 
     data_input = {
         'IteratorGetNext:0': np.load('../data/input-0.npy'),
@@ -55,9 +55,6 @@ def test_server_start():
         'IteratorGetNext:4': np.load('../data/input-4.npy')
     }
 
-    sleep_time = 100
-    print('Process started. Sleeping ' + str(sleep_time) + ' seconds.')
-    time.sleep(sleep_time)
     assert is_port_in_use(port)
 
     try:

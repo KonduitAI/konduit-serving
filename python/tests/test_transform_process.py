@@ -48,7 +48,7 @@ def test_build_tp():
     client = Client(return_output_data_format='JSON',
                     input_data_format='JSON',
                     output_data_format='RAW',
-                    url='http://localhost:' + str(port))
+                    port=port)
 
     data_input = {'first': 'value'}
 
