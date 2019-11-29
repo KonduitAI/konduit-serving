@@ -61,21 +61,21 @@ public class NativeMetrics implements MeterBinder {
         Gauge.builder("cpuload", hardwareMetric,HardwareMetric::getAveragedCpuLoad)
                 .tags(tags)
                 .description("Average cpu load")
-                .baseUnit("pipelines." + hardwareMetric.getHostName())
+                .baseUnit("konduit-serving." + hardwareMetric.getHostName())
                 .register(registry);
 
 
         Gauge.builder("memoryuse", hardwareMetric,HardwareMetric::getCurrentMemoryUse)
                 .tags(tags)
                 .description("Memory use")
-                .baseUnit("pipelines." + hardwareMetric.getHostName())
+                .baseUnit("konduit-serving." + hardwareMetric.getHostName())
                 .register(registry);
 
 
         Gauge.builder("iowaittime", hardwareMetric,HardwareMetric::getIoWaitTime)
                 .tags(tags)
                 .description("I/O Wait time")
-                .baseUnit("pipelines." + hardwareMetric.getHostName())
+                .baseUnit("konduit-serving." + hardwareMetric.getHostName())
                 .register(registry);
 
 
@@ -85,25 +85,25 @@ public class NativeMetrics implements MeterBinder {
                 Gauge.builder("gpu." + entry.getKey() + ".bandwidth.d2d" + entry.getKey(), deviceMetric,DeviceMetric::getBandwidthDeviceToDevice)
                         .tags(tags)
                         .description("Gpu " + entry.getKey() + " bandwidth device to device for device " + deviceMetric.getDeviceName())
-                        .baseUnit("pipelines." + hardwareMetric.getHostName())
+                        .baseUnit("konduit-serving." + hardwareMetric.getHostName())
                         .register(registry);
 
                 Gauge.builder("gpu." + entry.getKey() + ".bandwidth.d2h" + entry.getKey(), deviceMetric,DeviceMetric::getBandwidthDeviceToHost)
                         .tags(tags)
                         .description("Gpu " + entry.getKey() + " bandwidth device to host for device " + deviceMetric.getDeviceName())
-                        .baseUnit("pipelines." + hardwareMetric.getHostName())
+                        .baseUnit("konduit-serving." + hardwareMetric.getHostName())
                         .register(registry);
 
                 Gauge.builder("gpu." + entry.getKey() + ".load" + entry.getKey(), deviceMetric,DeviceMetric::getLoad)
                         .tags(tags)
                         .description("Gpu " + entry.getKey() + " current load for device " + deviceMetric.getDeviceName())
-                        .baseUnit("pipelines." + hardwareMetric.getHostName())
+                        .baseUnit("konduit-serving." + hardwareMetric.getHostName())
                         .register(registry);
 
                 Gauge.builder("gpu." + entry.getKey() + ".memavailable" + entry.getKey(), deviceMetric,DeviceMetric::getMemAvailable)
                         .tags(tags)
                         .description("Gpu " + entry.getKey() + " current available memory for device " + deviceMetric.getDeviceName())
-                        .baseUnit("pipelines." + hardwareMetric.getHostName())
+                        .baseUnit("konduit-serving." + hardwareMetric.getHostName())
                         .register(registry);
 
 
@@ -116,13 +116,13 @@ public class NativeMetrics implements MeterBinder {
                 Gauge.builder("Cpu." + entry.getKey() + ".load" + entry.getKey(), deviceMetric,DeviceMetric::getLoad)
                         .tags(tags)
                         .description("Cpu " + entry.getKey() + " current load for device " + deviceMetric.getDeviceName())
-                        .baseUnit("pipelines." + hardwareMetric.getHostName())
+                        .baseUnit("konduit-serving." + hardwareMetric.getHostName())
                         .register(registry);
 
                 Gauge.builder("cpu." + entry.getKey() + ".memavailable" + entry.getKey(), deviceMetric,DeviceMetric::getMemAvailable)
                         .tags(tags)
                         .description("Cpu " + entry.getKey() + " current available memory for device " + deviceMetric.getDeviceName())
-                        .baseUnit("pipelines." + hardwareMetric.getHostName())
+                        .baseUnit("konduit-serving." + hardwareMetric.getHostName())
                         .register(registry);
 
             }

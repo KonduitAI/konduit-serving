@@ -102,7 +102,7 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
         
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .inputDataType(Input.DataType.JSON)
+                .inputDataFormat(Input.DataFormat.JSON)
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
         
@@ -111,7 +111,7 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .pipelineStep(modelPipelineStep)
+                .step(modelPipelineStep)
                 .build();
         return new JsonObject(inferenceConfiguration.toJson());
     }

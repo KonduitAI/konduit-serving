@@ -35,8 +35,8 @@
     <properties>
         <javacpp.platform>windows-x86_64</javacpp.platform>
         <version.jre.launch4j>1.8</version.jre.launch4j>
-        <exeFileName>pipelines</exeFileName>
-        <jarFileName>pipelines</jarFileName>
+        <exeFileName>konduit-serving</exeFileName>
+        <jarFileName>konduit-serving</jarFileName>
     </properties>
 
     <dependencies>
@@ -48,7 +48,7 @@
     </dependencies>
 
     <build>
-        <finalName>pipelines</finalName>
+        <finalName>konduit-serving</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

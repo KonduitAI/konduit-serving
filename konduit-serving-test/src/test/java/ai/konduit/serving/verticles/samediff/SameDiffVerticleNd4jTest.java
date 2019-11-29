@@ -84,8 +84,8 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
         SameDiff values = SameDiff.fromFlatFile(tmpSameDiffFile);
         
         ServingConfig servingConfig = ServingConfig.builder()
-                .inputDataType(Input.DataType.NUMPY)
-                .outputDataType(Output.DataType.ND4J)
+                .inputDataFormat(Input.DataFormat.NUMPY)
+                .outputDataFormat(Output.DataFormat.ND4J)
                 .httpPort(port)
                 .build();
         
@@ -105,7 +105,7 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
         
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .pipelineStep(modelPipelineConfig)
+                .step(modelPipelineConfig)
                 .build();
         
         return new JsonObject(inferenceConfiguration.toJson());
