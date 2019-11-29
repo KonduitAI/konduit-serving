@@ -35,8 +35,8 @@ public class PipelineSerializationTests {
     @Test
     public void testFromYaml() throws Exception {
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
-                .pipelineStep(new PythonStep())
-                .pipelineStep(new PythonStep())
+                .step(new PythonStep())
+                .step(new PythonStep())
                 .servingConfig(ServingConfig.builder().build())
                 .build();
         assertEquals(inferenceConfiguration,InferenceConfiguration.fromYaml(inferenceConfiguration.toYaml()));
@@ -50,8 +50,8 @@ public class PipelineSerializationTests {
                 .build();
 
         InferenceConfiguration config = InferenceConfiguration.builder()
-                .pipelineStep(imageLoadingStepConfig)
-                .pipelineStep(imageLoadingStepConfig)
+                .step(imageLoadingStepConfig)
+                .step(imageLoadingStepConfig)
                 .build();
         System.out.println(config.toJson());
 

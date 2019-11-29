@@ -30,7 +30,7 @@ import ai.konduit.serving.model.PmmlConfig;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.config.Input.DataType;
+import ai.konduit.serving.config.Input.DataFormat;
 import ai.konduit.serving.config.SchemaType;
 import org.nd4j.linalg.dataset.DataSet;
 import ai.konduit.serving.config.Output;
@@ -68,7 +68,7 @@ public class PmmlIrisTest extends BaseVerticleTest {
     public void testInferenceResult(TestContext context) throws Exception  {
         List<DataSet> dataSets = org.deeplearning4j.base.IrisUtils.loadIris(0, 1);
         INDArray input = dataSets.get(0).getFeatures();
-        Buffer inputBuffer = convertBatchOutput(input, Output.DataType.JSON);
+        Buffer inputBuffer = convertBatchOutput(input, Output.DataFormat.JSON);
         String extract = given().port(port)
                 .contentType(com.jayway.restassured.http.ContentType.JSON)
                 .body(inputBuffer.toString())
@@ -94,13 +94,13 @@ public class PmmlIrisTest extends BaseVerticleTest {
     @Override
     public JsonObject getConfigObject() throws Exception {
         PmmlConfig pmmlConfig = PmmlConfig.builder()
-                .modelConfigType(ModelConfigType.pmml(new ClassPathResource("/inference/iris/classification/irisTree.xml").getFile().getAbsolutePath()))
+                .modelConfigType(ModelConfigType.pmml(new ClassPathResource("/inference/iris/classification/IrisTree.xml").getFile().getAbsolutePath()))
                 .build();
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .inputDataType(DataType.JSON)
-                .outputDataType(ai.konduit.serving.config.Output.DataType.JSON)
+                .inputDataFormat(DataFormat.JSON)
+                .outputDataFormat(ai.konduit.serving.config.Output.DataFormat.JSON)
                 .predictionType(ai.konduit.serving.config.Output.PredictionType.RAW)
                 .build();
 
@@ -124,7 +124,7 @@ public class PmmlIrisTest extends BaseVerticleTest {
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .pipelineStep(pmmlPipelineStep)
+                .step(pmmlPipelineStep)
                 .build();
 
         return new JsonObject(inferenceConfiguration.toJson());
