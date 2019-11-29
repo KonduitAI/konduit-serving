@@ -26,20 +26,33 @@ def client_from_server(server, output_data_format=None):
     port = serving_config._get_http_port()
     host = serving_config._get_listen_host()
     if not host:
-        host = 'http://localhost'
+        host = "http://localhost"
     url = "{}:{}".format(host, port)
     input_data_format = serving_config._get_input_data_format()
     return_output_data_format = serving_config._get_output_data_format()
 
-    return Client(url=url, input_data_format=input_data_format, return_output_data_format=return_output_data_format,
-                  output_data_format=output_data_format,
-                  input_names=input_names, output_names=output_names)
+    return Client(
+        url=url,
+        input_data_format=input_data_format,
+        return_output_data_format=return_output_data_format,
+        output_data_format=output_data_format,
+        input_names=input_names,
+        output_names=output_names,
+    )
 
 
 class Client(object):
-    def __init__(self, input_data_format='NUMPY', output_data_format=None,
-                 return_output_data_format=None, input_names=None, output_names=None, timeout=60,
-                 host="http://localhost", port=None):
+    def __init__(
+        self,
+        input_data_format="NUMPY",
+        output_data_format=None,
+        return_output_data_format=None,
+        input_names=None,
+        output_names=None,
+        timeout=60,
+        host="http://localhost",
+        port=None,
+    ):
         """Konduit Client
 
         This client is used to connect to a Konduit Server instance.
@@ -61,9 +74,11 @@ class Client(object):
         """
 
         if not host or not port:
-            logging.warning("You initialized your Client instance without specifying a 'host' or 'port' argument. "
-                            "The 'predict' method will fail to return valid results this way. Please "
-                            "set the 'host' and 'port' to the full URL to connect against yout")
+            logging.warning(
+                "You initialized your Client instance without specifying a 'host' or 'port' argument. "
+                "The 'predict' method will fail to return valid results this way. Please "
+                "set the 'host' and 'port' to the full URL to connect against yout"
+            )
 
         url = "{}:{}".format(host, port)
 
@@ -76,22 +91,24 @@ class Client(object):
                     response = requests.get("{}/config".format(url))
                     config = response.json()
                     logging.info("Retrieved config is".format(config))
-                    steps = config['steps']
-                    input_names = steps[0]['inputNames']
+                    steps = config["steps"]
+                    input_names = steps[0]["inputNames"]
                     if output_names is None:
-                        output_names = steps[-1]['outputNames']
+                        output_names = steps[-1]["outputNames"]
                 except Exception as ex:
-                    logging.error("{}\nUnable to get configuration from the server. Please verify that the server is "
-                                  "running without any issues...".format(str(ex)))
+                    logging.error(
+                        "{}\nUnable to get configuration from the server. Please verify that the server is "
+                        "running without any issues...".format(str(ex))
+                    )
                     exit(-1)
 
-        assert isinstance(input_names, list), 'Input names should be a list!'
-        assert len(input_names) > 0, 'Input names must not be empty!'
+        assert isinstance(input_names, list), "Input names should be a list!"
+        assert len(input_names) > 0, "Input names must not be empty!"
 
         if output_names is None:
-            output_names = ['default']
-        assert isinstance(output_names, list), 'Output names should be a list!'
-        assert len(output_names) > 0, 'Output names must not be empty!'
+            output_names = ["default"]
+        assert isinstance(output_names, list), "Output names should be a list!"
+        assert len(output_names) > 0, "Output names must not be empty!"
 
         # if not specified, we output the format we put in.
         if not output_data_format:
@@ -112,38 +129,51 @@ class Client(object):
 
     def predict(self, data_input=None):
         if isinstance(data_input, np.ndarray):
-            data_input = {'default': data_input}
+            data_input = {"default": data_input}
         if data_input is None:
             data_input = {}
-        if self.input_format.upper() == 'JSON':
-            resp = requests.post(self.url + '/' + self.output_format.lower() + '/' + self.input_format.lower(),
-                                 json=data_input, timeout=self.timeout)
+        if self.input_format.upper() == "JSON":
+            resp = requests.post(
+                self.url
+                + "/"
+                + self.output_format.lower()
+                + "/"
+                + self.input_format.lower(),
+                json=data_input,
+                timeout=self.timeout,
+            )
 
         else:
             self._validate_multi_part(data_input=data_input)
             converted_input = self._convert_multi_part_inputs(data_input=data_input)
-            resp = requests.post(self.url + '/' + self.output_format.lower() + '/' + self.input_format.lower(),
-                                 files=converted_input,
-                                 timeout=self.timeout)
-        if 'content-type' not in resp.headers.keys():
-            resp.headers['content-type'] = None
-        return self._parse_response(resp.content, resp.headers['content-type'])
+            resp = requests.post(
+                self.url
+                + "/"
+                + self.output_format.lower()
+                + "/"
+                + self.input_format.lower(),
+                files=converted_input,
+                timeout=self.timeout,
+            )
+        if "content-type" not in resp.headers.keys():
+            resp.headers["content-type"] = None
+        return self._parse_response(resp.content, resp.headers["content-type"])
 
     def _parse_response(self, content, content_type):
         try:
             if self.output_names is None or len(self.output_names) < 2:
                 bytes_content = io.BytesIO(content)
                 bytes_content.seek(0)
-                if self.return_output_data_format.upper() == 'NUMPY':
+                if self.return_output_data_format.upper() == "NUMPY":
                     return np.load(bytes_content)
-                elif self.return_output_data_format.upper() == 'ARROW':
+                elif self.return_output_data_format.upper() == "ARROW":
                     reader = RecordBatchFileReader(bytes_content)
                     return reader.read_pandas()
-                elif self.return_output_data_format.upper() == 'JSON':
+                elif self.return_output_data_format.upper() == "JSON":
                     return json.load(bytes_content)
-                elif self.return_output_data_format.upper() == 'ND4J':
-                    raise NotImplementedError('Nd4j not implemented yet.')
-                elif self.return_output_data_format.upper() == 'RAW':
+                elif self.return_output_data_format.upper() == "ND4J":
+                    raise NotImplementedError("Nd4j not implemented yet.")
+                elif self.return_output_data_format.upper() == "RAW":
                     return content
             else:
                 return self._convert_multi_part_output(content, content_type)
@@ -184,33 +214,38 @@ class Client(object):
         return ret
 
     def _convert_multi_part_output(self, content, content_type):
-        multipart_data = decoder.MultipartDecoder(content=content, content_type=content_type)
+        multipart_data = decoder.MultipartDecoder(
+            content=content, content_type=content_type
+        )
         ret = {}
         for part in multipart_data.parts:
             # typically something like: b'form-data; name="input1"'
-            name_with_form_data = str(part.headers[b'Content-Disposition'])
-            name_str = re.sub(r'([";\\\']|name=|form-data|b\\)',
-                              '', name_with_form_data).replace('b ', '')
-            if self.output_format.upper() == 'NUMPY':
+            name_with_form_data = str(part.headers[b"Content-Disposition"])
+            name_str = re.sub(
+                r'([";\\\']|name=|form-data|b\\)', "", name_with_form_data
+            ).replace("b ", "")
+            if self.output_format.upper() == "NUMPY":
                 ret[name_str] = Client._convert_binary_to_numpy(part.content)
-            elif self.output_format.upper() == 'ARROW':
+            elif self.output_format.upper() == "ARROW":
                 reader = RecordBatchFileReader(part.content)
                 ret[name_str] = reader.read_pandas()
-            elif self.output_format.upper() == 'JSON':
+            elif self.output_format.upper() == "JSON":
                 return json.load(part.content)
-            elif self.output_format.upper() == 'ND4J':
-                raise NotImplementedError('Nd4j not implemented yet.')
+            elif self.output_format.upper() == "ND4J":
+                raise NotImplementedError("Nd4j not implemented yet.")
             else:
                 ret[name_str] = part.content
         return ret
 
     def _validate_multi_part(self, data_input):
-        if self.input_format.capitalize() == 'JSON':
+        if self.input_format.capitalize() == "JSON":
             raise ValueError(
-                'Attempting to execute multi part request with input type specified as JSON.')
+                "Attempting to execute multi part request with input type specified as JSON."
+            )
 
         for key, value in data_input.items():
-            root_name = re.sub('\\[[0-9]+\\]', '', key)
+            root_name = re.sub("\\[[0-9]+\\]", "", key)
             if root_name not in self.input_names:
-                raise ValueError('Specified root name ' +
-                                 root_name + ' not found in input names.')
+                raise ValueError(
+                    "Specified root name " + root_name + " not found in input names."
+                )
