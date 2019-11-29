@@ -15,9 +15,9 @@ import pytest
 @pytest.mark.integration
 def test_build_tp():
     schema = pydatavec.Schema()
-    schema.add_string_column('first')
+    schema.add_string_column("first")
     tp = pydatavec.TransformProcess(schema)
-    tp.append_string('first', 'two')
+    tp.append_string("first", "two")
     java_tp = tp.to_java()
 
     tp_json = java_tp.toJson()
@@ -25,35 +25,45 @@ def test_build_tp():
     _ = json.dumps(tp_json)
 
     as_python_json = json.loads(tp_json)
-    transform_process = TransformProcessStep()\
-        .set_input(None, ['first'], ['String'])\
-        .set_output(None, ['first'], ['String'])\
+    transform_process = (
+        TransformProcessStep()
+        .set_input(None, ["first"], ["String"])
+        .set_output(None, ["first"], ["String"])
         .transform_process(as_python_json)
+    )
 
-    input_names = ['default']
-    output_names = ['default']
+    input_names = ["default"]
+    output_names = ["default"]
     port = random.randint(1000, 65535)
 
-    serving_config = ServingConfig(http_port=port,
-                                   input_data_format='JSON',
-                                   output_data_format='ARROW',
-                                   log_timings=True)
+    serving_config = ServingConfig(
+        http_port=port,
+        input_data_format="JSON",
+        output_data_format="ARROW",
+        log_timings=True,
+    )
 
-    inference_config = InferenceConfiguration(serving_config=serving_config, steps=[transform_process])
+    inference_config = InferenceConfiguration(
+        serving_config=serving_config, steps=[transform_process]
+    )
     as_json = config_to_dict_with_type(inference_config)
     inference_from_json(as_json)
 
-    server = Server(inference_config=inference_config,
-                    extra_start_args='-Xmx8g',
-                    jar_path='konduit.jar')
+    server = Server(
+        inference_config=inference_config,
+        extra_start_args="-Xmx8g",
+        jar_path="konduit.jar",
+    )
     server.start()
-    print('Process started. Sleeping 10 seconds.')
-    client = Client(return_output_data_format='ARROW',
-                    input_data_format='JSON',
-                    output_data_format='RAW',
-                    port=port)
+    print("Process started. Sleeping 10 seconds.")
+    client = Client(
+        return_output_data_format="ARROW",
+        input_data_format="JSON",
+        output_data_format="RAW",
+        port=port,
+    )
 
-    data_input = {'first': 'value'}
+    data_input = {"first": "value"}
 
     assert is_port_in_use(port)
 

@@ -20,7 +20,7 @@ def test_dict_wrapper():
 
 @pytest.mark.unit
 def test_list_wrapper():
-    lst = ['a', 'b', 'c']
+    lst = ["a", "b", "c"]
     lw = ListWrapper(lst)
 
     # This is a national tragedy, but OK
@@ -28,10 +28,10 @@ def test_list_wrapper():
 
     assert lst == lw.as_list()
 
-    x = ''
+    x = ""
     for i in lw:
         x = i
-    assert x == 'c'
+    assert x == "c"
 
 
 @pytest.mark.unit

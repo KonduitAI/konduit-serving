@@ -10,9 +10,9 @@ def test_client_from_server():
     serving_config = ServingConfig(http_port=port)
 
     python_config = PythonConfig(
-        python_code='first += 2',
-        python_inputs={'first': 'NDARRAY'},
-        python_outputs={'first': 'NDARRAY'},
+        python_code="first += 2",
+        python_inputs={"first": "NDARRAY"},
+        python_outputs={"first": "NDARRAY"},
     )
 
     step = PythonStep().step(python_config)
@@ -27,16 +27,13 @@ def test_client_from_server():
 
 @pytest.mark.unit
 def test_multipart_regex():
-    client = Client(input_names=['partname'], output_names=['nobody_cares'])
+    client = Client(input_names=["partname"], output_names=["nobody_cares"])
 
-    test_data = {
-        'partname[0]': 'foo',
-        "partname[1]": 'bar'
-    }
+    test_data = {"partname[0]": "foo", "partname[1]": "bar"}
 
     client._validate_multi_part(test_data)
 
-    test_data['foo'] = 'baz'
+    test_data["foo"] = "baz"
 
     with pytest.raises(Exception):
         client._validate_multi_part(test_data)

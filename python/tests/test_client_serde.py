@@ -10,15 +10,14 @@ import pytest
 
 @pytest.mark.unit
 def test_multipart_encode():
-    input_names = ["IteratorGetNext:0",
-                   "IteratorGetNext:1", "IteratorGetNext:4"]
+    input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
     output_names = ["loss/Softmax"]
     port = random.randint(1000, 65535)
     client = Client(input_names=input_names, output_names=output_names, port=port)
 
     input_data = {
-        'input1': Client._convert_numpy_to_binary(np.ones(1)),
-        'input2': Client._convert_numpy_to_binary(np.ones(2))
+        "input1": Client._convert_numpy_to_binary(np.ones(1)),
+        "input2": Client._convert_numpy_to_binary(np.ones(2)),
     }
 
     converted = Client._convert_multi_part_inputs(input_data)
@@ -30,19 +29,20 @@ def test_multipart_encode():
 @pytest.mark.unit
 def test_python_serde():
     python_configuration = PythonConfig(
-        python_code='first += 2',
-        python_inputs=['first'],
-        python_outputs=['first']
+        python_code="first += 2", python_inputs=["first"], python_outputs=["first"]
     )
 
     port = random.randint(1000, 65535)
-    serving_config = ServingConfig(http_port=port,
-                                   input_data_format='NUMPY',
-                                   output_data_format='NUMPY',
-                                   log_timings=True)
+    serving_config = ServingConfig(
+        http_port=port,
+        input_data_format="NUMPY",
+        output_data_format="NUMPY",
+        log_timings=True,
+    )
 
     python_pipeline_step = PythonStep().step(python_configuration)
-    inference_config = InferenceConfiguration(serving_config=serving_config,
-                                              steps=[python_pipeline_step])
+    inference_config = InferenceConfiguration(
+        serving_config=serving_config, steps=[python_pipeline_step]
+    )
 
     json.dumps(config_to_dict_with_type(inference_config))
