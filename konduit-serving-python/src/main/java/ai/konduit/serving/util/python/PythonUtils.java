@@ -247,7 +247,7 @@ public class PythonUtils {
             }
             else if (value instanceof Integer || value instanceof Long) {
                 Number number = (Number) value;
-                pyvars2.addInt(subkey, number.intValue());
+                pyvars2.addInt(subkey, number.longValue());
             }
             else if (value instanceof Float || value instanceof Double) {
                 Number number = (Number) value;

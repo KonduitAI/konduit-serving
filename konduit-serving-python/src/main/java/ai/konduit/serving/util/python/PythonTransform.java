@@ -64,6 +64,7 @@ public class PythonTransform implements Transform {
     private Schema outputSchema;
     private String outputDict;
     private boolean returnAllVariables;
+    private boolean setupAndRun = false;
 
 
     @Builder
@@ -74,10 +75,12 @@ public class PythonTransform implements Transform {
                            Schema inputSchema,
                            Schema outputSchema,
                            String outputDict,
-                           boolean returnAllInputs) {
+                           boolean returnAllInputs,
+                           boolean setupAndRun) {
         Preconditions.checkNotNull(code,"No code found to run!");
         this.code = code;
         this.returnAllVariables = returnAllInputs;
+        this.setupAndRun = setupAndRun;
         if(inputs != null)
             this.inputs = inputs;
         if(outputs != null)
@@ -172,16 +175,28 @@ public class PythonTransform implements Transform {
 
         try{
             if (returnAllVariables) {
+                if (setupAndRun){
+                    return getWritablesFromPyOutputs(PythonExecutioner.execWithSetupRunAndReturnAllVariables(code, pyInputs));
+                }
                 return getWritablesFromPyOutputs(PythonExecutioner.execAndReturnAllVariables(code, pyInputs));
             }
 
             if (outputDict != null) {
-                PythonExecutioner.exec(this, pyInputs);
+                if (setupAndRun) {
+                    PythonExecutioner.execWithSetupAndRun(this, pyInputs);
+                }else{
+                    PythonExecutioner.exec(this, pyInputs);
+                }
                 PythonVariables out = PythonUtils.expandInnerDict(outputs, outputDict);
                 return getWritablesFromPyOutputs(out);
             }
             else {
-                PythonExecutioner.execWithSetupAndRun(code,pyInputs,outputs);
+                if (setupAndRun) {
+                    PythonExecutioner.execWithSetupAndRun(code, pyInputs, outputs);
+                }else{
+                    PythonExecutioner.exec(code, pyInputs, outputs);
+                }
+
                 return getWritablesFromPyOutputs(outputs);
             }
 
