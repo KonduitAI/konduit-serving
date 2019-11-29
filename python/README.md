@@ -11,7 +11,15 @@
 ## Installation
 
 install `kondut` from PyPI with `pip install konduit`. You can also install this Python package
-from source, run `pip install .` in this directory. We recommend using Python 3.7+.
+from source, run `pip install .` in this directory. We recommend using Python 3.7+ for full support
+of all dev tools. To install all extensions needed for development run
+
+```shell script
+pip install -e '.[tests,codegen,dev]'
+```
+
+The `dev` dependencies use `black` as a pre-commit hook to lint your code automatically. To activate
+this functionality run `pre-commit install` on the command line first.
 
 Once the package itself is installed, you have access to a command line interface (CLI) tool
 called `konduit-python`. This helper tool can build the Java dependencies needed for `konduit`
