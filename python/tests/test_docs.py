@@ -56,11 +56,11 @@ def exec_python_code(code_blocks):
     for block in code_blocks:
         try:
             exec(block)
-        except Exception as e:
+        except Exception as ex:
             print("Test execution failed in the following block:\n")
             print(block)
             print("failed with error message:\n")
-            raise e
+            raise ex
 
 
 def make_folders():
@@ -149,14 +149,14 @@ def exec_java_code(code_blocks, file_path):
             class_regex = r'public\s+class\s+(\w+)'
             class_name = re.search(class_regex, block).group(1)
         else:
-            class_name = 'BasicsTest' + markdown_root + str(i)
-            args = None
+            class_name = 'BasicsTest{}{}'.format(markdown_root, str(i))
         basic_test_class = autoclass('ai.konduit.serving.' + class_name)
         basic_test = basic_test_class()
         if is_self_contained_example(block):
             basic_test.main([])
         else:
             basic_test.main()
+
 
 def clean_java_files(ext=''):
     """Clean Java source files and classes"""

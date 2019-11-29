@@ -31,10 +31,7 @@ package ai.konduit.serving.config;
  */
 public class Input {
 
-    /**
-     * Different kinds of data types inputs can be.
-     */
-    public enum DataType {
+    public enum DataFormat {
         NUMPY,
         JSON,
         ND4J,
