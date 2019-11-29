@@ -28,7 +28,7 @@ import org.nd4j.linalg.compression.CompressedDataBuffer;
 import org.nd4j.linalg.compression.CompressionDescriptor;
 
 /**
- * Possible data types for tensors. Comes with conversions from Tensorflow
+ * Possible data types for tensors. Comes with conversions from TensorFlow
  * and Python and between ND4J types.
  */
 public enum TensorDataType {

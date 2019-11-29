@@ -67,6 +67,16 @@ class TensorDataTypesConfig(object):
 
 
 class SavedModelConfig(object):
+    """SavedModelConfig
+
+    SavedModel Configuration for TensorFlow models
+
+    :param saved_model_path: path to the saved model
+    :param model_tag: a tag to give the model, e.g. "serve"
+    :param signature_key: TensorFlow SignatureDef key, e.g. "incr_counter_by"
+    :param saved_model_input_order: list of input variables in order
+    :param save_model_output_order: list of output variables in order
+    """
 
     _types_map = {
         "savedModelPath": {"type": str, "subtype": None},
@@ -186,6 +196,17 @@ class SavedModelConfig(object):
 
 
 class ParallelInferenceConfig(object):
+    """ParallelInferenceConfig
+
+    Configuration for parallel inference.
+
+    :param queue_limit:
+    :param batch_limit:
+    :param workers:
+    :param max_train_epochs:
+    :param inference_mode:
+    :param vertx_config_json:
+    """
 
     _inferenceMode_enum = enum.Enum(
         "_inferenceMode_enum", "SEQUENTIAL BATCHED INPLACE", module=__name__
@@ -321,6 +342,16 @@ class ParallelInferenceConfig(object):
 
 
 class ModelConfigType(object):
+    """ModelConfigType
+
+    This model configuration has meta data for a model loader, which
+    includes the model loading path and the model type. It's used in
+    konduit.ModelConfig.
+
+    :param model_type: Can be any of 'COMPUTATION_GRAPH', 'MULTI_LAYER_NETWORK',
+        'PMML', 'TENSORFLOW', 'KERAS', and 'SAMEDIFF'.
+    :param model_loading_path: path to the model file
+    """
 
     _modelType_enum = enum.Enum(
         "_modelType_enum",
@@ -378,6 +409,22 @@ class ModelConfigType(object):
 
 
 class ModelConfig(object):
+    """TensorDataType
+
+    Possible data types for tensors. Comes with conversions from TensorFlow
+    and Python and between ND4J types. Choose from
+
+    INVALID, FLOAT, DOUBLE, INT32, UINT8, INT16, INT8, STRING, COMPLEX64,
+    INT64, BOOL, QINT8, QUINT8, QINT32, BFLOAT16, QINT16, QUINT16, UINT16,
+    COMPLEX128, HALF, RESOURCE, VARIANT, UINT32, UINT64
+    """ """ModelConfig
+
+    Model configurations hold the TensorDataTypeConfig and the
+    .ModelConfigType of the model you want to serve.
+
+    :param tensor_data_types_config: konduit.TensorDataTypeConfig
+    :param model_config_type: konduit.ModelConfigType
+    """
 
     _types_map = {
         "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
