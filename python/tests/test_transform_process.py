@@ -53,7 +53,7 @@ def test_build_tp():
     server.start()
     print("Process started. Sleeping 10 seconds.")
     client = Client(
-        return_output_data_format="JSON",
+        convert_to_format="JSON",
         input_data_format="JSON",
         output_data_format="RAW",
         port=port,

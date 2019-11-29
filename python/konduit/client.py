@@ -27,14 +27,14 @@ def client_from_server(server, output_data_format=None):
     host = serving_config._get_listen_host()
     if not host:
         host = "http://localhost"
-    url = "{}:{}".format(host, port)
     input_data_format = serving_config._get_input_data_format()
     return_output_data_format = serving_config._get_output_data_format()
 
     return Client(
-        url=url,
+        host=host,
+        port=port,
         input_data_format=input_data_format,
-        return_output_data_format=return_output_data_format,
+        convert_to_format=return_output_data_format,
         output_data_format=output_data_format,
         input_names=input_names,
         output_names=output_names,
@@ -44,41 +44,36 @@ def client_from_server(server, output_data_format=None):
 class Client(object):
     def __init__(
         self,
-        input_data_format="NUMPY",
+        port,
+        host="http://localhost",
+        convert_to_format=None,
+        timeout=60,
+        input_data_format=None,
         output_data_format=None,
-        return_output_data_format=None,
         input_names=None,
         output_names=None,
-        timeout=60,
-        host="http://localhost",
-        port=None,
     ):
         """Konduit Client
 
-        This client is used to connect to a Konduit Server instance.
+        This client is used to connect to a Konduit Server instance. You usually create a Client instance
+        just by specifying host and port. If you want to convert the result of your endpoint to another data
+        format on return, use `convert_to_format` to do so.
 
+        :param port: The port on which the server is listening to. e.g. '1337' or 42, i.e. accepts int and str.
+        :param host: The server host, defaults to 'http://localhost'.
+        :param convert_to_format: The output format returned by the `predict` method of this client. If not
+               specified, we assume the return output format is the same as the input format. This output format can
+               be 'NUMPY', 'JSON', 'ARROW' and 'RAW'. 'ND4J' will be implemented at a later stage.
+        :param timeout: Request time-out in seconds.
         :param input_data_format: The format in which the input data is accepted by endpoints. Defaults to 'NUMPY',
                but can be 'JSON', 'ND4J', 'IMAGE' and 'ARROW' as well.
         :param output_data_format: The output format returned from the Konduit server. If not specified, this format
                will default to the input format specified.
-        :param return_output_data_format: The output format returned by the `predict` method of this client. If not
-               specified, we assume the return output format is the same as the input format. This output format can
-               be 'NUMPY', 'JSON', 'ARROW' and 'RAW'. 'ND4J' will be implemented at a later stage.
         :param input_names: The names of all inputs of the Konduit pipeline deployed for the Server corresponding to
                this client.
         :param output_names: The names of all inputs of the Konduit pipeline deployed for the Server corresponding to
                this client.
-        :param timeout: Request time-out in seconds.
-        :param host: The server host. e.g. 'http://localhost'.
-        :param port: The port on which the server is listening to. e.g. '1337'.
         """
-
-        if not host or not port:
-            logging.warning(
-                "You initialized your Client instance without specifying a 'host' or 'port' argument. "
-                "The 'predict' method will fail to return valid results this way. Please "
-                "set the 'host' and 'port' to the full URL to connect against yout"
-            )
 
         url = "{}:{}".format(host, port)
 
@@ -92,9 +87,17 @@ class Client(object):
                     config = response.json()
                     logging.info("Retrieved config is".format(config))
                     steps = config["steps"]
-                    input_names = steps[0]["inputNames"]
+                    input_names = []
+                    for step in steps:
+                        input_names += step["inputNames"]
                     if output_names is None:
-                        output_names = steps[-1]["outputNames"]
+                        output_names = []
+                        for step in steps:
+                            output_names += step["outputNames"]
+                    if input_data_format is None:
+                        input_data_format = config["inputDataFormat"]
+                    if output_data_format is None:
+                        output_data_format = config["outputDataFormat"]
                 except Exception as ex:
                     logging.error(
                         "{}\nUnable to get configuration from the server. Please verify that the server is "
@@ -115,10 +118,11 @@ class Client(object):
             output_data_format = input_data_format
 
         # the format returned to the client is identical to the input format, unless explicitly specified.
-        if return_output_data_format:
-            self.return_output_data_format = return_output_data_format
+        # TODO fix this logic, doesn't always make sense.
+        if convert_to_format:
+            self.convert_to_format = convert_to_format
         else:
-            self.return_output_data_format = input_data_format
+            self.convert_to_format = input_data_format
 
         self.timeout = timeout
         self.input_format = input_data_format
@@ -134,11 +138,9 @@ class Client(object):
             data_input = {}
         if self.input_format.upper() == "JSON":
             resp = requests.post(
-                self.url
-                + "/"
-                + self.output_format.lower()
-                + "/"
-                + self.input_format.lower(),
+                "{}/{}/{}".format(
+                    self.url, self.output_format.lower(), self.input_format.lower()
+                ),
                 json=data_input,
                 timeout=self.timeout,
             )
@@ -147,11 +149,9 @@ class Client(object):
             self._validate_multi_part(data_input=data_input)
             converted_input = self._convert_multi_part_inputs(data_input=data_input)
             resp = requests.post(
-                self.url
-                + "/"
-                + self.output_format.lower()
-                + "/"
-                + self.input_format.lower(),
+                "{}/{}/{}".format(
+                    self.url, self.output_format.lower(), self.input_format.lower()
+                ),
                 files=converted_input,
                 timeout=self.timeout,
             )
@@ -164,16 +164,18 @@ class Client(object):
             if self.output_names is None or len(self.output_names) < 2:
                 bytes_content = io.BytesIO(content)
                 bytes_content.seek(0)
-                if self.return_output_data_format.upper() == "NUMPY":
+                if self.convert_to_format.upper() == "NUMPY":
                     return np.load(bytes_content)
-                elif self.return_output_data_format.upper() == "ARROW":
+                elif self.convert_to_format.upper() == "ARROW":
                     reader = RecordBatchFileReader(bytes_content)
                     return reader.read_pandas()
-                elif self.return_output_data_format.upper() == "JSON":
+                elif self.convert_to_format.upper() == "JSON":
                     return json.load(bytes_content)
-                elif self.return_output_data_format.upper() == "ND4J":
+                elif self.convert_to_format.upper() == "ND4J":
                     raise NotImplementedError("Nd4j not implemented yet.")
-                elif self.return_output_data_format.upper() == "RAW":
+                elif self.convert_to_format.upper() == "IMAGE":
+                    raise NotImplementedError("Image not implemented yet.")
+                elif self.convert_to_format.upper() == "RAW":
                     return content
             else:
                 return self._convert_multi_part_output(content, content_type)
