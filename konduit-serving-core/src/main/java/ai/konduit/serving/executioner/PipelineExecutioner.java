@@ -285,7 +285,7 @@ public class PipelineExecutioner {
      * @param responseOutputType the {@link Output.DataType} for the output
      * @param inputs             the inputs based on the input data
      */
-    public void doInference(io.vertx.ext.web.RoutingContext ctx, Output.DataType responseOutputType, org.datavec.api.records.Record[] inputs) {
+    public void doInference(RoutingContext ctx, Output.DataType responseOutputType, Record[] inputs) {
         if(inputs == null || inputs.length < 1 || inputs[0] == null) {
             throw new IllegalStateException("No inputs specified!");
         }
@@ -293,6 +293,7 @@ public class PipelineExecutioner {
 
         String batchId = UUID.randomUUID().toString();
         long nanos = System.nanoTime();
+
         INDArray[] execute = pipeline.doPipelineArrays(inputs);
         long after = System.nanoTime();
         if(config.serving().isLogTimings()) {

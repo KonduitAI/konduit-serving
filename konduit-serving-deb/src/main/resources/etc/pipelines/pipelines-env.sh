@@ -3,7 +3,7 @@
 
 export KONDUIT_SERVING_HOME=/srv
 export KONDUIT_SERVING_CLASS_PATH=${KONDUIT_SERVING_HOME}/konduit-serving.jar
-export KONDUIT_SERVING_LOG_DIR=/tmp/pipelines.log
+export KONDUIT_SERVING_LOG_DIR=/tmp/konduit-serving.log
 export KONDUIT_SERVING_PID_FILE=/run/konduit-serving/konduit.serving.pid
 
 if [ -z "$JAVA_HOME" ]

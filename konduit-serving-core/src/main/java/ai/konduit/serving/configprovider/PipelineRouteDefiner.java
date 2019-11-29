@@ -21,12 +21,13 @@
  */
 
 package ai.konduit.serving.configprovider;
+
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.InferenceConfiguration;
 import io.micrometer.core.instrument.LongTaskTimer;
-import  io.micrometer.core.instrument.MeterRegistry;
-import  ai.konduit.serving.metrics.NativeMetrics;
+import io.micrometer.core.instrument.MeterRegistry;
+import ai.konduit.serving.metrics.NativeMetrics;
 import ai.konduit.serving.pipeline.PipelineStep;
 import  ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.input.adapter.InputAdapter;
@@ -63,6 +64,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+import java.io.IOException;
 import java.util.List;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.records.Record;
@@ -267,7 +269,7 @@ public class PipelineRouteDefiner {
         router.post("/:operation/:inputType")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed").handler(ctx -> {
-            Map<String, InputAdapter<io.vertx.core.buffer.Buffer, ?>> adapters = getAdapterMap(ctx);
+            Map<String, InputAdapter<Buffer, ?>> adapters = getAdapterMap(ctx);
 
             BatchInputParser batchInputParser = BatchInputParser.builder()
                     .converterArgs(pipelineExecutioner.getArgs())
@@ -305,7 +307,7 @@ public class PipelineRouteDefiner {
                     log.debug("Created batch for request " );
                 }
 
-                ctx.put(ai.konduit.serving.verticles.VerticleConstants.CONVERTED_INFERENCE_DATA,batch);
+                ctx.put(VerticleConstants.CONVERTED_INFERENCE_DATA,batch);
                 handler.complete();
             },true, result -> ctx.next());
 
@@ -315,10 +317,10 @@ public class PipelineRouteDefiner {
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed")
                 .produces("application/json").handler(ctx -> {
-            String transactionUUID = ctx.get(ai.konduit.serving.verticles.VerticleConstants.TRANSACTION_ID);
+            String transactionUUID = ctx.get(VerticleConstants.TRANSACTION_ID);
 
             log.debug("Processing transaction id " + transactionUUID);
-            org.datavec.api.records.Record[] inputs = ctx.get(ai.konduit.serving.verticles.VerticleConstants.CONVERTED_INFERENCE_DATA);
+            Record[] inputs = ctx.get(VerticleConstants.CONVERTED_INFERENCE_DATA);
 
             if(inputs == null) {
                 ctx.response().setStatusCode(400);
@@ -330,7 +332,7 @@ public class PipelineRouteDefiner {
             ctx.vertx().executeBlocking(blockingCall -> {
                 try {
                     long nanos = System.nanoTime();
-                    io.micrometer.core.instrument.LongTaskTimer.Sample start = null;
+                    LongTaskTimer.Sample start = null;
                     if(inferenceExecutionTimer != null)
                         start = inferenceExecutionTimer.start();
                     pipelineExecutioner.doInference(
@@ -363,7 +365,7 @@ public class PipelineRouteDefiner {
         router.post("/:inputType/:predictionType")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed").handler(ctx -> {
-            Map<String, InputAdapter<io.vertx.core.buffer.Buffer, ?>> adapters = getAdapterMap(ctx);
+            Map<String, InputAdapter<Buffer, ?>> adapters = getAdapterMap(ctx);
 
             String transactionUUID = java.util.UUID.randomUUID().toString();
             ctx.vertx().executeBlocking(handler -> {
@@ -374,7 +376,7 @@ public class PipelineRouteDefiner {
                         .build();
                 try {
                     long nanos = System.nanoTime();
-                    io.micrometer.core.instrument.LongTaskTimer.Sample start = null;
+                    LongTaskTimer.Sample start = null;
                     if(batchCreationTimer != null) {
                         start = batchCreationTimer.start();
                     }
@@ -395,7 +397,7 @@ public class PipelineRouteDefiner {
                     handler.complete();
 
 
-                } catch (java.io.IOException e) {
+                } catch (IOException e) {
                     ctx.fail(e);
                     log.error("Unable to convert inputs",e);
                     handler.fail(e);
