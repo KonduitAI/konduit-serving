@@ -3,6 +3,13 @@ from konduit.json_utils import empty_type_dict, DictWrapper, ListWrapper
 
 
 class TensorDataTypesConfig(object):
+    """TensorDataTypesConfig
+
+    Configures TensorDataTypes for inputs and outputs of a step.
+
+    :param input_data_types: List of input konduit.TensorDataType
+    :param output_data_types: List of output konduit.TensorDataType
+    """
 
     _types_map = {
         "inputDataTypes": {"type": dict, "subtype": None},

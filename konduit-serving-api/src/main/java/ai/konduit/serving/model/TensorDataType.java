@@ -27,6 +27,10 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.compression.CompressedDataBuffer;
 import org.nd4j.linalg.compression.CompressionDescriptor;
 
+/**
+ * Possible data types for tensors. Comes with conversions from Tensorflow
+ * and Python and between ND4J types.
+ */
 public enum TensorDataType {
     INVALID,
     FLOAT,
