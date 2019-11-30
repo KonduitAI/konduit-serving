@@ -226,6 +226,26 @@ public class SchemaTypeUtils {
     }
 
     /**
+     * Returns true if all records
+     * and {@link Writable} are of type
+     * {@link NDArrayWritable}
+     * false otherwise
+     * @param records the input {@link Record} to test
+     * @return true if all the records are of type {@link NDArrayWritable}
+     * false otherwise
+     */
+    public static boolean recordsAllArrayType(org.datavec.api.records.Record[] records) {
+        for(int i = 0; i  < records.length; i++) {
+            for(Writable writable : records[i].getRecord()) {
+                if(!(writable instanceof org.datavec.api.writable.NDArrayWritable)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
      * Convert an {@link INDArray}
      * batch to {@link Record}
      * input comprising of a single {@link NDArrayWritable}

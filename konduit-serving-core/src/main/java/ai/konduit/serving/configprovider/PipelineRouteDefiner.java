@@ -66,6 +66,8 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
+
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.records.Record;
 
@@ -215,7 +217,7 @@ public class PipelineRouteDefiner {
                 .produces("application/json").handler(ctx -> {
             PredictionType outputAdapterType = PredictionType.valueOf(ctx.pathParam("operation").toUpperCase());
             if(inputSchema == null) {
-                for(PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
+                for(PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
                     if(pipelineStep instanceof ModelStep) {
                         inputSchema = pipelineStep.inputSchemaForName("default");
                     }
@@ -229,7 +231,7 @@ public class PipelineRouteDefiner {
             }
 
             if(outputSchema == null) {
-                for(PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
+                for(PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
                     if(pipelineStep instanceof ModelStep) {
                         outputSchema = pipelineStep.outputSchemaForName("default");
                     }
@@ -255,7 +257,7 @@ public class PipelineRouteDefiner {
                         inputSchema,
                         null,
                         outputSchema,
-                        inferenceConfiguration.getServingConfig().getOutputDataType());
+                        inferenceConfiguration.getServingConfig().getOutputDataFormat());
                 if(start != null)
                     start.stop();
             } catch (Exception e) {
@@ -328,6 +330,12 @@ public class PipelineRouteDefiner {
                 ctx.next();
                 return;
             }
+            else if(!ai.konduit.serving.util.SchemaTypeUtils.recordsAllArrayType(inputs)) {
+                ctx.response().setStatusCode(400);
+                ctx.response().setStatusMessage("Invalid inputs found. All types must be valid numpy or nd4j arrays.");
+                ctx.next();
+                return;
+            }
 
             ctx.vertx().executeBlocking(blockingCall -> {
                 try {
@@ -335,9 +343,10 @@ public class PipelineRouteDefiner {
                     LongTaskTimer.Sample start = null;
                     if(inferenceExecutionTimer != null)
                         start = inferenceExecutionTimer.start();
+
                     pipelineExecutioner.doInference(
                             ctx,
-                            inferenceConfiguration.serving().getOutputDataType(),
+                            inferenceConfiguration.serving().getOutputDataFormat(),
                             inputs);
 
                     if(start != null)
@@ -367,7 +376,7 @@ public class PipelineRouteDefiner {
                 .consumes("multipart/mixed").handler(ctx -> {
             Map<String, InputAdapter<Buffer, ?>> adapters = getAdapterMap(ctx);
 
-            String transactionUUID = java.util.UUID.randomUUID().toString();
+            String transactionUUID = UUID.randomUUID().toString();
             ctx.vertx().executeBlocking(handler -> {
                 BatchInputParser batchInputParser = BatchInputParser.builder()
                         .converters(adapters)
@@ -419,7 +428,7 @@ public class PipelineRouteDefiner {
             }
 
             String outputType = ctx.pathParam("predictionType");
-            Output.DataType outputAdapterType = Output.DataType.valueOf(outputType.toUpperCase());
+            Output.DataFormat outputAdapterType = Output.DataFormat.valueOf(outputType.toUpperCase());
             ctx.vertx().executeBlocking(handler -> {
                 try {
                     long nanos = System.nanoTime();
@@ -468,7 +477,7 @@ public class PipelineRouteDefiner {
 
     private Map<String, InputAdapter<Buffer, ?>> getAdapterMap(RoutingContext ctx) {
         Map<String, InputAdapter<Buffer, ?>> adapters = new HashMap<>();
-        Input.DataType inputAdapterType = Input.DataType.valueOf(ctx.pathParam("inputType").toUpperCase());
+        Input.DataFormat inputAdapterType = Input.DataFormat.valueOf(ctx.pathParam("inputType").toUpperCase());
         InputAdapter<Buffer,?> adapter = getAdapter(inputAdapterType);
         for(String inputName : inputNames()) {
             adapters.put(inputName,adapter);
@@ -477,7 +486,7 @@ public class PipelineRouteDefiner {
     }
 
 
-    private InputAdapter<Buffer,?> getAdapter(Input.DataType inputDataType) {
+    private InputAdapter<Buffer,?> getAdapter(Input.DataFormat inputDataType) {
         switch(inputDataType) {
             case NUMPY:
                 return new VertxBufferNumpyInputAdapter();
