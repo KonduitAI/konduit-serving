@@ -4,6 +4,10 @@ import os
 import requests
 import signal
 import subprocess
+
+import requests
+import time
+
 from konduit.base_inference import PipelineStep
 from konduit.inference import InferenceConfiguration
 from konduit.json_utils import config_to_dict_with_type
@@ -101,6 +105,8 @@ class Server(object):
         print("Starting server", end='')
 
         for i in range(tries):
+            start_time = time.time()
+
             # This url returns status 204 with no content when the server is up.
             try:
                 """
@@ -128,6 +134,11 @@ class Server(object):
                     break
             except Exception as ex:
                 logging.debug("{}\nChecking server integrity again...".format(str(ex)))
+
+            time_taken = time.time() - start_time
+
+            if time_taken < request_timeout:
+                time.sleep(request_timeout - time_taken)  # Making sure the loop takes exactly "request_timeout" seconds
 
         if started:
             print("\n\nServer has started successfully.")
