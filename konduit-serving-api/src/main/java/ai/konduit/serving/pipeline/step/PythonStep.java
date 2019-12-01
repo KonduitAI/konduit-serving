@@ -22,6 +22,8 @@
 
 package ai.konduit.serving.pipeline.step;
 
+import ai.konduit.serving.config.Input.DataFormat;
+import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
@@ -131,6 +133,26 @@ public class PythonStep extends BasePipelineStep {
         }
 
         return null;
+    }
+
+    @Override
+    public DataFormat[] validInputTypes() {
+        return new DataFormat[] {
+                DataFormat.ARROW,
+                DataFormat.NUMPY,
+                DataFormat.JSON,
+                DataFormat.IMAGE
+        };
+    }
+
+    @Override
+    public Output.DataFormat[] validOutputTypes() {
+        return new Output.DataFormat[] {
+                Output.DataFormat.ARROW,
+                Output.DataFormat.ND4J,
+                Output.DataFormat.NUMPY,
+                Output.DataFormat.JSON
+        };
     }
 
     @Override

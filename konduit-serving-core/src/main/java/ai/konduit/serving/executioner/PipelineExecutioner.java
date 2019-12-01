@@ -68,10 +68,13 @@ import org.nd4j.shade.jackson.core.JsonProcessingException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 /**
@@ -124,16 +127,16 @@ public class PipelineExecutioner {
      */
     public static Buffer zipBuffer(Map<String, BatchOutput> adapt, Output.DataFormat responseOutputType) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             java.util.zip.ZipOutputStream out = new java.util.zip.ZipOutputStream(baos)) {
+            ZipOutputStream out = new ZipOutputStream(baos)) {
             for (Map.Entry<String, BatchOutput> outputEntry : adapt.entrySet()) {
-                java.util.zip.ZipEntry zipEntry = new java.util.zip.ZipEntry(outputEntry.getKey());
+                ZipEntry zipEntry = new ZipEntry(outputEntry.getKey());
                 try {
                     out.putNextEntry(zipEntry);
                     Buffer write = convertBatchOutput(outputEntry.getValue(), responseOutputType);
                     out.write(write.getBytes(), 0, write.getBytes().length);
                     out.closeEntry();
-                } catch (java.io.IOException e) {
-                    e.printStackTrace();
+                } catch (IOException e) {
+                    log.error("Unable to zip the buffer",e);
                 }
 
             }
@@ -144,7 +147,7 @@ public class PipelineExecutioner {
             return Buffer.buffer(baos.toByteArray());
 
 
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             log.error("Unable to zip buffer", e);
         }
 
@@ -209,6 +212,9 @@ public class PipelineExecutioner {
         ServingConfig servingConfig = config.getServingConfig();
         //initialize input and output data types
         this.pipeline = Pipeline.getPipeline(config.getSteps());
+        Preconditions.checkState(config.getSteps().get(0).isValidInputType(servingConfig.getInputDataFormat()),"Configured Serving Configuration input type is invalid");
+        Preconditions.checkState(config.getSteps().get(config.getSteps().size() - 1).isValidOutputType(servingConfig.getOutputDataFormat()),"Configured output type is invalid");
+
         for (int i = 0; i < config.getSteps().size(); i++) {
             PipelineStep pipelineStep = config.getSteps().get(i);
             PipelineStepRunner pipelineStepRunner = pipeline.getSteps().get(i);

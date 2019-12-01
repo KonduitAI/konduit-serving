@@ -22,6 +22,8 @@
 
 package ai.konduit.serving.pipeline.step;
 
+import ai.konduit.serving.config.Input.DataFormat;
+import ai.konduit.serving.config.Output;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,12 +32,28 @@ import lombok.experimental.SuperBuilder;
 /**
  * See: ai.konduit.serving.pipeline.steps.JsonExpanderTransformStepRunner
  * for associated documentation.
+ *
+ * @author Adam GIbson
  */
 @SuperBuilder
 @Data
 @NoArgsConstructor
 public class JsonExpanderTransformStep extends BasePipelineStep {
 
+
+    @Override
+    public DataFormat[] validInputTypes() {
+        return new DataFormat[] {
+                DataFormat.JSON
+        };
+    }
+
+    @Override
+    public Output.DataFormat[] validOutputTypes() {
+        return new Output.DataFormat[] {
+                Output.DataFormat.JSON
+        };
+    }
 
     @Override
     public String pipelineStepClazz() {

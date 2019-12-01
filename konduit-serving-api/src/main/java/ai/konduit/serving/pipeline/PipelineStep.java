@@ -1,9 +1,12 @@
 package ai.konduit.serving.pipeline;
 
 import  java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import ai.konduit.serving.config.Input;
+import ai.konduit.serving.config.Output;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 import ai.konduit.serving.pipeline.step.*;
@@ -26,6 +29,50 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 public interface PipelineStep extends Serializable {
 
+
+    /**
+     * Returns true if the input data format
+     * is valid or not
+     * @param dataFormat the dataformat to test
+     * @return true if the input format is valid or false otherwise
+     */
+   default  boolean isValidInputType(Input.DataFormat dataFormat) {
+     if(validInputTypes() == null || validInputTypes().length < 1) {
+         return true;
+     }
+     return Arrays.stream(validInputTypes()).anyMatch(input -> dataFormat.equals(input));
+   }
+
+
+    /**
+     * Returns true if the output data format
+     * is valid or not
+     * @param dataFormat the dataformat to test
+     * @return true if the output format is valid or false otherwise
+     */
+   default  boolean isValidOutputType(Output.DataFormat dataFormat) {
+       if(validOutputTypes() == null || validOutputTypes().length < 1) {
+           return true;
+       }
+
+       return Arrays.stream(validOutputTypes()).anyMatch(input -> dataFormat.equals(input));
+
+   }
+
+
+    /**
+     * Returns the valid {@link Input.DataFormat}
+     * when the input is the beginning of a pipeline
+     * @return
+     */
+    Input.DataFormat[] validInputTypes();
+
+    /**
+     * Returns the valid {@link Output.DataFormat}
+     * when the output is the end of a pipeline
+     * @return
+     */
+    Output.DataFormat[] validOutputTypes();
 
     /**
      * Getter for the input column names

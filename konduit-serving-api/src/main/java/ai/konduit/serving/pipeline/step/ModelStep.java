@@ -22,6 +22,8 @@
 
 package ai.konduit.serving.pipeline.step;
 
+import ai.konduit.serving.config.Input.DataFormat;
+import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.ModelConfig;
@@ -49,6 +51,23 @@ public class ModelStep extends BasePipelineStep {
 
     public ModelStep(ModelConfig modelConfig) {
         this.modelConfig = modelConfig;
+    }
+
+    @Override
+    public DataFormat[] validInputTypes() {
+        return new DataFormat[] {
+                DataFormat.NUMPY,
+                DataFormat.ND4J
+        };
+
+    }
+
+    @Override
+    public Output.DataFormat[] validOutputTypes() {
+        return new Output.DataFormat[] {
+                Output.DataFormat.NUMPY,
+                Output.DataFormat.ND4J
+        };
     }
 
     @Override
