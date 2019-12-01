@@ -217,9 +217,9 @@ public class PipelineExecutioner {
         PipelineStep finalPipelineStep = config.getSteps().get(config.getSteps().size() - 1);
         PipelineStep startingPipelineStep = config.getSteps().get(0);
 
-        Preconditions.checkState(config.getSteps().get(0).isValidInputType(servingConfig.getInputDataFormat()),"Configured input type is invalid for initial pipeline step of type " + startingPipelineStep.getClass().getName() + " expected input types were " + Arrays.toString(startingPipelineStep.validInputTypes()));
-        Preconditions.checkState(finalPipelineStep.isValidOutputType(servingConfig.getOutputDataFormat()),"Configured output type is invalid for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected output types were " + Arrays.toString(finalPipelineStep.validInputTypes()));
-        Preconditions.checkState(finalPipelineStep.isValidPredictionType(servingConfig.getPredictionType()),"Invalid prediction type configured for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected types were " + Arrays.toString(finalPipelineStep.validPredictionTypes()));
+        Preconditions.checkState(config.getSteps().get(0).isValidInputType(servingConfig.getInputDataFormat()),"Configured input type is invalid for initial pipeline step of type " + startingPipelineStep.getClass().getName() + " expected input types were " + Arrays.toString(startingPipelineStep.validInputTypes()) + ". If this list is null or empty, then any type is considered valid.");
+        Preconditions.checkState(finalPipelineStep.isValidOutputType(servingConfig.getOutputDataFormat()),"Configured output type is invalid for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected output types were " + Arrays.toString(finalPipelineStep.validInputTypes()) + ". If this list is null or empty, then any type is considered valid.");
+        Preconditions.checkState(finalPipelineStep.isValidPredictionType(servingConfig.getPredictionType()),"Invalid prediction type configured for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected types were " + Arrays.toString(finalPipelineStep.validPredictionTypes()) + ". If this list is null or empty, then any type is considered valid.");
 
         for (int i = 0; i < config.getSteps().size(); i++) {
             PipelineStep pipelineStep = config.getSteps().get(i);

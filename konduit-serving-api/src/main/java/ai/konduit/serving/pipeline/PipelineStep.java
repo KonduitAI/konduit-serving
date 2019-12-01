@@ -33,8 +33,9 @@ public interface PipelineStep extends Serializable {
 
     /**
      * Returns true if the input data format
-     * is valid or not
-     * @param dataFormat the dataformat to test
+     * is valid or not. Have {@link #validInputTypes()}
+     * return null or an empty array if you would like any type to be valid.
+     * @param dataFormat the {@link ai.konduit.serving.config.Input.DataFormat} to test
      * @return true if the input format is valid or false otherwise
      */
    default  boolean isValidInputType(Input.DataFormat dataFormat) {
@@ -47,8 +48,11 @@ public interface PipelineStep extends Serializable {
 
     /**
      * Returns true if the output data format
-     * is valid or not
-     * @param dataFormat the dataformat to test
+     * is valid or not.
+     * Have {@link #validOutputTypes()} return null or an empty array
+     * if you would like any type to be valid.
+      *
+     * @param dataFormat the {@link ai.konduit.serving.config.Output.DataFormat} to test
      * @return true if the output format is valid or false otherwise
      */
    default  boolean isValidOutputType(Output.DataFormat dataFormat) {
@@ -64,7 +68,10 @@ public interface PipelineStep extends Serializable {
     /**
      * Valid {@link PredictionType}s
      * if this {@link PipelineStep} is the last step
-     * in a pipeline
+     * in a pipeline.
+     * Have {@link #validPredictionTypes()} return null or empty array
+     * if you would like any type to be valid.
+      *
      * @return the valid prediction type
      */
    PredictionType[] validPredictionTypes();
