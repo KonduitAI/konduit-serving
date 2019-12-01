@@ -23,13 +23,13 @@
 package ai.konduit.serving.verticles.samediff;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.Input;
+import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.model.SameDiffConfig;
 import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.config.Input;
-import ai.konduit.serving.config.Output;
-import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.response.Response;
@@ -55,7 +55,6 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import static com.jayway.restassured.RestAssured.given;
-import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -67,28 +66,28 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return InferenceVerticle.class;
     }
-    
+
     @Override
     public Handler<HttpServerRequest> getRequest() {
         return null;
     }
-    
+
     @Override
     public JsonObject getConfigObject() throws Exception {
         SameDiff sameDiff = SameDiff.create();
-        SDVariable x = sameDiff.placeHolder("x", DataType.FLOAT,1,2);
-        SDVariable y = sameDiff.placeHolder("y",DataType.FLOAT,1,2);
-        SDVariable add = x.add("output",y);
+        SDVariable x = sameDiff.placeHolder("x", DataType.FLOAT, 1, 2);
+        SDVariable y = sameDiff.placeHolder("y", DataType.FLOAT, 1, 2);
+        SDVariable add = x.add("output", y);
         File tmpSameDiffFile = temporary.newFile();
         sameDiff.asFlatFile(tmpSameDiffFile);
         SameDiff values = SameDiff.fromFlatFile(tmpSameDiffFile);
-        
+
         ServingConfig servingConfig = ServingConfig.builder()
                 .inputDataFormat(Input.DataFormat.NUMPY)
                 .outputDataFormat(Output.DataFormat.ND4J)
                 .httpPort(port)
                 .build();
-        
+
         SameDiffConfig modelConfig = SameDiffConfig.builder()
                 .modelConfigType(
                         ModelConfigType.builder()
@@ -96,51 +95,51 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
                                 .modelLoadingPath(tmpSameDiffFile.getAbsolutePath())
                                 .build()
                 ).build();
-        
+
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)
-                .inputNames(Arrays.asList(new String[]{"x","y"}))
+                .inputNames(Arrays.asList(new String[]{"x", "y"}))
                 .outputNames(Arrays.asList(new String[]{"output"}))
                 .build();
-        
+
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .step(modelPipelineConfig)
                 .build();
-        
+
         return new JsonObject(inferenceConfiguration.toJson());
     }
-    
-    
+
+
     @Test
     public void runAdd(TestContext testContext) throws Exception {
-        INDArray x = Nd4j.create(new float[]{1.0f,2.0f});
-        INDArray y = Nd4j.create(new float[]{2.0f,3.0f});
+        INDArray x = Nd4j.create(new float[]{1.0f, 2.0f});
+        INDArray y = Nd4j.create(new float[]{2.0f, 3.0f});
         byte[] xNpy = Nd4j.toNpyByteArray(x);
         byte[] yNpy = Nd4j.toNpyByteArray(y);
-        
-        
+
+
         File xFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(xFile,xNpy);
-        
+        FileUtils.writeByteArrayToFile(xFile, xNpy);
+
         File yFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(yFile,yNpy);
-        
-        
+        FileUtils.writeByteArrayToFile(yFile, yNpy);
+
+
         Response response = given().port(port)
                 .multiPart("x", xFile)
                 .multiPart("y", yFile)
                 .post("/nd4j/numpy")
                 .andReturn();
-        
-        assertEquals("Response failed",200,response.getStatusCode());
-        
-        INDArray bodyResult = BinarySerde.toArray(ByteBuffer.wrap(response.getBody().asByteArray()));
-        assertArrayEquals(new long[]{1,2},bodyResult.shape());
-        assertEquals(Nd4j.create(new float[]{3.0f,5.0f}).reshape(1,2),bodyResult);
 
-        
+        assertEquals("Response failed", 200, response.getStatusCode());
+
+        INDArray bodyResult = BinarySerde.toArray(ByteBuffer.wrap(response.getBody().asByteArray()));
+        assertArrayEquals(new long[]{1, 2}, bodyResult.shape());
+        assertEquals(Nd4j.create(new float[]{3.0f, 5.0f}).reshape(1, 2), bodyResult);
+
+
     }
-    
-    
+
+
 }

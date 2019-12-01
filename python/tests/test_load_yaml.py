@@ -1,6 +1,6 @@
 import konduit
-from konduit.load import server_from_file, client_from_file
 import numpy as np
+from konduit.load import server_from_file, client_from_file
 
 
 def test_yaml_server_loading():

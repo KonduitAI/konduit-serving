@@ -43,12 +43,12 @@ public interface TensorflowObservable {
 
     void setOutputBatches(INDArray[] output);
 
-    void setOutputException(Exception e);
-
     void addObserver(Observer observer);
 
-    INDArray[]  getOutput();
+    INDArray[] getOutput();
 
     Exception getOutputException();
+
+    void setOutputException(Exception e);
 
 }

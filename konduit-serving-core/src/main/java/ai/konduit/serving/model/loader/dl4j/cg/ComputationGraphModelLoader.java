@@ -44,7 +44,7 @@ public class ComputationGraphModelLoader implements ModelLoader<ComputationGraph
     public Buffer saveModel(ComputationGraph model) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
-            ModelSerializer.writeModel(model,byteArrayOutputStream,true);
+            ModelSerializer.writeModel(model, byteArrayOutputStream, true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

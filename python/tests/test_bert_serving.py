@@ -1,6 +1,5 @@
-import random
-
 import numpy as np
+import random
 from konduit import ParallelInferenceConfig, ServingConfig, TensorFlowConfig, ModelConfigType
 from konduit import TensorDataTypesConfig, ModelStep, InferenceConfiguration
 from konduit.client import Client
@@ -9,7 +8,6 @@ from konduit.utils import is_port_in_use
 
 
 def test_server_start():
-
     input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
     output_names = ["loss/Softmax"]
     port = random.randint(1000, 65535)

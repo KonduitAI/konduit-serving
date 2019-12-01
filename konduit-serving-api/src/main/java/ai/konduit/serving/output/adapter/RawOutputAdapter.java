@@ -45,9 +45,9 @@ public class RawOutputAdapter implements OutputAdapter<NDArrayOutput> {
 
     @Override
     public NDArrayOutput adapt(Object input, RoutingContext routingContext) {
-        if(input instanceof INDArray) {
+        if (input instanceof INDArray) {
             INDArray input2 = (INDArray) input;
-            return adapt(input2,routingContext);
+            return adapt(input2, routingContext);
         }
 
         return null;

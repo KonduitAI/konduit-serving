@@ -34,6 +34,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SavedModelConfig {
-    private String savedModelPath, modelTag,signatureKey;
-    private List<String> savedModelInputOrder,saveModelOutputOrder;
+    private String savedModelPath, modelTag, signatureKey;
+    private List<String> savedModelInputOrder, saveModelOutputOrder;
 }

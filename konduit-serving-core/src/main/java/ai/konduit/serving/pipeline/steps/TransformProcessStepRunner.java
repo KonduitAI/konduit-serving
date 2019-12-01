@@ -22,7 +22,7 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.TransformProcess;
@@ -47,27 +47,25 @@ import java.util.Map;
  */
 public class TransformProcessStepRunner extends BaseStepRunner {
 
-    private Map<String,TransformProcess> transformProcesses;
+    private Map<String, TransformProcess> transformProcesses;
 
-    public TransformProcessStepRunner(PipelineStep pipelineStep) {
+    public TransformProcessStepRunner(BasePipelineStep pipelineStep) {
         super(pipelineStep);
         TransformProcessStep transformProcessStepConfig = (TransformProcessStep) pipelineStep;
         this.transformProcesses = transformProcessStepConfig.getTransformProcesses();
     }
 
 
-
     @Override
     public Record[] transform(Record[] input) {
         Record[] ret = new Record[input.length];
-        for(int i = 0; i < input.length; i++) {
-            if(pipelineStep.inputNameIsValidForStep(pipelineStep.inputNameAt(i))) {
+        for (int i = 0; i < input.length; i++) {
+            if (pipelineStep.inputNameIsValidForStep(pipelineStep.inputNameAt(i))) {
                 TransformProcess toExecute = transformProcesses.get(pipelineStep.inputNameAt(i));
-                Preconditions.checkNotNull(toExecute,"No transform process found for name " + (pipelineStep.inputNameAt(i)));
-                ret[i] = new org.datavec.api.records.impl.Record(LocalTransformExecutor.execute(Arrays.asList(input[i].getRecord()),toExecute).get(0),null);
+                Preconditions.checkNotNull(toExecute, "No transform process found for name " + (pipelineStep.inputNameAt(i)));
+                ret[i] = new org.datavec.api.records.impl.Record(LocalTransformExecutor.execute(Arrays.asList(input[i].getRecord()), toExecute).get(0), null);
 
-            }
-            else {
+            } else {
                 ret[i] = input[i];
             }
         }
@@ -76,6 +74,6 @@ public class TransformProcessStepRunner extends BaseStepRunner {
 
     @Override
     public void processValidWritable(Writable writable, List<Writable> record, int inputIndex, Object... extraArgs) {
-           throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 }

@@ -44,7 +44,6 @@ import java.util.Collections;
  * unpickling and conversion to pmml
  * among other functionality.
  *
- *
  * @author Adam Gibson
  */
 @Slf4j
@@ -81,13 +80,9 @@ public class ConverterPickle {
 
             pmmlPipeline = (PMMLPipeline) object;
 
-        }
-
-
-        else if(!(object instanceof PMML)) {
+        } else if (!(object instanceof PMML)) {
             pmmlPipeline = (PMMLPipeline) object;
-        }
-        else if(object instanceof PMML) {
+        } else if (object instanceof PMML) {
             PMML pmml = (PMML) object;
             return bufferForPmml(pmml);
 
@@ -111,6 +106,7 @@ public class ConverterPickle {
      * Return a {@link Buffer} containing the
      * xml of the pmml based on the
      * output of {@link MetroJAXBUtil#marshalPMML(PMML, OutputStream)}
+     *
      * @param pmml the pmml to write
      * @return the output buffer
      * @throws Exception if the buffer creation fails (such as invalid pmml)
@@ -127,13 +123,14 @@ public class ConverterPickle {
 
     /**
      * Unpickle the given file
+     *
      * @param tmpFile the file to unpickle
      * @return the unpickled python object
      * @throws Exception if the pickle de serialization fails
      */
     public static Object unpickle(File tmpFile) throws Exception {
         Object object = null;
-        try(Storage storage = PickleUtil.createStorage(tmpFile)) {
+        try (Storage storage = PickleUtil.createStorage(tmpFile)) {
             log.debug("Parsing PKL..");
 
             long start = System.currentTimeMillis();
@@ -142,8 +139,6 @@ public class ConverterPickle {
 
             log.debug("Parsed PKL in {} ms.", (end - start));
         }
-
-
 
 
         return object;

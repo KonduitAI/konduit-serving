@@ -1,6 +1,6 @@
+import pytest
 from konduit import *
 from konduit.json_utils import *
-import pytest
 
 
 def test_empty_dict_type():
@@ -32,7 +32,6 @@ def test_list_wrapper():
 
 
 def test_as_dict_checker():
-
     class FooCallable(object):
         def __init__(self):
             pass

@@ -22,9 +22,9 @@
 
 package ai.konduit.serving.executioner.inference;
 
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.pipeline.steps.TransformProcessStepRunner;
-import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.MathOp;
@@ -46,79 +46,79 @@ import static org.junit.Assert.assertEquals;
 
 @NotThreadSafe
 public class PipelineTests {
-    
+
     @Test
     public void transformProcessPipelineTest() {
         Schema schema = new Schema.Builder()
                 .addColumnString("first")
                 .build();
-        
+
         TransformProcess transformProcess = new TransformProcess.Builder(schema)
-                .appendStringColumnTransform("first","two")
+                .appendStringColumnTransform("first", "two")
                 .build();
-        
-        
+
+
         TransformProcessStep config = TransformProcessStep.builder()
                 .inputName("default")
-                .inputSchema("default",new SchemaType[]{SchemaType.String})
-                .outputSchema("default",new SchemaType[]{SchemaType.String})
-                
-                .inputColumnName("default",Arrays.asList(new String[]{"first"}))
+                .inputSchema("default", new SchemaType[]{SchemaType.String})
+                .outputSchema("default", new SchemaType[]{SchemaType.String})
+
+                .inputColumnName("default", Arrays.asList(new String[]{"first"}))
                 .transformProcess("default", transformProcess)
                 .build();
-        
+
         TransformProcessStepRunner step = new TransformProcessStepRunner(config);
-        
+
         List<Writable> ret = new ArrayList<>();
         ret.add(new Text("appended"));
-        
+
         Record[] transform = step.transform(new Record[]{
-            new org.datavec.api.records.impl.Record(ret, null)
+                new org.datavec.api.records.impl.Record(ret, null)
         });
-        
-        assertEquals(1,transform.length);
-        
+
+        assertEquals(1, transform.length);
+
         Writable writable = transform[0].getRecord().get(0);
-        assertEquals("appendedtwo",writable.toString());
-        
-        assertEquals(1,step.inputTypes().size());
-        assertEquals(1,step.outputTypes().size());
-        
-        
+        assertEquals("appendedtwo", writable.toString());
+
+        assertEquals(1, step.inputTypes().size());
+        assertEquals(1, step.outputTypes().size());
+
+
     }
-    
+
     @Test
     public void testNdArrayTransform() {
         Schema schema = new Schema.Builder()
-                .addColumnNDArray("first",new long[]{1,1})
+                .addColumnNDArray("first", new long[]{1, 1})
                 .build();
-        
+
         TransformProcess transformProcess = new TransformProcess.Builder(schema)
-                .ndArrayScalarOpTransform("first", MathOp.Add,1.0)
+                .ndArrayScalarOpTransform("first", MathOp.Add, 1.0)
                 .build();
-        
+
         TransformProcessStep config = TransformProcessStep.builder()
                 .inputName("default")
-                .inputColumnName("default",Arrays.asList(new String[]{"first"}))
+                .inputColumnName("default", Arrays.asList(new String[]{"first"}))
                 .transformProcess("default", transformProcess)
                 .build();
-        
+
         TransformProcessStepRunner step = new TransformProcessStepRunner(config);
-        
+
         List<Writable> ret = new ArrayList<>();
         ret.add(new NDArrayWritable(Nd4j.scalar(1.0)));
-        
+
         Record[] transform = step.transform(new Record[]{
-            new org.datavec.api.records.impl.Record(ret, null)
+                new org.datavec.api.records.impl.Record(ret, null)
         });
-        
-        assertEquals(1,transform.length);
-        
-        
+
+        assertEquals(1, transform.length);
+
+
         INDArray[] transformed = SchemaTypeUtils.toArrays(transform);
-        assertEquals(Nd4j.scalar(2.0),transformed[0]);
-        
+        assertEquals(Nd4j.scalar(2.0), transformed[0]);
+
     }
 
-    
+
 }

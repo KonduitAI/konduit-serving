@@ -51,12 +51,13 @@ public class RegressionOutputAdapter implements OutputAdapter<RegressionOutput> 
     /**
      * Create the output adapter
      * with the output inputSchema
+     *
      * @param schema the inputSchema of the output
      */
     public RegressionOutputAdapter(Schema schema) {
         this.schema = schema;
         fieldNames = new ArrayList<>(schema.numColumns());
-        for(int i = 0; i < schema.numColumns(); i++) {
+        for (int i = 0; i < schema.numColumns(); i++) {
             fieldNames.add(FieldName.create(schema.getName(i)));
         }
 
@@ -72,14 +73,14 @@ public class RegressionOutputAdapter implements OutputAdapter<RegressionOutput> 
 
     @Override
     public RegressionOutput adapt(List<? extends Map<FieldName, ?>> pmmlExamples, RoutingContext routingContext) {
-        if(schema == null) {
+        if (schema == null) {
             throw new IllegalStateException("No inputSchema found. A inputSchema is required in order to create results.");
         }
 
         double[][] values = new double[pmmlExamples.size()][pmmlExamples.get(0).size()];
-        for(int i = 0; i < pmmlExamples.size(); i++) {
-            Map<FieldName,?> example = pmmlExamples.get(i);
-            for(int j = 0; j < schema.numColumns(); j++) {
+        for (int i = 0; i < pmmlExamples.size(); i++) {
+            Map<FieldName, ?> example = pmmlExamples.get(i);
+            for (int j = 0; j < schema.numColumns(); j++) {
                 Double result = (Double) example.get(fieldNames.get(j));
                 values[i][j] = result;
             }
@@ -90,11 +91,10 @@ public class RegressionOutputAdapter implements OutputAdapter<RegressionOutput> 
 
     @Override
     public RegressionOutput adapt(Object input, RoutingContext routingContext) {
-        if(input instanceof INDArray) {
+        if (input instanceof INDArray) {
             INDArray arr = (INDArray) input;
             return adapt(arr, routingContext);
-        }
-        else if(input instanceof List) {
+        } else if (input instanceof List) {
             List<? extends Map<FieldName, ?>> pmmlExamples = (List<? extends Map<FieldName, ?>>) input;
             return adapt(pmmlExamples, routingContext);
         }

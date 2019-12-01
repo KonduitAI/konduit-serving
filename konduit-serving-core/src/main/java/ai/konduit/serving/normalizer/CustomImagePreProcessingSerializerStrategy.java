@@ -31,17 +31,16 @@ import java.io.*;
 /**
  * {@link NormalizerSerializerStrategy}
  * for {@link CustomImagePreProcessingScaler}
- *
+ * <p>
  * Saves the min range, max range, and max pixel value as
  * doubles
- *
  *
  * @author Adam Gibson
  */
 public class CustomImagePreProcessingSerializerStrategy extends CustomSerializerStrategy<CustomImagePreProcessingScaler> {
     @Override
     public void write(CustomImagePreProcessingScaler normalizer, OutputStream stream) throws IOException {
-        try(DataOutputStream dataOutputStream = new DataOutputStream(stream)) {
+        try (DataOutputStream dataOutputStream = new DataOutputStream(stream)) {
             dataOutputStream.writeDouble(normalizer.getMinRange());
             dataOutputStream.writeDouble(normalizer.getMaxRange());
             dataOutputStream.writeDouble(normalizer.getMaxPixelVal());
@@ -55,7 +54,7 @@ public class CustomImagePreProcessingSerializerStrategy extends CustomSerializer
         double minRange = dataOutputStream.readDouble();
         double maxRange = dataOutputStream.readDouble();
         double maxPixelVal = dataOutputStream.readDouble();
-        CustomImagePreProcessingScaler ret =  new CustomImagePreProcessingScaler(minRange,maxRange);
+        CustomImagePreProcessingScaler ret = new CustomImagePreProcessingScaler(minRange, maxRange);
         ret.setMaxPixelVal(maxPixelVal);
         return ret;
     }

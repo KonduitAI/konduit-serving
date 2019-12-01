@@ -1,10 +1,9 @@
 import json
 import logging
 import os
+import requests
 import signal
 import subprocess
-import requests
-
 from konduit.base_inference import PipelineStep
 from konduit.inference import InferenceConfiguration
 from konduit.json_utils import config_to_dict_with_type

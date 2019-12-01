@@ -1,11 +1,10 @@
+import os
 from konduit import *
-from konduit.server import Server
 from konduit.client import Client
+from konduit.server import Server
 from konduit.utils import default_python_path
 
-import os
 from utils import to_base_64
-
 
 # Set the working directory to this folder and register the "detect_image.py" script as code to be executed by konduit.
 work_dir = os.path.abspath('.')

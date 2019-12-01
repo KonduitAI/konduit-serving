@@ -36,9 +36,9 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class NormalizationConfig   implements Serializable {
+public class NormalizationConfig implements Serializable {
 
-    private Map<String,String> config = new HashMap<>();
+    private Map<String, String> config = new HashMap<>();
 
     public void put(String key, String value) {
         config.put(key, value);

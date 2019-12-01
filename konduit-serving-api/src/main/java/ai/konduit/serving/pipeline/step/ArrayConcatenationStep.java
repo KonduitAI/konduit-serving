@@ -22,7 +22,7 @@
 
 package ai.konduit.serving.pipeline.step;
 
-import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
@@ -33,10 +33,10 @@ import java.util.Map;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-public class ArrayConcatenationStep extends PipelineStep {
+public class ArrayConcatenationStep extends BasePipelineStep {
 
     @Singular
-    private Map<Integer,Integer> concatDimensions;
+    private Map<Integer, Integer> concatDimensions;
 
 
     @Override

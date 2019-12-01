@@ -39,7 +39,6 @@ import org.nd4j.linalg.dataset.api.preprocessor.serializer.NormalizerType;
  * default minRange = 0 and maxRange = 1;
  * If pixel values are not 8 bits, you can specify the number of bits as the third argument in the constructor
  * For values that are already floating point, specify the number of bits as 1
- *
  */
 @Slf4j
 @Getter
@@ -61,8 +60,9 @@ public class CustomImagePreProcessingScaler implements DataNormalization {
 
     /**
      * Preprocessor can take a range as minRange and maxRange
-     * @param a, default = 0
-     * @param b, default = 1
+     *
+     * @param a,      default = 0
+     * @param b,      default = 1
      * @param maxBits in the image, default = 8
      */
     public CustomImagePreProcessingScaler(double a, double b, int maxBits) {
@@ -113,6 +113,7 @@ public class CustomImagePreProcessingScaler implements DataNormalization {
 
     /**
      * Transform the data
+     *
      * @param toPreProcess the dataset to transform
      */
     @Override

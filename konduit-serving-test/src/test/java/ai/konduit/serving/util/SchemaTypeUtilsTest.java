@@ -35,11 +35,11 @@ public class SchemaTypeUtilsTest {
     @Test
     public void testToArrays() {
         Record[] inputs = new Record[2];
-        for(int i = 0; i < inputs.length; i++)
+        for (int i = 0; i < inputs.length; i++)
             inputs[i] = new org.datavec.api.records.impl.Record(Arrays.asList(
                     new NDArrayWritable(Nd4j.scalar(1.0)),
                     new NDArrayWritable(Nd4j.scalar(1.0))
-            ),null);
+            ), null);
 
         INDArray[] indArrays = SchemaTypeUtils.toArrays(inputs);
     }

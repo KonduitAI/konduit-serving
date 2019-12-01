@@ -1,11 +1,10 @@
-from konduit import *
-from konduit.server import Server
-from konduit.client import Client
-from konduit.utils import is_port_in_use
-
 import numpy as np
-import time
 import random
+import time
+from konduit import *
+from konduit.client import Client
+from konduit.server import Server
+from konduit.utils import is_port_in_use
 
 
 def test_server_start():
@@ -21,7 +20,7 @@ def test_server_start():
     step = PythonStep().step(python_config)
     server = Server(steps=step, serving_config=serving_config)
     server.start()
-    
+
     client = Client(port=port)
 
     data_input = {'default': np.load('../data/input-0.npy')}

@@ -23,12 +23,10 @@
 package ai.konduit.serving.verticles.nd4j.memmap;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.config.MemMapConfig;
-
+import ai.konduit.serving.config.ServingConfig;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
@@ -50,8 +48,7 @@ import static org.junit.Assert.assertEquals;
 @NotThreadSafe
 public class MemMapSpecificVerticleTest extends BaseMemMapTest {
 
-    private INDArray unkVector = Nd4j.linspace(1,4,4).addi(2);
-
+    private INDArray unkVector = Nd4j.linspace(1, 4, 4).addi(2);
 
 
     @Test(timeout = 60000)
@@ -61,27 +58,27 @@ public class MemMapSpecificVerticleTest extends BaseMemMapTest {
         jsonArray.add(1);
         Response response = given().contentType(ContentType.JSON)
                 .body(jsonArray.toString())
-                .header("Content-Type","application/json")
+                .header("Content-Type", "application/json")
                 .port(port)
                 .post("/array/indices/numpy")
                 .andReturn();
         byte[] content = response.getBody().asByteArray();
-        INDArray numpyTest = Nd4j.createNpyFromByteArray(content).reshape(2,4);
-        INDArray first = Nd4j.create(new float[]{3,4,5,6,5,6,7,8}).reshape(2,4);
-        assertEquals(2,numpyTest.rows());
-        assertEquals(unkVector,numpyTest.slice(0));
-        assertEquals(first,numpyTest);
+        INDArray numpyTest = Nd4j.createNpyFromByteArray(content).reshape(2, 4);
+        INDArray first = Nd4j.create(new float[]{3, 4, 5, 6, 5, 6, 7, 8}).reshape(2, 4);
+        assertEquals(2, numpyTest.rows());
+        assertEquals(unkVector, numpyTest.slice(0));
+        assertEquals(first, numpyTest);
     }
 
 
     @Override
     public JsonObject getConfigObject() throws Exception {
         File unkVectorPath = temporary.newFile();
-        Nd4j.writeAsNumpy(unkVector,unkVectorPath);
-        INDArray arr = Nd4j.linspace(1,8,8).reshape(2,4);
-        File tmpFile = new File(temporary.getRoot(),"tmpfile.npy");
+        Nd4j.writeAsNumpy(unkVector, unkVectorPath);
+        INDArray arr = Nd4j.linspace(1, 8, 8).reshape(2, 4);
+        File tmpFile = new File(temporary.getRoot(), "tmpfile.npy");
         byte[] save = Nd4j.toNpyByteArray(arr);
-        FileUtils.writeByteArrayToFile(tmpFile,save);
+        FileUtils.writeByteArrayToFile(tmpFile, save);
         InferenceConfiguration inferenceConfiguration =
                 InferenceConfiguration.builder()
                         .servingConfig(ServingConfig.builder()

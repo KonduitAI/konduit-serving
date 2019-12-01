@@ -21,6 +21,7 @@
  */
 
 package ai.konduit.serving.threadpool.samediff.observables;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -33,12 +34,11 @@ import java.util.Observable;
 @Slf4j
 public class BasicSameDiffInferenceObservable extends Observable implements SameDiffObservable {
 
+    protected Exception exception;
     private INDArray[] input;
     @Getter
     private long id;
     private INDArray[] output;
-    protected Exception exception;
-
 
 
     public BasicSameDiffInferenceObservable(INDArray[] inputs) {
@@ -64,14 +64,6 @@ public class BasicSameDiffInferenceObservable extends Observable implements Same
         notifyObservers();
     }
 
-
-    @Override
-    public void setOutputException(Exception exception) {
-        this.exception = exception;
-        this.setChanged();
-        notifyObservers();
-    }
-
     @Override
     public INDArray[] getOutput() {
         checkOutputException();
@@ -83,10 +75,17 @@ public class BasicSameDiffInferenceObservable extends Observable implements Same
         return exception;
     }
 
-    protected void checkOutputException(){
-        if(exception != null){
-            if(exception instanceof RuntimeException){
-                throw (RuntimeException)exception;
+    @Override
+    public void setOutputException(Exception exception) {
+        this.exception = exception;
+        this.setChanged();
+        notifyObservers();
+    }
+
+    protected void checkOutputException() {
+        if (exception != null) {
+            if (exception instanceof RuntimeException) {
+                throw (RuntimeException) exception;
             } else {
                 throw new RuntimeException("Exception encountered while getting output: " + exception.getMessage(), exception);
             }

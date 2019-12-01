@@ -39,14 +39,14 @@ public class PipelineSerializationTests {
                 .step(new PythonStep())
                 .servingConfig(ServingConfig.builder().build())
                 .build();
-        assertEquals(inferenceConfiguration,InferenceConfiguration.fromYaml(inferenceConfiguration.toYaml()));
+        assertEquals(inferenceConfiguration, InferenceConfiguration.fromYaml(inferenceConfiguration.toYaml()));
     }
 
     @Test
-    public void testPipelineSerialization() throws  Exception {
+    public void testPipelineSerialization() throws Exception {
         ImageLoadingStep imageLoadingStepConfig = ImageLoadingStep.builder()
-                .dimensionsConfig("default",new Long[]{426L,426L,3L})
-                .dimensionsConfig("1",new Long[]{426L,426L,3L})
+                .dimensionsConfig("default", new Long[]{426L, 426L, 3L})
+                .dimensionsConfig("1", new Long[]{426L, 426L, 3L})
                 .build();
 
         InferenceConfiguration config = InferenceConfiguration.builder()

@@ -1,5 +1,5 @@
-from jnius import autoclass
 import json
+from jnius import autoclass
 
 
 def load_java_tp(tp_json):

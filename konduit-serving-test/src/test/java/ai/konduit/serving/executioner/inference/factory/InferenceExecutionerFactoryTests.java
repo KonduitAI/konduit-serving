@@ -22,13 +22,13 @@
 
 package ai.konduit.serving.executioner.inference.factory;
 
+import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.executioner.inference.*;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
-import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
 import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
 import ai.konduit.serving.train.TrainUtils;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -43,7 +43,7 @@ import java.io.File;
 import static org.junit.Assert.*;
 
 public class InferenceExecutionerFactoryTests {
-    
+
     @Test
     public void testTensorflow() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/tensorflow/frozen_model.pb");
@@ -53,41 +53,41 @@ public class InferenceExecutionerFactoryTests {
                 .tensorDataTypesConfig(TensorDataTypesConfig.builder()
                         .inputDataType("default", TensorDataType.INT32).build())
                 .configProtoPath(classPathResource.getFile().getAbsolutePath()).build();
-        
+
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
                 .modelConfig(tensorFlowConfig)
                 .build();
-        
+
         TensorflowModelLoader tensorflowModelLoader = TensorflowModelLoader.createFromConfig(modelPipelineStep);
         assertFalse(tensorflowModelLoader.getInputNames().isEmpty());
         assertFalse(tensorflowModelLoader.getOutputNames().isEmpty());
         assertFalse(tensorflowModelLoader.getCastingInputTypes().isEmpty());
         assertTrue(tensorflowModelLoader.getCastingOutputTypes().isEmpty());
-        
+
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = tensorflowInferenceExecutionerFactory.create(modelPipelineStep);
         InferenceExecutioner inferenceExecutioner = initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(inferenceExecutioner);
-        
+
         TensorflowInferenceExecutioner tensorflowInferenceExecutioner = (TensorflowInferenceExecutioner) inferenceExecutioner;
         assertNotNull(tensorflowInferenceExecutioner.model());
         assertNotNull(tensorflowInferenceExecutioner.modelLoader());
         assertNotNull(tensorflowInferenceExecutioner.getTensorflowThreadPool());
-        
-        TensorflowGraphHolder tensorflowGraphHolder =  tensorflowInferenceExecutioner.model();
+
+        TensorflowGraphHolder tensorflowGraphHolder = tensorflowInferenceExecutioner.model();
         assertNotNull(tensorflowGraphHolder.getCastingInputTypes());
         assertFalse(tensorflowGraphHolder.getCastingInputTypes().isEmpty());
         assertNotNull(tensorflowGraphHolder.getTfGraph());
-        
+
         GraphRunner create = tensorflowGraphHolder.createRunner();
         assertNotNull(create.getInputDataTypes());
         assertFalse(create.getInputDataTypes().isEmpty());
-        assertEquals(create.getInputDataTypes().keySet().iterator().next(),create.getInputOrder().iterator().next());
+        assertEquals(create.getInputDataTypes().keySet().iterator().next(), create.getInputOrder().iterator().next());
     }
-    
+
     @Test
-    public void testKerasSequential() throws Exception  {
+    public void testKerasSequential() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/keras/bidirectional_lstm_tensorflow_1.h5");
         ModelConfig modelConfig = ModelConfig.builder()
                 .modelConfigType(ModelConfigType.keras(classPathResource.getFile().getAbsolutePath()))
@@ -111,7 +111,6 @@ public class InferenceExecutionerFactoryTests {
         assertNotNull(computationGraphInferenceExecutioner.modelLoader());
 
     }
-
 
 
     @Test
@@ -170,7 +169,7 @@ public class InferenceExecutionerFactoryTests {
         assertNotNull(computationGraphInferenceExecutioner.modelLoader());
 
     }
-    
+
     @Test
     public void testComputationGraph() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> trainedNetwork = TrainUtils.getTrainedNetwork();
@@ -181,11 +180,11 @@ public class InferenceExecutionerFactoryTests {
         ModelConfig modelConfig = ModelConfig.builder()
                 .modelConfigType(ModelConfigType.computationGraph(tmpZip.getAbsolutePath()))
                 .build();
-        
+
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(1139)
                 .build();
-        
+
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
@@ -201,5 +200,5 @@ public class InferenceExecutionerFactoryTests {
 
 
     }
-    
+
 }

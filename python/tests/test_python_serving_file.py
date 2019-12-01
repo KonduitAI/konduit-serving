@@ -1,10 +1,9 @@
-from konduit import *
-from konduit.server import Server
-from konduit.client import Client
-from konduit.utils import is_port_in_use, default_python_path
-
 import numpy as np
 import os
+from konduit import *
+from konduit.client import Client
+from konduit.server import Server
+from konduit.utils import is_port_in_use, default_python_path
 
 
 def test_python_script_prediction():
@@ -20,7 +19,7 @@ def test_python_script_prediction():
     step = PythonStep().step(python_config)
     server = Server(steps=step, serving_config=serving_config)
     server.start()
-    
+
     client = Client(port=port)
 
     if is_port_in_use(port):

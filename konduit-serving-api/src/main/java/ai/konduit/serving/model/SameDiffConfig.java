@@ -22,7 +22,9 @@
 
 package ai.konduit.serving.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Data
@@ -32,7 +34,6 @@ import lombok.experimental.SuperBuilder;
 public class SameDiffConfig extends ModelConfig {
     public final static String SAME_DIFF_EXECUTION_CONFIG_KEY = "sameDiffConfig";
     private TensorDataTypesConfig tensorDataTypesConfig;
-
 
 
 }

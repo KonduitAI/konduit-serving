@@ -1,13 +1,13 @@
-from konduit import *
-from konduit.json_utils import config_to_dict_with_type
-from konduit.server import Server
-from konduit.client import Client
-from konduit.utils import is_port_in_use
-
-import random
-import time
 import json
 import pydatavec
+import random
+import time
+from konduit import *
+from konduit.client import Client
+from konduit.json_utils import config_to_dict_with_type
+from konduit.server import Server
+from konduit.utils import is_port_in_use
+
 from .utils import load_java_tp, inference_from_json
 
 
@@ -22,9 +22,9 @@ def test_build_tp():
     load_java_tp(tp_json)
     _ = json.dumps(tp_json)
     as_python_json = json.loads(tp_json)
-    transform_process = TransformProcessStep()\
-        .set_input(None, ['first'], ['String'])\
-        .set_output(None, ['first'], ['String'])\
+    transform_process = TransformProcessStep() \
+        .set_input(None, ['first'], ['String']) \
+        .set_output(None, ['first'], ['String']) \
         .transform_process(as_python_json)
 
     port = random.randint(1000, 65535)

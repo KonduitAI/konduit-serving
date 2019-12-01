@@ -22,12 +22,12 @@
 
 package ai.konduit.serving.pipeline;
 
-import ai.konduit.serving.pipeline.step.PmmlStep;
-import ai.konduit.serving.util.ObjectMapperHolder;
-import ai.konduit.serving.util.WritableValueRetriever;
 import ai.konduit.serving.executioner.inference.PmmlInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.factory.PmmlInferenceExecutionerFactory;
+import ai.konduit.serving.pipeline.step.PmmlStep;
 import ai.konduit.serving.pipeline.steps.BaseStepRunner;
+import ai.konduit.serving.util.ObjectMapperHolder;
+import ai.konduit.serving.util.WritableValueRetriever;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.Text;
@@ -45,7 +45,7 @@ public class PmmlInferenceExecutionerStepRunner extends BaseStepRunner {
     private PmmlInferenceExecutioner pmmlInferenceExecutioner;
     private Evaluator evaluator;
 
-    public PmmlInferenceExecutionerStepRunner(PipelineStep pipelineStep) {
+    public PmmlInferenceExecutionerStepRunner(BasePipelineStep pipelineStep) {
         super(pipelineStep);
         PmmlStep pmmlStepConfig = (PmmlStep) pipelineStep;
         PmmlInferenceExecutionerFactory inferenceExecutionerFactory = new PmmlInferenceExecutionerFactory();
@@ -57,13 +57,13 @@ public class PmmlInferenceExecutionerStepRunner extends BaseStepRunner {
         }
 
         Preconditions.checkState(pmmlStepConfig.getOutputSchemas() != null &&
-                !pmmlStepConfig.getOutputSchemas().isEmpty(),"No output schemas found!");
+                !pmmlStepConfig.getOutputSchemas().isEmpty(), "No output schemas found!");
         Preconditions.checkState(pmmlStepConfig.getInputSchemas() != null &&
-                !pmmlStepConfig.getInputSchemas().isEmpty(),"No input schemas found!");
+                !pmmlStepConfig.getInputSchemas().isEmpty(), "No input schemas found!");
         Preconditions.checkState(pmmlStepConfig.getInputColumnNames() != null &&
-                !pmmlStepConfig.getInputColumnNames().isEmpty(),"No input column names  found!");
+                !pmmlStepConfig.getInputColumnNames().isEmpty(), "No input column names  found!");
         Preconditions.checkState(pmmlStepConfig.getOutputColumnNames() != null &&
-                !pmmlStepConfig.getOutputColumnNames().isEmpty(),"No output names found!");
+                !pmmlStepConfig.getOutputColumnNames().isEmpty(), "No output names found!");
 
 
     }
@@ -83,13 +83,13 @@ public class PmmlInferenceExecutionerStepRunner extends BaseStepRunner {
         Schema schema = pipelineStep.inputSchemaForName("default");
         List<Map<FieldName, Object>> pmmlInput = new ArrayList<>(input.length);
         List<FieldName> fieldNames = new ArrayList<>();
-        for(int i = 0; i < schema.numColumns(); i++) {
+        for (int i = 0; i < schema.numColumns(); i++) {
             fieldNames.add(FieldName.create(schema.getName(i)));
         }
 
-        for(Record record : input) {
+        for (Record record : input) {
             Map<FieldName, Object> pmmlRecord = new LinkedHashMap<>();
-            for(int i = 0; i < record.getRecord().size(); i++) {
+            for (int i = 0; i < record.getRecord().size(); i++) {
                 pmmlRecord.put(fieldNames.get(i), WritableValueRetriever.getUnderlyingValue(record.getRecord().get(i)));
             }
 
@@ -105,7 +105,7 @@ public class PmmlInferenceExecutionerStepRunner extends BaseStepRunner {
             throw new IllegalStateException("Unable to write json fore records " + execute);
         }
 
-        ret[0] = new org.datavec.api.records.impl.Record(Collections.singletonList(new Text(json)),null);
+        ret[0] = new org.datavec.api.records.impl.Record(Collections.singletonList(new Text(json)), null);
 
 
         return ret;

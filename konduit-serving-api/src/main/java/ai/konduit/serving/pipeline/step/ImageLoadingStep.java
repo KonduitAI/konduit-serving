@@ -22,9 +22,11 @@
 
 package ai.konduit.serving.pipeline.step;
 
-import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import org.datavec.image.transform.ImageTransformProcess;
 
@@ -34,7 +36,7 @@ import java.util.Map;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-public class ImageLoadingStep extends PipelineStep implements Serializable {
+public class ImageLoadingStep extends BasePipelineStep implements Serializable {
 
     private int originalImageHeight;
     private int originalImageWidth;
@@ -52,7 +54,7 @@ public class ImageLoadingStep extends PipelineStep implements Serializable {
     private ObjectDetectionConfig objectDetectionConfig;
 
     public boolean initialImageLayoutMatchesFinal() {
-        if(getImageProcessingInitialLayout() != null && getImageProcessingRequiredLayout() != null)
+        if (getImageProcessingInitialLayout() != null && getImageProcessingRequiredLayout() != null)
             return getImageProcessingInitialLayout().equals(getImageProcessingRequiredLayout());
         return true;
     }

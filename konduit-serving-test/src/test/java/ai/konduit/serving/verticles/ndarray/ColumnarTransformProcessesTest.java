@@ -24,13 +24,14 @@ package ai.konduit.serving.verticles.ndarray;
 
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.model.ModelConfig;
+import ai.konduit.serving.model.ModelConfigType;
+import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.http.ContentType;
@@ -87,7 +88,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
 
     @After
     public void after(TestContext context) {
-        if(vertx != null) {
+        if (vertx != null) {
             vertx.close(context.asyncAssertSuccess());
         }
     }
@@ -96,15 +97,15 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
     @Override
     public JsonObject getConfigObject() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = getTrainedNetwork();
-        File modelSave =  new File(temporary.getRoot(),"model.zip");
-        ModelSerializer.writeModel(multiLayerNetwork.getFirst(),modelSave,true);
+        File modelSave = new File(temporary.getRoot(), "model.zip");
+        ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, true);
 
         inputSchema = TrainUtils.getIrisInputSchema();
         Schema outputSchema = getIrisOutputSchema();
         Nd4j.getRandom().setSeed(42);
 
         TransformProcess.Builder transformProcessBuilder = new TransformProcess.Builder(inputSchema);
-        for(int i = 0; i < inputSchema.numColumns(); i++) {
+        for (int i = 0; i < inputSchema.numColumns(); i++) {
             transformProcessBuilder.convertToDouble(inputSchema.getName(i));
         }
 
@@ -122,7 +123,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .modelConfigType(ModelConfigType.multiLayerNetwork(modelSave.getAbsolutePath()))
                 .build();
 
-        ModelStep modelStepConfig = new ModelStep(modelConfig)
+        PipelineStep modelStepConfig = new ModelStep(modelConfig)
                 .setInput(inputSchema)
                 .setOutput(outputSchema);
 
@@ -141,12 +142,12 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) {
         JsonArray jsonArray = new JsonArray();
-        double[] vals = {5.1,3.5,1.4,0.2};
-        for(int i = 0; i < 4; i++) jsonArray.add(vals[i]);
+        double[] vals = {5.1, 3.5, 1.4, 0.2};
+        for (int i = 0; i < 4; i++) jsonArray.add(vals[i]);
 
         JsonObject wrapper = new JsonObject();
-        for(int i = 0; i < vals.length; i++) {
-            wrapper.put(inputSchema.getName(i),vals[i]);
+        for (int i = 0; i < vals.length; i++) {
+            wrapper.put(inputSchema.getName(i), vals[i]);
         }
 
         given().contentType(ContentType.JSON)
@@ -156,9 +157,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .then().statusCode(200);
 
 
-
     }
-
 
 
 }

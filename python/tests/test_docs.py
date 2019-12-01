@@ -1,6 +1,6 @@
-from konduit import *
 import glob
 import re
+from konduit import *
 
 
 def markdown_blocks(file_path, language='python'):
@@ -55,7 +55,7 @@ def exec_python_code(code_blocks):
     """
     for block in code_blocks:
         try:
-            exec(block)
+            exec (block)
         except Exception as ex:
             print("Test execution failed in the following block:\n")
             print(block)

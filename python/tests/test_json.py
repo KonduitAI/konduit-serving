@@ -1,9 +1,7 @@
+import json
+from jnius import autoclass
 from konduit import *
 from konduit.json_utils import config_to_dict_with_type
-
-from jnius import autoclass
-import json
-
 
 StringJava = autoclass("java.lang.String")
 InferenceConfigurationJava = autoclass(
@@ -22,8 +20,8 @@ def test_json_compare():
     model_pipeline_step = ModelStep(model_config=tensorflow_config,
                                     parallel_inference_config=parallel_inference_config,
                                     input_names=["IteratorGetNext:0",
-                                                         "IteratorGetNext:1",
-                                                         "IteratorGetNext:4"],
+                                                 "IteratorGetNext:1",
+                                                 "IteratorGetNext:4"],
                                     output_names=["loss/Softmax"])
 
     inference = InferenceConfiguration(serving_config=serving_config,

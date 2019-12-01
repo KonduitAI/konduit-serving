@@ -1,9 +1,9 @@
-from contextlib import closing
-import socket
-import os
-import sys
-import requests
 import logging
+import os
+import requests
+import socket
+import sys
+from contextlib import closing
 
 
 def is_port_in_use(port, base_url='localhost'):

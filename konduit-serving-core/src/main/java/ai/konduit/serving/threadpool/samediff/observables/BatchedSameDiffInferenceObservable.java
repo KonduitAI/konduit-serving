@@ -39,17 +39,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @NoArgsConstructor
 public class BatchedSameDiffInferenceObservable extends Observable implements SameDiffObservable {
 
-    private INDArray[]  input;
+    private final Object locker = new Object();
+    protected Exception exception;
+    private INDArray[] input;
     @Getter
     private long id;
     private INDArray[] output;
-    protected Exception exception;
     private AtomicInteger counter = new AtomicInteger(0);
     private ThreadLocal<Integer> position = new ThreadLocal<>();
     private List<int[]> outputBatchInputArrays = new ArrayList<>();
-
-    private final Object locker = new Object();
-
     private ReentrantReadWriteLock realLocker = new ReentrantReadWriteLock();
     private AtomicBoolean isLocked = new AtomicBoolean(false);
     private AtomicBoolean isReadLocked = new AtomicBoolean(false);
@@ -63,7 +61,7 @@ public class BatchedSameDiffInferenceObservable extends Observable implements Sa
     @Override
     public void addInput(@NonNull INDArray[] input) {
         synchronized (locker) {
-            if(this.input == null)
+            if (this.input == null)
                 this.input = input;
             position.set(counter.getAndIncrement());
 
@@ -72,7 +70,6 @@ public class BatchedSameDiffInferenceObservable extends Observable implements Sa
         }
         this.input = input;
     }
-
 
 
     @Override
@@ -90,7 +87,7 @@ public class BatchedSameDiffInferenceObservable extends Observable implements Sa
             realLocker.writeLock().unlock();
             return input;
         } else {
-            outputBatchInputArrays.add(new int[]{0,0});
+            outputBatchInputArrays.add(new int[]{0, 0});
             realLocker.writeLock().unlock();
             return input;
         }
@@ -107,15 +104,14 @@ public class BatchedSameDiffInferenceObservable extends Observable implements Sa
     }
 
     @Override
-    public void setOutputException(Exception e) {
-        this.exception = e;
-    }
-
-    @Override
     public Exception getOutputException() {
         return exception;
     }
 
+    @Override
+    public void setOutputException(Exception e) {
+        this.exception = e;
+    }
 
     /**
      * PLEASE NOTE: This method is for tests only
@@ -126,10 +122,6 @@ public class BatchedSameDiffInferenceObservable extends Observable implements Sa
         return output;
     }
 
-    protected void setCounter(int value) {
-        counter.set(value);
-    }
-
     public void setPosition(int pos) {
         position.set(pos);
     }
@@ -138,7 +130,9 @@ public class BatchedSameDiffInferenceObservable extends Observable implements Sa
         return counter.get();
     }
 
-
+    protected void setCounter(int value) {
+        counter.set(value);
+    }
 
     public boolean isLocked() {
         boolean lck = !realLocker.readLock().tryLock();

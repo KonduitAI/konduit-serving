@@ -1,5 +1,5 @@
-from konduit.base_inference import *
 from jnius import autoclass
+from konduit.base_inference import *
 
 try:
     SchemaTypeUtils = autoclass("ai.konduit.serving.util.SchemaTypeUtils")

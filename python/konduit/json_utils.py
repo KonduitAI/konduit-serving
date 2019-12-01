@@ -1,5 +1,3 @@
-
-
 def has_as_dict_attribute(python_object):
     """Checks if an object has a callable "as_dict" attribute
 
@@ -29,7 +27,8 @@ def _ensure_serializable(input_config):
     """Modifies a given input configuration, if necessary,
     to make it serializable.
     """
-    if not (hasattr(input_config, '__dict__') or type(input_config) is DictWrapper or type(input_config) is ListWrapper):
+    if not (hasattr(input_config, '__dict__') or type(input_config) is DictWrapper or type(
+            input_config) is ListWrapper):
         return
 
     # iterate over all config properties

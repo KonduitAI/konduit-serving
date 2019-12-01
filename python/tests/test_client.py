@@ -1,10 +1,9 @@
+import pytest
 from konduit import *
 from konduit.client import Client
-import pytest
 
 
 def test_multipart_regex():
-
     client = Client(input_names=['partname'], output_names=['nobody_cares'])
 
     test_data = {

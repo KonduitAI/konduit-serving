@@ -45,12 +45,12 @@ public class RawMultiOutputAdapter implements MultiOutputAdapter<INDArray[]> {
 
     @Override
     public Map<String, BatchOutput> adapt(INDArray[] array, List<String> outputNames, RoutingContext routingContext) {
-        Map<String,BatchOutput> ret = new LinkedHashMap<>();
-        if(rawOutputAdapter == null ) {
+        Map<String, BatchOutput> ret = new LinkedHashMap<>();
+        if (rawOutputAdapter == null) {
             rawOutputAdapter = new RawOutputAdapter();
         }
 
-        for(int i = 0; i < array.length; i++) {
+        for (int i = 0; i < array.length; i++) {
             ret.put(outputNames.get(i), rawOutputAdapter.adapt(array[i], routingContext));
 
         }
@@ -61,7 +61,6 @@ public class RawMultiOutputAdapter implements MultiOutputAdapter<INDArray[]> {
     public List<Class<? extends OutputAdapter<?>>> outputAdapterTypes() {
         return Arrays.asList(ClassifierOutputAdapter.class);
     }
-
 
 
 }

@@ -36,18 +36,15 @@ import java.util.Map;
 @SuperBuilder
 public class PythonConfig extends ModelConfig {
 
-    private String  pythonCode,pythonCodePath;
-    @Singular
-    private Map<String,String>  pythonInputs;
-    @Singular
-    private Map<String,String> pythonOutputs;
-    @Singular
-    private Map<String,String> extraInputs;
-
-    private String pythonPath;
-
     private static String defaultPythonPath;
-
+    private String pythonCode, pythonCodePath;
+    @Singular
+    private Map<String, String> pythonInputs;
+    @Singular
+    private Map<String, String> pythonOutputs;
+    @Singular
+    private Map<String, String> extraInputs;
+    private String pythonPath;
     private boolean returnAllInputs;
 
 }

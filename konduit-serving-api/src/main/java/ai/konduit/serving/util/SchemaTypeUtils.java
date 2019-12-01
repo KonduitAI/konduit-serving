@@ -40,19 +40,19 @@ import java.util.*;
 /**
  * Utils for a mix of data vec {@link Schema} manipulation
  * and configuration for {@link InferenceConfiguration}
- *
  */
 public class SchemaTypeUtils {
 
 
     /**
      * Get record for all values
+     *
      * @param values the record to get
      * @return the record
      */
-    public static List<Writable> getRecord(double...values) {
+    public static List<Writable> getRecord(double... values) {
         List<Writable> ret = new ArrayList<>();
-        for(int i = 0; i < values.length; i++) {
+        for (int i = 0; i < values.length; i++) {
             ret.add(new DoubleWritable(values[i]));
         }
 
@@ -61,6 +61,7 @@ public class SchemaTypeUtils {
 
     /**
      * Get the column names for the input schema
+     *
      * @param schema the schema to get the names for
      * @return list of column names
      */
@@ -70,12 +71,13 @@ public class SchemaTypeUtils {
 
     /**
      * Compute input types for the given set of transform processes
+     *
      * @param transformProcesses the input transform processes
      * @return the input types for the given transform processes
      */
     public static SchemaType[][] inputTypes(TransformProcess[] transformProcesses) {
         SchemaType[][] types = new SchemaType[transformProcesses.length][];
-        for(int i = 0; i < types.length; i++) {
+        for (int i = 0; i < types.length; i++) {
             types[i] = SchemaTypeUtils.typesForSchema(transformProcesses[i].getInitialSchema());
         }
 
@@ -84,12 +86,13 @@ public class SchemaTypeUtils {
 
     /**
      * Compute output types for the given set of transform processes
+     *
      * @param transformProcesses the input transform processes
      * @return the input types for the given transform processes
      */
     public static SchemaType[][] outputTypes(TransformProcess[] transformProcesses) {
         SchemaType[][] types = new SchemaType[transformProcesses.length][];
-        for(int i = 0; i < types.length; i++) {
+        for (int i = 0; i < types.length; i++) {
             types[i] = SchemaTypeUtils.typesForSchema(transformProcesses[i].getFinalSchema());
         }
 
@@ -100,13 +103,14 @@ public class SchemaTypeUtils {
     /**
      * Extract an ordered list
      * of the types in a given {@link Schema}
+     *
      * @param schema the schema to get the types for
      * @return the schema types based on the ordering
      * of the columns in the schema
      */
     public static SchemaType[] typesForSchema(Schema schema) {
         SchemaType[] ret = new SchemaType[schema.numColumns()];
-        for(int i = 0; i < ret.length; i++) {
+        for (int i = 0; i < ret.length; i++) {
             ret[i] = schemaTypeForColumnType(schema.getType(i));
         }
 
@@ -116,13 +120,14 @@ public class SchemaTypeUtils {
     /**
      * Create a mapping of name {@link SchemaType}
      * based on the {@link Schema}
+     *
      * @param schema the schema to decompose
      * @return the map of name to {@link SchemaType}
      */
-    public static Map<String,SchemaType> typeMappingsForSchema(Schema schema) {
-        Map<String,SchemaType> ret = new LinkedHashMap<>();
-        for(int i = 0; i < schema.numColumns(); i++) {
-            ret.put(schema.getName(i),schemaTypeForColumnType(schema.getType(i)));
+    public static Map<String, SchemaType> typeMappingsForSchema(Schema schema) {
+        Map<String, SchemaType> ret = new LinkedHashMap<>();
+        for (int i = 0; i < schema.numColumns(); i++) {
+            ret.put(schema.getName(i), schemaTypeForColumnType(schema.getType(i)));
         }
 
 
@@ -132,6 +137,7 @@ public class SchemaTypeUtils {
     /**
      * Convert a {@link ColumnType}
      * to the equivalent {@link SchemaType}
+     *
      * @param columnType the column type to convert
      * @return the schema type for the given column type
      */
@@ -146,21 +152,22 @@ public class SchemaTypeUtils {
      * Note that exceptions are thrown
      * when the types are null, names are null,
      * or the 2 arguments are not the same length
+     *
      * @param types the type
      * @param names the names of each column
      * @return the equivalent {@link Schema} given the types
      * and names
      */
     public static Schema toSchema(SchemaType[] types, List<String> names) {
-        Preconditions.checkNotNull(types,"Please specify types");
-        Preconditions.checkNotNull(names,"Please specify names.");
-        Preconditions.checkState(types.length == names.size(),"Types and names must be the same length");
+        Preconditions.checkNotNull(types, "Please specify types");
+        Preconditions.checkNotNull(names, "Please specify names.");
+        Preconditions.checkState(types.length == names.size(), "Types and names must be the same length");
         Schema.Builder builder = new Schema.Builder();
-        for(int i = 0; i < types.length; i++) {
-            Preconditions.checkNotNull(types[i],"Type " + i + " was null!");
-            switch(types[i]) {
+        for (int i = 0; i < types.length; i++) {
+            Preconditions.checkNotNull(types[i], "Type " + i + " was null!");
+            switch (types[i]) {
                 case NDArray:
-                    builder.addColumnNDArray(names.get(i),new long[]{1,1});
+                    builder.addColumnNDArray(names.get(i), new long[]{1, 1});
                     break;
                 case String:
                     builder.addColumnString(names.get(i));
@@ -197,12 +204,13 @@ public class SchemaTypeUtils {
     /**
      * Convert a set of {@link INDArray}
      * to an equivalent {@link NDArrayWritable}
+     *
      * @param writables the writables to convert
      * @return the underlying {@link INDArray}
      */
     public static Writable[] fromArrays(INDArray[] writables) {
         Writable[] ret = new Writable[writables.length];
-        for(int i = 0; i < ret.length; i++) {
+        for (int i = 0; i < ret.length; i++) {
             ret[i] = new NDArrayWritable(writables[i]);
         }
 
@@ -212,12 +220,13 @@ public class SchemaTypeUtils {
     /**
      * Convert a set of {@link NDArrayWritable}
      * to their underlying ndarrays
+     *
      * @param writables the writables to convert
      * @return the underlying {@link INDArray}
      */
     public static INDArray[] fromWritables(Writable[] writables) {
         INDArray[] ret = new INDArray[writables.length];
-        for(int i = 0; i < ret.length; i++) {
+        for (int i = 0; i < ret.length; i++) {
             NDArrayWritable ndArrayWritable = (NDArrayWritable) writables[i];
             ret[i] = ndArrayWritable.get();
         }
@@ -230,14 +239,15 @@ public class SchemaTypeUtils {
      * and {@link Writable} are of type
      * {@link NDArrayWritable}
      * false otherwise
+     *
      * @param records the input {@link Record} to test
      * @return true if all the records are of type {@link NDArrayWritable}
      * false otherwise
      */
     public static boolean recordsAllArrayType(org.datavec.api.records.Record[] records) {
-        for(int i = 0; i  < records.length; i++) {
-            for(Writable writable : records[i].getRecord()) {
-                if(!(writable instanceof org.datavec.api.writable.NDArrayWritable)) {
+        for (int i = 0; i < records.length; i++) {
+            for (Writable writable : records[i].getRecord()) {
+                if (!(writable instanceof org.datavec.api.writable.NDArrayWritable)) {
                     return false;
                 }
             }
@@ -249,15 +259,16 @@ public class SchemaTypeUtils {
      * Convert an {@link INDArray}
      * batch to {@link Record}
      * input comprising of a single {@link NDArrayWritable}
+     *
      * @param input the input
      * @return the equivalent output records
      */
     public static Record[] toRecords(INDArray[] input) {
         Record[] ret = new Record[input.length];
-        for(int i = 0; i < ret.length; i++) {
+        for (int i = 0; i < ret.length; i++) {
             ret[i] = new org.datavec.api.records.impl.Record(
                     Arrays.asList(new NDArrayWritable(input[i]))
-                    ,null);
+                    , null);
         }
 
         return ret;
@@ -269,6 +280,7 @@ public class SchemaTypeUtils {
      * this assumes that each "record" is
      * actually a size 1 {@link Writable} of type
      * {@link NDArrayWritable}
+     *
      * @param records the records to convert
      * @return the extracted {@link INDArray}
      */
@@ -276,16 +288,16 @@ public class SchemaTypeUtils {
         INDArray[] ret = new INDArray[records[0].getRecord().size()];
         int initialLength = ret.length;
         //each ndarray
-        for(int i = 0; i < initialLength; i++) {
+        for (int i = 0; i < initialLength; i++) {
             List<INDArray> accum = new ArrayList<>();
             //for each record
-            for(Record record : records) {
+            for (Record record : records) {
                 NDArrayWritable writable = (NDArrayWritable) record.getRecord().get(i);
                 accum.add(writable.get());
 
             }
 
-            ret[i] = Nd4j.concat(0,accum.toArray(new INDArray[0]));
+            ret[i] = Nd4j.concat(0, accum.toArray(new INDArray[0]));
 
         }
 

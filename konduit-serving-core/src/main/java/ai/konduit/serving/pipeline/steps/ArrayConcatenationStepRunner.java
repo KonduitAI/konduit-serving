@@ -22,8 +22,8 @@
 
 package ai.konduit.serving.pipeline.steps;
 
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.step.ArrayConcatenationStep;
-import ai.konduit.serving.pipeline.PipelineStep;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
@@ -39,7 +39,7 @@ import java.util.Map;
  * Merge input records composed of ndarrays
  * along specified dimensions
  * for each input.
- *
+ * <p>
  * This is meant to be used mainly right before a
  * {@link InferenceExecutionerStepRunner}
  * that takes in 1 array per named input.
@@ -48,9 +48,9 @@ import java.util.Map;
  */
 public class ArrayConcatenationStepRunner extends BaseStepRunner {
 
-    private Map<Integer,Integer> concatDimensionsForIndex;
+    private Map<Integer, Integer> concatDimensionsForIndex;
 
-    public ArrayConcatenationStepRunner(PipelineStep pipelineStep) {
+    public ArrayConcatenationStepRunner(BasePipelineStep pipelineStep) {
         super(pipelineStep);
         ArrayConcatenationStep arrayConcatenationStepConfig = (ArrayConcatenationStep) pipelineStep;
         this.concatDimensionsForIndex = arrayConcatenationStepConfig.getConcatDimensions();
@@ -59,21 +59,20 @@ public class ArrayConcatenationStepRunner extends BaseStepRunner {
     @Override
     public Record[] transform(Record[] input) {
         Record[] ret = new Record[1];
-        ret[0] = new org.datavec.api.records.impl.Record(new ArrayList<>(),null);
+        ret[0] = new org.datavec.api.records.impl.Record(new ArrayList<>(), null);
         //allow setting writables at particular indices
-        for(int i = 0; i < input[0].getRecord().size(); i++) {
+        for (int i = 0; i < input[0].getRecord().size(); i++) {
             ret[0].getRecord().add(null);
         }
 
-        Map<Integer,List<INDArray>> arrays = new LinkedHashMap<>();
-        for(int i = 0; i < input.length; i++) {
-            for(int j = 0 ; j < input[i].getRecord().size(); j++) {
+        Map<Integer, List<INDArray>> arrays = new LinkedHashMap<>();
+        for (int i = 0; i < input.length; i++) {
+            for (int j = 0; j < input[i].getRecord().size(); j++) {
                 List<INDArray> nameArraysToConcat;
-                if(!arrays.containsKey(j)) {
+                if (!arrays.containsKey(j)) {
                     nameArraysToConcat = new ArrayList<>();
-                    arrays.put(j,nameArraysToConcat);
-                }
-                else {
+                    arrays.put(j, nameArraysToConcat);
+                } else {
                     nameArraysToConcat = arrays.get(j);
                 }
 
@@ -83,16 +82,15 @@ public class ArrayConcatenationStepRunner extends BaseStepRunner {
         }
 
         //concatneate all the arrays together
-        for(Map.Entry<Integer,List<INDArray>> entry : arrays.entrySet()) {
+        for (Map.Entry<Integer, List<INDArray>> entry : arrays.entrySet()) {
             INDArray[] toConcat = entry.getValue().toArray(new INDArray[0]);
             int concatDim;
-            if(concatDimensionsForIndex.containsKey(entry.getKey())) {
+            if (concatDimensionsForIndex.containsKey(entry.getKey())) {
                 concatDim = concatDimensionsForIndex.get(entry.getKey());
-            }
-            else
+            } else
                 concatDim = 0;
 
-            ret[0].getRecord().set(entry.getKey(), new NDArrayWritable(Nd4j.concat(concatDim,toConcat)));
+            ret[0].getRecord().set(entry.getKey(), new NDArrayWritable(Nd4j.concat(concatDim, toConcat)));
         }
 
         return ret;

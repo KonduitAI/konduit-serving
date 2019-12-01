@@ -1,4 +1,4 @@
-#patch 1
+# patch 1
 
 """
 ========================
@@ -144,12 +144,12 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", message="numpy.ndarray size changed")
     try:
         from .mtrand import *
+
         # Some aliases:
         ranf = random = sample = random_sample
         __all__.extend(['ranf', 'random', 'sample'])
     except:
         warnings.warn("numpy.random is not available when using multiple interpreters!")
-
 
 
 def __RandomState_ctor():
@@ -167,6 +167,8 @@ def __RandomState_ctor():
     """
     return RandomState(seed=0)
 
+
 from numpy._pytesttester import PytestTester
+
 test = PytestTester(__name__)
 del PytestTester

@@ -42,7 +42,7 @@ public class InMemoryMultiLayernetworkModelLoader implements ModelLoader<MultiLa
     public Buffer saveModel(@NonNull MultiLayerNetwork model) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
-            ModelSerializer.writeModel(model,byteArrayOutputStream,true);
+            ModelSerializer.writeModel(model, byteArrayOutputStream, true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

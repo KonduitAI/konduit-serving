@@ -41,24 +41,23 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @Slf4j
 public class MultiComputationGraphInferenceExecutioner implements InferenceExecutioner<
-        ModelLoader<ComputationGraph>,INDArray[],INDArray[], ParallelInferenceConfig,ComputationGraph> {
+        ModelLoader<ComputationGraph>, INDArray[], INDArray[], ParallelInferenceConfig, ComputationGraph> {
 
-    private ParallelInference parallelInference;
-    private ComputationGraph computationGraph;
-    private static Field zooField,protoModelField,replicateModelField;
-    private ReentrantReadWriteLock modelReadWriteLock;
-    private ModelLoader<ComputationGraph> computationGraphModelLoader;
+    private static Field zooField, protoModelField, replicateModelField;
 
     static {
         try {
-            zooField =  ParallelInference.class.getDeclaredField("zoo");
+            zooField = ParallelInference.class.getDeclaredField("zoo");
             zooField.setAccessible(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
+    private ParallelInference parallelInference;
+    private ComputationGraph computationGraph;
+    private ReentrantReadWriteLock modelReadWriteLock;
+    private ModelLoader<ComputationGraph> computationGraphModelLoader;
 
     @Override
     public ModelLoader<ComputationGraph> modelLoader() {
@@ -80,7 +79,7 @@ public class MultiComputationGraphInferenceExecutioner implements InferenceExecu
     public void initialize(ModelLoader<ComputationGraph> model, ParallelInferenceConfig parallelInferenceConfig) throws Exception {
         ComputationGraph computationGraph = model.loadModel();
         this.computationGraph = computationGraph;
-        this.computationGraphModelLoader= model;
+        this.computationGraphModelLoader = model;
         ParallelInference inference = new ParallelInference.Builder(computationGraph)
                 .batchLimit(parallelInferenceConfig.getBatchLimit())
                 .queueLimit(parallelInferenceConfig.getQueueLimit())
@@ -89,15 +88,14 @@ public class MultiComputationGraphInferenceExecutioner implements InferenceExecu
                 .build();
 
 
-
         this.parallelInference = inference;
         Object[] zoo = (Object[]) zooField.get(parallelInference);
-        if(protoModelField == null) {
+        if (protoModelField == null) {
             protoModelField = zoo[0].getClass().getDeclaredField("protoModel");
             protoModelField.setAccessible(true);
         }
 
-        if(replicateModelField == null) {
+        if (replicateModelField == null) {
             replicateModelField = zoo[0].getClass().getDeclaredField("replicatedModel");
             replicateModelField.setAccessible(true);
         }
@@ -109,17 +107,16 @@ public class MultiComputationGraphInferenceExecutioner implements InferenceExecu
 
     @Override
     public INDArray[] execute(INDArray[] input) {
-        if(parallelInference == null) {
+        if (parallelInference == null) {
             throw new IllegalStateException("Initialize not called. No ParallelInference found. Please call inferenceExecutioner.initialize(..)");
         }
 
         try {
             modelReadWriteLock.readLock().lock();
-            INDArray[] output =  parallelInference.output(input);
+            INDArray[] output = parallelInference.output(input);
             return output;
 
-        }
-        finally {
+        } finally {
             modelReadWriteLock.readLock().unlock();
         }
 
@@ -128,7 +125,7 @@ public class MultiComputationGraphInferenceExecutioner implements InferenceExecu
 
     @Override
     public void stop() {
-        if(parallelInference != null) {
+        if (parallelInference != null) {
             parallelInference.shutdown();
         }
     }

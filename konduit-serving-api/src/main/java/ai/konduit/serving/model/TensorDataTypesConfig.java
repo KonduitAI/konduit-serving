@@ -32,8 +32,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class TensorDataTypesConfig {
     @Singular
-    private Map<String,TensorDataType> inputDataTypes;
+    private Map<String, TensorDataType> inputDataTypes;
     @Singular
-    private Map<String,TensorDataType> outputDataTypes;
+    private Map<String, TensorDataType> outputDataTypes;
 
 }

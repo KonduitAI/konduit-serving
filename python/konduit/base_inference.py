@@ -3,7 +3,6 @@ from konduit.json_utils import empty_type_dict, DictWrapper, ListWrapper
 
 
 class TensorDataTypesConfig(object):
-
     _types_map = {
         'inputDataTypes': {'type': dict, 'subtype': None},
         'outputDataTypes': {'type': dict, 'subtype': None},
@@ -23,6 +22,7 @@ class TensorDataTypesConfig(object):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputDataTypes must be type")
         self.__input_data_types = value
+
     input_data_types = property(_get_input_data_types, _set_input_data_types)
 
     def _get_output_data_types(self):
@@ -32,6 +32,7 @@ class TensorDataTypesConfig(object):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputDataTypes must be type")
         self.__output_data_types = value
+
     output_data_types = property(
         _get_output_data_types, _set_output_data_types)
 
@@ -47,7 +48,6 @@ class TensorDataTypesConfig(object):
 
 
 class SavedModelConfig(object):
-
     _types_map = {
         'savedModelPath': {'type': str, 'subtype': None},
         'modelTag': {'type': str, 'subtype': None},
@@ -60,7 +60,8 @@ class SavedModelConfig(object):
         'saveModelOutputOrder': 'table',
     }
 
-    def __init__(self, saved_model_path=None, model_tag=None, signature_key=None, saved_model_input_order=None, save_model_output_order=None
+    def __init__(self, saved_model_path=None, model_tag=None, signature_key=None, saved_model_input_order=None,
+                 save_model_output_order=None
                  ):
         self.__saved_model_path = saved_model_path
         self.__model_tag = model_tag
@@ -75,6 +76,7 @@ class SavedModelConfig(object):
         if not isinstance(value, str):
             raise TypeError("savedModelPath must be str")
         self.__saved_model_path = value
+
     saved_model_path = property(_get_saved_model_path, _set_saved_model_path)
 
     def _get_model_tag(self):
@@ -84,6 +86,7 @@ class SavedModelConfig(object):
         if not isinstance(value, str):
             raise TypeError("modelTag must be str")
         self.__model_tag = value
+
     model_tag = property(_get_model_tag, _set_model_tag)
 
     def _get_signature_key(self):
@@ -93,6 +96,7 @@ class SavedModelConfig(object):
         if not isinstance(value, str):
             raise TypeError("signatureKey must be str")
         self.__signature_key = value
+
     signature_key = property(_get_signature_key, _set_signature_key)
 
     def _get_saved_model_input_order(self):
@@ -104,6 +108,7 @@ class SavedModelConfig(object):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("savedModelInputOrder list valeus must be str")
         self.__saved_model_input_order = value
+
     saved_model_input_order = property(
         _get_saved_model_input_order, _set_saved_model_input_order)
 
@@ -116,6 +121,7 @@ class SavedModelConfig(object):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("saveModelOutputOrder list valeus must be str")
         self.__save_model_output_order = value
+
     save_model_output_order = property(
         _get_save_model_output_order, _set_save_model_output_order)
 
@@ -140,7 +146,6 @@ class SavedModelConfig(object):
 
 
 class ParallelInferenceConfig(object):
-
     _inferenceMode_enum = enum.Enum(
         '_inferenceMode_enum', 'SEQUENTIAL BATCHED INPLACE', module=__name__)
     _types_map = {
@@ -154,7 +159,8 @@ class ParallelInferenceConfig(object):
     _formats_map = {
     }
 
-    def __init__(self, queue_limit=None, batch_limit=None, workers=None, max_train_epochs=None, inference_mode=None, vertx_config_json=None
+    def __init__(self, queue_limit=None, batch_limit=None, workers=None, max_train_epochs=None, inference_mode=None,
+                 vertx_config_json=None
                  ):
         self.__queue_limit = queue_limit
         self.__batch_limit = batch_limit
@@ -170,6 +176,7 @@ class ParallelInferenceConfig(object):
         if not isinstance(value, int):
             raise TypeError("queueLimit must be int")
         self.__queue_limit = value
+
     queue_limit = property(_get_queue_limit, _set_queue_limit)
 
     def _get_batch_limit(self):
@@ -179,6 +186,7 @@ class ParallelInferenceConfig(object):
         if not isinstance(value, int):
             raise TypeError("batchLimit must be int")
         self.__batch_limit = value
+
     batch_limit = property(_get_batch_limit, _set_batch_limit)
 
     def _get_workers(self):
@@ -188,6 +196,7 @@ class ParallelInferenceConfig(object):
         if not isinstance(value, int):
             raise TypeError("workers must be int")
         self.__workers = value
+
     workers = property(_get_workers, _set_workers)
 
     def _get_max_train_epochs(self):
@@ -197,6 +206,7 @@ class ParallelInferenceConfig(object):
         if not isinstance(value, int):
             raise TypeError("maxTrainEpochs must be int")
         self.__max_train_epochs = value
+
     max_train_epochs = property(_get_max_train_epochs, _set_max_train_epochs)
 
     def _get_inference_mode(self):
@@ -210,6 +220,7 @@ class ParallelInferenceConfig(object):
         else:
             raise ValueError(
                 "Value {} not in _inferenceMode_enum list".format(value))
+
     inference_mode = property(_get_inference_mode, _set_inference_mode)
 
     def _get_vertx_config_json(self):
@@ -219,6 +230,7 @@ class ParallelInferenceConfig(object):
         if not isinstance(value, str):
             raise TypeError("vertxConfigJson must be str")
         self.__vertx_config_json = value
+
     vertx_config_json = property(
         _get_vertx_config_json, _set_vertx_config_json)
 
@@ -246,7 +258,6 @@ class ParallelInferenceConfig(object):
 
 
 class ModelConfigType(object):
-
     _modelType_enum = enum.Enum(
         '_modelType_enum', 'COMPUTATION_GRAPH MULTI_LAYER_NETWORK PMML TENSORFLOW KERAS SAMEDIFF', module=__name__)
     _types_map = {
@@ -272,6 +283,7 @@ class ModelConfigType(object):
         else:
             raise ValueError(
                 "Value {} not in _modelType_enum list".format(value))
+
     model_type = property(_get_model_type, _set_model_type)
 
     def _get_model_loading_path(self):
@@ -281,6 +293,7 @@ class ModelConfigType(object):
         if not isinstance(value, str):
             raise TypeError("modelLoadingPath must be str")
         self.__model_loading_path = value
+
     model_loading_path = property(
         _get_model_loading_path, _set_model_loading_path)
 
@@ -296,7 +309,6 @@ class ModelConfigType(object):
 
 
 class ModelConfig(object):
-
     _types_map = {
         'tensorDataTypesConfig': {'type': TensorDataTypesConfig, 'subtype': None},
         'modelConfigType': {'type': ModelConfigType, 'subtype': None},
@@ -317,6 +329,7 @@ class ModelConfig(object):
             raise TypeError(
                 "tensorDataTypesConfig must be TensorDataTypesConfig")
         self.__tensor_data_types_config = value
+
     tensor_data_types_config = property(
         _get_tensor_data_types_config, _set_tensor_data_types_config)
 
@@ -327,6 +340,7 @@ class ModelConfig(object):
         if not isinstance(value, ModelConfigType):
             raise TypeError("modelConfigType must be ModelConfigType")
         self.__model_config_type = value
+
     model_config_type = property(
         _get_model_config_type, _set_model_config_type)
 
@@ -342,7 +356,6 @@ class ModelConfig(object):
 
 
 class TensorDataType(object):
-
     _types_map = {
     }
     _formats_map = {
@@ -357,7 +370,6 @@ class TensorDataType(object):
 
 
 class PmmlConfig(object):
-
     _types_map = {
         'tensorDataTypesConfig': {'type': TensorDataTypesConfig, 'subtype': None},
         'modelConfigType': {'type': ModelConfigType, 'subtype': None},
@@ -380,6 +392,7 @@ class PmmlConfig(object):
             raise TypeError(
                 "tensorDataTypesConfig must be TensorDataTypesConfig")
         self.__tensor_data_types_config = value
+
     tensor_data_types_config = property(
         _get_tensor_data_types_config, _set_tensor_data_types_config)
 
@@ -390,6 +403,7 @@ class PmmlConfig(object):
         if not isinstance(value, ModelConfigType):
             raise TypeError("modelConfigType must be ModelConfigType")
         self.__model_config_type = value
+
     model_config_type = property(
         _get_model_config_type, _set_model_config_type)
 
@@ -400,6 +414,7 @@ class PmmlConfig(object):
         if not isinstance(value, str):
             raise TypeError("evaluatorFactoryName must be str")
         self.__evaluator_factory_name = value
+
     evaluator_factory_name = property(
         _get_evaluator_factory_name, _set_evaluator_factory_name)
 
@@ -418,7 +433,6 @@ class PmmlConfig(object):
 
 
 class ObjectDetectionConfig(object):
-
     _types_map = {
         'threshold': {'type': float, 'subtype': None},
         'numLabels': {'type': int, 'subtype': None},
@@ -446,6 +460,7 @@ class ObjectDetectionConfig(object):
         if not isinstance(value, float):
             raise TypeError("threshold must be float")
         self.__threshold = value
+
     threshold = property(_get_threshold, _set_threshold)
 
     def _get_num_labels(self):
@@ -455,6 +470,7 @@ class ObjectDetectionConfig(object):
         if not isinstance(value, int):
             raise TypeError("numLabels must be int")
         self.__num_labels = value
+
     num_labels = property(_get_num_labels, _set_num_labels)
 
     def _get_labels_path(self):
@@ -464,6 +480,7 @@ class ObjectDetectionConfig(object):
         if not isinstance(value, str):
             raise TypeError("labelsPath must be str")
         self.__labels_path = value
+
     labels_path = property(_get_labels_path, _set_labels_path)
 
     def _get_priors(self):
@@ -475,6 +492,7 @@ class ObjectDetectionConfig(object):
         if not all(isinstance(i, list) for i in value):
             raise TypeError("priors list valeus must be list")
         self.__priors = value
+
     priors = property(_get_priors, _set_priors)
 
     def _get_input_shape(self):
@@ -486,6 +504,7 @@ class ObjectDetectionConfig(object):
         if not all(isinstance(i, int) for i in value):
             raise TypeError("inputShape list valeus must be int")
         self.__input_shape = value
+
     input_shape = property(_get_input_shape, _set_input_shape)
 
     def as_dict(self):
@@ -509,7 +528,6 @@ class ObjectDetectionConfig(object):
 
 
 class SchemaType(object):
-
     _types_map = {
     }
     _formats_map = {
@@ -524,7 +542,6 @@ class SchemaType(object):
 
 
 class Input(object):
-
     _types_map = {
     }
     _formats_map = {
@@ -539,7 +556,6 @@ class Input(object):
 
 
 class Output(object):
-
     _types_map = {
     }
     _formats_map = {
@@ -554,7 +570,6 @@ class Output(object):
 
 
 class SameDiffConfig(object):
-
     _types_map = {
         'tensorDataTypesConfig': {'type': TensorDataTypesConfig, 'subtype': None},
         'modelConfigType': {'type': ModelConfigType, 'subtype': None},
@@ -575,6 +590,7 @@ class SameDiffConfig(object):
             raise TypeError(
                 "tensorDataTypesConfig must be TensorDataTypesConfig")
         self.__tensor_data_types_config = value
+
     tensor_data_types_config = property(
         _get_tensor_data_types_config, _set_tensor_data_types_config)
 
@@ -585,6 +601,7 @@ class SameDiffConfig(object):
         if not isinstance(value, ModelConfigType):
             raise TypeError("modelConfigType must be ModelConfigType")
         self.__model_config_type = value
+
     model_config_type = property(
         _get_model_config_type, _set_model_config_type)
 
@@ -600,7 +617,6 @@ class SameDiffConfig(object):
 
 
 class TensorFlowConfig(object):
-
     _types_map = {
         'tensorDataTypesConfig': {'type': TensorDataTypesConfig, 'subtype': None},
         'modelConfigType': {'type': ModelConfigType, 'subtype': None},
@@ -610,7 +626,8 @@ class TensorFlowConfig(object):
     _formats_map = {
     }
 
-    def __init__(self, tensor_data_types_config=None, model_config_type=None, config_proto_path=None, saved_model_config=None
+    def __init__(self, tensor_data_types_config=None, model_config_type=None, config_proto_path=None,
+                 saved_model_config=None
                  ):
         self.__tensor_data_types_config = tensor_data_types_config
         self.__model_config_type = model_config_type
@@ -625,6 +642,7 @@ class TensorFlowConfig(object):
             raise TypeError(
                 "tensorDataTypesConfig must be TensorDataTypesConfig")
         self.__tensor_data_types_config = value
+
     tensor_data_types_config = property(
         _get_tensor_data_types_config, _set_tensor_data_types_config)
 
@@ -635,6 +653,7 @@ class TensorFlowConfig(object):
         if not isinstance(value, ModelConfigType):
             raise TypeError("modelConfigType must be ModelConfigType")
         self.__model_config_type = value
+
     model_config_type = property(
         _get_model_config_type, _set_model_config_type)
 
@@ -645,6 +664,7 @@ class TensorFlowConfig(object):
         if not isinstance(value, str):
             raise TypeError("configProtoPath must be str")
         self.__config_proto_path = value
+
     config_proto_path = property(
         _get_config_proto_path, _set_config_proto_path)
 
@@ -655,6 +675,7 @@ class TensorFlowConfig(object):
         if not isinstance(value, SavedModelConfig):
             raise TypeError("savedModelConfig must be SavedModelConfig")
         self.__saved_model_config = value
+
     saved_model_config = property(
         _get_saved_model_config, _set_saved_model_config)
 
@@ -676,7 +697,6 @@ class TensorFlowConfig(object):
 
 
 class PythonConfig(object):
-
     _types_map = {
         'tensorDataTypesConfig': {'type': TensorDataTypesConfig, 'subtype': None},
         'modelConfigType': {'type': ModelConfigType, 'subtype': None},
@@ -691,7 +711,8 @@ class PythonConfig(object):
     _formats_map = {
     }
 
-    def __init__(self, tensor_data_types_config=None, model_config_type=None, python_code=None, python_code_path=None, python_inputs=None, python_outputs=None, extra_inputs=None, python_path=None, return_all_inputs=None
+    def __init__(self, tensor_data_types_config=None, model_config_type=None, python_code=None, python_code_path=None,
+                 python_inputs=None, python_outputs=None, extra_inputs=None, python_path=None, return_all_inputs=None
                  ):
         self.__tensor_data_types_config = tensor_data_types_config
         self.__model_config_type = model_config_type
@@ -711,6 +732,7 @@ class PythonConfig(object):
             raise TypeError(
                 "tensorDataTypesConfig must be TensorDataTypesConfig")
         self.__tensor_data_types_config = value
+
     tensor_data_types_config = property(
         _get_tensor_data_types_config, _set_tensor_data_types_config)
 
@@ -721,6 +743,7 @@ class PythonConfig(object):
         if not isinstance(value, ModelConfigType):
             raise TypeError("modelConfigType must be ModelConfigType")
         self.__model_config_type = value
+
     model_config_type = property(
         _get_model_config_type, _set_model_config_type)
 
@@ -731,6 +754,7 @@ class PythonConfig(object):
         if not isinstance(value, str):
             raise TypeError("pythonCode must be str")
         self.__python_code = value
+
     python_code = property(_get_python_code, _set_python_code)
 
     def _get_python_code_path(self):
@@ -740,6 +764,7 @@ class PythonConfig(object):
         if not isinstance(value, str):
             raise TypeError("pythonCodePath must be str")
         self.__python_code_path = value
+
     python_code_path = property(_get_python_code_path, _set_python_code_path)
 
     def _get_python_inputs(self):
@@ -749,6 +774,7 @@ class PythonConfig(object):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("pythonInputs must be type")
         self.__python_inputs = value
+
     python_inputs = property(_get_python_inputs, _set_python_inputs)
 
     def _get_python_outputs(self):
@@ -758,6 +784,7 @@ class PythonConfig(object):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("pythonOutputs must be type")
         self.__python_outputs = value
+
     python_outputs = property(_get_python_outputs, _set_python_outputs)
 
     def _get_extra_inputs(self):
@@ -767,6 +794,7 @@ class PythonConfig(object):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("extraInputs must be type")
         self.__extra_inputs = value
+
     extra_inputs = property(_get_extra_inputs, _set_extra_inputs)
 
     def _get_python_path(self):
@@ -776,6 +804,7 @@ class PythonConfig(object):
         if not isinstance(value, str):
             raise TypeError("pythonPath must be str")
         self.__python_path = value
+
     python_path = property(_get_python_path, _set_python_path)
 
     def _get_return_all_inputs(self):
@@ -785,6 +814,7 @@ class PythonConfig(object):
         if not isinstance(value, bool):
             raise TypeError("returnAllInputs must be bool")
         self.__return_all_inputs = value
+
     return_all_inputs = property(
         _get_return_all_inputs, _set_return_all_inputs)
 
@@ -821,7 +851,6 @@ class PythonConfig(object):
 
 
 class ServingConfig(object):
-
     _inputDataFormat_enum = enum.Enum(
         '_inputDataFormat_enum', 'NUMPY JSON ND4J IMAGE ARROW', module=__name__)
     _outputDataFormat_enum = enum.Enum(
@@ -842,7 +871,8 @@ class ServingConfig(object):
         'metricTypes': 'table',
     }
 
-    def __init__(self, http_port=None, listen_host=None, input_data_format='NUMPY', output_data_format='NUMPY', prediction_type=None, uploads_directory=None, log_timings=True, metric_types=None
+    def __init__(self, http_port=None, listen_host=None, input_data_format='NUMPY', output_data_format='NUMPY',
+                 prediction_type=None, uploads_directory=None, log_timings=True, metric_types=None
                  ):
         self.__http_port = http_port
         self.__listen_host = listen_host
@@ -860,6 +890,7 @@ class ServingConfig(object):
         if not isinstance(value, int):
             raise TypeError("httpPort must be int")
         self.__http_port = value
+
     http_port = property(_get_http_port, _set_http_port)
 
     def _get_listen_host(self):
@@ -869,6 +900,7 @@ class ServingConfig(object):
         if not isinstance(value, str):
             raise TypeError("listenHost must be str")
         self.__listen_host = value
+
     listen_host = property(_get_listen_host, _set_listen_host)
 
     def _get_input_data_format(self):
@@ -882,6 +914,7 @@ class ServingConfig(object):
         else:
             raise ValueError(
                 "Value {} not in _inputDataFormat_enum list".format(value))
+
     input_data_format = property(
         _get_input_data_format, _set_input_data_format)
 
@@ -896,6 +929,7 @@ class ServingConfig(object):
         else:
             raise ValueError(
                 "Value {} not in _outputDataFormat_enum list".format(value))
+
     output_data_format = property(
         _get_output_data_format, _set_output_data_format)
 
@@ -910,6 +944,7 @@ class ServingConfig(object):
         else:
             raise ValueError(
                 "Value {} not in _predictionType_enum list".format(value))
+
     prediction_type = property(_get_prediction_type, _set_prediction_type)
 
     def _get_uploads_directory(self):
@@ -919,6 +954,7 @@ class ServingConfig(object):
         if not isinstance(value, str):
             raise TypeError("uploadsDirectory must be str")
         self.__uploads_directory = value
+
     uploads_directory = property(
         _get_uploads_directory, _set_uploads_directory)
 
@@ -929,6 +965,7 @@ class ServingConfig(object):
         if not isinstance(value, bool):
             raise TypeError("logTimings must be bool")
         self.__log_timings = value
+
     log_timings = property(_get_log_timings, _set_log_timings)
 
     def _get_metric_types(self):
@@ -940,6 +977,7 @@ class ServingConfig(object):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("metricTypes list valeus must be str")
         self.__metric_types = value
+
     metric_types = property(_get_metric_types, _set_metric_types)
 
     def as_dict(self):
@@ -972,7 +1010,6 @@ class ServingConfig(object):
 
 
 class PipelineStep(object):
-
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
         'outputSchemas': {'type': dict, 'subtype': None},
@@ -987,7 +1024,8 @@ class PipelineStep(object):
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, runner=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None,
+                 input_column_names=None, output_column_names=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1004,6 +1042,7 @@ class PipelineStep(object):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputSchemas must be type")
         self.__input_schemas = value
+
     input_schemas = property(_get_input_schemas, _set_input_schemas)
 
     def _get_output_schemas(self):
@@ -1013,6 +1052,7 @@ class PipelineStep(object):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputSchemas must be type")
         self.__output_schemas = value
+
     output_schemas = property(_get_output_schemas, _set_output_schemas)
 
     def _get_input_names(self):
@@ -1024,6 +1064,7 @@ class PipelineStep(object):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("inputNames list valeus must be str")
         self.__input_names = value
+
     input_names = property(_get_input_names, _set_input_names)
 
     def _get_output_names(self):
@@ -1035,6 +1076,7 @@ class PipelineStep(object):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
+
     output_names = property(_get_output_names, _set_output_names)
 
     def _get_input_column_names(self):
@@ -1044,6 +1086,7 @@ class PipelineStep(object):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputColumnNames must be type")
         self.__input_column_names = value
+
     input_column_names = property(
         _get_input_column_names, _set_input_column_names)
 
@@ -1054,6 +1097,7 @@ class PipelineStep(object):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputColumnNames must be type")
         self.__output_column_names = value
+
     output_column_names = property(
         _get_output_column_names, _set_output_column_names)
 
@@ -1062,6 +1106,7 @@ class PipelineStep(object):
 
     def _set_runner(self, value):
         self.__runner = value
+
     runner = property(_get_runner, _set_runner)
 
     def as_dict(self):
@@ -1091,7 +1136,6 @@ class PipelineStep(object):
 
 
 class NormalizationConfig(object):
-
     _types_map = {
         'config': {'type': dict, 'subtype': None},
     }
@@ -1109,6 +1153,7 @@ class NormalizationConfig(object):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("config must be type")
         self.__config = value
+
     config = property(_get_config, _set_config)
 
     def as_dict(self):
@@ -1120,7 +1165,6 @@ class NormalizationConfig(object):
 
 
 class PythonStep(PipelineStep):
-
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
         'outputSchemas': {'type': dict, 'subtype': None},
@@ -1136,7 +1180,8 @@ class PythonStep(PipelineStep):
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, python_configs=None, runner=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None,
+                 input_column_names=None, output_column_names=None, python_configs=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1154,6 +1199,7 @@ class PythonStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputSchemas must be type")
         self.__input_schemas = value
+
     input_schemas = property(_get_input_schemas, _set_input_schemas)
 
     def _get_output_schemas(self):
@@ -1163,6 +1209,7 @@ class PythonStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputSchemas must be type")
         self.__output_schemas = value
+
     output_schemas = property(_get_output_schemas, _set_output_schemas)
 
     def _get_input_names(self):
@@ -1174,6 +1221,7 @@ class PythonStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("inputNames list valeus must be str")
         self.__input_names = value
+
     input_names = property(_get_input_names, _set_input_names)
 
     def _get_output_names(self):
@@ -1185,6 +1233,7 @@ class PythonStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
+
     output_names = property(_get_output_names, _set_output_names)
 
     def _get_input_column_names(self):
@@ -1194,6 +1243,7 @@ class PythonStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputColumnNames must be type")
         self.__input_column_names = value
+
     input_column_names = property(
         _get_input_column_names, _set_input_column_names)
 
@@ -1204,6 +1254,7 @@ class PythonStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputColumnNames must be type")
         self.__output_column_names = value
+
     output_column_names = property(
         _get_output_column_names, _set_output_column_names)
 
@@ -1214,6 +1265,7 @@ class PythonStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("pythonConfigs must be type")
         self.__python_configs = value
+
     python_configs = property(_get_python_configs, _set_python_configs)
 
     def _get_runner(self):
@@ -1221,6 +1273,7 @@ class PythonStep(PipelineStep):
 
     def _set_runner(self, value):
         self.__runner = value
+
     runner = property(_get_runner, _set_runner)
 
     def as_dict(self):
@@ -1253,7 +1306,6 @@ class PythonStep(PipelineStep):
 
 
 class TransformProcessStep(PipelineStep):
-
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
         'outputSchemas': {'type': dict, 'subtype': None},
@@ -1269,7 +1321,8 @@ class TransformProcessStep(PipelineStep):
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, transform_processes=None, runner=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None,
+                 input_column_names=None, output_column_names=None, transform_processes=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1287,6 +1340,7 @@ class TransformProcessStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputSchemas must be type")
         self.__input_schemas = value
+
     input_schemas = property(_get_input_schemas, _set_input_schemas)
 
     def _get_output_schemas(self):
@@ -1296,6 +1350,7 @@ class TransformProcessStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputSchemas must be type")
         self.__output_schemas = value
+
     output_schemas = property(_get_output_schemas, _set_output_schemas)
 
     def _get_input_names(self):
@@ -1307,6 +1362,7 @@ class TransformProcessStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("inputNames list valeus must be str")
         self.__input_names = value
+
     input_names = property(_get_input_names, _set_input_names)
 
     def _get_output_names(self):
@@ -1318,6 +1374,7 @@ class TransformProcessStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
+
     output_names = property(_get_output_names, _set_output_names)
 
     def _get_input_column_names(self):
@@ -1327,6 +1384,7 @@ class TransformProcessStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputColumnNames must be type")
         self.__input_column_names = value
+
     input_column_names = property(
         _get_input_column_names, _set_input_column_names)
 
@@ -1337,6 +1395,7 @@ class TransformProcessStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputColumnNames must be type")
         self.__output_column_names = value
+
     output_column_names = property(
         _get_output_column_names, _set_output_column_names)
 
@@ -1347,6 +1406,7 @@ class TransformProcessStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("transformProcesses must be type")
         self.__transform_processes = value
+
     transform_processes = property(
         _get_transform_processes, _set_transform_processes)
 
@@ -1355,6 +1415,7 @@ class TransformProcessStep(PipelineStep):
 
     def _set_runner(self, value):
         self.__runner = value
+
     runner = property(_get_runner, _set_runner)
 
     def as_dict(self):
@@ -1387,7 +1448,6 @@ class TransformProcessStep(PipelineStep):
 
 
 class ModelStep(PipelineStep):
-
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
         'outputSchemas': {'type': dict, 'subtype': None},
@@ -1405,7 +1465,9 @@ class ModelStep(PipelineStep):
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, model_config=None, parallel_inference_config=None, normalization_config=None, runner=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None,
+                 input_column_names=None, output_column_names=None, model_config=None, parallel_inference_config=None,
+                 normalization_config=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1425,6 +1487,7 @@ class ModelStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputSchemas must be type")
         self.__input_schemas = value
+
     input_schemas = property(_get_input_schemas, _set_input_schemas)
 
     def _get_output_schemas(self):
@@ -1434,6 +1497,7 @@ class ModelStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputSchemas must be type")
         self.__output_schemas = value
+
     output_schemas = property(_get_output_schemas, _set_output_schemas)
 
     def _get_input_names(self):
@@ -1445,6 +1509,7 @@ class ModelStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("inputNames list valeus must be str")
         self.__input_names = value
+
     input_names = property(_get_input_names, _set_input_names)
 
     def _get_output_names(self):
@@ -1456,6 +1521,7 @@ class ModelStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
+
     output_names = property(_get_output_names, _set_output_names)
 
     def _get_input_column_names(self):
@@ -1465,6 +1531,7 @@ class ModelStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputColumnNames must be type")
         self.__input_column_names = value
+
     input_column_names = property(
         _get_input_column_names, _set_input_column_names)
 
@@ -1475,6 +1542,7 @@ class ModelStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputColumnNames must be type")
         self.__output_column_names = value
+
     output_column_names = property(
         _get_output_column_names, _set_output_column_names)
 
@@ -1485,6 +1553,7 @@ class ModelStep(PipelineStep):
         if not isinstance(value, ModelConfig):
             raise TypeError("modelConfig must be ModelConfig")
         self.__model_config = value
+
     model_config = property(_get_model_config, _set_model_config)
 
     def _get_parallel_inference_config(self):
@@ -1495,6 +1564,7 @@ class ModelStep(PipelineStep):
             raise TypeError(
                 "parallelInferenceConfig must be ParallelInferenceConfig")
         self.__parallel_inference_config = value
+
     parallel_inference_config = property(
         _get_parallel_inference_config, _set_parallel_inference_config)
 
@@ -1505,6 +1575,7 @@ class ModelStep(PipelineStep):
         if not isinstance(value, NormalizationConfig):
             raise TypeError("normalizationConfig must be NormalizationConfig")
         self.__normalization_config = value
+
     normalization_config = property(
         _get_normalization_config, _set_normalization_config)
 
@@ -1513,6 +1584,7 @@ class ModelStep(PipelineStep):
 
     def _set_runner(self, value):
         self.__runner = value
+
     runner = property(_get_runner, _set_runner)
 
     def as_dict(self):
@@ -1551,7 +1623,6 @@ class ModelStep(PipelineStep):
 
 
 class ArrayConcatenationStep(PipelineStep):
-
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
         'outputSchemas': {'type': dict, 'subtype': None},
@@ -1567,7 +1638,8 @@ class ArrayConcatenationStep(PipelineStep):
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, concat_dimensions=None, runner=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None,
+                 input_column_names=None, output_column_names=None, concat_dimensions=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1585,6 +1657,7 @@ class ArrayConcatenationStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputSchemas must be type")
         self.__input_schemas = value
+
     input_schemas = property(_get_input_schemas, _set_input_schemas)
 
     def _get_output_schemas(self):
@@ -1594,6 +1667,7 @@ class ArrayConcatenationStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputSchemas must be type")
         self.__output_schemas = value
+
     output_schemas = property(_get_output_schemas, _set_output_schemas)
 
     def _get_input_names(self):
@@ -1605,6 +1679,7 @@ class ArrayConcatenationStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("inputNames list valeus must be str")
         self.__input_names = value
+
     input_names = property(_get_input_names, _set_input_names)
 
     def _get_output_names(self):
@@ -1616,6 +1691,7 @@ class ArrayConcatenationStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
+
     output_names = property(_get_output_names, _set_output_names)
 
     def _get_input_column_names(self):
@@ -1625,6 +1701,7 @@ class ArrayConcatenationStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputColumnNames must be type")
         self.__input_column_names = value
+
     input_column_names = property(
         _get_input_column_names, _set_input_column_names)
 
@@ -1635,6 +1712,7 @@ class ArrayConcatenationStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputColumnNames must be type")
         self.__output_column_names = value
+
     output_column_names = property(
         _get_output_column_names, _set_output_column_names)
 
@@ -1645,6 +1723,7 @@ class ArrayConcatenationStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("concatDimensions must be type")
         self.__concat_dimensions = value
+
     concat_dimensions = property(
         _get_concat_dimensions, _set_concat_dimensions)
 
@@ -1653,6 +1732,7 @@ class ArrayConcatenationStep(PipelineStep):
 
     def _set_runner(self, value):
         self.__runner = value
+
     runner = property(_get_runner, _set_runner)
 
     def as_dict(self):
@@ -1685,7 +1765,6 @@ class ArrayConcatenationStep(PipelineStep):
 
 
 class JsonExpanderTransformStep(PipelineStep):
-
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
         'outputSchemas': {'type': dict, 'subtype': None},
@@ -1700,7 +1779,8 @@ class JsonExpanderTransformStep(PipelineStep):
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, runner=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None,
+                 input_column_names=None, output_column_names=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1717,6 +1797,7 @@ class JsonExpanderTransformStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputSchemas must be type")
         self.__input_schemas = value
+
     input_schemas = property(_get_input_schemas, _set_input_schemas)
 
     def _get_output_schemas(self):
@@ -1726,6 +1807,7 @@ class JsonExpanderTransformStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputSchemas must be type")
         self.__output_schemas = value
+
     output_schemas = property(_get_output_schemas, _set_output_schemas)
 
     def _get_input_names(self):
@@ -1737,6 +1819,7 @@ class JsonExpanderTransformStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("inputNames list valeus must be str")
         self.__input_names = value
+
     input_names = property(_get_input_names, _set_input_names)
 
     def _get_output_names(self):
@@ -1748,6 +1831,7 @@ class JsonExpanderTransformStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
+
     output_names = property(_get_output_names, _set_output_names)
 
     def _get_input_column_names(self):
@@ -1757,6 +1841,7 @@ class JsonExpanderTransformStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputColumnNames must be type")
         self.__input_column_names = value
+
     input_column_names = property(
         _get_input_column_names, _set_input_column_names)
 
@@ -1767,6 +1852,7 @@ class JsonExpanderTransformStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputColumnNames must be type")
         self.__output_column_names = value
+
     output_column_names = property(
         _get_output_column_names, _set_output_column_names)
 
@@ -1775,6 +1861,7 @@ class JsonExpanderTransformStep(PipelineStep):
 
     def _set_runner(self, value):
         self.__runner = value
+
     runner = property(_get_runner, _set_runner)
 
     def as_dict(self):
@@ -1804,7 +1891,6 @@ class JsonExpanderTransformStep(PipelineStep):
 
 
 class ImageLoadingStep(PipelineStep):
-
     _types_map = {
         'inputSchemas': {'type': dict, 'subtype': None},
         'outputSchemas': {'type': dict, 'subtype': None},
@@ -1827,7 +1913,11 @@ class ImageLoadingStep(PipelineStep):
         'outputNames': 'table',
     }
 
-    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None, input_column_names=None, output_column_names=None, original_image_height=None, original_image_width=None, update_ordering_before_transform=None, dimensions_configs=None, image_processing_required_layout=None, image_processing_initial_layout=None, image_transform_processes=None, object_detection_config=None, runner=None
+    def __init__(self, input_schemas=None, output_schemas=None, input_names=None, output_names=None,
+                 input_column_names=None, output_column_names=None, original_image_height=None,
+                 original_image_width=None, update_ordering_before_transform=None, dimensions_configs=None,
+                 image_processing_required_layout=None, image_processing_initial_layout=None,
+                 image_transform_processes=None, object_detection_config=None, runner=None
                  ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1852,6 +1942,7 @@ class ImageLoadingStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputSchemas must be type")
         self.__input_schemas = value
+
     input_schemas = property(_get_input_schemas, _set_input_schemas)
 
     def _get_output_schemas(self):
@@ -1861,6 +1952,7 @@ class ImageLoadingStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputSchemas must be type")
         self.__output_schemas = value
+
     output_schemas = property(_get_output_schemas, _set_output_schemas)
 
     def _get_input_names(self):
@@ -1872,6 +1964,7 @@ class ImageLoadingStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("inputNames list valeus must be str")
         self.__input_names = value
+
     input_names = property(_get_input_names, _set_input_names)
 
     def _get_output_names(self):
@@ -1883,6 +1976,7 @@ class ImageLoadingStep(PipelineStep):
         if not all(isinstance(i, str) for i in value):
             raise TypeError("outputNames list valeus must be str")
         self.__output_names = value
+
     output_names = property(_get_output_names, _set_output_names)
 
     def _get_input_column_names(self):
@@ -1892,6 +1986,7 @@ class ImageLoadingStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("inputColumnNames must be type")
         self.__input_column_names = value
+
     input_column_names = property(
         _get_input_column_names, _set_input_column_names)
 
@@ -1902,6 +1997,7 @@ class ImageLoadingStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("outputColumnNames must be type")
         self.__output_column_names = value
+
     output_column_names = property(
         _get_output_column_names, _set_output_column_names)
 
@@ -1912,6 +2008,7 @@ class ImageLoadingStep(PipelineStep):
         if not isinstance(value, int):
             raise TypeError("originalImageHeight must be int")
         self.__original_image_height = value
+
     original_image_height = property(
         _get_original_image_height, _set_original_image_height)
 
@@ -1922,6 +2019,7 @@ class ImageLoadingStep(PipelineStep):
         if not isinstance(value, int):
             raise TypeError("originalImageWidth must be int")
         self.__original_image_width = value
+
     original_image_width = property(
         _get_original_image_width, _set_original_image_width)
 
@@ -1932,6 +2030,7 @@ class ImageLoadingStep(PipelineStep):
         if not isinstance(value, bool):
             raise TypeError("updateOrderingBeforeTransform must be bool")
         self.__update_ordering_before_transform = value
+
     update_ordering_before_transform = property(
         _get_update_ordering_before_transform, _set_update_ordering_before_transform)
 
@@ -1942,6 +2041,7 @@ class ImageLoadingStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("dimensionsConfigs must be type")
         self.__dimensions_configs = value
+
     dimensions_configs = property(
         _get_dimensions_configs, _set_dimensions_configs)
 
@@ -1952,6 +2052,7 @@ class ImageLoadingStep(PipelineStep):
         if not isinstance(value, str):
             raise TypeError("imageProcessingRequiredLayout must be str")
         self.__image_processing_required_layout = value
+
     image_processing_required_layout = property(
         _get_image_processing_required_layout, _set_image_processing_required_layout)
 
@@ -1962,6 +2063,7 @@ class ImageLoadingStep(PipelineStep):
         if not isinstance(value, str):
             raise TypeError("imageProcessingInitialLayout must be str")
         self.__image_processing_initial_layout = value
+
     image_processing_initial_layout = property(
         _get_image_processing_initial_layout, _set_image_processing_initial_layout)
 
@@ -1972,6 +2074,7 @@ class ImageLoadingStep(PipelineStep):
         if not isinstance(value, dict) and not isinstance(value, DictWrapper) and not isinstance(value, DictWrapper):
             raise TypeError("imageTransformProcesses must be type")
         self.__image_transform_processes = value
+
     image_transform_processes = property(
         _get_image_transform_processes, _set_image_transform_processes)
 
@@ -1983,6 +2086,7 @@ class ImageLoadingStep(PipelineStep):
             raise TypeError(
                 "objectDetectionConfig must be ObjectDetectionConfig")
         self.__object_detection_config = value
+
     object_detection_config = property(
         _get_object_detection_config, _set_object_detection_config)
 
@@ -1991,6 +2095,7 @@ class ImageLoadingStep(PipelineStep):
 
     def _set_runner(self, value):
         self.__runner = value
+
     runner = property(_get_runner, _set_runner)
 
     def as_dict(self):
@@ -2044,7 +2149,6 @@ class ImageLoadingStep(PipelineStep):
 
 
 class MemMapConfig(object):
-
     _types_map = {
         'arrayPath': {'type': str, 'subtype': None},
         'unkVectorPath': {'type': str, 'subtype': None},
@@ -2068,6 +2172,7 @@ class MemMapConfig(object):
         if not isinstance(value, str):
             raise TypeError("arrayPath must be str")
         self.__array_path = value
+
     array_path = property(_get_array_path, _set_array_path)
 
     def _get_unk_vector_path(self):
@@ -2077,6 +2182,7 @@ class MemMapConfig(object):
         if not isinstance(value, str):
             raise TypeError("unkVectorPath must be str")
         self.__unk_vector_path = value
+
     unk_vector_path = property(_get_unk_vector_path, _set_unk_vector_path)
 
     def _get_initial_memmap_size(self):
@@ -2086,6 +2192,7 @@ class MemMapConfig(object):
         if not isinstance(value, int):
             raise TypeError("initialMemmapSize must be int")
         self.__initial_memmap_size = value
+
     initial_memmap_size = property(
         _get_initial_memmap_size, _set_initial_memmap_size)
 
@@ -2096,6 +2203,7 @@ class MemMapConfig(object):
         if not isinstance(value, str):
             raise TypeError("workSpaceName must be str")
         self.__work_space_name = value
+
     work_space_name = property(_get_work_space_name, _set_work_space_name)
 
     def as_dict(self):
@@ -2116,7 +2224,6 @@ class MemMapConfig(object):
 
 
 class InferenceConfiguration(object):
-
     _types_map = {
         'steps': {'type': list, 'subtype': PipelineStep},
         'servingConfig': {'type': ServingConfig, 'subtype': None},
@@ -2141,6 +2248,7 @@ class InferenceConfiguration(object):
         if not all(isinstance(i, PipelineStep) for i in value):
             raise TypeError("steps list valeus must be PipelineStep")
         self.__steps = value
+
     steps = property(_get_steps, _set_steps)
 
     def _get_serving_config(self):
@@ -2150,6 +2258,7 @@ class InferenceConfiguration(object):
         if not isinstance(value, ServingConfig):
             raise TypeError("servingConfig must be ServingConfig")
         self.__serving_config = value
+
     serving_config = property(_get_serving_config, _set_serving_config)
 
     def _get_mem_map_config(self):
@@ -2159,6 +2268,7 @@ class InferenceConfiguration(object):
         if not isinstance(value, MemMapConfig):
             raise TypeError("memMapConfig must be MemMapConfig")
         self.__mem_map_config = value
+
     mem_map_config = property(_get_mem_map_config, _set_mem_map_config)
 
     def as_dict(self):

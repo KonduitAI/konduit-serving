@@ -22,13 +22,13 @@
 
 package ai.konduit.serving.pipeline.step;
 
-import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class CustomPipelineStep extends PipelineStep {
+public class CustomPipelineStep extends BasePipelineStep {
 
     private String customUdfClazz;
 

@@ -27,16 +27,18 @@ package ai.konduit.serving.pipeline.handlers.converter;
  * implementations to handle logging errors
  * passing in the input data, the exception
  * that happened, and the index of the input.
+ *
  * @author Adam Gibson
  */
 public interface DataPipelineErrorHandler {
 
     /**
      * The error handler method
-     * @param e the exception that happened
-     * @param row the actual input data
+     *
+     * @param e     the exception that happened
+     * @param row   the actual input data
      * @param index the index of the example
      */
-    void onError(Exception e,Object row,int index);
+    void onError(Exception e, Object row, int index);
 
 }

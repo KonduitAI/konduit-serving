@@ -22,28 +22,20 @@
 
 package ai.konduit.serving.verticles.nd4j.memmap;
 
-import ai.konduit.serving.verticles.BaseVerticleTest;
-import ai.konduit.serving.verticles.inference.InferenceVerticle;
-
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.io.File;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -63,8 +55,6 @@ public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verti
                 req.exceptionHandler(exception -> {
                     exception.printStackTrace();
                 });
-
-
 
 
             }
@@ -89,26 +79,24 @@ public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verti
                         System.out.println("Found numpy array bytes with length " + npyArray.length);
                         System.out.println("Contents: " + new String(npyArray));
                         INDArray arrFromNumpy = Nd4j.createNpyFromByteArray(npyArray);
-                        INDArray assertion = Nd4j.create(new float[]{1,2}).reshape(2);
-                        context.assertEquals(assertion,arrFromNumpy);
+                        INDArray assertion = Nd4j.create(new float[]{1, 2}).reshape(2);
+                        context.assertEquals(assertion, arrFromNumpy);
                         System.out.println(arrFromNumpy);
                         async.complete();
 
                     });
 
                     handler.exceptionHandler(exception -> {
-                        if(exception.getCause() != null)
+                        if (exception.getCause() != null)
                             context.fail(exception.getCause());
                     });
 
-                }).putHeader("Content-Type","application/json")
-                .putHeader("Content-Length",String.valueOf(0))
+                }).putHeader("Content-Type", "application/json")
+                .putHeader("Content-Length", String.valueOf(0))
                 .write("");
 
         async.await();
     }
-
-
 
 
 }

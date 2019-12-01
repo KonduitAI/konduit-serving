@@ -21,28 +21,22 @@
 
 package ai.konduit.serving.verticles.nd4j.memmap;
 
+import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.MemMapConfig;
+import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
-import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.config.MemMapConfig;
-
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
-
+import io.vertx.ext.unit.TestContext;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.serde.binary.BinarySerde;
 
-
-import  java.io.File;
+import java.io.File;
 
 public abstract class BaseMemMapTest extends BaseVerticleTest {
-
-
 
 
     @Override
@@ -76,10 +70,10 @@ public abstract class BaseMemMapTest extends BaseVerticleTest {
 
     @Override
     public io.vertx.core.json.JsonObject getConfigObject() throws Exception {
-        INDArray arr = Nd4j.linspace(1,4,4);
-        File tmpFile = new File(temporary.getRoot(),"tmpfile.npy");
+        INDArray arr = Nd4j.linspace(1, 4, 4);
+        File tmpFile = new File(temporary.getRoot(), "tmpfile.npy");
         byte[] save = Nd4j.toNpyByteArray(arr);
-        org.apache.commons.io.FileUtils.writeByteArrayToFile(tmpFile,save);
+        org.apache.commons.io.FileUtils.writeByteArrayToFile(tmpFile, save);
         InferenceConfiguration inferenceConfiguration =
                 InferenceConfiguration.builder()
                         .servingConfig(ServingConfig.builder()

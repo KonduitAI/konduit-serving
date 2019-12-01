@@ -6,12 +6,10 @@ export KONDUIT_SERVING_CLASS_PATH=${KONDUIT_SERVING_HOME}/konduit-serving.jar
 export KONDUIT_SERVING_LOG_DIR=/tmp/konduit-serving.log
 export KONDUIT_SERVING_PID_FILE=/run/konduit-serving/konduit.serving.pid
 
-if [ -z "$JAVA_HOME" ]
-then
+if [ -z "$JAVA_HOME" ]; then
   export JAVA_HOME=/usr/lib/jvm/java
 fi
 
-if [ -z "$JDK_HOME" ]
-then
+if [ -z "$JDK_HOME" ]; then
   export JDK_HOME=/usr/lib/jvm/java
 fi

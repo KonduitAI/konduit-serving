@@ -41,12 +41,12 @@ import java.util.UUID;
  * PMML handler for xgboost
  * An xgboost pmml handler takes in 2 args:
  * A  zip file containing:
- *     A file for the {@link Learner} named learner.model
- *    A file for the     {@link FeatureMap} named features.fmap
- *
+ * A file for the {@link Learner} named learner.model
+ * A file for the     {@link FeatureMap} named features.fmap
+ * <p>
  * and a configuration of an integer representing
  * the tree limit.
- *
+ * <p>
  * The handler should take in an extract directory
  * where the contents of the zip file will be extracted
  * to temporarily for loading.
@@ -67,20 +67,20 @@ public class XgboostPmmlHandler extends BasePmmlHandler {
         Learner learner;
         File tmpFile = (File) otherInputs[0];
         String tmpDirId = UUID.randomUUID().toString();
-        File tmpDir = new File(extractDir,tmpDirId);
+        File tmpDir = new File(extractDir, tmpDirId);
         tmpDir.mkdirs();
-        tmpFile.renameTo(new File(tmpFile.getParent(),tmpDir.getName() + ".zip"));
-        tmpFile = new File(tmpFile.getParent(),tmpDir.getName() + ".zip");
+        tmpFile.renameTo(new File(tmpFile.getParent(), tmpDir.getName() + ".zip"));
+        tmpFile = new File(tmpFile.getParent(), tmpDir.getName() + ".zip");
 
-        ArchiveUtils.unzipFileTo(tmpFile.getAbsolutePath(),tmpDir.getAbsolutePath());
+        ArchiveUtils.unzipFileTo(tmpFile.getAbsolutePath(), tmpDir.getAbsolutePath());
 
-        try(InputStream is = new FileInputStream(new File(tmpDir,"learner.model"))) {
+        try (InputStream is = new FileInputStream(new File(tmpDir, "learner.model"))) {
             learner = XGBoostUtil.loadLearner(is);
         }
 
         FeatureMap featureMap;
 
-        try(InputStream is = new FileInputStream(new File(tmpDir,"features.fmap"))) {
+        try (InputStream is = new FileInputStream(new File(tmpDir, "features.fmap"))) {
             featureMap = XGBoostUtil.loadFeatureMap(is);
         }
 
@@ -94,6 +94,6 @@ public class XgboostPmmlHandler extends BasePmmlHandler {
 
     @Override
     public Object[] getExtraArgs(RoutingContext req) {
-        return new Object[]{getTmpFileWithContext(req),nTreeLimit};
+        return new Object[]{getTmpFileWithContext(req), nTreeLimit};
     }
 }

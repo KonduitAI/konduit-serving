@@ -22,9 +22,9 @@
 
 package ai.konduit.serving.executioner.inference.inittests;
 
-import ai.konduit.serving.model.loader.dl4j.cg.InMemoryComputationGraphModelLoader;
-import ai.konduit.serving.executioner.inference.ComputationGraphInferenceExecutioner;
 import ai.konduit.serving.config.ParallelInferenceConfig;
+import ai.konduit.serving.executioner.inference.ComputationGraphInferenceExecutioner;
+import ai.konduit.serving.model.loader.dl4j.cg.InMemoryComputationGraphModelLoader;
 import ai.konduit.serving.train.TrainUtils;
 import org.deeplearning4j.datasets.iterator.impl.IrisDataSetIterator;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -52,14 +52,13 @@ public class ComputationGraphInferenceInitTests {
         ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
 
 
-
         File arrayFolder = folder.newFolder();
-        File testLabels = new File(arrayFolder,"test-labels.npy");
-        File testInput = new File(arrayFolder,"test-input.npy");
+        File testLabels = new File(arrayFolder, "test-labels.npy");
+        File testInput = new File(arrayFolder, "test-input.npy");
 
-        DataSet dataSet = new IrisDataSetIterator(150,150).next();
-        Nd4j.writeAsNumpy(dataSet.getFeatures(),testInput);
-        Nd4j.writeAsNumpy(dataSet.getLabels(),testLabels);
+        DataSet dataSet = new IrisDataSetIterator(150, 150).next();
+        Nd4j.writeAsNumpy(dataSet.getFeatures(), testInput);
+        Nd4j.writeAsNumpy(dataSet.getLabels(), testLabels);
 
         Pair<MultiLayerNetwork, DataNormalization> trainedNetwork = TrainUtils.getTrainedNetwork();
         trainedNetwork.getSecond().transform(dataSet.getFeatures());

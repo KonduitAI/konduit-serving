@@ -22,12 +22,12 @@
 
 package ai.konduit.serving.pipeline.steps;
 
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.executioner.inference.InferenceExecutioner;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.factory.InferenceExecutionerFactory;
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.pipeline.PipelineStep;
-import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.Getter;
 import org.datavec.api.records.Record;
@@ -46,12 +46,12 @@ import java.util.Map;
 /**
  * An {@link InferenceExecutioner}
  * is run as part of a pipeline step.
- *
+ * <p>
  * For the kinds of {@link InferenceExecutioner}
  * that can be run as part of a pipeline, please reference
  * the {@link ai.konduit.serving.model.ModelConfigType}
  * which contains all of the available types.
- *
+ * <p>
  * This pipeline step is used for executing standalone models
  * such as tensorflow,keras or dl4j.
  *
@@ -61,13 +61,13 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
     @Getter
     private InferenceExecutioner inferenceExecutioner;
 
-    public InferenceExecutionerStepRunner(PipelineStep pipelineStep) {
+    public InferenceExecutionerStepRunner(BasePipelineStep pipelineStep) {
         super(pipelineStep);
         ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
         InferenceExecutionerFactory inferenceExecutionerFactory;
         try {
-            Preconditions.checkNotNull(modelPipelineStepConfig.getModelConfig().getModelConfigType(),"No model state was specified!");
-            Preconditions.checkNotNull(modelPipelineStepConfig.getModelConfig().getModelConfigType().getModelType(),"No model type was specified!");
+            Preconditions.checkNotNull(modelPipelineStepConfig.getModelConfig().getModelConfigType(), "No model state was specified!");
+            Preconditions.checkNotNull(modelPipelineStepConfig.getModelConfig().getModelConfigType().getModelType(), "No model type was specified!");
 
             switch (modelPipelineStepConfig.getModelConfig().getModelConfigType().getModelType()) {
                 case SAMEDIFF:
@@ -93,13 +93,13 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
 
             }
 
-            Preconditions.checkNotNull(modelPipelineStepConfig,"NO pipeline configuration found!");
-            Preconditions.checkNotNull(modelPipelineStepConfig.getParallelInferenceConfig(),"No parallel inference configuration found!");
+            Preconditions.checkNotNull(modelPipelineStepConfig, "NO pipeline configuration found!");
+            Preconditions.checkNotNull(modelPipelineStepConfig.getParallelInferenceConfig(), "No parallel inference configuration found!");
             InitializedInferenceExecutionerConfig init = inferenceExecutionerFactory.create(modelPipelineStepConfig);
-            Preconditions.checkNotNull(init,"Initialized inference executioner configuration should not be null!");
+            Preconditions.checkNotNull(init, "Initialized inference executioner configuration should not be null!");
             inferenceExecutioner = init.getInferenceExecutioner();
 
-        } catch(Exception e){
+        } catch (Exception e) {
             throw new IllegalStateException(e);
         }
 
@@ -113,18 +113,18 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
 
     @Override
     public Map<String, SchemaType[]> inputTypes() {
-        Map<String,SchemaType[]> ret = new LinkedHashMap<>();
-        for(int i = 0; i < pipelineStep.getInputNames().size(); i++) {
-            ret.put(pipelineStep.getInputNames().get(i),new SchemaType[]{SchemaType.NDArray});
+        Map<String, SchemaType[]> ret = new LinkedHashMap<>();
+        for (int i = 0; i < pipelineStep.getInputNames().size(); i++) {
+            ret.put(pipelineStep.getInputNames().get(i), new SchemaType[]{SchemaType.NDArray});
         }
         return ret;
     }
 
     @Override
     public Map<String, SchemaType[]> outputTypes() {
-        Map<String,SchemaType[]> ret = new LinkedHashMap<>();
-        for(int i = 0; i < pipelineStep.getOutputNames().size(); i++) {
-            ret.put(pipelineStep.getOutputNames().get(i),new SchemaType[]{SchemaType.NDArray});
+        Map<String, SchemaType[]> ret = new LinkedHashMap<>();
+        for (int i = 0; i < pipelineStep.getOutputNames().size(); i++) {
+            ret.put(pipelineStep.getOutputNames().get(i), new SchemaType[]{SchemaType.NDArray});
         }
 
         return ret;
@@ -135,7 +135,7 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
         //not a singular ndarray record type
         //try to convert to matrix if all numeric,
         //otherwise throw an exception
-        if(input[0].getRecord().size() > 1 || recordIsAllNumeric(input[0]))
+        if (input[0].getRecord().size() > 1 || recordIsAllNumeric(input[0]))
             input = toNDArray(input);
         INDArray[] arrayInputs = SchemaTypeUtils.toArrays(input);
         INDArray[] execution = (INDArray[]) inferenceExecutioner.execute(arrayInputs);
@@ -144,32 +144,30 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
 
 
     private Record[] toNDArray(Record[] records) {
-        if(records[0].getRecord().size() > 1 && !recordIsAllNumeric(records[0])) {
+        if (records[0].getRecord().size() > 1 && !recordIsAllNumeric(records[0])) {
             throw new IllegalArgumentException("Invalid record type passed in. This pipeline only accepts records with singular ndarray records representing 1 input array per name for input graphs or purely numeric arrays that can be converted to a matrix");
-        }
-        else if(allNdArray(records)) {
+        } else if (allNdArray(records)) {
             return records;
-        }
-        else {
-            INDArray arr = Nd4j.create(records.length,records[0].getRecord().size());
-            for(int i = 0; i < arr.rows(); i++) {
-                for(int j = 0; j < arr.columns(); j++) {
-                    arr.putScalar(i,j,records[i].getRecord().get(j).toDouble());
+        } else {
+            INDArray arr = Nd4j.create(records.length, records[0].getRecord().size());
+            for (int i = 0; i < arr.rows(); i++) {
+                for (int j = 0; j < arr.columns(); j++) {
+                    arr.putScalar(i, j, records[i].getRecord().get(j).toDouble());
                 }
             }
 
-            return new Record[] {
+            return new Record[]{
                     new org.datavec.api.records.impl.Record(
                             Arrays.asList(new NDArrayWritable(arr))
-                            ,null
+                            , null
                     )};
         }
     }
 
     private boolean allNdArray(Record[] records) {
         boolean isAllNdArrays = true;
-        for(int i = 0; i < records.length; i++) {
-            if(records[i].getRecord().size() != 1 && records[i].getRecord().get(0).getType() != WritableType.NDArray) {
+        for (int i = 0; i < records.length; i++) {
+            if (records[i].getRecord().size() != 1 && records[i].getRecord().get(0).getType() != WritableType.NDArray) {
                 isAllNdArrays = false;
                 break;
             }
@@ -180,9 +178,9 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
 
     private boolean recordIsAllNumeric(Record record) {
         boolean recordIsAllNumbers = true;
-        for(int i = 0; i < record.getRecord().size(); i++) {
+        for (int i = 0; i < record.getRecord().size(); i++) {
             Writable currWritable = record.getRecord().get(i);
-            switch(currWritable.getType()) {
+            switch (currWritable.getType()) {
                 case Double:
                 case Float:
                 case Int:

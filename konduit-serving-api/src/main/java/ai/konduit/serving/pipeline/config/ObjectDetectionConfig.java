@@ -30,12 +30,12 @@ import java.io.Serializable;
 
 @Data
 @SuperBuilder
-public class ObjectDetectionConfig  implements Serializable {
+public class ObjectDetectionConfig implements Serializable {
+    public static final double[][] DEFAULT_PRIOR_BOXES = {{0.57273, 0.677385}, {1.87446, 2.06253}, {3.33843, 5.47434}, {7.88282, 3.52778}, {9.77052, 9.16828}};
     @Builder.Default
     private double threshold = 0.5;
     private int numLabels;
     private String labelsPath;
-    public static final double[][] DEFAULT_PRIOR_BOXES = {{0.57273, 0.677385}, {1.87446, 2.06253}, {3.33843, 5.47434}, {7.88282, 3.52778}, {9.77052, 9.16828}};
     @Builder.Default
     private double[][] priors = DEFAULT_PRIOR_BOXES;
     @Builder.Default

@@ -43,19 +43,18 @@ import java.util.*;
  */
 public class SSDOutputAdapter implements MultiOutputAdapter<INDArray[]> {
 
+    public final static String DEFAULT_LABELS_RESOURCE_NAME = "/mscoco_label_map.pbtxt";
     private double threshold;
     private int[] inputShape;
     private Labels labels;
     private int numLabels;
     @Getter
-    private String[] inputs = new String[] { "image_tensor"};
+    private String[] inputs = new String[]{"image_tensor"};
     @Getter
-    private String[] outputs = new String[] { "detection_boxes", "detection_scores", "detection_classes", "num_detections"};
-
-    public final static String DEFAULT_LABELS_RESOURCE_NAME = "/mscoco_label_map.pbtxt";
+    private String[] outputs = new String[]{"detection_boxes", "detection_scores", "detection_classes", "num_detections"};
 
 
-    public SSDOutputAdapter(double threshold,Labels labels,int numLabels) {
+    public SSDOutputAdapter(double threshold, Labels labels, int numLabels) {
         this.threshold = threshold;
         inputShape = new int[]{3, 0, 0};
         this.labels = labels;
@@ -63,80 +62,18 @@ public class SSDOutputAdapter implements MultiOutputAdapter<INDArray[]> {
 
     }
 
-    public SSDOutputAdapter(double threshold,int numLabels) {
-        this(threshold,getLabels(),numLabels);
+    public SSDOutputAdapter(double threshold, int numLabels) {
+        this(threshold, getLabels(), numLabels);
 
     }
 
 
-    public SSDOutputAdapter(double threshold,InputStream labels,int numLabels) {
-        this(threshold,getLabels(labels,numLabels),numLabels);
+    public SSDOutputAdapter(double threshold, InputStream labels, int numLabels) {
+        this(threshold, getLabels(labels, numLabels), numLabels);
 
     }
-    @Override
-    public Map<String, BatchOutput> adapt(INDArray[] input, List<String> outputNames, RoutingContext routingContext) {
-        int originalHeight = (int) routingContext.data().get(VerticleConstants.ORIGINAL_IMAGE_HEIGHT);
-        int originalWidth = (int) routingContext.data().get(VerticleConstants.ORIGINAL_IMAGE_WIDTH);
 
-        DetectedObjectsBatch[] detectedObjects = getPredictedObjects( input, threshold, outputNames.toArray(new String[outputNames.size()]),originalHeight,originalWidth);
-
-        Map<String,BatchOutput> ret = new HashMap<>();
-        for(int i  = 0; i < outputNames.size(); i++) {
-            ret.put(outputNames.get(i),detectedObjects[i]);
-        }
-
-        return ret;
-    }
-
-    @Override
-    public List<Class<? extends OutputAdapter<?>>> outputAdapterTypes() {
-        return null;
-    }
-
-
-    private DetectedObjectsBatch[] getPredictedObjects(INDArray[] outputs, double threshold, String[] outputNames,int originalHeight,int originalWidth) {
-        INDArray boxes = null, classes = null, scores = null;
-        for (int i = 0; i < outputs.length; i++) {
-            if (outputNames[i].contains("box")) {
-                boxes = outputs[i];
-            } else if (outputNames[i].contains("class")) {
-                classes = outputs[i];
-            } else if (outputNames[i].contains("score")) {
-                scores = outputs[i];
-            }
-        }
-
-        List<DetectedObjectsBatch> detectedObjects = new ArrayList<>();
-        for (int i = 0; i < scores.columns(); i++) {
-            double score = scores.getDouble(0, i);
-            if (score < threshold) {
-                continue;
-            }
-
-            int n = classes.rank() >= 2 ? classes.getInt(0,i) : classes.getInt(i);
-            String label = labels.getLabel(n);
-            double y1 = boxes.getDouble(0, i, 0) * originalHeight;
-            double x1 = boxes.getDouble(0, i, 1) * originalWidth;
-            double y2 = boxes.getDouble(0, i, 2) * originalHeight;
-            double x2 = boxes.getDouble(0, i, 3) * originalWidth;
-
-            DetectedObjectsBatch d = new DetectedObjectsBatch();
-            d.setCenterX((float)(x1 + x2) / 2);
-            d.setCenterY((float)(y1 + y2) / 2);
-            d.setWidth((float)(x2 - x1));
-            d.setHeight((float)(y2 - y1));
-            d.setPredictedClassNumbers(new int[] { n });
-            d.setPredictedClasses(new String[] { label });
-            d.setConfidences(new float[] { (float)score });
-            detectedObjects.add(d);
-        }
-
-        return detectedObjects.toArray(new DetectedObjectsBatch[detectedObjects.size()]);
-    }
-
-
-
-    public static Labels getLabels(InputStream is,int numLabels)  {
+    public static Labels getLabels(InputStream is, int numLabels) {
         try {
             return new BaseLabels() {
                 protected ArrayList<String> getLabels() {
@@ -185,10 +122,68 @@ public class SSDOutputAdapter implements MultiOutputAdapter<INDArray[]> {
         }
     }
 
+    public static Labels getLabels() {
+        return getLabels(SSDOutputAdapter.class.getResourceAsStream(DEFAULT_LABELS_RESOURCE_NAME), 100);
+    }
 
+    @Override
+    public Map<String, BatchOutput> adapt(INDArray[] input, List<String> outputNames, RoutingContext routingContext) {
+        int originalHeight = (int) routingContext.data().get(VerticleConstants.ORIGINAL_IMAGE_HEIGHT);
+        int originalWidth = (int) routingContext.data().get(VerticleConstants.ORIGINAL_IMAGE_WIDTH);
 
-    public static Labels getLabels()  {
-        return getLabels(SSDOutputAdapter.class.getResourceAsStream(DEFAULT_LABELS_RESOURCE_NAME),100);
+        DetectedObjectsBatch[] detectedObjects = getPredictedObjects(input, threshold, outputNames.toArray(new String[outputNames.size()]), originalHeight, originalWidth);
+
+        Map<String, BatchOutput> ret = new HashMap<>();
+        for (int i = 0; i < outputNames.size(); i++) {
+            ret.put(outputNames.get(i), detectedObjects[i]);
+        }
+
+        return ret;
+    }
+
+    @Override
+    public List<Class<? extends OutputAdapter<?>>> outputAdapterTypes() {
+        return null;
+    }
+
+    private DetectedObjectsBatch[] getPredictedObjects(INDArray[] outputs, double threshold, String[] outputNames, int originalHeight, int originalWidth) {
+        INDArray boxes = null, classes = null, scores = null;
+        for (int i = 0; i < outputs.length; i++) {
+            if (outputNames[i].contains("box")) {
+                boxes = outputs[i];
+            } else if (outputNames[i].contains("class")) {
+                classes = outputs[i];
+            } else if (outputNames[i].contains("score")) {
+                scores = outputs[i];
+            }
+        }
+
+        List<DetectedObjectsBatch> detectedObjects = new ArrayList<>();
+        for (int i = 0; i < scores.columns(); i++) {
+            double score = scores.getDouble(0, i);
+            if (score < threshold) {
+                continue;
+            }
+
+            int n = classes.rank() >= 2 ? classes.getInt(0, i) : classes.getInt(i);
+            String label = labels.getLabel(n);
+            double y1 = boxes.getDouble(0, i, 0) * originalHeight;
+            double x1 = boxes.getDouble(0, i, 1) * originalWidth;
+            double y2 = boxes.getDouble(0, i, 2) * originalHeight;
+            double x2 = boxes.getDouble(0, i, 3) * originalWidth;
+
+            DetectedObjectsBatch d = new DetectedObjectsBatch();
+            d.setCenterX((float) (x1 + x2) / 2);
+            d.setCenterY((float) (y1 + y2) / 2);
+            d.setWidth((float) (x2 - x1));
+            d.setHeight((float) (y2 - y1));
+            d.setPredictedClassNumbers(new int[]{n});
+            d.setPredictedClasses(new String[]{label});
+            d.setConfidences(new float[]{(float) score});
+            detectedObjects.add(d);
+        }
+
+        return detectedObjects.toArray(new DetectedObjectsBatch[detectedObjects.size()]);
     }
 
 }
