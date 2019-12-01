@@ -127,7 +127,7 @@ public class PipelineExecutioner {
      */
     public static Buffer zipBuffer(Map<String, BatchOutput> adapt, Output.DataFormat responseOutputType) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ZipOutputStream out = new ZipOutputStream(baos)) {
+             ZipOutputStream out = new ZipOutputStream(baos)) {
             for (Map.Entry<String, BatchOutput> outputEntry : adapt.entrySet()) {
                 ZipEntry zipEntry = new ZipEntry(outputEntry.getKey());
                 try {
@@ -212,8 +212,14 @@ public class PipelineExecutioner {
         ServingConfig servingConfig = config.getServingConfig();
         //initialize input and output data types
         this.pipeline = Pipeline.getPipeline(config.getSteps());
-        Preconditions.checkState(config.getSteps().get(0).isValidInputType(servingConfig.getInputDataFormat()),"Configured Serving Configuration input type is invalid");
-        Preconditions.checkState(config.getSteps().get(config.getSteps().size() - 1).isValidOutputType(servingConfig.getOutputDataFormat()),"Configured output type is invalid");
+
+        //configure validation for input and output
+        PipelineStep finalPipelineStep = config.getSteps().get(config.getSteps().size() - 1);
+        PipelineStep startingPipelineStep = config.getSteps().get(0);
+
+        Preconditions.checkState(config.getSteps().get(0).isValidInputType(servingConfig.getInputDataFormat()),"Configured input type is invalid for initial pipeline step of type " + startingPipelineStep.getClass().getName() + " expected input types were " + Arrays.toString(startingPipelineStep.validInputTypes()));
+        Preconditions.checkState(finalPipelineStep.isValidOutputType(servingConfig.getOutputDataFormat()),"Configured output type is invalid for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected output types were " + Arrays.toString(finalPipelineStep.validInputTypes()));
+        Preconditions.checkState(finalPipelineStep.isValidPredictionType(servingConfig.getPredictionType()),"Invalid prediction type configured for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected types were " + Arrays.toString(finalPipelineStep.validPredictionTypes()));
 
         for (int i = 0; i < config.getSteps().size(); i++) {
             PipelineStep pipelineStep = config.getSteps().get(i);

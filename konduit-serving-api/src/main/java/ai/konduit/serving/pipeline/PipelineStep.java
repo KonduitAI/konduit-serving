@@ -7,6 +7,7 @@ import java.util.Map;
 
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.Output.PredictionType;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 import ai.konduit.serving.pipeline.step.*;
@@ -57,6 +58,28 @@ public interface PipelineStep extends Serializable {
 
        return Arrays.stream(validOutputTypes()).anyMatch(input -> dataFormat.equals(input));
 
+   }
+
+
+    /**
+     * Valid {@link PredictionType}s
+     * if this {@link PipelineStep} is the last step
+     * in a pipeline
+     * @return the valid prediction type
+     */
+   PredictionType[] validPredictionTypes();
+
+    /**
+     * Returns true if the {@link #validPredictionTypes()}
+     * is contained within the input or if {@link #validPredictionTypes()}
+     * is null or empty
+     * @param predictionType the prediction type
+     * @return
+     */
+   default boolean isValidPredictionType(PredictionType predictionType) {
+       if(validPredictionTypes() == null || validPredictionTypes().length < 1)
+           return true;
+       return Arrays.stream(validPredictionTypes()).anyMatch(input -> predictionType.equals(input));
    }
 
 
