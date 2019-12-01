@@ -22,6 +22,8 @@
 
 package ai.konduit.serving.pipeline.step;
 
+import ai.konduit.serving.config.Input.DataFormat;
+import ai.konduit.serving.config.Output;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import lombok.Data;
@@ -57,6 +59,23 @@ public class ImageLoadingStep extends BasePipelineStep implements Serializable {
         if (getImageProcessingInitialLayout() != null && getImageProcessingRequiredLayout() != null)
             return getImageProcessingInitialLayout().equals(getImageProcessingRequiredLayout());
         return true;
+    }
+
+    @Override
+    public DataFormat[] validInputTypes() {
+        return new DataFormat[] {
+                DataFormat.NUMPY,
+                DataFormat.ND4J,
+                DataFormat.IMAGE
+        };
+    }
+
+    @Override
+    public Output.DataFormat[] validOutputTypes() {
+        return new Output.DataFormat[] {
+                Output.DataFormat.ND4J,
+                Output.DataFormat.NUMPY
+        };
     }
 
     @Override

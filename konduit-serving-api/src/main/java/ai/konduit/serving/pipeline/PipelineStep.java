@@ -1,9 +1,13 @@
 package ai.konduit.serving.pipeline;
 
 import  java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import ai.konduit.serving.config.Input;
+import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.Output.PredictionType;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 import ai.konduit.serving.pipeline.step.*;
@@ -26,6 +30,79 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 public interface PipelineStep extends Serializable {
 
+
+    /**
+     * Returns true if the input data format
+     * is valid or not. Have {@link #validInputTypes()}
+     * return null or an empty array if you would like any type to be valid.
+     * @param dataFormat the {@link ai.konduit.serving.config.Input.DataFormat} to test
+     * @return true if the input format is valid or false otherwise
+     */
+   default  boolean isValidInputType(Input.DataFormat dataFormat) {
+     if(validInputTypes() == null || validInputTypes().length < 1) {
+         return true;
+     }
+     return Arrays.stream(validInputTypes()).anyMatch(input -> dataFormat.equals(input));
+   }
+
+
+    /**
+     * Returns true if the output data format
+     * is valid or not.
+     * Have {@link #validOutputTypes()} return null or an empty array
+     * if you would like any type to be valid.
+      *
+     * @param dataFormat the {@link ai.konduit.serving.config.Output.DataFormat} to test
+     * @return true if the output format is valid or false otherwise
+     */
+   default  boolean isValidOutputType(Output.DataFormat dataFormat) {
+       if(validOutputTypes() == null || validOutputTypes().length < 1) {
+           return true;
+       }
+
+       return Arrays.stream(validOutputTypes()).anyMatch(input -> dataFormat.equals(input));
+
+   }
+
+
+    /**
+     * Valid {@link PredictionType}s
+     * if this {@link PipelineStep} is the last step
+     * in a pipeline.
+     * Have {@link #validPredictionTypes()} return null or empty array
+     * if you would like any type to be valid.
+      *
+     * @return the valid prediction type
+     */
+   PredictionType[] validPredictionTypes();
+
+    /**
+     * Returns true if the {@link #validPredictionTypes()}
+     * is contained within the input or if {@link #validPredictionTypes()}
+     * is null or empty
+     * @param predictionType the prediction type
+     * @return
+     */
+   default boolean isValidPredictionType(PredictionType predictionType) {
+       if(validPredictionTypes() == null || validPredictionTypes().length < 1)
+           return true;
+       return Arrays.stream(validPredictionTypes()).anyMatch(input -> predictionType.equals(input));
+   }
+
+
+    /**
+     * Returns the valid {@link Input.DataFormat}
+     * when the input is the beginning of a pipeline
+     * @return
+     */
+    Input.DataFormat[] validInputTypes();
+
+    /**
+     * Returns the valid {@link Output.DataFormat}
+     * when the output is the end of a pipeline
+     * @return
+     */
+    Output.DataFormat[] validOutputTypes();
 
     /**
      * Getter for the input column names

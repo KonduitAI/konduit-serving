@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.pipeline;
 
+import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.*;
@@ -57,7 +58,12 @@ public abstract class BasePipelineStep implements PipelineStep {
     protected Map<String, List<String>> inputColumnNames, outputColumnNames;
 
 
-
+    @Override
+    public PredictionType[] validPredictionTypes() {
+        return new PredictionType[]{
+                PredictionType.RAW
+        };
+    }
 
     /**
      *  {@inheritDoc}

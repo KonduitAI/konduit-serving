@@ -22,6 +22,8 @@
 
 package ai.konduit.serving.pipeline.step;
 
+import ai.konduit.serving.config.Input.DataFormat;
+import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
@@ -44,8 +46,8 @@ public class TransformProcessStep extends BasePipelineStep {
     private Map<String, TransformProcess> transformProcesses;
 
     /**
-     * Create a TransformProcess Step with default input and output names
-     * just from output schema and the actual TransformProcess. The
+     * Create a {@link TransformProcess} Step with default input and output names
+     * just from output schema and the actual {@link TransformProcess}. The
      * input/initial schema can be inferred from the TransformProcess itself
      *
      * @param transformProcess DataVec TransformProcess
@@ -54,6 +56,26 @@ public class TransformProcessStep extends BasePipelineStep {
      */
     public TransformProcessStep(TransformProcess transformProcess, Schema outputSchema) throws Exception {
         this.step("default", transformProcess, outputSchema);
+    }
+
+    @Override
+    public DataFormat[] validInputTypes() {
+        return new DataFormat[] {
+                DataFormat.JSON,
+                DataFormat.ARROW,
+                DataFormat.NUMPY,
+                DataFormat.ND4J
+        };
+    }
+
+    @Override
+    public Output.DataFormat[] validOutputTypes() {
+        return new Output.DataFormat[] {
+                Output.DataFormat.ND4J,
+                Output.DataFormat.ARROW,
+                Output.DataFormat.NUMPY,
+                Output.DataFormat.JSON
+        };
     }
 
     @Override
