@@ -825,6 +825,16 @@ class SameDiffConfig(object):
 
 
 class TensorFlowConfig(object):
+    """TensorFlowConfig
+
+    TensorFlow extension of konduit.ModelConfig used to define model steps
+    with TensorFlow models.
+
+    :param tensor_data_types_config: konduit.TensorDataTypesConfig
+    :param model_config_type: konduit.ModelConfigType
+    :param config_proto_path: path to the TensorFlow ProtoBuf model file.
+    :param saved_model_config: konduit.SavedModelConfig
+    """
 
     _types_map = {
         "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
@@ -841,13 +851,7 @@ class TensorFlowConfig(object):
         config_proto_path=None,
         saved_model_config=None,
     ):
-        """
 
-        :param tensor_data_types_config:
-        :param model_config_type:
-        :param config_proto_path:
-        :param saved_model_config:
-        """
         self.__tensor_data_types_config = tensor_data_types_config
         self.__model_config_type = model_config_type
         self.__config_proto_path = config_proto_path
@@ -951,6 +955,7 @@ class PythonConfig(object):
         python_path=None,
         return_all_inputs=None,
     ):
+
         self.__tensor_data_types_config = tensor_data_types_config
         self.__model_config_type = model_config_type
         self.__python_code = python_code
@@ -1125,7 +1130,6 @@ class PythonConfig(object):
 
 
 class ServingConfig(object):
-
     _inputDataFormat_enum = enum.Enum(
         "_inputDataFormat_enum", "NUMPY JSON ND4J IMAGE ARROW", module=__name__
     )
@@ -1341,6 +1345,7 @@ class PipelineStep(object):
         output_column_names=None,
         runner=None,
     ):
+
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
@@ -1516,6 +1521,19 @@ class NormalizationConfig(object):
 
 
 class PythonStep(PipelineStep):
+    """PythonStep
+
+    PythonStep defines a custom Python konduit.PipelineStep from a konduit.PythonConfig.
+
+    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.
+    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.
+    :param input_names: list of step input names, see konduit.PipelineStep.
+    :param output_names: list of step input names, see konduit.PipelineStep.
+    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param python_configs: konduit.PythonConfig
+    :param runner: do not touch, used internally only.
+    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -1543,6 +1561,7 @@ class PythonStep(PipelineStep):
         python_configs=None,
         runner=None,
     ):
+
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
@@ -1704,6 +1723,19 @@ class PythonStep(PipelineStep):
 
 
 class TransformProcessStep(PipelineStep):
+    """TransformProcessStep
+
+    TransformProcessStep defines a konduit.PipelineStep from a DataVec TransformProcess
+
+    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.
+    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.
+    :param input_names: list of step input names, see konduit.PipelineStep.
+    :param output_names: list of step input names, see konduit.PipelineStep.
+    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param transform_processes: DataVec TransformProcess
+    :param runner: do not touch, used internally only.
+    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -1731,6 +1763,7 @@ class TransformProcessStep(PipelineStep):
         transform_processes=None,
         runner=None,
     ):
+
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
@@ -1923,6 +1956,7 @@ class ModelStep(PipelineStep):
         normalization_config=None,
         runner=None,
     ):
+
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
@@ -2118,6 +2152,19 @@ class ModelStep(PipelineStep):
 
 
 class ArrayConcatenationStep(PipelineStep):
+    """ArrayConcatenationStep
+
+    konduit.PipelineStep that concatenates two or more arrays along the specified dimensions.
+
+    :param input_schemas:
+    :param output_schemas:
+    :param input_names:
+    :param output_names:
+    :param input_column_names:
+    :param output_column_names:
+    :param concat_dimensions: dictionary of array indices to concatenation dimension
+    :param runner: do not touch, only used internally.
+    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -2145,6 +2192,7 @@ class ArrayConcatenationStep(PipelineStep):
         concat_dimensions=None,
         runner=None,
     ):
+
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names

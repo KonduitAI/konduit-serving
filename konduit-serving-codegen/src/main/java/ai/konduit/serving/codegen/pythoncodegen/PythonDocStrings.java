@@ -177,6 +177,152 @@ public class PythonDocStrings {
                         "    \"\"\""
         );
 
+        code = code.replace(
+                "class TensorFlowConfig(object):\n",
+                "class TensorFlowConfig(object):\n" +
+                        "    \"\"\"TensorFlowConfig\n" +
+                        "\n" +
+                        "    TensorFlow extension of konduit.ModelConfig used to define model steps\n" +
+                        "    with TensorFlow models.\n" +
+                        "\n" +
+                        "    :param tensor_data_types_config: konduit.TensorDataTypesConfig\n" +
+                        "    :param model_config_type: konduit.ModelConfigType\n" +
+                        "    :param config_proto_path: path to the TensorFlow ProtoBuf model file.\n" +
+                        "    :param saved_model_config: konduit.SavedModelConfig\n" +
+                        "    \"\"\""
+        );
+
+        code = code.replace(
+                "class PythonConfig(object):\n",
+                "class PythonConfig(object):\n" +
+                        "    \"\"\"PythonConfig\n" +
+                        "\n" +
+                        "    Extension of konduit.ModelConfig for custom Python code. Provide your Python\n" +
+                        "    code either as string to `python_code` or as path to a Python script to `python_code_path`.\n" +
+                        "    Additionally, you can modify or extend your Python path by setting `python_path` accordingly.\n" +
+                        "\n" +
+                        "    :param tensor_data_types_config: konduit.TensorDataTypesConfig\n" +
+                        "    :param model_config_type: konduit.ModelConfigType\n" +
+                        "    :param python_code: Python code as str\n" +
+                        "    :param python_code_path: full qualifying path to the Python script you want to run, as str\n" +
+                        "    :param python_inputs: list of Python input variable names\n" +
+                        "    :param python_outputs: list of Python output variable names\n" +
+                        "    :param extra_inputs: potential extra input variables\n" +
+                        "    :param python_path: your desired Python PATH as str\n" +
+                        "    :param return_all_inputs: whether or not to return all inputs additionally to outputs\n" +
+                        "    \"\"\""
+        );
+
+        code = code.replace(
+                "class ServingConfig(object):\n",
+                "class ServingConfig(object):\n" +
+                        "    \"\"\"ServingConfig\n" +
+                        "\n" +
+                        "    A serving configuration collects all properties needed to serve your\n" +
+                        "    model pipeline within a konduit.InferenceConfig.\n" +
+                        "\n" +
+                        "    :param http_port: HTTP port of the konduit.Server\n" +
+                        "    :param listen_host: host of the konduit.Server, defaults to 'localhost'\n" +
+                        "    :param input_data_format: Input data format, see konduit.Input for more information\n" +
+                        "    :param output_data_format: Output data format, see konduit.Output for more information\n" +
+                        "    :param prediction_type: Prediction type, see konduit.Output for more information\n" +
+                        "    :param uploads_directory: to which directory to store file uploads to, defaults to 'file-uploads/'\n" +
+                        "    :param log_timings: whether to log timings for this config, defaults to False\n" +
+                        "    :param metric_types: the types of metrics logged for your ServingConfig can currently only be configured and\n" +
+                        "           extended from Java. don't modify this property.\n" +
+                        "    \"\"\""
+        );
+
+        code = code.replace(
+                "class PipelineStep(object):\n",
+                "class PipelineStep(object):\n" +
+                        "    \"\"\"PipelineStep\n" +
+                        "\n" +
+                        "    PipelineStep collects all ETL and model related properties (input schema,\n" +
+                        "    normalization and transform steps, output schema, potential pre-\n" +
+                        "    or post-processing etc.). This config is passed to the respective\n" +
+                        "    verticle along with konduit.ServingConfig.\n" +
+                        "\n" +
+                        "    :param input_schemas: dictionary of konduit.SchemaType for input names\n" +
+                        "    :param output_schemas: dictionary of konduit.SchemaType for output names\n" +
+                        "    :param input_names: list on step input names\n" +
+                        "    :param output_names: list of step output names\n" +
+                        "    :param input_column_names: dictionary mapping input names to lists of names of your columnar data (e.g.\n" +
+                        "           { \"input_1\": [\"col1\", \"col2\"]}\n" +
+                        "    :param output_column_names: dictionary mapping output names to lists of names of your columnar data (e.g.\n" +
+                        "           { \"output_1\": [\"col1\", \"col2\"]}\n" +
+                        "    :param runner: do not touch. internally used to infer the \"runner\" for this step configuration.\n" +
+                        "    \"\"\""
+        );
+
+        code = code.replace(
+                "class NormalizationConfig(object):\n",
+                "class NormalizationConfig(object):\n" +
+                        "    \"\"\"NormalizationConfig\n" +
+                        "\n" +
+                        "    Configuration for data normalization in the ETL part of your pipeline.\n" +
+                        "\n" +
+                        "    :param config: dictionary of str values defining you normalization step.\n" +
+                        "    \"\"\""
+        );
+
+        code = code.replace(
+                "class PythonStep(object):\n",
+                "class PythonStep(object):\n" +
+                        "    \"\"\"PythonStep\n" +
+                        "\n" +
+                        "    PythonStep defines a custom Python konduit.PipelineStep from a konduit.PythonConfig.\n" +
+                        "\n" +
+                        "    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param input_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param output_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "    :param python_configs: konduit.PythonConfig\n" +
+                        "    :param runner: do not touch, used internally only.\n" +
+                        "    \"\"\""
+        );
+
+        code = code.replace(
+                "class TransformProcessStep(object):\n",
+                "class TransformProcessStep(object):\n" +
+                        "    \"\"\"TransformProcessStep\n" +
+                        "\n" +
+                        "    TransformProcessStep defines a konduit.PipelineStep from a DataVec TransformProcess\n" +
+                        "\n" +
+                        "    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param input_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param output_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "    :param transform_processes: DataVec TransformProcess\n" +
+                        "    :param runner: do not touch, used internally only.\n" +
+                        "    \"\"\""
+        );
+
+        code = code.replace(
+                "class TransformProcessStep(object):\n",
+                "class TransformProcessStep(object):\n" +
+                        "    \"\"\"ModelStep\n" +
+                        "\n" +
+                        "    ModelStep extends konduit.PipelineStep and is the base class for all pipeline steps\n" +
+                        "    involving machine learning models.\n" +
+                        "\n" +
+                        "    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param input_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param output_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "    :param model_config: konduit.ModelConfig\n" +
+                        "    :param parallel_inference_config: konduit.ParallelInferenceConfig\n" +
+                        "    :param normalization_config: konduit.NormalizationConfig\n" +
+                        "    :param runner: do not touch, only used internally/\n" +
+                        "    \"\"\""
+        );
+
         return code;
     }
 }

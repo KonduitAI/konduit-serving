@@ -199,10 +199,16 @@ public class CodeGen {
         loadedModule = loadedModule.replace("'type': type","'type': dict");
 
         // Modify some constructor defaults to leverage Python's strengths
+        // By default we work with numpy-in-numpy-out and "raw" predictions to cause minimal harm to the intended
+        // audience.
         loadedModule = loadedModule.replace("input_data_format=None", "input_data_format='NUMPY'");
         loadedModule = loadedModule.replace("output_data_format=None", "output_data_format='NUMPY'");
-        loadedModule = loadedModule.replace("log_timings=None", "log_timings=True");
         loadedModule = loadedModule.replace("prediction_type=None", "prediction_type='RAW'");
+
+        loadedModule = loadedModule.replace("log_timings=None", "log_timings=False");
+        loadedModule = loadedModule.replace("listen_host=None", "listen_host='localhost'");
+        loadedModule = loadedModule.replace("uploads_directory=None", "uploads_directory='file-uploads/'");
+
 
         loadedModule = PythonDocStrings.generateDocs(loadedModule);
 

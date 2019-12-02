@@ -42,10 +42,10 @@ import java.util.*;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
-/** PipelineStep collects all ETL related properties (input schema,
+/** PipelineStep collects all ETL and model related properties (input schema,
  * normalization and transform steps, output schema, potential pre-
  * or post-processing etc.). This config is passed to the respective
- * verticle along with Model and Serving configurations.
+ * verticle along with a {@link ai.konduit.serving.config.ServingConfig}.
  *
  * @author Adam Gibson
  */

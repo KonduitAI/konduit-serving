@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.model;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
@@ -34,20 +35,20 @@ import java.util.Map;
 @NoArgsConstructor
 @Slf4j
 @SuperBuilder
+/**
+ * Extension of {@link ModelConfig} for custom Python steps.
+ */
 public class PythonConfig extends ModelConfig {
 
-    private String  pythonCode,pythonCodePath;
-    @Singular
-    private Map<String,String>  pythonInputs;
-    @Singular
-    private Map<String,String> pythonOutputs;
-    @Singular
-    private Map<String,String> extraInputs;
+    private String  pythonCode, pythonCodePath, pythonPath;
 
-    private String pythonPath;
+    @Singular
+    private Map<String,String>  pythonInputs, pythonOutputs, extraInputs;
+
+    @Builder.Default
+    private boolean returnAllInputs = false;
 
     private static String defaultPythonPath;
 
-    private boolean returnAllInputs;
 
 }
