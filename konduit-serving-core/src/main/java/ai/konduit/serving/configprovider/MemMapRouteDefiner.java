@@ -129,7 +129,7 @@ public class MemMapRouteDefiner {
                 Preconditions.checkState(tempFile.createNewFile(), String.format("Memmap temp file at path %s wasn't able to be created successfully. " +
                         "Check that if you have write permissions to that file location", tempFile.getAbsolutePath()));
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error(String.format("Unable to create file at location: %s", tempFile.getAbsolutePath()), e);
             }
         }
 
