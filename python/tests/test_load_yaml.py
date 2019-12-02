@@ -23,8 +23,8 @@ def test_yaml_client_loading():
 @pytest.mark.integration
 def test_yaml_minimal_loading():
     file_path = "yaml/konduit_minimal.yaml"
-    server = server_from_file(file_path, use_yaml=False)
-    client = client_from_file(file_path, use_yaml=False)
+    server = server_from_file(file_path, use_yaml=True)
+    client = client_from_file(file_path, use_yaml=True)
     del server, client
 
 

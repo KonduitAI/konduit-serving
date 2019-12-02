@@ -5,7 +5,6 @@ from konduit.client import Client
 from konduit.utils import is_port_in_use
 
 import random
-import time
 import json
 import pydatavec
 from .utils import load_java_tp, inference_from_json
@@ -13,7 +12,8 @@ import pytest
 
 
 @pytest.mark.integration
-def test_build_tp():
+@pytest.mark.parametrize("output_format", ["ARROW", "JSON"])
+def test_build_tp(output_format):
     schema = pydatavec.Schema()
     schema.add_string_column("first")
     tp = pydatavec.TransformProcess(schema)
@@ -23,11 +23,12 @@ def test_build_tp():
     tp_json = java_tp.toJson()
     load_java_tp(tp_json)
     _ = json.dumps(tp_json)
+
     as_python_json = json.loads(tp_json)
     transform_process = (
         TransformProcessStep()
-        .set_input(None, ["first"], ["String"])
-        .set_output(None, ["first"], ["String"])
+        .set_input(column_names=["first"], types=["String"])
+        .set_output(column_names=["first"], types=["String"])
         .transform_process(as_python_json)
     )
 
@@ -35,7 +36,7 @@ def test_build_tp():
     serving_config = ServingConfig(
         http_port=port,
         input_data_format="JSON",
-        output_data_format="JSON",
+        output_data_format=output_format,
         log_timings=True,
     )
 
@@ -51,9 +52,9 @@ def test_build_tp():
         jar_path="konduit.jar",
     )
     server.start()
-    print("Process started. Sleeping 10 seconds.")
+
     client = Client(
-        convert_to_format="JSON",
+        convert_to_format=output_format,
         input_data_format="JSON",
         output_data_format="RAW",
         port=port,
@@ -61,7 +62,6 @@ def test_build_tp():
 
     data_input = {"first": "value"}
 
-    time.sleep(30)
     assert is_port_in_use(port)
 
     try:
