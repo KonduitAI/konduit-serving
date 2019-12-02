@@ -303,8 +303,8 @@ public class PythonDocStrings {
         );
 
         code = code.replace(
-                "class TransformProcessStep(object):\n",
-                "class TransformProcessStep(object):\n" +
+                "class ModelStep(object):\n",
+                "class ModelStep(object):\n" +
                         "    \"\"\"ModelStep\n" +
                         "\n" +
                         "    ModelStep extends konduit.PipelineStep and is the base class for all pipeline steps\n" +
@@ -322,6 +322,111 @@ public class PythonDocStrings {
                         "    :param runner: do not touch, only used internally/\n" +
                         "    \"\"\""
         );
+
+        code = code.replace(
+                "class ArrayConcatenationStep(object):\n",
+                "class ArrayConcatenationStep(object):\n" +
+                        "    \"\"\"ArrayConcatenationStep\n" +
+                        "\n" +
+                        "    konduit.PipelineStep that concatenates two or more arrays along the specified dimensions.\n" +
+                        "\n" +
+                        "    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param input_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param output_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "    :param concat_dimensions: dictionary of array indices to concatenation dimension\n" +
+                        "    :param runner: do not touch, only used internally.\n" +
+                        "    \"\"\"\n"
+        );
+
+        code = code.replace(
+                "class JsonExpanderTransformStep(object):\n",
+                "class JsonExpanderTransformStep(object):\n" +
+                        "        \"\"\"JsonExpanderTransformStep\n" +
+                        "\n" +
+                        "        Executes expansion of JSON objects in to \"real\" objects.\n" +
+                        "        This is needed when integrating with PipelineStepRunner\n" +
+                        "        that may output {@link Text} with json arrays or json objects.\n" +
+                        "        This kind of output is generally expected from Python or PMML based pipelines\n" +
+                        "        which have a lot more complicated output and schema based values\n" +
+                        "        rather than straight NDArrays like\n" +
+                        "        most deep learning pipelines will be.\n" +
+                        "\n" +
+                        "        :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "        :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "        :param input_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "        :param output_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "        :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "        :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "        :param runner: do not touch, only used internally\n" +
+                        "        \"\"\""
+        );
+
+        code = code.replace(
+                "class ImageLoadingStep(object):\n",
+                "class ImageLoadingStep(object):\n" +
+                        "    \"\"\"ImageLoadingStep\n" +
+                        "\n" +
+                        "    Loads an input image into an NDArray.\n" +
+                        "\n" +
+                        "    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param input_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param output_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "    :param original_image_height: input image height in pixels\n" +
+                        "    :param original_image_width: input image width in pixels\n" +
+                        "    :param update_ordering_before_transform: boolean, defaults to False\n" +
+                        "    :param dimensions_configs: dictionary defining input shapes per input name, e.g. {\"input\", [28,28,3]}\n" +
+                        "    :param image_processing_required_layout: desired channel ordering after this pipeline step has been applied,\n" +
+                        "           either \"NCHW\" or \"NHWC\", defaults to the prior\n" +
+                        "    :param image_processing_initial_layout: channel ordering before processing, either\n" +
+                        "           \"NCHW\" or \"NHWC\", defaults to the prior\n" +
+                        "    :param image_transform_processes: a DataVec ImageTransformProcess\n" +
+                        "    :param object_detection_config: konduit.ObjectDetectionConfig\n" +
+                        "    :param runner: do not touch, only used internally.\n" +
+                        "    \"\"\""
+        );
+
+        code = code.replace(
+                "class MemMapConfig(object):\n",
+                "class MemMapConfig(object):\n" +
+                        "    \"\"\"MemMapConfig\n" +
+                        "\n" +
+                        "    Configuration for managing serving of memory-mapped files. The goal is to mem-map\n" +
+                        "    and serve a large array stored in \"array_path\" and get slices of this array on demand\n" +
+                        "    by index. If an index is specified that does not match an index of the mem-mapped array,\n" +
+                        "    an default or \"unknown\" vector is inserted into the slice instead, which is stored in\n" +
+                        "    \"unk_vector_path\".\n" +
+                        "\n" +
+                        "    For instance, let's say we want to mem-map [[1, 2, 3], [4, 5, 6]], a small array with two\n" +
+                        "    valid slices. Our unknown vector is simply [0, 0, 0] in this example. Now, if we query for\n" +
+                        "    the indices {-2, 1} we'd get [[0, 0, 0], [4, 5, 6]].\n" +
+                        "\n" +
+                        "    :param array_path: path: path to the file containing the large array you want to memory-map\n" +
+                        "    :param unk_vector_path: path to the file containing the \"unknown\" vector / slice\n" +
+                        "    :param initial_memmap_size: size of the mem-map, defaults to 1000000000\n" +
+                        "    :param work_space_name: DL4J 'WorkSpace' name, defaults to 'memMapWorkspace'\n" +
+                        "    \"\"\""
+        );
+
+        code = code.replace(
+                "class InferenceConfiguration(object):\n",
+                "class InferenceConfiguration(object):\n" +
+                        "    \"\"\"InferenceConfiguration\n" +
+                        "\n" +
+                        "    This configuration object brings together all properties to serve a set of\n" +
+                        "    pipeline steps for inference.\n" +
+                        "\n" +
+                        "    :param steps: list of konduit.PipelineStep\n" +
+                        "    :param serving_config: a konduit.ServingConfig\n" +
+                        "    :param mem_map_config: a konduit.MemMapConfig\n" +
+                        "    \"\"\""
+        );
+
 
         return code;
     }

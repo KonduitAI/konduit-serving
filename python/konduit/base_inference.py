@@ -851,7 +851,6 @@ class TensorFlowConfig(object):
         config_proto_path=None,
         saved_model_config=None,
     ):
-
         self.__tensor_data_types_config = tensor_data_types_config
         self.__model_config_type = model_config_type
         self.__config_proto_path = config_proto_path
@@ -929,16 +928,32 @@ class TensorFlowConfig(object):
 
 
 class PythonConfig(object):
+    """PythonConfig
+
+    Extension of konduit.ModelConfig for custom Python code. Provide your Python
+    code either as string to `python_code` or as path to a Python script to `python_code_path`.
+    Additionally, you can modify or extend your Python path by setting `python_path` accordingly.
+
+    :param tensor_data_types_config: konduit.TensorDataTypesConfig
+    :param model_config_type: konduit.ModelConfigType
+    :param python_code: Python code as str
+    :param python_code_path: full qualifying path to the Python script you want to run, as str
+    :param python_inputs: list of Python input variable names
+    :param python_outputs: list of Python output variable names
+    :param extra_inputs: potential extra input variables
+    :param python_path: your desired Python PATH as str
+    :param return_all_inputs: whether or not to return all inputs additionally to outputs
+    """
 
     _types_map = {
         "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
         "modelConfigType": {"type": ModelConfigType, "subtype": None},
         "pythonCode": {"type": str, "subtype": None},
         "pythonCodePath": {"type": str, "subtype": None},
+        "pythonPath": {"type": str, "subtype": None},
         "pythonInputs": {"type": dict, "subtype": None},
         "pythonOutputs": {"type": dict, "subtype": None},
         "extraInputs": {"type": dict, "subtype": None},
-        "pythonPath": {"type": str, "subtype": None},
         "returnAllInputs": {"type": bool, "subtype": None},
     }
     _formats_map = {}
@@ -949,21 +964,20 @@ class PythonConfig(object):
         model_config_type=None,
         python_code=None,
         python_code_path=None,
+        python_path=None,
         python_inputs=None,
         python_outputs=None,
         extra_inputs=None,
-        python_path=None,
         return_all_inputs=None,
     ):
-
         self.__tensor_data_types_config = tensor_data_types_config
         self.__model_config_type = model_config_type
         self.__python_code = python_code
         self.__python_code_path = python_code_path
+        self.__python_path = python_path
         self.__python_inputs = python_inputs
         self.__python_outputs = python_outputs
         self.__extra_inputs = extra_inputs
-        self.__python_path = python_path
         self.__return_all_inputs = return_all_inputs
 
     def _get_tensor_data_types_config(self):
@@ -1008,6 +1022,16 @@ class PythonConfig(object):
 
     python_code_path = property(_get_python_code_path, _set_python_code_path)
 
+    def _get_python_path(self):
+        return self.__python_path
+
+    def _set_python_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("pythonPath must be str")
+        self.__python_path = value
+
+    python_path = property(_get_python_path, _set_python_path)
+
     def _get_python_inputs(self):
         return self.__python_inputs
 
@@ -1050,16 +1074,6 @@ class PythonConfig(object):
 
     extra_inputs = property(_get_extra_inputs, _set_extra_inputs)
 
-    def _get_python_path(self):
-        return self.__python_path
-
-    def _set_python_path(self, value):
-        if not isinstance(value, str):
-            raise TypeError("pythonPath must be str")
-        self.__python_path = value
-
-    python_path = property(_get_python_path, _set_python_path)
-
     def _get_return_all_inputs(self):
         return self.__return_all_inputs
 
@@ -1096,6 +1110,12 @@ class PythonConfig(object):
                 if hasattr(self.__python_code_path, "as_dict")
                 else self.__python_code_path
             )
+        if self.__python_path is not None:
+            d["pythonPath"] = (
+                self.__python_path.as_dict()
+                if hasattr(self.__python_path, "as_dict")
+                else self.__python_path
+            )
         if self.__python_inputs is not None:
             d["pythonInputs"] = (
                 self.__python_inputs.as_dict()
@@ -1114,12 +1134,6 @@ class PythonConfig(object):
                 if hasattr(self.__extra_inputs, "as_dict")
                 else self.__extra_inputs
             )
-        if self.__python_path is not None:
-            d["pythonPath"] = (
-                self.__python_path.as_dict()
-                if hasattr(self.__python_path, "as_dict")
-                else self.__python_path
-            )
         if self.__return_all_inputs is not None:
             d["returnAllInputs"] = (
                 self.__return_all_inputs.as_dict()
@@ -1130,6 +1144,22 @@ class PythonConfig(object):
 
 
 class ServingConfig(object):
+    """ServingConfig
+
+    A serving configuration collects all properties needed to serve your
+    model pipeline within a konduit.InferenceConfig.
+
+    :param http_port: HTTP port of the konduit.Server
+    :param listen_host: host of the konduit.Server, defaults to 'localhost'
+    :param input_data_format: Input data format, see konduit.Input for more information
+    :param output_data_format: Output data format, see konduit.Output for more information
+    :param prediction_type: Prediction type, see konduit.Output for more information
+    :param uploads_directory: to which directory to store file uploads to, defaults to 'file-uploads/'
+    :param log_timings: whether to log timings for this config, defaults to False
+    :param metric_types: the types of metrics logged for your ServingConfig can currently only be configured and
+           extended from Java. don't modify this property.
+    """
+
     _inputDataFormat_enum = enum.Enum(
         "_inputDataFormat_enum", "NUMPY JSON ND4J IMAGE ARROW", module=__name__
     )
@@ -1158,12 +1188,12 @@ class ServingConfig(object):
     def __init__(
         self,
         http_port=None,
-        listen_host=None,
+        listen_host="localhost",
         input_data_format="NUMPY",
         output_data_format="NUMPY",
         prediction_type="RAW",
-        uploads_directory=None,
-        log_timings=True,
+        uploads_directory="file-uploads/",
+        log_timings=False,
         metric_types=None,
     ):
         self.__http_port = http_port
@@ -1320,6 +1350,23 @@ class ServingConfig(object):
 
 
 class PipelineStep(object):
+    """PipelineStep
+
+    PipelineStep collects all ETL and model related properties (input schema,
+    normalization and transform steps, output schema, potential pre-
+    or post-processing etc.). This config is passed to the respective
+    verticle along with konduit.ServingConfig.
+
+    :param input_schemas: dictionary of konduit.SchemaType for input names
+    :param output_schemas: dictionary of konduit.SchemaType for output names
+    :param input_names: list on step input names
+    :param output_names: list of step output names
+    :param input_column_names: dictionary mapping input names to lists of names of your columnar data (e.g.
+           { "input_1": ["col1", "col2"]}
+    :param output_column_names: dictionary mapping output names to lists of names of your columnar data (e.g.
+           { "output_1": ["col1", "col2"]}
+    :param runner: do not touch. internally used to infer the "runner" for this step configuration.
+    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -1345,7 +1392,6 @@ class PipelineStep(object):
         output_column_names=None,
         runner=None,
     ):
-
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
@@ -1486,6 +1532,12 @@ class PipelineStep(object):
 
 
 class NormalizationConfig(object):
+    """NormalizationConfig
+
+    Configuration for data normalization in the ETL part of your pipeline.
+
+    :param config: dictionary of str values defining you normalization step.
+    """
 
     _types_map = {
         "config": {"type": dict, "subtype": None},
@@ -1521,19 +1573,6 @@ class NormalizationConfig(object):
 
 
 class PythonStep(PipelineStep):
-    """PythonStep
-
-    PythonStep defines a custom Python konduit.PipelineStep from a konduit.PythonConfig.
-
-    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.
-    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.
-    :param input_names: list of step input names, see konduit.PipelineStep.
-    :param output_names: list of step input names, see konduit.PipelineStep.
-    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.
-    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.
-    :param python_configs: konduit.PythonConfig
-    :param runner: do not touch, used internally only.
-    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -1561,7 +1600,6 @@ class PythonStep(PipelineStep):
         python_configs=None,
         runner=None,
     ):
-
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
@@ -1723,19 +1761,6 @@ class PythonStep(PipelineStep):
 
 
 class TransformProcessStep(PipelineStep):
-    """TransformProcessStep
-
-    TransformProcessStep defines a konduit.PipelineStep from a DataVec TransformProcess
-
-    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.
-    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.
-    :param input_names: list of step input names, see konduit.PipelineStep.
-    :param output_names: list of step input names, see konduit.PipelineStep.
-    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.
-    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.
-    :param transform_processes: DataVec TransformProcess
-    :param runner: do not touch, used internally only.
-    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -1763,7 +1788,6 @@ class TransformProcessStep(PipelineStep):
         transform_processes=None,
         runner=None,
     ):
-
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
@@ -1956,7 +1980,6 @@ class ModelStep(PipelineStep):
         normalization_config=None,
         runner=None,
     ):
-
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
@@ -2152,19 +2175,6 @@ class ModelStep(PipelineStep):
 
 
 class ArrayConcatenationStep(PipelineStep):
-    """ArrayConcatenationStep
-
-    konduit.PipelineStep that concatenates two or more arrays along the specified dimensions.
-
-    :param input_schemas:
-    :param output_schemas:
-    :param input_names:
-    :param output_names:
-    :param input_column_names:
-    :param output_column_names:
-    :param concat_dimensions: dictionary of array indices to concatenation dimension
-    :param runner: do not touch, only used internally.
-    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -2192,7 +2202,6 @@ class ArrayConcatenationStep(PipelineStep):
         concat_dimensions=None,
         runner=None,
     ):
-
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__input_names = input_names
@@ -2858,6 +2867,23 @@ class ImageLoadingStep(PipelineStep):
 
 
 class MemMapConfig(object):
+    """MemMapConfig
+
+    Configuration for managing serving of memory-mapped files. The goal is to mem-map
+    and serve a large array stored in "array_path" and get slices of this array on demand
+    by index. If an index is specified that does not match an index of the mem-mapped array,
+    an default or "unknown" vector is inserted into the slice instead, which is stored in
+    "unk_vector_path".
+
+    For instance, let's say we want to mem-map [[1, 2, 3], [4, 5, 6]], a small array with two
+    valid slices. Our unknown vector is simply [0, 0, 0] in this example. Now, if we query for
+    the indices {-2, 1} we'd get [[0, 0, 0], [4, 5, 6]].
+
+    :param array_path: path: path to the file containing the large array you want to memory-map
+    :param unk_vector_path: path to the file containing the "unknown" vector / slice
+    :param initial_memmap_size: size of the mem-map, defaults to 1000000000
+    :param work_space_name: DL4J 'WorkSpace' name, defaults to 'memMapWorkspace'
+    """
 
     _types_map = {
         "arrayPath": {"type": str, "subtype": None},
@@ -2949,6 +2975,15 @@ class MemMapConfig(object):
 
 
 class InferenceConfiguration(object):
+    """InferenceConfiguration
+
+    This configuration object brings together all properties to serve a set of
+    pipeline steps for inference.
+
+    :param steps: list of konduit.PipelineStep
+    :param serving_config: a konduit.ServingConfig
+    :param mem_map_config: a konduit.MemMapConfig
+    """
 
     _types_map = {
         "steps": {"type": list, "subtype": PipelineStep},

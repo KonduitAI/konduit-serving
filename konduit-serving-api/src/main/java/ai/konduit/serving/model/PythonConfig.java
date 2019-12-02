@@ -31,13 +31,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
+/**
+ * Extension of {@link ModelConfig} for custom Python steps.
+ */
 @Data
 @NoArgsConstructor
 @Slf4j
 @SuperBuilder
-/**
- * Extension of {@link ModelConfig} for custom Python steps.
- */
 public class PythonConfig extends ModelConfig {
 
     private String  pythonCode, pythonCodePath, pythonPath;
@@ -45,8 +45,7 @@ public class PythonConfig extends ModelConfig {
     @Singular
     private Map<String,String>  pythonInputs, pythonOutputs, extraInputs;
 
-    @Builder.Default
-    private boolean returnAllInputs = false;
+    private boolean returnAllInputs;
 
     private static String defaultPythonPath;
 

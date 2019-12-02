@@ -39,10 +39,10 @@ import java.util.List;
  * Executes expansion of json objects in to "real" objects.
  * This is needed when integrating with {@link PipelineStepRunner}
  * that may output {@link Text} with json arrays or json objects.
- * This kind of output is generally expected from python or pmml based konduit-serving
+ * This kind of output is generally expected from python or pmml based pipelines
  * which have a lot more complicated output and schema based values
  * rather than straight {@link org.nd4j.linalg.api.ndarray.INDArray} like
- * most deep learning konduit-serving will be.
+ * most deep learning pipelines will be.
  *
  * @author Adam Gibson
  *

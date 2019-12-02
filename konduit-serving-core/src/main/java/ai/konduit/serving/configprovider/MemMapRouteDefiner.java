@@ -71,7 +71,7 @@ import java.util.List;
 @Slf4j
 public class MemMapRouteDefiner {
 
-    private INDArray unkVector;
+    private INDArray unknownVector;
     private ThreadLocal<INDArray> arr;
     private MemMapConfig memMapConfig;
 
@@ -117,7 +117,7 @@ public class MemMapRouteDefiner {
        if(path != null) {
            try {
                byte[] content = FileUtils.readFileToByteArray(new File(path));
-               unkVector = Nd4j.createNpyFromByteArray(content);
+               unknownVector = Nd4j.createNpyFromByteArray(content);
            } catch (IOException e) {
                throw new IllegalStateException("Unable to load unknown vector: " + path);
            }
@@ -308,7 +308,6 @@ public class MemMapRouteDefiner {
     private INDArray getArrayFromContext(RoutingContext ctx) {
         ctx.response().setStatusCode(200);
         ctx.response().setChunked(false);
-        String testBody = ctx.getBodyAsString();
         JsonArray bodyAsJson = ctx.getBodyAsJsonArray();
 
         if(bodyAsJson == null) {
@@ -323,12 +322,13 @@ public class MemMapRouteDefiner {
         for(int i = 0; i < jsonArray.size(); i++) {
             int idx = jsonArray.getInteger(i);
             if(idx < 0) {
-                if(unkVector != null) {
-                    slices.add(unkVector);
+                if(unknownVector != null) {
+                    slices.add(unknownVector);
                 }
                 else {
                     ctx.response().setStatusCode(400);
-                    ctx.response().setStatusMessage("Unknown vector specified, but server did not have one configured. Please specify a vector upon startup.");
+                    ctx.response().setStatusMessage("Unknown vector specified, but server did not have one " +
+                            "configured. Please specify a vector upon startup.");
                     ctx.response().setChunked(false);
                 }
             }
