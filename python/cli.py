@@ -141,15 +141,30 @@ def serve(config, start_server):
     required=True,
     help="Relative or absolute path to your konduit serving config file.",
 )
-@click.option("--numpy_data", help="Path to your numpy data")
-def predict_numpy(config, numpy_data):
-    """Get predictions for your pipeline from numpy input."""
-    # TODO: Note that this is a very limited use case for demo purposes only. we need a more reliable
-    #  system going forward.
+@click.option(
+    "--numpy_data",
+    required=True,
+    help="Comma-separated list of paths to your numpy data",
+)
+@click.option(
+    "--input_names",
+    default="default",
+    help="Comma-separated list of the input names to your pipeline",
+)
+def predict_numpy(config, numpy_data, input_names):
+    """Get predictions for your pipeline from numpy data and input names"""
     from konduit.load import client_from_file
 
+    numpy_files = numpy_data.split(",")
+    input_names = input_names.split(",")
+    assert len(numpy_files) == len(input_names)
+
     client = client_from_file(file_path=config)
-    print(client.predict(np.load(numpy_data)))
+
+    input_dict = {}
+    for i in range(len(numpy_files)):
+        input_dict[input_names[i]] = np.load(numpy_files[i])
+    print(client.predict(input_dict))
 
 
 @click.command()
