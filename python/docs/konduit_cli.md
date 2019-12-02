@@ -59,7 +59,6 @@ serving:
   log_timings: True
   extra_start_args: -Xmx8g
   jar_path: konduit.jar
-  sleep: 1
 steps:
   python_step:
     type: PYTHON
@@ -70,7 +69,7 @@ steps:
     python_outputs:
       second: NDARRAY
 client:
-    url: http://localhost:1337
+    port: 1337
 ```
 
 This Konduit experiment describes how your model will be run, what inputs it takes and

@@ -23,6 +23,8 @@
 package ai.konduit.serving.verticles.nd4j.memmap;
 
 import ai.konduit.serving.verticles.BaseVerticleTest;
+import ai.konduit.serving.verticles.inference.InferenceVerticle;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
@@ -43,15 +45,13 @@ import org.nd4j.serde.binary.BinarySerde;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 
-import static junit.framework.TestCase.assertTrue;
-
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class MemMapWholeArrayVerticleTest extends BaseVerticleTest {
+public class MemMapWholeArrayVerticleTest extends BaseMemMapTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
-        return MemMapVerticle.class;
+        return InferenceVerticle.class;
     }
 
     @After
@@ -83,7 +83,6 @@ public class MemMapWholeArrayVerticleTest extends BaseVerticleTest {
 
 
     @Test(timeout = 60000)
-
     public void testArrayResultRangeJson(TestContext context) {
         HttpClient httpClient = vertx.createHttpClient();
         JsonArray jsonArray = new JsonArray();
@@ -121,15 +120,4 @@ public class MemMapWholeArrayVerticleTest extends BaseVerticleTest {
     }
 
 
-    @Override
-    public JsonObject getConfigObject() throws Exception {
-        JsonObject config = new JsonObject();
-        config.put("httpPort",String.valueOf(port));
-        INDArray arr = Nd4j.linspace(1,4,4);
-        File tmpFile = new File(temporary.getRoot(),"tmpfile.bin");
-        BinarySerde.writeArrayToDisk(arr,tmpFile);
-        assertTrue(tmpFile.exists());
-        config.put(MemMapVerticle.ARRAY_URL,tmpFile.getAbsolutePath());
-        return config;
-    }
 }

@@ -23,6 +23,8 @@
 package ai.konduit.serving.verticles.nd4j.memmap;
 
 import ai.konduit.serving.verticles.BaseVerticleTest;
+import ai.konduit.serving.verticles.inference.InferenceVerticle;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
@@ -43,22 +45,9 @@ import org.nd4j.serde.binary.BinarySerde;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 
-import static junit.framework.TestCase.assertTrue;
-
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class MemMapArrayResultRangeVerticleTest extends BaseVerticleTest {
-
-    @Override
-    public Class<? extends AbstractVerticle> getVerticalClazz() {
-        return MemMapVerticle.class;
-    }
-
-    @After
-    public void after(TestContext context) {
-        vertx.close(context.asyncAssertSuccess());
-    }
-
+public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verticles.nd4j.memmap.BaseMemMapTest {
 
 
     @Override
@@ -85,7 +74,7 @@ public class MemMapArrayResultRangeVerticleTest extends BaseVerticleTest {
     }
 
 
-    @Test(timeout = 600000)
+    @Test(timeout = 60000)
 
     public void testArrayResultRange(TestContext context) {
         HttpClient httpClient = vertx.createHttpClient();
@@ -121,15 +110,5 @@ public class MemMapArrayResultRangeVerticleTest extends BaseVerticleTest {
 
 
 
-    @Override
-    public JsonObject getConfigObject() throws Exception {
-        JsonObject config = new JsonObject();
-        config.put("httpPort",String.valueOf(port));
-        INDArray arr = Nd4j.linspace(1,4,4);
-        File tmpFile = new File(temporary.getRoot(),"tmpfile.bin");
-        BinarySerde.writeArrayToDisk(arr,tmpFile);
-        assertTrue(tmpFile.exists());
-        config.put(MemMapVerticle.ARRAY_URL,tmpFile.getAbsolutePath());
-        return config;
-    }
+
 }

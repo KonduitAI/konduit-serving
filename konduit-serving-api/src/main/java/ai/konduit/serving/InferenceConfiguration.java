@@ -24,6 +24,7 @@ package ai.konduit.serving;
 
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.config.MemMapConfig;
 import lombok.*;
 import org.datavec.api.transform.serde.JsonMappers;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
@@ -40,9 +41,9 @@ import java.util.List;
 public class InferenceConfiguration implements Serializable  {
 
     @Singular
-    private List<PipelineStep> pipelineSteps;
+    private List<PipelineStep> steps;
     private ServingConfig servingConfig;
-
+    private MemMapConfig memMapConfig;
 
     /**
      * Returns a serving configuration if one is defined

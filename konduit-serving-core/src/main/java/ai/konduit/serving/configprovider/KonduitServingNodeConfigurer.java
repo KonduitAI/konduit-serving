@@ -117,6 +117,7 @@ public class KonduitServingNodeConfigurer {
 
     private MeterRegistry registry = BackendRegistries.getDefaultNow();
     @lombok.Builder.Default
+    @Parameter(names = "--pidFile",help = true,description = "The absolute path to use for creating the pid file. This defaults to the <current_dir>/konduit-serving.pid")
     private String pidFile = new File(System.getProperty("user.dir"),"konduit-serving.pid").getAbsolutePath();
     @lombok.Builder.Default
     @Parameter(names = {"--eventLoopTimeout"},help = true,description = "The event loop timeout")
@@ -187,9 +188,7 @@ public class KonduitServingNodeConfigurer {
         //logging using slf4j: defaults to jul
         setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory");
 
-        PrometheusMeterRegistry prometheusBackendRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        registry = prometheusBackendRegistry;
-
+        registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
 
         MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
                 .setMicrometerRegistry(registry)
@@ -207,7 +206,6 @@ public class KonduitServingNodeConfigurer {
                 .setWorkerPoolSize(workerPoolSize)
                 .setMetricsOptions(micrometerMetricsOptions);
 
-
         vertxOptions.getEventBusOptions().setClustered(isClustered);
         vertxOptions.getEventBusOptions().setPort(eventBusPort);
         vertxOptions.getEventBusOptions().setHost(eventBusHost);
@@ -218,9 +216,6 @@ public class KonduitServingNodeConfigurer {
             log.debug("Attempting to resolve verticle name");
             verticleClassName = ai.konduit.serving.verticles.inference.InferenceVerticle.class.getName();
         }
-
-
-
 
         if (configStoreType != null && configStoreType.equals("file")) {
             log.debug("Using file storage type.");
@@ -241,7 +236,6 @@ public class KonduitServingNodeConfigurer {
                 .addStore(httpStore);
 
     }
-
 
     /**
      * Configure the deployment options
@@ -277,7 +271,7 @@ public class KonduitServingNodeConfigurer {
             else if(configPath.endsWith(".yml")) {
                 File configInputYaml = new File(configPath);
                 File tmpConfigJson = new File(configInputYaml.getParent(), java.util.UUID.randomUUID() + "-config.json");
-                log.info("Rewriting yml " + configPath + " to json " + tmpConfigJson + " . THis file will disappear after server is stopped.");
+                log.info("Rewriting yml " + configPath + " to json " + tmpConfigJson + " . This file will disappear after server is stopped.");
                 tmpConfigJson.deleteOnExit();
 
                 try {
@@ -291,7 +285,7 @@ public class KonduitServingNodeConfigurer {
                     log.info("Rewrote input config yaml to path " + tmpConfigJson.getAbsolutePath());
 
                 } catch (IOException e) {
-                    log.error("Unable to rewrite configuration as json ",e);
+                    log.error("Unable to rewrite configuration as json ", e);
                 }
             }
 
@@ -306,13 +300,9 @@ public class KonduitServingNodeConfigurer {
         }
         else if(org.apache.commons.lang3.SystemUtils.IS_OS_MAC) {
             return org.bytedeco.systems.global.macosx.getpid();
-
         }
         else {
             return org.bytedeco.systems.global.linux.getpid();
         }
     }
-
-
-
 }

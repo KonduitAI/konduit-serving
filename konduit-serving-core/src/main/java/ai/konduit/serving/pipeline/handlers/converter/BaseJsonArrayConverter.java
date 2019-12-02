@@ -68,7 +68,7 @@ public abstract  class BaseJsonArrayConverter implements JsonArrayConverter {
      * given input (an array of json objects)
      * to an {@link ArrowWritableRecordBatch}
      * for use with {@link org.nd4j.linalg.api.ndarray.INDArray}
-     * based pipelines (usually dl4j).
+     * based konduit-serving (usually dl4j).
      * Note that since index matters for this conversion (due to {@link org.nd4j.linalg.api.ndarray.INDArray}
      * being index based) - internally, a inputSchema permutation happens to match the indices
      * appropriate for use with the given inputSchema

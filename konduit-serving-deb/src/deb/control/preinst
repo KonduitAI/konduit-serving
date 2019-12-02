@@ -1,21 +1,21 @@
 #!/bin/sh
 
-if ! getent passwd pipelines > /dev/null
+if ! getent passwd konduit-serving > /dev/null
 then
-    echo "adding user pipelines:daemon"
-    useradd -r -M -d /srv/pipelines -s /sbin/nologin \
-    -c "konduit serving Daemon" pipelines
+    echo "adding user konduit-serving:daemon"
+    useradd -r -M -d /srv/konduit-serving -s /sbin/nologin \
+    -c "konduit serving Daemon" konduit-serving
 fi
 
-mkdir /var/run/pipelines
-mkdir /var/pipelines
-mkdir /var/log/pipelines
-chown -R pipelines:daemon /var/run/pipelines
-chown -R pipelines:daemon /opt/pipelines
-chown -R pipelines:daemon /var/pipelines
-chown -R pipelines:daemon /var/log/pipelines
-chmod 755 /var/pipelines
-chmod 755 /var/run/pipelines
-chmod 755 /var/log/pipelines
+mkdir /var/run/konduit-serving
+mkdir /var/konduit-serving
+mkdir /var/log/konduit-serving
+chown -R konduit-serving:daemon /var/run/konduit-serving
+chown -R konduit-serving:daemon /opt/konduit-serving
+chown -R konduit-serving:daemon /var/konduit-serving
+chown -R konduit-serving:daemon /var/log/konduit-serving
+chmod 755 /var/konduit-serving
+chmod 755 /var/run/konduit-serving
+chmod 755 /var/log/konduit-serving
 
 exit 0

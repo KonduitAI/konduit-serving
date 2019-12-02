@@ -60,12 +60,20 @@ import org.deeplearning4j.zoo.util.Labels;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
+import org.nd4j.arrow.ArrowSerde;
+import org.nd4j.serde.binary.BinarySerde;
+import org.nd4j.linalg.factory.Nd4j;
 
+import java.nio.ByteBuffer;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import io.netty.buffer.Unpooled;
+
+import org.apache.arrow.flatbuf.Tensor;
 
 
 /**
@@ -124,19 +132,19 @@ public class PipelineExecutioner {
     public void init() {
         ServingConfig servingConfig = config.getServingConfig();
         //initialize input and output data types
-        this.pipeline = Pipeline.getPipeline(config.getPipelineSteps());
-        for (int i = 0; i < config.getPipelineSteps().size(); i++) {
-            PipelineStep pipelineStep = config.getPipelineSteps().get(i);
+        this.pipeline = Pipeline.getPipeline(config.getSteps());
+        for (int i = 0; i < config.getSteps().size(); i++) {
+            PipelineStep pipelineStep = config.getSteps().get(i);
             PipelineStepRunner pipelineStepRunner = pipeline.getSteps().get(i);
             Preconditions.checkNotNull(pipelineStep,"Pipeline step at " + i + " was null!");
             //only use the first input names that appear in the pipeline
             if (inputNames == null && pipelineStep.getInputNames() != null && !pipelineStep.getInputNames().isEmpty()) {
-                inputNames = config.getPipelineSteps().get(i).getInputNames();
+                inputNames = config.getSteps().get(i).getInputNames();
             }
 
             //always have output names change to the last defined names in the pipeline
             if (pipelineStep.getOutputNames() != null && !pipelineStep.getOutputNames().isEmpty()) {
-                outputNames = config.getPipelineSteps().get(i).getOutputNames();
+                outputNames = config.getSteps().get(i).getOutputNames();
             }
 
 
@@ -186,7 +194,7 @@ public class PipelineExecutioner {
 
 
         try {
-            if(servingConfig.getOutputDataType() == Output.DataType.JSON) {
+            if(servingConfig.getOutputDataFormat() == Output.DataFormat.JSON) {
                 multiOutputAdapter = outputAdapterFor(config().serving().getPredictionType(), objectDetectionConfig);
             }
             else {
@@ -198,7 +206,7 @@ public class PipelineExecutioner {
         }
 
 
-        if (servingConfig.getInputDataType() == null) {
+        if (servingConfig.getInputDataFormat() == null) {
             throw new IllegalStateException("Please define an input data type!");
         }
 
@@ -274,10 +282,10 @@ public class PipelineExecutioner {
      * Perform inference for the
      * endpoint using the inference executioner.
      * @param ctx                the routing context to use representing the current request
-     * @param responseOutputType the {@link Output.DataType} for the output
+     * @param responseOutputType the {@link Output.DataFormat} for the output
      * @param inputs             the inputs based on the input data
      */
-    public void doInference(io.vertx.ext.web.RoutingContext ctx, Output.DataType responseOutputType, org.datavec.api.records.Record[] inputs) {
+    public void doInference(io.vertx.ext.web.RoutingContext ctx, Output.DataFormat responseOutputType, org.datavec.api.records.Record[] inputs) {
         if(inputs == null || inputs.length < 1 || inputs[0] == null) {
             throw new IllegalStateException("No inputs specified!");
         }
@@ -337,14 +345,14 @@ public class PipelineExecutioner {
      *                         json
      * @param transformProcess the transform process to use
      * @param outputSchema the output schema
-     * @param outputDataType the output data type for the pipeline
+     * @param outputDataFormat the output data type for the pipeline
      */
     public void doInference(RoutingContext ctx,
                             Output.PredictionType outputAdapterType,
                             String input,
                             Schema conversionSchema,
                             TransformProcess transformProcess,
-                            Schema outputSchema, Output.DataType outputDataType) {
+                            Schema outputSchema, Output.DataFormat outputDataFormat) {
 
         Preconditions.checkNotNull(input,"Input data was null!");
 
@@ -388,11 +396,11 @@ public class PipelineExecutioner {
                     throw new IllegalStateException("Illegal type for json.");
             }
 
-            writeResponse(adapt, Output.DataType.JSON,UUID.randomUUID().toString(),ctx);
+            writeResponse(adapt, Output.DataFormat.JSON,UUID.randomUUID().toString(),ctx);
 
         }
         else if(records.length == 1 &&  records[0].getRecord().get(0) instanceof Text) {
-            if(outputDataType == Output.DataType.JSON) {
+            if(outputDataFormat == Output.DataFormat.JSON) {
                 JsonObject writeJson = new JsonObject();
                 for(int i = 0; i < records[0].getRecord().size(); i++) {
                     Text text = (Text) records[0].getRecord().get(i);
@@ -401,7 +409,7 @@ public class PipelineExecutioner {
                         JsonObject jsonObject1 = new JsonObject(text.toString());
                         writeJson.put(outputSchema.getName(i),jsonObject1);
                     }
-                    else if(text.toString().charAt(0) == ']'){
+                    else if(text.toString().charAt(0) == '[') {
                         JsonArray jsonObject = new JsonArray(text.toString());
                         writeJson.put(outputSchema.getName(i),jsonObject);
                     }
@@ -411,22 +419,22 @@ public class PipelineExecutioner {
                     }
                 }
 
-                log.info("Writing json response.");
+                log.debug("Writing json response.");
                 String write = writeJson.encodePrettily();
                 ctx.response().putHeader("Content-Type", "application/json");
                 ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
                 ctx.response().end(write);
             }
-            else if(outputDataType == Output.DataType.ARROW){
+            else if(outputDataFormat == Output.DataFormat.ARROW){
                 writeArrowResponse(ctx, outputSchema, convert);
             }
             else {
-                throw new IllegalStateException("Illegal data type response " + outputDataType);
+                throw new IllegalStateException("Illegal data type response " + outputDataFormat);
             }
 
 
         }
-        else if(outputDataType == Output.DataType.JSON) {
+        else if(outputDataFormat == Output.DataFormat.JSON) {
             JsonArray newArray = new JsonArray();
             for(Record record : records) {
                 JsonObject row = new JsonObject();
@@ -462,14 +470,14 @@ public class PipelineExecutioner {
                 newArray.add(row);
             }
 
-            log.info("Writing json response.");
+            log.debug("Writing json response.");
             String write = newArray.encodePrettily();
             ctx.response().putHeader("Content-Type", "application/json");
             ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
             ctx.response().end(write);
 
         }
-        else if(outputDataType == Output.DataType.ARROW) {
+        else if(outputDataFormat == Output.DataFormat.ARROW) {
             writeArrowResponse(ctx, outputSchema, convert);
         }
     }
@@ -490,7 +498,7 @@ public class PipelineExecutioner {
     }
 
     private void timedResponse(RoutingContext ctx,
-                               Output.DataType responseOutputType,
+                               Output.DataFormat responseOutputType,
                                String batchId,
                                INDArray[] execute,
                                Map<String, BatchOutput> adapt) {
@@ -522,11 +530,11 @@ public class PipelineExecutioner {
      * @param ctx     the routing context
      */
     protected void writeResponse(Map<String, BatchOutput> adapt,
-                                 Output.DataType responseOutputType,
+                                 Output.DataFormat responseOutputType,
                                  String batchId,
                                  RoutingContext ctx) {
 
-        if (responseOutputType == Output.DataType.JSON) {
+        if (responseOutputType == Output.DataFormat.JSON) {
             if (adapt == null) {
                 log.warn(" Adapt output was null!");
                 ctx.response().setStatusCode(500);
@@ -563,17 +571,17 @@ public class PipelineExecutioner {
         } else {
             if (adapt.size() > 1) {
                 Buffer buffer = zipBuffer(adapt, responseOutputType);
-                writeBinary(buffer, batchId, ctx);
+                writeBinary(buffer, ctx);
             } else {
                 Map.Entry<String, BatchOutput> entry = adapt.entrySet().iterator().next();
-                writeBinary(convertBatchOutput(entry.getValue(), responseOutputType), batchId, ctx);
+                writeBinary(convertBatchOutput(entry.getValue(), responseOutputType), ctx);
             }
         }
 
     }
 
 
-    private void writeBinary(Buffer buffer, String batchId, RoutingContext ctx) {
+    private void writeBinary(io.vertx.core.buffer.Buffer buffer, io.vertx.ext.web.RoutingContext ctx) {
         try {
             ctx.response().putHeader("Content-Type", "application/octet-stream");
             ctx.response().putHeader("Content-Length", String.valueOf(buffer.length()));
@@ -626,7 +634,7 @@ public class PipelineExecutioner {
      * @param responseOutputType the response type
      * @return the zip file with each output's name being an entry in the zip file.
      */
-    public static Buffer zipBuffer(Map<String,BatchOutput> adapt, Output.DataType responseOutputType) {
+    public static Buffer zipBuffer(Map<String,BatchOutput> adapt, Output.DataFormat responseOutputType) {
         try(ByteArrayOutputStream baos = new ByteArrayOutputStream();
             java.util.zip.ZipOutputStream out = new java.util.zip.ZipOutputStream(baos)) {
             for (Map.Entry<String, BatchOutput> outputEntry : adapt.entrySet()) {
@@ -649,11 +657,8 @@ public class PipelineExecutioner {
 
 
         } catch (java.io.IOException e) {
-            e.printStackTrace();
+            log.error("Unable to zip buffer",e);
         }
-
-
-
 
         return null;
 
@@ -662,12 +667,12 @@ public class PipelineExecutioner {
 
     /**
      * Convert a batch output {@link NDArrayOutput}
-     * given a {@link Output.DataType}
+     * given a {@link Output.DataFormat}
      * @param batchOutput the batch output to convert
      * @param responseOutputType the response type
      * @return converted buffer
      */
-    public static Buffer convertBatchOutput(BatchOutput batchOutput, Output.DataType responseOutputType) {
+    public static Buffer convertBatchOutput(BatchOutput batchOutput, Output.DataFormat responseOutputType) {
         NDArrayOutput ndArrayOutput = (NDArrayOutput) batchOutput;
         return convertBatchOutput(ndArrayOutput.getNdArray(),responseOutputType);
     }
@@ -676,29 +681,31 @@ public class PipelineExecutioner {
 
     /**
      * Convert a {@link INDArray}
-     * given a {@link Output.DataType}
+     * given a {@link Output.DataFormat}
      * @param input the batch ndarray to convert
      * @param responseOutputType the response type
      * @return converted buffer
      */
-    public static Buffer convertBatchOutput(INDArray input, Output.DataType responseOutputType) {
+    public static Buffer convertBatchOutput(INDArray input, Output.DataFormat responseOutputType) {
         Preconditions.checkNotNull(input,"Input was null!");
         Preconditions.checkNotNull(responseOutputType,"Response output type was null!");
         Buffer ret = null;
 
         switch(responseOutputType) {
             case NUMPY:
-                ret = Buffer.buffer(io.netty.buffer.Unpooled.wrappedBuffer(java.nio.ByteBuffer.wrap(org.nd4j.linalg.factory.Nd4j.toNpyByteArray(input))));
+                ret = Buffer.buffer(Unpooled.wrappedBuffer(ByteBuffer.wrap(Nd4j.toNpyByteArray(input))));
                 break;
             case ND4J:
-                java.nio.ByteBuffer byteBuffer2 = org.nd4j.serde.binary.BinarySerde.toByteBuffer(input);
-                ret = Buffer.buffer(io.netty.buffer.Unpooled.wrappedBuffer(byteBuffer2));
+                ByteBuffer byteBuffer2 = BinarySerde.toByteBuffer(input);
+                ret = Buffer.buffer(Unpooled.wrappedBuffer(byteBuffer2));
                 break;
             case ARROW:
-                org.apache.arrow.flatbuf.Tensor tensor = org.nd4j.arrow.ArrowSerde.toTensor(input);
-                ret = Buffer.buffer(io.netty.buffer.Unpooled.wrappedBuffer(tensor.getByteBuffer()));
+                Tensor tensor = ArrowSerde.toTensor(input);
+                ret = Buffer.buffer(Unpooled.wrappedBuffer(tensor.getByteBuffer()));
                 break;
-
+            case JSON:
+                ret = Buffer.buffer(input.toStringFull());
+                break;
         }
 
         return ret;

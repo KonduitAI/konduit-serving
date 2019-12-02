@@ -1,12 +1,11 @@
-from konduit import ParallelInferenceConfig, ServingConfig, TensorFlowConfig, ModelConfigType
-from konduit import TensorDataTypesConfig, ModelStep, InferenceConfiguration
-from konduit.server import Server
-from konduit.client import Client
-from konduit.utils import is_port_in_use
+import random
 
 import numpy as np
-import time
-import random
+from konduit import ParallelInferenceConfig, ServingConfig, TensorFlowConfig, ModelConfigType
+from konduit import TensorDataTypesConfig, ModelStep, InferenceConfiguration
+from konduit.client import Client
+from konduit.server import Server
+from konduit.utils import is_port_in_use
 
 
 def test_server_start():
@@ -16,8 +15,8 @@ def test_server_start():
     port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(http_port=port,
-                                   input_data_type='NUMPY',
-                                   output_data_type='NUMPY',
+                                   input_data_format='NUMPY',
+                                   output_data_format='NUMPY',
                                    log_timings=True)
 
     tensorflow_config = TensorFlowConfig(
@@ -35,17 +34,15 @@ def test_server_start():
                                     output_names=output_names)
 
     inference = InferenceConfiguration(serving_config=serving_config,
-                                       pipeline_steps=[model_pipeline_step])
+                                       steps=[model_pipeline_step])
 
     server = Server(inference_config=inference,
                     extra_start_args='-Xmx8g',
                     jar_path='konduit.jar')
     server.start()
-    client = Client(input_names=input_names,
-                    output_names=output_names,
-                    input_type='NUMPY',
-                    endpoint_output_type='NUMPY',
-                    url='http://localhost:' + str(port))
+    client = Client(input_data_format='NUMPY',
+                    output_data_format='NUMPY',
+                    port=port)
 
     data_input = {
         'IteratorGetNext:0': np.load('../data/input-0.npy'),
@@ -53,9 +50,6 @@ def test_server_start():
         'IteratorGetNext:4': np.load('../data/input-4.npy')
     }
 
-    sleep_time = 100
-    print('Process started. Sleeping ' + str(sleep_time) + ' seconds.')
-    time.sleep(sleep_time)
     assert is_port_in_use(port)
 
     try:

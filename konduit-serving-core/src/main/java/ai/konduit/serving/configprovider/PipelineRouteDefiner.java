@@ -56,6 +56,8 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.micrometer.backends.BackendRegistries;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.base.Preconditions;
@@ -66,13 +68,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import lombok.extern.slf4j.Slf4j;
+import lombok.Getter;
+
 /**
  * Handles setting up a router for doing pipeline based inference.
  *
  * @author Adam Gibson
  */
-@lombok.extern.slf4j.Slf4j
-@lombok.Getter
+@Slf4j
+@Getter
 public class PipelineRouteDefiner {
 
     protected PipelineExecutioner pipelineExecutioner;
@@ -172,14 +177,32 @@ public class PipelineRouteDefiner {
         healthCheckHandler = HealthCheckHandler.create(vertx);
         router.get("/healthcheck*").handler(healthCheckHandler);
 
+        router.get("/config")
+                .produces("application/json").handler(ctx -> {
+            try {
+                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().end(vertx.getOrCreateContext().config().encode());
+            } catch (Exception e) {
+                ctx.fail(500, e);
+            }
+        });
+
+        router.get("/config/pretty")
+                .produces("application/json").handler(ctx -> {
+            try {
+                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().end(vertx.getOrCreateContext().config().encodePrettily());
+            } catch (Exception e) {
+                ctx.fail(500, e);
+            }
+        });
+
         router.get("/metrics").handler(io.vertx.micrometer.PrometheusScrapingHandler.create())
                 .failureHandler(failureHandler -> {
                     if(failureHandler.failure() != null) {
                         log.error("Failed to scrape metrics",failureHandler.failure());
                     }
                 });
-
-
 
 
 
@@ -209,7 +232,7 @@ public class PipelineRouteDefiner {
                 .produces("application/json").handler(ctx -> {
             PredictionType outputAdapterType = PredictionType.valueOf(ctx.pathParam("operation").toUpperCase());
             if(inputSchema == null) {
-                for(PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
+                for(PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
                     if(pipelineStep instanceof ModelStep) {
                         inputSchema = pipelineStep.inputSchemaForName("default");
                     }
@@ -223,7 +246,7 @@ public class PipelineRouteDefiner {
             }
 
             if(outputSchema == null) {
-                for(PipelineStep pipelineStep : inferenceConfiguration.getPipelineSteps()) {
+                for(PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
                     if(pipelineStep instanceof ModelStep) {
                         outputSchema = pipelineStep.outputSchemaForName("default");
                     }
@@ -249,7 +272,7 @@ public class PipelineRouteDefiner {
                         inputSchema,
                         null,
                         outputSchema,
-                        inferenceConfiguration.getServingConfig().getOutputDataType());
+                        inferenceConfiguration.getServingConfig().getOutputDataFormat());
                 if(start != null)
                     start.stop();
             } catch (Exception e) {
@@ -331,7 +354,7 @@ public class PipelineRouteDefiner {
                         start = inferenceExecutionTimer.start();
                     pipelineExecutioner.doInference(
                             ctx,
-                            inferenceConfiguration.serving().getOutputDataType(),
+                            inferenceConfiguration.serving().getOutputDataFormat(),
                             inputs);
 
                     if(start != null)
@@ -413,7 +436,7 @@ public class PipelineRouteDefiner {
             }
 
             String outputType = ctx.pathParam("predictionType");
-            Output.DataType outputAdapterType = Output.DataType.valueOf(outputType.toUpperCase());
+            Output.DataFormat outputAdapterType = Output.DataFormat.valueOf(outputType.toUpperCase());
             ctx.vertx().executeBlocking(handler -> {
                 try {
                     long nanos = System.nanoTime();
@@ -440,7 +463,6 @@ public class PipelineRouteDefiner {
 
         });
 
-
         if (pipelineExecutioner == null) {
             log.debug("Initializing inference executioner after starting verticle");
             //note that we initialize this after the verticle is started
@@ -462,7 +484,7 @@ public class PipelineRouteDefiner {
 
     private Map<String, InputAdapter<Buffer, ?>> getAdapterMap(RoutingContext ctx) {
         Map<String, InputAdapter<Buffer, ?>> adapters = new HashMap<>();
-        Input.DataType inputAdapterType = Input.DataType.valueOf(ctx.pathParam("inputType").toUpperCase());
+        Input.DataFormat inputAdapterType = Input.DataFormat.valueOf(ctx.pathParam("inputType").toUpperCase());
         InputAdapter<Buffer,?> adapter = getAdapter(inputAdapterType);
         for(String inputName : inputNames()) {
             adapters.put(inputName,adapter);
@@ -471,8 +493,8 @@ public class PipelineRouteDefiner {
     }
 
 
-    private InputAdapter<Buffer,?> getAdapter(Input.DataType inputDataType) {
-        switch(inputDataType) {
+    private InputAdapter<Buffer,?> getAdapter(Input.DataFormat inputDataFormat) {
+        switch(inputDataFormat) {
             case NUMPY:
                 return new VertxBufferNumpyInputAdapter();
             case ND4J:
