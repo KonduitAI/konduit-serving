@@ -48,8 +48,8 @@ class Client(object):
         host="http://localhost",
         convert_to_format=None,
         timeout=60,
-        input_data_format=None,
-        output_data_format=None,
+        input_data_format="NUMPY",
+        output_data_format="NUMPY",
         input_names=None,
         output_names=None,
     ):
@@ -79,8 +79,7 @@ class Client(object):
 
         if input_names is None:
             if not validate_server(url):
-                logging.error("Unable to connect to the server at {}".format(url))
-                exit(-1)
+                raise RuntimeError("Unable to connect to the server at {}".format(url))
             else:
                 try:
                     response = requests.get("{}/config".format(url))
@@ -103,7 +102,7 @@ class Client(object):
                         "{}\nUnable to get configuration from the server. Please verify that the server is "
                         "running without any issues...".format(str(ex))
                     )
-                    exit(-1)
+                    raise RuntimeError(ex)
 
         assert isinstance(input_names, list), "Input names should be a list!"
         assert len(input_names) > 0, "Input names must not be empty!"

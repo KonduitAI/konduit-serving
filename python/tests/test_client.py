@@ -4,7 +4,7 @@ import pytest
 import random
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_client_from_server():
     port = random.randint(1000, 65535)
     serving_config = ServingConfig(http_port=port)
@@ -27,7 +27,12 @@ def test_client_from_server():
 
 @pytest.mark.unit
 def test_multipart_regex():
-    client = Client(input_names=["partname"], output_names=["nobody_cares"])
+    client = Client(
+        port=1337,
+        input_data_format="NUMPY",
+        input_names=["partname"],
+        output_names=["nobody_cares"],
+    )
 
     test_data = {"partname[0]": "foo", "partname[1]": "bar"}
 

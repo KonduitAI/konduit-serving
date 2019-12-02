@@ -12,7 +12,7 @@ def test_pid_storage():
     assert pid == 123
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_pid_creation_removal():
     file_path = "yaml/konduit.yaml"
     running_server = server_from_file(file_path, start_server=True)
