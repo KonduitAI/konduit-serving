@@ -22,28 +22,20 @@
 
 package ai.konduit.serving.verticles.nd4j.memmap;
 
-import ai.konduit.serving.verticles.BaseVerticleTest;
-import ai.konduit.serving.verticles.inference.InferenceVerticle;
-
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.io.File;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -52,30 +44,16 @@ public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verti
 
     @Override
     public Handler<HttpServerRequest> getRequest() {
-        Handler<HttpServerRequest> ret = new Handler<HttpServerRequest>() {
-            @Override
-            public void handle(HttpServerRequest req) {
-                //should be json body of classification
-                req.bodyHandler(body -> {
-                    System.out.println("Finish body" + body);
-                });
 
-                req.exceptionHandler(exception -> {
-                    exception.printStackTrace();
-                });
-
-
-
-
-            }
+        return req -> {
+            //should be json body of classification
+            req.bodyHandler(body -> System.out.println("Finish body" + body));
+            req.exceptionHandler(Throwable::printStackTrace);
         };
-
-        return ret;
     }
 
 
     @Test(timeout = 60000)
-
     public void testArrayResultRange(TestContext context) {
         HttpClient httpClient = vertx.createHttpClient();
         JsonArray jsonArray = new JsonArray();
@@ -107,8 +85,4 @@ public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verti
 
         async.await();
     }
-
-
-
-
 }
