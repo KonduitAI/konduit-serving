@@ -84,6 +84,13 @@ cd python/tests
 python -m pytest .
 ```
 
+To quickly run unit tests (recommended before each commit), or run the full set of integration tests, you can do:
+
+```shell script
+pytest -m unit
+pytest -m integration
+```
+
 to also run documentation tests with `doctest` for an individual file, simply run:
 
 ```shell script
