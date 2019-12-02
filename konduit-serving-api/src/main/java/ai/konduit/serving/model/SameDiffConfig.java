@@ -25,14 +25,16 @@ package ai.konduit.serving.model;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * Extension of {@link ModelConfig} for DL4J SameDiff models.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
 public class SameDiffConfig extends ModelConfig {
+
     public final static String SAME_DIFF_EXECUTION_CONFIG_KEY = "sameDiffConfig";
     private TensorDataTypesConfig tensorDataTypesConfig;
-
-
 
 }

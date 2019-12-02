@@ -30,6 +30,9 @@ import java.io.Serializable;
 
 @Data
 @SuperBuilder
+/**
+ * Configuration for object detection output of models.
+ */
 public class ObjectDetectionConfig  implements Serializable {
     @Builder.Default
     private double threshold = 0.5;

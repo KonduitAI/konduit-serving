@@ -409,15 +409,7 @@ class ModelConfigType(object):
 
 
 class ModelConfig(object):
-    """TensorDataType
-
-    Possible data types for tensors. Comes with conversions from TensorFlow
-    and Python and between ND4J types. Choose from
-
-    INVALID, FLOAT, DOUBLE, INT32, UINT8, INT16, INT8, STRING, COMPLEX64,
-    INT64, BOOL, QINT8, QUINT8, QINT32, BFLOAT16, QINT16, QUINT16, UINT16,
-    COMPLEX128, HALF, RESOURCE, VARIANT, UINT32, UINT64
-    """ """ModelConfig
+    """ModelConfig
 
     Model configurations hold the TensorDataTypeConfig and the
     .ModelConfigType of the model you want to serve.
@@ -476,6 +468,15 @@ class ModelConfig(object):
 
 
 class TensorDataType(object):
+    """TensorDataType
+
+    Possible data types for tensors. Comes with conversions from TensorFlow
+    and Python and between ND4J types. Choose from
+
+    INVALID, FLOAT, DOUBLE, INT32, UINT8, INT16, INT8, STRING, COMPLEX64,
+    INT64, BOOL, QINT8, QUINT8, QINT32, BFLOAT16, QINT16, QUINT16, UINT16,
+    COMPLEX128, HALF, RESOURCE, VARIANT, UINT32, UINT64
+    """
 
     _types_map = {}
     _formats_map = {}
@@ -489,6 +490,15 @@ class TensorDataType(object):
 
 
 class PmmlConfig(object):
+    """PmmlConfig
+
+    Configuration for models in PMML format
+
+    :param tensor_data_types_config: konduit.TensorDataTypesConfig
+    :param model_config_type: konduit.ModelConfigType
+    :param evaluator_factory_name: defaults to "org.jpmml.evaluator.ModelEvaluatorFactory". Custom extensions
+           have to be written in Java.
+    """
 
     _types_map = {
         "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
@@ -565,6 +575,16 @@ class PmmlConfig(object):
 
 
 class ObjectDetectionConfig(object):
+    """ObjectDetectionConfig
+
+     Configuration for object detection output of models.
+
+    :param threshold: cut-off threshold for detected objects, defaults to 0.5
+    :param num_labels: the number of labels to predict with your model.
+    :param labels_path: Path to file containing the labels
+    :param priors: list of bounding box priors (list of list of floating point numbers)
+    :param input_shape: input shape of the data
+    """
 
     _types_map = {
         "threshold": {"type": float, "subtype": None},
@@ -678,6 +698,13 @@ class ObjectDetectionConfig(object):
 
 
 class SchemaType(object):
+    """SchemaType
+
+    Type of an input or output to a pipeline step. Can be any of:
+
+    'String', 'Integer', 'Long', 'Double', 'Float', 'Categorical', 'Time', 'Bytes',
+    'Boolean', 'NDArray', 'Image'.
+    """
 
     _types_map = {}
     _formats_map = {}
@@ -691,6 +718,14 @@ class SchemaType(object):
 
 
 class Input(object):
+    """Input
+
+    Used for specifying various kinds of configuration about inputs
+    for the server. Input.DataFormat defines in which data format
+    an input variable is expected to be specified. Can be any of
+
+    'NUMPY', 'JSON', 'ND4J', 'IMAGE', or 'ARROW'
+    """
 
     _types_map = {}
     _formats_map = {}
@@ -704,6 +739,21 @@ class Input(object):
 
 
 class Output(object):
+    """Output
+
+    Used for specifying various kinds of configuration about outputs
+    for the server. Outnput.DataFormat defines in which data format
+    an input variable is expected to be specified. Can be any of
+
+    'NUMPY', 'JSON', 'ND4J', or 'ARROW'.
+
+    Additionally, Output.PredictionType defines the type of prediction
+    you want to specify for your pipeline. The prediction type determines
+    which "output adapter" is used to transform the output. Currently you
+    can choose from the following values:
+
+    'CLASSIFICATION', 'YOLO', 'SSD', 'RCNN', 'RAW', 'REGRESSION'
+    """
 
     _types_map = {}
     _formats_map = {}
@@ -717,6 +767,13 @@ class Output(object):
 
 
 class SameDiffConfig(object):
+    """SameDiffConfig
+
+    Extension of ModelConfig to DL4J SameDiff models
+
+    :param tensor_data_types_config: konduit.TensorDataTypesConfig
+    :param model_config_type: konduit.ModelConfigType
+    """
 
     _types_map = {
         "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
@@ -784,6 +841,13 @@ class TensorFlowConfig(object):
         config_proto_path=None,
         saved_model_config=None,
     ):
+        """
+
+        :param tensor_data_types_config:
+        :param model_config_type:
+        :param config_proto_path:
+        :param saved_model_config:
+        """
         self.__tensor_data_types_config = tensor_data_types_config
         self.__model_config_type = model_config_type
         self.__config_proto_path = config_proto_path

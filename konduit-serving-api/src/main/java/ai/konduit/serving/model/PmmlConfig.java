@@ -32,6 +32,9 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * Configuration for models in PMML format.
+ */
 public class PmmlConfig extends ModelConfig {
 
     private String evaluatorFactoryName = DEFAULT_EVALUATOR_FACTORY;
