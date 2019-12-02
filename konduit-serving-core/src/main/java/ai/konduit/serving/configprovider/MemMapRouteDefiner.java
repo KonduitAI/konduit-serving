@@ -133,7 +133,7 @@ public class MemMapRouteDefiner {
             }
         }
 
-        Preconditions.checkState(tempFile.canWrite() && tempFile.canWrite(), String.format("Unable to either read or write to %s for memmap temp file.",
+        Preconditions.checkState(tempFile.canWrite() && tempFile.canRead(), String.format("Unable to either read or write to %s for memmap temp file.",
                 tempFile.getAbsolutePath()));
 
         arr = new ThreadLocal<>();
