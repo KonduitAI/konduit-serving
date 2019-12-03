@@ -26,13 +26,13 @@ serving_config = ServingConfig(
 
 # Start a konduit server and wait for it to start
 server = Server(serving_config=serving_config, steps=[python_pipeline_step])
-server.start(sleep=10)
+server.start()
 
 # Initialize a konduit client that takes in and outputs JSON
 client = Client(
     input_data_format="JSON",
-    output_data_format="RAW",
-    convert_to_format="JSON",
+    prediction_type="RAW",
+    output_data_format="JSON",
     host="http://localhost",
     port=1337,
 )

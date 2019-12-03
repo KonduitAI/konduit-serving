@@ -1,5 +1,4 @@
 from konduit import *
-from konduit.client import client_from_server
 import pytest
 import random
 
@@ -20,7 +19,7 @@ def test_client_from_server():
     server.start()
 
     try:
-        client_from_server(server)
+        server.get_client()
     finally:
         server.stop()
 

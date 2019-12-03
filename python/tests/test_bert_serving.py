@@ -59,7 +59,7 @@ def test_server_start():
         inference_config=inference, extra_start_args="-Xmx8g", jar_path="konduit.jar"
     )
     server.start()
-    client = Client(input_data_format="NUMPY", output_data_format="NUMPY", port=port)
+    client = Client(input_data_format="NUMPY", prediction_type="NUMPY", port=port)
 
     data_input = {
         "IteratorGetNext:0": np.load("../data/input-0.npy"),

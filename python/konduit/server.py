@@ -9,6 +9,7 @@ import time
 from konduit.base_inference import PipelineStep
 from konduit.inference import InferenceConfiguration
 from konduit.json_utils import config_to_dict_with_type
+from konduit.client import Client
 
 
 def stop_server_by_pid(pid):
@@ -77,6 +78,39 @@ class Server(object):
             self.extra_start_args = [extra_start_args]
         else:
             self.extra_start_args = extra_start_args
+
+    def get_client(self, output_data_format=None):
+        """Get a Konduit Client instance from this Server instance.
+        :param output_data_format: optional, same as in Client signature
+        :return: konduit.Client
+        """
+        serving_config = self.config._get_serving_config()
+        steps = self.config._get_steps()
+        input_names = []
+        output_names = []
+        for step in steps:
+            input_names += step._get_input_names()
+            output_names += step._get_output_names()
+
+        port = serving_config._get_http_port()
+        host = serving_config._get_listen_host()
+        if not host.startswith("http://"):
+            host = "http://" + host
+        input_data_format = serving_config._get_input_data_format()
+        prediction_type = serving_config._get_prediction_type()
+
+        if not output_data_format:
+            output_data_format = serving_config._get_output_data_format()
+
+        return Client(
+            host=host,
+            port=port,
+            input_data_format=input_data_format,
+            output_data_format=output_data_format,
+            prediction_type=prediction_type,
+            input_names=input_names,
+            output_names=output_names,
+        )
 
     def start(self, kill_existing_server=True):
         """Start the Konduit server

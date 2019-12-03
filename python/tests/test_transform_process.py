@@ -54,9 +54,9 @@ def test_build_tp(output_format):
     server.start()
 
     client = Client(
-        convert_to_format=output_format,
+        output_data_format=output_format,
         input_data_format="JSON",
-        output_data_format="RAW",
+        prediction_type="RAW",
         port=port,
     )
 

@@ -9,47 +9,15 @@ import logging
 from konduit.utils import validate_server
 
 
-def client_from_server(server, output_data_format=None):
-    """Get a Konduit Client instance from a Konduit Server instance.
-    :param server: konduit.Server
-    :param output_data_format: output data format, same as in Client signature.
-    :return: konduit.Client
-    """
-    serving_config = server.config._get_serving_config()
-    steps = server.config._get_steps()
-    input_names = []
-    output_names = []
-    for step in steps:
-        input_names += step._get_input_names()
-        output_names += step._get_output_names()
-
-    port = serving_config._get_http_port()
-    host = serving_config._get_listen_host()
-    if not host:
-        host = "http://localhost"
-    input_data_format = serving_config._get_input_data_format()
-    return_output_data_format = serving_config._get_output_data_format()
-
-    return Client(
-        host=host,
-        port=port,
-        input_data_format=input_data_format,
-        convert_to_format=return_output_data_format,
-        output_data_format=output_data_format,
-        input_names=input_names,
-        output_names=output_names,
-    )
-
-
 class Client(object):
     def __init__(
         self,
         port,
         host="http://localhost",
-        convert_to_format=None,
+        output_data_format=None,
+        input_data_format=None,
+        prediction_type=None,
         timeout=60,
-        input_data_format="NUMPY",
-        output_data_format="NUMPY",
         input_names=None,
         output_names=None,
     ):
@@ -61,14 +29,14 @@ class Client(object):
 
         :param port: The port on which the server is listening to. e.g. '1337' or 42, i.e. accepts int and str.
         :param host: The server host, defaults to 'http://localhost'.
-        :param convert_to_format: The output format returned by the `predict` method of this client. If not
-               specified, we assume the return output format is the same as the input format. This output format can
-               be 'NUMPY', 'JSON', 'ARROW' and 'RAW'. 'ND4J' will be implemented at a later stage.
-        :param timeout: Request time-out in seconds.
+        :param output_data_format: The output format returned by the `predict` method of this client. If not
+               specified, we assume the output format is the same as the input format. This output format can
+               be 'NUMPY', 'JSON', 'ARROW' and 'RAW'. 'IMAGE' will be implemented at a later stage.
         :param input_data_format: The format in which the input data is accepted by endpoints. Defaults to 'NUMPY',
                but can be 'JSON', 'ND4J', 'IMAGE' and 'ARROW' as well.
-        :param output_data_format: The output format returned from the Konduit server. If not specified, this format
-               will default to the input format specified.
+        :param prediction_type: The prediction type of the Konduit server. If not specified, this format
+               will default to 'RAW'.
+        :param timeout: Request time-out in seconds.
         :param input_names: The names of all inputs of the Konduit pipeline deployed for the Server corresponding to
                this client.
         :param output_names: The names of all inputs of the Konduit pipeline deployed for the Server corresponding to
@@ -84,8 +52,9 @@ class Client(object):
                 try:
                     response = requests.get("{}/config".format(url))
                     config = response.json()
-                    logging.info("Retrieved config is".format(config))
+                    logging.info("Retrieved config is".format(json.dumps(config)))
                     steps = config["steps"]
+                    config = config["servingConfig"]
                     input_names = []
                     for step in steps:
                         input_names += step["inputNames"]
@@ -97,6 +66,8 @@ class Client(object):
                         input_data_format = config["inputDataFormat"]
                     if output_data_format is None:
                         output_data_format = config["outputDataFormat"]
+                    if prediction_type is None:
+                        prediction_type = config["predictionType"]
                 except Exception as ex:
                     logging.error(
                         "{}\nUnable to get configuration from the server. Please verify that the server is "
@@ -112,20 +83,17 @@ class Client(object):
         assert isinstance(output_names, list), "Output names should be a list!"
         assert len(output_names) > 0, "Output names must not be empty!"
 
-        # if not specified, we output the format we put in.
-        if not output_data_format:
-            output_data_format = input_data_format
-
-        # the format returned to the client is identical to the input format, unless explicitly specified.
-        # TODO fix this logic, doesn't always make sense.
-        if convert_to_format:
-            self.convert_to_format = convert_to_format
+        if output_data_format:
+            self.convert_to_format = output_data_format
         else:
             self.convert_to_format = input_data_format
 
+        if prediction_type is None:
+            prediction_type = "RAW"
+
         self.timeout = timeout
         self.input_format = input_data_format
-        self.output_format = output_data_format
+        self.prediction_type = prediction_type
         self.input_names = input_names
         self.output_names = output_names
         self.url = url
@@ -138,7 +106,7 @@ class Client(object):
         if self.input_format.upper() == "JSON":
             resp = requests.post(
                 "{}/{}/{}".format(
-                    self.url, self.output_format.lower(), self.input_format.lower()
+                    self.url, self.prediction_type.lower(), self.input_format.lower()
                 ),
                 json=data_input,
                 timeout=self.timeout,
@@ -149,7 +117,7 @@ class Client(object):
             converted_input = self._convert_multi_part_inputs(data_input=data_input)
             resp = requests.post(
                 "{}/{}/{}".format(
-                    self.url, self.output_format.lower(), self.input_format.lower()
+                    self.url, self.prediction_type.lower(), self.input_format.lower()
                 ),
                 files=converted_input,
                 timeout=self.timeout,
@@ -170,8 +138,6 @@ class Client(object):
                     return reader.read_pandas()
                 elif self.convert_to_format.upper() == "JSON":
                     return json.load(bytes_content)
-                elif self.convert_to_format.upper() == "ND4J":
-                    raise NotImplementedError("Nd4j not implemented yet.")
                 elif self.convert_to_format.upper() == "IMAGE":
                     raise NotImplementedError("Image not implemented yet.")
                 elif self.convert_to_format.upper() == "RAW":
@@ -225,14 +191,14 @@ class Client(object):
             name_str = re.sub(
                 r'([";\\\']|name=|form-data|b\\)', "", name_with_form_data
             ).replace("b ", "")
-            if self.output_format.upper() == "NUMPY":
+            if self.prediction_type.upper() == "NUMPY":
                 ret[name_str] = Client._convert_binary_to_numpy(part.content)
-            elif self.output_format.upper() == "ARROW":
+            elif self.prediction_type.upper() == "ARROW":
                 reader = RecordBatchFileReader(part.content)
                 ret[name_str] = reader.read_pandas()
-            elif self.output_format.upper() == "JSON":
+            elif self.prediction_type.upper() == "JSON":
                 return json.load(part.content)
-            elif self.output_format.upper() == "ND4J":
+            elif self.prediction_type.upper() == "ND4J":
                 raise NotImplementedError("Nd4j not implemented yet.")
             else:
                 ret[name_str] = part.content
