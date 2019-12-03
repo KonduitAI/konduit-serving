@@ -52,20 +52,12 @@ def test_build_tp(output_format):
         jar_path="konduit.jar",
     )
     server.start()
-
-    client = Client(
-        output_data_format=output_format,
-        input_data_format="JSON",
-        prediction_type="RAW",
-        port=port,
-    )
-
-    data_input = {"first": "value"}
+    client = server.get_client()
 
     assert is_port_in_use(port)
 
     try:
-        predicted = client.predict(data_input)
+        predicted = client.predict({"first": "value"})
         print(predicted)
         server.stop()
     except Exception as e:

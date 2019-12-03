@@ -24,7 +24,7 @@ def test_server_start():
     server = Server(steps=step, serving_config=serving_config)
     server.start()
 
-    client = Client(port=port)
+    client = server.get_client()
 
     data_input = {"default": np.load("../data/input-0.npy")}
 
