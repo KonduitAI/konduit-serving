@@ -14,7 +14,6 @@
     <name>konduit-serving-gpu</name>
 
     <properties>
-        <nd4j.stable.version>1.0.0-beta5</nd4j.stable.version>
         <cuda.version>10.1</cuda.version>
         <nd4j.cuda.version>${nd4j.version}-${cuda.version}</nd4j.cuda.version>
         <javacpp.date>7.6</javacpp.date>
