@@ -279,13 +279,12 @@ public class PipelineExecutioner {
     }
 
     /**
-     * Perform inference for the
-     * endpoint using the inference executioner.
-     * @param ctx                the routing context to use representing the current request
-     * @param responseOutputType the {@link Output.DataFormat} for the output
-     * @param inputs             the inputs based on the input data
+     * Perform inference for the endpoint using the inference executioner.
+     * @param ctx        the routing context to use representing the current request
+     * @param dataFormat the {@link Output.DataFormat} for the output
+     * @param inputs     the inputs based on the input data
      */
-    public void doInference(io.vertx.ext.web.RoutingContext ctx, Output.DataFormat responseOutputType, org.datavec.api.records.Record[] inputs) {
+    public void doInference(io.vertx.ext.web.RoutingContext ctx, Output.DataFormat dataFormat, org.datavec.api.records.Record[] inputs) {
         if(inputs == null || inputs.length < 1 || inputs[0] == null) {
             throw new IllegalStateException("No inputs specified!");
         }
@@ -319,7 +318,7 @@ public class PipelineExecutioner {
                 return;
             }
 
-            timedResponse(ctx, responseOutputType, batchId, execute, adapt);
+            timedResponse(ctx, dataFormat, batchId, execute, adapt);
 
         } else {
             /**
@@ -330,7 +329,7 @@ public class PipelineExecutioner {
                 namedBatchOutput.put(outputNames.get(i), NDArrayOutput.builder().ndArray(execute[i]).build());
             }
 
-            timedResponse(ctx, responseOutputType, batchId, execute, namedBatchOutput);
+            timedResponse(ctx, dataFormat, batchId, execute, namedBatchOutput);
         }
     }
 
@@ -338,21 +337,20 @@ public class PipelineExecutioner {
     /**
      * Perform inference
      * @param ctx the routing context
-     * @param outputAdapterType the output adapter
-     *                          to use on output
+     * @param predictionType the prediction type used on this output
      * @param input the input string (json generally)
-     * @param conversionSchema the schema to convert the
-     *                         json
+     * @param conversionSchema the schema to convert the json
      * @param transformProcess the transform process to use
      * @param outputSchema the output schema
-     * @param outputDataFormat the output data type for the pipeline
+     * @param outputDataFormat the output data format for the pipeline
      */
     public void doInference(RoutingContext ctx,
-                            Output.PredictionType outputAdapterType,
+                            Output.PredictionType predictionType,
                             String input,
                             Schema conversionSchema,
                             TransformProcess transformProcess,
-                            Schema outputSchema, Output.DataFormat outputDataFormat) {
+                            Schema outputSchema,
+                            Output.DataFormat outputDataFormat) {
 
         Preconditions.checkNotNull(input,"Input data was null!");
 
@@ -382,7 +380,7 @@ public class PipelineExecutioner {
         if(firstWritable.getType() == WritableType.NDArray) {
             INDArray[] arrays = SchemaTypeUtils.toArrays(records);
             Map<String, BatchOutput> adapt;
-            switch(outputAdapterType) {
+            switch(predictionType) {
                 case CLASSIFICATION:
                     adapt = classificationMultiOutputAdapter.adapt(arrays, outputNames(), ctx);
                     break;
