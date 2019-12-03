@@ -128,33 +128,33 @@ public class GpuMetrics implements MeterBinder {
                     .description("Device memory used in bytes")
                     .baseUnit(deviceStats.toString())
                     .register(registry);
-            final long deviceMemoryFreeInBytes = memory.free();
-            Gauge.builder(".memory.free",() -> deviceMemoryFreeInBytes)
-                    .tags(tags)
-                    .description("Device memory free in bytes")
-                    .baseUnit(deviceStats.toString())
-                    .register(registry);
-
-            checkReturn(nvmlDeviceGetTemperature(device,NVML_TEMPERATURE_GPU,resultArr));
-            final int tempC = resultArr[0];
-            Gauge.builder(".temp.celsius",() -> deviceMemoryFreeInBytes)
-                    .tags(tags)
-                    .description("Temperature of gpu in celsius")
-                    .baseUnit(deviceStats.toString())
-                    .register(registry);
-            final int tempF = tempC * 9 / 5 + 32;
-            Gauge.builder(".temp.farenheit",() -> tempF)
-                    .tags(tags)
-                    .description("Temperature of gpu in farenheit")
-                    .baseUnit(deviceStats.toString())
-                    .register(registry);
-            checkReturn(nvmlDeviceGetPowerUsage(device,resultArr));
-            final int powerUsedMilliWatts = resultArr[0];
-            Gauge.builder(".power.used.milliwatts",() -> powerUsedMilliWatts)
-                    .tags(tags)
-                    .description("Power used by gpu in milliwatts")
-                    .baseUnit(deviceStats.toString())
-                    .register(registry);
+//            final long deviceMemoryFreeInBytes = memory.free();
+//            Gauge.builder(".memory.free",() -> deviceMemoryFreeInBytes)
+//                    .tags(tags)
+//                    .description("Device memory free in bytes")
+//                    .baseUnit(deviceStats.toString())
+//                    .register(registry);
+//
+//            checkReturn(nvmlDeviceGetTemperature(device,NVML_TEMPERATURE_GPU,resultArr));
+//            final int tempC = resultArr[0];
+//            Gauge.builder(".temp.celsius",() -> deviceMemoryFreeInBytes)
+//                    .tags(tags)
+//                    .description("Temperature of gpu in celsius")
+//                    .baseUnit(deviceStats.toString())
+//                    .register(registry);
+//            final int tempF = tempC * 9 / 5 + 32;
+//            Gauge.builder(".temp.farenheit",() -> tempF)
+//                    .tags(tags)
+//                    .description("Temperature of gpu in farenheit")
+//                    .baseUnit(deviceStats.toString())
+//                    .register(registry);
+//            checkReturn(nvmlDeviceGetPowerUsage(device,resultArr));
+//            final int powerUsedMilliWatts = resultArr[0];
+//            Gauge.builder(".power.used.milliwatts",() -> powerUsedMilliWatts)
+//                    .tags(tags)
+//                    .description("Power used by gpu in milliwatts")
+//                    .baseUnit(deviceStats.toString())
+//                    .register(registry);
         }
 
         nvmlShutdown();
