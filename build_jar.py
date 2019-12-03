@@ -58,13 +58,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    platform = args.os.replace("-gpu", "")
     command = [
         args.source + os.sep + "mvnw",
         "-Puberjar",
         "clean",
         "install",
         "-Dmaven.test.skip=true",
-        "-Djavacpp.platform=" + args.os,
+        "-Djavacpp.platform=" + platform,
     ]
 
     if "arm" in args.os:
