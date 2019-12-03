@@ -199,26 +199,46 @@ public class CodeGen {
         loadedModule = loadedModule.replace("'type': type","'type': dict");
 
         // Modify some constructor defaults to leverage Python's strengths
+        // By default we work with numpy-in-numpy-out and "raw" predictions to cause minimal harm to the intended
+        // audience.
         loadedModule = loadedModule.replace("input_data_format=None", "input_data_format='NUMPY'");
         loadedModule = loadedModule.replace("output_data_format=None", "output_data_format='NUMPY'");
-        loadedModule = loadedModule.replace("log_timings=None", "log_timings=True");
+        loadedModule = loadedModule.replace("prediction_type=None", "prediction_type='RAW'");
 
+        loadedModule = loadedModule.replace("log_timings=None", "log_timings=False");
+        loadedModule = loadedModule.replace("listen_host=None", "listen_host='localhost'");
+        loadedModule = loadedModule.replace("uploads_directory=None", "uploads_directory='file-uploads/'");
+
+
+        loadedModule = PythonDocStrings.generateDocs(loadedModule);
 
         String sb = "import enum\nfrom konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n" +
                 loadedModule;
 
         FileUtils.writeStringToFile(newModule, sb,Charset.defaultCharset(),false);
 
-        Process p = runtime.exec("autopep8 --in-place " + newModule);
-        p.waitFor(8, TimeUnit.SECONDS);
-        if(p.exitValue() != 0) {
+        Process autopep_linting = runtime.exec("autopep8 --in-place " + newModule);
+        autopep_linting.waitFor(8, TimeUnit.SECONDS);
+        if(autopep_linting.exitValue() != 0) {
             String errorMessage = "";
-            try(InputStream is = p.getInputStream()) {
+            try(InputStream is = autopep_linting.getInputStream()) {
                 errorMessage += IOUtils.toString(is,Charset.defaultCharset());
 
             }
             throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
         }
-        p.destroy();
+        autopep_linting.destroy();
+
+        Process black_linting = runtime.exec("black " + newModule);
+        black_linting.waitFor(5, TimeUnit.SECONDS);
+        if(black_linting.exitValue() != 0) {
+            String errorMessage = "";
+            try(InputStream is = black_linting.getInputStream()) {
+                errorMessage += IOUtils.toString(is,Charset.defaultCharset());
+
+            }
+            throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
+        }
+        black_linting.destroy();
     }
 }

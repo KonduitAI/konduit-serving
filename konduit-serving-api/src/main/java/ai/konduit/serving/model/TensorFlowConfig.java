@@ -27,10 +27,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * TensorFlow extension of {@link ModelConfig}.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
+
 public class TensorFlowConfig extends ModelConfig {
 
     private String configProtoPath;

@@ -28,6 +28,9 @@ import lombok.*;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Configuration of all properties regarding serving a pipeline.
+ */
 @Data
 @Builder
 @AllArgsConstructor
