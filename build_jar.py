@@ -3,7 +3,7 @@ import subprocess
 from shutil import copyfile
 import os
 import re
-import distutils
+from distutils.util import strtobool
 
 
 if __name__ == "__main__":
@@ -57,28 +57,35 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    command = (
-        args.source + os.sep + "mvnw -Puberjar clean install -Dmaven.test.skip=true"
-    )
-    command += " -Djavacpp.platform=" + args.os + " "
+
+    command = [
+        args.source + os.sep + "mvnw",
+        "-Puberjar",
+        "clean",
+        "install",
+        "-Dmaven.test.skip=true",
+        "-Djavacpp.platform=" + args.os,
+    ]
+
     if "arm" in args.os:
-        command += "-Dchip=arm"
+        command.append("-Dchip=arm")
     elif "gpu" in args.os:
-        command += " -Dchip=gpu"
+        command.append("-Dchip=gpu")
     else:
-        command += " -Dchip=cpu"
-    if distutils.util.strtobool(args.usePython):
-        command += " -Ppython"
-    if distutils.util.strtobool(args.usePmml):
-        command += " -Ppmml"
+        command.append("-Dchip=cpu")
+
+    if strtobool(args.usePython):
+        command.append("-Ppython")
+    if strtobool(args.usePmml):
+        command.append("-Ppmml")
 
     with open(os.path.join(args.source, "pom.xml"), "r") as pom:
         content = pom.read()
         regex = r"<version>(\d+.\d+.\d+)</version>"
         version = re.findall(regex, content)
 
-    print("Running command: " + command)
-    subprocess.run(command, cwd=args.source, shell=True, check=True)
+    print("Running command: " + " ".join(command))
+    subprocess.call(command)
     copyfile(
         os.path.join(
             args.source,
