@@ -86,6 +86,6 @@ if __name__ == "__main__":
             "target",
             "konduit-serving-uberjar-{}-bin.jar".format(version[0]),
         ),
-        args.target,
+        os.path.join(args.source, args.target),
     )
     copyfile(args.target, os.path.join(args.source, "python", "tests", args.target))
