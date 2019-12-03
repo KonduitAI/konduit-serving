@@ -25,6 +25,7 @@ package ai.konduit.serving.verticles.samediff;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
@@ -85,6 +86,7 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
         ServingConfig servingConfig = ServingConfig.builder()
                 .inputDataFormat(Input.DataFormat.NUMPY)
                 .outputDataFormat(Output.DataFormat.ND4J)
+                .predictionType(PredictionType.RAW)
                 .httpPort(port)
                 .build();
 

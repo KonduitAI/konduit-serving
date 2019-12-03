@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.config;
 
+import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.metrics.MetricType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,7 +48,7 @@ public class ServingConfig {
     private Output.DataFormat outputDataFormat = Output.DataFormat.JSON;
 
     @Builder.Default
-    private Output.PredictionType predictionType = Output.PredictionType.CLASSIFICATION;
+    private Output.PredictionType predictionType = PredictionType.RAW;
 
     @Builder.Default
     private String uploadsDirectory = "file-uploads/";

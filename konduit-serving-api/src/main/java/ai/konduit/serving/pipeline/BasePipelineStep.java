@@ -1,7 +1,6 @@
 /*
  *
  *  * ******************************************************************************
- *  *  * Copyright (c) 2015-2019 Skymind Inc.
  *  *  * Copyright (c) 2019 Konduit AI.
  *  *  *
  *  *  * This program and the accompanying materials are made available under the
@@ -58,9 +57,12 @@ public abstract class BasePipelineStep implements PipelineStep {
     protected Map<String, List<String>> inputColumnNames, outputColumnNames;
 
 
+    /**
+     *  {@inheritDoc}
+     */
     @Override
     public PredictionType[] validPredictionTypes() {
-        return new PredictionType[]{
+        return new PredictionType[] {
                 PredictionType.RAW
         };
     }
@@ -189,10 +191,10 @@ public abstract class BasePipelineStep implements PipelineStep {
         if (names == null) {
             names = new ArrayList<>();
         }
-        if (!names.contains(outputName)) {
 
+        if (!names.contains(outputName)) {
             names.add(outputName);
-            this.setOutputNames(names);
+            setOutputNames(names);
 
             List<String> columnNames = SchemaTypeUtils.columnNames(outputSchema);
             setOutputColumns(outputName, columnNames);
@@ -250,6 +252,7 @@ public abstract class BasePipelineStep implements PipelineStep {
      */
     @Override
     public boolean hasInputName(String name) {
+        Preconditions.checkState(!inputNames.isEmpty(), "Input names must not be empty!");
         return inputNames.contains(name);
     }
 

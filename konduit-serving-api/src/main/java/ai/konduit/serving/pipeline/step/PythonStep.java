@@ -24,6 +24,7 @@ package ai.konduit.serving.pipeline.step;
 
 import ai.konduit.serving.config.Input.DataFormat;
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
@@ -31,6 +32,7 @@ import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.python.PythonVariables;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.schema.Schema;
 
 import java.util.Arrays;
@@ -41,6 +43,7 @@ import java.util.Map;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@Slf4j
 public class PythonStep extends BasePipelineStep {
 
     @Getter
@@ -89,9 +92,9 @@ public class PythonStep extends BasePipelineStep {
      * Create a PythonConfig Step with default input and output names
      * just from input/output schema and the actual PythonConfig
      *
-     * @param inputSchema  DataVec Schema for data input
-     * @param outputSchema DataVec Schema for data output
-     * @param pythonConfig Konduit PythonConfig
+     * @param inputSchema  {@link Schema} for data input
+     * @param outputSchema {@link Schema} for data output
+     * @param pythonConfig {@link PythonConfig}
      * @throws Exception key error
      */
     public PythonStep(Schema inputSchema, Schema outputSchema,
@@ -108,7 +111,7 @@ public class PythonStep extends BasePipelineStep {
                 .toArray(SchemaType[]::new);
     }
 
-    private static ai.konduit.serving.config.SchemaType pythonToDataVecVarTypes(PythonVariables.Type pythonVarType) {
+    private static SchemaType pythonToDataVecVarTypes(PythonVariables.Type pythonVarType) {
         try {
             switch (pythonVarType) {
                 case BOOL:
@@ -129,10 +132,17 @@ public class PythonStep extends BasePipelineStep {
                             pythonVarType.name(), ai.konduit.serving.config.SchemaType.class.getName()));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Unable to convert type " + pythonVarType + ". Error was",e);
         }
 
         return null;
+    }
+
+    @Override
+    public PredictionType[] validPredictionTypes() {
+        return new PredictionType[] {
+           PredictionType.RAW
+        };
     }
 
     @Override
@@ -198,7 +208,7 @@ public class PythonStep extends BasePipelineStep {
     /**
      * Define a single, named step for a Python pipeline.
      *
-     * @param pythonConfig Konduit PythonConfig
+     * @param pythonConfig {@link PythonConfig}
      * @throws Exception key error
      */
     public PythonStep step(PythonConfig pythonConfig)
@@ -211,9 +221,9 @@ public class PythonStep extends BasePipelineStep {
     /**
      * Define a single, named step for a Python pipeline.
      *
-     * @param pythonConfig Konduit PythonConfig
-     * @param inputSchema  DataVec Schema for data input
-     * @param outputSchema DataVec Schema for data output
+     * @param pythonConfig {@link PythonConfig}
+     * @param inputSchema  {@link Schema} for data input
+     * @param outputSchema {@link Schema} for data output
      * @return this python step
      * @throws Exception key error
      */
@@ -226,7 +236,7 @@ public class PythonStep extends BasePipelineStep {
      * Define a single, named step for a Python pipeline.
      *
      * @param stepName     input and output name for this step
-     * @param pythonConfig Konduit PythonConfig
+     * @param pythonConfig {@link PythonConfig}
      * @param inputSchema  {@link Schema} for data input
      * @param outputSchema {@link Schema} for data output
      * @return this python step
@@ -247,9 +257,9 @@ public class PythonStep extends BasePipelineStep {
      * Define a single, named step for a Python pipeline.
      *
      * @param stepName          input and output name for this step
-     * @param pythonConfig      Konduit PythonConfig
+     * @param pythonConfig      {@link PythonConfig}
      * @param inputColumnNames  input column names
-     * @param inputTypes        inpput schema types
+     * @param inputTypes        input schema types
      * @param outputColumnNames output column names
      * @param outputTypes       output schema types
      * @throws Exception key error

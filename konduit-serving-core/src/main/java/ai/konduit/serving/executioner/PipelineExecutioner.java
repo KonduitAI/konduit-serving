@@ -24,6 +24,8 @@ package ai.konduit.serving.executioner;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.Output.DataFormat;
+import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.model.ModelConfig;
@@ -32,9 +34,7 @@ import ai.konduit.serving.model.TensorDataTypesConfig;
 import ai.konduit.serving.output.adapter.*;
 import ai.konduit.serving.output.types.BatchOutput;
 import ai.konduit.serving.output.types.NDArrayOutput;
-import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
-import ai.konduit.serving.pipeline.PipelineStepRunner;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
@@ -63,6 +63,7 @@ import org.nd4j.arrow.ArrowSerde;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.io.ReflectionUtils;
 import org.nd4j.serde.binary.BinarySerde;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 
@@ -106,11 +107,11 @@ public class PipelineExecutioner {
     private Schema outputSchema = null;
     private ModelConfig modelConfig = null;
     private ObjectDetectionConfig objectDetectionConfig = null;
-    private JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
+    private static JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
 
-    private ClassificationMultiOutputAdapter classificationMultiOutputAdapter = new ClassificationMultiOutputAdapter();
-    private RegressionMultiOutputAdapter regressionMultiOutputAdapter = new RegressionMultiOutputAdapter();
-    private RawMultiOutputAdapter rawMultiOutputAdapter = new RawMultiOutputAdapter();
+    private static ClassificationMultiOutputAdapter classificationMultiOutputAdapter = new ClassificationMultiOutputAdapter();
+    private static RegressionMultiOutputAdapter regressionMultiOutputAdapter = new RegressionMultiOutputAdapter();
+    private static RawMultiOutputAdapter rawMultiOutputAdapter = new RawMultiOutputAdapter();
 
     public PipelineExecutioner(InferenceConfiguration inferenceConfiguration) {
         this.config = inferenceConfiguration;
@@ -210,20 +211,26 @@ public class PipelineExecutioner {
      */
     public void init() {
         ServingConfig servingConfig = config.getServingConfig();
+        if(config.getSteps().isEmpty()) {
+            log.warn("No pipeline steps configured.");
+        }
+
         //initialize input and output data types
         this.pipeline = Pipeline.getPipeline(config.getSteps());
 
         //configure validation for input and output
-        PipelineStep finalPipelineStep = config.getSteps().get(config.getSteps().size() - 1);
-        PipelineStep startingPipelineStep = config.getSteps().get(0);
+        if(!config.getSteps().isEmpty()) {
+            PipelineStep finalPipelineStep = config.getSteps().get(config.getSteps().size() - 1);
+            PipelineStep startingPipelineStep = config.getSteps().get(0);
 
-        Preconditions.checkState(config.getSteps().get(0).isValidInputType(servingConfig.getInputDataFormat()),"Configured input type is invalid for initial pipeline step of type " + startingPipelineStep.getClass().getName() + " expected input types were " + Arrays.toString(startingPipelineStep.validInputTypes()) + ". If this list is null or empty, then any type is considered valid.");
-        Preconditions.checkState(finalPipelineStep.isValidOutputType(servingConfig.getOutputDataFormat()),"Configured output type is invalid for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected output types were " + Arrays.toString(finalPipelineStep.validInputTypes()) + ". If this list is null or empty, then any type is considered valid.");
-        Preconditions.checkState(finalPipelineStep.isValidPredictionType(servingConfig.getPredictionType()),"Invalid prediction type configured for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected types were " + Arrays.toString(finalPipelineStep.validPredictionTypes()) + ". If this list is null or empty, then any type is considered valid.");
+            Preconditions.checkState(startingPipelineStep.isValidInputType(servingConfig.getInputDataFormat()),"Configured input type is invalid for initial pipeline step of type " + startingPipelineStep.getClass().getName() + " expected input types were " + Arrays.toString(startingPipelineStep.validInputTypes()) + ". If this list is null or empty, then any type is considered valid.");
+            Preconditions.checkState(finalPipelineStep.isValidOutputType(servingConfig.getOutputDataFormat()),"Configured output type is invalid for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected output types were " + Arrays.toString(finalPipelineStep.validInputTypes()) + ". If this list is null or empty, then any type is considered valid.");
+            Preconditions.checkState(finalPipelineStep.isValidPredictionType(servingConfig.getPredictionType()),"Invalid prediction type configured for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected types were " + Arrays.toString(finalPipelineStep.validPredictionTypes()) + ". If this list is null or empty, then any type is considered valid.");
+
+        }
 
         for (int i = 0; i < config.getSteps().size(); i++) {
             PipelineStep pipelineStep = config.getSteps().get(i);
-            PipelineStepRunner pipelineStepRunner = pipeline.getSteps().get(i);
             Preconditions.checkNotNull(pipelineStep, "Pipeline step at " + i + " was null!");
             //only use the first input names that appear in the pipeline
             if (inputNames == null && pipelineStep.getInputNames() != null && !pipelineStep.getInputNames().isEmpty()) {
@@ -425,48 +432,25 @@ public class PipelineExecutioner {
 
     /**
      * Perform inference
-     *
-     * @param ctx               the routing context
+     *  @param ctx               the routing context
      * @param outputAdapterType the output adapter
      *                          to use on output
      * @param input             the input string (json generally)
      * @param conversionSchema  the schema to convert the
-     *                          json
+*                          json
      * @param transformProcess  the transform process to use
      * @param outputSchema      the output schema
      * @param outputDataType    the output data type for the pipeline
      */
     public void doInference(RoutingContext ctx,
-                            Output.PredictionType outputAdapterType,
-                            String input,
+                            PredictionType outputAdapterType,
+                            Object input,
                             Schema conversionSchema,
                             TransformProcess transformProcess,
                             Schema outputSchema,
-                            Output.DataFormat outputDataType) {
+                            DataFormat outputDataType) {
 
-        Preconditions.checkNotNull(input, "Input data was null!");
-
-        if (input.charAt(0) == '{') {
-            //json object
-            log.info("Auto converting json object to json array");
-            input = "[" + input + "]";
-        }
-
-        JsonArray jsonArray = new JsonArray(input);
-        ArrowWritableRecordBatch convert = null;
-        try {
-            convert = mapConverter.convert(conversionSchema, jsonArray, transformProcess);
-        } catch (Exception e) {
-            log.error("Error performing conversion", e);
-            throw e;
-        }
-
-        Preconditions.checkNotNull(convert, "Conversion was null!");
-        Record[] pipelineInput = new Record[convert.size()];
-        for (int i = 0; i < pipelineInput.length; i++) {
-            pipelineInput[i] = new ArrowRecord(convert, i, null);
-        }
-
+        Record[] pipelineInput = PipelineExecutioner.createInput(input,transformProcess,conversionSchema);
         Record[] records = pipeline.doPipeline(pipelineInput);
         Writable firstWritable = records[0].getRecord().get(0);
         if (firstWritable.getType() == WritableType.NDArray) {
@@ -486,7 +470,7 @@ public class PipelineExecutioner {
                     throw new IllegalStateException("Illegal type for json.");
             }
 
-            writeResponse(adapt, Output.DataFormat.JSON, UUID.randomUUID().toString(), ctx);
+            writeResponse(adapt, outputDataType, UUID.randomUUID().toString(), ctx);
 
         } else if (records.length == 1 && records[0].getRecord().get(0) instanceof Text) {
             if (outputDataType == Output.DataFormat.JSON) {
@@ -511,6 +495,8 @@ public class PipelineExecutioner {
                 ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
                 ctx.response().end(write);
             } else if (outputDataType == Output.DataFormat.ARROW) {
+                ArrowRecord arrowRecord = (ArrowRecord) records[0].getRecord();
+                ArrowWritableRecordBatch  convert =  ArrowUtils.getBatchFromRecord(arrowRecord);
                 writeArrowResponse(ctx, outputSchema, convert);
             } else {
                 throw new IllegalStateException("Illegal data type response " + outputDataType);
@@ -559,6 +545,8 @@ public class PipelineExecutioner {
             ctx.response().end(write);
 
         } else if (outputDataType == Output.DataFormat.ARROW) {
+            ArrowRecord arrowRecord = (ArrowRecord) records[0].getRecord();
+            ArrowWritableRecordBatch  convert =  ArrowUtils.getBatchFromRecord(arrowRecord);
             writeArrowResponse(ctx, outputSchema, convert);
         }
     }
@@ -567,8 +555,45 @@ public class PipelineExecutioner {
         pipeline.destroy();
     }
 
+
+    public static Record[] createInput(Object input,TransformProcess transformProcess,Schema conversionSchema) {
+        Preconditions.checkNotNull(input, "Input data was null!");
+
+        if(input instanceof String) {
+            String inputJson = (String) input;
+            if (inputJson.charAt(0) == '{') {
+                //json object
+                log.info("Auto converting json object to json array");
+                inputJson = "[" + input + "]";
+            }
+
+            JsonArray jsonArray = new JsonArray(inputJson);
+            ArrowWritableRecordBatch convert = null;
+            try {
+                convert = mapConverter.convert(conversionSchema, jsonArray, transformProcess);
+            } catch (Exception e) {
+                log.error("Error performing conversion", e);
+                throw e;
+            }
+
+            Preconditions.checkNotNull(convert, "Conversion was null!");
+            Record[] pipelineInput = new Record[convert.size()];
+            for (int i = 0; i < pipelineInput.length; i++) {
+                pipelineInput[i] = new ArrowRecord(convert, i, null);
+            }
+
+            return pipelineInput;
+        }
+
+        else {
+            //ndarrays already
+            return (Record[]) input;
+        }
+
+    }
+
     private void writeArrowResponse(RoutingContext ctx, Schema outputSchema, ArrowWritableRecordBatch convert) {
-        log.info("Writing arrow response.");
+        log.debug("Writing arrow response.");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ArrowUtils.writeRecordBatchTo(convert, outputSchema, byteArrayOutputStream);
         Buffer write = Buffer.buffer(byteArrayOutputStream.toByteArray());
@@ -660,7 +685,7 @@ public class PipelineExecutioner {
 
     }
 
-    private void writeBinary(io.vertx.core.buffer.Buffer buffer, io.vertx.ext.web.RoutingContext ctx) {
+    private void writeBinary(Buffer buffer,RoutingContext ctx) {
         try {
             ctx.response().putHeader("Content-Type", "application/octet-stream");
             ctx.response().putHeader("Content-Length", String.valueOf(buffer.length()));

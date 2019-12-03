@@ -63,7 +63,10 @@ public class ModelStep extends BasePipelineStep {
     public DataFormat[] validInputTypes() {
         return new DataFormat[] {
                 DataFormat.NUMPY,
-                DataFormat.ND4J
+                DataFormat.ND4J,
+                DataFormat.JSON,
+                DataFormat.IMAGE,
+                DataFormat.IMAGE
         };
 
     }
@@ -72,7 +75,9 @@ public class ModelStep extends BasePipelineStep {
     public Output.DataFormat[] validOutputTypes() {
         return new Output.DataFormat[] {
                 Output.DataFormat.NUMPY,
-                Output.DataFormat.ND4J
+                Output.DataFormat.ND4J,
+                Output.DataFormat.JSON,
+                Output.DataFormat.ARROW,
         };
     }
 

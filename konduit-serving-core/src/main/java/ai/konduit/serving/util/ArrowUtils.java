@@ -46,6 +46,7 @@ import org.datavec.api.transform.schema.conversion.TypeConversion;
 import org.datavec.api.util.ndarray.RecordConverter;
 import org.datavec.api.writable.*;
 import org.datavec.arrow.ArrowConverter;
+import org.datavec.arrow.recordreader.ArrowRecord;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.datavec.arrow.recordreader.ArrowWritableRecordTimeSeriesBatch;
 import org.nd4j.linalg.api.buffer.DataBuffer;
@@ -53,6 +54,7 @@ import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.exception.ND4JIllegalArgumentException;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.io.ReflectionUtils;
 import org.nd4j.linalg.primitives.Pair;
 import org.nd4j.serde.binary.BinarySerde;
 
@@ -74,7 +76,27 @@ import java.util.*;
  */
 @Slf4j
 public class ArrowUtils {
+    private static java.lang.reflect.Field arrowRecordField;
 
+    static {
+        try {
+            arrowRecordField = ArrowRecord.class.getDeclaredField("arrowWritableRecordBatch");
+            arrowRecordField.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Returns the underlying {@link ArrowWritableRecordBatch}
+     * for the input {@link ArrowRecord}
+     * @param arrowRecord the arrow record to get the underlying batch for
+     * @return the batch for the given record
+     */
+    public static ArrowWritableRecordBatch getBatchFromRecord(ArrowRecord arrowRecord) {
+        ArrowWritableRecordBatch writableRecordBatch = (ArrowWritableRecordBatch) ReflectionUtils.getField(arrowRecordField,arrowRecord);
+        return writableRecordBatch;
+    }
 
     public static INDArray toArray(ArrowWritableRecordTimeSeriesBatch arrowWritableRecordBatch) {
         return RecordConverter.toTensor(arrowWritableRecordBatch);

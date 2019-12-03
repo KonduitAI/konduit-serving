@@ -25,6 +25,7 @@ package ai.konduit.serving.verticles.python;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -91,7 +92,7 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .inputDataFormat(Input.DataFormat.NUMPY)
-                .predictionType(Output.PredictionType.CLASSIFICATION)
+                .predictionType(PredictionType.RAW)
                 .build();
 
 

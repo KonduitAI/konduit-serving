@@ -31,7 +31,6 @@ import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.metrics.NativeMetrics;
-import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.image.VertxBufferImageInputAdapter;
@@ -40,6 +39,7 @@ import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
+import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.LongTaskTimer.Sample;
@@ -204,32 +204,7 @@ public class PipelineRouteDefiner {
                 .consumes("application/json")
                 .produces("application/json").handler(ctx -> {
             PredictionType outputAdapterType = PredictionType.valueOf(ctx.pathParam("operation").toUpperCase());
-            if (inputSchema == null) {
-                for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                    if (pipelineStep instanceof ModelStep) {
-                        inputSchema = pipelineStep.inputSchemaForName("default");
-                    }
-                    if (pipelineStep instanceof PythonStep) {
-                        inputSchema = pipelineStep.inputSchemaForName("default");
-                    }
-                    if (pipelineStep instanceof TransformProcessStep) {
-                        inputSchema = pipelineStep.inputSchemaForName("default");
-                    }
-                }
-            }
-
-            if (outputSchema == null) {
-                for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                    if (pipelineStep instanceof ModelStep) {
-                        outputSchema = pipelineStep.outputSchemaForName("default");
-                    } else if (pipelineStep instanceof PythonStep) {
-                        outputSchema = pipelineStep.outputSchemaForName("default");
-                    }
-                    if (pipelineStep instanceof TransformProcessStep) {
-                        outputSchema = pipelineStep.inputSchemaForName("default");
-                    }
-                }
-            }
+            initializeSchemas(inferenceConfiguration, true);
 
 
             try {
@@ -306,6 +281,8 @@ public class PipelineRouteDefiner {
                 .consumes("multipart/mixed")
                 .produces("application/json").handler(ctx -> {
             String transactionUUID = ctx.get(VerticleConstants.TRANSACTION_ID);
+            //need to initialize schemas for output
+            initializeSchemas(inferenceConfiguration, false);
 
             log.debug("Processing transaction id " + transactionUUID);
             Record[] inputs = ctx.get(VerticleConstants.CONVERTED_INFERENCE_DATA);
@@ -315,7 +292,7 @@ public class PipelineRouteDefiner {
                 ctx.response().setStatusMessage("NDArrays failed to de serialize.");
                 ctx.next();
                 return;
-            } else if (!ai.konduit.serving.util.SchemaTypeUtils.recordsAllArrayType(inputs)) {
+            } else if (!SchemaTypeUtils.recordsAllArrayType(inputs)) {
                 ctx.response().setStatusCode(400);
                 ctx.response().setStatusMessage("Invalid inputs found. All types must be valid numpy or nd4j arrays.");
                 ctx.next();
@@ -331,8 +308,12 @@ public class PipelineRouteDefiner {
 
                     pipelineExecutioner.doInference(
                             ctx,
-                            inferenceConfiguration.serving().getOutputDataFormat(),
-                            inputs);
+                            inferenceConfiguration.getServingConfig().getPredictionType(),
+                            inputs,
+                            inputSchema,
+                            null,
+                            outputSchema,
+                            inferenceConfiguration.getServingConfig().getOutputDataFormat());
 
                     if (start != null)
                         start.stop();
@@ -458,6 +439,35 @@ public class PipelineRouteDefiner {
         }
 
         return router;
+    }
+
+    private void initializeSchemas(InferenceConfiguration inferenceConfiguration, boolean inputRequired) {
+        if (inputSchema == null && inputRequired) {
+            for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
+                if (pipelineStep instanceof ModelStep) {
+                    inputSchema = pipelineStep.inputSchemaForName("default");
+                }
+                if (pipelineStep instanceof PythonStep) {
+                    inputSchema = pipelineStep.inputSchemaForName("default");
+                }
+                if (pipelineStep instanceof TransformProcessStep) {
+                    inputSchema = pipelineStep.inputSchemaForName("default");
+                }
+            }
+        }
+
+        if (outputSchema == null) {
+            for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
+                if (pipelineStep instanceof ModelStep) {
+                    outputSchema = pipelineStep.outputSchemaForName("default");
+                } else if (pipelineStep instanceof PythonStep) {
+                    outputSchema = pipelineStep.outputSchemaForName("default");
+                }
+                if (pipelineStep instanceof TransformProcessStep) {
+                    outputSchema = pipelineStep.inputSchemaForName("default");
+                }
+            }
+        }
     }
 
     private Map<String, InputAdapter<Buffer, ?>> getAdapterMap(RoutingContext ctx) {

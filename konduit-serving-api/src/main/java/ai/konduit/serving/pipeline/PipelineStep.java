@@ -38,12 +38,13 @@ public interface PipelineStep extends Serializable {
      * @param dataFormat the {@link ai.konduit.serving.config.Input.DataFormat} to test
      * @return true if the input format is valid or false otherwise
      */
-   default  boolean isValidInputType(Input.DataFormat dataFormat) {
-     if(validInputTypes() == null || validInputTypes().length < 1) {
-         return true;
-     }
-     return Arrays.stream(validInputTypes()).anyMatch(input -> dataFormat.equals(input));
-   }
+    default  boolean isValidInputType(Input.DataFormat dataFormat) {
+        if(validInputTypes() == null || validInputTypes().length < 1) {
+            return true;
+        }
+        boolean ret =  Arrays.stream(validInputTypes()).anyMatch(input -> dataFormat.equals(input));
+        return ret;
+    }
 
 
     /**
@@ -51,18 +52,18 @@ public interface PipelineStep extends Serializable {
      * is valid or not.
      * Have {@link #validOutputTypes()} return null or an empty array
      * if you would like any type to be valid.
-      *
+     *
      * @param dataFormat the {@link ai.konduit.serving.config.Output.DataFormat} to test
      * @return true if the output format is valid or false otherwise
      */
-   default  boolean isValidOutputType(Output.DataFormat dataFormat) {
-       if(validOutputTypes() == null || validOutputTypes().length < 1) {
-           return true;
-       }
+    default  boolean isValidOutputType(Output.DataFormat dataFormat) {
+        if(validOutputTypes() == null || validOutputTypes().length < 1) {
+            return true;
+        }
 
-       return Arrays.stream(validOutputTypes()).anyMatch(input -> dataFormat.equals(input));
-
-   }
+        boolean ret =  Arrays.stream(validOutputTypes()).anyMatch(input -> dataFormat.equals(input));
+        return ret;
+    }
 
 
     /**
@@ -71,10 +72,10 @@ public interface PipelineStep extends Serializable {
      * in a pipeline.
      * Have {@link #validPredictionTypes()} return null or empty array
      * if you would like any type to be valid.
-      *
+     *
      * @return the valid prediction type
      */
-   PredictionType[] validPredictionTypes();
+    PredictionType[] validPredictionTypes();
 
     /**
      * Returns true if the {@link #validPredictionTypes()}
@@ -83,11 +84,12 @@ public interface PipelineStep extends Serializable {
      * @param predictionType the prediction type
      * @return
      */
-   default boolean isValidPredictionType(PredictionType predictionType) {
-       if(validPredictionTypes() == null || validPredictionTypes().length < 1)
-           return true;
-       return Arrays.stream(validPredictionTypes()).anyMatch(input -> predictionType.equals(input));
-   }
+    default boolean isValidPredictionType(PredictionType predictionType) {
+        if(validPredictionTypes() == null || validPredictionTypes().length < 1)
+            return true;
+        boolean ret =  Arrays.stream(validPredictionTypes()).anyMatch(input -> predictionType.equals(input));
+        return ret;
+    }
 
 
     /**
