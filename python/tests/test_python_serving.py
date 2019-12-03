@@ -1,10 +1,8 @@
 from konduit import *
 from konduit.server import Server
-from konduit.client import Client
 from konduit.utils import is_port_in_use
 
 import numpy as np
-import time
 import random
 import pytest
 
@@ -28,7 +26,6 @@ def test_server_start():
 
     data_input = {"default": np.load("../data/input-0.npy")}
 
-    time.sleep(10)
     assert is_port_in_use(port)
 
     try:
