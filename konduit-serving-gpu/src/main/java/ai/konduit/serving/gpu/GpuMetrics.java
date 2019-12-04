@@ -128,16 +128,16 @@ public class GpuMetrics implements MeterBinder {
                     .description("Device memory used in bytes")
                     .baseUnit(deviceStats.toString())
                     .register(registry);
-            final long deviceMemoryFreeInBytes = memory.free();
-            Gauge.builder(".memory.free",() -> deviceMemoryFreeInBytes)
-                    .tags(tags)
-                    .description("Device memory free in bytes")
-                    .baseUnit(deviceStats.toString())
-                    .register(registry);
-
+            // free needs a Pointer and has void return type now
+//            final long deviceMemoryFreeInBytes = memory.free();
+//            Gauge.builder(".memory.free",() -> deviceMemoryFreeInBytes)
+//                    .tags(tags)
+//                    .description("Device memory free in bytes")
+//                    .baseUnit(deviceStats.toString())
+//                    .register(registry);
             checkReturn(nvmlDeviceGetTemperature(device,NVML_TEMPERATURE_GPU,resultArr));
             final int tempC = resultArr[0];
-            Gauge.builder(".temp.celsius",() -> deviceMemoryFreeInBytes)
+            Gauge.builder(".temp.celsius",() -> tempC)
                     .tags(tags)
                     .description("Temperature of gpu in celsius")
                     .baseUnit(deviceStats.toString())
