@@ -1,0 +1,18 @@
+serving:
+  http_port: 1337
+  input_data_format: NUMPY
+  output_data_format: NUMPY
+  log_timings: True
+  extra_start_args: -Xmx8g
+steps:
+  tensorflow_step:
+    type: TENSORFLOW
+    model_loading_path: ../data/mnist_2.0.0.pb
+    input_names:
+      - input_layer
+    output_names:
+      - output_layer/Softmax
+    input_data_types:
+      input_layer: FLOAT
+    parallel_inference_config:
+      workers: 1
