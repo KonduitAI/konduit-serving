@@ -85,7 +85,7 @@ if __name__ == "__main__":
         version = re.findall(regex, content)
 
     print("Running command: " + " ".join(command))
-    subprocess.call(command)
+    subprocess.call(command, shell=True, cwd=args.source)
     copyfile(
         os.path.join(
             args.source,
