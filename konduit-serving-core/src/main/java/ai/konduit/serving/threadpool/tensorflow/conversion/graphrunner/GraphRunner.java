@@ -224,21 +224,21 @@ public class GraphRunner implements Closeable {
         if(inputDataTypes == null || inputDataTypes.isEmpty()) {
             inputDataTypes = new LinkedHashMap<>();
             for (String s : inputOrder) {
-//                TensorDataType tensorDataType = TensorDataType.values()[inputs.get(s).  dtype()];
-//                Preconditions.checkNotNull(tensorDataType, "Data type of " + inputs.get(s).dtype() + " was null!");
-//                inputDataTypes.put(s, tensorDataType);
+                TensorDataType tensorDataType = TensorDataType.values()[TF_TensorType(inputs.get(s))];
+                Preconditions.checkNotNull(tensorDataType, "Data type of " + TF_TensorType(inputs.get(s)) + " was null!");
+                inputDataTypes.put(s, tensorDataType);
             }
         }
 
         Map<String, TF_Tensor> ret = new HashMap<>();
         for (String s : inputOrder) {
             TF_Tensor currInput = inputs.get(s);
-//            TensorDataType fromDType = TensorDataType.values()[currInput.dtype()];
-//            if (fromDType != inputDataTypes.get(s)) {
-//                TF_Tensor oldTensor = currInput;
-//                currInput = castTensor(currInput, fromDType, inputDataTypes.get(s));
-//                TF_DeleteTensor(oldTensor);
-//            }
+            TensorDataType fromDType = TensorDataType.values()[TF_TensorType(currInput)];
+            if (fromDType != inputDataTypes.get(s)) {
+                TF_Tensor oldTensor = currInput;
+                currInput = castTensor(currInput, fromDType, inputDataTypes.get(s));
+                TF_DeleteTensor(oldTensor);
+            }
 
             ret.put(s, currInput);
         }
@@ -265,7 +265,7 @@ public class GraphRunner implements Closeable {
         if(inputDataTypes == null) {
             inputDataTypes = new LinkedHashMap<>();
             for (String s : inputOrder) {
-//                inputDataTypes.put(s, TensorDataType.values()[inputs.get(s).dtype()]);
+                inputDataTypes.put(s, TensorDataType.values()[TF_TensorType(inputs.get(s))]);
             }
         }
 
