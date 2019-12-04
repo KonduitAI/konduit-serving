@@ -141,15 +141,27 @@ def server_from_file(file_path, start_server=True, use_yaml=True):
 
 
 def client_from_file(file_path, use_yaml=True):
-    """Create a Konduit client instance from a configuration file
+    """Create a Konduit client instance from a configuration file.
+    If your konduit configuration file has a "client" section, that
+    is used to create the client instance. If it doesn't, all properties
+    are derived from the "serving" section.
 
     :param file_path: path to your konduit.yaml
     :param use_yaml: use yaml or json
     :return: konduit.client.Client instance
     """
     data = load_data(file_path, use_yaml)
-    client_data = data.get("client", None)
-    client = Client(**client_data)
+    if "client" in data.keys():
+        client_data = data.get("client", None)
+        client = Client(**client_data)
+    else:
+        client_data = data.get("serving", None)
+        port = client_data.get("http_port", None)
+        if not port:
+            raise RuntimeError(
+                "No HTTP port found in configuration file, can't proceed."
+            )
+        client = Client(port=port)
     return client
 
 
