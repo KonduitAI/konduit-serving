@@ -8,6 +8,10 @@ import java.util.Map;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 import ai.konduit.serving.pipeline.step.*;
@@ -24,10 +28,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  *
  * @author Adam Gibson
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@SuperBuilder
+
 @JsonSubTypes({
         @JsonSubTypes.Type(value = ModelStep.class, name = "ModelStep"),
         @JsonSubTypes.Type(value = PythonStep.class, name = "PythonStep"),

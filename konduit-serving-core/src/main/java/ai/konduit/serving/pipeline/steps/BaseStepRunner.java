@@ -24,6 +24,7 @@ package ai.konduit.serving.pipeline.steps;
 
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.PipelineStepRunner;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.*;
@@ -49,9 +50,9 @@ import java.util.stream.Collectors;
  */
 public abstract class BaseStepRunner implements PipelineStepRunner {
 
-    protected BasePipelineStep pipelineStep;
+    protected PipelineStep pipelineStep;
 
-    public BaseStepRunner(BasePipelineStep pipelineStep) {
+    public BaseStepRunner(PipelineStep pipelineStep) {
         this.pipelineStep = pipelineStep;
     }
 

@@ -22,7 +22,6 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ArrayConcatenationStep;
 import org.datavec.api.records.Record;
@@ -42,7 +41,7 @@ import java.util.Map;
  * for each input.
  * <p>
  * This is meant to be used mainly right before a
- * {@link InferenceExecutionerStepRunner}
+ * {@link ai.konduit.serving.pipeline.steps.InferenceExecutionerStepRunner}
  * that takes in 1 array per named input.
  *
  * @author Adam Gibson

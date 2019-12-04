@@ -220,13 +220,12 @@ public class PipelineRouteDefiner {
                 });
 
 
-        router.post("/:operation/:inputType")
 
         // TODO: this json specific route assumes a single input and output called "default". That seems very restrictive.
         router.post("/:predictionType/:inputType")
                 .consumes("application/json")
                 .produces("application/json").handler(ctx -> {
-            PredictionType outputAdapterType = PredictionType.valueOf(ctx.pathParam("operation").toUpperCase());
+            PredictionType outputAdapterType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
             initializeSchemas(inferenceConfiguration, true);
 
 
@@ -427,7 +426,7 @@ public class PipelineRouteDefiner {
                     if (batchCreationTimer != null) {
                         start = batchCreationTimer.start();
                     }
-                    pipelineExecutioner.doInference(ctx, outputAdapterType, inputs);
+                    pipelineExecutioner.doInference(ctx, dataFormat, inputs);
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
@@ -495,7 +494,7 @@ public class PipelineRouteDefiner {
         }
     }
 
-    private Map<String, InputAdapter<Buffer, ?>> getAdapterMap(RoutingContext ctx) {
+    private Map<String, InputAdapter<Buffer, ?>> getInputAdapterMap(RoutingContext ctx) {
         Map<String, InputAdapter<Buffer, ?>> adapters = new HashMap<>();
         Input.DataFormat inputAdapterType = Input.DataFormat.valueOf(ctx.pathParam("inputType").toUpperCase());
         InputAdapter<Buffer,?> adapter = getInputAdapter(inputAdapterType);

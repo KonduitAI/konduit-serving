@@ -219,28 +219,28 @@ public class CodeGen {
 
         FileUtils.writeStringToFile(newModule, sb,Charset.defaultCharset(),false);
 
-        Process autopep_linting = runtime.exec("autopep8 --in-place " + newModule);
-        autopep_linting.waitFor(8, TimeUnit.SECONDS);
-        if(autopep_linting.exitValue() != 0) {
+        Process autopepLinting = runtime.exec("autopep8 --in-place " + newModule);
+        autopepLinting.waitFor(8, TimeUnit.SECONDS);
+        if(autopepLinting.exitValue() != 0) {
             String errorMessage = "";
-            try(InputStream is = autopep_linting.getInputStream()) {
+            try(InputStream is = autopepLinting.getInputStream()) {
                 errorMessage += IOUtils.toString(is,Charset.defaultCharset());
 
             }
             throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
         }
-        autopep_linting.destroy();
+        autopepLinting.destroy();
 
-        Process black_linting = runtime.exec("black " + newModule);
-        black_linting.waitFor(5, TimeUnit.SECONDS);
-        if(black_linting.exitValue() != 0) {
+        Process blackLinting = runtime.exec("black " + newModule);
+        blackLinting.waitFor(5, TimeUnit.SECONDS);
+        if(blackLinting.exitValue() != 0) {
             String errorMessage = "";
-            try(InputStream is = black_linting.getInputStream()) {
+            try(InputStream is = blackLinting.getInputStream()) {
                 errorMessage += IOUtils.toString(is,Charset.defaultCharset());
 
             }
             throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
         }
-        black_linting.destroy();
+        blackLinting.destroy();
     }
 }
