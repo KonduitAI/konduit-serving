@@ -45,7 +45,12 @@ class Client(object):
 
         url = "{}:{}".format(host, port)
 
-        if input_names is None:
+        # If any "format" is missing, check for server configuration
+        if (
+            input_data_format is None
+            or output_data_format is None
+            or prediction_type is None
+        ):
             if not validate_server(url):
                 raise RuntimeError("Unable to connect to the server at {}".format(url))
             else:
