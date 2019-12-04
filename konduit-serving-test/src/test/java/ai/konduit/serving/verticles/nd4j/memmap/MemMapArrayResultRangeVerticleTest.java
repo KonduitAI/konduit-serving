@@ -44,28 +44,16 @@ public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verti
 
     @Override
     public Handler<HttpServerRequest> getRequest() {
-        Handler<HttpServerRequest> ret = new Handler<HttpServerRequest>() {
-            @Override
-            public void handle(HttpServerRequest req) {
-                //should be json body of classification
-                req.bodyHandler(body -> {
-                    System.out.println("Finish body" + body);
-                });
 
-                req.exceptionHandler(exception -> {
-                    exception.printStackTrace();
-                });
-
-
-            }
+        return req -> {
+            //should be json body of classification
+            req.bodyHandler(body -> System.out.println("Finish body" + body));
+            req.exceptionHandler(Throwable::printStackTrace);
         };
-
-        return ret;
     }
 
 
     @Test(timeout = 60000)
-
     public void testArrayResultRange(TestContext context) {
         HttpClient httpClient = vertx.createHttpClient();
         JsonArray jsonArray = new JsonArray();

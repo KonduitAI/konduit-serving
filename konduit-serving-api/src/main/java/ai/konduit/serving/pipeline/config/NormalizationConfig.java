@@ -31,7 +31,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * Configuration for data normalization in the ETL part of your pipeline.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

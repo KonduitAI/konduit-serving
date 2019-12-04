@@ -3,8 +3,10 @@ def has_as_dict_attribute(python_object):
 
     :param python_object: any Python object
     """
-    if not hasattr(python_object.__class__, 'as_dict') and callable(getattr(python_object.__class__, 'as_dict')):
-        raise AttributeError('Passed in Python object does not have an as_dict method.')
+    if not hasattr(python_object.__class__, "as_dict") and callable(
+        getattr(python_object.__class__, "as_dict")
+    ):
+        raise AttributeError("Passed in Python object does not have an as_dict method.")
 
 
 def _invoke_setter_on(input_object, method_name, value):
@@ -15,9 +17,9 @@ def _invoke_setter_on(input_object, method_name, value):
     :param method_name: name of the setter method
     :param value: value to set
     """
-    remove = '_' + type(input_object).__name__ + '__'
-    real_method_name = method_name.replace(remove, '')
-    setter_method = '_set_' + real_method_name
+    remove = "_" + type(input_object).__name__ + "__"
+    real_method_name = method_name.replace(remove, "")
+    setter_method = "_set_" + real_method_name
     if hasattr(input_object, setter_method):
         method = getattr(input_object, setter_method)
         method(value)
@@ -27,8 +29,11 @@ def _ensure_serializable(input_config):
     """Modifies a given input configuration, if necessary,
     to make it serializable.
     """
-    if not (hasattr(input_config, '__dict__') or type(input_config) is DictWrapper or type(
-            input_config) is ListWrapper):
+    if not (
+        hasattr(input_config, "__dict__")
+        or type(input_config) is DictWrapper
+        or type(input_config) is ListWrapper
+    ):
         return
 
     # iterate over all config properties
@@ -40,7 +45,7 @@ def _ensure_serializable(input_config):
                 _ensure_serializable(item)
             _invoke_setter_on(input_config, setter_method, ListWrapper(value))
 
-        elif hasattr(value, 'as_dict'):
+        elif hasattr(value, "as_dict"):
             _ensure_serializable(value)
 
 
@@ -55,7 +60,7 @@ def config_to_dict_with_type(inference_config):
     has_as_dict_attribute(inference_config)
     _ensure_serializable(inference_config)
     input_dict = inference_config.as_dict()
-    input_dict['@type'] = inference_config.__class__.__name__
+    input_dict["@type"] = inference_config.__class__.__name__
     return input_dict
 
 
@@ -67,7 +72,7 @@ def empty_type_dict(input_object):
     :return:
     """
     d = dict()
-    d['@type'] = input_object.__class__.__name__
+    d["@type"] = input_object.__class__.__name__
     return d
 
 
@@ -77,13 +82,13 @@ class DictWrapper:
     """
 
     def __init__(self, input_dict):
-        assert type(input_dict) is dict, 'Input type must be a dictionary!'
+        assert type(input_dict) is dict, "Input type must be a dictionary!"
         self.input_dict = input_dict
 
     def as_dict(self):
         ret = {}
         for key, value in self.input_dict.items():
-            if hasattr(value, 'as_dict'):
+            if hasattr(value, "as_dict"):
                 ret[key] = value.as_dict()
             else:
                 ret[key] = value
@@ -98,7 +103,7 @@ class ListWrapper:
     """
 
     def __init__(self, input_list):
-        assert type(input_list) is list, 'Input type must be a list!'
+        assert type(input_list) is list, "Input type must be a list!"
         self.input_list = input_list
 
     def as_dict(self):

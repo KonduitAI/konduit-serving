@@ -23,9 +23,15 @@
 package ai.konduit.serving.codegen.pythoncodegen;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.*;
+import ai.konduit.serving.config.Input;
+import ai.konduit.serving.config.MemMapConfig;
+import ai.konduit.serving.config.ParallelInferenceConfig;
+import ai.konduit.serving.config.SchemaType;
+import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.config.NormalizationConfig;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.step.*;
@@ -46,9 +52,10 @@ import java.util.regex.Pattern;
 
 /**
  * Konduit Python client generator
+ *
  */
 public class CodeGen {
-    public static void main(String[] args) throws Exception {
+    public static void main( String[] args ) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper, JsonSchemaConfig.html5EnabledSchema());
         Class<?>[] clazzes = {
@@ -67,6 +74,7 @@ public class CodeGen {
                 TensorFlowConfig.class,
                 PythonConfig.class,
                 ServingConfig.class,
+                PipelineStep.class,
                 BasePipelineStep.class,
                 NormalizationConfig.class,
                 PythonStep.class,
@@ -92,14 +100,14 @@ public class CodeGen {
         Runtime runtime = Runtime.getRuntime();
         Pattern replace = Pattern.compile("class\\s[A-Za-z]+:");
 
-        for (Class<?> clazz : clazzes) {
+        for(Class<?> clazz : clazzes) {
             System.out.println("Writing class " + clazz.getSimpleName());
             JsonNode jsonNode = jsonSchemaGenerator.generateJsonSchema(clazz);
             ObjectNode objectNode = (ObjectNode) jsonNode;
             objectNode.putObject("definitions");
-            objectNode.put("title", clazz.getSimpleName());
+            objectNode.put("title",clazz.getSimpleName());
             File classJson = new File("schema-%s.json", clazz.getSimpleName());
-            if (classJson.exists()) {
+            if(classJson.exists()) {
                 boolean deleted = classJson.delete();
                 System.out.println(deleted);
             }
@@ -124,30 +132,31 @@ public class CodeGen {
 
             //change class names
             String load = FileUtils.readFileToString(pythonFile, Charset.defaultCharset());
-            if (BasePipelineStep.class.isAssignableFrom(clazz) && !clazz.equals(BasePipelineStep.class))
-                load = load.replaceFirst(replace.pattern(), "\nclass "
+            if(PipelineStep.class.isAssignableFrom(clazz) && !clazz.equals(PipelineStep.class))
+                load = load.replaceFirst(replace.pattern(),"\nclass "
                         + clazz.getSimpleName() + "(PipelineStep):");
             else
-                load = load.replaceFirst(replace.pattern(), "\nclass "
+                load = load.replaceFirst(replace.pattern(),"\nclass "
                         + clazz.getSimpleName() + "(object):");
 
             //change keywords args to underscores
             StringBuilder kwArgsAsUnderScore = new StringBuilder();
             String[] split = load.split("\n");
-            for (String splitLine : split) {
-                if (splitLine.contains("=None")) {
+            for(String splitLine : split) {
+                if(splitLine.contains("=None")) {
                     splitLine = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, splitLine);
                 }
                 //property needed for json
-                else if (!splitLine.contains("'")
+                else if(!splitLine.contains("'")
                         && !splitLine.contains("TypeError")
                         && !splitLine.contains("ValueError")
                         && !splitLine.contains("class")
                         && !splitLine.contains("isinstance")
-                        && !splitLine.contains("enum")) {
+                        && !splitLine.contains("enum")){
                     splitLine = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, splitLine);
 
-                } else if (splitLine.contains("'") && splitLine.contains("=") && !splitLine.contains("enum")) {
+                }
+                else if(splitLine.contains("'") && splitLine.contains("=") && !splitLine.contains("enum")) {
                     String[] split2 = splitLine.split("=");
                     StringBuilder newSplitLine = new StringBuilder();
                     newSplitLine.append(split2[0]);
@@ -157,19 +166,19 @@ public class CodeGen {
                     splitLine = newSplitLine.toString();
                 }
 
-                splitLine = splitLine.replace("_none", "None");
+                splitLine = splitLine.replace("_none","None");
                 kwArgsAsUnderScore.append(splitLine).append("\n");
             }
 
             load = kwArgsAsUnderScore.toString();
-            load = load.replace("d = dict()", "d = empty_type_dict(self)");
+            load = load.replace("d = dict()","d = empty_type_dict(self)");
             //load = load.replaceFirst("import enum",imports.toString());
-            FileUtils.writeStringToFile(newModule, load, Charset.defaultCharset(), true);
+            FileUtils.writeStringToFile(newModule,load,Charset.defaultCharset(),true);
 
             // Clean up JSON files after code generation.
             boolean pythonDeleted = pythonFile.delete();
             System.out.println(pythonDeleted);
-            if (classJson.exists()) {
+            if(classJson.exists()) {
                 boolean deleteStatus = classJson.delete();
                 System.out.println(classJson.toString() + " intermediate JSON file was deleted "
                         + (deleteStatus ? "successfully" : "unsuccessfully"));
@@ -177,10 +186,10 @@ public class CodeGen {
         }
 
         String loadedModule = FileUtils.readFileToString(newModule, Charset.defaultCharset());
-        loadedModule = loadedModule.replace("import enum", "");
-        loadedModule = loadedModule.replace("#!/usr/bin/env/python", "");
+        loadedModule = loadedModule.replace("import enum","");
+        loadedModule = loadedModule.replace("#!/usr/bin/env/python","");
         loadedModule = loadedModule.replace("def __init__(self\n" +
-                "            ):", "def __init__(self):\n\t\tpass");
+                "            ):","def __init__(self):\n\t\tpass");
         loadedModule = loadedModule.replace("if not isinstance(value, type)",
                 "if not isinstance(value, dict) and not isinstance(value, DictWrapper)");
         loadedModule = loadedModule.replace("if not isinstance(value, type)",
@@ -189,29 +198,49 @@ public class CodeGen {
                 "if not isinstance(value, dict) and not isinstance(value, DictWrapper)");
         loadedModule = loadedModule.replace("if not isinstance(value, list)",
                 "if not isinstance(value, list) and not isinstance(value, ListWrapper)");
-        loadedModule = loadedModule.replace("'type': type", "'type': dict");
+        loadedModule = loadedModule.replace("'type': type","'type': dict");
 
         // Modify some constructor defaults to leverage Python's strengths
+        // By default we work with numpy-in-numpy-out and "raw" predictions to cause minimal harm to the intended
+        // audience.
         loadedModule = loadedModule.replace("input_data_format=None", "input_data_format='NUMPY'");
         loadedModule = loadedModule.replace("output_data_format=None", "output_data_format='NUMPY'");
-        loadedModule = loadedModule.replace("log_timings=None", "log_timings=True");
+        loadedModule = loadedModule.replace("prediction_type=None", "prediction_type='RAW'");
 
+        loadedModule = loadedModule.replace("log_timings=None", "log_timings=False");
+        loadedModule = loadedModule.replace("listen_host=None", "listen_host='localhost'");
+        loadedModule = loadedModule.replace("uploads_directory=None", "uploads_directory='file-uploads/'");
+
+
+        loadedModule = PythonDocStrings.generateDocs(loadedModule);
 
         String sb = "import enum\nfrom konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n" +
                 loadedModule;
 
-        FileUtils.writeStringToFile(newModule, sb, Charset.defaultCharset(), false);
+        FileUtils.writeStringToFile(newModule, sb,Charset.defaultCharset(),false);
 
-        Process p = runtime.exec("autopep8 --in-place " + newModule);
-        p.waitFor(8, TimeUnit.SECONDS);
-        if (p.exitValue() != 0) {
+        Process autopep_linting = runtime.exec("autopep8 --in-place " + newModule);
+        autopep_linting.waitFor(8, TimeUnit.SECONDS);
+        if(autopep_linting.exitValue() != 0) {
             String errorMessage = "";
-            try (InputStream is = p.getInputStream()) {
-                errorMessage += IOUtils.toString(is, Charset.defaultCharset());
+            try(InputStream is = autopep_linting.getInputStream()) {
+                errorMessage += IOUtils.toString(is,Charset.defaultCharset());
 
             }
-            throw new IllegalStateException("Code linting failed with error message: " + errorMessage);
+            throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
         }
-        p.destroy();
+        autopep_linting.destroy();
+
+        Process black_linting = runtime.exec("black " + newModule);
+        black_linting.waitFor(5, TimeUnit.SECONDS);
+        if(black_linting.exitValue() != 0) {
+            String errorMessage = "";
+            try(InputStream is = black_linting.getInputStream()) {
+                errorMessage += IOUtils.toString(is,Charset.defaultCharset());
+
+            }
+            throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
+        }
+        black_linting.destroy();
     }
 }

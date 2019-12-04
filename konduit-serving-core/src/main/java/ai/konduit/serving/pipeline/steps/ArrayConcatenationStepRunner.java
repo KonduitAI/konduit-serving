@@ -23,6 +23,7 @@
 package ai.konduit.serving.pipeline.steps;
 
 import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ArrayConcatenationStep;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;
@@ -50,7 +51,7 @@ public class ArrayConcatenationStepRunner extends BaseStepRunner {
 
     private Map<Integer, Integer> concatDimensionsForIndex;
 
-    public ArrayConcatenationStepRunner(BasePipelineStep pipelineStep) {
+    public ArrayConcatenationStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
         ArrayConcatenationStep arrayConcatenationStepConfig = (ArrayConcatenationStep) pipelineStep;
         this.concatDimensionsForIndex = arrayConcatenationStepConfig.getConcatDimensions();
@@ -65,9 +66,9 @@ public class ArrayConcatenationStepRunner extends BaseStepRunner {
             ret[0].getRecord().add(null);
         }
 
-        Map<Integer, List<INDArray>> arrays = new LinkedHashMap<>();
-        for (int i = 0; i < input.length; i++) {
-            for (int j = 0; j < input[i].getRecord().size(); j++) {
+        Map<Integer,List<INDArray>> arrays = new LinkedHashMap<>();
+        for (Record record : input) {
+            for (int j = 0; j < record.getRecord().size(); j++) {
                 List<INDArray> nameArraysToConcat;
                 if (!arrays.containsKey(j)) {
                     nameArraysToConcat = new ArrayList<>();
@@ -76,7 +77,7 @@ public class ArrayConcatenationStepRunner extends BaseStepRunner {
                     nameArraysToConcat = arrays.get(j);
                 }
 
-                NDArrayWritable ndArrayWritable = (NDArrayWritable) input[i].getRecord().get(j);
+                NDArrayWritable ndArrayWritable = (NDArrayWritable) record.getRecord().get(j);
                 nameArraysToConcat.add(ndArrayWritable.get());
             }
         }

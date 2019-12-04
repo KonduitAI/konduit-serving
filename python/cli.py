@@ -4,10 +4,10 @@ import numpy as np
 import os as opos
 import subprocess
 
-USER_PATH = opos.path.expanduser('~')
-KONDUIT_BASE_DIR = opos.path.join(USER_PATH, '.konduit')
-KONDUIT_DIR = opos.path.join(KONDUIT_BASE_DIR, 'konduit-serving')
-KONDUIT_PID_STORAGE = opos.path.join(KONDUIT_DIR, 'pid.json')
+USER_PATH = opos.path.expanduser("~")
+KONDUIT_BASE_DIR = opos.path.join(USER_PATH, ".konduit")
+KONDUIT_DIR = opos.path.join(KONDUIT_BASE_DIR, "konduit-serving")
+KONDUIT_PID_STORAGE = opos.path.join(KONDUIT_DIR, "pid.json")
 
 
 def mkdir(x):
@@ -25,49 +25,76 @@ def git_clone_konduit(use_https=True):
     """Clone the konduit-serving git repo, if it doesn't already exist locally."""
     if not opos.path.exists(KONDUIT_DIR):
         if use_https:
-            repo = 'https://github.com/KonduitAI/konduit-serving.git'
+            repo = "https://github.com/KonduitAI/konduit-serving.git"
         else:
-            repo = 'git@github.com:KonduitAI/konduit-serving.git'
+            repo = "git@github.com:KonduitAI/konduit-serving.git"
         try:
             subprocess.call(["git", "clone", repo, KONDUIT_DIR])
         except Exception as e:
-            raise RuntimeError('>>> Could not clone konduit-serving repopository. Make sure to have '
-                               'git installed. Type' +
-                               'konduit-python --help for help resolving this.\n', e)
+            raise RuntimeError(
+                ">>> Could not clone konduit-serving repopository. Make sure to have "
+                "git installed. Type"
+                + "konduit-python --help for help resolving this.\n",
+                e,
+            )
 
 
 def build_jar(operating_sys):
     """Build the actual JAR, using our mvnw wrapper under the hood."""
+    if operating_sys is None:
+        raise RuntimeError("Specify an operating system to build a konduit jar.")
     try:
         subprocess.call(["git", "-C", KONDUIT_DIR, "pull"])
     except Exception as e:
-        raise RuntimeError('>>> Could not clone konduit-serving repository. Make sure to have '
-                           'git installed. Type ' +
-                           'konduit-python --help for help resolving this.\n', e)
+        raise RuntimeError(
+            ">>> Could not clone konduit-serving repository. Make sure to have "
+            "git installed. Type " + "konduit-python --help for help resolving this.\n",
+            e,
+        )
 
     try:
-        subprocess.call(['python3', '--version'])
+        subprocess.call(["python3", "--version"])
     except Exception as e:
-        raise RuntimeError('>>> No python3 found on your system. Make sure to install python3 first, '
-                           'then run konduit-python again.\n', e)
+        raise RuntimeError(
+            ">>> No python3 found on your system. Make sure to install python3 first, "
+            "then run konduit-python again.\n",
+            e,
+        )
     try:
-        subprocess.call(['python3', opos.path.join(KONDUIT_DIR, 'build_jar.py'), '--os', operating_sys,
-                         '--source', KONDUIT_DIR])
+        subprocess.call(
+            [
+                "python3",
+                opos.path.join(KONDUIT_DIR, "build_jar.py"),
+                "--os",
+                operating_sys,
+                "--source",
+                KONDUIT_DIR,
+            ]
+        )
     except Exception as e:
-        RuntimeError('Failed to build jar.\n', e)
+        RuntimeError("Failed to build jar.\n", e)
 
 
 def export_jar_path():
     """Export the environment variable KONDUIT_JAR_PATH so that the Python package will automatically
     pick it up."""
-    jar_path = opos.path.join(KONDUIT_DIR, 'konduit.jar')
-    opos.environ['KONDUIT_JAR_PATH'] = jar_path
+    jar_path = opos.path.join(KONDUIT_DIR, "konduit.jar")
+    opos.environ["KONDUIT_JAR_PATH"] = jar_path
 
 
 @click.command()
-@click.option('--os', help='Your operating system. Choose from  `windows-x86_64`,`linux-x86_64`,`linux-x86_64-gpu`,' +
-                           '`macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`')
-@click.option('--https', default=True, help='If True, use HTTPS to clone konduit-serving, else SSH.')
+@click.option(
+    "--os",
+    required=True,
+    help="Your operating system. Choose from  `windows-x86_64`,"
+    "`linux-x86_64`,`linux-x86_64-gpu`,"
+    + "`macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`",
+)
+@click.option(
+    "--https",
+    default=True,
+    help="If True, use HTTPS to clone konduit-serving, else SSH.",
+)
 def init(os, https):
     """Initialize the konduit-python CLI. You can also use this to build a new konduit-serving JAR."""
     git_clone_konduit(https)
@@ -76,17 +103,28 @@ def init(os, https):
 
 
 @click.command()
-@click.option('--os', required=True, help='Your operating system. Choose from  `windows-x86_64`,`linux-x86_64`,'
-                                          '`linux-x86_64-gpu`,' +
-                                          '`macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`')
+@click.option(
+    "--os",
+    required=True,
+    help="Your operating system. Choose from  `windows-x86_64`,`linux-x86_64`,"
+    "`linux-x86_64-gpu`," + "`macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`",
+)
 def build(os):
     """Build the underlying konduit.jar (again)."""
     build_jar(os)
 
 
 @click.command()
-@click.option('--config', required=True, help='Relative or absolute path to your konduit serving config file.')
-@click.option('--start_server', default=True, help='Whether to start the server instance after initialization.')
+@click.option(
+    "--config",
+    required=True,
+    help="Relative or absolute path to your konduit serving config file.",
+)
+@click.option(
+    "--start_server",
+    default=True,
+    help="Whether to start the server instance after initialization.",
+)
 def serve(config, start_server):
     """Serve a pipeline from a konduit configuration"""
     from konduit.load import store_pid
@@ -98,20 +136,43 @@ def serve(config, start_server):
 
 
 @click.command()
-@click.option('--config', required=True, help='Relative or absolute path to your konduit serving config file.')
-@click.option('--numpy_data', help='Path to your numpy data')
-def predict_numpy(config, numpy_data):
-    """Get predictions for your pipeline from numpy input."""
-    # TODO: Note that this is a very limited use case for demo purposes only. we need a more reliable
-    #  system going forward.
+@click.option(
+    "--config",
+    required=True,
+    help="Relative or absolute path to your konduit serving config file.",
+)
+@click.option(
+    "--numpy_data",
+    required=True,
+    help="Comma-separated list of paths to your numpy data",
+)
+@click.option(
+    "--input_names",
+    default="default",
+    help="Comma-separated list of the input names to your pipeline",
+)
+def predict_numpy(config, numpy_data, input_names):
+    """Get predictions for your pipeline from numpy data and input names"""
     from konduit.load import client_from_file
 
+    numpy_files = numpy_data.split(",")
+    input_names = input_names.split(",")
+    assert len(numpy_files) == len(input_names)
+
     client = client_from_file(file_path=config)
-    print(client.predict(np.load(numpy_data)))
+
+    input_dict = {}
+    for i in range(len(numpy_files)):
+        input_dict[input_names[i]] = np.load(numpy_files[i])
+    print(client.predict(input_dict))
 
 
 @click.command()
-@click.option('--config', required=True, help='Relative or absolute path to your konduit serving config file.')
+@click.option(
+    "--config",
+    required=True,
+    help="Relative or absolute path to your konduit serving config file.",
+)
 def stop_server(config):
     """Stop the Konduit server associated with a given config file."""
     from konduit.server import stop_server_by_pid

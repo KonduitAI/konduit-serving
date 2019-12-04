@@ -174,6 +174,26 @@ public class PipelineRouteDefiner {
         healthCheckHandler = HealthCheckHandler.create(vertx);
         router.get("/healthcheck*").handler(healthCheckHandler);
 
+        router.get("/config")
+                .produces("application/json").handler(ctx -> {
+            try {
+                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().end(vertx.getOrCreateContext().config().encode());
+            } catch (Exception e) {
+                ctx.fail(500, e);
+            }
+        });
+
+        router.get("/config/pretty")
+                .produces("application/json").handler(ctx -> {
+            try {
+                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().end(vertx.getOrCreateContext().config().encodePrettily());
+            } catch (Exception e) {
+                ctx.fail(500, e);
+            }
+        });
+
         router.get("/metrics").handler(io.vertx.micrometer.PrometheusScrapingHandler.create())
                 .failureHandler(failureHandler -> {
                     if (failureHandler.failure() != null) {
@@ -201,6 +221,9 @@ public class PipelineRouteDefiner {
 
 
         router.post("/:operation/:inputType")
+
+        // TODO: this json specific route assumes a single input and output called "default". That seems very restrictive.
+        router.post("/:predictionType/:inputType")
                 .consumes("application/json")
                 .produces("application/json").handler(ctx -> {
             PredictionType outputAdapterType = PredictionType.valueOf(ctx.pathParam("operation").toUpperCase());
@@ -230,10 +253,11 @@ public class PipelineRouteDefiner {
             }
         });
 
-        router.post("/:operation/:inputType")
+        // TODO: predictionType is unused, why put it into the route?
+        router.post("/:predictionType/:inputType")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed").handler(ctx -> {
-            Map<String, InputAdapter<Buffer, ?>> adapters = getAdapterMap(ctx);
+            Map<String, InputAdapter<io.vertx.core.buffer.Buffer, ?>> adapters = getInputAdapterMap(ctx);
 
             BatchInputParser batchInputParser = BatchInputParser.builder()
                     .converterArgs(pipelineExecutioner.getArgs())
@@ -276,7 +300,8 @@ public class PipelineRouteDefiner {
 
         });
 
-        router.post("/:operation/:inputType")
+        // TODO: predictionType is unused, why put it into the route?
+        router.post("/:predictionType/:inputType")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed")
                 .produces("application/json").handler(ctx -> {
@@ -340,7 +365,7 @@ public class PipelineRouteDefiner {
         router.post("/:inputType/:predictionType")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed").handler(ctx -> {
-            Map<String, InputAdapter<Buffer, ?>> adapters = getAdapterMap(ctx);
+            Map<String, InputAdapter<Buffer, ?>> adapters = getInputAdapterMap(ctx);
 
             String transactionUUID = UUID.randomUUID().toString();
             ctx.vertx().executeBlocking(handler -> {
@@ -380,8 +405,8 @@ public class PipelineRouteDefiner {
             }, true, result -> ctx.next());
         });
 
-
-        router.post("/:inputType/:predictionType")
+        // TODO: this seems bad for consistency reasons. All routes before flip input and prediction type
+        router.post("/:inputType/:outputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed")
                 .produces("application/octet-stream").handler((RoutingContext ctx) -> {
@@ -393,8 +418,8 @@ public class PipelineRouteDefiner {
                 return;
             }
 
-            String outputType = ctx.pathParam("predictionType");
-            Output.DataFormat outputAdapterType = Output.DataFormat.valueOf(outputType.toUpperCase());
+            String outputDataFormatString = ctx.pathParam("outputDataFormat");
+            Output.DataFormat dataFormat = Output.DataFormat.valueOf(outputDataFormatString.toUpperCase());
             ctx.vertx().executeBlocking(handler -> {
                 try {
                     long nanos = System.nanoTime();
@@ -473,16 +498,21 @@ public class PipelineRouteDefiner {
     private Map<String, InputAdapter<Buffer, ?>> getAdapterMap(RoutingContext ctx) {
         Map<String, InputAdapter<Buffer, ?>> adapters = new HashMap<>();
         Input.DataFormat inputAdapterType = Input.DataFormat.valueOf(ctx.pathParam("inputType").toUpperCase());
-        InputAdapter<Buffer, ?> adapter = getAdapter(inputAdapterType);
-        for (String inputName : inputNames()) {
-            adapters.put(inputName, adapter);
+        InputAdapter<Buffer,?> adapter = getInputAdapter(inputAdapterType);
+        for(String inputName : inputNames()) {
+            adapters.put(inputName,adapter);
         }
         return adapters;
     }
 
 
-    private InputAdapter<Buffer, ?> getAdapter(Input.DataFormat inputDataType) {
-        switch (inputDataType) {
+    /**
+     * Get an {@link InputAdapter} for an input data format
+     * @param inputDataFormat input data format
+     * @return input adapter
+     */
+    private InputAdapter<Buffer,?> getInputAdapter(Input.DataFormat inputDataFormat) {
+        switch(inputDataFormat) {
             case NUMPY:
                 return new VertxBufferNumpyInputAdapter();
             case ND4J:

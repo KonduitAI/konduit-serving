@@ -104,7 +104,6 @@ public class KonduitServingMainTest {
         Schema outputSchema = outputSchemaBuilder.build();
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .inputDataFormat(Input.DataFormat.JSON)
                 .httpPort(getAvailablePort())
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();

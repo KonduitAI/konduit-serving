@@ -37,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
+import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.memory.MemoryWorkspace;
 import org.nd4j.linalg.api.memory.conf.WorkspaceConfiguration;
 import org.nd4j.linalg.api.memory.enums.LocationPolicy;
@@ -70,7 +71,7 @@ import java.util.List;
 @Slf4j
 public class MemMapRouteDefiner {
 
-    private INDArray unkVector;
+    private INDArray unknownVector;
     private ThreadLocal<INDArray> arr;
     private MemMapConfig memMapConfig;
 
@@ -112,21 +113,34 @@ public class MemMapRouteDefiner {
         Router router = Router.router(vertx);
         memMapConfig = inferenceConfiguration.getMemMapConfig();
 
-        String path = inferenceConfiguration.getMemMapConfig().getUnkVectorPath();
-        if (path != null) {
+        String path =  inferenceConfiguration.getMemMapConfig().getUnkVectorPath();
+       if(path != null) {
+           try {
+               byte[] content = FileUtils.readFileToByteArray(new File(path));
+               unknownVector = Nd4j.createNpyFromByteArray(content);
+           } catch (IOException e) {
+               throw new IllegalStateException("Unable to load unknown vector: " + path);
+           }
+       }
+
+        File tempFile = new File(System.getProperty("user.home"), ".mmap-temp-file");
+        if (!tempFile.exists()) {
             try {
-                byte[] content = FileUtils.readFileToByteArray(new File(path));
-                unkVector = Nd4j.createNpyFromByteArray(content);
+                Preconditions.checkState(tempFile.createNewFile(), String.format("Memmap temp file at path %s wasn't able to be created successfully. " +
+                        "Check that if you have write permissions to that file location", tempFile.getAbsolutePath()));
             } catch (IOException e) {
-                throw new IllegalStateException("Unable to load unknown vector: " + path);
+                log.error(String.format("Unable to create file at location: %s", tempFile.getAbsolutePath()), e);
             }
         }
 
+        Preconditions.checkState(tempFile.canWrite() && tempFile.canRead(), String.format("Unable to either read or write to %s for memmap temp file.",
+                tempFile.getAbsolutePath()));
 
         arr = new ThreadLocal<>();
         mmap = WorkspaceConfiguration.builder()
                 .initialSize(initialSize)
                 .policyLocation(LocationPolicy.MMAP)
+                .tempFilePath(tempFile.getAbsolutePath())
                 .build();
 
         router.post().handler(BodyHandler.create()
@@ -171,23 +185,24 @@ public class MemMapRouteDefiner {
 
         router.post("/array/:arrayType")
                 .handler(ctx -> {
-                    INDArray write = getOrSetArrForContext();
+                    INDArray write  = getOrSetArrForContext();
                     String paramType = ctx.pathParam("arrayType");
-                    if (paramType.equals("json"))
-                        writeArrayJson(write, ctx);
+                    if(paramType.equals("json"))
+                        writeArrayJson(write,ctx);
                     else
-                        writeArrayBinary(write, ctx);
+                        writeArrayBinary(write,ctx);
                 });
+
 
 
         router.post("/array/indices/:arrayType")
                 .handler(ctx -> {
-                    INDArray write = getArrayFromContext(ctx);
+                    INDArray write  = getArrayFromContext(ctx);
                     String paramType = ctx.pathParam("arrayType");
-                    if (paramType.equals("json"))
-                        writeArrayJson(write, ctx);
+                    if(paramType.equals("json"))
+                        writeArrayJson(write,ctx);
                     else
-                        writeArrayBinary(write, ctx);
+                        writeArrayBinary(write,ctx);
                 });
 
         router.post("/array/range/:from/:to/:arrayType")
@@ -301,7 +316,6 @@ public class MemMapRouteDefiner {
     private INDArray getArrayFromContext(RoutingContext ctx) {
         ctx.response().setStatusCode(200);
         ctx.response().setChunked(false);
-        String testBody = ctx.getBodyAsString();
         JsonArray bodyAsJson = ctx.getBodyAsJsonArray();
 
         if (bodyAsJson == null) {
@@ -315,12 +329,14 @@ public class MemMapRouteDefiner {
         List<INDArray> slices = new ArrayList<>();
         for (int i = 0; i < jsonArray.size(); i++) {
             int idx = jsonArray.getInteger(i);
-            if (idx < 0) {
-                if (unkVector != null) {
-                    slices.add(unkVector);
-                } else {
+            if(idx < 0) {
+                if(unknownVector != null) {
+                    slices.add(unknownVector);
+                }
+                else {
                     ctx.response().setStatusCode(400);
-                    ctx.response().setStatusMessage("Unknown vector specified, but server did not have one configured. Please specify a vector upon startup.");
+                    ctx.response().setStatusMessage("Unknown vector specified, but server did not have one " +
+                            "configured. Please specify a vector upon startup.");
                     ctx.response().setChunked(false);
                 }
             } else

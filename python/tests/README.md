@@ -25,11 +25,8 @@ The transform process is defined by [TransformProcessBuilder](https://github.com
 
 Given a JSON file as input, the Client sends a query to the Server and prints the predicted output. 
 
-This server is configured for JSON input and output. 
+This server is configured for JSON input and and parametrized with JSON and ARROW output.
 
-### [`test_transform_process_arrow.py`](test_transform_process_arrow.py)
-
-Similar to `test_transform_process.py`, checks if a DataVec transformation can be configured, but with the server configured to return [Arrow](https://arrow.apache.org/) output instead of JSON. 
 
 ### [`test_python_serving.py`](test_python_serving.py)
 

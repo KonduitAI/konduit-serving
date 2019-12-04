@@ -1,6 +1,6 @@
 import os
 
-jar = os.getenv('KONDUIT_JAR_PATH', 'konduit.jar')
+jar = os.getenv("KONDUIT_JAR_PATH", "konduit.jar")
 
 try:
     import pydl4j

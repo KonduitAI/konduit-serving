@@ -17,6 +17,17 @@ import org.datavec.api.transform.schema.Schema;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
+/** PipelineStep collects all ETL and model related properties (input schema,
+ * normalization and transform steps, output schema, potential pre-
+ * or post-processing etc.). This config is passed to the respective
+ * verticle along with a {@link ai.konduit.serving.config.ServingConfig}.
+ *
+ * @author Adam Gibson
+ */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
 @JsonSubTypes({
         @JsonSubTypes.Type(value = ModelStep.class, name = "ModelStep"),
         @JsonSubTypes.Type(value = PythonStep.class, name = "PythonStep"),
