@@ -32,13 +32,12 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public class KonduitServlet extends HttpServlet {
 
-    private Vertx vertx;
-    private HttpClient httpClient;
-    private JsonObject vertxConfig;
-
     public final static String CLASS_NAME = "ai.konduit.serving.class";
     public final static String CONFIG_JSON = "ai.konduit.serving.configpath";
     public final static int DEFAULT_HTTP_PORT = 8081;
+    private Vertx vertx;
+    private HttpClient httpClient;
+    private JsonObject vertxConfig;
 
     public KonduitServlet() {
         super();
@@ -58,7 +57,7 @@ public class KonduitServlet extends HttpServlet {
 
         String configStorePath = System.getProperty(CONFIG_JSON);
         JsonObject config1 = new JsonObject();
-        config1.put("path",configStorePath);
+        config1.put("path", configStorePath);
         ConfigStoreOptions httpStore = new ConfigStoreOptions()
                 .setType("file")
                 .setOptional(true)
@@ -104,12 +103,11 @@ public class KonduitServlet extends HttpServlet {
             });
 
 
-            vertx.deployVerticle(verticleClassName,deploymentOptions,handler -> {
-                if(handler.failed()) {
-                    log.error("Unable to deploy verticle",handler.cause());
-                    log("Unable to deploy verticle",handler.cause());
-                }
-                else {
+            vertx.deployVerticle(verticleClassName, deploymentOptions, handler -> {
+                if (handler.failed()) {
+                    log.error("Unable to deploy verticle", handler.cause());
+                    log("Unable to deploy verticle", handler.cause());
+                } else {
                     log.debug("Deployed verticle");
                     log("Deployed verticle");
                     countDownLatch.countDown();
@@ -125,7 +123,7 @@ public class KonduitServlet extends HttpServlet {
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
-            log("Interrupting await call for servlet start",e.getCause());
+            log("Interrupting await call for servlet start", e.getCause());
             Thread.currentThread().interrupt();
         }
 
@@ -137,15 +135,14 @@ public class KonduitServlet extends HttpServlet {
     @Override
     public void destroy() {
         super.destroy();
-        if(httpClient != null) {
+        if (httpClient != null) {
             httpClient.close();
         }
-        if(vertx != null) {
+        if (vertx != null) {
             vertx.close(result -> {
-                if(result.failed()) {
-                    log("Failed to close down server",result.cause());
-                }
-                else {
+                if (result.failed()) {
+                    log("Failed to close down server", result.cause());
+                } else {
                     log("Shut down server");
 
                 }
@@ -164,11 +161,10 @@ public class KonduitServlet extends HttpServlet {
         inputStream.close();
 
         String reqUrl = req.getRequestURL().toString();
-        String baseUrl = reqUrl.replace(req.getContextPath() + "//",req.getContextPath() + "/");
-        String url = baseUrl.replace(req.getContextPath(),"")
+        String baseUrl = reqUrl.replace(req.getContextPath() + "//", req.getContextPath() + "/");
+        String url = baseUrl.replace(req.getContextPath(), "")
                 .replace(String.valueOf(req.getLocalPort()),
                         String.valueOf(vertxConfig.getInteger("httpPort")));
-
 
 
         HttpClientRequest request = httpClient.request(HttpMethod.GET, url, httpClientResponse -> {
@@ -190,15 +186,12 @@ public class KonduitServlet extends HttpServlet {
         });
 
 
-        request.putHeader("Content-Type",req.getHeader("Content-Type"));
+        request.putHeader("Content-Type", req.getHeader("Content-Type"));
         request.setChunked(false);
         request.end(Buffer.buffer(streamContent));
 
 
-
     }
-
-
 
 
     @Override
@@ -210,11 +203,11 @@ public class KonduitServlet extends HttpServlet {
         byte[] streamContent = IOUtils.toByteArray(inputStream);
         inputStream.close();
 
-        if(streamContent != null && streamContent.length > 0)  {
+        if (streamContent != null && streamContent.length > 0) {
             //proxy through to vertx backend
             String reqUrl = req.getRequestURL().toString();
-            String baseUrl = reqUrl.replace(req.getContextPath() + "//",req.getContextPath() + "/");
-            String url = baseUrl.replace(req.getContextPath(),"")
+            String baseUrl = reqUrl.replace(req.getContextPath() + "//", req.getContextPath() + "/");
+            String url = baseUrl.replace(req.getContextPath(), "")
                     .replace(String.valueOf(req.getLocalPort()),
                             String.valueOf(vertxConfig.getInteger("httpPort")));
 
@@ -238,16 +231,14 @@ public class KonduitServlet extends HttpServlet {
             });
 
             request.setChunked(false);
-            request.putHeader("Content-Type",req.getHeader("Content-Type"));
-            request.putHeader("Content-Length",String.valueOf(streamContent.length));
+            request.putHeader("Content-Type", req.getHeader("Content-Type"));
+            request.putHeader("Content-Length", String.valueOf(streamContent.length));
             request.end(Buffer.buffer(streamContent));
-        }
-
-        else {
+        } else {
             try {
                 final PrintWriter writer = aCtx.getResponse().getWriter();
                 aCtx.getResponse().setContentType("application/json");
-                writer.write(new JsonObject().put("status","empty body").toString());
+                writer.write(new JsonObject().put("status", "empty body").toString());
                 writer.flush();
                 writer.close();
                 aCtx.complete();
@@ -274,7 +265,7 @@ public class KonduitServlet extends HttpServlet {
 
             @Override
             public void onError(AsyncEvent event) throws IOException {
-                log("Error request",event.getThrowable());
+                log("Error request", event.getThrowable());
 
             }
 

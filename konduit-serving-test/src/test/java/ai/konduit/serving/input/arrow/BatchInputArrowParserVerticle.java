@@ -55,7 +55,7 @@ public class BatchInputArrowParserVerticle extends BaseRoutableVerticle {
 
         BatchInputParser batchInputParser = BatchInputParser.builder()
                 .inputParts(Collections.singletonList(inputName))
-                .converters(Collections.singletonMap(inputName,  new ArrowBinaryInputAdapter()))
+                .converters(Collections.singletonMap(inputName, new ArrowBinaryInputAdapter()))
                 .converterArgs(Collections.singletonMap(inputName, ConverterArgs.builder()
                         .strings(Collections.singletonList(DataType.LONG.name())).build())).build();
         BatchInputArrowParserVerticle.this.inputParser = batchInputParser;

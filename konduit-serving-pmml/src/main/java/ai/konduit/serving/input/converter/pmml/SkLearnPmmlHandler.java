@@ -32,10 +32,10 @@ import java.io.File;
  * PMML handler for sk learn pickle files
  * The mandatory argument is an input file for use with
  * {@link ConverterPickle#unpickle(File)}
+ *
  * @author Adam Gibson
  */
 public class SkLearnPmmlHandler extends BasePmmlHandler {
-
 
 
     @Override
@@ -43,7 +43,7 @@ public class SkLearnPmmlHandler extends BasePmmlHandler {
         File tmpFile = (File) otherInputs[0];
         Object object = ConverterPickle.unpickle(tmpFile);
         Buffer writeBuffer = ConverterPickle.writePmml(object);
-        return  writeBuffer;
+        return writeBuffer;
     }
 
     @Override

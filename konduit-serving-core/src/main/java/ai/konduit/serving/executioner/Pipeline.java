@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.executioner;
 
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.PipelineStepRunner;
 import ai.konduit.serving.util.SchemaTypeUtils;
@@ -31,20 +32,17 @@ import lombok.Singular;
 import org.datavec.api.records.Record;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
 
 /**
  * Run a pipeline. A pipeline
  * is just runs a sequence
  * of {@link PipelineStepRunner}
- * created from a set of {@link PipelineStep}
- *
- *
+ * created from a set of {@link BasePipelineStep}
  */
 @Builder
 public class Pipeline {
- 
+
     @Singular
     @Getter
     private List<PipelineStepRunner> steps;
@@ -53,42 +51,37 @@ public class Pipeline {
     /**
      * Create a pipeline from a list of pipeline steps.
      * All this does is calls a constructor present on each {@link PipelineStepRunner}
-     * that takes in a parameter of {@link PipelineStep}
+     * that takes in a parameter of {@link BasePipelineStep}
      * and adds it to the {@link #steps}
      * list in a created Pipeline instance
-     * @param configurations the list of {@link PipelineStep}
+     *
+     * @param configurations the list of {@link BasePipelineStep}
      *                       to create a pipeline from
      * @return the created pipeline
      */
     public static Pipeline getPipeline(List<PipelineStep> configurations) {
         PipelineBuilder builder = Pipeline.builder();
-        for(PipelineStep config : configurations) {
-            try {
-                Class<? extends PipelineStepRunner> clazz = (Class<? extends PipelineStepRunner>) Class.forName(config.pipelineStepClazz());
-                Constructor constructor = clazz.getConstructor(PipelineStep.class);
-                PipelineStepRunner pipelineStepRunner = (PipelineStepRunner) constructor.newInstance(config);
-                builder = builder.step(pipelineStepRunner);
-            }catch(Exception e) {
-                throw new IllegalStateException("Unable to instantiate pipeline step from class " + config.pipelineStepClazz(),e);
-            }
+        for (PipelineStep config : configurations) {
+            builder = builder.step(config.createRunner());
         }
 
         return builder.build();
     }
 
     public void destroy() {
-        for(PipelineStepRunner pipelineStepRunner : steps) {
+        for (PipelineStepRunner pipelineStepRunner : steps) {
             pipelineStepRunner.destroy();
         }
     }
 
     /**
      * Executes a pipeline on a set of input {@link Record}
+     *
      * @param inputs the array of records (one "row" per input.
      * @return the output set of records
      */
     public Record[] doPipeline(Record[] inputs) {
-        for(PipelineStepRunner pipelineStepRunner : steps)
+        for (PipelineStepRunner pipelineStepRunner : steps)
             inputs = pipelineStepRunner.transform(inputs);
 
         return inputs;
@@ -100,6 +93,7 @@ public class Pipeline {
      * See {@link SchemaTypeUtils#toArrays(Record[])}
      * for the format of the input that goes in to
      * the pipeline
+     *
      * @param inputs the input {@link INDArray}
      * @return an extracted set of {@link INDArray}
      * from a set of {@link Record}
@@ -107,7 +101,6 @@ public class Pipeline {
     public INDArray[] doPipelineArrays(Record[] inputs) {
         return SchemaTypeUtils.toArrays(doPipeline(inputs));
     }
-
 
 
 }

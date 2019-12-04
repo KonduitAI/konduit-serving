@@ -1,12 +1,10 @@
-from . import *
-from .server import Server
-from .client import Client
-
-import yaml
-import os
 import json
 import logging
+import os
+import yaml
 
+from .client import Client
+from .server import Server
 
 USER_PATH = os.path.expanduser("~")
 KONDUIT_BASE_DIR = os.path.join(USER_PATH, ".konduit")

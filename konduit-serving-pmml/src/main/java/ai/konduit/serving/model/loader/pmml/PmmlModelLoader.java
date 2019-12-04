@@ -52,8 +52,8 @@ public class PmmlModelLoader implements ModelLoader<Evaluator> {
     @Override
     public Evaluator loadModel() throws Exception {
         PMML pmml;
-        try(InputStream is = new FileInputStream(pmmlFile)) {
-            pmml =  PMMLUtil.unmarshal(is);
+        try (InputStream is = new FileInputStream(pmmlFile)) {
+            pmml = PMMLUtil.unmarshal(is);
         }
 
 

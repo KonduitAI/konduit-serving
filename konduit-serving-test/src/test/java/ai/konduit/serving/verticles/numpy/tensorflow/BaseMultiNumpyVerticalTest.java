@@ -37,6 +37,4 @@ public abstract class BaseMultiNumpyVerticalTest extends BaseVerticleTest {
     }
 
 
-
-
 }

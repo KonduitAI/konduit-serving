@@ -22,7 +22,10 @@
 
 package ai.konduit.serving.pipeline.step;
 
-import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.config.Input.DataFormat;
+import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.Output.PredictionType;
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
@@ -33,11 +36,28 @@ import java.util.Map;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-public class ArrayConcatenationStep extends PipelineStep {
+public class ArrayConcatenationStep extends BasePipelineStep {
 
     @Singular
-    private Map<Integer,Integer> concatDimensions;
+    private Map<Integer, Integer> concatDimensions;
 
+
+
+    @Override
+    public DataFormat[] validInputTypes() {
+        return new DataFormat[] {
+                DataFormat.ND4J,
+                DataFormat.NUMPY
+        };
+    }
+
+    @Override
+    public Output.DataFormat[] validOutputTypes() {
+        return new Output.DataFormat[] {
+                Output.DataFormat.NUMPY,
+                Output.DataFormat.ND4J
+        };
+    }
 
     @Override
     public String pipelineStepClazz() {

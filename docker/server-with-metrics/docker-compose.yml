@@ -5,26 +5,26 @@ services:
   # prometheus
   # ---------------------------
   prometheus:
-   image: prom/prometheus
-   container_name: prometheus
-   ports:
-    - 9090:9090
-   volumes:
-    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
 
   pipeline:
     image: skymind/konduit-serving:1.2.1
     ports:
-     - 65322:65322
+      - 65322:65322
     volumes:
-     - ./config.json:/usr/share/config.json
+      - ./config.json:/usr/share/config.json
     entrypoint:
-     - java
-     - -cp
-     - /srv/konduit-serving.jar
-     - ai.konduit.serving.configprovider.KonduitServingMain
-     - --configPath
-     - /usr/share/config.json
+      - java
+      - -cp
+      - /srv/konduit-serving.jar
+      - ai.konduit.serving.configprovider.KonduitServingMain
+      - --configPath
+      - /usr/share/config.json
 
   # ---------------------------
   # grafana

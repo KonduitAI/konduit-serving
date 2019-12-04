@@ -23,9 +23,9 @@
 
 package ai.konduit.serving.config;
 
-import lombok.Data;
-import lombok.Builder;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
@@ -57,7 +57,6 @@ public class MemMapConfig implements Serializable {
     private long initialMemmapSize = DEFAULT_INITIAL_SIZE;
     @Builder.Default
     private String workSpaceName = WORKSPACE_NAME;
-
 
 
 }

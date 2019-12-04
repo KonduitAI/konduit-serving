@@ -23,13 +23,14 @@
 package ai.konduit.serving.verticles.ndarray;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.output.types.ClassifierOutput;
-import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.model.ModelConfig;
+import ai.konduit.serving.model.ModelConfigType;
+import ai.konduit.serving.output.types.ClassifierOutput;
+import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -53,10 +54,10 @@ import static org.junit.Assert.assertEquals;
 
 @NotThreadSafe
 public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
-    
+
     @Override
     public Handler<HttpServerRequest> getRequest() {
-        
+
         return req -> {
             req.bodyHandler(body -> {
                 try {
@@ -71,42 +72,41 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
             req.exceptionHandler(Throwable::printStackTrace);
         };
     }
-    
-    
-    
+
+
     @Override
     public JsonObject getConfigObject() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = getTrainedNetwork();
-        File modelSave =  new File(temporary.getRoot(),"model.zip");
-        ModelSerializer.writeModel(multiLayerNetwork.getFirst(),modelSave,true);
-        
+        File modelSave = new File(temporary.getRoot(), "model.zip");
+        ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, true);
+
         Schema.Builder schemaBuilder = new Schema.Builder();
         schemaBuilder.addColumnDouble("petal_length")
                 .addColumnDouble("petal_width")
                 .addColumnDouble("sepal_width")
                 .addColumnDouble("sepal_height");
         Schema inputSchema = schemaBuilder.build();
-        
+
         Schema.Builder outputSchemaBuilder = new Schema.Builder();
         outputSchemaBuilder.addColumnDouble("setosa");
         outputSchemaBuilder.addColumnDouble("versicolor");
         outputSchemaBuilder.addColumnDouble("virginica");
         Schema outputSchema = outputSchemaBuilder.build();
-        
-        
+
+
         Nd4j.getRandom().setSeed(42);
-        
+
         ModelConfig modelConfig = ModelConfig.builder()
                 .modelConfigType(ModelConfigType.multiLayerNetwork(modelSave.getAbsolutePath()))
                 .build();
-        
+
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .inputDataFormat(Input.DataFormat.JSON)
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
-        
-        ModelStep modelPipelineStep = new ModelStep(modelConfig)
+
+        PipelineStep modelPipelineStep = new ModelStep(modelConfig)
                 .setInput(inputSchema).setOutput(outputSchema);
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
@@ -115,13 +115,12 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
                 .build();
         return new JsonObject(inferenceConfiguration.toJson());
     }
-    
-    
+
+
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return InferenceVerticle.class;
     }
-    
-    
-    
+
+
 }

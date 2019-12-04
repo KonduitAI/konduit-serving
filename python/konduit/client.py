@@ -1,12 +1,12 @@
-import requests
-import re
-import numpy as np
 import io
 import json
+import logging
+import numpy as np
+import re
+import requests
+from konduit.utils import validate_server
 from pyarrow.ipc import RecordBatchFileReader
 from requests_toolbelt.multipart import decoder, encoder
-import logging
-from konduit.utils import validate_server
 
 
 class Client(object):

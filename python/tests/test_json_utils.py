@@ -1,6 +1,6 @@
+import pytest
 from konduit import *
 from konduit.json_utils import *
-import pytest
 
 
 @pytest.mark.unit

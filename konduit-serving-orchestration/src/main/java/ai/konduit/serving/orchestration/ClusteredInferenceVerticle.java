@@ -24,15 +24,15 @@ package ai.konduit.serving.orchestration;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.configprovider.PipelineRouteDefiner;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.Vertx;
 import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxImpl;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
-
 import org.nd4j.base.Preconditions;
+
 import java.util.List;
 
 /**
@@ -81,29 +81,29 @@ public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
             clusterManager = impl.getClusterManager();
             this.router.get("/numnodes").handler(ctx -> {
                 List<String> nodes = clusterManager.getNodes();
-                ctx.response().putHeader("Content-Type","application/json");
-                ctx.response().end(new JsonObject().put("numnodes",nodes.size()).toBuffer());
+                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().end(new JsonObject().put("numnodes", nodes.size()).toBuffer());
             });
 
             this.router.get("/nodes").handler(ctx -> {
                 List<String> nodes = clusterManager.getNodes();
-                ctx.response().putHeader("Content-Type","application/json");
-                ctx.response().end(new JsonObject().put("nodes",new JsonArray(nodes)).toBuffer());
+                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().end(new JsonObject().put("nodes", new JsonArray(nodes)).toBuffer());
             });
 
             setupWebServer();
         } catch (java.io.IOException e) {
-            log.error("Unable to parse InferenceConfiguration",e);
+            log.error("Unable to parse InferenceConfiguration", e);
         }
     }
 
 
     protected void setupWebServer() {
-       Preconditions.checkNotNull(inferenceConfiguration,"Inference configuration undefined!");
+        Preconditions.checkNotNull(inferenceConfiguration, "Inference configuration undefined!");
         int portValue = inferenceConfiguration.getServingConfig().getHttpPort();
-        if(portValue == 0) {
+        if (portValue == 0) {
             String portEnvValue = System.getenv(ai.konduit.serving.verticles.VerticleConstants.PORT_FROM_ENV);
-            if(portEnvValue != null) {
+            if (portEnvValue != null) {
                 portValue = Integer.parseInt(portEnvValue);
             }
         }

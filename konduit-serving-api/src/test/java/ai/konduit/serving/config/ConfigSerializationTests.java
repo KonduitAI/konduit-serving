@@ -40,8 +40,6 @@ public class ConfigSerializationTests {
     }
 
 
-
-
     private String trySerialize(Object o) throws Exception {
         return ObjectMapperHolder.getJsonMapper().writeValueAsString(o);
     }

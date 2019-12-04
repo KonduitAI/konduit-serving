@@ -62,19 +62,19 @@ public class YOLOOutputAdapter implements MultiOutputAdapter<INDArray[]> {
 
 
     @Builder
-    public YOLOOutputAdapter(double threshold, int[] inputShape,Labels labels,int numLabels,double[][] boundingBoxPriors) {
+    public YOLOOutputAdapter(double threshold, int[] inputShape, Labels labels, int numLabels, double[][] boundingBoxPriors) {
         this.labels = labels == null ? getLabels() : labels;
-        if(threshold == 0.0)
+        if (threshold == 0.0)
             this.threshold = 0.5;
         else
             this.threshold = threshold;
-        if(inputShape != null)
+        if (inputShape != null)
             this.inputShape = inputShape;
         else
             this.inputShape = new int[]{3, 608, 608};
         this.labels = labels;
         this.numLabels = numLabels;
-        if(boundingBoxPriors == null)
+        if (boundingBoxPriors == null)
             this.boundingBoxPriors = Nd4j.create(YOLO2.DEFAULT_PRIOR_BOXES).castTo(DataType.FLOAT);
         else {
             this.boundingBoxPriors = Nd4j.create(boundingBoxPriors).castTo(DataType.FLOAT);
@@ -85,7 +85,7 @@ public class YOLOOutputAdapter implements MultiOutputAdapter<INDArray[]> {
 
     }
 
-    public YOLOOutputAdapter(double threshold, Labels labels,int numLabels) {
+    public YOLOOutputAdapter(double threshold, Labels labels, int numLabels) {
         this.threshold = threshold;
         inputShape = new int[]{3, 608, 608};
         this.labels = labels;
@@ -97,70 +97,16 @@ public class YOLOOutputAdapter implements MultiOutputAdapter<INDArray[]> {
     }
 
     public YOLOOutputAdapter(double threshold, int numLabels) {
-        this(threshold,getLabels(),numLabels);
+        this(threshold, getLabels(), numLabels);
 
     }
 
     public YOLOOutputAdapter(double threshold, InputStream labels, int numLabels) {
-        this(threshold,labels == null ? getLabels() : getLabels(labels,numLabels),numLabels);
+        this(threshold, labels == null ? getLabels() : getLabels(labels, numLabels), numLabels);
 
     }
 
-    @Override
-    public Map<String, BatchOutput> adapt(INDArray[] input, List<String> outputNames, RoutingContext routingContext) {
-        int originalHeight = (int) routingContext.data().get(VerticleConstants.ORIGINAL_IMAGE_HEIGHT);
-        int originalWidth = (int) routingContext.data().get(VerticleConstants.ORIGINAL_IMAGE_WIDTH);
-
-        DetectedObjectsBatch[] detectedObjects = getPredictedObjects( input, threshold, outputNames.toArray(new String[outputNames.size()]),originalHeight,originalWidth);
-        Map<String,BatchOutput> ret = new HashMap<>();
-        ret.put(outputNames.get(0), ManyDetectedObjects.builder().detectedObjectsBatches(detectedObjects).build());
-        return ret;
-    }
-
-    @Override
-    public List<Class<? extends OutputAdapter<?>>> outputAdapterTypes() {
-        return null;
-    }
-
-
-    private DetectedObjectsBatch[] getPredictedObjects(INDArray[] outputs, double threshold, String[] outputNames,int originalHeight,int originalWidth) {
-        // assuming "standard" output from TensorFlow using a "normal" YOLOv2 model
-        //INDArray permuted = outputs[0].permute(0, 3, 1, 2);
-        INDArray permuted = outputs[0];
-        INDArray activated = YoloUtils.activate(boundingBoxPriors, permuted);
-
-        List<DetectedObject> predictedObjects1 = YoloUtils.getPredictedObjects(boundingBoxPriors, activated, threshold, 0.4);
-
-
-        DetectedObjectsBatch[] detectedObjects = new DetectedObjectsBatch[predictedObjects1.size()];
-
-        int n = numLabels; // an arbitrary number of classes returned per object
-        for (int i = 0; i < detectedObjects.length; i++) {
-            DetectedObject detectedObject = predictedObjects1.get(i);
-            long x = Math.round(originalWidth * predictedObjects1.get(i).getCenterX() / gridWidth);
-            long y = Math.round(originalHeight * predictedObjects1.get(i).getCenterY() / gridHeight);
-            long w = Math.round(originalWidth * predictedObjects1.get(i).getWidth() / gridWidth);
-            long h = Math.round(originalHeight * predictedObjects1.get(i).getHeight() / gridHeight);
-
-            detectedObjects[i] = new DetectedObjectsBatch();
-            detectedObjects[i].setCenterX(x);
-            detectedObjects[i].setCenterY(y);
-            detectedObjects[i].setWidth(w);
-            detectedObjects[i].setHeight(h);
-            detectedObjects[i].setPredictedClasses(new String[]{labels.getLabel(detectedObject.getPredictedClass())});
-            detectedObjects[i].setPredictedClassNumbers(new int[]{detectedObject.getPredictedClass()});
-            detectedObjects[i].setConfidences(new float[]{detectedObject.getClassPredictions().getFloat(detectedObject.getPredictedClass())});
-
-        }
-
-        return detectedObjects;
-
-
-    }
-
-
-
-    private static Labels getLabels(InputStream is,int numLabels)  {
+    private static Labels getLabels(InputStream is, int numLabels) {
         try {
             return new BaseLabels() {
                 protected ArrayList<String> getLabels() {
@@ -214,12 +160,63 @@ public class YOLOOutputAdapter implements MultiOutputAdapter<INDArray[]> {
         }
     }
 
-    private static Labels getLabels()  {
+    private static Labels getLabels() {
         try {
             return new COCOLabels();
         } catch (IOException e) {
             return null;
         }
+    }
+
+    @Override
+    public Map<String, BatchOutput> adapt(INDArray[] input, List<String> outputNames, RoutingContext routingContext) {
+        int originalHeight = (int) routingContext.data().get(VerticleConstants.ORIGINAL_IMAGE_HEIGHT);
+        int originalWidth = (int) routingContext.data().get(VerticleConstants.ORIGINAL_IMAGE_WIDTH);
+
+        DetectedObjectsBatch[] detectedObjects = getPredictedObjects(input, threshold, outputNames.toArray(new String[outputNames.size()]), originalHeight, originalWidth);
+        Map<String, BatchOutput> ret = new HashMap<>();
+        ret.put(outputNames.get(0), ManyDetectedObjects.builder().detectedObjectsBatches(detectedObjects).build());
+        return ret;
+    }
+
+    @Override
+    public List<Class<? extends OutputAdapter<?>>> outputAdapterTypes() {
+        return null;
+    }
+
+    private DetectedObjectsBatch[] getPredictedObjects(INDArray[] outputs, double threshold, String[] outputNames, int originalHeight, int originalWidth) {
+        // assuming "standard" output from TensorFlow using a "normal" YOLOv2 model
+        //INDArray permuted = outputs[0].permute(0, 3, 1, 2);
+        INDArray permuted = outputs[0];
+        INDArray activated = YoloUtils.activate(boundingBoxPriors, permuted);
+
+        List<DetectedObject> predictedObjects1 = YoloUtils.getPredictedObjects(boundingBoxPriors, activated, threshold, 0.4);
+
+
+        DetectedObjectsBatch[] detectedObjects = new DetectedObjectsBatch[predictedObjects1.size()];
+
+        int n = numLabels; // an arbitrary number of classes returned per object
+        for (int i = 0; i < detectedObjects.length; i++) {
+            DetectedObject detectedObject = predictedObjects1.get(i);
+            long x = Math.round(originalWidth * predictedObjects1.get(i).getCenterX() / gridWidth);
+            long y = Math.round(originalHeight * predictedObjects1.get(i).getCenterY() / gridHeight);
+            long w = Math.round(originalWidth * predictedObjects1.get(i).getWidth() / gridWidth);
+            long h = Math.round(originalHeight * predictedObjects1.get(i).getHeight() / gridHeight);
+
+            detectedObjects[i] = new DetectedObjectsBatch();
+            detectedObjects[i].setCenterX(x);
+            detectedObjects[i].setCenterY(y);
+            detectedObjects[i].setWidth(w);
+            detectedObjects[i].setHeight(h);
+            detectedObjects[i].setPredictedClasses(new String[]{labels.getLabel(detectedObject.getPredictedClass())});
+            detectedObjects[i].setPredictedClassNumbers(new int[]{detectedObject.getPredictedClass()});
+            detectedObjects[i].setConfidences(new float[]{detectedObject.getClassPredictions().getFloat(detectedObject.getPredictedClass())});
+
+        }
+
+        return detectedObjects;
+
+
     }
 
 }

@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * The converter arguments
  * needed for input binary data.
- example usage.
+ * example usage.
  *
  * @author Adam Gibson
  */
@@ -63,6 +63,6 @@ public class ConverterArgs implements Serializable {
     @Builder.Default
     private List<String> strings = new ArrayList<>();
 
-    private String imageProcessingRequiredLayout,imageProcessingInitialLayout = "NCHW";
+    private String imageProcessingRequiredLayout, imageProcessingInitialLayout = "NCHW";
 
 }

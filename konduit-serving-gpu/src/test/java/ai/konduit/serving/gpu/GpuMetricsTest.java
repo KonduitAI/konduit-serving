@@ -28,7 +28,7 @@ import org.junit.Test;
 public class GpuMetricsTest {
 
     @Test
-    public void testMetrics()  {
+    public void testMetrics() {
         GpuMetrics gpuMetrics = new GpuMetrics();
         SimpleMeterRegistry simpleMeterRegistry = new SimpleMeterRegistry();
         gpuMetrics.bindTo(simpleMeterRegistry);

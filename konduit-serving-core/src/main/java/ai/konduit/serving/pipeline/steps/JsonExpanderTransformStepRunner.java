@@ -22,7 +22,7 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStepRunner;
 import ai.konduit.serving.util.WritableValueRetriever;
 import io.vertx.core.json.JsonArray;
@@ -45,11 +45,10 @@ import java.util.List;
  * most deep learning pipelines will be.
  *
  * @author Adam Gibson
- *
  */
 public class JsonExpanderTransformStepRunner extends BaseStepRunner {
 
-    public JsonExpanderTransformStepRunner(PipelineStep pipelineStep) {
+    public JsonExpanderTransformStepRunner(BasePipelineStep pipelineStep) {
         super(pipelineStep);
     }
 
@@ -60,30 +59,29 @@ public class JsonExpanderTransformStepRunner extends BaseStepRunner {
 
     @Override
     public Record[] transform(Record[] input) {
-        Preconditions.checkNotNull(input,"Input  records were null!");
+        Preconditions.checkNotNull(input, "Input  records were null!");
         List<Record> recordList = new ArrayList<>();
-        for(Record record : input) {
+        for (Record record : input) {
             Text text = (Text) record.getRecord().get(0);
-            if(text.toString().charAt(0) == '[') {
+            if (text.toString().charAt(0) == '[') {
                 JsonArray arr = new JsonArray(text.toString());
-                for(int i  = 0; i < arr.size(); i++) {
+                for (int i = 0; i < arr.size(); i++) {
                     List<Writable> writables = new ArrayList<>();
                     JsonObject object = arr.getJsonObject(i);
-                    for(String field : object.fieldNames()) {
+                    for (String field : object.fieldNames()) {
                         writables.add(WritableValueRetriever.writableFromValue(object.getValue(field)));
                     }
 
-                    recordList.add(new org.datavec.api.records.impl.Record(writables,null));
+                    recordList.add(new org.datavec.api.records.impl.Record(writables, null));
                 }
-            }
-            else if(text.toString().charAt(0) == '{') {
+            } else if (text.toString().charAt(0) == '{') {
                 JsonObject jsonObject = new JsonObject(text.toString());
                 List<Writable> writables = new ArrayList<>();
-                for(String field : jsonObject.fieldNames()) {
+                for (String field : jsonObject.fieldNames()) {
                     writables.add(WritableValueRetriever.writableFromValue(jsonObject.getValue(field)));
                 }
 
-                recordList.add(new org.datavec.api.records.impl.Record(writables,null));
+                recordList.add(new org.datavec.api.records.impl.Record(writables, null));
 
             }
 

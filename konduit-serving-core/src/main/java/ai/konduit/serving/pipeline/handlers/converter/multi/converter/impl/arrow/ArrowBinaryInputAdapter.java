@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * @author Adam Gibson
  */
-public class ArrowBinaryInputAdapter implements InputAdapter<Buffer,ArrowWritableRecordBatch> {
+public class ArrowBinaryInputAdapter implements InputAdapter<Buffer, ArrowWritableRecordBatch> {
 
     @Override
     public ArrowWritableRecordBatch convert(Buffer input, ConverterArgs parameters, Map<String, Object> contextData) {

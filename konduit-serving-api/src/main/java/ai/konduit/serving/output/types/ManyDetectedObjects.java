@@ -36,7 +36,7 @@ public class ManyDetectedObjects implements BatchOutput {
 
     @Override
     public void setBatchId(String batchId) {
-        for(DetectedObjectsBatch detectedObjectsBatch : detectedObjectsBatches) {
+        for (DetectedObjectsBatch detectedObjectsBatch : detectedObjectsBatches) {
             detectedObjectsBatch.setBatchId(batchId);
         }
     }

@@ -1,8 +1,8 @@
-import os as opos
 import click
-import subprocess
-import numpy as np
 import logging
+import numpy as np
+import os as opos
+import subprocess
 
 USER_PATH = opos.path.expanduser("~")
 KONDUIT_BASE_DIR = opos.path.join(USER_PATH, ".konduit")

@@ -76,8 +76,8 @@ public class BatchNumpyInputParserTest extends BaseVerticleTest {
         Image image = nativeImageLoader.asImageMatrix(new ClassPathResource("data/5.png").getFile());
         File tmpFile = temporary.newFile();
         byte[] npyContents = Nd4j.toNpyByteArray(image.getImage());
-        try(FileOutputStream fileOutputStream = new FileOutputStream(tmpFile)) {
-            IOUtils.write(npyContents,fileOutputStream);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(tmpFile)) {
+            IOUtils.write(npyContents, fileOutputStream);
             fileOutputStream.flush();
         }
 

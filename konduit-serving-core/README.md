@@ -1,6 +1,6 @@
 #Konduit Serving core
 
-Contains most pipelines abstractions and core logic for:
+Contains most konduit-serving abstractions and core logic for:
 
 1. TensorFlow
 2. DL4J

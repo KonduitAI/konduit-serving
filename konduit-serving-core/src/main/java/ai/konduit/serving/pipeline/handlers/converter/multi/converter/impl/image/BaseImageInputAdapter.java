@@ -48,17 +48,18 @@ public abstract class BaseImageInputAdapter<T> implements InputAdapter<T, Writab
     @Override
     public Writable convert(T input, ConverterArgs parameters, Map<String, Object> contextData) throws IOException {
         NativeImageLoader imageLoader = getImageLoader(input, parameters);
-        return new NDArrayWritable(getArrayUsing(imageLoader,input, parameters));
+        return new NDArrayWritable(getArrayUsing(imageLoader, input, parameters));
     }
 
     /**
      * Uses the passed in {@link NativeImageLoader}
      * to convert the specified input to a
      * {@link INDArray} (usually a bitmap format)
+     *
      * @param nativeImageLoader the {@link NativeImageLoader}
      *                          used for conversion
-     * @param input the input to convert
-     * @param converterArgs converter arguments to use
+     * @param input             the input to convert
+     * @param converterArgs     converter arguments to use
      * @return the converted input: an {@link INDArray}
      * representing the image
      * @throws IOException if an error occurs during the array creation
@@ -69,33 +70,31 @@ public abstract class BaseImageInputAdapter<T> implements InputAdapter<T, Writab
      * Get the image loader
      * configuring it using the
      * {@link ConverterArgs}
-     * @param input the input to convert
+     *
+     * @param input         the input to convert
      * @param converterArgs the converter args to use
      * @return the configured {@link NativeImageLoader}
      */
     public NativeImageLoader getImageLoader(T input, ConverterArgs converterArgs) {
-        if(converterArgs == null || converterArgs.getLongs().isEmpty())
+        if (converterArgs == null || converterArgs.getLongs().isEmpty())
             return new NativeImageLoader();
-        else if(converterArgs.getLongs().size() == 3) {
-            if(converterArgs.getImageTransformProcess() != null) {
-                return new NativeImageLoader(converterArgs.getLongs().get(0),converterArgs.getLongs().get(1),converterArgs.getLongs().get(2),new MultiImageTransform(converterArgs.getImageTransformProcess().getTransformList().toArray(new ImageTransform[1])));
+        else if (converterArgs.getLongs().size() == 3) {
+            if (converterArgs.getImageTransformProcess() != null) {
+                return new NativeImageLoader(converterArgs.getLongs().get(0), converterArgs.getLongs().get(1), converterArgs.getLongs().get(2), new MultiImageTransform(converterArgs.getImageTransformProcess().getTransformList().toArray(new ImageTransform[1])));
 
-            }
-            else if(converterArgs.getImageTransformProcess() != null)
-                return new NativeImageLoader(converterArgs.getLongs().get(0),converterArgs.getLongs().get(1),converterArgs.getLongs().get(2),new MultiImageTransform(converterArgs.getImageTransformProcess().getTransformList().toArray(new ImageTransform[1])));
+            } else if (converterArgs.getImageTransformProcess() != null)
+                return new NativeImageLoader(converterArgs.getLongs().get(0), converterArgs.getLongs().get(1), converterArgs.getLongs().get(2), new MultiImageTransform(converterArgs.getImageTransformProcess().getTransformList().toArray(new ImageTransform[1])));
             else {
-                return new NativeImageLoader(converterArgs.getLongs().get(0),converterArgs.getLongs().get(1),converterArgs.getLongs().get(2));
+                return new NativeImageLoader(converterArgs.getLongs().get(0), converterArgs.getLongs().get(1), converterArgs.getLongs().get(2));
 
             }
-        }
-        else if(converterArgs.getLongs().size() == 3) {
-            if(converterArgs.getImageTransformProcess() != null) {
-                return new NativeImageLoader(converterArgs.getLongs().get(0).intValue(),converterArgs.getLongs().get(1).intValue()
-                        ,converterArgs.getLongs().get(2).intValue(),new MultiImageTransform(converterArgs.getImageTransformProcess().getTransformList().toArray(new ImageTransform[1])));
-            }
-            else
-                return new NativeImageLoader(converterArgs.getLongs().get(0).intValue(),converterArgs.getLongs().get(1).intValue()
-                        ,converterArgs.getLongs().get(2).intValue());
+        } else if (converterArgs.getLongs().size() == 3) {
+            if (converterArgs.getImageTransformProcess() != null) {
+                return new NativeImageLoader(converterArgs.getLongs().get(0).intValue(), converterArgs.getLongs().get(1).intValue()
+                        , converterArgs.getLongs().get(2).intValue(), new MultiImageTransform(converterArgs.getImageTransformProcess().getTransformList().toArray(new ImageTransform[1])));
+            } else
+                return new NativeImageLoader(converterArgs.getLongs().get(0).intValue(), converterArgs.getLongs().get(1).intValue()
+                        , converterArgs.getLongs().get(2).intValue());
         }
 
 

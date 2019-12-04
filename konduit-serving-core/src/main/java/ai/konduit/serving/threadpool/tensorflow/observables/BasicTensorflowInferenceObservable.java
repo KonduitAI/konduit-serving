@@ -34,12 +34,11 @@ import java.util.Observable;
 @Slf4j
 public class BasicTensorflowInferenceObservable extends Observable implements TensorflowObservable {
 
+    protected Exception exception;
     private INDArray[] input;
     @Getter
     private long id;
     private INDArray[] output;
-    protected Exception exception;
-
 
 
     public BasicTensorflowInferenceObservable(INDArray[] inputs) {
@@ -65,14 +64,6 @@ public class BasicTensorflowInferenceObservable extends Observable implements Te
         notifyObservers();
     }
 
-
-    @Override
-    public void setOutputException(Exception exception) {
-        this.exception = exception;
-        this.setChanged();
-        notifyObservers();
-    }
-
     @Override
     public INDArray[] getOutput() {
         checkOutputException();
@@ -84,10 +75,17 @@ public class BasicTensorflowInferenceObservable extends Observable implements Te
         return exception;
     }
 
-    protected void checkOutputException(){
-        if(exception != null){
-            if(exception instanceof RuntimeException){
-                throw (RuntimeException)exception;
+    @Override
+    public void setOutputException(Exception exception) {
+        this.exception = exception;
+        this.setChanged();
+        notifyObservers();
+    }
+
+    protected void checkOutputException() {
+        if (exception != null) {
+            if (exception instanceof RuntimeException) {
+                throw (RuntimeException) exception;
             } else {
                 throw new RuntimeException("Exception encountered while getting output: " + exception.getMessage(), exception);
             }

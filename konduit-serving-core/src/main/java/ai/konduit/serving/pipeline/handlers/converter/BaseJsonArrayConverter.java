@@ -36,17 +36,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract  class BaseJsonArrayConverter implements JsonArrayConverter {
+public abstract class BaseJsonArrayConverter implements JsonArrayConverter {
 
 
     @Override
     public Pair<Map<Integer, Integer>, List<? extends Map<FieldName, ?>>> convertPmmlWithErrors(Schema schema, JsonArray jsonArray, DataPipelineErrorHandler dataPipelineErrorHandler) {
-        return convertPmmlWithErrors(schema,jsonArray,null,dataPipelineErrorHandler);
+        return convertPmmlWithErrors(schema, jsonArray, null, dataPipelineErrorHandler);
     }
 
     @Override
     public Pair<Map<Integer, Integer>, ArrowWritableRecordBatch> convertWithErrors(Schema schema, JsonArray jsonArray, DataPipelineErrorHandler dataPipelineErrorHandler) {
-        return convertWithErrors(schema, jsonArray, null,dataPipelineErrorHandler);
+        return convertWithErrors(schema, jsonArray, null, dataPipelineErrorHandler);
     }
 
 
@@ -54,13 +54,14 @@ public abstract  class BaseJsonArrayConverter implements JsonArrayConverter {
      * Given a {@link Schema} transform the
      * given input (an array of json objects)
      * to a dictionary for use with the pmml evaluator
-     * @param schema the input inputSchema
+     *
+     * @param schema    the input inputSchema
      * @param jsonArray an array of json objects
-     * @return  a list of fields for use with pmml
+     * @return a list of fields for use with pmml
      */
     @Override
     public List<? extends Map<FieldName, ?>> convertPmml(Schema schema, JsonArray jsonArray) {
-        return convertPmml(schema,jsonArray,null);
+        return convertPmml(schema, jsonArray, null);
     }
 
     /**
@@ -73,21 +74,21 @@ public abstract  class BaseJsonArrayConverter implements JsonArrayConverter {
      * being index based) - internally, a inputSchema permutation happens to match the indices
      * appropriate for use with the given inputSchema
      *
-     * @param schema the input inputSchema
+     * @param schema    the input inputSchema
      * @param jsonArray an array of json objects
      * @return an {@link ArrowWritableRecordBatch} for use with conversion to
      * {@link org.nd4j.linalg.api.ndarray.INDArray}
      */
     @Override
     public ArrowWritableRecordBatch convert(Schema schema, JsonArray jsonArray) {
-        return convert(schema,jsonArray,null);
+        return convert(schema, jsonArray, null);
     }
 
 
-    protected Pair<Map<Integer,Integer>,List<? extends Map<FieldName, ?>>> doTransformProcessConvertPmmlWithErrors(Schema schema,JsonArray jsonArray,TransformProcess transformProcess,DataPipelineErrorHandler dataPipelineErrorHandler) {
+    protected Pair<Map<Integer, Integer>, List<? extends Map<FieldName, ?>>> doTransformProcessConvertPmmlWithErrors(Schema schema, JsonArray jsonArray, TransformProcess transformProcess, DataPipelineErrorHandler dataPipelineErrorHandler) {
         Schema outputSchema = transformProcess.getFinalSchema();
 
-        if(!transformProcess.getInitialSchema().equals(schema)) {
+        if (!transformProcess.getInitialSchema().equals(schema)) {
             throw new IllegalArgumentException("Transform process specified, but does not match target input inputSchema");
         }
 
@@ -95,27 +96,27 @@ public abstract  class BaseJsonArrayConverter implements JsonArrayConverter {
         List<Map<FieldName, Object>> ret = new ArrayList<>(jsonArray.size());
         List<FieldName> fieldNames = getNameRepresentationFor(outputSchema);
 
-        Pair<Map<Integer, Integer>, ArrowWritableRecordBatch> convertWithErrors = convertWithErrors(schema,jsonArray,transformProcess,dataPipelineErrorHandler);
+        Pair<Map<Integer, Integer>, ArrowWritableRecordBatch> convertWithErrors = convertWithErrors(schema, jsonArray, transformProcess, dataPipelineErrorHandler);
         ArrowWritableRecordBatch conversion = convertWithErrors.getRight();
-        for(int i = 0; i < conversion.size(); i++) {
+        for (int i = 0; i < conversion.size(); i++) {
             List<Writable> recordToMap = conversion.get(i);
             Map<FieldName, Object> record = new LinkedHashMap();
-            for(int j = 0; j < outputSchema.numColumns(); j++) {
-                record.put(fieldNames.get(j),WritableValueRetriever.getUnderlyingValue(recordToMap.get(j)));
+            for (int j = 0; j < outputSchema.numColumns(); j++) {
+                record.put(fieldNames.get(j), WritableValueRetriever.getUnderlyingValue(recordToMap.get(j)));
 
             }
 
             ret.add(record);
         }
 
-        return Pair.of(convertWithErrors.getKey(),ret);
+        return Pair.of(convertWithErrors.getKey(), ret);
     }
 
 
-    protected List<Map<FieldName, Object>> doTransformProcessConvertPmml(Schema schema,JsonArray jsonArray,TransformProcess transformProcess) {
+    protected List<Map<FieldName, Object>> doTransformProcessConvertPmml(Schema schema, JsonArray jsonArray, TransformProcess transformProcess) {
         Schema outputSchema = transformProcess.getFinalSchema();
 
-        if(!transformProcess.getInitialSchema().equals(schema)) {
+        if (!transformProcess.getInitialSchema().equals(schema)) {
             throw new IllegalArgumentException("Transform process specified, but does not match target input inputSchema");
         }
 
@@ -123,11 +124,11 @@ public abstract  class BaseJsonArrayConverter implements JsonArrayConverter {
         List<Map<FieldName, Object>> ret = new ArrayList<>(jsonArray.size());
         List<FieldName> fieldNames = getNameRepresentationFor(outputSchema);
 
-        ArrowWritableRecordBatch conversion = convert(schema,jsonArray,transformProcess);
-        for(int i = 0; i < conversion.size(); i++) {
+        ArrowWritableRecordBatch conversion = convert(schema, jsonArray, transformProcess);
+        for (int i = 0; i < conversion.size(); i++) {
             List<Writable> recordToMap = conversion.get(i);
             Map<FieldName, Object> record = new LinkedHashMap();
-            for(int j = 0; j < outputSchema.numColumns(); j++) {
+            for (int j = 0; j < outputSchema.numColumns(); j++) {
                 record.put(fieldNames.get(j), WritableValueRetriever.getUnderlyingValue(recordToMap.get(j)));
 
             }
@@ -143,7 +144,7 @@ public abstract  class BaseJsonArrayConverter implements JsonArrayConverter {
 
     protected List<FieldName> getNameRepresentationFor(Schema schema) {
         List<FieldName> fieldNames = new ArrayList<>();
-        for(int i = 0; i < schema.numColumns(); i++) {
+        for (int i = 0; i < schema.numColumns(); i++) {
             fieldNames.add(FieldName.create(schema.getName(i)));
         }
 

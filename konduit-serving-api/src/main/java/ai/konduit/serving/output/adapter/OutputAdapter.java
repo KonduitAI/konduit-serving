@@ -36,7 +36,6 @@ import java.util.Map;
  * from PMML to human readable json.
  *
  * @param <T> the type to convert to
- *
  * @author Adam Gibson
  */
 public interface OutputAdapter<T extends BatchOutput> {
@@ -44,7 +43,8 @@ public interface OutputAdapter<T extends BatchOutput> {
     /**
      * Given an input array,
      * output the desired type
-     * @param array the input array
+     *
+     * @param array          the input array
      * @param routingContext Vert.x routing context
      * @return the desired output
      */
@@ -53,7 +53,8 @@ public interface OutputAdapter<T extends BatchOutput> {
     /**
      * Convert the pmml to
      * the desired type
-     * @param pmmlExamples the list of examples to convert
+     *
+     * @param pmmlExamples   the list of examples to convert
      * @param routingContext Vert.x routing context
      * @return the desired output type
      */
@@ -63,7 +64,8 @@ public interface OutputAdapter<T extends BatchOutput> {
      * Adapt an arbitrary object.
      * This is for types that may be outside of pmml
      * or {@link INDArray}
-     * @param input the input to convert
+     *
+     * @param input          the input to convert
      * @param routingContext routing context
      * @return the output type
      */
@@ -74,6 +76,7 @@ public interface OutputAdapter<T extends BatchOutput> {
      * output adapter.
      * This metadata is used for documentation
      * generation
+     *
      * @return adapter type
      */
     Class<T> outputAdapterType();

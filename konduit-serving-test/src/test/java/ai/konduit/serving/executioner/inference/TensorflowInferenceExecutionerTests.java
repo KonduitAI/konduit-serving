@@ -22,9 +22,9 @@
 
 package ai.konduit.serving.executioner.inference;
 
-import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
-import ai.konduit.serving.model.SavedModelConfig;
 import ai.konduit.serving.config.ParallelInferenceConfig;
+import ai.konduit.serving.model.SavedModelConfig;
+import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import org.deeplearning4j.parallelism.inference.InferenceMode;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,12 +45,11 @@ public class TensorflowInferenceExecutionerTests {
     public TemporaryFolder testDir = new TemporaryFolder();
 
 
-
     @Test(timeout = 60000)
 
     public void testInferenceExecutioner() throws Exception {
         TensorflowModelLoader tensorflowModelLoader = TensorflowModelLoader.builder()
-                .inputNames(Arrays.asList("input_0","input_1"))
+                .inputNames(Arrays.asList("input_0", "input_1"))
                 .outputNames(Arrays.asList("output"))
                 .protoFile(new ClassPathResource("inference/tensorflow/frozen_model.pb").getFile())
                 .build();
@@ -66,7 +65,7 @@ public class TensorflowInferenceExecutionerTests {
 
         INDArray assertion = Nd4j.linspace(1, 4, 4).muli(2);
         INDArray[] output = tensorflowInferenceExecutioner.execute(new INDArray[]{Nd4j.linspace(1, 4, 4), Nd4j.linspace(1, 4, 4)});
-        assertEquals(assertion,output[0]);
+        assertEquals(assertion, output[0]);
         tensorflowInferenceExecutioner.stop();
     }
 
@@ -95,9 +94,9 @@ public class TensorflowInferenceExecutionerTests {
                 .inferenceMode(InferenceMode.SEQUENTIAL)
                 .build());
 
-        INDArray assertion = Nd4j.create(new float[] { 42 }, new long[0]);
+        INDArray assertion = Nd4j.create(new float[]{42}, new long[0]);
         INDArray[] output = tensorflowInferenceExecutioner.execute(new INDArray[]{assertion});
-        assertEquals(assertion.getDouble(0),output[0].getDouble(0),1e-1);
+        assertEquals(assertion.getDouble(0), output[0].getDouble(0), 1e-1);
         tensorflowInferenceExecutioner.stop();
     }
 

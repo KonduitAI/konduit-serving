@@ -22,12 +22,17 @@
 
 package ai.konduit.serving.pipeline.step;
 
+import ai.konduit.serving.config.Input.DataFormat;
+import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.python.PythonVariables;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.schema.Schema;
 
 import java.util.Arrays;
@@ -41,7 +46,8 @@ import java.util.Map;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PythonStep extends PipelineStep {
+@Slf4j
+public class PythonStep extends BasePipelineStep {
 
     @Getter
     @Setter
@@ -52,55 +58,15 @@ public class PythonStep extends PipelineStep {
         this.step(pythonConfig);
     }
 
-    @Override
-    public PythonStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setInput("default", columnNames, types);
-    }
-
-    @Override
-    public PythonStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setOutput("default", columnNames, types);
-    }
-
-    @Override
-    public PythonStep setInput(Schema inputSchema) throws Exception {
-        return (PythonStep) super.setInput("default", inputSchema);
-    }
-
-    @Override
-    public PythonStep setOutput(Schema outputSchema) throws Exception {
-        return (PythonStep) super.setOutput("default", outputSchema);
-    }
-
-    @Override
-    public PythonStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setInput(inputName, columnNames, types);
-    }
-
-    @Override
-    public PythonStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setOutput(outputName, columnNames, types);
-    }
-
-    @Override
-    public PythonStep setInput(String inputName, Schema inputSchema) throws Exception {
-        return (PythonStep) super.setInput(inputName, inputSchema);
-    }
-
-    @Override
-    public PythonStep setOutput(String outputName, Schema outputSchema) throws Exception {
-        return (PythonStep) super.setOutput(outputName, outputSchema);
-    }
-
     /**
      * Create a PythonConfig Step with default input and output names
      * from column names, schema types and the actual PythonConfig
      *
-     * @param pythonConfig Konduit PythonConfig
-     * @param inputColumnNames input column names
-     * @param inputTypes input schema types
+     * @param pythonConfig      Konduit PythonConfig
+     * @param inputColumnNames  input column names
+     * @param inputTypes        input schema types
      * @param outputColumnNames output column names
-     * @param outputTypes output schema types
+     * @param outputTypes       output schema types
      * @throws Exception key error
      */
     public PythonStep(PythonConfig pythonConfig, String[] inputColumnNames, SchemaType[] inputTypes,
@@ -112,9 +78,140 @@ public class PythonStep extends PipelineStep {
     }
 
     /**
+     * Create a PythonConfig Step with default input and output names
+     * from input column names, input schema types and the actual PythonConfig
+     *
+     * @param pythonConfig     Konduit PythonConfig
+     * @param inputColumnNames input column names
+     * @param inputTypes       input schema types
+     * @throws Exception key error
+     */
+    public PythonStep(PythonConfig pythonConfig, String[] inputColumnNames, SchemaType[] inputTypes)
+            throws Exception {
+        this(pythonConfig, inputColumnNames, inputTypes, new String[]{}, new SchemaType[]{});
+    }
+
+    /**
+     * Create a PythonConfig Step with default input and output names
+     * just from input/output schema and the actual PythonConfig
+     *
+     * @param inputSchema  {@link Schema} for data input
+     * @param outputSchema {@link Schema} for data output
+     * @param pythonConfig {@link PythonConfig}
+     * @throws Exception key error
+     */
+    public PythonStep(Schema inputSchema, Schema outputSchema,
+                      PythonConfig pythonConfig) throws Exception {
+        String defaultName = "default";
+        this.setInput(defaultName, inputSchema);
+        this.setOutput(defaultName, outputSchema);
+        this.pythonConfig(defaultName, pythonConfig);
+    }
+
+    private static SchemaType[] pythonToDataVecVarTypes(String[] pythonVarTypes) {
+        return Arrays.stream(pythonVarTypes)
+                .map(type -> pythonToDataVecVarTypes(PythonVariables.Type.valueOf(type)))
+                .toArray(SchemaType[]::new);
+    }
+
+    private static SchemaType pythonToDataVecVarTypes(PythonVariables.Type pythonVarType) {
+        try {
+            switch (pythonVarType) {
+                case BOOL:
+                    return ai.konduit.serving.config.SchemaType.Boolean;
+                case STR:
+                    return ai.konduit.serving.config.SchemaType.String;
+                case INT:
+                    return ai.konduit.serving.config.SchemaType.Integer;
+                case FLOAT:
+                    return ai.konduit.serving.config.SchemaType.Float;
+                case NDARRAY:
+                    return ai.konduit.serving.config.SchemaType.NDArray;
+                case LIST:
+                case FILE:
+                case DICT:
+                default:
+                    throw new IllegalArgumentException(String.format("Can't convert (%s) to (%s) enum",
+                            pythonVarType.name(), ai.konduit.serving.config.SchemaType.class.getName()));
+            }
+        } catch (Exception e) {
+            log.error("Unable to convert type " + pythonVarType + ". Error was",e);
+        }
+
+        return null;
+    }
+
+    @Override
+    public PredictionType[] validPredictionTypes() {
+        return new PredictionType[] {
+           PredictionType.RAW
+        };
+    }
+
+    @Override
+    public DataFormat[] validInputTypes() {
+        return new DataFormat[] {
+                DataFormat.ARROW,
+                DataFormat.NUMPY,
+                DataFormat.JSON,
+                DataFormat.IMAGE
+        };
+    }
+
+    @Override
+    public Output.DataFormat[] validOutputTypes() {
+        return new Output.DataFormat[] {
+                Output.DataFormat.ARROW,
+                Output.DataFormat.ND4J,
+                Output.DataFormat.NUMPY,
+                Output.DataFormat.JSON
+        };
+    }
+
+    @Override
+    public PipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
+        return (PythonStep) super.setInput("default", columnNames, types);
+    }
+
+    @Override
+    public PipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
+        return (PythonStep) super.setOutput("default", columnNames, types);
+    }
+
+    @Override
+    public PipelineStep setInput(Schema inputSchema) throws Exception {
+        return (PythonStep) super.setInput("default", inputSchema);
+    }
+
+    @Override
+    public PipelineStep setOutput(Schema outputSchema) throws Exception {
+        return (PythonStep) super.setOutput("default", outputSchema);
+    }
+
+    @Override
+    public PipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
+        return (PythonStep) super.setInput(inputName, columnNames, types);
+    }
+
+    @Override
+    public PipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
+        return (PythonStep) super.setOutput(outputName, columnNames, types);
+    }
+
+    @Override
+    public PipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
+        return (PythonStep) super.setInput(inputName, inputSchema);
+    }
+
+    @Override
+    public PipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
+        return (PythonStep) super.setOutput(outputName, outputSchema);
+    }
+
+    /**
      * Define a single, named step for a Python pipeline.
      *
-     * @param pythonConfig Konduit PythonConfig
+     * @param pythonConfig {@link PythonConfig}
      * @throws Exception key error
      */
     public PythonStep step(PythonConfig pythonConfig)
@@ -127,9 +224,9 @@ public class PythonStep extends PipelineStep {
     /**
      * Define a single, named step for a Python pipeline.
      *
-     * @param pythonConfig Konduit PythonConfig
-     * @param inputSchema DataVec Schema for data input
-     * @param outputSchema DataVec Schema for data output
+     * @param pythonConfig {@link PythonConfig}
+     * @param inputSchema  {@link Schema} for data input
+     * @param outputSchema {@link Schema} for data output
      * @return this python step
      * @throws Exception key error
      */
@@ -139,44 +236,11 @@ public class PythonStep extends PipelineStep {
     }
 
     /**
-     * Create a PythonConfig Step with default input and output names
-     * from input column names, input schema types and the actual PythonConfig
-     *
-     * @param pythonConfig Konduit PythonConfig
-     * @param inputColumnNames input column names
-     * @param inputTypes input schema types
-     * @throws Exception key error
-     */
-    public PythonStep(PythonConfig pythonConfig, String[] inputColumnNames, SchemaType[] inputTypes)
-            throws Exception {
-        this(pythonConfig, inputColumnNames, inputTypes, new String[]{}, new SchemaType[]{});
-    }
-
-
-    /**
-     * Create a PythonConfig Step with default input and output names
-     * just from input/output schema and the actual PythonConfig
-     *
-     * @param inputSchema DataVec Schema for data input
-     * @param outputSchema DataVec Schema for data output
-     * @param pythonConfig Konduit PythonConfig
-     * @throws Exception key error
-     */
-    public PythonStep(Schema inputSchema, Schema outputSchema,
-                      PythonConfig pythonConfig) throws Exception {
-        String defaultName = "default";
-        this.setInput(defaultName, inputSchema);
-        this.setOutput(defaultName, outputSchema);
-        this.pythonConfig(defaultName, pythonConfig);
-    }
-
-
-    /**
      * Define a single, named step for a Python pipeline.
      *
-     * @param stepName input and output name for this step
-     * @param pythonConfig Konduit PythonConfig
-     * @param inputSchema {@link Schema} for data input
+     * @param stepName     input and output name for this step
+     * @param pythonConfig {@link PythonConfig}
+     * @param inputSchema  {@link Schema} for data input
      * @param outputSchema {@link Schema} for data output
      * @return this python step
      * @throws Exception key error
@@ -195,12 +259,12 @@ public class PythonStep extends PipelineStep {
     /**
      * Define a single, named step for a Python pipeline.
      *
-     * @param stepName input and output name for this step
-     * @param pythonConfig Konduit PythonConfig
-     * @param inputColumnNames input column names
-     * @param inputTypes inpput schema types
+     * @param stepName          input and output name for this step
+     * @param pythonConfig      {@link PythonConfig}
+     * @param inputColumnNames  input column names
+     * @param inputTypes        input schema types
      * @param outputColumnNames output column names
-     * @param outputTypes output schema types
+     * @param outputTypes       output schema types
      * @throws Exception key error
      */
     public PythonStep step(String stepName, PythonConfig pythonConfig, String[] inputColumnNames,
@@ -216,11 +280,10 @@ public class PythonStep extends PipelineStep {
     /**
      * Define a single, named step for a Python pipeline.
      *
-     * @param stepName input and output name for this step
-     * @param pythonConfig Konduit {@link PythonConfig}
+     * @param stepName         input and output name for this step
+     * @param pythonConfig     Konduit {@link PythonConfig}
      * @param inputColumnNames input column names
-     * @param inputTypes input schema types
-
+     * @param inputTypes       input schema types
      * @throws Exception key error
      */
     public PythonStep step(String stepName, PythonConfig pythonConfig, String[] inputColumnNames,
@@ -250,7 +313,7 @@ public class PythonStep extends PipelineStep {
     /**
      * Define a Python config for this step.
      *
-     * @param inputName input name
+     * @param inputName    input name
      * @param pythonConfig Konduit PythonConfig
      * @return this Python step
      */
@@ -265,7 +328,7 @@ public class PythonStep extends PipelineStep {
     /**
      * Define a single, named step for a Python pipeline.
      *
-     * @param stepName input and output name for this step
+     * @param stepName     input and output name for this step
      * @param pythonConfig {@link PythonConfig}
      * @throws Exception key error
      */
@@ -284,39 +347,6 @@ public class PythonStep extends PipelineStep {
         return this;
     }
 
-
-    private static SchemaType[] pythonToDataVecVarTypes(String [] pythonVarTypes) {
-        return Arrays.stream(pythonVarTypes)
-                .map(type -> pythonToDataVecVarTypes(PythonVariables.Type.valueOf(type)))
-                .toArray(SchemaType[]::new);
-    }
-
-    private static ai.konduit.serving.config.SchemaType pythonToDataVecVarTypes(PythonVariables.Type pythonVarType) {
-        try {
-            switch (pythonVarType) {
-                case BOOL:
-                    return ai.konduit.serving.config.SchemaType.Boolean;
-                case STR:
-                    return ai.konduit.serving.config.SchemaType.String;
-                case INT:
-                    return ai.konduit.serving.config.SchemaType.Integer;
-                case FLOAT:
-                    return ai.konduit.serving.config.SchemaType.Float;
-                case NDARRAY:
-                    return ai.konduit.serving.config.SchemaType.NDArray;
-                case LIST:
-                case FILE:
-                case DICT:
-                default:
-                    throw new IllegalArgumentException(String.format("Can't convert (%s) to (%s) enum",
-                            pythonVarType.name(), ai.konduit.serving.config.SchemaType.class.getName()));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
 
 
 

@@ -42,8 +42,9 @@ public interface MultiOutputAdapter<T> {
      * Adapt a pair of {@link INDArray}
      * and the output names,
      * with the array input ordered by the output name
-     * @param input the arrays to adapt
-     * @param outputNames the output names to adapt
+     *
+     * @param input          the arrays to adapt
+     * @param outputNames    the output names to adapt
      * @param routingContext routing context
      * @return Adapted inputs
      */
@@ -53,6 +54,7 @@ public interface MultiOutputAdapter<T> {
      * Returns a map of the strings by output name
      * to the {@link OutputAdapter}
      * for each output
+     *
      * @return the output adapter types for this multi output adapter
      */
     List<Class<? extends OutputAdapter<?>>> outputAdapterTypes();

@@ -33,6 +33,7 @@ public class DataUtilities {
 
     /**
      * Download a remote file if it doesn't exist.
+     *
      * @param remoteUrl URL of the remote file.
      * @param localPath Where to download the file.
      * @return True if and only if the file has been downloaded.
@@ -66,7 +67,8 @@ public class DataUtilities {
 
     /**
      * Extract a "tar.gz" file into a local folder.
-     * @param inputPath Input file path.
+     *
+     * @param inputPath  Input file path.
      * @param outputPath Output directory path.
      * @throws IOException IO error.
      */

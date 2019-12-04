@@ -30,7 +30,7 @@ import org.nd4j.linalg.dataset.api.preprocessor.serializer.NormalizerSerializer;
  * The default normalization loader
  * uses dl4j's {@link NormalizerSerializer}
  * to load the model from a given path.
- *
+ * <p>
  * Typically this will be a persisted zip file.
  * See {@link NormalizerSerializer}
  * for more information on the expected file format.
@@ -38,10 +38,9 @@ import org.nd4j.linalg.dataset.api.preprocessor.serializer.NormalizerSerializer;
  * @author Adam Gibson
  */
 @AllArgsConstructor
-public  class DefaultNormalizationLoader implements NormalizationLoader {
+public class DefaultNormalizationLoader implements NormalizationLoader {
 
     protected String path;
-
 
 
     @Override
