@@ -757,6 +757,13 @@ public class PythonExecutioner {
         execWithSetupAndRun(transform.getCode(), inputs, transform.getOutputs());
         return transform.getOutputs();
     }
+    public static PythonVariables execWithSetupAndRun(PythonTransform transform, PythonVariables inputs)throws Exception {
+        String name = interpreterNameFromTransform(transform);
+        setInterpreter(name);
+        Preconditions.checkNotNull(transform.getOutputs(),"Transform outputs were null!");
+        execWithSetupAndRun(transform.getCode(), inputs, transform.getOutputs());
+        return transform.getOutputs();
+    }
 
 
     /**
@@ -789,6 +796,24 @@ public class PythonExecutioner {
         return execAndReturnAllVariables(inputCode + code);
     }
 
+    public static PythonVariables execWithSetupRunAndReturnAllVariables(String code) {
+        execWithSetupAndRun(code + '\n' + outputCodeForAllVariables());
+        PythonVariables allVars = new PythonVariables();
+        allVars.addDict(ALL_VARIABLES_KEY);
+        try {
+            _readOutputs(allVars);
+        }catch (IOException e) {
+            log.error("Failed to read outputs", e);
+        }
+
+        return expandInnerDict(allVars, ALL_VARIABLES_KEY);
+    }
+    public static PythonVariables execWithSetupRunAndReturnAllVariables(String code, PythonVariables pyInputs) throws Exception {
+        String inputCode = inputCode(pyInputs);
+        return execWithSetupRunAndReturnAllVariables(inputCode + code);
+    }
+
+    /**
 
     /**
      * Evaluate a string based on the
