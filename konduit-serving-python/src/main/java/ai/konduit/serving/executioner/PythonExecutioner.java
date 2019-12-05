@@ -1053,7 +1053,7 @@ public class PythonExecutioner {
         // exec("print('Reloading numpy'); sys.stdout.flush(); sys.stderr.flush(); import importlib; print('Imported importlib'); sys.stdout.flush();  importlib.reload(np); print('Reloaded lib'); sys.stdout.flush(); sys.stderr.flush();");
         for (String[] patch: _getPatches()){
             if (!_checkPatchApplied(patch[1])){
-                log.warn("Error patching numpy. Multiple interpreters not supported. " + e);
+                log.warn("Error patching numpy. Multiple interpreters not supported.");
             }
         }
     }
