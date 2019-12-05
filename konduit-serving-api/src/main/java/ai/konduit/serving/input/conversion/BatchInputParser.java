@@ -176,7 +176,11 @@ public class BatchInputParser {
             //verify against the name in the configuration and set it to that
             if (name.contains(" ")) {
                 name = name.replace(" ", ":");
-                if (!inputParts.contains(name)) {
+                String inputName = name;
+                if(inputName.contains("[")) {
+                    inputName = inputName.substring(0, name.indexOf("["));
+                }
+                if (!inputParts.contains(inputName)) {
                     throw new IllegalStateException("Illegal name for multi part passed in " + upload.name());
                 } else {
                     log.warn("Corrected input name " + upload.name() + " to " + name);
