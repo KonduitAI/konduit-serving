@@ -23,10 +23,11 @@
 package ai.konduit.serving.executioner.inference;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Builder;
-import java.util.List;
+import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -34,5 +35,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class InitializedInferenceExecutionerConfig {
     private InferenceExecutioner inferenceExecutioner;
-    private List<String> inputNames,outputNames;
+    private List<String> inputNames, outputNames;
 }

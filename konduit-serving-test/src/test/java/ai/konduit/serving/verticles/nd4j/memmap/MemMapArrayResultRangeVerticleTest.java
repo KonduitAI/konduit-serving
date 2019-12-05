@@ -22,69 +22,38 @@
 
 package ai.konduit.serving.verticles.nd4j.memmap;
 
-import ai.konduit.serving.verticles.BaseVerticleTest;
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.io.File;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class MemMapArrayResultRangeVerticleTest extends BaseVerticleTest {
-
-    @Override
-    public Class<? extends AbstractVerticle> getVerticalClazz() {
-        return MemMapVerticle.class;
-    }
-
-    @After
-    public void after(TestContext context) {
-        vertx.close(context.asyncAssertSuccess());
-    }
-
+public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verticles.nd4j.memmap.BaseMemMapTest {
 
 
     @Override
     public Handler<HttpServerRequest> getRequest() {
-        Handler<HttpServerRequest> ret = new Handler<HttpServerRequest>() {
-            @Override
-            public void handle(HttpServerRequest req) {
-                //should be json body of classification
-                req.bodyHandler(body -> {
-                    System.out.println("Finish body" + body);
-                });
 
-                req.exceptionHandler(exception -> {
-                    exception.printStackTrace();
-                });
-
-
-
-
-            }
+        return req -> {
+            //should be json body of classification
+            req.bodyHandler(body -> System.out.println("Finish body" + body));
+            req.exceptionHandler(Throwable::printStackTrace);
         };
-
-        return ret;
     }
 
 
     @Test(timeout = 60000)
-
     public void testArrayResultRange(TestContext context) {
         HttpClient httpClient = vertx.createHttpClient();
         JsonArray jsonArray = new JsonArray();
@@ -98,35 +67,24 @@ public class MemMapArrayResultRangeVerticleTest extends BaseVerticleTest {
                         System.out.println("Found numpy array bytes with length " + npyArray.length);
                         System.out.println("Contents: " + new String(npyArray));
                         INDArray arrFromNumpy = Nd4j.createNpyFromByteArray(npyArray);
-                        INDArray assertion = Nd4j.create(new float[]{1,2}).reshape(2);
-                        context.assertEquals(assertion,arrFromNumpy);
+                        INDArray assertion = Nd4j.create(new float[]{1, 2}).reshape(2);
+                        context.assertEquals(assertion, arrFromNumpy);
                         System.out.println(arrFromNumpy);
                         async.complete();
 
                     });
 
                     handler.exceptionHandler(exception -> {
-                        if(exception.getCause() != null)
+                        if (exception.getCause() != null)
                             context.fail(exception.getCause());
                     });
 
-                }).putHeader("Content-Type","application/json")
-                .putHeader("Content-Length",String.valueOf(0))
+                }).putHeader("Content-Type", "application/json")
+                .putHeader("Content-Length", String.valueOf(0))
                 .write("");
 
         async.await();
     }
 
 
-
-    @Override
-    public JsonObject getConfigObject() throws Exception {
-        JsonObject config = new JsonObject();
-        config.put("httpPort",String.valueOf(port));
-        INDArray arr = Nd4j.linspace(1,4,4);
-        File tmpFile = new File(temporary.getRoot(),"tmpfile.bin");
-        BinarySerde.writeArrayToDisk(arr,tmpFile);
-        config.put(MemMapVerticle.ARRAY_URL,tmpFile.getAbsolutePath());
-        return config;
-    }
 }

@@ -44,7 +44,7 @@ public class MultiLayerNetworkModelLoader implements ModelLoader<MultiLayerNetwo
     public Buffer saveModel(MultiLayerNetwork model) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
-            ModelSerializer.writeModel(model,byteArrayOutputStream,true);
+            ModelSerializer.writeModel(model, byteArrayOutputStream, true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

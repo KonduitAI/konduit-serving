@@ -42,10 +42,9 @@ import java.util.UUID;
  * and handles using various converter utilities
  * to convert objects to {@link org.dmg.pmml.PMML}
  * based on the parser from jpmml.
- *
+ * <p>
  * There are various sub classes that then parse the
  * expected input differently to output pmml.
- *
  *
  * @author Adam Gibson
  */
@@ -56,27 +55,26 @@ public abstract class BasePmmlHandler implements Handler<RoutingContext> {
     public void handle(RoutingContext req) {
 
         Object[] extraArgs = getExtraArgs(req);
-        if(extraArgs == null) {
+        if (extraArgs == null) {
             return;
         }
 
         try {
 
-            Buffer writeBuffer = getPmmlBuffer(req,getExtraArgs(req));
-            File newFile = new File(System.getProperty("java.io.tmpdir"),"tmpFile-" + UUID.randomUUID().toString() + ".xml");
+            Buffer writeBuffer = getPmmlBuffer(req, getExtraArgs(req));
+            File newFile = new File(System.getProperty("java.io.tmpdir"), "tmpFile-" + UUID.randomUUID().toString() + ".xml");
             newFile.deleteOnExit();
-            FileUtils.writeByteArrayToFile(newFile,writeBuffer.getBytes());
-            req.response().sendFile(newFile.getAbsolutePath(),resultHandler -> {
-                if(resultHandler.failed()) {
-                    if(resultHandler.cause() != null)
+            FileUtils.writeByteArrayToFile(newFile, writeBuffer.getBytes());
+            req.response().sendFile(newFile.getAbsolutePath(), resultHandler -> {
+                if (resultHandler.failed()) {
+                    if (resultHandler.cause() != null)
                         resultHandler.cause().printStackTrace();
                     else {
                         log.warn("No error found. Failed to convert pmml.");
                     }
                     req.response().setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 
-                }
-                else {
+                } else {
                     req.response().setStatusCode(200);
                 }
             });
@@ -93,7 +91,7 @@ public abstract class BasePmmlHandler implements Handler<RoutingContext> {
     }
 
 
-    public abstract Buffer getPmmlBuffer(RoutingContext routingContext,Object...otherInputs) throws Exception;
+    public abstract Buffer getPmmlBuffer(RoutingContext routingContext, Object... otherInputs) throws Exception;
 
 
     public abstract Object[] getExtraArgs(RoutingContext req);
@@ -105,7 +103,7 @@ public abstract class BasePmmlHandler implements Handler<RoutingContext> {
         try {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buff.getBytes());
             FileOutputStream fileOutputStream = new FileOutputStream(tmpFile);
-            IOUtils.copy(byteArrayInputStream,fileOutputStream);
+            IOUtils.copy(byteArrayInputStream, fileOutputStream);
             fileOutputStream.flush();
             fileOutputStream.close();
         } catch (IOException e) {

@@ -55,18 +55,18 @@ public class ArrowBinaryInputAdapterTest {
         ArrowRecordWriter arrowRecordWriter = new ArrowRecordWriter(irisInputSchema);
         CSVRecordReader reader = new CSVRecordReader();
         reader.initialize(new FileSplit(new ClassPathResource("iris.txt").getFile()));
-        List<List<Writable>>  writables = reader.next(150);
+        List<List<Writable>> writables = reader.next(150);
 
-        File tmpFile = new File(temporary.getRoot(),"tmp.arrow");
+        File tmpFile = new File(temporary.getRoot(), "tmp.arrow");
         FileSplit fileSplit = new FileSplit(tmpFile);
-        arrowRecordWriter.initialize(fileSplit,new NumberOfRecordsPartitioner());
+        arrowRecordWriter.initialize(fileSplit, new NumberOfRecordsPartitioner());
         arrowRecordWriter.writeBatch(writables);
         byte[] arrowBytes = FileUtils.readFileToByteArray(tmpFile);
 
         Buffer buffer = Buffer.buffer(arrowBytes);
         ArrowBinaryInputAdapter arrowBinaryInputAdapter = new ArrowBinaryInputAdapter();
         ArrowWritableRecordBatch convert = arrowBinaryInputAdapter.convert(buffer, ConverterArgs.builder().schema(irisInputSchema).build(), null);
-        assertEquals(writables.size(),convert.size());
+        assertEquals(writables.size(), convert.size());
     }
 
 }

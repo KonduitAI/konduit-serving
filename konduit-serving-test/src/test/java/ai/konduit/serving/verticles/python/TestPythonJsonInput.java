@@ -23,7 +23,10 @@
 package ai.konduit.serving.verticles.python;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.*;
+import ai.konduit.serving.config.Input;
+import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.Output.PredictionType;
+import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -88,13 +91,13 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .inputDataType(Input.DataType.NUMPY)
-                .predictionType(Output.PredictionType.CLASSIFICATION)
+                .inputDataFormat(Input.DataFormat.NUMPY)
+                .predictionType(PredictionType.RAW)
                 .build();
 
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
-                .pipelineStep(pythonStepConfig)
+                .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
 
@@ -110,19 +113,19 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
-        jsonObject.put("first",2);
+        jsonObject.put("first", 2);
         requestSpecification.body(jsonObject.encode().getBytes());
-        requestSpecification.header("Content-Type","application/json");
+        requestSpecification.header("Content-Type", "application/json");
         String body = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/dictionary").then()
                 .extract()
-        .body().asString();
+                .body().asString();
         JsonArray arr = new JsonArray(body);
         JsonObject jsonObject1 = arr.getJsonObject(0);
         assertTrue(jsonObject1.containsKey("second"));
-        assertEquals(4,jsonObject1.getInteger("second"),1e-1);
+        assertEquals(4, jsonObject1.getInteger("second"), 1e-1);
 
     }
 }

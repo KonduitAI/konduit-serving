@@ -43,8 +43,9 @@ import java.util.List;
 public class SameDiffModelLoader implements ModelLoader<SameDiff> {
 
     private File pathToModel;
-    @Getter @Setter
-    private List<String> inputNames,outputNames;
+    @Getter
+    @Setter
+    private List<String> inputNames, outputNames;
 
     public SameDiffModelLoader(File pathToModel) {
         this.pathToModel = pathToModel;
@@ -52,7 +53,7 @@ public class SameDiffModelLoader implements ModelLoader<SameDiff> {
 
     @Override
     public Buffer saveModel(SameDiff model) {
-        if(model.getTrainingConfig() != null) {
+        if (model.getTrainingConfig() != null) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             //  model.save(byteArrayOutputStream,true);
             return Buffer.buffer(byteArrayOutputStream.toByteArray());
@@ -65,12 +66,11 @@ public class SameDiffModelLoader implements ModelLoader<SameDiff> {
 
     @Override
     public SameDiff loadModel() throws Exception {
-        if(ModelGuesser.isTensorflowFile(pathToModel)) {
+        if (ModelGuesser.isTensorflowFile(pathToModel)) {
             log.debug("Loading tensorflow model from " + pathToModel.getAbsolutePath());
             return TFGraphMapper.importGraph(pathToModel);
-        }
-        else if(ModelGuesser.isSameDiffZipFile(pathToModel)) {
-            return SameDiff.load(pathToModel,true);
+        } else if (ModelGuesser.isSameDiffZipFile(pathToModel)) {
+            return SameDiff.load(pathToModel, true);
         }
 
         log.debug("Loading samediff model from " + pathToModel.getAbsolutePath());

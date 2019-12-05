@@ -22,15 +22,27 @@
 
 package ai.konduit.serving.pipeline.step;
 
-import ai.konduit.serving.pipeline.PipelineStep;
-import lombok.Builder;
+import ai.konduit.serving.config.Input.DataFormat;
+import ai.konduit.serving.config.Output;
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@Builder
-public class CustomPipelineStep extends PipelineStep {
+@SuperBuilder
+public class CustomPipelineStep extends BasePipelineStep {
 
     private String customUdfClazz;
+
+    @Override
+    public DataFormat[] validInputTypes() {
+        return null;
+    }
+
+    @Override
+    public Output.DataFormat[] validOutputTypes() {
+        return null;
+    }
 
     @Override
     public String pipelineStepClazz() {

@@ -29,9 +29,9 @@ import io.vertx.ext.web.Router;
  * An interface representing an object
  * with a {@link Router}
  * instance and a {@link Vertx}
- *  instance
+ * instance
  *
- *  @author Adam Gibson
+ * @author Adam Gibson
  */
 public interface Routable {
 
@@ -39,6 +39,7 @@ public interface Routable {
     /**
      * Returns the {@link Router}
      * associated with this object
+     *
      * @return router
      */
     Router router();
@@ -46,6 +47,7 @@ public interface Routable {
     /**
      * Returns the {@link Vertx}
      * instance associated with this object
+     *
      * @return router
      */
     Vertx vertx();

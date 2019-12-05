@@ -22,6 +22,9 @@
 
 package ai.konduit.serving.config;
 
+/**
+ * Type of an input or output of a pipeline step.
+ */
 public enum SchemaType {
     String,
     Integer,

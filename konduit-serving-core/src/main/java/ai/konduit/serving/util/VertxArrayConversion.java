@@ -47,8 +47,9 @@ public class VertxArrayConversion {
      * with a direct byte buffer copy (nd4j requires direct allocation
      * for byte buffers
      * json:  (converts with a straight for loop, note that this only supports matrices only)
+     *
      * @param buffer the buffer to convert
-     * @param type the type of buffer
+     * @param type   the type of buffer
      * @return the created ndarray
      */
     public static INDArray toArray(Buffer buffer, String type) {

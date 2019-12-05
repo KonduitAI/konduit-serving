@@ -25,15 +25,12 @@ The transform process is defined by [TransformProcessBuilder](https://github.com
 
 Given a JSON file as input, the Client sends a query to the Server and prints the predicted output. 
 
-This server is configured for JSON input and output. 
+This server is configured for JSON input and and parametrized with JSON and ARROW output.
 
-### [`test_transform_process_arrow.py`](test_transform_process_arrow.py)
-
-Similar to `test_transform_process.py`, checks if a DataVec transformation can be configured, but with the server configured to return [Arrow](https://arrow.apache.org/) output instead of JSON. 
 
 ### [`test_python_serving.py`](test_python_serving.py)
 
-Tests whether Python pipelines can be served. Takes as input a NumPy array saved in `../data/input-0.npy` and performs a simple operation on the model inputs in a [PythonPipelineStep](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L1183-L1301).
+Tests whether Python konduit-serving can be served. Takes as input a NumPy array saved in `../data/input-0.npy` and performs a simple operation on the model inputs in a [PythonPipelineStep](https://github.com/KonduitAI/konduit-serving/blob/6d12ebd5e37a2092c66aee04ee588b5c0d028445/python/konduit/inference.py#L1183-L1301).
 
 The input and output data types of this server are configured to be NUMPY. 
 

@@ -11,14 +11,22 @@
 ## Installation
 
 install `kondut` from PyPI with `pip install konduit`. You can also install this Python package
-from source, run `pip install .` in this directory. We recommend using Python 3.7+.
+from source, run `pip install .` in this directory. We recommend using Python 3.7+ for full support
+of all dev tools. To install all extensions needed for development run
+
+```shell script
+pip install -e '.[tests,codegen,dev]'
+```
+
+The `dev` dependencies use `black` as a pre-commit hook to lint your code automatically. To activate
+this functionality run `pre-commit install` on the command line first.
 
 Once the package itself is installed, you have access to a command line interface (CLI) tool
 called `konduit-python`. This helper tool can build the Java dependencies needed for `konduit`
 for you under the hood. All you need to do is run:
 
-```bash
-konduit-python --os <your-platform>
+```shell script
+konduit init --os <your-platform>
 ```
 
 where `<your-platform>` is picked from `windows-x86_64`,`linux-x86_64`,`linux-x86_64-gpu`,
@@ -27,7 +35,7 @@ and architecture. This tool assumes that you have `git` installed on your system
 available. If you don't want to use the CLI tool and have cloned this repository, you can also build
 the necessary jar on your own like this:
 
-```bash
+```shell script
 cd ..
 python3 build_jar.py --os <your-platform>
 ```
@@ -38,7 +46,7 @@ To use konduit, make sure to export the environment variable `KONDUIT_JAR_PATH`.
 will be set to `~/.konduit/konduit-serving/konduit.jar`. Make sure to put this in your `zshrc`, `bashrc`, or
 similar files on your respective system that you might be using, i.e. put
 
-```bash
+```shell script
 export KONDUIT_JAR_PATH="~/.konduit/konduit-serving/konduit.jar"
 ```
 
@@ -49,26 +57,44 @@ base of the Python script you want to execute, it will work without setting the 
 
 Install test dependencies using `pip install 'konduit[tests]'` if you want to run tests. 
 
-On Windows, compiling the test dependencies requires Visual Studio Build Tools 14.0, which can be installed from [here](https://visualstudio.microsoft.com/downloads/). You may also need to install the Windows 8.1 / 10 SDK. See Python's [*WindowsCompilers*](https://wiki.python.org/moin/WindowsCompilers) page for details. 
+On Windows, compiling the test dependencies requires Visual Studio Build Tools 14.0, which can be installed from
+[here](https://visualstudio.microsoft.com/downloads/). You may also need to install the Windows 8.1 / 10 SDK.
+See Python's [*WindowsCompilers*](https://wiki.python.org/moin/WindowsCompilers) page for details.
 
-The tests also require `bert_mrpc_frozen.pb` to be placed in the `python/tests` folder. Run the following code in `python/tests`: 
-```
+The tests also require `bert_mrpc_frozen.pb` to be placed in the `python/tests` folder. Run the following
+code in `python/tests`: 
+
+```shell script
 curl https://deeplearning4jblob.blob.core.windows.net/testresources/bert_mrpc_frozen_v1.zip --output bert.zip
 unzip bert.zip 
 ```
 
-The resulting JAR will be generated at the base of the `konduit` project.
-Copy it to the `tests` folder:
+The resulting JAR will be generated at the base of the `konduit` project. To copy that JAR into the test folder
+and prepare the documentation (in the `docs` folder) to be tested within the testing framework, run:
 
-```bash
-cp konduit.jar python/tests
+```shell script
+cd tests
+./prepare_doc_tests.sh
 ```
 
-Run the tests with `pytest`:
+The tests are then run with `pytest`:
 
-```bash
+```shell script
 cd python/tests
 python -m pytest .
+```
+
+To quickly run unit tests (recommended before each commit), or run the full set of integration tests, you can do:
+
+```shell script
+pytest -m unit
+pytest -m integration
+```
+
+to also run documentation tests with `doctest` for an individual file, simply run:
+
+```shell script
+ python -m doctest ../konduit/server.py -v
 ```
 
 ## Developing `konduit` from source
@@ -77,7 +103,7 @@ python -m pytest .
 this way. If you change the interface in `konduit-serving-api`, you should regenerate `konduit` Python code as well,
 using:
 
-```bash
+```shell script
 cd ..
 sh build_client.sh
 ```
@@ -86,10 +112,10 @@ This script uses the `jsonschema2popo` tool underneath, which transforms JSON to
 That means you first need to install this tool with (note that this requires you to use python 3.4+,
 which you could install in a virtual environment):
 
-```bash
-pip install jsonschema2popo
+```shell script
+pip install jsonschema2popo autopep8
 ```
 
 and then you have to put `jsonschema2popo` on your `PATH`, so that you can use it from anywhere. To test
-the installation, simply type `jsonschema2popo` in your console. If the command is recognized
-by your shell, you should be able to build `konduit` from source.
+the installation, simply type `jsonschema2popo` in your console. `autopep8` is used internally for linting.
+If the command `jsonschema2popo` is recognized by your shell, you should be able to build `konduit` from source.

@@ -41,7 +41,7 @@ public class InMemoryComputationGraphModelLoader implements ModelLoader<Computat
     public Buffer saveModel(ComputationGraph model) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
-            ModelSerializer.writeModel(model,byteArrayOutputStream,true);
+            ModelSerializer.writeModel(model, byteArrayOutputStream, true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -50,7 +50,7 @@ public interface JsonArrayConverter {
      * PMML expects a list of named tuples
      * where each name is a {@link FieldName}
      * representing a column  in the input.
-     *
+     * <p>
      * This returns a mapping of original indices
      * to the output indices.
      * If there are no errors,mappings should be 1 to 1.
@@ -58,38 +58,40 @@ public interface JsonArrayConverter {
      * what rows in the output (the second part of the pair)
      * map to the original input rows.
      *
-     * @param schema the inputSchema for the input
-     * @param jsonArray the array of arrays to use
+     * @param schema                   the inputSchema for the input
+     * @param jsonArray                the array of arrays to use
      * @param dataPipelineErrorHandler the {@link DataPipelineErrorHandler}
      *                                 when an error is encountered in the conversion step
      * @return a map of the original inputs to the output rows, and the list of converted inputs
      * in pmml format
      */
-    Pair<Map<Integer,Integer>,List<? extends Map<FieldName, ?>>> convertPmmlWithErrors(Schema schema, JsonArray jsonArray,
-                                                                                       DataPipelineErrorHandler dataPipelineErrorHandler);
+    Pair<Map<Integer, Integer>, List<? extends Map<FieldName, ?>>> convertPmmlWithErrors(Schema schema, JsonArray jsonArray,
+                                                                                         DataPipelineErrorHandler dataPipelineErrorHandler);
 
     /**
      * See {@link #convertPmmlWithErrors(Schema, JsonArray, TransformProcess, DataPipelineErrorHandler)}
      * for the documentation for this method. This method just adds a {@link TransformProcess}
      * as an option for converting the output.
-     * @param schema the input inputSchema
-     * @param jsonArray the array of arrays
-     * @param transformProcess the transform process to use to transform the data
+     *
+     * @param schema                   the input inputSchema
+     * @param jsonArray                the array of arrays
+     * @param transformProcess         the transform process to use to transform the data
      * @param dataPipelineErrorHandler the {@link DataPipelineErrorHandler}
      *                                 error handler to use
      * @return a map of the original inputs to the output rows, and the list of converted inputs
-     *         in pmml format
+     * in pmml format
      */
-    Pair<Map<Integer,Integer>, List<? extends Map<FieldName, ?>>> convertPmmlWithErrors(Schema schema,
-                                                                                       JsonArray jsonArray,
-                                                                                       TransformProcess transformProcess,
-                                                                                       DataPipelineErrorHandler dataPipelineErrorHandler);
+    Pair<Map<Integer, Integer>, List<? extends Map<FieldName, ?>>> convertPmmlWithErrors(Schema schema,
+                                                                                         JsonArray jsonArray,
+                                                                                         TransformProcess transformProcess,
+                                                                                         DataPipelineErrorHandler dataPipelineErrorHandler);
 
 
     /**
      * Convert a json array to pmml output
      * given an input {@link Schema} and {@link JsonArray}
-     * @param schema the inputSchema to convert
+     *
+     * @param schema    the inputSchema to convert
      * @param jsonArray the json array to convert
      * @return a list of maps of {@link FieldName} to feature value
      * where each item in the list is considered a "row" or an example.
@@ -102,8 +104,9 @@ public interface JsonArrayConverter {
      * This method just adds the ability to add a
      * {@link TransformProcess} to the conversion process
      * after sending in the raw input.
-     * @param schema the input inputSchema
-     * @param jsonArray the input data to convert
+     *
+     * @param schema           the input inputSchema
+     * @param jsonArray        the input data to convert
      * @param transformProcess the {@link TransformProcess}
      *                         to convert
      * @return a list of maps of {@link FieldName} to feature
@@ -117,13 +120,13 @@ public interface JsonArrayConverter {
      * Convert a {@link JsonArray}
      * given an input inputSchema to an {@link ArrowWritableRecordBatch}
      * representing a schemaed input for use with nd4j based
-     * pipelines where data in memory is represented by arrow.
+     * konduit-serving where data in memory is represented by arrow.
+     * <p>
+     * The {@link ArrowWritableRecordBatch} is an implementation of
+     * the expected input format for {@link org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator}
+     * {@link org.datavec.api.records.Record}
      *
-     *  The {@link ArrowWritableRecordBatch} is an implementation of
-     *  the expected input format for {@link org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator}
-     *  {@link org.datavec.api.records.Record}
-     *
-     * @param schema the input inputSchema to use
+     * @param schema    the input inputSchema to use
      * @param jsonArray the json array of raw data to convert
      * @return the converted batch
      */
@@ -134,8 +137,9 @@ public interface JsonArrayConverter {
      * for more context on what this method does.
      * This method just adds a transform process as
      * a conversion step.
-     * @param schema the inputSchema to use
-     * @param jsonArray the json array input data
+     *
+     * @param schema           the inputSchema to use
+     * @param jsonArray        the json array input data
      * @param transformProcess the {@link TransformProcess}
      *                         to use as part of the conversion step
      * @return the converted batch
@@ -146,7 +150,7 @@ public interface JsonArrayConverter {
     /**
      * Convert a json array of arrays to
      * {@link ArrowWritableRecordBatch}.
-
+     * <p>
      * This returns a mapping of original indices
      * to the output indices.
      * If there are no errors,mappings should be 1 to 1.
@@ -154,16 +158,16 @@ public interface JsonArrayConverter {
      * what rows in the output (the second part of the pair)
      * map to the original input rows.
      *
-     * @param schema the inputSchema for the input
-     * @param jsonArray the array of arrays to use
+     * @param schema                   the inputSchema for the input
+     * @param jsonArray                the array of arrays to use
      * @param dataPipelineErrorHandler the {@link DataPipelineErrorHandler}
      *                                 when an error is encountered in the conversion step
      * @return a map of the original inputs to the output rows, and the {@link ArrowWritableRecordBatch}
      * resulting from the conversion
      */
-    Pair<Map<Integer,Integer>,ArrowWritableRecordBatch> convertWithErrors(Schema schema,
-                                                                          JsonArray jsonArray,
-                                                                          DataPipelineErrorHandler dataPipelineErrorHandler);
+    Pair<Map<Integer, Integer>, ArrowWritableRecordBatch> convertWithErrors(Schema schema,
+                                                                            JsonArray jsonArray,
+                                                                            DataPipelineErrorHandler dataPipelineErrorHandler);
 
     /**
      * See {@link #convertWithErrors(Schema, JsonArray, DataPipelineErrorHandler)}
@@ -171,17 +175,18 @@ public interface JsonArrayConverter {
      * This method just adds a {@link TransformProcess}
      * manipulating the raw input data in to a state suitable
      * for conversion to {@link ArrowWritableRecordBatch}
-     * @param schema the input inputSchema of the data
-     * @param jsonArray the data to convert
-     * @param transformProcess the transform process to use for conversion
+     *
+     * @param schema                   the input inputSchema of the data
+     * @param jsonArray                the data to convert
+     * @param transformProcess         the transform process to use for conversion
      * @param dataPipelineErrorHandler the {@link DataPipelineErrorHandler}
      *                                 to use
      * @return a map of the original inputs to the output rows, and the {@link ArrowWritableRecordBatch}
-     *         resulting from the conversion
+     * resulting from the conversion
      */
-    Pair<Map<Integer,Integer>,ArrowWritableRecordBatch> convertWithErrors(Schema schema,
-                                                                          JsonArray jsonArray,
-                                                                          TransformProcess transformProcess,
-                                                                          DataPipelineErrorHandler dataPipelineErrorHandler);
+    Pair<Map<Integer, Integer>, ArrowWritableRecordBatch> convertWithErrors(Schema schema,
+                                                                            JsonArray jsonArray,
+                                                                            TransformProcess transformProcess,
+                                                                            DataPipelineErrorHandler dataPipelineErrorHandler);
 
 }

@@ -49,6 +49,7 @@ import java.util.List;
 @AllArgsConstructor
 public class KonduitServingMainArgs implements Serializable {
 
+    private static Field[] fields;
     private String configHost;
     private int configPort;
     private String configStoreType;
@@ -69,30 +70,27 @@ public class KonduitServingMainArgs implements Serializable {
     private InputDataType inputType;
     private ModelType modelType;
 
-    private static Field[] fields;
-
     public String[] toArgs() {
-        if(fields == null) {
+        if (fields == null) {
             fields = KonduitServingMainArgs.class.getDeclaredFields();
 
         }
 
         List<String> args = new ArrayList<>();
-        for(int i = 0; i < fields.length; i++) {
+        for (int i = 0; i < fields.length; i++) {
             if (java.lang.reflect.Modifier.isStatic(fields[i].getModifiers())) {
                 continue;
             }
 
             try {
                 Object o = fields[i].get(this);
-                if(o != null) {
-                    if(!(o instanceof Boolean)) {
+                if (o != null) {
+                    if (!(o instanceof Boolean)) {
                         args.add("--" + fields[i].getName());
                         args.add(String.valueOf(o));
-                    }
-                    else {
+                    } else {
                         Boolean bool = (Boolean) o;
-                        if(bool) {
+                        if (bool) {
                             args.add("--" + fields[i].getName());
                         }
                     }

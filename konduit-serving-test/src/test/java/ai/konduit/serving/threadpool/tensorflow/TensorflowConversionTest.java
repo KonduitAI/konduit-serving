@@ -36,17 +36,17 @@ public class TensorflowConversionTest {
     @Test(timeout = 60000)
 
     public void testView() {
-        INDArray matrix = Nd4j.linspace(1,8,8).reshape(2,4);
+        INDArray matrix = Nd4j.linspace(1, 8, 8).reshape(2, 4);
         INDArray view = matrix.slice(0);
         TensorflowConversion conversion = TensorflowConversion.getInstance();
         TF_Tensor tf_tensor = conversion.tensorFromNDArray(view);
         INDArray converted = conversion.ndArrayFromTensor(tf_tensor);
-        assertEquals(view,converted);
+        assertEquals(view, converted);
     }
 
-    @Test(timeout = 60000,expected = IllegalArgumentException.class)
+    @Test(timeout = 60000, expected = IllegalArgumentException.class)
     public void testNullArray() {
-        INDArray array = Nd4j.create(2,2);
+        INDArray array = Nd4j.create(2, 2);
         array.setData(null);
         TensorflowConversion conversion = TensorflowConversion.getInstance();
         TF_Tensor tf_tensor = conversion.tensorFromNDArray(array);
@@ -56,15 +56,15 @@ public class TensorflowConversionTest {
     @Test(timeout = 60000)
 
     public void testConversionFromNdArray() throws Exception {
-        INDArray arr = Nd4j.linspace(1,4,4);
+        INDArray arr = Nd4j.linspace(1, 4, 4);
         TensorflowConversion tensorflowConversion = TensorflowConversion.getInstance();
         TF_Tensor tf_tensor = tensorflowConversion.tensorFromNDArray(arr);
         INDArray fromTensor = tensorflowConversion.ndArrayFromTensor(tf_tensor);
-        assertEquals(arr,fromTensor);
+        assertEquals(arr, fromTensor);
         arr.addi(1.0);
         tf_tensor = tensorflowConversion.tensorFromNDArray(arr);
         fromTensor = tensorflowConversion.ndArrayFromTensor(tf_tensor);
-        assertEquals(arr,fromTensor);
+        assertEquals(arr, fromTensor);
 
 
     }
