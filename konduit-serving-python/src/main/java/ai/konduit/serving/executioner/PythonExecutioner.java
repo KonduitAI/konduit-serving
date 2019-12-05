@@ -1031,7 +1031,7 @@ public class PythonExecutioner {
             FileUtils.write(new File(dest), patch, "utf-8");
         }
         catch(IOException e){
-            throw new RuntimeException("Error reading resource.");
+            log.warn("Error patching numpy. Multiple interpreters not supported. " + e);
         }
     }
 
@@ -1039,7 +1039,7 @@ public class PythonExecutioner {
         try {
             return FileUtils.readFileToString(new File(dest), "utf-8").startsWith("#patch");
         } catch (IOException e) {
-            throw new RuntimeException("Error patching numpy");
+            log.warn("Error patching numpy. Multiple interpreters not supported. " + e);
 
         }
     }
@@ -1053,7 +1053,7 @@ public class PythonExecutioner {
         // exec("print('Reloading numpy'); sys.stdout.flush(); sys.stderr.flush(); import importlib; print('Imported importlib'); sys.stdout.flush();  importlib.reload(np); print('Reloaded lib'); sys.stdout.flush(); sys.stderr.flush();");
         for (String[] patch: _getPatches()){
             if (!_checkPatchApplied(patch[1])){
-                throw new RuntimeException("Error patching numpy");
+                log.warn("Error patching numpy. Multiple interpreters not supported. " + e);
             }
         }
     }
