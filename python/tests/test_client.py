@@ -29,6 +29,7 @@ def test_multipart_regex():
     client = Client(
         port=1337,
         input_data_format="NUMPY",
+        output_data_format="NUMPY",
         input_names=["partname"],
         output_names=["nobody_cares"],
     )
