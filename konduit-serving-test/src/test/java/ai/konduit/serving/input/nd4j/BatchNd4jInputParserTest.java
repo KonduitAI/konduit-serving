@@ -73,7 +73,7 @@ public class BatchNd4jInputParserTest extends BaseVerticleTest {
         NativeImageLoader nativeImageLoader = new NativeImageLoader();
         Image image = nativeImageLoader.asImageMatrix(new ClassPathResource("data/5.png").getFile());
         File tmpFile = temporary.newFile();
-        BinarySerde.writeArrayToDisk(image.getImage(),tmpFile);
+        BinarySerde.writeArrayToDisk(image.getImage(), tmpFile);
 
         given().port(port)
                 .multiPart("input1", tmpFile)

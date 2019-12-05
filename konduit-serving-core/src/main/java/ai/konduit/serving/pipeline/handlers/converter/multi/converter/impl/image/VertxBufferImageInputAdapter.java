@@ -23,8 +23,8 @@
 package ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.image;
 
 import ai.konduit.serving.input.conversion.ConverterArgs;
-import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.util.image.NativeImageLoader;
+import ai.konduit.serving.verticles.VerticleConstants;
 import io.vertx.core.buffer.Buffer;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.data.ImageWritable;
@@ -50,14 +50,13 @@ public class VertxBufferImageInputAdapter extends BaseImageInputAdapter<Buffer> 
     public Writable convert(Buffer input, ConverterArgs parameters, Map<String, Object> contextData) throws IOException {
         NativeImageLoader imageLoader = getImageLoader(input, parameters);
         ImageWritable image = imageLoader.asWritable(new ByteArrayInputStream(input.getBytes()));
-        if(contextData != null) {
-            contextData.put(VerticleConstants.ORIGINAL_IMAGE_HEIGHT,image.getHeight());
-            contextData.put(VerticleConstants.ORIGINAL_IMAGE_WIDTH,image.getWidth());
+        if (contextData != null) {
+            contextData.put(VerticleConstants.ORIGINAL_IMAGE_HEIGHT, image.getHeight());
+            contextData.put(VerticleConstants.ORIGINAL_IMAGE_WIDTH, image.getWidth());
         }
 
         return image;
     }
-
 
 
 }

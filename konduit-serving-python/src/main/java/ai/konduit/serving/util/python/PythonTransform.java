@@ -28,7 +28,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
-import org.datavec.api.transform.ColumnType;
 import org.datavec.api.transform.Transform;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.*;
@@ -59,11 +58,12 @@ public class PythonTransform implements Transform {
     private String code;
     private PythonVariables inputs;
     private PythonVariables outputs;
-    private String name =  UUID.randomUUID().toString();
+    private String name = UUID.randomUUID().toString();
     private Schema inputSchema;
     private Schema outputSchema;
     private String outputDict;
     private boolean returnAllVariables;
+    private boolean setupAndRun = false;
 
 
     @Builder
@@ -74,16 +74,18 @@ public class PythonTransform implements Transform {
                            Schema inputSchema,
                            Schema outputSchema,
                            String outputDict,
-                           boolean returnAllInputs) {
-        Preconditions.checkNotNull(code,"No code found to run!");
+                           boolean returnAllInputs,
+                           boolean setupAndRun) {
+        Preconditions.checkNotNull(code, "No code found to run!");
         this.code = code;
         this.returnAllVariables = returnAllInputs;
-        if(inputs != null)
+        this.setupAndRun = setupAndRun;
+        if (inputs != null)
             this.inputs = inputs;
-        if(outputs != null)
+        if (outputs != null)
             this.outputs = outputs;
 
-        if(name != null)
+        if (name != null)
             this.name = name;
         if (outputDict != null) {
             this.outputDict = outputDict;
@@ -91,55 +93,54 @@ public class PythonTransform implements Transform {
             this.outputs.addDict(outputDict);
 
             String helpers;
-            try(InputStream is = new ClassPathResource("pythonexec/serialize_array.py").getInputStream()) {
+            try (InputStream is = new ClassPathResource("pythonexec/serialize_array.py").getInputStream()) {
                 helpers = IOUtils.toString(is, Charset.defaultCharset());
 
-            }catch (IOException e){
-                throw  new RuntimeException("Error reading python code");
+            } catch (IOException e) {
+                throw new RuntimeException("Error reading python code");
             }
             this.code += "\n\n" + helpers;
             this.code += "\n" + outputDict + " = __recursive_serialize_dict(" + outputDict + ")";
         }
 
         try {
-            if(inputSchema != null) {
+            if (inputSchema != null) {
                 this.inputSchema = inputSchema;
-                if(inputs == null || inputs.isEmpty()) {
+                if (inputs == null || inputs.isEmpty()) {
                     this.inputs = schemaToPythonVariables(inputSchema);
                 }
             }
 
-            if(outputSchema != null) {
+            if (outputSchema != null) {
                 this.outputSchema = outputSchema;
-                if(outputs == null || outputs.isEmpty()) {
+                if (outputs == null || outputs.isEmpty()) {
                     this.outputs = schemaToPythonVariables(outputSchema);
                 }
             }
-        }catch(Exception e) {
+        } catch (Exception e) {
             throw new IllegalStateException(e);
         }
 
     }
 
-
     @Override
-    public void setInputSchema(Schema inputSchema) {
-        Preconditions.checkNotNull(inputSchema,"No input schema found!");
-        this.inputSchema = inputSchema;
-        try{
-            inputs = schemaToPythonVariables(inputSchema);
-        }catch (Exception e){
-            throw new RuntimeException(e);
-        }
-        if (outputSchema == null && outputDict == null){
-            outputSchema = inputSchema;
-        }
-
+    public Schema getInputSchema() {
+        return inputSchema;
     }
 
     @Override
-    public Schema getInputSchema(){
-        return inputSchema;
+    public void setInputSchema(Schema inputSchema) {
+        Preconditions.checkNotNull(inputSchema, "No input schema found!");
+        this.inputSchema = inputSchema;
+        try {
+            inputs = schemaToPythonVariables(inputSchema);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        if (outputSchema == null && outputDict == null) {
+            outputSchema = inputSchema;
+        }
+
     }
 
     @Override
@@ -162,55 +163,64 @@ public class PythonTransform implements Transform {
     }
 
 
-
-
     @Override
     public List<Writable> map(List<Writable> writables) {
         PythonVariables pyInputs = getPyInputsFromWritables(writables);
-        Preconditions.checkNotNull(pyInputs,"Inputs must not be null!");
+        Preconditions.checkNotNull(pyInputs, "Inputs must not be null!");
 
 
-        try{
+        try {
             if (returnAllVariables) {
+                if (setupAndRun) {
+                    return getWritablesFromPyOutputs(PythonExecutioner.execWithSetupRunAndReturnAllVariables(code, pyInputs));
+                }
                 return getWritablesFromPyOutputs(PythonExecutioner.execAndReturnAllVariables(code, pyInputs));
             }
 
             if (outputDict != null) {
-                PythonExecutioner.exec(this, pyInputs);
+                if (setupAndRun) {
+                    PythonExecutioner.execWithSetupAndRun(this, pyInputs);
+                } else {
+                    PythonExecutioner.exec(this, pyInputs);
+                }
                 PythonVariables out = PythonUtils.expandInnerDict(outputs, outputDict);
                 return getWritablesFromPyOutputs(out);
-            }
-            else {
-                PythonExecutioner.execWithSetupAndRun(code,pyInputs,outputs);
+            } else {
+                if (setupAndRun) {
+                    PythonExecutioner.execWithSetupAndRun(code, pyInputs, outputs);
+                } else {
+                    PythonExecutioner.exec(code, pyInputs, outputs);
+                }
+
                 return getWritablesFromPyOutputs(outputs);
             }
 
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public String[] outputColumnNames(){
+    public String[] outputColumnNames() {
         return outputs.getVariables();
     }
 
     @Override
-    public String outputColumnName(){
+    public String outputColumnName() {
         return outputColumnNames()[0];
     }
+
     @Override
-    public String[] columnNames(){
+    public String[] columnNames() {
         return outputs.getVariables();
     }
 
     @Override
-    public String columnName(){
+    public String columnName() {
         return columnNames()[0];
     }
 
-    public Schema transform(Schema inputSchema){
+    public Schema transform(Schema inputSchema) {
         return outputSchema;
     }
 
@@ -218,33 +228,31 @@ public class PythonTransform implements Transform {
     private PythonVariables getPyInputsFromWritables(List<Writable> writables) {
         PythonVariables ret = new PythonVariables();
 
-        for (String name: inputs.getVariables()) {
+        for (String name : inputs.getVariables()) {
             int colIdx = inputSchema.getIndexOfColumn(name);
             Writable w = writables.get(colIdx);
             PythonVariables.Type pyType = inputs.getType(name);
-            switch (pyType){
+            switch (pyType) {
                 case INT:
-                    if (w instanceof LongWritable){
-                        ret.addInt(name, ((LongWritable)w).get());
-                    }
-                    else{
-                        ret.addInt(name, ((IntWritable)w).get());
+                    if (w instanceof LongWritable) {
+                        ret.addInt(name, ((LongWritable) w).get());
+                    } else {
+                        ret.addInt(name, ((IntWritable) w).get());
                     }
 
                     break;
                 case FLOAT:
                     if (w instanceof DoubleWritable) {
-                        ret.addFloat(name, ((DoubleWritable)w).get());
-                    }
-                    else{
-                        ret.addFloat(name, ((FloatWritable)w).get());
+                        ret.addFloat(name, ((DoubleWritable) w).get());
+                    } else {
+                        ret.addFloat(name, ((FloatWritable) w).get());
                     }
                     break;
                 case STR:
                     ret.addStr(name, w.toString());
                     break;
                 case NDARRAY:
-                    ret.addNDArray(name,((NDArrayWritable)w).get());
+                    ret.addNDArray(name, ((NDArrayWritable) w).get());
                     break;
                 default:
                     throw new RuntimeException("Unsupported input type:" + pyType);
@@ -262,7 +270,7 @@ public class PythonTransform implements Transform {
         for (int i = 0; i < varNames.length; i++) {
             String name = varNames[i];
             PythonVariables.Type pyType = pyOuts.getType(name);
-            switch (pyType){
+            switch (pyType) {
                 case INT:
                     schemaBuilder.addColumnLong(name);
                     break;
@@ -289,7 +297,7 @@ public class PythonTransform implements Transform {
             String name = varNames[i];
             PythonVariables.Type pyType = pyOuts.getType(name);
 
-            switch (pyType){
+            switch (pyType) {
                 case INT:
                     out.add(new LongWritable(pyOuts.getIntValue(name)));
                     break;
@@ -306,9 +314,9 @@ public class PythonTransform implements Transform {
                 case DICT:
                     Map<?, ?> dictValue = pyOuts.getDictValue(name);
                     Map noNullValues = new java.util.HashMap<>();
-                    for(Map.Entry entry : dictValue.entrySet()) {
-                        if(entry.getValue() != org.json.JSONObject.NULL) {
-                           noNullValues.put(entry.getKey(), entry.getValue());
+                    for (Map.Entry entry : dictValue.entrySet()) {
+                        if (entry.getValue() != org.json.JSONObject.NULL) {
+                            noNullValues.put(entry.getKey(), entry.getValue());
                         }
                     }
 
@@ -332,8 +340,6 @@ public class PythonTransform implements Transform {
         }
         return out;
     }
-
-
 
 
 }

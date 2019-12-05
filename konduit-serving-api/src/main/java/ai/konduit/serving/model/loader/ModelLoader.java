@@ -27,8 +27,8 @@ import io.vertx.core.buffer.Buffer;
 /**
  * Model loader. Given a path
  * knows how to load a model of a specified type from disk.
- * @param <T> the type of the model
  *
+ * @param <T> the type of the model
  * @author Adam Gibson
  */
 public interface ModelLoader<T> {
@@ -36,6 +36,7 @@ public interface ModelLoader<T> {
 
     /**
      * Save a model as a buffer
+     *
      * @param model the model to save
      * @return a buffer representing
      * the binary representation of the model
@@ -44,6 +45,7 @@ public interface ModelLoader<T> {
 
     /**
      * Load the model
+     *
      * @return the loaded model
      * @throws Exception if an error occurs loading the model
      */

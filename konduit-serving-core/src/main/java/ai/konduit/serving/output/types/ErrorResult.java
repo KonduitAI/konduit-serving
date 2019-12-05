@@ -38,8 +38,8 @@ import java.util.Map;
 public class ErrorResult<T> implements Serializable {
 
     private T results;
-    private Map<Integer,String> errors = new LinkedHashMap<>();
-    private Map<Integer,Integer> resultIndices = new LinkedHashMap<>();
+    private Map<Integer, String> errors = new LinkedHashMap<>();
+    private Map<Integer, Integer> resultIndices = new LinkedHashMap<>();
 
 
 }

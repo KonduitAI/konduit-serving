@@ -39,7 +39,8 @@ public class Java2DNativeImageLoader extends NativeImageLoader {
 
     Java2DFrameConverter converter2 = new Java2DFrameConverter();
 
-    public Java2DNativeImageLoader() {}
+    public Java2DNativeImageLoader() {
+    }
 
     public Java2DNativeImageLoader(int height, int width) {
         super(height, width);
@@ -62,9 +63,9 @@ public class Java2DNativeImageLoader extends NativeImageLoader {
     }
 
     /**
-     * @param image  the input image
-     * @return  {@code asMatrix(image, false).ravel()}.
-     * @throws  IOException if an error occurs loading the image
+     * @param image the input image
+     * @return {@code asMatrix(image, false).ravel()}.
+     * @throws IOException if an error occurs loading the image
      */
     public INDArray asRowVector(BufferedImage image) throws IOException {
         return asMatrix(image, false).ravel();
@@ -72,18 +73,18 @@ public class Java2DNativeImageLoader extends NativeImageLoader {
 
     /**
      * @param image the input image
-     * @return  {@code asMatrix(image, false)}.
-     * @throws  IOException if an error occurs loading the image
+     * @return {@code asMatrix(image, false)}.
+     * @throws IOException if an error occurs loading the image
      */
     public INDArray asMatrix(BufferedImage image) throws IOException {
         return asMatrix(image, false);
     }
 
     /**
-     * @param image the input image
+     * @param image        the input image
      * @param flipChannels whether to flip the channels or not
-     * @return  {@code asMatrix(image, flipChannels).ravel()}.
-     * @throws  IOException if an error occurs loading the image
+     * @return {@code asMatrix(image, flipChannels).ravel()}.
+     * @throws IOException if an error occurs loading the image
      */
     public INDArray asRowVector(BufferedImage image, boolean flipChannels) throws IOException {
         return asMatrix(image, flipChannels).ravel();
@@ -92,7 +93,7 @@ public class Java2DNativeImageLoader extends NativeImageLoader {
     /**
      * Loads a {@link INDArray} from a {@link BufferedImage}.
      *
-     * @param image as a BufferedImage
+     * @param image        as a BufferedImage
      * @param flipChannels to have a format like TYPE_INT_RGB (ARGB) output as BGRA, etc
      * @return the loaded matrix
      * @throws IOException if an error occurs creating the {@link INDArray}
@@ -117,7 +118,7 @@ public class Java2DNativeImageLoader extends NativeImageLoader {
     /**
      * Converts an INDArray to a BufferedImage. Only intended for images with rank 3.
      *
-     * @param array to convert
+     * @param array    to convert
      * @param dataType from JavaCV (DEPTH_FLOAT, DEPTH_UBYTE, etc), or -1 to use same type as the INDArray
      * @return data copied to a Frame
      */

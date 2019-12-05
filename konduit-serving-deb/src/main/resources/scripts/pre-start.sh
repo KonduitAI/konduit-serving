@@ -1,4 +1,3 @@
-    
 #!/bin/sh
 
 KONDUIT_SERVING_PID_FILE=${KONDUIT_SERVING_PID_FILE:-/run/KONDUIT_SERVING/KONDUIT_SERVING.pid}
@@ -6,9 +5,8 @@ KONDUIT_SERVING_PID_DIR=$(dirname ${KONDUIT_SERVING_PID_FILE})
 
 echo "checking for PID dir ${KONDUIT_SERVING_PID_DIR}"
 
-if [ ! -d ${KONDUIT_SERVING_PID_DIR} ]
-then
-    echo "creating PID directory ${KONDUIT_SERVING_PID_DIR}"
-    mkdir ${KONDUIT_SERVING_PID_DIR}
-    chown KONDUIT_SERVING:daemon ${KONDUIT_SERVING_PID_DIR}
+if [ ! -d ${KONDUIT_SERVING_PID_DIR} ]; then
+  echo "creating PID directory ${KONDUIT_SERVING_PID_DIR}"
+  mkdir ${KONDUIT_SERVING_PID_DIR}
+  chown KONDUIT_SERVING:daemon ${KONDUIT_SERVING_PID_DIR}
 fi

@@ -22,12 +22,19 @@
 
 package ai.konduit.serving.config;
 
+import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.metrics.MetricType;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Configuration of all properties regarding serving a pipeline.
+ */
 @Data
 @Builder
 @AllArgsConstructor
@@ -39,12 +46,12 @@ public class ServingConfig {
     @Builder.Default
     private String listenHost = "localhost";
     @Builder.Default
-    private Input.DataType inputDataType = Input.DataType.JSON;
+    private Input.DataFormat inputDataFormat = Input.DataFormat.JSON;
     @Builder.Default
-    private Output.DataType outputDataType = Output.DataType.JSON;
+    private Output.DataFormat outputDataFormat = Output.DataFormat.JSON;
 
     @Builder.Default
-    private Output.PredictionType predictionType = Output.PredictionType.CLASSIFICATION;
+    private Output.PredictionType predictionType = PredictionType.RAW;
 
     @Builder.Default
     private String uploadsDirectory = "file-uploads/";

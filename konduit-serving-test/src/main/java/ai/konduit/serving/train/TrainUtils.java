@@ -31,7 +31,6 @@ public class TrainUtils {
     private static final String dataUrl = "http://github.com/myleott/mnist_png/raw/master/mnist_png.tar.gz";
 
 
-
     public static org.datavec.api.transform.schema.Schema getAudOutputSchema() {
         org.datavec.api.transform.schema.Schema.Builder schemaBuilder = new org.datavec.api.transform.schema.Schema.Builder();
         schemaBuilder.addColumnDouble("xgbValue");
@@ -71,9 +70,9 @@ public class TrainUtils {
     }
 
     public static org.datavec.api.transform.schema.Schema getPmmlIrisInputSchema() {
-        String[] columnNames = {"Petal.Length","Petal.Width"};
+        String[] columnNames = {"Petal.Length", "Petal.Width"};
         org.datavec.api.transform.schema.Schema.Builder schemaBuilder = new org.datavec.api.transform.schema.Schema.Builder();
-        for(int i = 0; i < columnNames.length; i++) {
+        for (int i = 0; i < columnNames.length; i++) {
             schemaBuilder.addColumnDouble(columnNames[i]);
         }
 
@@ -84,7 +83,7 @@ public class TrainUtils {
     public static org.datavec.api.transform.TransformProcess getTransformProcessForIrisInput() {
         org.datavec.api.transform.schema.Schema schema = getIrisInputSchema();
         org.datavec.api.transform.TransformProcess.Builder transformProcessBuilder = new org.datavec.api.transform.TransformProcess.Builder(schema);
-        for(int i = 0; i < schema.numColumns(); i++) {
+        for (int i = 0; i < schema.numColumns(); i++) {
             transformProcessBuilder.convertToDouble(schema.getName(i));
         }
 
@@ -99,7 +98,7 @@ public class TrainUtils {
         outputSchemaBuilder.addColumnDouble("virginica");
 
         org.datavec.api.transform.schema.Schema outputSchema = outputSchemaBuilder.build();
-        return  outputSchema;
+        return outputSchema;
     }
 
     public static org.datavec.api.transform.schema.Schema getIrisInputSchema() {
@@ -110,14 +109,14 @@ public class TrainUtils {
                 .addColumnString("sepal_height");
 
         org.datavec.api.transform.schema.Schema schema = schemaBuilder.build();
-        return  schema;
+        return schema;
     }
 
-    public static synchronized  org.nd4j.linalg.primitives.Pair<org.deeplearning4j.nn.multilayer.MultiLayerNetwork, org.nd4j.linalg.dataset.api.preprocessor.DataNormalization> getTrainedNetwork() throws Exception {
+    public static synchronized org.nd4j.linalg.primitives.Pair<org.deeplearning4j.nn.multilayer.MultiLayerNetwork, org.nd4j.linalg.dataset.api.preprocessor.DataNormalization> getTrainedNetwork() throws Exception {
         //First: get the dataset using the record reader. CSVRecordReader handles loading/parsing
         int numLinesToSkip = 0;
         char delimiter = ',';
-        org.datavec.api.records.reader.RecordReader recordReader = new org.datavec.api.records.reader.impl.csv.CSVRecordReader(numLinesToSkip,delimiter);
+        org.datavec.api.records.reader.RecordReader recordReader = new org.datavec.api.records.reader.impl.csv.CSVRecordReader(numLinesToSkip, delimiter);
         recordReader.initialize(new org.datavec.api.split.FileSplit(new org.nd4j.linalg.io.ClassPathResource("iris.txt").getFile()));
 
         //Second: the RecordReaderDataSetIterator handles conversion to DataSet objects, ready for use in neural network
@@ -125,7 +124,7 @@ public class TrainUtils {
         int numClasses = 3;     //3 classes (types of iris flowers) in the iris data set. Classes have integer values 0, 1 or 2
         int batchSize = 150;    //Iris data set: 150 examples total. We are loading all of them into one DataSet (not recommended for large data sets)
 
-        org.nd4j.linalg.dataset.api.iterator.DataSetIterator iterator = new org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator(recordReader,batchSize,labelIndex,numClasses);
+        org.nd4j.linalg.dataset.api.iterator.DataSetIterator iterator = new org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator(recordReader, batchSize, labelIndex, numClasses);
         org.nd4j.linalg.dataset.DataSet allData = iterator.next();
         allData.shuffle();
         org.nd4j.linalg.dataset.SplitTestAndTrain testAndTrain = allData.splitTestAndTrain(0.65);  //Use 65% of data for training
@@ -166,11 +165,11 @@ public class TrainUtils {
         model.init();
         model.setListeners(new org.deeplearning4j.optimize.listeners.ScoreIterationListener(100));
 
-        for(int i = 0; i < 1000; i++ ) {
+        for (int i = 0; i < 1000; i++) {
             model.fit(trainingData);
         }
 
-        return org.nd4j.linalg.primitives.Pair.of(model,normalizer);
+        return org.nd4j.linalg.primitives.Pair.of(model, normalizer);
 
     }
 
@@ -190,7 +189,7 @@ public class TrainUtils {
         if (DataUtilities.downloadFile(dataUrl, localFilePath))
             log.debug("Data downloaded from {}", dataUrl);
         if (!new java.io.File(basePath + "/mnist_png").exists())
-           DataUtilities.extractTarGz(localFilePath, basePath);
+            DataUtilities.extractTarGz(localFilePath, basePath);
 
         // vectorization of ai.konduit.serving.train.train data
         java.io.File trainData = new java.io.File(basePath + "/mnist_png/training");
@@ -253,7 +252,7 @@ public class TrainUtils {
                         .activation(org.nd4j.linalg.activations.Activation.SOFTMAX)
                         .build())
                 .setInputType(org.deeplearning4j.nn.conf.inputs.InputType.convolutionalFlat(28, 28, 1)) // InputDataType.convolutional for normal image
-               .build();
+                .build();
 
         org.deeplearning4j.nn.multilayer.MultiLayerNetwork net = new org.deeplearning4j.nn.multilayer.MultiLayerNetwork(conf);
         net.init();

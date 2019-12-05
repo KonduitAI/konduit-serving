@@ -22,8 +22,8 @@
 
 package ai.konduit.serving.pipeline.steps;
 
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
-import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ImagePermuter;
 import org.datavec.api.writable.BytesWritable;
 import org.datavec.api.writable.NDArrayWritable;
@@ -41,12 +41,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
 public class ImageTransformProcessStepRunner extends BaseStepRunner {
 
     private Map<String, NativeImageLoader> imageLoaders;
     private ImageLoadingStep imageLoadingStepConfig;
 
-    public ImageTransformProcessStepRunner(PipelineStep pipelineStep) {
+    public ImageTransformProcessStepRunner(BasePipelineStep pipelineStep) {
         super(pipelineStep);
 
         this.imageLoadingStepConfig = (ImageLoadingStep) pipelineStep;
@@ -54,7 +55,7 @@ public class ImageTransformProcessStepRunner extends BaseStepRunner {
         imageLoaders = imageLoadingStepConfig.getInputNames().stream()
                 .map(inputName -> {
                     Long[] values = imageLoadingStepConfig.getDimensionsConfigs().getOrDefault(inputName, null);
-                    if(values != null) {
+                    if (values != null) {
                         return new Pair<>(inputName, new NativeImageLoader(values[0], values[1], values[2]));
                     } else {
                         return new Pair<>(inputName, new NativeImageLoader());
@@ -62,7 +63,7 @@ public class ImageTransformProcessStepRunner extends BaseStepRunner {
                 })
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
-        Preconditions.checkState(!imageLoaders.isEmpty(),"No image loaders specified.");
+        Preconditions.checkState(!imageLoaders.isEmpty(), "No image loaders specified.");
     }
 
     @Override
@@ -89,7 +90,7 @@ public class ImageTransformProcessStepRunner extends BaseStepRunner {
 
             INDArray output;
 
-            if(imageLoadingStepConfig.isUpdateOrderingBeforeTransform()) {
+            if (imageLoadingStepConfig.isUpdateOrderingBeforeTransform()) {
                 output = applyTransform(imageTransformProcess, nativeImageLoader, permuteImageOrder(input));
             } else {
                 output = permuteImageOrder(applyTransform(imageTransformProcess, nativeImageLoader, input));

@@ -29,20 +29,20 @@
         </encoder>
     </appender>
 
-    <logger name="org.apache.catalina.core" level="DEBUG" />
-    <logger name="org.springframework" level="INFO" />
-    <logger name="org.deeplearning4j" level="INFO" />
-    <logger name="org.nd4j" level="INFO" />
-    <logger name="opennlp.uima.util" level="OFF" />
-    <logger name="org.apache.uima" level="OFF" />
-    <logger name="org.cleartk" level="OFF" />
-    <logger name="ai.konduit.serving" level="INFO" />
-    <logger name="org.apache" level="WARN" />
-    <logger name="com.sun" level="INFO" />
-    <logger name="org.eclipse" level="INFO" />
+    <logger name="org.apache.catalina.core" level="DEBUG"/>
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.deeplearning4j" level="INFO"/>
+    <logger name="org.nd4j" level="INFO"/>
+    <logger name="opennlp.uima.util" level="OFF"/>
+    <logger name="org.apache.uima" level="OFF"/>
+    <logger name="org.cleartk" level="OFF"/>
+    <logger name="ai.konduit.serving" level="INFO"/>
+    <logger name="org.apache" level="WARN"/>
+    <logger name="com.sun" level="INFO"/>
+    <logger name="org.eclipse" level="INFO"/>
 
     <root level="INFO">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="FILE"/>
     </root>
 
 </configuration>

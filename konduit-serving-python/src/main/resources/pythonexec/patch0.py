@@ -1,14 +1,12 @@
-#patch
+# patch
 
 """Implementation of __array_function__ overrides from NEP-18."""
 import collections
 import functools
 import os
-
+from numpy.compat._inspect import getargspec
 from numpy.core._multiarray_umath import (
     add_docstring, implement_array_function, _get_implementing_args)
-from numpy.compat._inspect import getargspec
-
 
 ENABLE_ARRAY_FUNCTION = bool(
     int(os.environ.get('NUMPY_EXPERIMENTAL_ARRAY_FUNCTION', 0)))
@@ -56,7 +54,6 @@ add_docstring(
     TypeError : if no implementation is found.
     """)
 
-
 # exposed for testing purposes; used internally by implement_array_function
 add_docstring(
     _get_implementing_args,
@@ -74,7 +71,6 @@ add_docstring(
     Sequence of arguments with __array_function__ methods, in the order in
     which they should be called.
     """)
-
 
 ArgSpec = collections.namedtuple('ArgSpec', 'args varargs keywords defaults')
 
@@ -112,10 +108,12 @@ def set_module(module):
 
         assert example.__module__ == 'numpy'
     """
+
     def decorator(func):
         if module is not None:
             func.__module__ = module
         return func
+
     return decorator
 
 
@@ -160,6 +158,7 @@ def array_function_dispatch(dispatcher, module=None, verify=True,
             if docs_from_dispatcher:
                 add_docstring(implementation, dispatcher.__doc__)
             return implementation
+
         return decorator
 
     def decorator(implementation):
@@ -195,4 +194,5 @@ def array_function_from_dispatcher(
         return array_function_dispatch(
             dispatcher, module, verify=verify,
             docs_from_dispatcher=docs_from_dispatcher)(implementation)
+
     return decorator

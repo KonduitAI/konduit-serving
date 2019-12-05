@@ -54,10 +54,15 @@ import static org.bytedeco.tensorflow.global.tensorflow.TF_DeleteTensor;
  * This class is simple wrapper for
  * PMMLThreadPool using batched input
  * Adapted from {@link org.deeplearning4j.parallelism.ParallelInference}
+ *
  * @author Adam Gibson
  */
 @Slf4j
 public class TensorFlowThreadPool {
+    public final static int DEFAULT_NUM_WORKERS = Nd4j.getAffinityManager().getNumberOfDevices();
+    public final static int DEFAULT_BATCH_LIMIT = 32;
+    public final static InferenceMode DEFAULT_INFERENCE_MODE = InferenceMode.BATCHED;
+    public final static int DEFAULT_QUEUE_LIMIT = 64;
     private ModelLoader<TensorflowGraphHolder> tensorFlowModelLoader;
     private long nanos;
     private int workers;
@@ -69,14 +74,7 @@ public class TensorFlowThreadPool {
     private GraphRunner replicatedModel;
     private InferenceWorker[] zoo;
     private ObservablesProvider provider;
-
-    private String[] inputNames,outputNames;
-
-    public final static int DEFAULT_NUM_WORKERS = Nd4j.getAffinityManager().getNumberOfDevices();
-    public final static int DEFAULT_BATCH_LIMIT = 32;
-    public final static InferenceMode DEFAULT_INFERENCE_MODE = InferenceMode.BATCHED;
-    public final static int DEFAULT_QUEUE_LIMIT = 64;
-
+    private String[] inputNames, outputNames;
 
 
     protected TensorFlowThreadPool() {
@@ -91,15 +89,15 @@ public class TensorFlowThreadPool {
 
         inputNames = replicatedModel.getInputOrder().toArray(new String[0]);
         outputNames = replicatedModel.getOutputOrder().toArray(new String[0]);
-        if(graphHolder.getSavedModelConfig() == null && (replicatedModel.getOutputOrder() == null || replicatedModel.getInputOrder() == null || replicatedModel.getInputOrder().isEmpty() || replicatedModel.getOutputOrder().isEmpty())) {
+        if (graphHolder.getSavedModelConfig() == null && (replicatedModel.getOutputOrder() == null || replicatedModel.getInputOrder() == null || replicatedModel.getInputOrder().isEmpty() || replicatedModel.getOutputOrder().isEmpty())) {
             throw new IllegalStateException("Unable to run graph runner. Inputs and outputs are empty. Please check the graph initialization.");
         }
 
-        if(replicatedModel.getInputOrder().isEmpty()) {
+        if (replicatedModel.getInputOrder().isEmpty()) {
             throw new IllegalStateException("Inputs not resolved!");
         }
 
-        if(replicatedModel.getOutputOrder().isEmpty()) {
+        if (replicatedModel.getOutputOrder().isEmpty()) {
             throw new IllegalStateException("Outputs not resolved!");
         }
 
@@ -113,9 +111,9 @@ public class TensorFlowThreadPool {
             boolean cRoot = !assignedRoot.get() && cDevice == currentDevice;
             assignedRoot.compareAndSet(false, cRoot);
 
-            zoo[i] = new InferenceWorker(i,observables,true, tensorFlowModelLoader);
-            zoo[i].setUncaughtExceptionHandler((handler,e) -> {
-                log.error("Exception in thread",e);
+            zoo[i] = new InferenceWorker(i, observables, true, tensorFlowModelLoader);
+            zoo[i].setUncaughtExceptionHandler((handler, e) -> {
+                log.error("Exception in thread", e);
             });
 
 
@@ -137,9 +135,8 @@ public class TensorFlowThreadPool {
     }
 
     public String[] outputNames() {
-        return  outputNames;
+        return outputNames;
     }
-
 
 
     /**
@@ -163,16 +160,15 @@ public class TensorFlowThreadPool {
     }
 
 
-
     /**
      * Generate predictions/outputSchema from the network, optionally using input masks for predictions
      *
-     * @param input      Input to the network
+     * @param input Input to the network
      * @return Output from the network
      */
     public INDArray[] output(INDArray[] input) {
         // basically, depending on model type we either throw stuff to specific model, or wait for batch
-        if(input == null) {
+        if (input == null) {
             throw new IllegalArgumentException("No null input allowed.");
         }
 
@@ -204,8 +200,6 @@ public class TensorFlowThreadPool {
         }
 
 
-
-
         return observable.getOutput();
     }
 
@@ -222,10 +216,9 @@ public class TensorFlowThreadPool {
         }
 
 
-
         /**
          * This method allows you to define mode that'll be used during inference. Options are:
-         *
+         * <p>
          * SEQUENTIAL: Input will be sent to last-used worker unmodified.
          * BATCHED: Multiple inputs will be packed into single batch, and
          * sent to last-used device.
@@ -239,10 +232,9 @@ public class TensorFlowThreadPool {
         }
 
 
-
         /**
          * This method defines, how many model copies will be used for inference.
-         *
+         * <p>
          * PLEASE NOTE: This method primarily suited for multi-GPU systems
          *
          * @param workers the number of workers
@@ -259,7 +251,7 @@ public class TensorFlowThreadPool {
         /**
          * This method defines, how many input samples can
          * be batched within given time frame.
-         *
+         * <p>
          * PLEASE NOTE: This value has no effect in
          * SEQUENTIAL inference mode
          *
@@ -277,7 +269,7 @@ public class TensorFlowThreadPool {
 
         /**
          * This method defines buffer queue size.
-         *
+         * <p>
          * Default value: 64
          *
          * @param limit th elimit of the buffer queue size
@@ -313,134 +305,12 @@ public class TensorFlowThreadPool {
         }
     }
 
-
-    /**
-     * This class actually does inference with respect to device affinity
-     *
-     */
-    private class InferenceWorker extends Thread implements Runnable {
-        private BlockingQueue<TensorflowObservable> inputQueue;
-        private AtomicBoolean shouldWork = new AtomicBoolean(true);
-        private AtomicBoolean isStopped = new AtomicBoolean(false);
-        private AtomicLong counter = new AtomicLong(0);
-        private boolean rootDevice;
-
-
-        private InferenceWorker(int id,@NonNull BlockingQueue inputQueue, boolean rootDevice, @NonNull ModelLoader<TensorflowGraphHolder> modelLoader) {
-            this.inputQueue = inputQueue;
-            this.rootDevice = rootDevice;
-            this.setDaemon(true);
-            this.setName("InferenceThread-" + id);
-
-        }
-
-        protected long getCounterValue() {
-            return counter.get();
-        }
-
-        @Override
-        public void run() {
-            try {
-                // model should be replicated & initialized here
-                while (shouldWork.get()) {
-                    TensorflowObservable request = inputQueue.take();
-
-                    if (request != null) {
-                        counter.incrementAndGet();
-
-                        INDArray[] batches = request.getInputBatches();
-                        if(batches == null) {
-                            request.setOutputException(new IllegalArgumentException("No batches found!"));
-                            return;
-                        }
-
-                        log.debug("Received batches");
-
-                        try {
-                            if(replicatedModel.getInputOrder() == null || replicatedModel.getInputOrder().size() != batches.length) {
-                                request.setOutputException(new IllegalArgumentException("Inputs did not match input order!"));
-                                return;
-                            }
-
-                            List<String> inputNames = replicatedModel.getInputOrder();
-                            List<String> outputNames = replicatedModel.getOutputOrder();
-                            Map<String, TF_Tensor> inputs = new LinkedHashMap<>(batches.length);
-
-                            for (int i = 0; i < replicatedModel.getInputOrder().size(); i++) {
-                                inputs.put(inputNames.get(i), TensorflowConversion.getInstance().tensorFromNDArray(batches[i]));
-                            }
-
-                            //ensure inputs are recast in case there's a disconnect between the original inputs and the target
-                            //input type in the graph
-                            long start = System.nanoTime();
-                            inputs = replicatedModel.recastInputs(inputs);
-                            long end = System.nanoTime();
-                            long diff = TimeUnit.NANOSECONDS.toMillis((end - start));
-                            log.info("Recast timing in ms " + diff + " and input shape " + batches[0].shapeInfoToString());
-
-                            log.debug("Running graph with inputs "  + inputNames + " and outputSchema " + outputNames);
-                            start = System.nanoTime();
-                            Map<String, TF_Tensor> outputs = replicatedModel.runTfTensor(inputs);
-                            outputs = replicatedModel.recastOutputs(outputs);
-                            end = System.nanoTime();
-                            diff = TimeUnit.NANOSECONDS.toMillis((end - start));
-                            log.info("Raw TF execution  timing in ms " + diff);
-
-                            log.debug("Ran graph with outputSchema " + outputNames);
-                            INDArray[] outputsArr = new INDArray[outputs.size()];
-                            log.info("Creating new ndarrays from tensor output.");
-                            start = System.nanoTime();
-                            for (int i = 0; i < outputsArr.length; i++) {
-                                outputsArr[i] = TensorflowConversion.getInstance().ndArrayFromTensor(outputs.get(outputNames.get(i)));
-                            }
-
-                            end = System.nanoTime();
-                            diff = TimeUnit.NANOSECONDS.toMillis((end - start));
-                            log.info("NDArray from tensor timing in ms " + diff);
-
-                            request.setOutputBatches(outputsArr);
-
-                            //delete after the batches are done allowing cleanup to happen
-                            //while the next execution can begin
-                            for(Map.Entry<String,TF_Tensor> entry : inputs.entrySet()) {
-                                TF_DeleteTensor(entry.getValue());
-                            }
-
-
-                        }catch (Exception e) {
-                            log.error("Exception found",e);
-                            request.setOutputException(e);
-                        }
-                    } else {
-                        // just do nothing, i guess and hope for next round?
-                    }
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                // do nothing
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                isStopped.set(true);
-            }
-        }
-
-        protected void shutdown() {
-            shouldWork.set(false);
-            while (!isStopped.get()) {
-                // block until main loop is finished
-            }
-        }
-    }
-
-
     protected static class ObservablesProvider {
+        private final Object locker = new Object();
         private BlockingQueue<TensorflowObservable> targetQueue;
         private long nanos;
         private int batchLimit;
-
         private volatile BatchedTensorflowInferenceObservable currentObservable;
-        private final Object locker = new Object();
 
         protected ObservablesProvider(long nanos, int batchLimit, @NonNull BlockingQueue<TensorflowObservable> queue) {
             this.targetQueue = queue;
@@ -469,6 +339,124 @@ public class TensorFlowThreadPool {
                 }
 
                 return currentObservable;
+            }
+        }
+    }
+
+    /**
+     * This class actually does inference with respect to device affinity
+     */
+    private class InferenceWorker extends Thread implements Runnable {
+        private BlockingQueue<TensorflowObservable> inputQueue;
+        private AtomicBoolean shouldWork = new AtomicBoolean(true);
+        private AtomicBoolean isStopped = new AtomicBoolean(false);
+        private AtomicLong counter = new AtomicLong(0);
+        private boolean rootDevice;
+
+
+        private InferenceWorker(int id, @NonNull BlockingQueue inputQueue, boolean rootDevice, @NonNull ModelLoader<TensorflowGraphHolder> modelLoader) {
+            this.inputQueue = inputQueue;
+            this.rootDevice = rootDevice;
+            this.setDaemon(true);
+            this.setName("InferenceThread-" + id);
+
+        }
+
+        protected long getCounterValue() {
+            return counter.get();
+        }
+
+        @Override
+        public void run() {
+            try {
+                // model should be replicated & initialized here
+                while (shouldWork.get()) {
+                    TensorflowObservable request = inputQueue.take();
+
+                    if (request != null) {
+                        counter.incrementAndGet();
+
+                        INDArray[] batches = request.getInputBatches();
+                        if (batches == null) {
+                            request.setOutputException(new IllegalArgumentException("No batches found!"));
+                            return;
+                        }
+
+                        log.debug("Received batches");
+
+                        try {
+                            if (replicatedModel.getInputOrder() == null || replicatedModel.getInputOrder().size() != batches.length) {
+                                request.setOutputException(new IllegalArgumentException("Inputs did not match input order!"));
+                                return;
+                            }
+
+                            List<String> inputNames = replicatedModel.getInputOrder();
+                            List<String> outputNames = replicatedModel.getOutputOrder();
+                            Map<String, TF_Tensor> inputs = new LinkedHashMap<>(batches.length);
+
+                            for (int i = 0; i < replicatedModel.getInputOrder().size(); i++) {
+                                inputs.put(inputNames.get(i), TensorflowConversion.getInstance().tensorFromNDArray(batches[i]));
+                            }
+
+                            //ensure inputs are recast in case there's a disconnect between the original inputs and the target
+                            //input type in the graph
+                            long start = System.nanoTime();
+                            inputs = replicatedModel.recastInputs(inputs);
+                            long end = System.nanoTime();
+                            long diff = TimeUnit.NANOSECONDS.toMillis((end - start));
+                            log.info("Recast timing in ms " + diff + " and input shape " + batches[0].shapeInfoToString());
+
+                            log.debug("Running graph with inputs " + inputNames + " and outputSchema " + outputNames);
+                            start = System.nanoTime();
+                            Map<String, TF_Tensor> outputs = replicatedModel.runTfTensor(inputs);
+                            outputs = replicatedModel.recastOutputs(outputs);
+                            end = System.nanoTime();
+                            diff = TimeUnit.NANOSECONDS.toMillis((end - start));
+                            log.info("Raw TF execution  timing in ms " + diff);
+
+                            log.debug("Ran graph with outputSchema " + outputNames);
+                            INDArray[] outputsArr = new INDArray[outputs.size()];
+                            log.info("Creating new ndarrays from tensor output.");
+                            start = System.nanoTime();
+                            for (int i = 0; i < outputsArr.length; i++) {
+                                outputsArr[i] = TensorflowConversion.getInstance().ndArrayFromTensor(outputs.get(outputNames.get(i)));
+                            }
+
+                            end = System.nanoTime();
+                            diff = TimeUnit.NANOSECONDS.toMillis((end - start));
+                            log.info("NDArray from tensor timing in ms " + diff);
+
+                            request.setOutputBatches(outputsArr);
+
+                            //delete after the batches are done allowing cleanup to happen
+                            //while the next execution can begin
+                            for (Map.Entry<String, TF_Tensor> entry : inputs.entrySet()) {
+                                TF_DeleteTensor(entry.getValue());
+                            }
+
+
+                        } catch (Exception e) {
+                            log.error("Exception found", e);
+                            request.setOutputException(e);
+                        }
+                    } else {
+                        // just do nothing, i guess and hope for next round?
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                // do nothing
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+                isStopped.set(true);
+            }
+        }
+
+        protected void shutdown() {
+            shouldWork.set(false);
+            while (!isStopped.get()) {
+                // block until main loop is finished
             }
         }
     }

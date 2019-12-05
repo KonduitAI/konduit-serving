@@ -47,17 +47,17 @@ public class ClassificationMultiOutputAdapter implements MultiOutputAdapter<INDA
 
     @Override
     public Map<String, BatchOutput> adapt(INDArray[] array, List<String> outputNames, RoutingContext routingContext) {
-        Map<String,BatchOutput> ret = new LinkedHashMap<>();
-        if(classifierOutputAdapter == null || classifierOutputAdapter.getLabels().length != outputNames.size()) {
+        Map<String, BatchOutput> ret = new LinkedHashMap<>();
+        if (classifierOutputAdapter == null || classifierOutputAdapter.getLabels().length != outputNames.size()) {
             Schema.Builder schemaBuilder = new Schema.Builder();
-            Preconditions.checkNotNull(outputNames,"Output names not defined!");
-            for(int i = 0; i < outputNames.size(); i++) {
+            Preconditions.checkNotNull(outputNames, "Output names not defined!");
+            for (int i = 0; i < outputNames.size(); i++) {
                 schemaBuilder.addColumnDouble(outputNames.get(i));
             }
 
             classifierOutputAdapter = new ClassifierOutputAdapter(schemaBuilder.build());
         }
-        ret.put(outputNames.get(0),classifierOutputAdapter.adapt(array[0], routingContext));
+        ret.put(outputNames.get(0), classifierOutputAdapter.adapt(array[0], routingContext));
         return ret;
     }
 
@@ -65,7 +65,6 @@ public class ClassificationMultiOutputAdapter implements MultiOutputAdapter<INDA
     public List<Class<? extends OutputAdapter<?>>> outputAdapterTypes() {
         return Arrays.asList(ClassifierOutputAdapter.class);
     }
-
 
 
 }

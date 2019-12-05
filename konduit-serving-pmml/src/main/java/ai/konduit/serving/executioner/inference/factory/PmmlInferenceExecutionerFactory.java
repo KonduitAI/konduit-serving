@@ -47,6 +47,6 @@ public class PmmlInferenceExecutionerFactory implements InferenceExecutionerFact
         PmmlInferenceExecutioner inferenceExecutioner = new PmmlInferenceExecutioner();
         PmmlModelLoader modelLoader1 = new PmmlModelLoader(modelEvaluatorFactory, new File(pmmlConfigPath));
         inferenceExecutioner.initialize(modelLoader1, parallelInferenceConfig);
-        return new InitializedInferenceExecutionerConfig(inferenceExecutioner,null,null);
+        return new InitializedInferenceExecutionerConfig(inferenceExecutioner, null, null);
     }
 }

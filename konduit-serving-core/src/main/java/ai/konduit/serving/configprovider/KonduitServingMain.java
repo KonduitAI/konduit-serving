@@ -24,8 +24,6 @@ package ai.konduit.serving.configprovider;
 
 import com.beust.jcommander.JCommander;
 import io.vertx.config.ConfigRetriever;
-import io.vertx.config.ConfigStoreOptions;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -49,14 +47,26 @@ public class KonduitServingMain {
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
 
     static {
-        setProperty (LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
-        LoggerFactory.getLogger (LoggerFactory.class); // Required for Logback to work in Vertx
+        setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
+        LoggerFactory.getLogger(LoggerFactory.class); // Required for Logback to work in Vertx
 
     }
+
     public KonduitServingMain() {
     }
 
-    public void runMain(String...args) {
+    public static void main(String... args) {
+        try {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> log.debug("Shutting down model server.")));
+            new KonduitServingMain().runMain(args);
+            log.debug("Exiting model server.");
+        } catch (Exception e) {
+            log.error("Unable to start model server.", e);
+            throw e;
+        }
+    }
+
+    public void runMain(String... args) {
         log.debug("Parsing args " + Arrays.toString(args));
         KonduitServingNodeConfigurer konduitServingNodeConfigurer = new KonduitServingNodeConfigurer();
         //ensure clustering is off
@@ -64,42 +74,27 @@ public class KonduitServingMain {
         JCommander jCommander = new JCommander(konduitServingNodeConfigurer);
         jCommander.parse(args);
         konduitServingNodeConfigurer.setupVertxOptions();
-       runMain(konduitServingNodeConfigurer);
+        runMain(konduitServingNodeConfigurer);
     }
-
 
     public void runMain(KonduitServingNodeConfigurer konduitServingNodeConfigurer) {
         Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
-        ConfigRetriever configRetriever = ConfigRetriever.create(vertx,konduitServingNodeConfigurer.getOptions());
+        ConfigRetriever configRetriever = ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getOptions());
         configRetriever.getConfig(result -> {
-            if(result.failed()) {
+            if (result.failed()) {
                 log.error("Unable to retrieve configuration " + result.cause());
-            }
-            else {
+            } else {
                 io.vertx.core.json.JsonObject result1 = result.result();
                 konduitServingNodeConfigurer.configureWithJson(result1);
-                vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(),konduitServingNodeConfigurer.getDeploymentOptions(),handler -> {
-                    if(handler.failed()) {
-                        log.error("Unable to deploy verticle {}",konduitServingNodeConfigurer.getVerticleClassName(),handler.cause());
-                    }
-                    else {
-                        log.info("Deployed verticle {}",konduitServingNodeConfigurer.getVerticleClassName());
+                vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
+                    if (handler.failed()) {
+                        log.error("Unable to deploy verticle {}", konduitServingNodeConfigurer.getVerticleClassName(), handler.cause());
+                    } else {
+                        log.info("Deployed verticle {}", konduitServingNodeConfigurer.getVerticleClassName());
                     }
                 });
             }
         });
-    }
-
-
-    public static void main(String...args) {
-        try {
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> log.debug("Shutting down model server.")));
-            new KonduitServingMain().runMain(args);
-            log.debug("Exiting model server.");
-        }catch(Exception e) {
-            log.error("Unable to start model server.",e);
-            throw e;
-        }
     }
 
 }

@@ -43,14 +43,14 @@ public interface PmmlObservable {
     void addInput(List<Map<FieldName, Object>> inputs);
 
 
-    void setOutputBatches(List<Map<FieldName, Object>>  output);
-
-    void setOutputException(Exception e);
+    void setOutputBatches(List<Map<FieldName, Object>> output);
 
     void addObserver(Observer observer);
 
-    List<Map<FieldName, Object>>  getOutput();
+    List<Map<FieldName, Object>> getOutput();
 
     Exception getOutputException();
+
+    void setOutputException(Exception e);
 
 }

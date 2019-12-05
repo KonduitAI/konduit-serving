@@ -22,8 +22,8 @@
 
 package ai.konduit.serving.executioner.inference;
 
-import ai.konduit.serving.model.loader.ModelLoader;
 import ai.konduit.serving.config.ParallelInferenceConfig;
+import ai.konduit.serving.model.loader.ModelLoader;
 import ai.konduit.serving.threadpool.pmml.PMMLThreadPool;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +41,8 @@ import java.util.Map;
  */
 @Slf4j
 public class PmmlInferenceExecutioner implements
-        InferenceExecutioner<ModelLoader<Evaluator>,List<Map<FieldName,Object>>,List<Map<FieldName,Object>>,
-                ParallelInferenceConfig,Evaluator> {
+        InferenceExecutioner<ModelLoader<Evaluator>, List<Map<FieldName, Object>>, List<Map<FieldName, Object>>,
+                ParallelInferenceConfig, Evaluator> {
 
     @Getter
     private PMMLThreadPool inference;
@@ -60,7 +60,7 @@ public class PmmlInferenceExecutioner implements
         try {
             return modelLoader.loadModel();
         } catch (Exception e) {
-            log.error("Unable to load model in model() call for pmml inference executioner",e);
+            log.error("Unable to load model in model() call for pmml inference executioner", e);
             return null;
         }
     }
@@ -81,7 +81,7 @@ public class PmmlInferenceExecutioner implements
 
     @Override
     public List<Map<FieldName, Object>> execute(List<Map<FieldName, Object>> input) {
-        if(inference == null) {
+        if (inference == null) {
             throw new IllegalStateException("Initialize not called. No ParallelInference found. Please call " +
                     "inferenceExecutioner.initialize(..)");
         }
@@ -90,7 +90,7 @@ public class PmmlInferenceExecutioner implements
 
     @Override
     public void stop() {
-        if(inference != null) {
+        if (inference != null) {
             inference.shutdown();
         }
     }

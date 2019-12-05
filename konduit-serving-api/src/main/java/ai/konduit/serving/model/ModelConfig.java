@@ -22,8 +22,8 @@
 
 package ai.konduit.serving.model;
 
-import ai.konduit.serving.output.types.ClassifierOutput;
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.output.types.ClassifierOutput;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,45 +42,43 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  * ModelLoadingConfiguration is for use with the various
  * {@link io.vertx.core.Verticle} found in the model server.
  * A range of enums are defined that encompass the model server workflow including:
- *
+ * <p>
  * {@link Output.PredictionType} which covers converting raw results
  * from InferenceExecutioner
  * to output consumable as json for application consumers.
  * A simple example of this would be converting a raw {@link org.nd4j.linalg.api.ndarray.INDArray}
  * containing probabilities to a {@link ClassifierOutput}
  * which contains human readable labels directly consumable from the json.
- *
+ * <p>
  * {@link ModelType} contains the various kinds of models that can be loaded
  * by the model server
- *
+ * <p>
  * JsonInputType covers the 2 major supported input types,
  * which are {@link io.vertx.core.json.JsonArray} of {@link io.vertx.core.json.JsonObject}
  * as named key value pairs, or {@link io.vertx.core.json.JsonArray} of
  * {@link io.vertx.core.json.JsonArray} which are index based values.
-
+ * <p>
  * We also support variants of each of these input types with _ERROR
  * which will be slower for inference, but will also ignore invalid rows
  * that are found. These _ERROR endpoints will output skipped rows
- * where errors were encountered so users can fix problems with input data pipelines.
- *
+ * where errors were encountered so users can fix problems with input data konduit-serving.
  *
  * @author Adam Gibson
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties({"map","empty"})
+@JsonIgnoreProperties({"map", "empty"})
 @JsonSubTypes({
-        @JsonSubTypes.Type(value=PmmlConfig.class, name = "PmmlConfig"),
-        @JsonSubTypes.Type(value=MemMapConfig.class, name = "MemMapConfig"),
-        @JsonSubTypes.Type(value=SameDiffConfig.class, name = "SameDiffConfig"),
-        @JsonSubTypes.Type(value=TensorFlowConfig.class, name = "TensorFlowConfig"),
-        @JsonSubTypes.Type(value=PythonConfig.class, name = "PythonConfig"),
+        @JsonSubTypes.Type(value = PmmlConfig.class, name = "PmmlConfig"),
+        @JsonSubTypes.Type(value = SameDiffConfig.class, name = "SameDiffConfig"),
+        @JsonSubTypes.Type(value = TensorFlowConfig.class, name = "TensorFlowConfig"),
+        @JsonSubTypes.Type(value = PythonConfig.class, name = "PythonConfig"),
 
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 @SuperBuilder
-public class ModelConfig  implements Serializable {
+public class ModelConfig implements Serializable {
 
     @JsonProperty
     private TensorDataTypesConfig tensorDataTypesConfig;

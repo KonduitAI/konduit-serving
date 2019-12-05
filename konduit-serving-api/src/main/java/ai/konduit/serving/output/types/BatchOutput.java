@@ -37,6 +37,7 @@ public interface BatchOutput extends Serializable {
     /**
      * Set the batch id for the batch output.
      * This batch id is used during retraining.
+     *
      * @param batchId the batch id for the batch output
      */
     void setBatchId(String batchId);
@@ -44,6 +45,7 @@ public interface BatchOutput extends Serializable {
     /**
      * Return the batch id for this batch output.
      * The batch id used for retraining.
+     *
      * @return batch id
      */
     String batchId();

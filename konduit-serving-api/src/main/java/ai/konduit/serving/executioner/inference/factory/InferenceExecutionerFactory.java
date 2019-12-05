@@ -28,7 +28,7 @@ import ai.konduit.serving.pipeline.step.ModelStep;
 
 /**
  * Creates {@link InferenceExecutioner}
- * instances for use within pipelines.
+ * instances for use within konduit-serving.
  *
  * @author Adam Gibson
  */

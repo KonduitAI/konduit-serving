@@ -22,11 +22,11 @@
 
 package ai.konduit.serving.model.loader.tensorflow;
 
+import ai.konduit.serving.model.SavedModelConfig;
 import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.model.TensorFlowConfig;
 import ai.konduit.serving.model.loader.ModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.model.SavedModelConfig;
 import io.vertx.core.buffer.Buffer;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,7 +36,6 @@ import org.nd4j.base.Preconditions;
 
 import java.io.File;
 import java.util.List;
-
 import java.util.Map;
 
 /**
@@ -52,23 +51,24 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
     private File configFile;
     @Singular
     @Getter
-    private List<String> inputNames,outputNames;
+    private List<String> inputNames, outputNames;
     @Singular
     @Getter
-    private Map<String, TensorDataType> castingInputTypes,castingOutputTypes;
+    private Map<String, TensorDataType> castingInputTypes, castingOutputTypes;
     @Getter
     private SavedModelConfig savedModelConfig;
 
 
     /**
      * Load the model with the given inputs
-     * @param inputNames the input names ot use for the model
-     * @param outputNames the output names for the model
-     * @param protoFile the protobuf file for the model
-     * @param configFile the session configuration for running the model (can be null)
-     * @param savedModelConfig the saved model configuration for the model (this can be null and should only be used
-     *                         when proto file is null(
-     * @param castingInputTypes the input types to automatically cast inputs to before performing inference
+     *
+     * @param inputNames         the input names ot use for the model
+     * @param outputNames        the output names for the model
+     * @param protoFile          the protobuf file for the model
+     * @param configFile         the session configuration for running the model (can be null)
+     * @param savedModelConfig   the saved model configuration for the model (this can be null and should only be used
+     *                           when proto file is null(
+     * @param castingInputTypes  the input types to automatically cast inputs to before performing inference
      * @param castingOutputTypes the output types to automatically cast outputs to before returning results
      */
     @Builder
@@ -79,8 +79,8 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
                                  SavedModelConfig savedModelConfig,
                                  Map<String, TensorDataType> castingInputTypes,
                                  Map<String, TensorDataType> castingOutputTypes) {
-        if(inputNames != null && outputNames != null)
-            Preconditions.checkState(!inputNames.equals(outputNames),"Input names and output names should not be the same");
+        if (inputNames != null && outputNames != null)
+            Preconditions.checkState(!inputNames.equals(outputNames), "Input names and output names should not be the same");
         this.protoFile = protoFile;
         this.configFile = configFile;
         this.inputNames = inputNames;
@@ -88,35 +88,6 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
         this.savedModelConfig = savedModelConfig;
         this.castingInputTypes = castingInputTypes;
         this.castingOutputTypes = castingOutputTypes;
-    }
-
-
-
-    @Override
-    public Buffer saveModel(TensorflowGraphHolder model) {
-        return Buffer.buffer(model.getGraphDef().toByteArray());
-    }
-
-    @Override
-    public TensorflowGraphHolder loadModel() throws Exception {
-        //note that saved model config supplants the normal model loading configuration
-        if(savedModelConfig == null) {
-            Preconditions.checkNotNull(protoFile, "No model configuration path specified!");
-            Preconditions.checkNotNull(inputNames, "No input names specified!");
-            Preconditions.checkNotNull(outputNames, "No output names specified!");
-        }
-
-        TensorflowGraphHolder tensorflowGraphHolder = TensorflowGraphHolder.builder()
-                .configProto(configFile == null ? null : FileUtils.readFileToByteArray(configFile))
-                .graphContent(protoFile == null ? null : FileUtils.readFileToByteArray(protoFile))
-                .inputNames(inputNames)
-                .outputNames(outputNames)
-                .savedModelConfig(savedModelConfig)
-                .castingInputTypes(castingInputTypes)
-                .castingOutputTypes(castingOutputTypes)
-                .build();
-
-        return tensorflowGraphHolder;
     }
 
     /**
@@ -134,9 +105,9 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
         List<String> inputNames = modelPipelineStepConfig.getInputNames();
         List<String> outputNames = modelPipelineStepConfig.getOutputNames();
         String modelConfigPath = config.getModelConfigType().getModelLoadingPath();
-        Preconditions.checkNotNull(modelConfigPath,"No model configuration path specified!");
-        Preconditions.checkNotNull(inputNames,"No input names specified!");
-        Preconditions.checkNotNull(outputNames,"No output names specified!");
+        Preconditions.checkNotNull(modelConfigPath, "No model configuration path specified!");
+        Preconditions.checkNotNull(inputNames, "No input names specified!");
+        Preconditions.checkNotNull(outputNames, "No output names specified!");
 
         try {
             TensorflowModelLoader tensorflowModelLoader = TensorflowModelLoader.builder()
@@ -144,10 +115,10 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
                     .inputNames(inputNames)
                     .outputNames(outputNames)
                     .castingInputTypes(config.getTensorDataTypesConfig() == null ? null : config.getTensorDataTypesConfig().getInputDataTypes())
-                    .castingOutputTypes(config.getTensorDataTypesConfig() == null ? null :config.getTensorDataTypesConfig().getOutputDataTypes())
+                    .castingOutputTypes(config.getTensorDataTypesConfig() == null ? null : config.getTensorDataTypesConfig().getOutputDataTypes())
                     .savedModelConfig(savedModelConfig)
                     .configFile(sessionConfigPath != null ? new File(sessionConfigPath) : null)
-                    .protoFile(modelConfigPath != null ? new File(modelConfigPath): null)
+                    .protoFile(modelConfigPath != null ? new File(modelConfigPath) : null)
                     .build();
 
             return tensorflowModelLoader;
@@ -155,6 +126,33 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @Override
+    public Buffer saveModel(TensorflowGraphHolder model) {
+        return Buffer.buffer(model.getGraphDef().toByteArray());
+    }
+
+    @Override
+    public TensorflowGraphHolder loadModel() throws Exception {
+        //note that saved model config supplants the normal model loading configuration
+        if (savedModelConfig == null) {
+            Preconditions.checkNotNull(protoFile, "No model configuration path specified!");
+            Preconditions.checkNotNull(inputNames, "No input names specified!");
+            Preconditions.checkNotNull(outputNames, "No output names specified!");
+        }
+
+        TensorflowGraphHolder tensorflowGraphHolder = TensorflowGraphHolder.builder()
+                .configProto(configFile == null ? null : FileUtils.readFileToByteArray(configFile))
+                .graphContent(protoFile == null ? null : FileUtils.readFileToByteArray(protoFile))
+                .inputNames(inputNames)
+                .outputNames(outputNames)
+                .savedModelConfig(savedModelConfig)
+                .castingInputTypes(castingInputTypes)
+                .castingOutputTypes(castingOutputTypes)
+                .build();
+
+        return tensorflowGraphHolder;
     }
 
 }

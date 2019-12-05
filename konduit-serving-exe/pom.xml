@@ -21,8 +21,8 @@
   ~
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>konduit-serving</artifactId>
@@ -35,8 +35,8 @@
     <properties>
         <javacpp.platform>windows-x86_64</javacpp.platform>
         <version.jre.launch4j>1.8</version.jre.launch4j>
-        <exeFileName>pipelines</exeFileName>
-        <jarFileName>pipelines</jarFileName>
+        <exeFileName>konduit-serving</exeFileName>
+        <jarFileName>konduit-serving</jarFileName>
     </properties>
 
     <dependencies>
@@ -48,7 +48,7 @@
     </dependencies>
 
     <build>
-        <finalName>pipelines</finalName>
+        <finalName>konduit-serving</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -102,11 +102,14 @@
                         </goals>
                         <configuration>
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>reference.conf</resource>
                                 </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>ai.konduit.serving.configprovider.KonduitServingMain</mainClass>
                                 </transformer>
                             </transformers>
@@ -123,7 +126,9 @@
                     <execution>
                         <id>l4j-clui</id>
                         <phase>package</phase>
-                        <goals><goal>launch4j</goal></goals>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
                         <configuration>
                             <headerType>console</headerType>
                             <outfile>target/${exeFileName}.exe</outfile>

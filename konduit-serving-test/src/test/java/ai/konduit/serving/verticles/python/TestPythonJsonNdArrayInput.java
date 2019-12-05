@@ -21,13 +21,16 @@
  */
 
 package ai.konduit.serving.verticles.python;
-import ai.konduit.serving.util.python.PythonVariables;
+
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.*;
+import ai.konduit.serving.config.Input;
+import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMapperHolder;
+import ai.konduit.serving.util.python.PythonVariables;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -90,12 +93,12 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .inputDataType(Input.DataType.NUMPY)
+                .inputDataFormat(Input.DataFormat.NUMPY)
                 .predictionType(Output.PredictionType.RAW)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
-                .pipelineStep(pythonStepConfig)
+                .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
 
@@ -111,18 +114,18 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
         JsonObject jsonObject = new JsonObject();
         jsonObject.put("first", Nd4j.scalar(2.0).toString());
         requestSpecification.body(jsonObject.encode().getBytes());
-        requestSpecification.header("Content-Type","application/json");
+        requestSpecification.header("Content-Type", "application/json");
         String body = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/dictionary").then()
                 .extract()
-        .body().asString();
+                .body().asString();
         JsonObject jsonObject1 = new JsonObject(body);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
-        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde,NDArrayOutput.class);
+        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray value = nd.getNdArray();
-        assertEquals(4,value.getDouble(0),1e-1);
+        assertEquals(4, value.getDouble(0), 1e-1);
 
     }
 

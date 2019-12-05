@@ -38,10 +38,10 @@ import java.util.UUID;
 
 /**
  * A keras to dl4j import handler.
- *
+ * <p>
  * The endpoint has 2 path params:
  * sequential and functional
- *
+ * <p>
  * This handler will return a direct dl4j zip file
  * based on the the model import output of
  * {@link KerasModelImport}
@@ -52,12 +52,6 @@ public class KerasDl4jHandler implements Handler<RoutingContext> {
 
     public final static String MODEL_TYPE = "modelType";
 
-    public enum ModelType {
-        SEQUENTIAL,FUNCTIONAL
-    }
-
-
-
     @Override
     public void handle(RoutingContext event) {
         File kerasFile = getTmpFileWithContext(event);
@@ -67,24 +61,23 @@ public class KerasDl4jHandler implements Handler<RoutingContext> {
             switch (type) {
                 case FUNCTIONAL:
                     ComputationGraph computationGraph = KerasModelImport.importKerasModelAndWeights(kerasFile.getAbsolutePath());
-                    ModelSerializer.writeModel(computationGraph,byteArrayOutputStream,true);
+                    ModelSerializer.writeModel(computationGraph, byteArrayOutputStream, true);
                     break;
                 case SEQUENTIAL:
                     MultiLayerNetwork multiLayerConfiguration = KerasModelImport.importKerasSequentialModelAndWeights(kerasFile.getAbsolutePath());
-                    ModelSerializer.writeModel(multiLayerConfiguration,byteArrayOutputStream,true);
+                    ModelSerializer.writeModel(multiLayerConfiguration, byteArrayOutputStream, true);
                     break;
             }
 
             Buffer buffer = Buffer.buffer(byteArrayOutputStream.toByteArray());
             File newFile = new File("tmpFile-" + UUID.randomUUID().toString() + ".xml");
-            FileUtils.writeByteArrayToFile(newFile,buffer.getBytes());
-            event.response().sendFile(newFile.getAbsolutePath(),resultHandler -> {
-                if(resultHandler.failed()) {
+            FileUtils.writeByteArrayToFile(newFile, buffer.getBytes());
+            event.response().sendFile(newFile.getAbsolutePath(), resultHandler -> {
+                if (resultHandler.failed()) {
                     resultHandler.cause().printStackTrace();
                     event.response().setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 
-                }
-                else {
+                } else {
                     event.response().setStatusCode(200);
                 }
             });
@@ -94,8 +87,7 @@ public class KerasDl4jHandler implements Handler<RoutingContext> {
                 exception.printStackTrace();
             });
 
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             event.response().setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             event.response().setStatusMessage("Error importing model " + e.getMessage());
         }
@@ -106,7 +98,6 @@ public class KerasDl4jHandler implements Handler<RoutingContext> {
         return ModelType.valueOf(modelType.toUpperCase());
     }
 
-
     protected File getTmpFileWithContext(RoutingContext req) {
         File tmpFile = new File(UUID.randomUUID().toString());
         Buffer buff = req.getBody();
@@ -114,7 +105,7 @@ public class KerasDl4jHandler implements Handler<RoutingContext> {
         try {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buff.getBytes());
             FileOutputStream fileOutputStream = new FileOutputStream(tmpFile);
-            IOUtils.copy(byteArrayInputStream,fileOutputStream);
+            IOUtils.copy(byteArrayInputStream, fileOutputStream);
             fileOutputStream.flush();
             fileOutputStream.close();
         } catch (IOException e) {
@@ -125,5 +116,10 @@ public class KerasDl4jHandler implements Handler<RoutingContext> {
         }
 
         return tmpFile;
+    }
+
+
+    public enum ModelType {
+        SEQUENTIAL, FUNCTIONAL
     }
 }

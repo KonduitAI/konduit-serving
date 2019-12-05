@@ -30,10 +30,14 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+/**
+ * Configures the {@link TensorDataType} of inputs and outputs
+ * of a step.
+ */
 public class TensorDataTypesConfig {
     @Singular
-    private Map<String,TensorDataType> inputDataTypes;
+    private Map<String, TensorDataType> inputDataTypes;
     @Singular
-    private Map<String,TensorDataType> outputDataTypes;
+    private Map<String, TensorDataType> outputDataTypes;
 
 }

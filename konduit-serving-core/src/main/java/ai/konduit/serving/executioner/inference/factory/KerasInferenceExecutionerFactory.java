@@ -23,9 +23,9 @@
 package ai.konduit.serving.executioner.inference.factory;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
+import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.MultiComputationGraphInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.MultiLayerNetworkInferenceExecutioner;
-import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.loader.ModelGuesser;
 import ai.konduit.serving.model.loader.ModelLoader;
@@ -61,14 +61,14 @@ public class KerasInferenceExecutionerFactory implements InferenceExecutionerFac
             inferenceExecutioner.initialize(kerasLoader, parallelInferenceConfig);
 
             log.info("Keras model loaded with inputs " + inputNames + " and output names " + outputNames);
-            return new InitializedInferenceExecutionerConfig(inferenceExecutioner,inputNames,outputNames);
+            return new InitializedInferenceExecutionerConfig(inferenceExecutioner, inputNames, outputNames);
         } else {
             MultiLayerNetworkInferenceExecutioner inferenceExecutioner = new MultiLayerNetworkInferenceExecutioner();
             kerasLoader = new MultiLayerNetworkModelLoader(new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath()));
             List<String> inputNames = Collections.singletonList("default");
             List<String> outputNames = Collections.singletonList("default");
             inferenceExecutioner.initialize(kerasLoader, parallelInferenceConfig);
-            return new InitializedInferenceExecutionerConfig(inferenceExecutioner,inputNames,outputNames);
+            return new InitializedInferenceExecutionerConfig(inferenceExecutioner, inputNames, outputNames);
 
         }
     }

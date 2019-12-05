@@ -22,12 +22,12 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.executioner.PythonExecutioner;
 import ai.konduit.serving.executioner.Pipeline;
-import ai.konduit.serving.util.python.PythonTransform;
+import ai.konduit.serving.executioner.PythonExecutioner;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.util.python.PythonTransform;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.records.Record;
@@ -48,7 +48,7 @@ import java.util.Map;
  * Run python code as part of a {@link Pipeline}
  * For configuration options see the
  * {@link PythonStep}.
- *
+ * <p>
  * The python pipeline step runner allows a definition of
  * 1 python script per input.
  * An "input" is generally just 1 name of "default"
@@ -57,7 +57,7 @@ import java.util.Map;
  * defined per input where "input" is an individual input name
  * in to a neural network that requires multiple inputs defined
  * in a lower level framework like pytorch or tensorflow.
- *
+ * <p>
  * Upon execution a {@link PythonExecutioner}
  * is used underneath for interpreter management, initialization
  * of the python script in memory and the management of the values
@@ -65,7 +65,7 @@ import java.util.Map;
  * This runner handles pulling values out of the in memory interepter
  * in python and passes the values along to the next step in a
  * pipline.
- *
+ * <p>
  * A common example is transforming numpy arrays with zero copy in to
  * an equivalent {@link org.nd4j.linalg.api.ndarray.INDArray}.
  * This allows for high performance interop in a production pipeline
@@ -78,26 +78,27 @@ import java.util.Map;
 public class PythonStepRunner extends BaseStepRunner {
 
     private Map<String, PythonTransform> pythonTransform;
-    private Map<String,TransformProcess> transformProcesses;
+    private Map<String, TransformProcess> transformProcesses;
 
-    public PythonStepRunner(PipelineStep pipelineStep) {
+    public PythonStepRunner(BasePipelineStep pipelineStep) {
         super(pipelineStep);
         PythonStep pythonConfig = (PythonStep) pipelineStep;
         pythonTransform = new HashMap<>();
         transformProcesses = new HashMap<>();
         boolean setPath = false;
-        for(Map.Entry<String,PythonConfig> configEntry : pythonConfig.getPythonConfigs().entrySet()) {
-            Preconditions.checkState(pipelineStep.hasInputName(configEntry.getKey()),"Invalid input name specified for transform " + configEntry.getKey());
+        for (Map.Entry<String, PythonConfig> configEntry : pythonConfig.getPythonConfigs().entrySet()) {
+            Preconditions.checkState(pipelineStep.hasInputName(configEntry.getKey()),
+                    "Invalid input name specified for transform " + configEntry.getKey());
             PythonConfig currConfig = configEntry.getValue();
-            if(currConfig.getPythonPath() != null && !setPath) {
+            if (currConfig.getPythonPath() != null && !setPath) {
                 log.info("Over riding python path " + currConfig.getPythonPath());
-                System.setProperty(PythonExecutioner.DEFAULT_PYTHON_PATH_PROPERTY,currConfig.getPythonPath());
+                System.setProperty(PythonExecutioner.DEFAULT_PYTHON_PATH_PROPERTY, currConfig.getPythonPath());
                 setPath = true;
             }
 
 
             String code = configEntry.getValue().getPythonCode();
-            if(code == null) {
+            if (code == null) {
                 try {
                     code = FileUtils.readFileToString(new File(currConfig.getPythonCodePath()), Charset.defaultCharset());
                 } catch (IOException e) {
@@ -107,21 +108,21 @@ public class PythonStepRunner extends BaseStepRunner {
             }
 
 
-            Preconditions.checkNotNull(code,"No code to run!");
-            Preconditions.checkState(!code.isEmpty(),"Code resolved to an empty string!");
+            Preconditions.checkNotNull(code, "No code to run!");
+            Preconditions.checkState(!code.isEmpty(), "Code resolved to an empty string!");
             PythonTransform pythonTransform = PythonTransform.builder()
                     .code(code)
                     .returnAllInputs(currConfig.isReturnAllInputs())
-                    .inputs(currConfig.getPythonInputs() != null ? ai.konduit.serving.util.python.PythonVariables.schemaFromMap(currConfig.getPythonInputs()): null)
+                    .inputs(currConfig.getPythonInputs() != null ? ai.konduit.serving.util.python.PythonVariables.schemaFromMap(currConfig.getPythonInputs()) : null)
                     .outputs(currConfig.getPythonOutputs() != null ? ai.konduit.serving.util.python.PythonVariables.schemaFromMap(currConfig.getPythonOutputs()) : null)
                     .inputSchema(pythonConfig.inputSchemaForName(configEntry.getKey()))
                     .outputSchema(pythonConfig.outputSchemaForName(configEntry.getKey()))
                     .build();
-            this.pythonTransform.put(configEntry.getKey(),pythonTransform);
+            this.pythonTransform.put(configEntry.getKey(), pythonTransform);
             TransformProcess transformProcess = new TransformProcess.Builder(pythonConfig.inputSchemaForName(configEntry.getKey()))
                     .transform(pythonTransform)
                     .build();
-            this.transformProcesses.put(configEntry.getKey(),transformProcess);
+            this.transformProcesses.put(configEntry.getKey(), transformProcess);
         }
 
         PythonExecutioner.init();
@@ -137,14 +138,13 @@ public class PythonStepRunner extends BaseStepRunner {
     @Override
     public Record[] transform(Record[] input) {
         Record[] ret = new Record[input.length];
-        for(int i = 0; i < ret.length; i++) {
-            if(transformProcesses.containsKey(pipelineStep.inputNameAt(i))) {
+        for (int i = 0; i < ret.length; i++) {
+            if (transformProcesses.containsKey(pipelineStep.inputNameAt(i))) {
                 TransformProcess transformProcess = transformProcesses.get(pipelineStep.inputNameAt(i));
-                Preconditions.checkState(input[i].getRecord() != null && !input[i].getRecord().isEmpty(),"Record should not be empty!");
-                List<List<Writable>> execute = LocalTransformExecutor.execute(Arrays.asList(input[i].getRecord()),transformProcess );
-                ret[i] =  new org.datavec.api.records.impl.Record(execute.get(0),null);
-            }
-            else {
+                Preconditions.checkState(input[i].getRecord() != null && !input[i].getRecord().isEmpty(), "Record should not be empty!");
+                List<List<Writable>> execute = LocalTransformExecutor.execute(Arrays.asList(input[i].getRecord()), transformProcess);
+                ret[i] = new org.datavec.api.records.impl.Record(execute.get(0), null);
+            } else {
                 ret[i] = input[i];
             }
         }

@@ -43,12 +43,14 @@ import java.util.zip.ZipFile;
 
 /**
  * Guess a model from the given path
+ *
  * @author Adam Gibson
  */
 @Slf4j
 public class ModelGuesser {
 
     private static KerasModelConfiguration kerasConfig = new KerasModelConfiguration();
+
     static {
         // Turn off the auto-printing when failure occurs so that we can
         // handle the errors appropriately
@@ -57,6 +59,7 @@ public class ModelGuesser {
 
     /**
      * A facade for {@link ModelSerializer#restoreNormalizerFromInputStream(InputStream)}
+     *
      * @param is the input stream to load form
      * @return the loaded normalizer
      * @throws IOException if an error occurs loading the normalizer
@@ -69,6 +72,7 @@ public class ModelGuesser {
     /**
      * Returns true if the given file
      * is a keras file or not
+     *
      * @param path the file to check
      * @return true if the given file is a keras file,
      * faloee otherwise
@@ -85,7 +89,7 @@ public class ModelGuesser {
                 log.error("Failure to load keras file", e);
                 return false;
             }
-        }catch(Throwable e) {
+        } catch (Throwable e) {
             //catch any errors related to opening non hdf5 files
             return false;
         }
@@ -96,6 +100,7 @@ public class ModelGuesser {
     /**
      * Returns true if the given file
      * is a keras file or not
+     *
      * @param path the file to check
      * @return true if the given file is a keras file,
      * faloee otherwise
@@ -112,7 +117,7 @@ public class ModelGuesser {
                 log.error("Failure to load keras file", e);
                 return false;
             }
-        }catch(Throwable e) {
+        } catch (Throwable e) {
             //catch any errors related to opening non hdf5 files
             return false;
         }
@@ -121,12 +126,13 @@ public class ModelGuesser {
 
     /**
      * Returns true if the given file is a tensorflow proto file.
+     *
      * @param file the file to check
      * @return true if the given file is a tensorflow proto file
      * false otherwise
      */
     public static boolean isTensorflowFile(File file) {
-        try(InputStream is = new FileInputStream(file)) {
+        try (InputStream is = new FileInputStream(file)) {
             org.nd4j.shade.protobuf.CodedInputStream cis = org.nd4j.shade.protobuf.CodedInputStream.newInstance(is);
             int size;
             int version_;
@@ -178,8 +184,8 @@ public class ModelGuesser {
 
 
             return true;
-        }catch(IOException e) {
-            log.error("Unable to read proto file",e);
+        } catch (IOException e) {
+            log.error("Unable to read proto file", e);
             return false;
         }
     }
@@ -187,19 +193,20 @@ public class ModelGuesser {
 
     /**
      * Loads a dl4j zip file (either computation graph or multi layer network)
+     *
      * @param path the path to the file to load
      * @return a loaded dl4j model
      * @throws Exception if loading a dl4j model fails
      */
     public static Model loadDl4jGuess(String path) throws Exception {
-        if(isZipFile(new File(path))) {
+        if (isZipFile(new File(path))) {
             log.debug("Loading file " + path);
             boolean compGraph = false;
-            try(ZipFile zipFile = new ZipFile(path)) {
+            try (ZipFile zipFile = new ZipFile(path)) {
                 List<String> collect = zipFile.stream().map(ZipEntry::getName)
                         .collect(Collectors.toList());
                 log.debug("Entries " + collect);
-                if(collect.contains(ModelSerializer.COEFFICIENTS_BIN) && collect.contains(ModelSerializer.CONFIGURATION_JSON)) {
+                if (collect.contains(ModelSerializer.COEFFICIENTS_BIN) && collect.contains(ModelSerializer.CONFIGURATION_JSON)) {
                     ZipEntry entry = zipFile.getEntry(ModelSerializer.CONFIGURATION_JSON);
                     log.debug("Loaded configuration");
                     try (InputStream is = zipFile.getInputStream(entry)) {
@@ -216,10 +223,9 @@ public class ModelGuesser {
                 }
             }
 
-            if(compGraph) {
+            if (compGraph) {
                 return ModelSerializer.restoreComputationGraph(new File(path));
-            }
-            else {
+            } else {
                 return ModelSerializer.restoreMultiLayerNetwork(new File(path));
             }
         }
@@ -230,11 +236,12 @@ public class ModelGuesser {
 
     /**
      * Returns true if the given file is a dl4j zip file.
+     *
      * @param modelFile the model file to test
      * @return true if the model file is a dl4j zip file
      */
     public static boolean isSameDiffZipFile(File modelFile) {
-        if(isZipFile(modelFile)) {
+        if (isZipFile(modelFile)) {
             ZipFile zipFile = null;
             try {
                 zipFile = new ZipFile(modelFile);
@@ -253,11 +260,12 @@ public class ModelGuesser {
 
     /**
      * Returns true if the given file is a dl4j zip file.
+     *
      * @param modelFile the model file to test
      * @return true if the model file is a dl4j zip file
      */
     public static boolean isDl4jFile(File modelFile) {
-        if(isZipFile(modelFile)) {
+        if (isZipFile(modelFile)) {
             ZipFile zipFile = null;
             try {
                 zipFile = new ZipFile(modelFile);
@@ -276,23 +284,25 @@ public class ModelGuesser {
 
     /**
      * Returns true if the given file is a zip file
+     *
      * @param f the input file
      * @return true if the input file is a zip file
      */
     public static boolean isZipFile(File f) {
         long fileSingature = 0;
-        try(RandomAccessFile raf = new RandomAccessFile(f,"r")) {
+        try (RandomAccessFile raf = new RandomAccessFile(f, "r")) {
             fileSingature = raf.readInt();
 
-        }catch(IOException e) {
+        } catch (IOException e) {
             return false;
         }
-        return fileSingature == 0x504B0304 || fileSingature == 0x504B0506 ||  fileSingature == 0x50B0708;
+        return fileSingature == 0x504B0304 || fileSingature == 0x504B0506 || fileSingature == 0x50B0708;
     }
+
     /**
      * Load the model from the given file path
-     * @param path the path of the file to "guess"
      *
+     * @param path the path of the file to "guess"
      * @return the loaded model
      * @throws Exception if every model load attempt fails
      */
@@ -332,8 +342,8 @@ public class ModelGuesser {
 
     /**
      * Load the model from the given input stream
-     * @param stream the path of the file to "guess"
      *
+     * @param stream the path of the file to "guess"
      * @return the loaded model
      * @throws Exception if loading the model fails
      */
@@ -343,29 +353,28 @@ public class ModelGuesser {
 
     /**
      * Load the model from the given input stream
-     * @param stream the path of the file to "guess"
-     * @param tempFileDirectory May be null. The directory in which to create any temporary files
      *
+     * @param stream            the path of the file to "guess"
+     * @param tempFileDirectory May be null. The directory in which to create any temporary files
      * @return the loaded model
      * @throws Exception if all attempts at loading the model fail
      */
     public static Model loadModelGuess(InputStream stream, File tempFileDirectory) throws Exception {
         //Currently (Nov 2017): KerasModelImport doesn't support loading from input streams
         //Simplest solution here: write to a temporary file
-        File f = File.createTempFile("loadModelGuess",".bin",tempFileDirectory);
+        File f = File.createTempFile("loadModelGuess", ".bin", tempFileDirectory);
         f.deleteOnExit();
 
         try (OutputStream os = new BufferedOutputStream(new FileOutputStream(f))) {
             IOUtils.copy(stream, os);
             os.flush();
             return loadModelGuess(f.getAbsolutePath());
-        } catch (ModelGuesserException e){
+        } catch (ModelGuesserException e) {
             throw new ModelGuesserException("Unable to load model from input stream (invalid model file not a known model type)");
         } finally {
             f.delete();
         }
     }
-
 
 
 }

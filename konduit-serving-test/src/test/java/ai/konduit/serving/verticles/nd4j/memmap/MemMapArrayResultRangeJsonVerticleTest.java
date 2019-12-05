@@ -22,41 +22,22 @@
 
 package ai.konduit.serving.verticles.nd4j.memmap;
 
-import ai.konduit.serving.verticles.BaseVerticleTest;
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.io.File;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class MemMapArrayResultRangeJsonVerticleTest extends BaseVerticleTest {
-
-    @Override
-    public Class<? extends AbstractVerticle> getVerticalClazz() {
-        return MemMapVerticle.class;
-    }
-
-    @After
-    public void after(TestContext context) {
-        vertx.close(context.asyncAssertSuccess());
-    }
-
+public class MemMapArrayResultRangeJsonVerticleTest extends ai.konduit.serving.verticles.nd4j.memmap.BaseMemMapTest {
 
 
     @Override
@@ -74,8 +55,6 @@ public class MemMapArrayResultRangeJsonVerticleTest extends BaseVerticleTest {
                 });
 
 
-
-
             }
         };
 
@@ -83,7 +62,6 @@ public class MemMapArrayResultRangeJsonVerticleTest extends BaseVerticleTest {
     }
 
     @Test(timeout = 60000)
-
     public void testArrayResultJson(TestContext context) {
         HttpClient httpClient = vertx.createHttpClient();
         JsonArray jsonArray = new JsonArray();
@@ -96,32 +74,21 @@ public class MemMapArrayResultRangeJsonVerticleTest extends BaseVerticleTest {
                         byte[] npyArray = body.getBytes();
                         System.out.println("Found numpy array bytes with length " + npyArray.length);
                         System.out.println("Contents: " + new String(npyArray));
-                        context.assertEquals(Double.parseDouble(new String(npyArray)),1.0);
+                        context.assertEquals(Double.parseDouble(new String(npyArray)), 1.0);
                         async.complete();
                     });
 
                     handler.exceptionHandler(exception -> {
-                        if(exception.getCause() != null)
+                        if (exception.getCause() != null)
                             context.fail(exception.getCause());
                         async.complete();
                     });
 
-                }).putHeader("Content-Type","application/json")
-                .putHeader("Content-Length",String.valueOf(jsonArray.toBuffer().length()))
+                }).putHeader("Content-Type", "application/json")
+                .putHeader("Content-Length", String.valueOf(jsonArray.toBuffer().length()))
                 .write(jsonArray.encode());
 
         async.await();
     }
 
-
-    @Override
-    public JsonObject getConfigObject() throws Exception {
-        JsonObject config = new JsonObject();
-        config.put("httpPort",String.valueOf(port));
-        INDArray arr = Nd4j.linspace(1,4,4);
-        File tmpFile = new File(temporary.getRoot(),"tmpfile.bin");
-        BinarySerde.writeArrayToDisk(arr,tmpFile);
-        config.put(MemMapVerticle.ARRAY_URL,tmpFile.getAbsolutePath());
-        return config;
-    }
 }

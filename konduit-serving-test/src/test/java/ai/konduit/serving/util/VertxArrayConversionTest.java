@@ -40,20 +40,20 @@ public class VertxArrayConversionTest {
     @Test(timeout = 60000)
 
     public void testConversion() {
-        INDArray initial = Nd4j.linspace(1,4,4);
+        INDArray initial = Nd4j.linspace(1, 4, 4);
         byte[] npyBytes = Nd4j.toNpyByteArray(initial);
         Buffer npyBuffer = Buffer.buffer(npyBytes);
         INDArray npyArray = VertxArrayConversion.toArray(npyBuffer, "numpy");
-        assertEquals(initial,npyArray);
+        assertEquals(initial, npyArray);
 
-        JsonArray jsonArray = new JsonArray().add(new JsonArray(Arrays.asList(1,2,3,4)));
-        INDArray jsonConversion = VertxArrayConversion.toArray(Buffer.buffer(jsonArray.toString()),"json").reshape(4);
-        assertEquals(initial,jsonConversion);
+        JsonArray jsonArray = new JsonArray().add(new JsonArray(Arrays.asList(1, 2, 3, 4)));
+        INDArray jsonConversion = VertxArrayConversion.toArray(Buffer.buffer(jsonArray.toString()), "json").reshape(4);
+        assertEquals(initial, jsonConversion);
 
         ByteBuffer nd4j = BinarySerde.toByteBuffer(initial);
         Buffer buffer = Buffer.buffer(Unpooled.wrappedBuffer(nd4j));
-        INDArray nd4jConverted = VertxArrayConversion.toArray(buffer,"nd4j");
-        assertEquals(initial,nd4jConverted);
+        INDArray nd4jConverted = VertxArrayConversion.toArray(buffer, "nd4j");
+        assertEquals(initial, nd4jConverted);
     }
 
 

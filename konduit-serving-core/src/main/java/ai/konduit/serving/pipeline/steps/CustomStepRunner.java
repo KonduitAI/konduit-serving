@@ -22,9 +22,9 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.step.CustomPipelineStep;
 import ai.konduit.serving.pipeline.CustomPipelineStepUDF;
-import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.pipeline.step.CustomPipelineStep;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.Writable;
 
@@ -36,7 +36,7 @@ public class CustomStepRunner extends BaseStepRunner {
 
     private CustomPipelineStepUDF customPipelineStepUDF;
 
-    public CustomStepRunner(PipelineStep pipelineStep) {
+    public CustomStepRunner(BasePipelineStep pipelineStep) {
         super(pipelineStep);
         CustomPipelineStep customPipelineStep = (CustomPipelineStep) pipelineStep;
         try {

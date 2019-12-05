@@ -42,14 +42,18 @@
             <MiningField name="Petal.Width"/>
         </MiningSchema>
         <Output>
-            <OutputField name="probability(setosa)" optype="continuous" jsonInputType="double" feature="probability" value="setosa"/>
-            <OutputField name="probability(versicolor)" optype="continuous" jsonInputType="double" feature="probability" value="versicolor"/>
-            <OutputField name="probability(virginica)" optype="continuous" jsonInputType="double" feature="probability" value="virginica"/>
+            <OutputField name="probability(setosa)" optype="continuous" jsonInputType="double" feature="probability"
+                         value="setosa"/>
+            <OutputField name="probability(versicolor)" optype="continuous" jsonInputType="double" feature="probability"
+                         value="versicolor"/>
+            <OutputField name="probability(virginica)" optype="continuous" jsonInputType="double" feature="probability"
+                         value="virginica"/>
         </Output>
         <Segmentation multipleModelMethod="majorityVote">
             <Segment id="1">
                 <True/>
-                <TreeModel functionName="classification" missingValueStrategy="nullPrediction" noTrueChildStrategy="returnLastPrediction">
+                <TreeModel functionName="classification" missingValueStrategy="nullPrediction"
+                           noTrueChildStrategy="returnLastPrediction">
                     <MiningSchema>
                         <MiningField name="Petal.Length"/>
                         <MiningField name="Petal.Width"/>
@@ -79,7 +83,8 @@
             </Segment>
             <Segment id="2">
                 <True/>
-                <TreeModel functionName="classification" missingValueStrategy="nullPrediction" noTrueChildStrategy="returnLastPrediction">
+                <TreeModel functionName="classification" missingValueStrategy="nullPrediction"
+                           noTrueChildStrategy="returnLastPrediction">
                     <MiningSchema>
                         <MiningField name="Petal.Length"/>
                         <MiningField name="Petal.Width"/>
@@ -109,7 +114,8 @@
             </Segment>
             <Segment id="3">
                 <True/>
-                <TreeModel functionName="classification" missingValueStrategy="nullPrediction" noTrueChildStrategy="returnLastPrediction">
+                <TreeModel functionName="classification" missingValueStrategy="nullPrediction"
+                           noTrueChildStrategy="returnLastPrediction">
                     <MiningSchema>
                         <MiningField name="Petal.Length"/>
                         <MiningField name="Petal.Width"/>
@@ -133,7 +139,8 @@
             </Segment>
             <Segment id="4">
                 <True/>
-                <TreeModel functionName="classification" missingValueStrategy="nullPrediction" noTrueChildStrategy="returnLastPrediction">
+                <TreeModel functionName="classification" missingValueStrategy="nullPrediction"
+                           noTrueChildStrategy="returnLastPrediction">
                     <MiningSchema>
                         <MiningField name="Petal.Length"/>
                     </MiningSchema>
@@ -156,7 +163,8 @@
             </Segment>
             <Segment id="5">
                 <True/>
-                <TreeModel functionName="classification" missingValueStrategy="nullPrediction" noTrueChildStrategy="returnLastPrediction">
+                <TreeModel functionName="classification" missingValueStrategy="nullPrediction"
+                           noTrueChildStrategy="returnLastPrediction">
                     <MiningSchema>
                         <MiningField name="Petal.Length"/>
                         <MiningField name="Petal.Width"/>
@@ -180,7 +188,8 @@
             </Segment>
             <Segment id="6">
                 <True/>
-                <TreeModel functionName="classification" missingValueStrategy="nullPrediction" noTrueChildStrategy="returnLastPrediction">
+                <TreeModel functionName="classification" missingValueStrategy="nullPrediction"
+                           noTrueChildStrategy="returnLastPrediction">
                     <MiningSchema>
                         <MiningField name="Petal.Length"/>
                         <MiningField name="Petal.Width"/>
@@ -210,7 +219,8 @@
             </Segment>
             <Segment id="7">
                 <True/>
-                <TreeModel functionName="classification" missingValueStrategy="nullPrediction" noTrueChildStrategy="returnLastPrediction">
+                <TreeModel functionName="classification" missingValueStrategy="nullPrediction"
+                           noTrueChildStrategy="returnLastPrediction">
                     <MiningSchema>
                         <MiningField name="Petal.Length"/>
                         <MiningField name="Petal.Width"/>

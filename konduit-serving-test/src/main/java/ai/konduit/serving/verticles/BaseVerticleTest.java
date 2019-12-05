@@ -52,8 +52,8 @@ public abstract class BaseVerticleTest {
     public TemporaryFolder temporary = new TemporaryFolder();
 
     protected Vertx vertx;
-    protected int port,pubsubPort;
-    protected HttpServer httpServer,normalServer;
+    protected int port, pubsubPort;
+    protected HttpServer httpServer, normalServer;
     protected TestContext context;
     protected Verticle verticle;
 
@@ -61,13 +61,13 @@ public abstract class BaseVerticleTest {
     public void before(TestContext context) throws Exception {
         port = getRandomPort();
         pubsubPort = getRandomPort();
-        System.setProperty("vertx.options.maxEventLoopExecuteTime","240000");
+        System.setProperty("vertx.options.maxEventLoopExecuteTime", "240000");
         VertxOptions vertxOptions = new VertxOptions();
         vertxOptions.setMaxEventLoopExecuteTime(240000);
         vertx = Vertx.vertx(vertxOptions);
         Nd4j.getWorkspaceManager().setDebugMode(DebugMode.SPILL_EVERYTHING);
         setupVertx(vertx);
-        if(isPubSub()) {
+        if (isPubSub()) {
             httpServer = vertx.createHttpServer().requestHandler(getRequest());
             httpServer.listen(pubsubPort);
         }
@@ -77,9 +77,9 @@ public abstract class BaseVerticleTest {
         Nd4j.getRandom().setSeed(42);
 
         DeploymentOptions options = new DeploymentOptions()
-                        .setWorker(true).setInstances(1)
-                        .setWorkerPoolSize(1)
-                        .setConfig(getConfigObject());
+                .setWorker(true).setInstances(1)
+                .setWorkerPoolSize(1)
+                .setConfig(getConfigObject());
         String verticleClassName = getVertexName();
         String[] split = verticleClassName.split("\\.");
         vertx.registerVerticleFactory(new VerticleFactory() {
@@ -90,12 +90,11 @@ public abstract class BaseVerticleTest {
 
             @Override
             public Verticle createVerticle(String s, ClassLoader classLoader) throws Exception {
-                Verticle ret =  (Verticle) classLoader.loadClass(verticleClassName).newInstance();
+                Verticle ret = (Verticle) classLoader.loadClass(verticleClassName).newInstance();
                 verticle = ret;
                 return ret;
             }
         });
-
 
 
         vertx.registerVerticleFactory(new VerticleFactory() {
@@ -122,27 +121,29 @@ public abstract class BaseVerticleTest {
     @After
     public void after(TestContext context) {
         vertx.close(context.asyncAssertSuccess());
-        if(httpServer != null)
+        if (httpServer != null)
             httpServer.close();
-        if(normalServer != null)
+        if (normalServer != null)
             normalServer.close();
     }
 
 
-    public abstract Class<? extends AbstractVerticle> getVerticalClazz();
+    public Class<? extends AbstractVerticle> getVerticalClazz() {
+        return ai.konduit.serving.verticles.inference.InferenceVerticle.class;
+    }
 
     public int getRandomPort() throws IOException {
         ServerSocket pubSubSocket = new ServerSocket(0);
-        int ret  = pubSubSocket.getLocalPort();
+        int ret = pubSubSocket.getLocalPort();
         pubSubSocket.close();
         return ret;
     }
 
     public abstract Handler<HttpServerRequest> getRequest();
 
-    public abstract  JsonObject getConfigObject() throws Exception;
+    public abstract JsonObject getConfigObject() throws Exception;
 
-    public  void setupVertx(Vertx vertx) {
+    public void setupVertx(Vertx vertx) {
 
     }
 

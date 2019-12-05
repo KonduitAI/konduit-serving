@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>konduit-serving</artifactId>
@@ -15,7 +15,7 @@
     <properties>
         <rpm-maven-plugin.version>2.1.5</rpm-maven-plugin.version>
         <resource.dir>src/main/resources</resource.dir>
-        <prefix>/pipelines</prefix>
+        <prefix>/konduit-serving</prefix>
         <pipeline.dir>${project.artifactId}</pipeline.dir>
 
     </properties>
@@ -29,7 +29,7 @@
     </dependencies>
 
     <build>
-        <finalName>pipelines</finalName>
+        <finalName>konduit-serving</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -105,7 +105,7 @@
                 </executions>
 
                 <configuration>
-                    <name>pipelines</name>
+                    <name>konduit-serving</name>
                     <license>(C) 2019 Skymind.ai, https://www.apache.org/licenses/LICENSE-2.0</license>
                     <group>Application/Misc</group>
                     <targetVendor>redhat</targetVendor>
@@ -137,30 +137,30 @@
                     <mappings>
                         <mapping>
                             <directory>${prefix}</directory>
-                            <username>pipelines</username>
+                            <username>konduit-serving</username>
                         </mapping>
 
                         <mapping>
-                            <directory>/etc/pipelines</directory>
+                            <directory>/etc/konduit-serving</directory>
                             <configuration>true</configuration>
                             <sources>
                                 <source>
-                                    <location>${resource.dir}/etc/pipelines/logback.xml</location>
+                                    <location>${resource.dir}/etc/konduit-serving/logback.xml</location>
                                 </source>
                             </sources>
-                            <username>pipelines</username>
+                            <username>konduit-serving</username>
                             <groupname>daemon</groupname>
                         </mapping>
 
                         <mapping>
-                            <directory>/etc/pipelines</directory>
+                            <directory>/etc/konduit-serving</directory>
                             <configuration>true</configuration>
                             <sources>
                                 <source>
-                                    <location>${resource.dir}/etc/pipelines/konduit-serving-env.sh</location>
+                                    <location>${resource.dir}/etc/konduit-serving/konduit-serving-env.sh</location>
                                 </source>
                             </sources>
-                            <username>pipelines</username>
+                            <username>konduit-serving</username>
                             <groupname>daemon</groupname>
                         </mapping>
 

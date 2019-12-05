@@ -32,59 +32,23 @@ import java.util.List;
 
 public class BuildScriptGen {
 
-    @Parameter(names =  {"--chip"},validateValueWith = ChipValidator.class)
+    @Parameter(names = {"--chip"}, validateValueWith = ChipValidator.class)
     private String chip = "cpu";
 
-    @Parameter(names = "--os", description = "os",validateValueWith = OsValidator.class,required = true)
+    @Parameter(names = "--os", description = "os", validateValueWith = OsValidator.class, required = true)
     private String os;
 
-    @Parameter(names = "--usePython",description = "whether to use python or not")
+    @Parameter(names = "--usePython", description = "whether to use python or not")
     private boolean usePython = true;
 
-    @Parameter(names = "--usePmml",description = "whether to use pmml (note: pmml is agpl licensed) or not")
+    @Parameter(names = "--usePmml", description = "whether to use pmml (note: pmml is agpl licensed) or not")
     private boolean usePmml = true;
 
     public static void main(String... args) throws Exception {
         new BuildScriptGen().runMain(args);
     }
 
-
-    public static class ChipValidator implements IValueValidator<String> {
-        private List<String> chips = Arrays.asList(
-                "gpu","cpu","arm"
-        );
-
-
-        @Override
-        public void validate(String name, String value) throws ParameterException {
-            if(!chips.contains(value)) {
-                throw new ParameterException("Os value must be one of " + chips);
-            }
-
-        }
-    }
-
-
-    public static class OsValidator implements IValueValidator<String> {
-        private List<String> oses = Arrays.asList(
-                "windows-x86_64",
-                "linux-x86_64",
-                "macosx-x86_64",
-                "linux-armhf",
-                "windows-x86_64-gpu"
-        );
-
-
-        @Override
-        public void validate(String name, String value) throws ParameterException {
-            if(!oses.contains(value)) {
-                throw new ParameterException("Os value must be one of " + oses);
-            }
-
-        }
-    }
-
-    public void runMain(String...args) throws Exception {
+    public void runMain(String... args) throws Exception {
         JCommander jCommander = new JCommander(this);
         jCommander.parse(args);
 
@@ -100,37 +64,69 @@ public class BuildScriptGen {
                 "windows-x86_64-gpu"
         };
 
-        for(String os : oses) {
+        for (String os : oses) {
             StringBuffer buildCommandForOs = new StringBuffer();
             buildCommandForOs.append(command.toString());
             buildCommandForOs.append(" -Djavacpp.platform=" + os + " ");
-            if(!os.contains("arm") && !os.contains("gpu")) {
+            if (!os.contains("arm") && !os.contains("gpu")) {
                 buildCommandForOs.append(" -Dchip=cpu -Ppython");
-            }
-            else if(os.contains("arm")) {
+            } else if (os.contains("arm")) {
                 buildCommandForOs.append("-Dchip=arm");
-            }
-            else if(os.contains("gpu")) {
+            } else if (os.contains("gpu")) {
                 buildCommandForOs.append(" -Dchip=gpu");
             }
 
-            if(usePython) {
+            if (usePython) {
                 buildCommandForOs.append(" -Ppython");
             }
 
-            if(usePmml) {
+            if (usePmml) {
                 buildCommandForOs.append(" -Ppmml");
             }
 
 
-            Runtime run  = Runtime.getRuntime();
+            Runtime run = Runtime.getRuntime();
             Process proc = run.exec(buildCommandForOs.toString());
             int wait = proc.waitFor();
-            if(wait != 0) {
+            if (wait != 0) {
                 throw new IllegalStateException("Program didn't finish successfully. Please run " + buildCommandForOs.toString());
             }
         }
 
+    }
+
+    public static class ChipValidator implements IValueValidator<String> {
+        private List<String> chips = Arrays.asList(
+                "gpu", "cpu", "arm"
+        );
+
+
+        @Override
+        public void validate(String name, String value) throws ParameterException {
+            if (!chips.contains(value)) {
+                throw new ParameterException("Os value must be one of " + chips);
+            }
+
+        }
+    }
+
+    public static class OsValidator implements IValueValidator<String> {
+        private List<String> oses = Arrays.asList(
+                "windows-x86_64",
+                "linux-x86_64",
+                "macosx-x86_64",
+                "linux-armhf",
+                "windows-x86_64-gpu"
+        );
+
+
+        @Override
+        public void validate(String name, String value) throws ParameterException {
+            if (!oses.contains(value)) {
+                throw new ParameterException("Os value must be one of " + oses);
+            }
+
+        }
     }
 
 }

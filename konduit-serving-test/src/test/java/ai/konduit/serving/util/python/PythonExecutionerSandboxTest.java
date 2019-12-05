@@ -30,7 +30,7 @@ import org.junit.Test;
 public class PythonExecutionerSandboxTest {
 
     @Test
-    public void testInt(){
+    public void testInt() {
         PythonExecutioner.setInterpreter("interp1");
         PythonExecutioner.exec("a = 1");
         PythonExecutioner.setInterpreter("interp2");
@@ -50,7 +50,7 @@ public class PythonExecutionerSandboxTest {
     }
 
     @Test
-    public void testNDArray(){
+    public void testNDArray() {
         PythonExecutioner.setInterpreter("main");
         PythonExecutioner.exec("import numpy as np");
         PythonExecutioner.exec("a = np.zeros(5)");
@@ -67,14 +67,14 @@ public class PythonExecutionerSandboxTest {
 
         PythonExecutioner.setInterpreter("main");
         //PythonExecutioner.exec("import numpy as np");
-       // PythonExecutioner.exec("a = np.zeros(5)");
+        // PythonExecutioner.exec("a = np.zeros(5)");
 
         PythonExecutioner.setInterpreter("main");
         Assert.assertEquals(25, PythonExecutioner.evalNdArray("a").getNd4jArray().sum().getDouble(), 1e-5);
     }
 
     @Test
-    public void testNumpyRandom(){
+    public void testNumpyRandom() {
         PythonExecutioner.setInterpreter("main");
         PythonExecutioner.exec("import numpy as np; print(np.random.randint(5))");
     }

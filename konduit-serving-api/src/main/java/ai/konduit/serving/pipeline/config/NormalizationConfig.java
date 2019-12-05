@@ -31,14 +31,16 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * Configuration for data normalization in the ETL part of your pipeline.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class NormalizationConfig   implements Serializable {
+public class NormalizationConfig implements Serializable {
 
-    private Map<String,String> config = new HashMap<>();
+    private Map<String, String> config = new HashMap<>();
 
     public void put(String key, String value) {
         config.put(key, value);

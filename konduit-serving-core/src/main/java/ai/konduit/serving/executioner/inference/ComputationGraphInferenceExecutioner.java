@@ -22,8 +22,8 @@
 
 package ai.konduit.serving.executioner.inference;
 
-import ai.konduit.serving.model.loader.ModelLoader;
 import ai.konduit.serving.config.ParallelInferenceConfig;
+import ai.konduit.serving.model.loader.ModelLoader;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.deeplearning4j.nn.graph.ComputationGraph;
@@ -41,28 +41,26 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author Adam Gibson
  */
 @Slf4j
-public class ComputationGraphInferenceExecutioner implements InferenceExecutioner<ModelLoader<ComputationGraph>,INDArray,INDArray, ParallelInferenceConfig,ComputationGraph> {
+public class ComputationGraphInferenceExecutioner implements InferenceExecutioner<ModelLoader<ComputationGraph>, INDArray, INDArray, ParallelInferenceConfig, ComputationGraph> {
 
-    @Getter
-    private ParallelInference parallelInference;
-    @Getter
-    private ComputationGraph computationGraph;
-    private static Field zooField,protoModelField,replicateModelField;
-    private ReentrantReadWriteLock modelReadWriteLock;
-    @Getter
-    private ModelLoader<ComputationGraph> computationGraphModelLoader;
+    private static Field zooField, protoModelField, replicateModelField;
 
     static {
         try {
-            zooField =  ParallelInference.class.getDeclaredField("zoo");
+            zooField = ParallelInference.class.getDeclaredField("zoo");
             zooField.setAccessible(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
-
+    @Getter
+    private ParallelInference parallelInference;
+    @Getter
+    private ComputationGraph computationGraph;
+    private ReentrantReadWriteLock modelReadWriteLock;
+    @Getter
+    private ModelLoader<ComputationGraph> computationGraphModelLoader;
 
     @Override
     public ModelLoader<ComputationGraph> modelLoader() {
@@ -93,16 +91,15 @@ public class ComputationGraphInferenceExecutioner implements InferenceExecutione
                 .build();
 
 
-
         this.parallelInference = inference;
 
         Object[] zoo = (Object[]) zooField.get(parallelInference);
-        if(protoModelField == null) {
+        if (protoModelField == null) {
             protoModelField = zoo[0].getClass().getDeclaredField("protoModel");
             protoModelField.setAccessible(true);
         }
 
-        if(replicateModelField == null) {
+        if (replicateModelField == null) {
             replicateModelField = zoo[0].getClass().getDeclaredField("replicatedModel");
             replicateModelField.setAccessible(true);
         }
@@ -113,17 +110,16 @@ public class ComputationGraphInferenceExecutioner implements InferenceExecutione
 
     @Override
     public INDArray execute(INDArray input) {
-        if(parallelInference == null) {
+        if (parallelInference == null) {
             throw new IllegalStateException("Initialize not called. No ParallelInference found. Please call inferenceExecutioner.initialize(..)");
         }
 
         try {
             modelReadWriteLock.readLock().lock();
-            INDArray output =  parallelInference.output(new INDArray[]{input})[0];
+            INDArray output = parallelInference.output(new INDArray[]{input})[0];
             return output;
 
-        }
-        finally {
+        } finally {
             modelReadWriteLock.readLock().unlock();
         }
 
@@ -131,7 +127,7 @@ public class ComputationGraphInferenceExecutioner implements InferenceExecutione
 
     @Override
     public void stop() {
-        if(parallelInference != null) {
+        if (parallelInference != null) {
             parallelInference.shutdown();
         }
     }

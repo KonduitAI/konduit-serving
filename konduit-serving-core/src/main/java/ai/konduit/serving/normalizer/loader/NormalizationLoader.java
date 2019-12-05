@@ -34,6 +34,7 @@ public interface NormalizationLoader {
 
     /**
      * The loaded {@link DataNormalization}
+     *
      * @return the loaded {@link DataNormalization}
      * @throws Exception if an error occurs loading the normalizer
      */
