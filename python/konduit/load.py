@@ -3,6 +3,7 @@ import logging
 import os
 import yaml
 
+from .inference import *
 from .client import Client
 from .server import Server
 
@@ -157,11 +158,18 @@ def client_from_file(file_path, use_yaml=True):
     else:
         client_data = data.get("serving", None)
         port = client_data.get("http_port", None)
+        input_data_format = client_data.get("input_data_format", None)
+        output_data_format = client_data.get("output_data_format", None)
+
         if not port:
             raise RuntimeError(
                 "No HTTP port found in configuration file, can't proceed."
             )
-        client = Client(port=port)
+        client = Client(
+            port=port,
+            input_data_format=input_data_format,
+            output_data_format=output_data_format,
+        )
     return client
 
 
