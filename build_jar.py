@@ -101,4 +101,4 @@ if __name__ == "__main__":
 
     # Copy the built jar file to the "python/tests" folder if it exists.
     if os.path.isdir(os.path.join(args.source, "python", "tests")):
-        copyfile(args.target, os.path.join(args.source, "python", "tests", args.target))
+        copyfile(os.path.join(args.source, args.target), os.path.join(args.source, "python", "tests", "konduit.jar"))
