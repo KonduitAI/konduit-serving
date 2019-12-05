@@ -178,7 +178,7 @@ public class BatchInputParser {
                 name = name.replace(" ", ":");
                 String inputName = name;
                 if(inputName.contains("[")) {
-                    inputName = inputName.substring(0, name.indexOf("["));
+                    inputName = inputName.substring(0, name.lastIndexOf("["));
                 }
                 if (!inputParts.contains(inputName)) {
                     throw new IllegalStateException("Illegal name for multi part passed in " + upload.name());
