@@ -95,4 +95,6 @@ if __name__ == "__main__":
         ),
         os.path.join(args.source, args.target),
     )
-    copyfile(args.target, os.path.join(args.source, "python", "tests", args.target))
+
+    if os.path.isdir(os.path.join(args.source, "python", "tests")):
+        copyfile(args.target, os.path.join(args.source, "python", "tests", args.target))
