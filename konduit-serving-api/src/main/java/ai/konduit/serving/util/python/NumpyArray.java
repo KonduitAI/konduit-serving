@@ -24,6 +24,9 @@
 package ai.konduit.serving.util.python;
 
 
+import org.nd4j.linalg.api.concurrency.AffinityManager;
+import org.nd4j.linalg.factory.Nd4j;
+
 /**
  * Wrapper around INDArray for initializing from numpy array
  *
@@ -56,6 +59,7 @@ public class NumpyArray {
         setND4JArray();
         if (copy) {
             nd4jArray = nd4jArray.dup();
+            Nd4j.getAffinityManager().ensureLocation(nd4jArray, AffinityManager.Location.HOST);
             this.address = nd4jArray.data().address();
 
         }
@@ -77,11 +81,13 @@ public class NumpyArray {
         setND4JArray();
         if (copy) {
             nd4jArray = nd4jArray.dup();
+            Nd4j.getAffinityManager().ensureLocation(nd4jArray, AffinityManager.Location.HOST);
             this.address = nd4jArray.data().address();
         }
     }
 
     public NumpyArray(org.nd4j.linalg.api.ndarray.INDArray nd4jArray) {
+        Nd4j.getAffinityManager().ensureLocation(nd4jArray, AffinityManager.Location.HOST);
         org.nd4j.linalg.api.buffer.DataBuffer buff = nd4jArray.data();
         address = buff.pointer().address();
         shape = nd4jArray.shape();
@@ -107,7 +113,8 @@ public class NumpyArray {
         org.nd4j.linalg.api.buffer.DataBuffer buff = org.nd4j.linalg.factory.Nd4j.createBuffer(ptr, size, dtype);
         int elemSize = buff.getElementSize();
         long[] nd4jStrides = java.util.Arrays.stream(strides).map(stride -> stride / elemSize).toArray();
-        this.nd4jArray = org.nd4j.linalg.factory.Nd4j.create(buff, shape, nd4jStrides, 0, org.nd4j.linalg.api.shape.Shape.getOrder(shape, nd4jStrides, 1), dtype);
+        nd4jArray = org.nd4j.linalg.factory.Nd4j.create(buff, shape, nd4jStrides, 0, org.nd4j.linalg.api.shape.Shape.getOrder(shape, nd4jStrides, 1), dtype);
+        Nd4j.getAffinityManager().ensureLocation(nd4jArray, AffinityManager.Location.HOST);
 
     }
 
