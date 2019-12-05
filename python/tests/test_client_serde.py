@@ -13,7 +13,13 @@ def test_multipart_encode():
     input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
     output_names = ["loss/Softmax"]
     port = random.randint(1000, 65535)
-    client = Client(input_names=input_names, output_names=output_names, port=port)
+    client = Client(
+        input_names=input_names,
+        output_names=output_names,
+        input_data_format="NUMPY",
+        output_data_format="NUMPY",
+        port=port,
+    )
 
     input_data = {
         "input1": Client._convert_numpy_to_binary(np.ones(1)),
