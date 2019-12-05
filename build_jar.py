@@ -2,6 +2,7 @@ import argparse
 import subprocess
 from shutil import copyfile
 import os
+import sys
 import re
 from distutils.util import strtobool
 
@@ -85,7 +86,9 @@ if __name__ == "__main__":
         version = re.findall(regex, content)
 
     print("Running command: " + " ".join(command))
-    subprocess.call(command, shell=True, cwd=args.source)
+    subprocess.call(command, shell=sys.platform.startswith('win'), cwd=args.source)
+
+    # Copy the jar file to the path specified by the "target" argument
     copyfile(
         os.path.join(
             args.source,
@@ -95,4 +98,7 @@ if __name__ == "__main__":
         ),
         os.path.join(args.source, args.target),
     )
-    copyfile(args.target, os.path.join(args.source, "python", "tests", args.target))
+
+    # Copy the built jar file to the "python/tests" folder if it exists.
+    if os.path.isdir(os.path.join(args.source, "python", "tests")):
+        copyfile(args.target, os.path.join(args.source, "python", "tests", args.target))
