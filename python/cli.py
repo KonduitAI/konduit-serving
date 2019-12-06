@@ -75,13 +75,6 @@ def build_jar(operating_sys):
         RuntimeError("Failed to build jar.\n", e)
 
 
-def export_jar_path():
-    """Export the environment variable KONDUIT_JAR_PATH so that the Python package will automatically
-    pick it up."""
-    jar_path = opos.path.join(KONDUIT_DIR, "konduit.jar")
-    opos.environ["KONDUIT_JAR_PATH"] = jar_path
-
-
 @click.command()
 @click.option(
     "--os",
@@ -99,7 +92,6 @@ def init(os, https):
     """Initialize the konduit-python CLI. You can also use this to build a new konduit-serving JAR."""
     git_clone_konduit(https)
     build_jar(os)
-    export_jar_path()
 
 
 @click.command()
