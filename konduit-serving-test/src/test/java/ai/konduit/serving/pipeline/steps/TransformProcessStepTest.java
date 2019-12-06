@@ -19,7 +19,7 @@ public class TransformProcessStepTest {
         Schema inputSchema = TrainUtils.getIrisInputSchema();
         Schema outputSchema = getIrisOutputSchema();
         TransformProcess.Builder transformProcessBuilder = new TransformProcess.Builder(inputSchema);
-        for(int i = 0; i < inputSchema.numColumns(); i++) {
+        for (int i = 0; i < inputSchema.numColumns(); i++) {
             transformProcessBuilder.convertToDouble(inputSchema.getName(i));
         }
         TransformProcess tp = transformProcessBuilder.build();
@@ -36,7 +36,7 @@ public class TransformProcessStepTest {
 
         TransformProcessStep tpps2 = new TransformProcessStep(tp, outputSchema);
 
-        assert  tpps2.getTransformProcesses().get("default") == tp;
+        assert tpps2.getTransformProcesses().get("default") == tp;
 
         assert Arrays.equals(tpps2.getInputSchemas().get("default"), SchemaTypeUtils.typesForSchema(inputSchema));
 

@@ -32,12 +32,12 @@ import org.nd4j.linalg.api.ndarray.INDArray;
  * C: Channel in an image
  * W: Width
  * H: Height
- *
+ * <p>
  * NCHW is used to describe the expected layout of an image as input
  * in to a deep learning framework.
  * Different frameworks require different input formats specified
  * as some form of NCHW.
- *
+ * <p>
  * Methods related to manipulating images and image layout should go here.
  *
  * @author Adam Gibson
@@ -45,24 +45,22 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 public class ImagePermuter {
 
 
-
     static int[] determinePermuteOrder(String startingOrder, String destinationOrder) {
         startingOrder = startingOrder.toLowerCase().trim();
         destinationOrder = destinationOrder.toLowerCase().trim();
-        Preconditions.checkState(startingOrder.length() == 4 && destinationOrder.length() == 4,"Orders must be of length 4");
-        Preconditions.checkState(startingOrder.contains("n") && destinationOrder.contains("n"),"One order is missing n");
-        Preconditions.checkState(startingOrder.contains("c") && destinationOrder.contains("c"),"One order is missing c");
-        Preconditions.checkState(startingOrder.contains("h") && destinationOrder.contains("h"),"One order is missing h");
-        Preconditions.checkState(startingOrder.contains("w") && destinationOrder.contains("w"),"One order is missing w");
+        Preconditions.checkState(startingOrder.length() == 4 && destinationOrder.length() == 4, "Orders must be of length 4");
+        Preconditions.checkState(startingOrder.contains("n") && destinationOrder.contains("n"), "One order is missing n");
+        Preconditions.checkState(startingOrder.contains("c") && destinationOrder.contains("c"), "One order is missing c");
+        Preconditions.checkState(startingOrder.contains("h") && destinationOrder.contains("h"), "One order is missing h");
+        Preconditions.checkState(startingOrder.contains("w") && destinationOrder.contains("w"), "One order is missing w");
 
         boolean[] done = new boolean[4];
         int[] retPermuteOrder = new int[4];
-        for(int i = 0;  i < 4; i++) {
-            if(startingOrder.charAt(i) == destinationOrder.charAt(i)) {
-                retPermuteOrder[i]= i;
+        for (int i = 0; i < 4; i++) {
+            if (startingOrder.charAt(i) == destinationOrder.charAt(i)) {
+                retPermuteOrder[i] = i;
                 done[i] = true;
-            }
-            else {
+            } else {
                 int destinationIdxOfCurrentStartingChar = destinationOrder.indexOf(startingOrder.charAt(i));
                 retPermuteOrder[destinationIdxOfCurrentStartingChar] = i;
             }
@@ -71,7 +69,7 @@ public class ImagePermuter {
         return retPermuteOrder;
     }
 
-    static String applyPermuteOrderToString(String origin,int[] permuteOrder) {
+    static String applyPermuteOrderToString(String origin, int[] permuteOrder) {
         StringBuilder sb = new StringBuilder();
         for (int value : permuteOrder) {
             sb.append(origin.charAt(value));
@@ -84,13 +82,14 @@ public class ImagePermuter {
      * Permute the order given the input string
      * starting order and the target destination order.
      * Only nchw are supported.
-     * @param input the input array
-     * @param startingOrder the starting order (string must be some permutation of nchw)
+     *
+     * @param input            the input array
+     * @param startingOrder    the starting order (string must be some permutation of nchw)
      * @param destinationOrder the destination order (string must be some permutation of nchw)
      * @return the output {@link INDArray} rearranged
      */
-    public static INDArray permuteOrder(INDArray input,String startingOrder,String destinationOrder) {
-        return input.permute(determinePermuteOrder(startingOrder,destinationOrder));
+    public static INDArray permuteOrder(INDArray input, String startingOrder, String destinationOrder) {
+        return input.permute(determinePermuteOrder(startingOrder, destinationOrder));
     }
 
 

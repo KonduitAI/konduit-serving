@@ -21,6 +21,7 @@
  */
 
 package ai.konduit.serving.threadpool.pmml.observables;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dmg.pmml.FieldName;
@@ -36,15 +37,14 @@ import java.util.Observable;
 @Slf4j
 public class BasicPmmlInferenceObservable extends Observable implements PmmlObservable {
 
-    private List<Map<FieldName,Object>> input;
+    protected Exception exception;
+    private List<Map<FieldName, Object>> input;
     @Getter
     private long id;
-    private List<Map<FieldName,Object>> output;
-    protected Exception exception;
+    private List<Map<FieldName, Object>> output;
 
 
-
-    public BasicPmmlInferenceObservable(List<Map<FieldName,Object>> inputs) {
+    public BasicPmmlInferenceObservable(List<Map<FieldName, Object>> inputs) {
         super();
         this.input = inputs;
     }
@@ -57,7 +57,7 @@ public class BasicPmmlInferenceObservable extends Observable implements PmmlObse
 
     @Override
     public void addInput(List<Map<FieldName, Object>> inputs) {
-        if(input == null) {
+        if (input == null) {
             input = new ArrayList<>(1);
         }
 
@@ -71,16 +71,8 @@ public class BasicPmmlInferenceObservable extends Observable implements PmmlObse
         notifyObservers();
     }
 
-
     @Override
-    public void setOutputException(Exception exception) {
-        this.exception = exception;
-        this.setChanged();
-        notifyObservers();
-    }
-
-    @Override
-    public List<Map<FieldName,Object>> getOutput() {
+    public List<Map<FieldName, Object>> getOutput() {
         checkOutputException();
         return output;
     }
@@ -90,10 +82,17 @@ public class BasicPmmlInferenceObservable extends Observable implements PmmlObse
         return exception;
     }
 
-    protected void checkOutputException(){
-        if(exception != null){
-            if(exception instanceof RuntimeException){
-                throw (RuntimeException)exception;
+    @Override
+    public void setOutputException(Exception exception) {
+        this.exception = exception;
+        this.setChanged();
+        notifyObservers();
+    }
+
+    protected void checkOutputException() {
+        if (exception != null) {
+            if (exception instanceof RuntimeException) {
+                throw (RuntimeException) exception;
             } else {
                 throw new RuntimeException("Exception encountered while getting output: " + exception.getMessage(), exception);
             }

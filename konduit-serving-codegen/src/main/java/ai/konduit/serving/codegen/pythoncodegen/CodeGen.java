@@ -30,6 +30,7 @@ import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.*;
+import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.config.NormalizationConfig;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
@@ -56,7 +57,7 @@ import java.util.regex.Pattern;
 public class CodeGen {
     public static void main( String[] args ) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper,JsonSchemaConfig.html5EnabledSchema());
+        JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper, JsonSchemaConfig.html5EnabledSchema());
         Class<?>[] clazzes = {
                 TensorDataTypesConfig.class,
                 SavedModelConfig.class,
@@ -74,6 +75,7 @@ public class CodeGen {
                 PythonConfig.class,
                 ServingConfig.class,
                 PipelineStep.class,
+                BasePipelineStep.class,
                 NormalizationConfig.class,
                 PythonStep.class,
                 TransformProcessStep.class,
@@ -111,16 +113,16 @@ public class CodeGen {
             }
             FileUtils.writeStringToFile(classJson, objectMapper.writeValueAsString(jsonNode), Charset.defaultCharset());
             File pythonFile = new File(String.format(projectBasePath + sep + "python"
-                    + sep +"%s.py",clazz.getSimpleName().toLowerCase()));
+                    + sep + "%s.py", clazz.getSimpleName().toLowerCase()));
 
             Process p = runtime.exec(String.format("jsonschema2popo -o %s %s\n", pythonFile.getAbsolutePath(),
                     classJson.getAbsolutePath())
             );
             p.waitFor(10, TimeUnit.SECONDS);
-            if(p.exitValue() != 0) {
+            if (p.exitValue() != 0) {
                 String errorMessage = "";
-                try(InputStream is = p.getInputStream()) {
-                    errorMessage += IOUtils.toString(is,Charset.defaultCharset());
+                try (InputStream is = p.getInputStream()) {
+                    errorMessage += IOUtils.toString(is, Charset.defaultCharset());
 
                 }
                 throw new IllegalStateException("Json schema conversion in python threw an error with output "
@@ -199,26 +201,46 @@ public class CodeGen {
         loadedModule = loadedModule.replace("'type': type","'type': dict");
 
         // Modify some constructor defaults to leverage Python's strengths
+        // By default we work with numpy-in-numpy-out and "raw" predictions to cause minimal harm to the intended
+        // audience.
         loadedModule = loadedModule.replace("input_data_format=None", "input_data_format='NUMPY'");
         loadedModule = loadedModule.replace("output_data_format=None", "output_data_format='NUMPY'");
-        loadedModule = loadedModule.replace("log_timings=None", "log_timings=True");
+        loadedModule = loadedModule.replace("prediction_type=None", "prediction_type='RAW'");
 
+        loadedModule = loadedModule.replace("log_timings=None", "log_timings=False");
+        loadedModule = loadedModule.replace("listen_host=None", "listen_host='localhost'");
+        loadedModule = loadedModule.replace("uploads_directory=None", "uploads_directory='file-uploads/'");
+
+
+        loadedModule = PythonDocStrings.generateDocs(loadedModule);
 
         String sb = "import enum\nfrom konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n" +
                 loadedModule;
 
         FileUtils.writeStringToFile(newModule, sb,Charset.defaultCharset(),false);
 
-        Process p = runtime.exec("autopep8 --in-place " + newModule);
-        p.waitFor(8, TimeUnit.SECONDS);
-        if(p.exitValue() != 0) {
+        Process autopepLinting = runtime.exec("autopep8 --in-place " + newModule);
+        autopepLinting.waitFor(8, TimeUnit.SECONDS);
+        if(autopepLinting.exitValue() != 0) {
             String errorMessage = "";
-            try(InputStream is = p.getInputStream()) {
+            try(InputStream is = autopepLinting.getInputStream()) {
                 errorMessage += IOUtils.toString(is,Charset.defaultCharset());
 
             }
             throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
         }
-        p.destroy();
+        autopepLinting.destroy();
+
+        Process blackLinting = runtime.exec("black " + newModule);
+        blackLinting.waitFor(5, TimeUnit.SECONDS);
+        if(blackLinting.exitValue() != 0) {
+            String errorMessage = "";
+            try(InputStream is = blackLinting.getInputStream()) {
+                errorMessage += IOUtils.toString(is,Charset.defaultCharset());
+
+            }
+            throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
+        }
+        blackLinting.destroy();
     }
 }

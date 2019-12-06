@@ -23,12 +23,12 @@
 package ai.konduit.serving.executioner.inference.factory;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
-import ai.konduit.serving.executioner.inference.SameDiffInferenceExecutioner;
-import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
+import ai.konduit.serving.executioner.inference.SameDiffInferenceExecutioner;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.model.SameDiffConfig;
+import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,7 +69,6 @@ public class SameDiffInferenceExecutionerFactory implements InferenceExecutioner
         }
 
 
-
-        return new InitializedInferenceExecutionerConfig(inferenceExecutioner,inputNames,outputNames);
+        return new InitializedInferenceExecutionerConfig(inferenceExecutioner, inputNames, outputNames);
     }
 }

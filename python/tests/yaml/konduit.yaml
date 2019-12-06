@@ -14,7 +14,3 @@ steps:
       first: NDARRAY
     python_outputs:
       second: NDARRAY
-client:
-    port: 1337
-    input_names:
-      - default

@@ -37,8 +37,8 @@ import org.nd4j.linalg.api.ndarray.INDArray;
  * @author Adam Gibson
  */
 public class TensorflowInferenceExecutioner implements
-        InferenceExecutioner<ModelLoader<TensorflowGraphHolder>,INDArray[],INDArray[],
-                ParallelInferenceConfig,TensorflowGraphHolder> {
+        InferenceExecutioner<ModelLoader<TensorflowGraphHolder>, INDArray[], INDArray[],
+                ParallelInferenceConfig, TensorflowGraphHolder> {
 
     @Getter
     private TensorFlowThreadPool tensorflowThreadPool;
@@ -80,7 +80,7 @@ public class TensorflowInferenceExecutioner implements
 
     @Override
     public void stop() {
-        if(tensorflowThreadPool != null) {
+        if (tensorflowThreadPool != null) {
             tensorflowThreadPool.shutdown();
         }
     }

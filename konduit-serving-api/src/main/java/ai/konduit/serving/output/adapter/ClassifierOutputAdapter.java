@@ -50,39 +50,39 @@ public class ClassifierOutputAdapter implements OutputAdapter<ClassifierOutput> 
     public ClassifierOutputAdapter(Schema schema) {
         this.schema = schema;
         fieldNames = new ArrayList<>(schema.numColumns());
-        for(int i = 0; i < schema.numColumns(); i++) {
+        for (int i = 0; i < schema.numColumns(); i++) {
             fieldNames.add(FieldName.create(schema.getName(i)));
         }
     }
 
     @Override
     public ClassifierOutput adapt(INDArray array, RoutingContext routingContext) {
-        INDArray argMax = Nd4j.argMax(array,-1);
+        INDArray argMax = Nd4j.argMax(array, -1);
         return ClassifierOutput.builder()
                 .labels(getLabels())
                 .decisions(argMax.data().asInt())
-                .probabilities(array.isVector() ? new double[][] {array.toDoubleVector()} : array.toDoubleMatrix())
+                .probabilities(array.isVector() ? new double[][]{array.toDoubleVector()} : array.toDoubleMatrix())
                 .build();
     }
 
     @Override
     public ClassifierOutput adapt(List<? extends Map<FieldName, ?>> pmmlExamples, RoutingContext routingContext) {
-        if(schema == null) {
+        if (schema == null) {
             throw new IllegalStateException("No inputSchema found. A inputSchema is required in order to create results.");
         }
 
         int[] labelIndices = new int[pmmlExamples.size()];
         double[][] values = new double[pmmlExamples.size()][schema.numColumns()];
-        for(int i = 0; i < pmmlExamples.size(); i++) {
-            Map<FieldName,?> example = pmmlExamples.get(i);
+        for (int i = 0; i < pmmlExamples.size(); i++) {
+            Map<FieldName, ?> example = pmmlExamples.get(i);
             int maxIdx = -1;
             double compare = Double.NEGATIVE_INFINITY;
-            for(int j = 0; j < schema.numColumns(); j++) {
+            for (int j = 0; j < schema.numColumns(); j++) {
                 Double result = (Double) example.get(FieldName.create("probability(" + schema.getName(j) + ")"));
-                if(result == null) {
+                if (result == null) {
                     throw new IllegalArgumentException("No label found for " + schema.getName(j));
                 }
-                if(result > compare) {
+                if (result > compare) {
                     maxIdx = j;
                     compare = maxIdx;
                 }
@@ -102,11 +102,10 @@ public class ClassifierOutputAdapter implements OutputAdapter<ClassifierOutput> 
 
     @Override
     public ClassifierOutput adapt(Object input, RoutingContext routingContext) {
-        if(input instanceof INDArray) {
+        if (input instanceof INDArray) {
             INDArray arr = (INDArray) input;
             return adapt(arr, routingContext);
-        }
-        else if(input instanceof List) {
+        } else if (input instanceof List) {
             List<? extends Map<FieldName, ?>> pmmlExamples = (List<? extends Map<FieldName, ?>>) input;
             return adapt(pmmlExamples, routingContext);
         }
@@ -120,7 +119,7 @@ public class ClassifierOutputAdapter implements OutputAdapter<ClassifierOutput> 
 
     public String[] getLabels() {
         String[] labels = new String[schema.numColumns()];
-        for(int i = 0; i < schema.numColumns(); i++) {
+        for (int i = 0; i < schema.numColumns(); i++) {
             labels[i] = schema.getName(i);
         }
 

@@ -80,11 +80,11 @@ public class BatchInputParserMultiRecordTest extends BaseVerticleTest {
         ArrowRecordWriter arrowRecordWriter = new ArrowRecordWriter(irisInputSchema);
         CSVRecordReader reader = new CSVRecordReader();
         reader.initialize(new FileSplit(new ClassPathResource("iris.txt").getFile()));
-        List<List<Writable>>  writables = reader.next(150);
+        List<List<Writable>> writables = reader.next(150);
 
-        File tmpFile = new File(temporary.getRoot(),"tmp.arrow");
+        File tmpFile = new File(temporary.getRoot(), "tmp.arrow");
         FileSplit fileSplit = new FileSplit(tmpFile);
-        arrowRecordWriter.initialize(fileSplit,new NumberOfRecordsPartitioner());
+        arrowRecordWriter.initialize(fileSplit, new NumberOfRecordsPartitioner());
         arrowRecordWriter.writeBatch(writables);
         byte[] arrowBytes = FileUtils.readFileToByteArray(tmpFile);
 
@@ -96,6 +96,6 @@ public class BatchInputParserMultiRecordTest extends BaseVerticleTest {
         assertNotNull("Inputs were null. This means parsing failed.", verticleRef.getBatch());
         assertTrue(verticleRef.getBatch().length >= 1);
         assertNotNull(verticleRef.getBatch());
-        assertEquals(150,verticleRef.getBatch().length);
+        assertEquals(150, verticleRef.getBatch().length);
     }
 }

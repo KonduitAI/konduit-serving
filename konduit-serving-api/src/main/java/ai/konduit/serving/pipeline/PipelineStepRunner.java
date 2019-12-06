@@ -35,15 +35,15 @@ import java.util.Map;
  * Pipeline steps represent a component
  * in pre processing data ending
  * in data in an {@link INDArray} form.
- *
+ * <p>
  * A runner is the actual implementation
- * of the {@link PipelineStep}
+ * of the {@link BasePipelineStep}
  * which is just a configuration interface
  * for a runner.
- *
+ * <p>
  * A runner takes in 1 or more input
  * {@link Record} and returns 1 or more output {@link Record}.
- *
+ * <p>
  * There are a  number of implementations. You can also create a custom one
  * using the {@link CustomPipelineStep} and {@link CustomPipelineStepUDF}
  * definitions. This is recommended as the easiest way of creating your own custom ones.
@@ -56,7 +56,7 @@ public interface PipelineStepRunner {
 
     /**
      * Destroy the pipeline runner.
-     *
+     * <p>
      * This means cleaning up used resources.
      * This method will be called when a pipeline needs to be finalized.
      */
@@ -65,6 +65,7 @@ public interface PipelineStepRunner {
     /**
      * Returns the expected input types
      * for this step
+     *
      * @return pipeline step
      */
     Map<String, SchemaType[]> inputTypes();
@@ -72,6 +73,7 @@ public interface PipelineStepRunner {
     /**
      * Returns the expected output types
      * for this step
+     *
      * @return pipeline step
      */
     Map<String, SchemaType[]> outputTypes();
@@ -79,6 +81,7 @@ public interface PipelineStepRunner {
     /**
      * Transform a set of {@link Object}
      * via this operation.
+     *
      * @param input the input array
      * @return the output from the transform
      */
@@ -87,6 +90,7 @@ public interface PipelineStepRunner {
     /**
      * Transform a set of {@link Object}
      * via this operation.
+     *
      * @param input the input array
      * @return the output from the transform
      */
@@ -95,6 +99,7 @@ public interface PipelineStepRunner {
     /**
      * Transform a set of {@link INDArray}
      * via this operation.
+     *
      * @param input the input array
      * @return the output from the transform
      */

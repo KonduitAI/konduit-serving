@@ -23,9 +23,9 @@
 
 package ai.konduit.serving.config;
 
-import lombok.Data;
-import lombok.Builder;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
@@ -34,6 +34,17 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+/**
+ * Configuration for managing serving of memory-mapped files. The goal is to mem-map
+ * and serve a large array stored in "arrayPath" and get slices of this array on demand
+ * by index. If an index is specified that does not match an index of the mem-mapped array,
+ * an default or "unknown" vector is inserted into the slice instead, which is stored in
+ * "unkVectorPath".
+ *
+ * For instance, let's say we want to mem-map [[1, 2, 3], [4, 5, 6]], a small array with two
+ * valid slices. Our unknown vector is simply [0, 0, 0] in this example. Now, if we query for
+ * the indices {-2, 1} we'd get [[0, 0, 0], [4, 5, 6]].
+ */
 public class MemMapConfig implements Serializable {
 
     public final static String ARRAY_URL = "arrayPath";
@@ -41,12 +52,11 @@ public class MemMapConfig implements Serializable {
     public final static long DEFAULT_INITIAL_SIZE = 1000000000;
     public final static String WORKSPACE_NAME = "memMapWorkspace";
 
-    private String arrayPath,unkVectorPath;
+    private String arrayPath, unkVectorPath;
     @Builder.Default
     private long initialMemmapSize = DEFAULT_INITIAL_SIZE;
     @Builder.Default
     private String workSpaceName = WORKSPACE_NAME;
-
 
 
 }

@@ -46,16 +46,16 @@ public class RegressionMultiOutputAdapter implements MultiOutputAdapter<INDArray
 
     @Override
     public Map<String, BatchOutput> adapt(INDArray[] array, List<String> outputNames, RoutingContext routingContext) {
-        Map<String,BatchOutput> ret = new LinkedHashMap<>();
-        if(regressionOutputAdapter == null) {
+        Map<String, BatchOutput> ret = new LinkedHashMap<>();
+        if (regressionOutputAdapter == null) {
             Schema.Builder schemaBuilder = new Schema.Builder();
-            for(int i = 0; i < outputNames.size(); i++) {
+            for (int i = 0; i < outputNames.size(); i++) {
                 schemaBuilder.addColumnDouble(outputNames.get(i));
             }
 
             regressionOutputAdapter = new RegressionOutputAdapter(schemaBuilder.build());
         }
-        ret.put(outputNames.get(0),regressionOutputAdapter.adapt(array[0], routingContext));
+        ret.put(outputNames.get(0), regressionOutputAdapter.adapt(array[0], routingContext));
 
         return ret;
     }
@@ -64,7 +64,6 @@ public class RegressionMultiOutputAdapter implements MultiOutputAdapter<INDArray
     public List<Class<? extends OutputAdapter<?>>> outputAdapterTypes() {
         return Arrays.asList(RegressionOutputAdapter.class);
     }
-
 
 
 }

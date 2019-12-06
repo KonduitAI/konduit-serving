@@ -22,9 +22,9 @@
 
 package ai.konduit.serving.threadpool.tensorflow;
 
+import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.threadpool.tensorflow.conversion.TensorflowConversion;
 import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
-import ai.konduit.serving.model.TensorDataType;
 import org.bytedeco.tensorflow.TF_Tensor;
 import org.junit.Test;
 import org.nd4j.linalg.api.buffer.DataType;
@@ -37,17 +37,17 @@ public class GraphRunnerTests {
 
     @Test()
     public void testGraphRunnerCast() {
-        INDArray arr = Nd4j.linspace(1,4,4).castTo(DataType.FLOAT);
+        INDArray arr = Nd4j.linspace(1, 4, 4).castTo(DataType.FLOAT);
         TF_Tensor tensor = TensorflowConversion.getInstance().tensorFromNDArray(arr);
-        TF_Tensor tf_tensor = GraphRunner.castTensor(tensor, TensorDataType.FLOAT,TensorDataType.DOUBLE);
+        TF_Tensor tf_tensor = GraphRunner.castTensor(tensor, TensorDataType.FLOAT, TensorDataType.DOUBLE);
         INDArray doubleNDArray = TensorflowConversion.getInstance().ndArrayFromTensor(tf_tensor);
-        assertEquals(DataType.DOUBLE,doubleNDArray.dataType());
+        assertEquals(DataType.DOUBLE, doubleNDArray.dataType());
 
         arr = arr.castTo(DataType.INT);
         tensor = TensorflowConversion.getInstance().tensorFromNDArray(arr);
-        tf_tensor = GraphRunner.castTensor(tensor, TensorDataType.fromNd4jType(DataType.INT),TensorDataType.DOUBLE);
+        tf_tensor = GraphRunner.castTensor(tensor, TensorDataType.fromNd4jType(DataType.INT), TensorDataType.DOUBLE);
         doubleNDArray = TensorflowConversion.getInstance().ndArrayFromTensor(tf_tensor);
-        assertEquals(DataType.DOUBLE,doubleNDArray.dataType());
+        assertEquals(DataType.DOUBLE, doubleNDArray.dataType());
 
     }
 

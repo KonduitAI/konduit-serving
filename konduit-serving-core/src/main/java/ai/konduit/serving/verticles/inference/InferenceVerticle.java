@@ -23,6 +23,9 @@
 package ai.konduit.serving.verticles.inference;
 
 
+import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.configprovider.MemMapRouteDefiner;
+import ai.konduit.serving.configprovider.PipelineRouteDefiner;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
@@ -30,25 +33,21 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import lombok.extern.slf4j.Slf4j;
-import ai.konduit.serving.InferenceConfiguration;
-import  ai.konduit.serving.configprovider.PipelineRouteDefiner;
-import ai.konduit.serving.configprovider.MemMapRouteDefiner;
 
 import java.io.IOException;
 
 /**
  * A {@link io.vertx.core.Verticle} that takes multi part file uploads
  * as inputs.
- *
+ * <p>
  * Many computation graphs are usually multiple inputs
  * by name: Each part for a multi part file upload
  * should map on to a name. For example:
  * input_1 : part name: input_1
  * input_2 : part name: input_2
- *
+ * <p>
  * The handler logic for this {@link io.vertx.core.Verticle} is implemented
  * in {@link PipelineExecutioner}
- *
  *
  * @author Adam Gibson
  */
@@ -83,25 +82,24 @@ public class InferenceVerticle extends BaseRoutableVerticle {
             inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
             this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
             //define the memory map endpoints if the user specifies the memory map configuration
-            if(inferenceConfiguration.getMemMapConfig() != null) {
-                this.router = new MemMapRouteDefiner().defineRoutes(vertx,inferenceConfiguration);
-            }
-            else {
+            if (inferenceConfiguration.getMemMapConfig() != null) {
+                this.router = new MemMapRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+            } else {
                 this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
 
             }
             setupWebServer();
         } catch (IOException e) {
-            log.error("Unable to parse InferenceConfiguration",e);
+            log.error("Unable to parse InferenceConfiguration", e);
         }
     }
 
 
     protected void setupWebServer() {
         int portValue = inferenceConfiguration.getServingConfig().getHttpPort();
-        if(portValue == 0) {
+        if (portValue == 0) {
             String portEnvValue = System.getenv(VerticleConstants.PORT_FROM_ENV);
-            if(portEnvValue != null) {
+            if (portEnvValue != null) {
                 portValue = Integer.parseInt(portEnvValue);
             }
         }

@@ -34,8 +34,8 @@ public abstract class BaseVerticleTest {
     public org.junit.rules.TemporaryFolder temporary = new org.junit.rules.TemporaryFolder();
 
     protected io.vertx.core.Vertx vertx;
-    protected int port,pubsubPort;
-    protected io.vertx.core.http.HttpServer httpServer,normalServer;
+    protected int port, pubsubPort;
+    protected io.vertx.core.http.HttpServer httpServer, normalServer;
     protected io.vertx.ext.unit.TestContext context;
     protected io.vertx.core.Verticle verticle;
 
@@ -43,13 +43,13 @@ public abstract class BaseVerticleTest {
     public void before(io.vertx.ext.unit.TestContext context) throws Exception {
         port = getRandomPort();
         pubsubPort = getRandomPort();
-        System.setProperty("vertx.options.maxEventLoopExecuteTime","240000");
+        System.setProperty("vertx.options.maxEventLoopExecuteTime", "240000");
         io.vertx.core.VertxOptions vertxOptions = new io.vertx.core.VertxOptions();
         vertxOptions.setMaxEventLoopExecuteTime(240000);
         vertx = io.vertx.core.Vertx.vertx(vertxOptions);
         org.nd4j.linalg.factory.Nd4j.getWorkspaceManager().setDebugMode(org.nd4j.linalg.api.memory.enums.DebugMode.SPILL_EVERYTHING);
         setupVertx(vertx);
-        if(isPubSub()) {
+        if (isPubSub()) {
             httpServer = vertx.createHttpServer().requestHandler(getRequest());
             httpServer.listen(pubsubPort);
         }
@@ -59,9 +59,9 @@ public abstract class BaseVerticleTest {
         org.nd4j.linalg.factory.Nd4j.getRandom().setSeed(42);
 
         io.vertx.core.DeploymentOptions options = new io.vertx.core.DeploymentOptions()
-                        .setWorker(true).setInstances(1)
-                        .setWorkerPoolSize(1)
-                        .setConfig(getConfigObject());
+                .setWorker(true).setInstances(1)
+                .setWorkerPoolSize(1)
+                .setConfig(getConfigObject());
         String verticleClassName = getVertexName();
         String[] split = verticleClassName.split("\\.");
         vertx.registerVerticleFactory(new io.vertx.core.spi.VerticleFactory() {
@@ -72,12 +72,11 @@ public abstract class BaseVerticleTest {
 
             @Override
             public io.vertx.core.Verticle createVerticle(String s, ClassLoader classLoader) throws Exception {
-                io.vertx.core.Verticle ret =  (io.vertx.core.Verticle) classLoader.loadClass(verticleClassName).newInstance();
+                io.vertx.core.Verticle ret = (io.vertx.core.Verticle) classLoader.loadClass(verticleClassName).newInstance();
                 verticle = ret;
                 return ret;
             }
         });
-
 
 
         vertx.registerVerticleFactory(new io.vertx.core.spi.VerticleFactory() {
@@ -104,9 +103,9 @@ public abstract class BaseVerticleTest {
     @org.junit.After
     public void after(io.vertx.ext.unit.TestContext context) {
         vertx.close(context.asyncAssertSuccess());
-        if(httpServer != null)
+        if (httpServer != null)
             httpServer.close();
-        if(normalServer != null)
+        if (normalServer != null)
             normalServer.close();
     }
 
@@ -115,16 +114,16 @@ public abstract class BaseVerticleTest {
 
     public int getRandomPort() throws java.io.IOException {
         java.net.ServerSocket pubSubSocket = new java.net.ServerSocket(0);
-        int ret  = pubSubSocket.getLocalPort();
+        int ret = pubSubSocket.getLocalPort();
         pubSubSocket.close();
         return ret;
     }
 
     public abstract io.vertx.core.Handler<io.vertx.core.http.HttpServerRequest> getRequest();
 
-    public abstract  io.vertx.core.json.JsonObject getConfigObject() throws Exception;
+    public abstract io.vertx.core.json.JsonObject getConfigObject() throws Exception;
 
-    public  void setupVertx(io.vertx.core.Vertx vertx) {
+    public void setupVertx(io.vertx.core.Vertx vertx) {
 
     }
 

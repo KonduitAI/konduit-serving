@@ -1,18 +1,24 @@
-from . import *
-from .server import Server
-from .client import Client
-
-import yaml
-import os
 import json
 import logging
+import os
+import yaml
 
+from .inference import *
+from .client import Client
+from .server import Server
 
-USER_PATH = os.path.expanduser('~')
-KONDUIT_BASE_DIR = os.path.join(USER_PATH, '.konduit')
-KONDUIT_DIR = os.path.join(KONDUIT_BASE_DIR, 'konduit-serving')
-KONDUIT_PID_STORAGE = os.path.join(KONDUIT_DIR, 'pid.json')
-MODEL_TYPES = ['TENSORFLOW', 'KERAS', 'COMPUTATION_GRAPH', 'MULTI_LAYER_NETWORK', 'PMML', 'SAMEDIFF']
+USER_PATH = os.path.expanduser("~")
+KONDUIT_BASE_DIR = os.path.join(USER_PATH, ".konduit")
+KONDUIT_DIR = os.path.join(KONDUIT_BASE_DIR, "konduit-serving")
+KONDUIT_PID_STORAGE = os.path.join(KONDUIT_DIR, "pid.json")
+MODEL_TYPES = [
+    "TENSORFLOW",
+    "KERAS",
+    "COMPUTATION_GRAPH",
+    "MULTI_LAYER_NETWORK",
+    "PMML",
+    "SAMEDIFF",
+]
 
 
 def store_pid(file_path, pid):
@@ -24,7 +30,7 @@ def store_pid(file_path, pid):
     """
     yaml_path = os.path.abspath(file_path)
     pid_dict = {yaml_path: pid}
-    with open(KONDUIT_PID_STORAGE, 'w') as f:
+    with open(KONDUIT_PID_STORAGE, "w") as f:
         try:
             previous = json.load(f)
             new = previous.copy()
@@ -42,7 +48,7 @@ def pop_pid(file_path):
     :return: the process ID belonging to that Konduit server instance.
     """
     pid = None
-    with open(KONDUIT_PID_STORAGE, 'r+') as f:
+    with open(KONDUIT_PID_STORAGE, "r+") as f:
         yaml_path = os.path.abspath(file_path)
         try:
             previous = json.load(f)
@@ -63,7 +69,7 @@ def load_data(file_path, use_yaml=True):
     :param use_yaml: use yaml or json
     :return: contents of the file as Python dict.
     """
-    with open(file_path, 'r') as f:
+    with open(file_path, "r") as f:
         if use_yaml:
             data = yaml.safe_load(f)
         else:
@@ -93,7 +99,10 @@ def from_file(file_path, start_server=True, use_yaml=True):
     :param use_yaml: use yaml or json
     :return: konduit.server.Server and konduit.client.Client instances
     """
-    return server_from_file(file_path, start_server, use_yaml), client_from_file(file_path, use_yaml)
+    return (
+        server_from_file(file_path, start_server, use_yaml),
+        client_from_file(file_path, use_yaml),
+    )
 
 
 def server_from_file(file_path, start_server=True, use_yaml=True):
@@ -105,17 +114,17 @@ def server_from_file(file_path, start_server=True, use_yaml=True):
     :return: konduit.server.Server instance
     """
     data = load_data(file_path, use_yaml)
-    serving_data = data.get('serving', None)
+    serving_data = data.get("serving", None)
 
-    extra_start_args = pop_data(serving_data, 'extra_start_args')
-    jar_path = pop_data(serving_data, 'jar_path')
-    config_path = pop_data(serving_data, 'config_path')
+    extra_start_args = pop_data(serving_data, "extra_start_args")
+    jar_path = pop_data(serving_data, "jar_path")
+    config_path = pop_data(serving_data, "config_path")
     if not config_path:
-        config_path = 'config.json'
+        config_path = "config.json"
 
     serving_config = ServingConfig(**serving_data)
 
-    step_data = data.get('steps', None)
+    step_data = data.get("steps", None)
     steps = []
     for step_config in step_data.values():
         steps.append(get_step(step_config))
@@ -125,7 +134,7 @@ def server_from_file(file_path, start_server=True, use_yaml=True):
         steps=steps,
         extra_start_args=extra_start_args,
         jar_path=jar_path,
-        config_path=config_path
+        config_path=config_path,
     )
     if start_server:
         server.start()
@@ -133,15 +142,34 @@ def server_from_file(file_path, start_server=True, use_yaml=True):
 
 
 def client_from_file(file_path, use_yaml=True):
-    """Create a Konduit client instance from a configuration file
+    """Create a Konduit client instance from a configuration file.
+    If your konduit configuration file has a "client" section, that
+    is used to create the client instance. If it doesn't, all properties
+    are derived from the "serving" section.
 
     :param file_path: path to your konduit.yaml
     :param use_yaml: use yaml or json
     :return: konduit.client.Client instance
     """
     data = load_data(file_path, use_yaml)
-    client_data = data.get('client', None)
-    client = Client(**client_data)
+    if "client" in data.keys():
+        client_data = data.get("client", None)
+        client = Client(**client_data)
+    else:
+        client_data = data.get("serving", None)
+        port = client_data.get("http_port", None)
+        input_data_format = client_data.get("input_data_format", None)
+        output_data_format = client_data.get("output_data_format", None)
+
+        if not port:
+            raise RuntimeError(
+                "No HTTP port found in configuration file, can't proceed."
+            )
+        client = Client(
+            port=port,
+            input_data_format=input_data_format,
+            output_data_format=output_data_format,
+        )
     return client
 
 
@@ -151,13 +179,13 @@ def get_step(step_config):
     :param step_config: python dictionary with properties to create a PipelineStep
     :return: konduit.inference.PipelineStep instance.
     """
-    step_type = step_config.pop('type')
-    if step_type == 'PYTHON':
+    step_type = step_config.pop("type")
+    if step_type == "PYTHON":
         step = get_python_step(step_config)
     elif step_type in MODEL_TYPES:
         step = get_model_step(step_config, step_type)
     else:
-        raise Exception('Step type of type ' + step_type + ' currently not supported.')
+        raise Exception("Step type of type " + step_type + " currently not supported.")
     return step
 
 
@@ -181,39 +209,40 @@ def get_model_step(step_config, step_type):
     """
     model_config_type = ModelConfigType(
         model_type=step_type,
-        model_loading_path=pop_data(step_config, 'model_loading_path')
+        model_loading_path=pop_data(step_config, "model_loading_path"),
     )
 
-    if step_type == 'TENSORFLOW':  # TF has to extra properties, all others are identical
+    if (
+        step_type == "TENSORFLOW"
+    ):  # TF has to extra properties, all others are identical
         model_config = TensorFlowConfig(
-            config_proto_path=pop_data(step_config, 'config_proto_path'),
-            saved_model_config=pop_data(step_config, 'saved_model_config'),
+            config_proto_path=pop_data(step_config, "config_proto_path"),
+            saved_model_config=pop_data(step_config, "saved_model_config"),
             model_config_type=model_config_type,
-            tensor_data_types_config=get_tensor_data_types(step_config)
+            tensor_data_types_config=get_tensor_data_types(step_config),
         )
     else:
         model_config = ModelConfig(
             model_config_type=model_config_type,
-            tensor_data_types_config=get_tensor_data_types(step_config)
+            tensor_data_types_config=get_tensor_data_types(step_config),
         )
-    step_config['model_config'] = model_config
+    step_config["model_config"] = model_config
     step_config = extract_parallel_inference(step_config)
     step = ModelStep(**step_config)
     return step
 
 
 def get_tensor_data_types(step_config):
-    input_data_types = pop_data(step_config, 'input_data_types')
-    output_data_types = pop_data(step_config, 'output_data_types')
+    input_data_types = pop_data(step_config, "input_data_types")
+    output_data_types = pop_data(step_config, "output_data_types")
     return TensorDataTypesConfig(
-        input_data_types=input_data_types,
-        output_data_types=output_data_types
+        input_data_types=input_data_types, output_data_types=output_data_types
     )
 
 
 def extract_parallel_inference(step_config):
-    pi_config = pop_data(step_config, 'parallel_inference_config')
+    pi_config = pop_data(step_config, "parallel_inference_config")
     if pi_config:
         pic = ParallelInferenceConfig(**pi_config)
-        step_config['parallel_inference_config'] = pic
+        step_config["parallel_inference_config"] = pic
     return step_config

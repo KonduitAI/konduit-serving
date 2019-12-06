@@ -52,10 +52,21 @@ import java.util.concurrent.atomic.AtomicLong;
  * This class is simple wrapper for
  * PMMLThreadPool using batched input
  * Adapted from {@link org.deeplearning4j.parallelism.ParallelInference}
+ *
  * @author Adam Gibson
  */
 @Slf4j
 public class SameDiffThreadPool {
+    public final static int DEFAULT_NUM_WORKERS = Nd4j.getAffinityManager().getNumberOfDevices();
+    public final static int DEFAULT_BATCH_LIMIT = 32;
+    public final static InferenceMode DEFAULT_INFERENCE_MODE = InferenceMode.BATCHED;
+    public final static int DEFAULT_QUEUE_LIMIT = 64;
+    private static ExecutorConfiguration configuration = ExecutorConfiguration.builder()
+            .executionMode(ExecutionMode.SEQUENTIAL)
+            .profilingMode(OpExecutioner.ProfilingMode.DISABLED)
+            .gatherTimings(true)
+            .outputMode(OutputMode.IMPLICIT)
+            .build();
     private ModelLoader<SameDiff> sameDiffModelLoader;
     private long nanos;
     private int workers;
@@ -66,22 +77,9 @@ public class SameDiffThreadPool {
     private BlockingQueue<SameDiffObservable> observables;
     private SameDiff replicatedModel;
     private NativeGraphExecutioner nativeGraphExecutioner;
-    private List<String> inputNames,outputNames;
+    private List<String> inputNames, outputNames;
     private InferenceWorker[] zoo;
     private ObservablesProvider provider;
-    private static ExecutorConfiguration configuration = ExecutorConfiguration.builder()
-            .executionMode(ExecutionMode.SEQUENTIAL)
-            .profilingMode(OpExecutioner.ProfilingMode.DISABLED)
-            .gatherTimings(true)
-            .outputMode(OutputMode.IMPLICIT)
-            .build();
-
-
-    public final static int DEFAULT_NUM_WORKERS = Nd4j.getAffinityManager().getNumberOfDevices();
-    public final static int DEFAULT_BATCH_LIMIT = 32;
-    public final static InferenceMode DEFAULT_INFERENCE_MODE = InferenceMode.BATCHED;
-    public final static int DEFAULT_QUEUE_LIMIT = 64;
-
 
 
     protected SameDiffThreadPool() {
@@ -104,7 +102,7 @@ public class SameDiffThreadPool {
             boolean cRoot = !assignedRoot.get() && cDevice == currentDevice;
             assignedRoot.compareAndSet(false, cRoot);
 
-            zoo[i] = new InferenceWorker(i,observables,true, sameDiffModelLoader);
+            zoo[i] = new InferenceWorker(i, observables, true, sameDiffModelLoader);
 
 
             Nd4j.getAffinityManager().unsafeSetDevice(cDevice);
@@ -154,11 +152,10 @@ public class SameDiffThreadPool {
     }
 
 
-
     /**
      * Generate predictions/outputSchema from the network, optionally using input masks for predictions
      *
-     * @param input      Input to the network
+     * @param input Input to the network
      * @return Output from the network
      */
     public INDArray[] output(INDArray[] input) {
@@ -192,8 +189,6 @@ public class SameDiffThreadPool {
         }
 
 
-
-
         return observable.getOutput();
     }
 
@@ -204,7 +199,7 @@ public class SameDiffThreadPool {
         private int batchLimit = DEFAULT_BATCH_LIMIT;
         private InferenceMode inferenceMode = DEFAULT_INFERENCE_MODE;
         private int queueLimit = DEFAULT_QUEUE_LIMIT;
-        private List<String> inputNames,outputNames;
+        private List<String> inputNames, outputNames;
 
         public Builder(@NonNull ModelLoader<SameDiff> tensorflowModelLoader) {
             this.tensorflowModelLoader = tensorflowModelLoader;
@@ -213,6 +208,7 @@ public class SameDiffThreadPool {
 
         /**
          * Specify the input names for the graph.
+         *
          * @param inputNames teh input names to use
          * @return the builder
          */
@@ -224,6 +220,7 @@ public class SameDiffThreadPool {
         /**
          * Specify the output names to use
          * for the graph
+         *
          * @param outputNames the output names to use
          * @return the builder
          */
@@ -234,7 +231,7 @@ public class SameDiffThreadPool {
 
         /**
          * This method allows you to define mode that'll be used during inference. Options are:
-         *
+         * <p>
          * SEQUENTIAL: Input will be sent to last-used worker unmodified.
          * BATCHED: Multiple inputs will be packed into single batch, and
          * sent to last-used device.
@@ -248,10 +245,9 @@ public class SameDiffThreadPool {
         }
 
 
-
         /**
          * This method defines, how many model copies will be used for inference.
-         *
+         * <p>
          * PLEASE NOTE: This method primarily suited for multi-GPU systems
          *
          * @param workers the number of workers to run
@@ -268,7 +264,7 @@ public class SameDiffThreadPool {
         /**
          * This method defines, how many input samples can
          * be batched within given time frame.
-         *
+         * <p>
          * PLEASE NOTE: This value has no effect in
          * SEQUENTIAL inference mode
          *
@@ -286,7 +282,7 @@ public class SameDiffThreadPool {
 
         /**
          * This method defines buffer queue size.
-         *
+         * <p>
          * Default value: 64
          *
          * @param limit the limit for the buffer queue size
@@ -324,101 +320,12 @@ public class SameDiffThreadPool {
         }
     }
 
-
-    /**
-     * This class actually does inference with respect to device affinity
-     *
-     */
-    private class InferenceWorker extends Thread implements Runnable {
-        private BlockingQueue<SameDiffObservable> inputQueue;
-        private AtomicBoolean shouldWork = new AtomicBoolean(true);
-        private AtomicBoolean isStopped = new AtomicBoolean(false);
-        private AtomicLong counter = new AtomicLong(0);
-        private boolean rootDevice;
-        private SameDiff replicatedModel;
-
-        private InferenceWorker(int id,@NonNull BlockingQueue inputQueue, boolean rootDevice, @NonNull ModelLoader<SameDiff> modelLoader) {
-            this.inputQueue = inputQueue;
-            this.rootDevice = rootDevice;
-            this.setDaemon(true);
-            try {
-                replicatedModel = modelLoader.loadModel();
-            } catch (Exception e) {
-                log.error("Unable to load samediff model",e);
-            }
-
-            this.setName("InferenceThread-" + id);
-
-
-        }
-
-        protected long getCounterValue() {
-            return counter.get();
-        }
-
-        @Override
-        public void run() {
-            try {
-                // model should be replicated & initialized here
-                while (shouldWork.get()) {
-                    SameDiffObservable request = inputQueue.take();
-
-                    if (request != null) {
-                        counter.incrementAndGet();
-
-
-                        INDArray[] batches = request.getInputBatches();
-                        if(batches == null || batches.length < 1) {
-                            log.warn("Batch length was zero. Skipping.");
-                            continue;
-                        }
-                        log.debug("Received batches");
-                        try {
-                            Map<String, INDArray> inputs = new LinkedHashMap<>(batches.length);
-                            for (int i = 0; i < inputNames.size(); i++) {
-                                inputs.put(inputNames.get(i), batches[i]);
-                                replicatedModel.associateArrayWithVariable(batches[i],inputNames.get(i));
-                            }
-
-                            INDArray[] indArrays1 = nativeGraphExecutioner.executeGraph(replicatedModel,configuration);
-
-                            log.debug("Running graph with inputs " + inputNames);
-                            request.setOutputBatches(indArrays1);
-
-                        }catch (Exception e) {
-                            log.error("Exception found",e);
-                            request.setOutputException(e);
-                        }
-                    } else {
-                        // just do nothing, i guess and hope for next round?
-                    }
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                // do nothing
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                isStopped.set(true);
-            }
-        }
-
-        protected void shutdown() {
-            shouldWork.set(false);
-            while (!isStopped.get()) {
-                // block until main loop is finished
-            }
-        }
-    }
-
-
     protected static class ObservablesProvider {
+        private final Object locker = new Object();
         private BlockingQueue<SameDiffObservable> targetQueue;
         private long nanos;
         private int batchLimit;
-
         private volatile BatchedSameDiffInferenceObservable currentObservable;
-        private final Object locker = new Object();
 
         protected ObservablesProvider(long nanos, int batchLimit, @NonNull BlockingQueue<SameDiffObservable> queue) {
             this.targetQueue = queue;
@@ -447,6 +354,91 @@ public class SameDiffThreadPool {
                 }
 
                 return currentObservable;
+            }
+        }
+    }
+
+    /**
+     * This class actually does inference with respect to device affinity
+     */
+    private class InferenceWorker extends Thread implements Runnable {
+        private BlockingQueue<SameDiffObservable> inputQueue;
+        private AtomicBoolean shouldWork = new AtomicBoolean(true);
+        private AtomicBoolean isStopped = new AtomicBoolean(false);
+        private AtomicLong counter = new AtomicLong(0);
+        private boolean rootDevice;
+        private SameDiff replicatedModel;
+
+        private InferenceWorker(int id, @NonNull BlockingQueue inputQueue, boolean rootDevice, @NonNull ModelLoader<SameDiff> modelLoader) {
+            this.inputQueue = inputQueue;
+            this.rootDevice = rootDevice;
+            this.setDaemon(true);
+            try {
+                replicatedModel = modelLoader.loadModel();
+            } catch (Exception e) {
+                log.error("Unable to load samediff model", e);
+            }
+
+            this.setName("InferenceThread-" + id);
+
+
+        }
+
+        protected long getCounterValue() {
+            return counter.get();
+        }
+
+        @Override
+        public void run() {
+            try {
+                // model should be replicated & initialized here
+                while (shouldWork.get()) {
+                    SameDiffObservable request = inputQueue.take();
+
+                    if (request != null) {
+                        counter.incrementAndGet();
+
+
+                        INDArray[] batches = request.getInputBatches();
+                        if (batches == null || batches.length < 1) {
+                            log.warn("Batch length was zero. Skipping.");
+                            continue;
+                        }
+                        log.debug("Received batches");
+                        try {
+                            Map<String, INDArray> inputs = new LinkedHashMap<>(batches.length);
+                            for (int i = 0; i < inputNames.size(); i++) {
+                                inputs.put(inputNames.get(i), batches[i]);
+                                replicatedModel.associateArrayWithVariable(batches[i], inputNames.get(i));
+                            }
+
+                            INDArray[] indArrays1 = nativeGraphExecutioner.executeGraph(replicatedModel, configuration);
+
+                            log.debug("Running graph with inputs " + inputNames);
+                            request.setOutputBatches(indArrays1);
+
+                        } catch (Exception e) {
+                            log.error("Exception found", e);
+                            request.setOutputException(e);
+                        }
+                    } else {
+                        // just do nothing, i guess and hope for next round?
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                // do nothing
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+                isStopped.set(true);
+            }
+        }
+
+        protected void shutdown() {
+            shouldWork.set(false);
+            while (!isStopped.get()) {
+                // block until main loop is finished
             }
         }
     }

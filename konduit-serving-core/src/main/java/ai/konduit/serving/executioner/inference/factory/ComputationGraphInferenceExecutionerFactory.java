@@ -23,8 +23,8 @@
 package ai.konduit.serving.executioner.inference.factory;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
-import ai.konduit.serving.executioner.inference.MultiComputationGraphInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
+import ai.konduit.serving.executioner.inference.MultiComputationGraphInferenceExecutioner;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.loader.dl4j.cg.ComputationGraphModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;

@@ -49,14 +49,14 @@ public class VertxBufferNumpyInputAdapter implements InputAdapter<Buffer, Writab
 
     @Override
     public NDArrayWritable convert(Buffer input, ConverterArgs parameters, Map<String, Object> contextData) {
-        Preconditions.checkState(input.length() > 0,"Buffer appears to be empty!");
+        Preconditions.checkState(input.length() > 0, "Buffer appears to be empty!");
         INDArray fromNpyPointer = Nd4j.getNDArrayFactory().createFromNpyPointer(new BytePointer(input.getByteBuf().nioBuffer()));
-        if(fromNpyPointer.rank() < 4) {
-            fromNpyPointer = fromNpyPointer.reshape(Longs.concat(new long[]{1},fromNpyPointer.shape()));
+        if (fromNpyPointer.rank() < 4) {
+            fromNpyPointer = fromNpyPointer.reshape(Longs.concat(new long[]{1}, fromNpyPointer.shape()));
         }
         //permute required
-        if(parameters != null && parameters.getImageProcessingInitialLayout() != null && !parameters.getImageProcessingInitialLayout().equals(parameters.getImageProcessingRequiredLayout())) {
-            fromNpyPointer = ImagePermuter.permuteOrder(fromNpyPointer,parameters.getImageProcessingInitialLayout(),parameters.getImageProcessingRequiredLayout());
+        if (parameters != null && parameters.getImageProcessingInitialLayout() != null && !parameters.getImageProcessingInitialLayout().equals(parameters.getImageProcessingRequiredLayout())) {
+            fromNpyPointer = ImagePermuter.permuteOrder(fromNpyPointer, parameters.getImageProcessingInitialLayout(), parameters.getImageProcessingRequiredLayout());
         }
 
         return new NDArrayWritable(fromNpyPointer);

@@ -32,7 +32,7 @@ service:
 ingress:
   enabled: false
   annotations: {}
-      - chart-example.local
+    - chart-example.local
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -43,8 +43,8 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
   # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+#   cpu: 100m
+#   memory: 128Mi
 
 nodeSelector: {}
 
