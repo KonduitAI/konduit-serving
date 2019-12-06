@@ -61,7 +61,6 @@
             </dependencies>
         </profile>
     </profiles>
-
     <dependencies>
         <dependency>
             <groupId>org.bytedeco</groupId>
@@ -227,6 +226,11 @@
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
             <version>${jcommander.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20190722</version>
         </dependency>
     </dependencies>
     <dependencyManagement>

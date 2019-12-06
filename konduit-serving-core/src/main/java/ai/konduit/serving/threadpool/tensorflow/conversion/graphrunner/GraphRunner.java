@@ -67,7 +67,8 @@ public class GraphRunner implements Closeable {
     static {
         recastGraphDefs = new ConcurrentHashMap<>();
     }
-
+    private static boolean isTfWarmedUp = false;
+    private static boolean isTfWarmingUp = false;
     private SavedModelConfig savedModelConfig;
     //the in memory representation parsed from protobuf
     private TF_Graph graph;
@@ -506,6 +507,11 @@ public class GraphRunner implements Closeable {
      * ndarrays matching each output specified in the graph
      */
     public Map<String, INDArray> run(Map<String, INDArray> inputs) {
+        if (!isTfWarmedUp && !isTfWarmingUp){
+            isTfWarmingUp = true;
+            run(inputs);
+            isTfWarmedUp = true;
+        }
         Map<String, TF_Tensor> inputTensors = new LinkedHashMap<>();
         for (Map.Entry<String, INDArray> input : inputs.entrySet()) {
             inputTensors.put(input.getKey(), conversion.tensorFromNDArray(input.getValue()));
