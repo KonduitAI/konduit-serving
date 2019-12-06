@@ -458,8 +458,7 @@ public class PipelineRouteDefiner {
 
         if (pipelineExecutioner == null) {
             log.debug("Initializing inference executioner after starting verticle");
-            //note that we initialize this after the verticle is started
-            //due to needing to sometime initialize retraining routes
+
             try {
                 pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration);
                 pipelineExecutioner.init();
