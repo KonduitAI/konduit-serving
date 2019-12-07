@@ -32,9 +32,12 @@ encoded_image = cv2.cvtColor(
     cv2.imread("./Ultra-Light-Fast-Generic-Face-Detector-1MB/imgs/1.jpg"),
     cv2.COLOR_BGR2RGB,
 )
+encoded_image = encoded_image.astype("int16")
+print(">>> Image input shape")
+print(encoded_image.shape)
 
 try:
-    predicted = client.predict({step_input_name: encoded_image.astype("int16")})
+    predicted = client.predict({step_input_name: encoded_image})
     assert predicted[step_input_name]["ndArray"]["data"][0] == 51
 finally:
     server.stop()

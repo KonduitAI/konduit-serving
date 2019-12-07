@@ -28,6 +28,8 @@ predictor = create_Mb_Tiny_RFB_fd_predictor(
 net.load(model_path)
 
 # The variable "image" is sent from the konduit client in "konduit_server.py", i.e. in our example "encoded_image"
+print(">>> Server side shape")
+print(image.shape)
 image = np.squeeze(image)
 boxes, _, _ = predictor.predict(image, candidate_size / 2, threshold)
 
