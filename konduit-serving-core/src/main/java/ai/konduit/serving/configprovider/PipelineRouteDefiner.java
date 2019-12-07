@@ -174,7 +174,8 @@ public class PipelineRouteDefiner {
         healthCheckHandler = HealthCheckHandler.create(vertx);
 
         /**
-         * Get a basic health check for a running Konduit server
+         * Get a basic health check for a running Konduit server.
+         * If a server is up, this endpoint will return status of 204.
          */
         router.get("/healthcheck*").handler(healthCheckHandler);
 
