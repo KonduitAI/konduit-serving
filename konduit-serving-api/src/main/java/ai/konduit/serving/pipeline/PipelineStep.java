@@ -8,10 +8,6 @@ import java.util.Map;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 import ai.konduit.serving.pipeline.step.*;
@@ -40,7 +36,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = ArrayConcatenationStep.class, name = "ArrayConcatenationStep"),
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
-public interface PipelineStep extends Serializable {
+public interface PipelineStep<T extends PipelineStep<T>> extends Serializable {
 
 
     /**
@@ -54,6 +50,7 @@ public interface PipelineStep extends Serializable {
         if(validInputTypes() == null || validInputTypes().length < 1) {
             return true;
         }
+
         boolean ret =  Arrays.stream(validInputTypes()).anyMatch(input -> dataFormat.equals(input));
         return ret;
     }
@@ -156,26 +153,7 @@ public interface PipelineStep extends Serializable {
      */
     List<String> getInputNames();
 
-    /**
-     * Define a single input for a PipelineStep from column names and types.
-     * The input name will be "default" when using this method.
-     *
-     * @param columnNames column names
-     * @param types       schema types
-     * @return this pipeline step
-     * @throws Exception key error
-     */
-    PipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception;
 
-    /**
-     * Define a single input for a PipelineStep from a schema.
-     * The input name will be "default" when using this method.
-     *
-     * @param inputSchema input schema
-     * @return this pipeline step
-     * @throws Exception key error
-     */
-    PipelineStep setInput(Schema inputSchema) throws Exception;
 
     /**
      * Define a single input for a TransformProcess Step from explicit
@@ -187,7 +165,7 @@ public interface PipelineStep extends Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    PipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types)
+    T setInput(String inputName, String[] columnNames, SchemaType[] types)
             throws Exception;
 
     /**
@@ -198,30 +176,9 @@ public interface PipelineStep extends Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    PipelineStep setInput(String inputName, Schema inputSchema) throws Exception;
+    T setInput(String inputName, Schema inputSchema) throws Exception;
 
-    /**
-     * Define a single output for a PipelineStep from explicit
-     * column names and types for this output. The output name
-     * for this step will be "default".
-     *
-     * @param columnNames column names
-     * @param types       schema types
-     * @return this pipeline step
-     * @throws Exception key error
-     */
-    PipelineStep setOutput(String[] columnNames, SchemaType[] types)
-            throws Exception;
 
-    /**
-     * Define a single output for a PipelineStep from a schema.
-     * The output name for this step will be "default".
-     *
-     * @param outputSchema output schema
-     * @return this pipeline step
-     * @throws Exception key error
-     */
-    PipelineStep setOutput(Schema outputSchema) throws Exception;
 
     /**
      * Define a single output for a TransformProcess Step from explicit
@@ -233,7 +190,7 @@ public interface PipelineStep extends Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    PipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types)
+    T setOutput(String outputName, String[] columnNames, SchemaType[] types)
             throws Exception;
 
     /**
@@ -244,7 +201,58 @@ public interface PipelineStep extends Serializable {
      * @return this pipeline step
      * @throws Exception key error
      */
-    PipelineStep setOutput(String outputName, Schema outputSchema) throws Exception;
+    T setOutput(String outputName, Schema outputSchema) throws Exception;
+
+    /**
+     * Define a single input for a PipelineStep from column names and types.
+     * The input name will be "default" when using this method.
+     *
+     * @param columnNames column names
+     * @param types       schema types
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+    default T setInput(String[] columnNames, SchemaType[] types) throws Exception {
+        return setInput("default", columnNames, types);
+    }
+
+    /**
+     * Define a single output for a PipelineStep from explicit
+     * column names and types for this output. The output name
+     * for this step will be "default".
+     *
+     * @param columnNames column names
+     * @param types       schema types
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+    default T setOutput(String[] columnNames, SchemaType[] types) throws Exception {
+        return setOutput("default", columnNames, types);
+    }
+
+    /**
+     * Define a single input for a PipelineStep from a schema.
+     * The input name will be "default" when using this method.
+     *
+     * @param inputSchema input schema
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+     default T setInput(Schema inputSchema) throws Exception {
+        return setInput("default", inputSchema);
+    }
+
+    /**
+     * Define a single output for a PipelineStep from a schema.
+     * The output name for this step will be "default".
+     *
+     * @param outputSchema output schema
+     * @return this pipeline step
+     * @throws Exception key error
+     */
+    default T setOutput(Schema outputSchema) throws Exception {
+        return setOutput("default", outputSchema);
+    }
 
     /**
      * Get the respective runner for the configuration

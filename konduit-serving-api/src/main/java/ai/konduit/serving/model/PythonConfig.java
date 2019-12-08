@@ -22,7 +22,6 @@
 
 package ai.konduit.serving.model;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
@@ -33,6 +32,8 @@ import java.util.Map;
 
 /**
  * Extension of {@link ModelConfig} for custom Python steps.
+ *
+ * @author Adam Gibson
  */
 @Data
 @NoArgsConstructor

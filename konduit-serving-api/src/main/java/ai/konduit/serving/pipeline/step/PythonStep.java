@@ -81,7 +81,7 @@ public class PythonStep extends BasePipelineStep {
      * Create a PythonConfig Step with default input and output names
      * from input column names, input schema types and the actual PythonConfig
      *
-     * @param pythonConfig     Konduit PythonConfig
+     * @param pythonConfig     {@link PythonConfig}
      * @param inputColumnNames input column names
      * @param inputTypes       input schema types
      * @throws Exception key error
