@@ -74,7 +74,7 @@ public class BatchInputParser {
     public Record[] createBatch(RoutingContext routingContext) throws IOException {
         //partition the input content by name
         Map<String, List<BatchPartInfo>> partInfo = partInfoForUploads(routingContext);
-        if (partInfo == null || partInfo.isEmpty()) {
+        if (partInfo.isEmpty()) {
             throw new IllegalArgumentException("No parts resolved for file uploads!");
         } else if (!partInfo.containsKey(inputParts.get(0))) {
             throw new IllegalArgumentException("Illegal part info resolved. Part info keys were " + partInfo.keySet() + " while input parts were " + inputParts);

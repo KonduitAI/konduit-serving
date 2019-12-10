@@ -482,13 +482,11 @@ public class PipelineRouteDefiner {
 
         if (outputSchema == null) {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                if (pipelineStep instanceof ModelStep) {
-                    outputSchema = pipelineStep.outputSchemaForName("default");
-                } else if (pipelineStep instanceof PythonStep) {
+                if (pipelineStep instanceof PythonStep) {
                     outputSchema = pipelineStep.outputSchemaForName("default");
                 }
                 if (pipelineStep instanceof TransformProcessStep) {
-                    outputSchema = pipelineStep.inputSchemaForName("default");
+                    outputSchema = pipelineStep.outputSchemaForName("default");
                 }
             }
         }
