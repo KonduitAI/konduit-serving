@@ -36,7 +36,6 @@ import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.image.VertxBufferImageInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.nd4j.VertxBufferNd4jInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy.VertxBufferNumpyInputAdapter;
-import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.util.SchemaTypeUtils;
@@ -492,7 +491,7 @@ public class PipelineRouteDefiner {
     private void initializeSchemas(InferenceConfiguration inferenceConfiguration, boolean inputRequired) {
         if (inputSchema == null && inputRequired) {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                if (pipelineStep instanceof ModelStep || pipelineStep instanceof  PythonStep || pipelineStep
+                if (pipelineStep instanceof  PythonStep || pipelineStep
                         instanceof TransformProcessStep) {
                     inputSchema = pipelineStep.inputSchemaForName("default");
                 }
@@ -501,7 +500,7 @@ public class PipelineRouteDefiner {
 
         if (outputSchema == null) {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                if (pipelineStep instanceof ModelStep || pipelineStep instanceof  PythonStep || pipelineStep
+                if (pipelineStep instanceof  PythonStep || pipelineStep
                         instanceof TransformProcessStep) {
                     outputSchema = pipelineStep.outputSchemaForName("default");
                 }
