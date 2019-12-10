@@ -77,7 +77,7 @@ public class Pipeline {
     /**
      * Executes a pipeline on a set of input {@link Record}
      *
-     * @param inputs the array of records (one "row" per input.
+     * @param inputs the array of records (one "row" per input).
      * @return the output set of records
      */
     public Record[] doPipeline(Record[] inputs) {

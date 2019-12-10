@@ -36,6 +36,7 @@ import org.junit.Test;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -73,8 +74,8 @@ public class PipelineExecutionerTests {
 
         ModelStep modelStepConfig = ModelStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)
-                .inputNames(Arrays.asList(new String[]{"image_tensor"}))
-                .outputNames(Arrays.asList(new String[]{"detection_classes"}))
+                .inputNames(Collections.singletonList("image_tensor"))
+                .outputNames(Collections.singletonList("detection_classes"))
                 .modelConfig(modelConfig)
                 .build();
 
@@ -109,8 +110,8 @@ public class PipelineExecutionerTests {
                 .numLabels(80)
                 .build();
         ImageLoadingStep imageLoadingStepConfig = ImageLoadingStep.builder()
-                .inputNames(Arrays.asList(new String[]{"image_tensor"}))
-                .outputNames(Arrays.asList(new String[]{"detection_classes"}))
+                .inputNames(Collections.singletonList("image_tensor"))
+                .outputNames(Collections.singletonList("detection_classes"))
                 .objectDetectionConfig(objectRecognitionConfig)
                 .build();
 
@@ -129,10 +130,9 @@ public class PipelineExecutionerTests {
         ModelStep modelStepConfig = ModelStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)
                 .modelConfig(modelConfig)
-                .inputNames(Arrays.asList(new String[]{"image_tensor"}))
-                .outputNames(Arrays.asList(new String[]{"detection_classes"}))
+                .inputNames(Collections.singletonList("image_tensor"))
+                .outputNames(Collections.singletonList("detection_classes"))
                 .build();
-
 
         InferenceConfiguration configuration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)

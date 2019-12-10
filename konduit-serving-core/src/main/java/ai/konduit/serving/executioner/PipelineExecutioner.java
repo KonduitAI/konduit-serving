@@ -63,7 +63,6 @@ import org.nd4j.arrow.ArrowSerde;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.io.ReflectionUtils;
 import org.nd4j.serde.binary.BinarySerde;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 
@@ -118,10 +117,9 @@ public class PipelineExecutioner {
     }
 
     /**
-     * Create a zip file buffer based on the given
-     * adapted output
+     * Create a zip file buffer based on the given adapted output
      *
-     * @param adapt              the adapted output
+     * @param adapt              the adapted output, a map from String to {@link BatchOutput}
      *                           from {@link RawMultiOutputAdapter}
      * @param responseOutputType the response type
      * @return the zip file with each output's name being an entry in the zip file.
@@ -141,12 +139,10 @@ public class PipelineExecutioner {
                 }
 
             }
-
             out.flush();
             out.close();
 
             return Buffer.buffer(baos.toByteArray());
-
 
         } catch (IOException e) {
             log.error("Unable to zip buffer", e);
@@ -173,16 +169,16 @@ public class PipelineExecutioner {
      * Convert a {@link INDArray}
      * given a {@link Output.DataFormat}
      *
-     * @param input              the batch ndarray to convert
-     * @param responseOutputType the response type
+     * @param input      the batch ndarray to convert
+     * @param dataFormat the output data format
      * @return converted buffer
      */
-    public static Buffer convertBatchOutput(INDArray input, Output.DataFormat responseOutputType) {
+    public static Buffer convertBatchOutput(INDArray input, Output.DataFormat dataFormat) {
         Preconditions.checkNotNull(input, "Input was null!");
-        Preconditions.checkNotNull(responseOutputType, "Response output type was null!");
+        Preconditions.checkNotNull(dataFormat, "Response output type was null!");
         Buffer ret = null;
 
-        switch (responseOutputType) {
+        switch (dataFormat) {
             case NUMPY:
                 ret = Buffer.buffer(Unpooled.wrappedBuffer(ByteBuffer.wrap(Nd4j.toNpyByteArray(input))));
                 break;
@@ -206,6 +202,47 @@ public class PipelineExecutioner {
         return config;
     }
 
+    private void inferInputAndOutputSchemas(PipelineStep pipelineStep) {
+        if (inputSchema == null && pipelineStep.getInputSchemas() != null &&
+                !pipelineStep.getInputSchemas().isEmpty() &&
+                pipelineStep.getInputSchemas().get("default") != null &&
+                pipelineStep.getInputColumnNames().get("default") != null) {
+            inputSchema = SchemaTypeUtils.toSchema(pipelineStep.getInputSchemas().get("default"),
+                    pipelineStep.getInputColumnNames().get("default"));
+        }
+        if (outputSchema == null && pipelineStep.getOutputSchemas() != null &&
+                pipelineStep.getOutputSchemas().get("default") != null &&
+                !pipelineStep.getOutputSchemas().isEmpty() &&
+                pipelineStep.getInputColumnNames().get("default") != null) {
+            outputSchema = SchemaTypeUtils.toSchema(pipelineStep.getOutputSchemas().get("default"),
+                    pipelineStep.getOutputColumnNames().get("default"));
+        }
+    }
+
+    private void validateInputsAndOutputs(ServingConfig servingConfig) {
+        //configure validation for input and output
+        if(!config.getSteps().isEmpty()) {
+            PipelineStep finalPipelineStep = config.getSteps().get(config.getSteps().size() - 1);
+            PipelineStep startingPipelineStep = config.getSteps().get(0);
+
+            Preconditions.checkState(startingPipelineStep.isValidInputType(servingConfig.getInputDataFormat()),
+                    "Configured input type is invalid for initial pipeline step of type "
+                            + startingPipelineStep.getClass().getName() + " expected input types were "
+                            + Arrays.toString(startingPipelineStep.validInputTypes())
+                            + ". If this list is null or empty, then any type is considered valid.");
+            Preconditions.checkState(finalPipelineStep.isValidOutputType(servingConfig.getOutputDataFormat()),
+                    "Configured output type is invalid for final pipeline step of type "
+                            + finalPipelineStep.getClass().getName() + " expected output types were "
+                            + Arrays.toString(finalPipelineStep.validInputTypes())
+                            + ". If this list is null or empty, then any type is considered valid.");
+            Preconditions.checkState(finalPipelineStep.isValidPredictionType(servingConfig.getPredictionType()),
+                    "Invalid prediction type configured for final pipeline step of type "
+                            + finalPipelineStep.getClass().getName() + " expected types were "
+                            + Arrays.toString(finalPipelineStep.validPredictionTypes())
+                            + ". If this list is null or empty, then any type is considered valid.");
+        }
+    }
+
     /**
      * Init the pipeline executioner.
      */
@@ -215,68 +252,32 @@ public class PipelineExecutioner {
             log.warn("No pipeline steps configured.");
         }
 
-        //initialize input and output data types
+        validateInputsAndOutputs(servingConfig);
+
         this.pipeline = Pipeline.getPipeline(config.getSteps());
-
-        //configure validation for input and output
-        if(!config.getSteps().isEmpty()) {
-            PipelineStep finalPipelineStep = config.getSteps().get(config.getSteps().size() - 1);
-            PipelineStep startingPipelineStep = config.getSteps().get(0);
-
-            Preconditions.checkState(startingPipelineStep.isValidInputType(servingConfig.getInputDataFormat()),"Configured input type is invalid for initial pipeline step of type " + startingPipelineStep.getClass().getName() + " expected input types were " + Arrays.toString(startingPipelineStep.validInputTypes()) + ". If this list is null or empty, then any type is considered valid.");
-            Preconditions.checkState(finalPipelineStep.isValidOutputType(servingConfig.getOutputDataFormat()),"Configured output type is invalid for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected output types were " + Arrays.toString(finalPipelineStep.validInputTypes()) + ". If this list is null or empty, then any type is considered valid.");
-            Preconditions.checkState(finalPipelineStep.isValidPredictionType(servingConfig.getPredictionType()),"Invalid prediction type configured for final pipeline step of type " + finalPipelineStep.getClass().getName() + " expected types were " + Arrays.toString(finalPipelineStep.validPredictionTypes()) + ". If this list is null or empty, then any type is considered valid.");
-
-        }
 
         for (int i = 0; i < config.getSteps().size(); i++) {
             PipelineStep pipelineStep = config.getSteps().get(i);
             Preconditions.checkNotNull(pipelineStep, "Pipeline step at " + i + " was null!");
-            //only use the first input names that appear in the pipeline
+
+            // set the "inputNames" of this executioner to the input names of the current step
             if (inputNames == null && pipelineStep.getInputNames() != null && !pipelineStep.getInputNames().isEmpty()) {
                 inputNames = config.getSteps().get(i).getInputNames();
             }
 
-            //always have output names change to the last defined names in the pipeline
+            // set the "outputNames" of this executioner to the output names of the current step
             if (pipelineStep.getOutputNames() != null && !pipelineStep.getOutputNames().isEmpty()) {
                 outputNames = config.getSteps().get(i).getOutputNames();
             }
 
+            inferInputAndOutputSchemas(pipelineStep);
 
-            if (inputSchema == null && pipelineStep
-                    .getInputSchemas() != null &&
-                    !pipelineStep
-                            .getInputSchemas().isEmpty() &&
-                    pipelineStep
-                            .getInputSchemas().get("default") != null &&
-                    pipelineStep.getInputColumnNames().get("default") != null) {
-                inputSchema = SchemaTypeUtils.toSchema(pipelineStep
-                                .getInputSchemas().get("default"),
-                        pipelineStep
-                                .getInputColumnNames().get("default"));
-            }
-
-            if (outputSchema == null && pipelineStep
-                    .getOutputSchemas() != null &&
-                    pipelineStep
-                            .getOutputSchemas().get("default") != null
-                    &&
-                    !pipelineStep
-                            .getOutputSchemas().isEmpty() &&
-                    pipelineStep.getInputColumnNames().get("default") != null) {
-                outputSchema = SchemaTypeUtils.toSchema(pipelineStep
-                                .getOutputSchemas().get("default"),
-                        pipelineStep
-                                .getOutputColumnNames().get("default"));
-
-            }
-
+            // Specific PipelineStep types require special treatment.
             if (pipelineStep instanceof ModelStep) {
                 ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
                 modelConfig = modelPipelineStepConfig.getModelConfig();
                 tensorDataTypesConfig = modelConfig.getTensorDataTypesConfig();
             }
-
             if (pipelineStep instanceof ImageLoadingStep) {
                 ImageLoadingStep imageLoadingStepConfig = (ImageLoadingStep) pipelineStep;
                 objectDetectionConfig = imageLoadingStepConfig.getObjectDetectionConfig();
@@ -287,7 +288,6 @@ public class PipelineExecutioner {
 
         initDataTypes();
 
-
         try {
             if (servingConfig.getOutputDataFormat() == Output.DataFormat.JSON) {
                 multiOutputAdapter = outputAdapterFor(config().serving().getPredictionType(), objectDetectionConfig);
@@ -296,7 +296,6 @@ public class PipelineExecutioner {
             }
         } catch (Exception e) {
             log.error("Error initializing output adapter.", e);
-
         }
 
 
@@ -306,7 +305,8 @@ public class PipelineExecutioner {
 
         if (modelConfig != null && modelConfig.getModelConfigType().getModelType() != ModelConfig.ModelType.PMML
                 && (inputNames == null || inputNames.isEmpty())) {
-            throw new IllegalStateException("No inputs defined! Please specify input names for your verticle via the model configuration.");
+            throw new IllegalStateException(
+                    "No inputs defined! Please specify input names for your verticle via the model configuration.");
         }
 
     }
@@ -319,18 +319,17 @@ public class PipelineExecutioner {
         return outputNames;
     }
 
-    private MultiOutputAdapter outputAdapterFor(Output.PredictionType predictionType, ObjectDetectionConfig objectDetectionConfig) throws Exception {
+    private MultiOutputAdapter outputAdapterFor(Output.PredictionType predictionType,
+                                                ObjectDetectionConfig objectDetectionConfig) throws Exception {
         MultiOutputAdapter multiOutputAdapter;
         //custom labels input stream for custom labels for yolo and ssd
         InputStream customLabelsInputStream = null;
-
 
         if (objectDetectionConfig != null && objectDetectionConfig.getLabelsPath() != null) {
             customLabelsInputStream = new FileInputStream(objectDetectionConfig.getLabelsPath());
             ssdLabels = SSDOutputAdapter.getLabels(customLabelsInputStream, objectDetectionConfig.getNumLabels());
             yoloLabels = ssdLabels;
         }
-
 
         switch (predictionType) {
             case CLASSIFICATION:
@@ -371,51 +370,41 @@ public class PipelineExecutioner {
     }
 
     /**
-     * Perform inference for the
-     * endpoint using the inference executioner.
+     * Perform inference using the inference executioner. This method is only used for multi-part data requests.
      *
      * @param ctx                the routing context to use representing the current request
-     * @param responseOutputType the {@link Output.DataFormat} for the output
-     * @param inputs             the inputs based on the input data
+     * @param outputDataFormat   the {@link Output.DataFormat} for the output
+     * @param inputs             input data as array of {@link Record}
      */
     public void doInference(RoutingContext ctx,
-                            Output.DataFormat responseOutputType,
+                            Output.DataFormat outputDataFormat,
                             Record[] inputs) {
         if (inputs == null || inputs.length < 1 || inputs[0] == null) {
             throw new IllegalStateException("No inputs specified!");
         }
 
-
         String batchId = UUID.randomUUID().toString();
-        long nanos = System.nanoTime();
-
-        INDArray[] execute = pipeline.doPipelineArrays(inputs);
-        long after = System.nanoTime();
-        if (config.serving().isLogTimings()) {
-            long diff = after - nanos;
-            long millis = TimeUnit.NANOSECONDS.toMillis(diff);
-            log.info("Post internal execution timing in ms " + millis);
-        }
-
+        long startTime = System.nanoTime();
+        INDArray[] arrays = pipeline.doPipelineArrays(inputs);
+        logTimings(startTime);
 
         if (multiOutputAdapter != null) {
             log.debug("Performing adaption.");
-            Map<String, BatchOutput> adapt = null;
+            Map<String, BatchOutput> batchOutputMap;
             try {
-                adapt = multiOutputAdapter.adapt(execute, outputNames, ctx);
+                batchOutputMap = multiOutputAdapter.adapt(arrays, outputNames, ctx);
             } catch (Exception e) {
                 log.error("Unable to adapt output", e);
                 ctx.response().setStatusCode(500);
                 ctx.response().setStatusMessage("Was unable to adapt output.");
                 ctx.response().end();
-                for (int i = 0; i < execute.length; i++) {
-                    if (execute[i].closeable())
-                        execute[i].close();
+                for (INDArray array: arrays) {
+                    if (array.closeable())
+                        array.close();
                 }
                 return;
             }
-
-            timedResponse(ctx, responseOutputType, batchId, execute, adapt);
+            timedResponse(ctx, outputDataFormat, batchId, arrays, batchOutputMap);
 
         } else {
             /**
@@ -423,32 +412,33 @@ public class PipelineExecutioner {
              */
             Map<String, BatchOutput> namedBatchOutput = new HashMap<>();
             for (int i = 0; i < outputNames.size(); i++) {
-                namedBatchOutput.put(outputNames.get(i), NDArrayOutput.builder().ndArray(execute[i]).build());
+                namedBatchOutput.put(outputNames.get(i), NDArrayOutput.builder().ndArray(arrays[i]).build());
             }
 
-            timedResponse(ctx, responseOutputType, batchId, execute, namedBatchOutput);
+            timedResponse(ctx, outputDataFormat, batchId, arrays, namedBatchOutput);
         }
     }
 
     /**
-     * Perform inference
-     *  @param ctx               the routing context
-     * @param outputAdapterType the output adapter
-     *                          to use on output
+     * Perform inference. Two endpoints in the pipeline route definer use this inference runner, both produce
+     * JSON output, but take either JSON or multi-part input. See
+     * {@link ai.konduit.serving.configprovider.PipelineRouteDefiner} for more information.
+     *
+     * @param ctx               the routing context
+     * @param predictionType    the prediction type, determines the output adapter used after prediction
      * @param input             the input string (json generally)
-     * @param conversionSchema  the schema to convert the
-*                          json
+     * @param conversionSchema  the schema to convert the json
      * @param transformProcess  the transform process to use
      * @param outputSchema      the output schema
-     * @param outputDataType    the output data type for the pipeline
+     * @param outputDataFormat  the output data type for the pipeline
      */
     public void doInference(RoutingContext ctx,
-                            PredictionType outputAdapterType,
+                            PredictionType predictionType,
                             Object input,
                             Schema conversionSchema,
                             TransformProcess transformProcess,
                             Schema outputSchema,
-                            DataFormat outputDataType) {
+                            DataFormat outputDataFormat) {
 
         Record[] pipelineInput = PipelineExecutioner.createInput(input,transformProcess,conversionSchema);
         Record[] records = pipeline.doPipeline(pipelineInput);
@@ -456,7 +446,7 @@ public class PipelineExecutioner {
         if (firstWritable.getType() == WritableType.NDArray) {
             INDArray[] arrays = SchemaTypeUtils.toArrays(records);
             Map<String, BatchOutput> adapt;
-            switch (outputAdapterType) {
+            switch (predictionType) {
                 case CLASSIFICATION:
                     adapt = classificationMultiOutputAdapter.adapt(arrays, outputNames(), ctx);
                     break;
@@ -469,11 +459,10 @@ public class PipelineExecutioner {
                 default:
                     throw new IllegalStateException("Illegal type for json.");
             }
-
-            writeResponse(adapt, outputDataType, UUID.randomUUID().toString(), ctx);
+            writeResponse(adapt, outputDataFormat, UUID.randomUUID().toString(), ctx);
 
         } else if (records.length == 1 && records[0].getRecord().get(0) instanceof Text) {
-            if (outputDataType == Output.DataFormat.JSON) {
+            if (outputDataFormat == Output.DataFormat.JSON) {
                 JsonObject writeJson = new JsonObject();
                 for (int i = 0; i < records[0].getRecord().size(); i++) {
                     Text text = (Text) records[0].getRecord().get(i);
@@ -494,16 +483,16 @@ public class PipelineExecutioner {
                 ctx.response().putHeader("Content-Type", "application/json");
                 ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
                 ctx.response().end(write);
-            } else if (outputDataType == Output.DataFormat.ARROW) {
+            } else if (outputDataFormat == Output.DataFormat.ARROW) {
                 ArrowRecord arrowRecord = (ArrowRecord) records[0].getRecord();
                 ArrowWritableRecordBatch  convert =  ArrowUtils.getBatchFromRecord(arrowRecord);
                 writeArrowResponse(ctx, outputSchema, convert);
             } else {
-                throw new IllegalStateException("Illegal data type response " + outputDataType);
+                throw new IllegalStateException("Illegal data type response " + outputDataFormat);
             }
 
 
-        } else if (outputDataType == Output.DataFormat.JSON) {
+        } else if (outputDataFormat == Output.DataFormat.JSON) {
             JsonArray newArray = new JsonArray();
             for (Record record : records) {
                 JsonObject row = new JsonObject();
@@ -544,13 +533,14 @@ public class PipelineExecutioner {
             ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
             ctx.response().end(write);
 
-        } else if (outputDataType == Output.DataFormat.ARROW) {
+        } else if (outputDataFormat == Output.DataFormat.ARROW) {
             ArrowRecord arrowRecord = (ArrowRecord) records[0].getRecord();
             ArrowWritableRecordBatch  convert =  ArrowUtils.getBatchFromRecord(arrowRecord);
             writeArrowResponse(ctx, outputSchema, convert);
         }
     }
 
+    // TODO: unused, do we need it?
     public void destroy() {
         pipeline.destroy();
     }
@@ -602,25 +592,28 @@ public class PipelineExecutioner {
         ctx.response().end(write);
     }
 
-    private void timedResponse(RoutingContext ctx,
-                               Output.DataFormat responseOutputType,
-                               String batchId,
-                               INDArray[] execute,
-                               Map<String, BatchOutput> adapt) {
-        long nanos;
-        long after;
-        nanos = System.nanoTime();
-        writeResponse(adapt, responseOutputType, batchId, ctx);
-        after = System.nanoTime();
+    private void logTimings(long startTime) {
+        long stopTime = System.nanoTime();
         if (config.serving().isLogTimings()) {
-            long diff = after - nanos;
+            long diff = stopTime - startTime;
             long millis = TimeUnit.NANOSECONDS.toMillis(diff);
             log.info("Post write response timing in ms " + millis);
         }
+    }
 
-        for (INDArray indArray : execute) {
-            if (indArray.closeable())
-                indArray.close();
+    private void timedResponse(RoutingContext ctx,
+                               Output.DataFormat outputDataFormat,
+                               String batchId,
+                               INDArray[] arrays,
+                               Map<String, BatchOutput> batchOutputMap) {
+
+        long startTime = System.nanoTime();
+        writeResponse(batchOutputMap, outputDataFormat, batchId, ctx);
+        logTimings(startTime);
+
+        for (INDArray array : arrays) {
+            if (array.closeable())
+                array.close();
         }
     }
 
@@ -711,7 +704,8 @@ public class PipelineExecutioner {
 
     }
 
-    private Map<String, TensorDataType> initDataTypes(List<String> namesValidation, Map<String, TensorDataType> types, String inputOrOutputType) {
+    private Map<String, TensorDataType> initDataTypes(List<String> namesValidation, Map<String, TensorDataType> types,
+                                                      String inputOrOutputType) {
         Preconditions.checkNotNull(namesValidation, "Names validation must not be null!");
         Preconditions.checkNotNull(types, "Types must not be null!");
         Preconditions.checkNotNull(inputOrOutputType, "inputOrOutputType must not be null!");

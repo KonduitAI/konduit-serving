@@ -76,8 +76,8 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
     @Override
     public JsonObject getConfigObject() throws Exception {
         SameDiff sameDiff = SameDiff.create();
-        SDVariable x = sameDiff.placeHolder("x", DataType.FLOAT, 1, 2);
-        SDVariable y = sameDiff.placeHolder("y", DataType.FLOAT, 1, 2);
+        SDVariable x = sameDiff.placeHolder("x", DataType.FLOAT, 2);
+        SDVariable y = sameDiff.placeHolder("y", DataType.FLOAT, 2);
         SDVariable add = x.add("output", y);
         File tmpSameDiffFile = temporary.newFile();
         sameDiff.asFlatFile(tmpSameDiffFile);
@@ -137,8 +137,8 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
         assertEquals("Response failed", 200, response.getStatusCode());
 
         INDArray bodyResult = BinarySerde.toArray(ByteBuffer.wrap(response.getBody().asByteArray()));
-        assertArrayEquals(new long[]{1, 2}, bodyResult.shape());
-        assertEquals(Nd4j.create(new float[]{3.0f, 5.0f}).reshape(1, 2), bodyResult);
+        assertArrayEquals(new long[]{2}, bodyResult.shape());
+        assertEquals(Nd4j.create(new float[]{3.0f, 5.0f}), bodyResult);
 
 
     }
