@@ -22,9 +22,9 @@
 
 package ai.konduit.serving.threadpool.tensorflow;
 
-import ai.konduit.serving.model.TensorDataType;
-import ai.konduit.serving.threadpool.tensorflow.conversion.TensorflowConversion;
-import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
+import org.nd4j.tensorflow.conversion.TensorDataType;
+import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
+import org.nd4j.tensorflow.conversion.TensorflowConversion;
 import org.bytedeco.tensorflow.TF_Tensor;
 import org.junit.Test;
 import org.nd4j.linalg.api.buffer.DataType;
