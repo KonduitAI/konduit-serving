@@ -1,10 +1,27 @@
 # Face detection demo with PyTorch
 
-To get started, make sure to set your `KONDUIT_JAR_PATH` to point to a valid `konduit.jar`.
-After that, simply run the following steps.
+## Getting started 
+
+First, ensure that you have installed the Konduit Python SDK and built a Konduit Serving JAR file (using `konduit build`) according to the [installation instructions](https://serving.oss.konduit.ai/installation).
+
+Clone the Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB repository to this folder. This repository contains a lightweight face detection model built in PyTorch that will be used for this demo.  
 
 ```bash
 git clone https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB
+```
+
+Next, install the required modules for this repository. If you encounter any errors with installing the required modules, try installing PyTorch first following the instructions on their [home page](https://pytorch.org/), then running the following command again to install the remaining required modules.
+
+```bash
 pip install -r ./Ultra-Light-Fast-Generic-Face-Detector-1MB/requirements.txt
+```
+
+## Usage
+
+Run the following command to run this demo: 
+
+```bash
 python run_konduit.py
 ```
+
+
