@@ -21,6 +21,13 @@ def default_python_path(work_dir="."):
 
 
 def validate_server(url):
+    """
+    Validates if a konduit.Server is running under the specified url. Returns True if
+    the server is running, False otherwise.
+
+    :param url: host and port of the server as str
+    :return: boolean
+    """
     try:
         r = requests.get("{}/healthcheck".format(url))
         if r.status_code != 204:
@@ -36,3 +43,26 @@ def validate_server(url):
             "verify that the server is running without any issues...".format(str(ex))
         )
         return False
+
+
+def to_unix_path(file_path):
+    """Utility function to turn a Windows-style path into Unix-style. Windows
+    can handle the latter, so we use this representation internally
+
+    :param file_path: path to your file
+    :return: Unix-style version of your file
+    """
+    return file_path.replace("\\", "/")
+
+
+def update_dict_with_unix_paths(config):
+    """Replace all str values in Python dictionary that correspond to paths
+    by their Unix-style equivalent.
+
+    :param config: any Python dictionary
+    :return: updated dict
+    """
+    for k, v in config.items():
+        if "_path" in k and isinstance(v, str):
+            config[k] = to_unix_path(v)
+    return config

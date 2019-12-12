@@ -6,6 +6,7 @@ import yaml
 from .inference import *
 from .client import Client
 from .server import Server
+from .utils import to_unix_path, update_dict_with_unix_paths
 
 USER_PATH = os.path.expanduser("~")
 KONDUIT_BASE_DIR = os.path.join(USER_PATH, ".konduit")
@@ -113,6 +114,7 @@ def server_from_file(file_path, start_server=True, use_yaml=True):
     :param use_yaml: use yaml or json
     :return: konduit.server.Server instance
     """
+    file_path = to_unix_path(file_path)
     data = load_data(file_path, use_yaml)
     serving_data = data.get("serving", None)
 
@@ -151,6 +153,7 @@ def client_from_file(file_path, use_yaml=True):
     :param use_yaml: use yaml or json
     :return: konduit.client.Client instance
     """
+    file_path = to_unix_path(file_path)
     data = load_data(file_path, use_yaml)
     if "client" in data.keys():
         client_data = data.get("client", None)
@@ -180,6 +183,8 @@ def get_step(step_config):
     :return: konduit.inference.PipelineStep instance.
     """
     step_type = step_config.pop("type")
+    step_config = update_dict_with_unix_paths(step_config)
+
     if step_type == "PYTHON":
         step = get_python_step(step_config)
     elif step_type in MODEL_TYPES:
@@ -211,7 +216,6 @@ def get_model_step(step_config, step_type):
         model_type=step_type,
         model_loading_path=pop_data(step_config, "model_loading_path"),
     )
-
     if (
         step_type == "TENSORFLOW"
     ):  # TF has to extra properties, all others are identical
