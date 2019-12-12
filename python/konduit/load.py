@@ -184,6 +184,8 @@ def get_step(step_config):
         step = get_python_step(step_config)
     elif step_type in MODEL_TYPES:
         step = get_model_step(step_config, step_type)
+    elif step_type == 'IMAGE_LOADING':
+        step = get_image_load_step(step_config)
     else:
         raise Exception("Step type of type " + step_type + " currently not supported.")
     return step
@@ -197,6 +199,15 @@ def get_python_step(step_config):
     """
     python_config = PythonConfig(**step_config)
     step = PythonStep().step(python_config)
+    return step
+
+def get_image_load_step(step_config):
+    """Get a ImageLoadingStep from a configuration object
+
+    :param step_config: python dictionary with properties to create the ImageLoadingStep
+    :return: konduit.inference.ImageLoadingStep instance.
+    """
+    step = ImageLoadingStep(**step_config)
     return step
 
 
