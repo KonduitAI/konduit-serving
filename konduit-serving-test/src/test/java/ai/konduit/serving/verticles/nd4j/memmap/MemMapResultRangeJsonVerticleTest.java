@@ -22,16 +22,13 @@
 
 package ai.konduit.serving.verticles.nd4j.memmap;
 
-import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -40,10 +37,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.io.File;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -60,7 +55,6 @@ public class MemMapResultRangeJsonVerticleTest extends BaseMemMapTest {
     }
 
 
-
     @Override
     public Handler<HttpServerRequest> getRequest() {
         Handler<HttpServerRequest> ret = new Handler<HttpServerRequest>() {
@@ -74,8 +68,6 @@ public class MemMapResultRangeJsonVerticleTest extends BaseMemMapTest {
                 req.exceptionHandler(exception -> {
                     exception.printStackTrace();
                 });
-
-
 
 
             }
@@ -99,13 +91,13 @@ public class MemMapResultRangeJsonVerticleTest extends BaseMemMapTest {
                         System.out.println("Found numpy array bytes with length " + npyArray.length);
                         System.out.println("Contents: " + new String(npyArray));
                         JsonArray jsonArray1 = new JsonArray(new String(npyArray));
-                        double[] arrContent =  new double[jsonArray1.size()];
-                        for(int  i = 0; i < jsonArray1.size(); i++) {
+                        double[] arrContent = new double[jsonArray1.size()];
+                        for (int i = 0; i < jsonArray1.size(); i++) {
                             arrContent[i] = jsonArray1.getDouble(i);
                         }
 
                         INDArray arrFromNumpy = Nd4j.create(arrContent);
-                        context.assertEquals(Nd4j.create(new double[]{1,2}),arrFromNumpy);
+                        context.assertEquals(Nd4j.create(new double[]{1, 2}), arrFromNumpy);
                         System.out.println(arrFromNumpy);
                         async2.complete();
                     });
@@ -115,13 +107,12 @@ public class MemMapResultRangeJsonVerticleTest extends BaseMemMapTest {
                         async2.complete();
                     });
 
-                }).putHeader("Content-Type","application/json")
-                .putHeader("Content-Length",String.valueOf(0))
+                }).putHeader("Content-Type", "application/json")
+                .putHeader("Content-Length", String.valueOf(0))
                 .write("");
 
         async2.await();
     }
-
 
 
 }

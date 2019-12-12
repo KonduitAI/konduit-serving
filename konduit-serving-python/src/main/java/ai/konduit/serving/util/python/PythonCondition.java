@@ -23,7 +23,6 @@
 package ai.konduit.serving.util.python;
 
 import ai.konduit.serving.executioner.PythonExecutioner;
-import org.datavec.api.transform.ColumnType;
 import org.datavec.api.transform.condition.Condition;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.*;
@@ -48,18 +47,20 @@ public class PythonCondition implements Condition {
 
 
     public PythonCondition(String pythonCode) {
-        org.nd4j.base.Preconditions.checkNotNull("Python code must not be null!",pythonCode);
-        org.nd4j.base.Preconditions.checkState(pythonCode.length() >= 1,"Python code must not be empty!");
+        org.nd4j.base.Preconditions.checkNotNull("Python code must not be null!", pythonCode);
+        org.nd4j.base.Preconditions.checkState(pythonCode.length() >= 1, "Python code must not be empty!");
         code = pythonCode;
     }
 
-
-
+    @Override
+    public Schema getInputSchema() {
+        return inputSchema;
+    }
 
     @Override
     public void setInputSchema(Schema inputSchema) {
         this.inputSchema = inputSchema;
-        try{
+        try {
             pyInputs = schemaToPythonVariables(inputSchema);
             PythonVariables pyOuts = new PythonVariables();
             pyOuts.addInt("out");
@@ -69,18 +70,11 @@ public class PythonCondition implements Condition {
                     .outputs(pyOuts)
                     .build();
 
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
 
-
-    }
-
-    @Override
-    public Schema getInputSchema(){
-        return inputSchema;
     }
 
     @Override
@@ -91,40 +85,39 @@ public class PythonCondition implements Condition {
     }
 
     @Override
-    public String outputColumnName(){
+    public String outputColumnName() {
         return outputColumnNames()[0];
     }
 
     @Override
-    public String[] columnNames(){
+    public String[] columnNames() {
         return outputColumnNames();
     }
 
     @Override
-    public String columnName(){
+    public String columnName() {
         return outputColumnName();
     }
 
     @Override
-    public Schema transform(Schema inputSchema){
+    public Schema transform(Schema inputSchema) {
         return inputSchema;
     }
 
     @Override
     public boolean condition(List<Writable> list) {
         PythonVariables inputs = getPyInputsFromWritables(list);
-        try{
+        try {
             PythonExecutioner.exec(pythonTransform.getCode(), inputs, pythonTransform.getOutputs());
             boolean ret = pythonTransform.getOutputs().getIntValue("out") != 0;
             return ret;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public boolean condition(Object input){
+    public boolean condition(Object input) {
         return condition(input);
     }
 
@@ -142,28 +135,27 @@ public class PythonCondition implements Condition {
     private PythonVariables getPyInputsFromWritables(List<Writable> writables) {
         PythonVariables ret = new PythonVariables();
 
-        for (int i = 0; i < inputSchema.numColumns(); i++){
+        for (int i = 0; i < inputSchema.numColumns(); i++) {
             String name = inputSchema.getName(i);
             Writable w = writables.get(i);
             PythonVariables.Type pyType = pyInputs.getType(inputSchema.getName(i));
-            switch (pyType){
+            switch (pyType) {
                 case INT:
                     if (w instanceof LongWritable) {
-                        ret.addInt(name, ((LongWritable)w).get());
-                    }
-                    else {
-                        ret.addInt(name, ((IntWritable)w).get());
+                        ret.addInt(name, ((LongWritable) w).get());
+                    } else {
+                        ret.addInt(name, ((IntWritable) w).get());
                     }
 
                     break;
                 case FLOAT:
-                    ret.addFloat(name, ((DoubleWritable)w).get());
+                    ret.addFloat(name, ((DoubleWritable) w).get());
                     break;
                 case STR:
                     ret.addStr(name, w.toString());
                     break;
                 case NDARRAY:
-                    ret.addNDArray(name,((NDArrayWritable)w).get());
+                    ret.addNDArray(name, ((NDArrayWritable) w).get());
                     break;
             }
         }

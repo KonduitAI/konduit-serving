@@ -62,6 +62,7 @@ public class ParallelInferenceConfig implements Serializable {
 
     /**
      * Default parallel inference configuration
+     *
      * @return default configuration
      */
     public static ParallelInferenceConfig defaultConfig() {

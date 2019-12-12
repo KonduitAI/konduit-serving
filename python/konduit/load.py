@@ -1,12 +1,12 @@
-from . import *
-from .server import Server
-from .client import Client
-
-import yaml
-import os
 import json
 import logging
+import os
+import yaml
 
+from .inference import *
+from .client import Client
+from .server import Server
+from .utils import to_unix_path, update_dict_with_unix_paths
 
 USER_PATH = os.path.expanduser("~")
 KONDUIT_BASE_DIR = os.path.join(USER_PATH, ".konduit")
@@ -96,7 +96,8 @@ def from_file(file_path, start_server=True, use_yaml=True):
     """Create Konduit Server and Client from file
 
     :param file_path: path to your konduit.yaml
-    :param start_server: whether to start the server instance or not (if not you can start it later).
+    :param start_server: whether to start the server instance or not (if not you can start it later). Defaults to
+           True so that the client can be loaded successfully.
     :param use_yaml: use yaml or json
     :return: konduit.server.Server and konduit.client.Client instances
     """
@@ -106,14 +107,16 @@ def from_file(file_path, start_server=True, use_yaml=True):
     )
 
 
-def server_from_file(file_path, start_server=True, use_yaml=True):
+def server_from_file(file_path, start_server=False, use_yaml=True):
     """Create a Konduit Server from a from a configuration file.
 
     :param file_path: path to your konduit.yaml
-    :param start_server: whether to start the server instance or not (if not you can start it later).
+    :param start_server: whether to start the server instance or not (if not you can start it later). Defaults to
+           False, meaning you have to start the server manually by calling "start()" explicitly.
     :param use_yaml: use yaml or json
     :return: konduit.server.Server instance
     """
+    file_path = to_unix_path(file_path)
     data = load_data(file_path, use_yaml)
     serving_data = data.get("serving", None)
 
@@ -143,15 +146,35 @@ def server_from_file(file_path, start_server=True, use_yaml=True):
 
 
 def client_from_file(file_path, use_yaml=True):
-    """Create a Konduit client instance from a configuration file
+    """Create a Konduit client instance from a configuration file.
+    If your konduit configuration file has a "client" section, that
+    is used to create the client instance. If it doesn't, all properties
+    are derived from the "serving" section.
 
     :param file_path: path to your konduit.yaml
     :param use_yaml: use yaml or json
     :return: konduit.client.Client instance
     """
+    file_path = to_unix_path(file_path)
     data = load_data(file_path, use_yaml)
-    client_data = data.get("client", None)
-    client = Client(**client_data)
+    if "client" in data.keys():
+        client_data = data.get("client", None)
+        client = Client(**client_data)
+    else:
+        client_data = data.get("serving", None)
+        port = client_data.get("http_port", None)
+        input_data_format = client_data.get("input_data_format", None)
+        output_data_format = client_data.get("output_data_format", None)
+
+        if not port:
+            raise RuntimeError(
+                "No HTTP port found in configuration file, can't proceed."
+            )
+        client = Client(
+            port=port,
+            input_data_format=input_data_format,
+            output_data_format=output_data_format,
+        )
     return client
 
 
@@ -162,10 +185,14 @@ def get_step(step_config):
     :return: konduit.inference.PipelineStep instance.
     """
     step_type = step_config.pop("type")
+    step_config = update_dict_with_unix_paths(step_config)
+
     if step_type == "PYTHON":
         step = get_python_step(step_config)
     elif step_type in MODEL_TYPES:
         step = get_model_step(step_config, step_type)
+    elif step_type == 'IMAGE_LOADING':
+        step = get_image_load_step(step_config)
     else:
         raise Exception("Step type of type " + step_type + " currently not supported.")
     return step
@@ -181,6 +208,15 @@ def get_python_step(step_config):
     step = PythonStep().step(python_config)
     return step
 
+def get_image_load_step(step_config):
+    """Get a ImageLoadingStep from a configuration object
+
+    :param step_config: python dictionary with properties to create the ImageLoadingStep
+    :return: konduit.inference.ImageLoadingStep instance.
+    """
+    step = ImageLoadingStep(**step_config)
+    return step
+
 
 def get_model_step(step_config, step_type):
     """Get a ModelStep from a configuration object
@@ -193,7 +229,6 @@ def get_model_step(step_config, step_type):
         model_type=step_type,
         model_loading_path=pop_data(step_config, "model_loading_path"),
     )
-
     if (
         step_type == "TENSORFLOW"
     ):  # TF has to extra properties, all others are identical

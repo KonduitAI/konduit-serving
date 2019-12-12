@@ -24,7 +24,6 @@ package ai.konduit.serving.util.python;
 
 import ai.konduit.serving.executioner.PythonExecutioner;
 import org.junit.Test;
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import java.util.Arrays;
@@ -32,12 +31,9 @@ import java.util.Collections;
 
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PythonVariablesTest {
-
 
 
     @Test
@@ -65,37 +61,36 @@ public class PythonVariablesTest {
 
         NumpyArray npArr = new NumpyArray(Nd4j.scalar(1.0));
         Object[] values = {
-                1L,1.0,"1",true, Collections.singletonMap("1",1),
-                new Object[]{1}, Arrays.asList(1),"type", npArr
+                1L, 1.0, "1", true, Collections.singletonMap("1", 1),
+                new Object[]{1}, Arrays.asList(1), "type", npArr
         };
 
         Object[] expectedValues = {
-                1L,1.0,"1",true, Collections.singletonMap("1",1),
-                new Object[]{1}, new Object[]{1},"type", npArr
+                1L, 1.0, "1", true, Collections.singletonMap("1", 1),
+                new Object[]{1}, new Object[]{1}, "type", npArr
         };
 
-        for(int i = 0; i < types.length; i++) {
-            testInsertGet(pythonVariables,types[i].name() + i,values[i],types[i],expectedValues[i]);
+        for (int i = 0; i < types.length; i++) {
+            testInsertGet(pythonVariables, types[i].name() + i, values[i], types[i], expectedValues[i]);
         }
 
-        assertEquals(types.length,pythonVariables.getVariables().length);
+        assertEquals(types.length, pythonVariables.getVariables().length);
 
     }
 
-    private void testInsertGet(PythonVariables pythonVariables,String key,Object value,PythonVariables.Type type,Object expectedValue) {
+    private void testInsertGet(PythonVariables pythonVariables, String key, Object value, PythonVariables.Type type, Object expectedValue) {
         pythonVariables.add(key, type);
         assertNull(pythonVariables.getValue(key));
-        pythonVariables.setValue(key,value);
+        pythonVariables.setValue(key, value);
         assertNotNull(pythonVariables.getValue(key));
         Object actualValue = pythonVariables.getValue(key);
-        if (expectedValue instanceof Object[]){
+        if (expectedValue instanceof Object[]) {
             assertTrue(actualValue instanceof Object[]);
-            Object[] actualArr = (Object[])actualValue;
-            Object[] expectedArr = (Object[])expectedValue;
+            Object[] actualArr = (Object[]) actualValue;
+            Object[] expectedArr = (Object[]) expectedValue;
             assertArrayEquals(expectedArr, actualArr);
-        }
-        else{
-            assertEquals(expectedValue,pythonVariables.getValue(key));
+        } else {
+            assertEquals(expectedValue, pythonVariables.getValue(key));
         }
 
     }

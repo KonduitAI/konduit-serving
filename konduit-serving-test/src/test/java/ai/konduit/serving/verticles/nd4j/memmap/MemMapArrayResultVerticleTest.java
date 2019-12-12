@@ -22,28 +22,18 @@
 
 package ai.konduit.serving.verticles.nd4j.memmap;
 
-import ai.konduit.serving.verticles.BaseVerticleTest;
-import ai.konduit.serving.verticles.inference.InferenceVerticle;
-
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.io.File;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -63,19 +53,19 @@ public class MemMapArrayResultVerticleTest extends ai.konduit.serving.verticles.
                         System.out.println("Found numpy array bytes with length " + npyArray.length);
                         System.out.println("Contents: " + new String(npyArray));
                         INDArray arrFromNumpy = Nd4j.createNpyFromByteArray(npyArray);
-                        context.assertEquals(Nd4j.linspace(1,4,4),arrFromNumpy);
+                        context.assertEquals(Nd4j.linspace(1, 4, 4), arrFromNumpy);
                         System.out.println(arrFromNumpy);
                         async.complete();
                     });
 
                     handler.exceptionHandler(exception -> {
-                        if(exception.getCause() != null)
+                        if (exception.getCause() != null)
                             context.fail(exception.getCause());
                         async.complete();
                     });
 
-                }).putHeader("Content-Type","application/json")
-                .putHeader("Content-Length",String.valueOf(jsonArray.toBuffer().length()))
+                }).putHeader("Content-Type", "application/json")
+                .putHeader("Content-Length", String.valueOf(jsonArray.toBuffer().length()))
                 .write(jsonArray.encode());
 
         async.await();

@@ -34,7 +34,7 @@ public class ImagePermuterTests {
         String startingOrder = "nchw";
         String destinationOrder = "nhwc";
         int[] determinePermuteOrder = ImagePermuter.determinePermuteOrder(startingOrder, destinationOrder);
-        assertEquals(destinationOrder,ImagePermuter.applyPermuteOrderToString(startingOrder, determinePermuteOrder));
+        assertEquals(destinationOrder, ImagePermuter.applyPermuteOrderToString(startingOrder, determinePermuteOrder));
     }
 
 }

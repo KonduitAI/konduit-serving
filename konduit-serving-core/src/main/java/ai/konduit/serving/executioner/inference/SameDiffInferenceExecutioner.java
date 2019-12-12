@@ -40,8 +40,8 @@ import org.nd4j.linalg.factory.Nd4j;
  *
  * @author Adam Gibson
  */
-public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelLoader<SameDiff>,INDArray[],INDArray[],
-        ParallelInferenceConfig,SameDiff> {
+public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelLoader<SameDiff>, INDArray[], INDArray[],
+        ParallelInferenceConfig, SameDiff> {
 
     @Getter
     private SameDiffThreadPool sameDiffThreadPool;
@@ -80,9 +80,9 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
 
     @Override
     public INDArray[] execute(INDArray[] input) {
-        INDArray[] ret =  sameDiffThreadPool.output(input);
-        for(int i = 0; i < ret.length; i++) {
-            if(ret[i].dataType() != Nd4j.dataType()) {
+        INDArray[] ret = sameDiffThreadPool.output(input);
+        for (int i = 0; i < ret.length; i++) {
+            if (ret[i].dataType() != Nd4j.dataType()) {
                 ret[i] = Nd4j.dataType() == DataType.DOUBLE
                         ? ret[i].castTo(DataType.DOUBLE)
                         : ret[i].castTo(DataType.FLOAT);
@@ -94,7 +94,7 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
 
     @Override
     public void stop() {
-        if(sameDiffThreadPool != null) {
+        if (sameDiffThreadPool != null) {
             sameDiffThreadPool.shutdown();
         }
     }

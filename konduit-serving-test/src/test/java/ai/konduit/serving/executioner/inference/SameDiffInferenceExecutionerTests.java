@@ -22,8 +22,8 @@
 
 package ai.konduit.serving.executioner.inference;
 
-import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
 import ai.konduit.serving.config.ParallelInferenceConfig;
+import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -49,31 +49,30 @@ public class SameDiffInferenceExecutionerTests {
     public void testSameDiff() throws Exception {
         SameDiffInferenceExecutioner sameDiffInferenceExecutioner = new SameDiffInferenceExecutioner();
         SameDiff sameDiff = SameDiff.create();
-        SDVariable input1 = sameDiff.var("input1",2,2);
-        SDVariable input2 = sameDiff.var("input2",2,2);
-        SDVariable result = input1.add("output",input2);
-        INDArray input1Arr = Nd4j.linspace(1,4,4).reshape(2,2);
-        INDArray input2Arr = Nd4j.linspace(1,4,4).reshape(2,2);
-        sameDiff.associateArrayWithVariable(input1Arr,input1.getVarName());
-        sameDiff.associateArrayWithVariable(input2Arr,input2.getVarName());
-        Map<String,INDArray> indArrays = new LinkedHashMap<>();
-        indArrays.put(input1.getVarName(),input1Arr);
-        indArrays.put(input2.getVarName(),input2Arr);
+        SDVariable input1 = sameDiff.var("input1", 2, 2);
+        SDVariable input2 = sameDiff.var("input2", 2, 2);
+        SDVariable result = input1.add("output", input2);
+        INDArray input1Arr = Nd4j.linspace(1, 4, 4).reshape(2, 2);
+        INDArray input2Arr = Nd4j.linspace(1, 4, 4).reshape(2, 2);
+        sameDiff.associateArrayWithVariable(input1Arr, input1.getVarName());
+        sameDiff.associateArrayWithVariable(input2Arr, input2.getVarName());
+        Map<String, INDArray> indArrays = new LinkedHashMap<>();
+        indArrays.put(input1.getVarName(), input1Arr);
+        indArrays.put(input2.getVarName(), input2Arr);
         Map<String, INDArray> outputs = sameDiff.outputAll(indArrays);
-        assertEquals(3,outputs.size());
+        assertEquals(3, outputs.size());
 
         ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
         File newFile = temporary.newFile();
         sameDiff.asFlatFile(newFile);
-        SameDiffModelLoader sameDiffModelLoader = new SameDiffModelLoader(newFile, Arrays.asList("input1","input2"),Arrays.asList("output"));
+        SameDiffModelLoader sameDiffModelLoader = new SameDiffModelLoader(newFile, Arrays.asList("input1", "input2"), Arrays.asList("output"));
 
 
         sameDiffInferenceExecutioner.initialize(sameDiffModelLoader, parallelInferenceConfig);
 
 
-
         INDArray[] execute = sameDiffInferenceExecutioner.execute(new INDArray[]{input1Arr, input2Arr});
-        assertEquals(outputs.values().iterator().next(),execute[0]);
+        assertEquals(outputs.values().iterator().next(), execute[0]);
     }
 
 }

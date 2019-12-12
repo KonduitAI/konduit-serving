@@ -22,10 +22,10 @@
 
 package ai.konduit.serving.model.loader.tensorflow;
 
+import ai.konduit.serving.model.SavedModelConfig;
 import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.threadpool.tensorflow.conversion.TensorflowConversion;
 import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
-import ai.konduit.serving.model.SavedModelConfig;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -51,11 +50,11 @@ public class TensorflowGraphHolder {
     private GraphDef graphDef;
     private TF_Graph tfGraph;
     private ConfigProto configProto;
-    private List<String> inputNames,outputNames;
+    private List<String> inputNames, outputNames;
     private TF_Status tfStatus;
     private SavedModelConfig savedModelConfig;
     private byte[] graphDefContent;
-    private Map<String, TensorDataType> castingInputTypes,castingOutputTypes;
+    private Map<String, TensorDataType> castingInputTypes, castingOutputTypes;
 
 
     @Builder
@@ -66,23 +65,23 @@ public class TensorflowGraphHolder {
                                  Map<String, TensorDataType> castingInputTypes,
                                  Map<String, TensorDataType> castingOutputTypes,
                                  SavedModelConfig savedModelConfig) throws Exception {
-        if(savedModelConfig == null)
-            Preconditions.checkNotNull(graphContent,"No graph content found!");
-        if(inputNames != null && outputNames != null) {
-            if(inputNames.equals(outputNames)) {
+        if (savedModelConfig == null)
+            Preconditions.checkNotNull(graphContent, "No graph content found!");
+        if (inputNames != null && outputNames != null) {
+            if (inputNames.equals(outputNames)) {
                 throw new IllegalArgumentException("Inputs and outputSchema must not be the same!");
             }
         }
 
-        if(castingInputTypes != null && !castingInputTypes.isEmpty()) {
-            for(Map.Entry<String,TensorDataType> entry : castingInputTypes.entrySet()) {
+        if (castingInputTypes != null && !castingInputTypes.isEmpty()) {
+            for (Map.Entry<String, TensorDataType> entry : castingInputTypes.entrySet()) {
                 Preconditions.checkNotNull(entry.getKey());
                 Preconditions.checkNotNull(entry.getValue());
             }
         }
 
-        if(castingOutputTypes != null && !castingOutputTypes.isEmpty()) {
-            for(Map.Entry<String,TensorDataType> entry : castingOutputTypes.entrySet()) {
+        if (castingOutputTypes != null && !castingOutputTypes.isEmpty()) {
+            for (Map.Entry<String, TensorDataType> entry : castingOutputTypes.entrySet()) {
                 Preconditions.checkNotNull(entry.getKey());
                 Preconditions.checkNotNull(entry.getValue());
             }
@@ -93,18 +92,18 @@ public class TensorflowGraphHolder {
         this.castingInputTypes = castingInputTypes;
         this.castingOutputTypes = castingOutputTypes;
         this.graphDefContent = graphContent;
-        if(graphDefContent != null && savedModelConfig == null)
+        if (graphDefContent != null && savedModelConfig == null)
             graphDef = GraphDef.parseFrom(graphContent);
-        else if(savedModelConfig == null){
+        else if (savedModelConfig == null) {
             throw new IllegalStateException("No saved model configuration or graph proto file loaded!");
         }
         this.inputNames = inputNames;
         this.outputNames = outputNames;
         tfStatus = TF_Status.newStatus();
         log.info("Loading graph");
-        if(graphDefContent != null)
-            tfGraph = TensorflowConversion.getInstance().loadGraph(graphDefContent,tfStatus);
-        if(configProto != null) {
+        if (graphDefContent != null)
+            tfGraph = TensorflowConversion.getInstance().loadGraph(graphDefContent, tfStatus);
+        if (configProto != null) {
             this.configProto = ConfigProto.parseFrom(configProto);
         }
     }
@@ -114,6 +113,7 @@ public class TensorflowGraphHolder {
      * Creates a graph runner
      * based on the configuration
      * of the graph holder.
+     *
      * @return he created {@link GraphRunner}
      */
     public GraphRunner createRunner() {

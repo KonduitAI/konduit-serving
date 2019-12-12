@@ -41,6 +41,15 @@ public class Output {
     /**
      * Used by {@link ai.konduit.serving.output.adapter.OutputAdapter}.
      * This is for specifying modifications of outputs.
+     *
+     * The typical configuration should usually be {@link #RAW}.
+     * All other types exist to make it easier to convert
+     * {@link org.nd4j.linalg.api.ndarray.INDArray} output to
+     * user readable json automatically.
+     *
+     * Various {@link ai.konduit.serving.pipeline.PipelineStep}s have
+     * different expected {@link PredictionType}s
+     * when they are the final output.
      */
     public enum PredictionType {
         CLASSIFICATION,

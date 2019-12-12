@@ -42,7 +42,8 @@
                 <MiningModel functionName="regression" x-mathContext="float">
                     <MiningSchema/>
                     <Output>
-                        <OutputField name="xgbValue" optype="continuous" jsonInputType="float" feature="predictedValue" isFinalResult="false"/>
+                        <OutputField name="xgbValue" optype="continuous" jsonInputType="float" feature="predictedValue"
+                                     isFinalResult="false"/>
                     </Output>
                     <Segmentation multipleModelMethod="sum"/>
                 </MiningModel>
@@ -55,8 +56,10 @@
                         <MiningField name="xgbValue"/>
                     </MiningSchema>
                     <Output>
-                        <OutputField name="probability(0)" optype="continuous" jsonInputType="float" feature="probability" value="0"/>
-                        <OutputField name="probability(1)" optype="continuous" jsonInputType="float" feature="probability" value="1"/>
+                        <OutputField name="probability(0)" optype="continuous" jsonInputType="float"
+                                     feature="probability" value="0"/>
+                        <OutputField name="probability(1)" optype="continuous" jsonInputType="float"
+                                     feature="probability" value="1"/>
                     </Output>
                     <RegressionTable intercept="0.0" targetCategory="1">
                         <NumericPredictor name="xgbValue" coefficient="1.0"/>

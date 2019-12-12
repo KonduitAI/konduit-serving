@@ -185,23 +185,24 @@ public class MemMapRouteDefiner {
 
         router.post("/array/:arrayType")
                 .handler(ctx -> {
-                    INDArray write = getOrSetArrForContext();
+                    INDArray write  = getOrSetArrForContext();
                     String paramType = ctx.pathParam("arrayType");
-                    if (paramType.equals("json"))
-                        writeArrayJson(write, ctx);
+                    if(paramType.equals("json"))
+                        writeArrayJson(write,ctx);
                     else
-                        writeArrayBinary(write, ctx);
+                        writeArrayBinary(write,ctx);
                 });
+
 
 
         router.post("/array/indices/:arrayType")
                 .handler(ctx -> {
-                    INDArray write = getArrayFromContext(ctx);
+                    INDArray write  = getArrayFromContext(ctx);
                     String paramType = ctx.pathParam("arrayType");
-                    if (paramType.equals("json"))
-                        writeArrayJson(write, ctx);
+                    if(paramType.equals("json"))
+                        writeArrayJson(write,ctx);
                     else
-                        writeArrayBinary(write, ctx);
+                        writeArrayBinary(write,ctx);
                 });
 
         router.post("/array/range/:from/:to/:arrayType")

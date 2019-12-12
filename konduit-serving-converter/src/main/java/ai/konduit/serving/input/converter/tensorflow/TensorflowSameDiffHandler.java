@@ -60,14 +60,13 @@ public class TensorflowSameDiffHandler implements Handler<RoutingContext> {
             ByteBuffer byteBuffer = sameDiff.asFlatBuffers(true);
             Buffer buffer = Buffer.buffer(Unpooled.wrappedBuffer(byteBuffer));
             File newFile = new File("tmpFile-" + UUID.randomUUID().toString() + ".xml");
-            FileUtils.writeByteArrayToFile(newFile,buffer.getBytes());
-            event.response().sendFile(newFile.getAbsolutePath(),resultHandler -> {
-                if(resultHandler.failed()) {
+            FileUtils.writeByteArrayToFile(newFile, buffer.getBytes());
+            event.response().sendFile(newFile.getAbsolutePath(), resultHandler -> {
+                if (resultHandler.failed()) {
                     resultHandler.cause().printStackTrace();
                     event.response().setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 
-                }
-                else {
+                } else {
                     event.response().setStatusCode(200);
                 }
             });
@@ -77,14 +76,11 @@ public class TensorflowSameDiffHandler implements Handler<RoutingContext> {
                 exception.printStackTrace();
             });
 
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             event.response().setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             event.response().setStatusMessage("Error importing model " + e.getMessage());
         }
     }
-
-
 
 
     protected File getTmpFileWithContext(RoutingContext req) {
@@ -94,7 +90,7 @@ public class TensorflowSameDiffHandler implements Handler<RoutingContext> {
         try {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buff.getBytes());
             FileOutputStream fileOutputStream = new FileOutputStream(tmpFile);
-            IOUtils.copy(byteArrayInputStream,fileOutputStream);
+            IOUtils.copy(byteArrayInputStream, fileOutputStream);
             fileOutputStream.flush();
             fileOutputStream.close();
         } catch (IOException e) {

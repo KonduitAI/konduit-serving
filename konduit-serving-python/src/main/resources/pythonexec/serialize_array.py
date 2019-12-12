@@ -1,5 +1,6 @@
 def __is_numpy_array(x):
-    return str(type(x))== "<class 'numpy.ndarray'>"
+    return str(type(x)) == "<class 'numpy.ndarray'>"
+
 
 def __maybe_serialize_ndarray_metadata(x):
     return __serialize_ndarray_metadata(x) if __is_numpy_array(x) else x
@@ -22,6 +23,7 @@ def __serialize_dict(x):
     import json
     return json.dumps(__recursive_serialize_dict(x))
 
+
 def __recursive_serialize_list(x):
     out = []
     for i in x:
@@ -34,6 +36,7 @@ def __recursive_serialize_list(x):
         else:
             out.append(i)
     return out
+
 
 def __recursive_serialize_dict(x):
     out = {}

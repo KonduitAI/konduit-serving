@@ -96,7 +96,7 @@ public class PythonTransformTest {
                 PythonTransform.builder().code(pythonCode)
                         .outputSchema(finalSchema)
                         .inputSchema(initialSchema)
-                        .build()        ).build();
+                        .build()).build();
 
         List<Writable> inputs = Arrays.asList(new IntWritable(10),
                 new FloatWritable(3.5f),
@@ -105,7 +105,7 @@ public class PythonTransformTest {
         );
 
         List<Writable> outputs = tp.execute(inputs);
-        assertEquals(((LongWritable)outputs.get(4)).get(), 36);
+        assertEquals(((LongWritable) outputs.get(4)).get(), 36);
     }
 
     @Test(timeout = 60000L)
@@ -129,7 +129,7 @@ public class PythonTransformTest {
         TransformProcess tp = new TransformProcess.Builder(initialSchema).transform(
                 PythonTransform.builder().code(pythonCode)
                         .outputSchema(finalSchema)
-                        .build()        ).build();
+                        .build()).build();
 
         List<Writable> inputs = Arrays.asList(
                 new NDArrayWritable(arr1),
@@ -137,9 +137,9 @@ public class PythonTransformTest {
         );
 
         List<Writable> outputs = tp.execute(inputs);
-        assertEquals(arr1, ((NDArrayWritable)outputs.get(0)).get());
-        assertEquals(arr2, ((NDArrayWritable)outputs.get(1)).get());
-        assertEquals(expectedOutput,((NDArrayWritable)outputs.get(2)).get());
+        assertEquals(arr1, ((NDArrayWritable) outputs.get(0)).get());
+        assertEquals(arr2, ((NDArrayWritable) outputs.get(1)).get());
+        assertEquals(expectedOutput, ((NDArrayWritable) outputs.get(2)).get());
 
     }
 
@@ -164,7 +164,7 @@ public class PythonTransformTest {
         TransformProcess tp = new TransformProcess.Builder(initialSchema).transform(
                 PythonTransform.builder().code(pythonCode)
                         .outputSchema(finalSchema)
-                        .build()        ).build();
+                        .build()).build();
 
         List<Writable> inputs = Arrays.asList(
                 new NDArrayWritable(arr1),
@@ -172,9 +172,9 @@ public class PythonTransformTest {
         );
 
         List<Writable> outputs = tp.execute(inputs);
-        assertEquals(arr1, ((NDArrayWritable)outputs.get(0)).get());
-        assertEquals(arr2, ((NDArrayWritable)outputs.get(1)).get());
-        assertEquals(expectedOutput,((NDArrayWritable)outputs.get(2)).get());
+        assertEquals(arr1, ((NDArrayWritable) outputs.get(0)).get());
+        assertEquals(arr2, ((NDArrayWritable) outputs.get(1)).get());
+        assertEquals(expectedOutput, ((NDArrayWritable) outputs.get(2)).get());
 
     }
 
@@ -207,9 +207,9 @@ public class PythonTransformTest {
         );
 
         List<Writable> outputs = tp.execute(inputs);
-        assertEquals(arr1, ((NDArrayWritable)outputs.get(0)).get());
-        assertEquals(arr2, ((NDArrayWritable)outputs.get(1)).get());
-        assertEquals(expectedOutput,((NDArrayWritable)outputs.get(2)).get());
+        assertEquals(arr1, ((NDArrayWritable) outputs.get(0)).get());
+        assertEquals(arr2, ((NDArrayWritable) outputs.get(1)).get());
+        assertEquals(expectedOutput, ((NDArrayWritable) outputs.get(2)).get());
 
     }
 
@@ -283,7 +283,7 @@ public class PythonTransformTest {
                         new DoubleWritable(2.1))
         );
 
-        LocalTransformExecutor.execute(inputs,tp);
+        LocalTransformExecutor.execute(inputs, tp);
     }
 
 
@@ -303,8 +303,8 @@ public class PythonTransformTest {
                 .transform(pythonTransform)
                 .build();
         List<List<Writable>> execute = LocalTransformExecutor.execute(inputs, tp);
-        assertEquals(3,execute.get(0).get(0).toInt());
-        assertEquals("hello world",execute.get(0).get(1).toString());
+        assertEquals(3, execute.get(0).get(0).toInt());
+        assertEquals("hello world", execute.get(0).get(1).toString());
 
     }
 
@@ -318,7 +318,7 @@ public class PythonTransformTest {
         List<List<Writable>> inputs = new ArrayList<>();
         inputs.add(Collections.singletonList(new NDArrayWritable(Nd4j.scalar(1).reshape(1, 1))));
         Schema inputSchema = new Builder()
-                .addColumnNDArray("a",new long[]{1,1})
+                .addColumnNDArray("a", new long[]{1, 1})
                 .build();
 
         TransformProcess tp = new TransformProcess.Builder(inputSchema)
@@ -328,7 +328,7 @@ public class PythonTransformTest {
         assertFalse(execute.isEmpty());
         assertNotNull(execute.get(0));
         assertNotNull(execute.get(0).get(0));
-        assertEquals("hello world",execute.get(0).get(0).toString());
+        assertEquals("hello world", execute.get(0).get(0).toString());
     }
 
 }

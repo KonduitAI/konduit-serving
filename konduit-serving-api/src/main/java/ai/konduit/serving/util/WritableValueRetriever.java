@@ -43,46 +43,40 @@ public class WritableValueRetriever {
      * If an input type is invalid, an
      * {@link IllegalArgumentException}
      * will be thrown
+     *
      * @param input the input object
      * @return writable
      */
     public static Writable writableFromValue(Object input) {
-        Preconditions.checkNotNull(input,"Unable to convert null value!");
-        if(input instanceof Double) {
+        Preconditions.checkNotNull(input, "Unable to convert null value!");
+        if (input instanceof Double) {
             return new DoubleWritable((Double) input);
-        }
-        else if(input instanceof Float) {
+        } else if (input instanceof Float) {
             return new FloatWritable((Float) input);
-        }
-        else if(input instanceof String) {
+        } else if (input instanceof String) {
             return new Text(input.toString());
-        }
-        else if(input instanceof Long) {
+        } else if (input instanceof Long) {
             return new LongWritable((Long) input);
-        }
-        else if(input instanceof INDArray) {
+        } else if (input instanceof INDArray) {
             return new NDArrayWritable((INDArray) input);
-        }
-        else if(input instanceof Integer) {
+        } else if (input instanceof Integer) {
             return new IntWritable((Integer) input);
-        }
-        else if(input instanceof byte[]) {
+        } else if (input instanceof byte[]) {
             return new BytesWritable((byte[]) input);
-        }
-        else if(input instanceof Boolean) {
+        } else if (input instanceof Boolean) {
             return new BooleanWritable((Boolean) input);
-        }
-        else
+        } else
             throw new IllegalArgumentException("Unsupported type " + input.getClass().getName());
     }
 
     /**
      * Get the underlying value fro the given {@link Writable}
+     *
      * @param writable the writable to get the value for
      * @return the underlying value represnted by the {@link Writable}
      */
     public static Object getUnderlyingValue(Writable writable) {
-        switch(writable.getType()) {
+        switch (writable.getType()) {
             case Float:
                 return writable.toFloat();
             case Double:

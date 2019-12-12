@@ -29,10 +29,10 @@ import org.datavec.api.transform.serde.JsonMappers;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Text;
 import org.datavec.api.writable.Writable;
-import org.dmg.pmml.*;
 import org.dmg.pmml.OutputField;
-import org.jpmml.evaluator.*;
+import org.dmg.pmml.*;
 import org.jpmml.evaluator.Value;
+import org.jpmml.evaluator.*;
 import org.jpmml.evaluator.clustering.ClusterAffinityDistribution;
 import org.jpmml.evaluator.support_vector_machine.DistanceDistribution;
 import org.nd4j.base.Preconditions;
@@ -44,19 +44,17 @@ import java.util.*;
 public class PmmlUtils {
 
 
-
-    public static Map<String,Double> getResult(Evaluator evaluator, Object result) {
+    public static Map<String, Double> getResult(Evaluator evaluator, Object result) {
         MiningFunction miningFunction = evaluator.getMiningFunction();
-        switch(miningFunction){
+        switch (miningFunction) {
             case CLASSIFICATION:
-                if(result instanceof Map) {
-                    return (Map<String,Double>) result;
-                }
-                else {
+                if (result instanceof Map) {
+                    return (Map<String, Double>) result;
+                } else {
                     HasProbability probability = (HasProbability) result;
-                    Map<String,Double> ret = new HashMap<>();
-                    for(String category : probability.getCategories()) {
-                        ret.put(category,probability.getProbability(category));
+                    Map<String, Double> ret = new HashMap<>();
+                    for (String category : probability.getCategories()) {
+                        ret.put(category, probability.getProbability(category));
                     }
 
                     return ret;
@@ -77,22 +75,23 @@ public class PmmlUtils {
 
     /**
      * Convert the input pmm output to {@link Record}
-     * @param pmmlInput the input
+     *
+     * @param pmmlInput        the input
      * @param conversionSchema the intended schema
      * @return the equivalent records based on the pmml output
      */
-    public static Record[] toRecords(List<Map<FieldName,Object>> pmmlInput, Schema conversionSchema) {
+    public static Record[] toRecords(List<Map<FieldName, Object>> pmmlInput, Schema conversionSchema) {
         Record[] ret = new Record[pmmlInput.size()];
-        for(int i = 0; i < pmmlInput.size(); i++) {
-            Preconditions.checkState(conversionSchema.numColumns() == pmmlInput.get(i).size(),"Illegal pmml output. Does not match passed in schema.");
+        for (int i = 0; i < pmmlInput.size(); i++) {
+            Preconditions.checkState(conversionSchema.numColumns() == pmmlInput.get(i).size(), "Illegal pmml output. Does not match passed in schema.");
             List<Writable> record = new ArrayList<>();
-            for(int j = 0; j < conversionSchema.numColumns(); j++) {
+            for (int j = 0; j < conversionSchema.numColumns(); j++) {
                 FieldName fieldName = FieldName.create(conversionSchema.getName(j));
                 Object value = pmmlInput.get(i).get(fieldName);
-                Preconditions.checkNotNull(value,"Value " + fieldName.getValue() + " not found!");
-                if(value instanceof HasProbability) {
+                Preconditions.checkNotNull(value, "Value " + fieldName.getValue() + " not found!");
+                if (value instanceof HasProbability) {
                     HasProbability probabilityDistribution = (HasProbability) value;
-                    switch(conversionSchema.getType(j)) {
+                    switch (conversionSchema.getType(j)) {
                         case String:
                             try {
                                 Text text = new Text(JsonMappers.getMapper().writeValueAsString(probabilityDistribution));
@@ -104,27 +103,26 @@ public class PmmlUtils {
                         case NDArray:
                             double[] probabilities = new double[probabilityDistribution.getCategories().size()];
                             int count = 0;
-                            for(Object catgory : probabilityDistribution.getCategories()) {
+                            for (Object catgory : probabilityDistribution.getCategories()) {
                                 probabilities[count++] = probabilityDistribution.getProbability(catgory.toString());
                             }
                             record.add(new NDArrayWritable(Nd4j.createFromArray(probabilities)));
                             break;
 
                     }
-                }
-                else if(value instanceof Classification) {
+                } else if (value instanceof Classification) {
                     Classification classification = (Classification) value;
-                    switch(classification.getType()) {
+                    switch (classification.getType()) {
                         case DISTANCE:
                             DistanceDistribution distanceDistribution = (DistanceDistribution) classification;
-                            ValueMap<String,Double> values = distanceDistribution.getValues();
-                            Map<String,Double> map = new LinkedHashMap<>();
-                            for(Map.Entry<String, Value<Double>> entry : values.entrySet()) {
-                                map.put(entry.getKey(),entry.getValue().doubleValue());
+                            ValueMap<String, Double> values = distanceDistribution.getValues();
+                            Map<String, Double> map = new LinkedHashMap<>();
+                            for (Map.Entry<String, Value<Double>> entry : values.entrySet()) {
+                                map.put(entry.getKey(), entry.getValue().doubleValue());
                             }
 
 
-                            switch(conversionSchema.getType(j)) {
+                            switch (conversionSchema.getType(j)) {
                                 case String:
                                     try {
                                         Text text = new Text(JsonMappers.getMapper().writeValueAsString(map));
@@ -136,7 +134,7 @@ public class PmmlUtils {
                                 case NDArray:
                                     double[] probabilities = new double[map.size()];
                                     int count = 0;
-                                    for(Map.Entry<String,Double> category : map.entrySet()) {
+                                    for (Map.Entry<String, Double> category : map.entrySet()) {
                                         probabilities[count++] = category.getValue();
                                     }
                                     record.add(new NDArrayWritable(Nd4j.createFromArray(probabilities)));
@@ -148,7 +146,7 @@ public class PmmlUtils {
                             break;
                         case SIMILARITY:
                             ClusterAffinityDistribution clusterAffinityDistribution = (ClusterAffinityDistribution) classification;
-                            switch(conversionSchema.getType(j)) {
+                            switch (conversionSchema.getType(j)) {
                                 case String:
                                     try {
                                         Text text = new Text(JsonMappers.getMapper().writeValueAsString(clusterAffinityDistribution));
@@ -160,7 +158,7 @@ public class PmmlUtils {
                                 case NDArray:
                                     double[] probabilities = new double[clusterAffinityDistribution.getCategories().size()];
                                     int count = 0;
-                                    for(Object catgory : clusterAffinityDistribution.getCategories()) {
+                                    for (Object catgory : clusterAffinityDistribution.getCategories()) {
                                         probabilities[count++] = clusterAffinityDistribution.getAffinity(catgory.toString());
                                     }
                                     record.add(new NDArrayWritable(Nd4j.createFromArray(probabilities)));
@@ -176,15 +174,14 @@ public class PmmlUtils {
                         case CONFIDENCE:
                             throw new IllegalStateException("Probability case should be handled earlier");
                     }
-                }
-                else {
+                } else {
                     Writable writable = WritableValueRetriever.writableFromValue(value);
                     record.add(writable);
                 }
 
             }
 
-            ret[i] = new org.datavec.api.records.impl.Record(record,null);
+            ret[i] = new org.datavec.api.records.impl.Record(record, null);
         }
 
         return ret;
@@ -194,46 +191,44 @@ public class PmmlUtils {
     /**
      * Auto infer a schema based on the final model
      * output from the pmml document.
+     *
      * @param pmml the pmml document
      * @return the output schema relative to the output fields
-     *  in the pmml document
+     * in the pmml document
      */
     public static Schema outputSchema(PMML pmml) {
         Schema.Builder ret = new Schema.Builder();
-        Preconditions.checkState(!pmml.getModels().isEmpty(),"No models found for automatic inference of output schema");
+        Preconditions.checkState(!pmml.getModels().isEmpty(), "No models found for automatic inference of output schema");
         Model model = pmml.getModels().get(pmml.getModels().size() - 1);
         Output output = model.getOutput();
-        if(output != null) {
-            for(OutputField outputField : output.getOutputFields()) {
-                if(outputField.getDataType() != null)
-                    addDataTypeForSchema(outputField.getDataType(),ret,outputField.getName().getValue());
+        if (output != null) {
+            for (OutputField outputField : output.getOutputFields()) {
+                if (outputField.getDataType() != null)
+                    addDataTypeForSchema(outputField.getDataType(), ret, outputField.getName().getValue());
                 else {
-                    addDataTypeForSchema(DataType.STRING,ret,outputField.getName().getValue());
+                    addDataTypeForSchema(DataType.STRING, ret, outputField.getName().getValue());
                 }
             }
-        }
-        else {
-            if(model.getMiningFunction() == MiningFunction.CLASSIFICATION) {
-                for(DataField dataField : pmml.getDataDictionary().getDataFields()) {
-                    if(dataField.getOpType() == OpType.CATEGORICAL && model.getMiningFunction() == MiningFunction.CLASSIFICATION) {
-                        addDataTypeForSchema(dataField.getDataType(),ret,dataField.getName().getValue());
+        } else {
+            if (model.getMiningFunction() == MiningFunction.CLASSIFICATION) {
+                for (DataField dataField : pmml.getDataDictionary().getDataFields()) {
+                    if (dataField.getOpType() == OpType.CATEGORICAL && model.getMiningFunction() == MiningFunction.CLASSIFICATION) {
+                        addDataTypeForSchema(dataField.getDataType(), ret, dataField.getName().getValue());
                     }
 
                 }
 
-            }
-            else if(model.getMiningFunction() == MiningFunction.REGRESSION) {
-                for(MiningField miningField : model.getMiningSchema().getMiningFields()) {
-                    if(miningField.getUsageType() == MiningField.UsageType.PREDICTED) {
-                        for(DataField dataField : pmml.getDataDictionary().getDataFields()) {
-                            if(dataField.getName().equals(miningField.getName())) {
-                                addDataTypeForSchema(dataField.getDataType(),ret,dataField.getName().getValue());
+            } else if (model.getMiningFunction() == MiningFunction.REGRESSION) {
+                for (MiningField miningField : model.getMiningSchema().getMiningFields()) {
+                    if (miningField.getUsageType() == MiningField.UsageType.PREDICTED) {
+                        for (DataField dataField : pmml.getDataDictionary().getDataFields()) {
+                            if (dataField.getName().equals(miningField.getName())) {
+                                addDataTypeForSchema(dataField.getDataType(), ret, dataField.getName().getValue());
                             }
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 throw new IllegalStateException("Unsupported mining function type " + model.getMiningFunction());
             }
 
@@ -246,6 +241,7 @@ public class PmmlUtils {
     /**
      * Convert a {@link DataDictionary}
      * to a schema {@link Schema}
+     *
      * @param pmml the target {@link PMML} document
      * @return the equivalent {@link Schema}
      */
@@ -255,24 +251,24 @@ public class PmmlUtils {
         MiningSchema miningSchema = pmml.getModels().get(0).getMiningSchema();
         Set<FieldName> outputNames = new HashSet<>();
         //ensure we only grab output fields
-        for(MiningField miningField : miningSchema.getMiningFields()) {
-            if(miningField.getUsageType() == MiningField.UsageType.PREDICTED) {
+        for (MiningField miningField : miningSchema.getMiningFields()) {
+            if (miningField.getUsageType() == MiningField.UsageType.PREDICTED) {
                 outputNames.add(miningField.getName());
             }
         }
-        for(int i = 0; i < dataDictionary.getNumberOfFields(); i++) {
+        for (int i = 0; i < dataDictionary.getNumberOfFields(); i++) {
             String name = dataDictionary.getDataFields().get(i).getName().getValue();
-            if(!outputNames.contains(dataDictionary.getDataFields().get(i).getName()))
-                addDataTypeForSchema(dataDictionary.getDataFields().get(i).getDataType(),ret,name);
+            if (!outputNames.contains(dataDictionary.getDataFields().get(i).getName()))
+                addDataTypeForSchema(dataDictionary.getDataFields().get(i).getDataType(), ret, name);
 
         }
 
         return ret.build();
     }
 
-    public static void addDataTypeForSchema(DataType dataType,Schema.Builder ret,String name) {
-        Preconditions.checkNotNull(dataType,"Data type for name " + name + " is null!");
-        switch(dataType) {
+    public static void addDataTypeForSchema(DataType dataType, Schema.Builder ret, String name) {
+        Preconditions.checkNotNull(dataType, "Data type for name " + name + " is null!");
+        switch (dataType) {
             case FLOAT:
                 ret.addColumnFloat(name);
                 break;

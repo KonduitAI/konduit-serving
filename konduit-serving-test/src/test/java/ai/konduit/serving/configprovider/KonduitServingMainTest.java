@@ -23,12 +23,12 @@
 package ai.konduit.serving.configprovider;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.model.ModelConfig;
+import ai.konduit.serving.model.ModelConfigType;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -49,12 +49,28 @@ import java.nio.charset.Charset;
 public class KonduitServingMainTest {
 
 
+    /**
+     * @return single available port number
+     */
+    public static int getAvailablePort() {
+        try {
+            ServerSocket socket = new ServerSocket(0);
+            try {
+                return socket.getLocalPort();
+            } finally {
+                socket.close();
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot find available port: " + e.getMessage(), e);
+        }
+    }
+
     @Test
     public void testFile() throws Exception {
         KonduitServingMain konduitServingMain = new KonduitServingMain();
         JsonObject config = getConfig();
-        File jsonConfigPath = new File(System.getProperty("java.io.tmpdir"),"config.json");
-        FileUtils.write(jsonConfigPath,config.encodePrettily(), Charset.defaultCharset());
+        File jsonConfigPath = new File(System.getProperty("java.io.tmpdir"), "config.json");
+        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
         int port = getAvailablePort();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
@@ -68,11 +84,10 @@ public class KonduitServingMainTest {
         Thread.sleep(10000);
     }
 
-
     public JsonObject getConfig() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
-        File modelSave =  new File(System.getProperty("java.io.tmpdir"),"model.zip");
-        ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave,false);
+        File modelSave = new File(System.getProperty("java.io.tmpdir"), "model.zip");
+        ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
 
 
         Schema.Builder schemaBuilder = new Schema.Builder();
@@ -93,8 +108,7 @@ public class KonduitServingMainTest {
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
 
-        
-        
+
         ModelConfig modelConfig = ModelConfig.builder()
                 .modelConfigType(
                         ModelConfigType.builder().modelLoadingPath(modelSave.getAbsolutePath())
@@ -106,12 +120,12 @@ public class KonduitServingMainTest {
                 .inputName("default")
                 .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
                 .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
-                .outputSchema("default",SchemaTypeUtils.typesForSchema(outputSchema))
+                .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
                 .modelConfig(modelConfig)
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .build();
-        
-        
+
+
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .step(modelPipelineStep)
@@ -119,22 +133,5 @@ public class KonduitServingMainTest {
 
 
         return new JsonObject(inferenceConfiguration.toJson());
-    }
-
-
-    /**
-     * @return single available port number
-     */
-    public static int getAvailablePort() {
-        try {
-            ServerSocket socket = new ServerSocket(0);
-            try {
-                return socket.getLocalPort();
-            } finally {
-                socket.close();
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot find available port: " + e.getMessage(), e);
-        }
     }
 }

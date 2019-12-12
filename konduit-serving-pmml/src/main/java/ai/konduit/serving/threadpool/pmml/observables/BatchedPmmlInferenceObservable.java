@@ -37,31 +37,29 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @NoArgsConstructor
 public class BatchedPmmlInferenceObservable extends Observable implements PmmlObservable {
 
-    private List<Map<FieldName,Object>> input;
+    private final Object locker = new Object();
+    protected Exception exception;
+    private List<Map<FieldName, Object>> input;
     @Getter
     private long id;
-    private List<Map<FieldName,Object>> output;
-    protected Exception exception;
+    private List<Map<FieldName, Object>> output;
     private AtomicInteger counter = new AtomicInteger(0);
     private ThreadLocal<Integer> position = new ThreadLocal<>();
     private List<int[]> outputBatchInputArrays = new ArrayList<>();
-
-    private final Object locker = new Object();
-
     private ReentrantReadWriteLock realLocker = new ReentrantReadWriteLock();
     private AtomicBoolean isLocked = new AtomicBoolean(false);
     private AtomicBoolean isReadLocked = new AtomicBoolean(false);
 
 
-    public BatchedPmmlInferenceObservable(List<Map<FieldName,Object>> inputs) {
+    public BatchedPmmlInferenceObservable(List<Map<FieldName, Object>> inputs) {
         this.input = inputs;
     }
 
 
     @Override
-    public void addInput(@NonNull List<Map<FieldName,Object>>  input) {
+    public void addInput(@NonNull List<Map<FieldName, Object>> input) {
         synchronized (locker) {
-            if(this.input == null)
+            if (this.input == null)
                 this.input = new ArrayList<>();
             this.input.addAll(input);
             position.set(counter.getAndIncrement());
@@ -73,9 +71,8 @@ public class BatchedPmmlInferenceObservable extends Observable implements PmmlOb
     }
 
 
-
     @Override
-    public List<Map<FieldName,Object>> getInputBatches() {
+    public List<Map<FieldName, Object>> getInputBatches() {
         realLocker.writeLock().lock();
         isLocked.set(true);
 
@@ -86,11 +83,11 @@ public class BatchedPmmlInferenceObservable extends Observable implements PmmlOb
         if (counter.get() > 1) {
 
             int pos = 0;
-            List<Map<FieldName,Object>> out = new ArrayList<>(input);
+            List<Map<FieldName, Object>> out = new ArrayList<>(input);
             realLocker.writeLock().unlock();
             return out;
         } else {
-            outputBatchInputArrays.add(new int[]{0,0});
+            outputBatchInputArrays.add(new int[]{0, 0});
             realLocker.writeLock().unlock();
             return Collections.singletonList(input.get(0));
         }
@@ -98,7 +95,7 @@ public class BatchedPmmlInferenceObservable extends Observable implements PmmlOb
 
 
     @Override
-    public void setOutputBatches(List<Map<FieldName,Object>> output) {
+    public void setOutputBatches(List<Map<FieldName, Object>> output) {
         //this method should split batched output INDArray[] into multiple separate INDArrays
         int countNumInputBatches = 0;   //Counter for total number of input batches processed
         this.output = output;
@@ -107,27 +104,22 @@ public class BatchedPmmlInferenceObservable extends Observable implements PmmlOb
     }
 
     @Override
-    public void setOutputException(Exception e) {
-        this.exception = e;
-    }
-
-    @Override
     public Exception getOutputException() {
         return exception;
     }
 
+    @Override
+    public void setOutputException(Exception e) {
+        this.exception = e;
+    }
 
     /**
      * PLEASE NOTE: This method is for tests only
      *
      * @return the outputs of the observable
      */
-    protected List<Map<FieldName,Object>> getOutputs() {
+    protected List<Map<FieldName, Object>> getOutputs() {
         return output;
-    }
-
-    protected void setCounter(int value) {
-        counter.set(value);
     }
 
     public void setPosition(int pos) {
@@ -138,7 +130,9 @@ public class BatchedPmmlInferenceObservable extends Observable implements PmmlOb
         return counter.get();
     }
 
-
+    protected void setCounter(int value) {
+        counter.set(value);
+    }
 
     public boolean isLocked() {
         boolean lck = !realLocker.readLock().tryLock();

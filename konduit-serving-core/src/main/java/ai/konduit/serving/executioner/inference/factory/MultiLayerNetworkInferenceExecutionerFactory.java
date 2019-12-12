@@ -23,8 +23,8 @@
 package ai.konduit.serving.executioner.inference.factory;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
-import ai.konduit.serving.executioner.inference.MultiLayerNetworkInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
+import ai.konduit.serving.executioner.inference.MultiLayerNetworkInferenceExecutioner;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.loader.dl4j.mln.MultiLayerNetworkModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
@@ -45,6 +45,6 @@ public class MultiLayerNetworkInferenceExecutionerFactory implements InferenceEx
         inferenceExecutioner.initialize(multiLayerNetworkModelLoader, parallelInferenceConfig);
         List<String> inputNames = Collections.singletonList("default");
         List<String> outputNames = Collections.singletonList("default");
-        return new InitializedInferenceExecutionerConfig(inferenceExecutioner,inputNames,outputNames);
+        return new InitializedInferenceExecutionerConfig(inferenceExecutioner, inputNames, outputNames);
     }
 }

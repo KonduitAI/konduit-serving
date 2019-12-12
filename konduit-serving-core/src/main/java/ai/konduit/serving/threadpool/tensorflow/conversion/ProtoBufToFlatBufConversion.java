@@ -32,12 +32,12 @@ import java.io.IOException;
  * Conversion from models saved using the Google's Protocol Buffer
  * (https://github.com/protocolbuffers/protobuf) to flatbuffer format
  * (https://github.com/google/flatbuffers)
- *
+ * <p>
  * This is especially useful for executing models using only the C++ libnd4j
  * library, as the protobuf loader is only available through the Java API
- *
+ * <p>
  * It simply loads a file as a SameDiff and saves it as a flat file.
- *
+ * <p>
  * There is a special case for BERT models where a pre-processing is necessary:
  * See nd4j/nd4j-backends/nd4j-tests/src/test/java/org/nd4j/imports/TFGraphs/BERTGraphTest.java
  * for details
@@ -49,13 +49,14 @@ public class ProtoBufToFlatBufConversion {
     /**
      * Converts a file containing a model from the Protocol Buffer format to the Flat
      * Buffer format.
-     * @param inFile input file (.pb format)
+     *
+     * @param inFile  input file (.pb format)
      * @param outFile output file (.fb format)
-     * @throws IOException I/O Exception
+     * @throws IOException                                         I/O Exception
      * @throws org.nd4j.linalg.exception.ND4JIllegalStateException if an error occurs during conversion
      */
     public static void convert(String inFile, String outFile)
-                    throws IOException, org.nd4j.linalg.exception.ND4JIllegalStateException {
+            throws IOException, org.nd4j.linalg.exception.ND4JIllegalStateException {
         SameDiff tg = TFGraphMapper.importGraph(new File(inFile));
         tg.asFlatFile(new File(outFile));
     }
@@ -73,7 +74,7 @@ public class ProtoBufToFlatBufConversion {
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
             System.err.println("Usage:\n"
-                            + "mvn exec:java -Dexec.mainClass=\"org.nd4j.tensorflow.conversion.ProtoBufToFlatBufConversion\" -Dexec.args=\"<input_file.pb> <output_file.fb>\"\n");
+                    + "mvn exec:java -Dexec.mainClass=\"org.nd4j.tensorflow.conversion.ProtoBufToFlatBufConversion\" -Dexec.args=\"<input_file.pb> <output_file.fb>\"\n");
         } else {
             convert(args[0], args[1]);
         }

@@ -48,39 +48,38 @@ import static org.bytedeco.tensorflow.global.tensorflow.*;
 /**
  * Interop between nd4j {@link INDArray}
  * and {@link TF_Tensor}
- * 
+ * <p>
  * Of note are data type conversion utilities,
  * creation of {@link TF_Tensor} objects back and forth.
- * 
+ * <p>
  * Note that for data types it relies on references from the javacpp presets
  * directly generated from the tensorflow c++ sources.
- * 
+ * <p>
  * For ease of use, the data type integers are presented as below:
- *  DT_INVALID = 0
- *  DT_FLOAT = 1
- *  DT_DOUBLE = 2
- *  DT_INT32 = 3
- *  DT_UINT8 = 4
- *  DT_INT16 = 5
- *  DT_INT8 = 6
- *  DT_STRING = 7
- *  DT_COMPLEX64 = 8
- *  DT_INT64 = 9
- *  DT_BOOL = 10
- *  DT_QINT8 = 11
- *  DT_QUINT8 = 12
- *  DT_QINT32 = 13
- *  DT_BFLOAT16 = 14
- *  DT_QINT16 = 15
- *  DT_QUINT16 = 16
- *  DT_UINT16 = 17
- *  DT_COMPLEX128 = 18
- *  DT_HALF = 19
- *  DT_RESOURCE = 20
- *  DT_VARIANT = 21
- *  DT_UINT32 = 22
- *  DT_UINT64 = 23
- *
+ * DT_INVALID = 0
+ * DT_FLOAT = 1
+ * DT_DOUBLE = 2
+ * DT_INT32 = 3
+ * DT_UINT8 = 4
+ * DT_INT16 = 5
+ * DT_INT8 = 6
+ * DT_STRING = 7
+ * DT_COMPLEX64 = 8
+ * DT_INT64 = 9
+ * DT_BOOL = 10
+ * DT_QINT8 = 11
+ * DT_QUINT8 = 12
+ * DT_QINT32 = 13
+ * DT_BFLOAT16 = 14
+ * DT_QINT16 = 15
+ * DT_QUINT16 = 16
+ * DT_UINT16 = 17
+ * DT_COMPLEX128 = 18
+ * DT_HALF = 19
+ * DT_RESOURCE = 20
+ * DT_VARIANT = 21
+ * DT_UINT32 = 22
+ * DT_UINT64 = 23
  *
  * @author Adam Gibson
  */
@@ -89,26 +88,25 @@ public class TensorflowConversion {
     //used for passing to tensorflow: this dummy de allocator
     //allows us to use nd4j buffers for memory management
     //rather than having them managed by tensorflow
-    private   static Deallocator_Pointer_long_Pointer calling;
+    private static Deallocator_Pointer_long_Pointer calling;
     private static TensorflowConversion INSTANCE;
 
-    /**
-     * Get a singleton instance
-     * @return the singleton
-     */
-    public static TensorflowConversion getInstance() {
-        if(INSTANCE == null)
-            INSTANCE = new TensorflowConversion();
-        return INSTANCE;
-    }
-
-
     private TensorflowConversion() {
-        if(calling == null)
+        if (calling == null)
             calling = DummyDeAllocator.getInstance();
 
     }
 
+    /**
+     * Get a singleton instance
+     *
+     * @return the singleton
+     */
+    public static TensorflowConversion getInstance() {
+        if (INSTANCE == null)
+            INSTANCE = new TensorflowConversion();
+        return INSTANCE;
+    }
 
     /**
      * Convert an {@link INDArray}
@@ -116,20 +114,21 @@ public class TensorflowConversion {
      * with zero copy.
      * Uses a direct pointer to the underlying ndarray's
      * data
+     *
      * @param ndArray the ndarray to use
      * @return the equivalent {@link TF_Tensor}
      */
     public TF_Tensor tensorFromNDArray(INDArray ndArray) {
-        if(ndArray == null) {
+        if (ndArray == null) {
             throw new IllegalArgumentException("NDArray must not be null!");
         }
         //we infer data type from the ndarray.databuffer()
         //for now we throw an exception
-        if(ndArray.data() == null) {
+        if (ndArray.data() == null) {
             throw new IllegalArgumentException("Unable to infer data type from null databuffer");
         }
 
-        if(ndArray.isView() || ndArray.ordering() != 'c') {
+        if (ndArray.isView() || ndArray.ordering() != 'c') {
             ndArray = ndArray.dup('c');
         }
 
@@ -145,7 +144,7 @@ public class TensorflowConversion {
 
         try {
             type = tfDataTypeFromNd4jDataType(data);
-        }catch(Exception e) {
+        } catch (Exception e) {
             try {
                 Nd4j.getAffinityManager().ensureLocation(ndArray, AffinityManager.Location.HOST);
             } catch (Exception e2) {
@@ -154,16 +153,27 @@ public class TensorflowConversion {
                 data = ndArray.data();
                 dataType = data.dataType();
                 switch (dataType) {
-                    case DOUBLE: type = DT_DOUBLE; break;
-                    case FLOAT:  type = DT_FLOAT;  break;
-                    case INT:    type = DT_INT32;  break;
-                    case LONG:   type = DT_INT64;  break;
-                    case UTF8: type = DT_STRING; break;
-                    default: throw new IllegalArgumentException("Unsupported data type: " + dataType);
+                    case DOUBLE:
+                        type = DT_DOUBLE;
+                        break;
+                    case FLOAT:
+                        type = DT_FLOAT;
+                        break;
+                    case INT:
+                        type = DT_INT32;
+                        break;
+                    case LONG:
+                        type = DT_INT64;
+                        break;
+                    case UTF8:
+                        type = DT_STRING;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported data type: " + dataType);
                 }
             }
 
-            if(type < 0)
+            if (type < 0)
                 throw new IllegalArgumentException("No type found!");
 
         }
@@ -179,9 +189,10 @@ public class TensorflowConversion {
     /**
      * Convert a {@link INDArray}
      * to a {@link TF_Tensor}
-     *  using zero copy.
-     *  It will use the underlying
-     *  pointer with in nd4j.
+     * using zero copy.
+     * It will use the underlying
+     * pointer with in nd4j.
+     *
      * @param tensor the tensor to use
      * @return the created {@link INDArray}
      */
@@ -191,11 +202,11 @@ public class TensorflowConversion {
         int[] ndShape;
         if (rank == 0) {
             // scalar
-            ndShape = new int[] { 1 };
+            ndShape = new int[]{1};
         } else {
             ndShape = new int[rank];
             for (int i = 0; i < ndShape.length; i++) {
-                ndShape[i] = (int) TF_Dim(tensor,i);
+                ndShape[i] = (int) TF_Dim(tensor, i);
             }
         }
 
@@ -207,7 +218,7 @@ public class TensorflowConversion {
         if (nd4jType == DataType.UTF8) {
             String[] strings = new String[length];
             BytePointer data = new BytePointer(TF_TensorData(tensor)).capacity(TF_TensorByteSize(tensor));
-            BytePointer str = new BytePointer((Pointer)null);
+            BytePointer str = new BytePointer((Pointer) null);
             SizeTPointer size = new SizeTPointer(1);
             TF_Status status = TF_NewStatus();
             for (int i = 0; i < length; i++) {
@@ -222,35 +233,44 @@ public class TensorflowConversion {
             array = Nd4j.create(strings);
         } else {
             Pointer pointer = TF_TensorData(tensor).capacity(length);
-            Indexer indexer = indexerForType(nd4jType,pointer);
-            DataBuffer d = Nd4j.createBuffer(indexer.pointer(),nd4jType,length,indexer);
-            array = Nd4j.create(d,ndShape);
+            Indexer indexer = indexerForType(nd4jType, pointer);
+            DataBuffer d = Nd4j.createBuffer(indexer.pointer(), nd4jType, length, indexer);
+            array = Nd4j.create(d, ndShape);
         }
         Nd4j.getAffinityManager().tagLocation(array, AffinityManager.Location.HOST);
         return array;
     }
 
 
-
-
     private Indexer indexerForType(DataType type, Pointer pointer) {
-        switch(type) {
-            case DOUBLE: return DoubleIndexer.create(new DoublePointer(pointer));
-            case FLOAT: return FloatIndexer.create(new FloatPointer(pointer));
-            case INT: return IntIndexer.create(new IntPointer(pointer));
-            case LONG: return LongIndexer.create(new LongPointer(pointer));
-            default: throw new IllegalArgumentException("Illegal type " + type);
+        switch (type) {
+            case DOUBLE:
+                return DoubleIndexer.create(new DoublePointer(pointer));
+            case FLOAT:
+                return FloatIndexer.create(new FloatPointer(pointer));
+            case INT:
+                return IntIndexer.create(new IntPointer(pointer));
+            case LONG:
+                return LongIndexer.create(new LongPointer(pointer));
+            default:
+                throw new IllegalArgumentException("Illegal type " + type);
         }
     }
 
     private DataType typeFor(int tensorflowType) {
-        switch(tensorflowType) {
-            case DT_DOUBLE: return DataType.DOUBLE;
-            case DT_FLOAT: return DataType.FLOAT;
-            case DT_INT32: return DataType.LONG;
-            case DT_INT64: return DataType.LONG;
-            case DT_STRING: return DataType.UTF8;
-            default: throw new IllegalArgumentException("Illegal type " + tensorflowType);
+        switch (tensorflowType) {
+            case DT_DOUBLE:
+                return DataType.DOUBLE;
+            case DT_FLOAT:
+                return DataType.FLOAT;
+            case DT_INT32:
+                return DataType.LONG;
+            case DT_INT64:
+                return DataType.LONG;
+            case DT_STRING:
+                return DataType.UTF8;
+            default:
+                throw new IllegalArgumentException("Illegal type " + tensorflowType);
         }
     }
 
@@ -260,12 +280,13 @@ public class TensorflowConversion {
      * (the file must be a binary protobuf/pb file)
      * The graph will be modified to be associated
      * with the device associated with this current thread.
-     *
+     * <p>
      * Depending on the active {@link Nd4j#getBackend()}
      * the device will either be the gpu pinned to the current thread
      * or the cpu
+     *
      * @param filePath the path to the file to read
-     * @param status the status to check if an exception is thrown in c++
+     * @param status   the status to check if an exception is thrown in c++
      * @return the initialized graph
      * @throws IOException if an error occurs loading the graph
      */
@@ -281,12 +302,13 @@ public class TensorflowConversion {
      * (the content must be a binary protobuf/pb file)
      * The graph will be modified to be associated
      * with the device associated with this current thread.
-     *
+     * <p>
      * Depending on the active {@link Nd4j#getBackend()}
      * the device will either be the gpu pinned to the current thread
      * or the content
+     *
      * @param content the path to the file to read
-     * @param status the status object to use to throw an exception in java if one occurs
+     * @param status  the status object to use to throw an exception in java if one occurs
      * @return the initialized graph
      */
 
@@ -308,13 +330,14 @@ public class TensorflowConversion {
 
     /**
      * Load a session based on the saved model
+     *
      * @param savedModelConfig the configuration for the saved model
-     * @param options the session options to use
-     * @param runOptions the run configuration to use
-     * @param graph the tf graph to use
-     * @param inputsMap the input map
-     * @param outputsMap the output names
-     * @param status  the status object to use for verifying the results
+     * @param options          the session options to use
+     * @param runOptions       the run configuration to use
+     * @param graph            the tf graph to use
+     * @param inputsMap        the input map
+     * @param outputsMap       the output names
+     * @param status           the status object to use for verifying the results
      * @return the created session
      */
     public TF_Session loadSavedModel(SavedModelConfig savedModelConfig, TF_SessionOptions options, TF_Buffer runOptions, TF_Graph graph, Map<String, String> inputsMap, Map<String, String> outputsMap, TF_Status status) {
@@ -352,12 +375,12 @@ public class TensorflowConversion {
         if (type == DT_STRING) {
             long size = 0;
             long length = ndArray.length();
-            BytePointer[] strings = new BytePointer[(int)length];
+            BytePointer[] strings = new BytePointer[(int) length];
             for (int i = 0; i < length; i++) {
                 strings[i] = new BytePointer(ndArray.getString(i));
                 size += TF_StringEncodedSize(strings[i].capacity());
             }
-            
+
             tfTensor = TF_AllocateTensor(
                     type,
                     longPointer,
@@ -376,7 +399,7 @@ public class TensorflowConversion {
             }
 
             TF_DeleteStatus(status);
-            
+
         } else {
             tfTensor = TF_NewTensor(
                     type,
@@ -384,41 +407,63 @@ public class TensorflowConversion {
                     tfShape.length,
                     data.pointer(),
                     data.length() * data.getElementSize(),
-                    calling,null);
+                    calling, null);
         }
 
         return tfTensor;
     }
 
 
-
     private int tfDataTypeFromNd4jDataType(DataBuffer data) {
         DataType dataType = data.dataType();
-        
+
         int type;
         switch (dataType) {
-            case DOUBLE: type = DT_DOUBLE; break;
-            case FLOAT:  type = DT_FLOAT;  break;
-            case INT:    type = DT_INT32;  break;
-            case HALF:   type = DT_HALF;   break;
+            case DOUBLE:
+                type = DT_DOUBLE;
+                break;
+            case FLOAT:
+                type = DT_FLOAT;
+                break;
+            case INT:
+                type = DT_INT32;
+                break;
+            case HALF:
+                type = DT_HALF;
+                break;
             case COMPRESSED:
-                CompressedDataBuffer compressedData = (CompressedDataBuffer)data;
+                CompressedDataBuffer compressedData = (CompressedDataBuffer) data;
                 CompressionDescriptor desc = compressedData.getCompressionDescriptor();
                 String algo = desc.getCompressionAlgorithm();
                 switch (algo) {
-                    case "FLOAT16": type = DT_HALF;   break;
-                    case "INT8":    type = DT_INT8;   break;
-                    case "UINT8":   type = DT_UINT8;  break;
-                    case "INT16":   type = DT_INT16;  break;
-                    case "UINT16":  type = DT_UINT16; break;
-                    default: throw new IllegalArgumentException("Unsupported compression algorithm: " + algo);
+                    case "FLOAT16":
+                        type = DT_HALF;
+                        break;
+                    case "INT8":
+                        type = DT_INT8;
+                        break;
+                    case "UINT8":
+                        type = DT_UINT8;
+                        break;
+                    case "INT16":
+                        type = DT_INT16;
+                        break;
+                    case "UINT16":
+                        type = DT_UINT16;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported compression algorithm: " + algo);
                 }
                 break;
-            case LONG: type = DT_INT64; break;
-            case UTF8: type = DT_STRING; break;
-            default: throw new IllegalArgumentException("Unsupported data type: " + dataType);
+            case LONG:
+                type = DT_INT64;
+                break;
+            case UTF8:
+                type = DT_STRING;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported data type: " + dataType);
         }
-
 
 
         return type;

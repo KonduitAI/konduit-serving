@@ -58,7 +58,6 @@
         </fileSet>
 
 
-
         <fileSet>
             <directory>${konduit.serving.base.dir}/jackson-2.4.4</directory>
             <outputDirectory>jackson-2.4.4</outputDirectory>

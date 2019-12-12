@@ -38,10 +38,10 @@ import lombok.extern.slf4j.Slf4j;
  * @author Adam Gibson
  */
 @Slf4j
-public abstract  class BaseRoutableVerticle extends AbstractVerticle implements Routable {
+public abstract class BaseRoutableVerticle extends AbstractVerticle implements Routable {
 
-    protected Router router;
     private final static int DEFAULT_HTTP_PORT = 8081;
+    protected Router router;
 
     public BaseRoutableVerticle() {
         super();
@@ -54,7 +54,7 @@ public abstract  class BaseRoutableVerticle extends AbstractVerticle implements 
     protected void setupWebServer() {
         RouterImpl router = (RouterImpl) router();
         int port;
-        if(context != null && config().containsKey(VerticleConstants.HTTP_PORT_KEY)) {
+        if (context != null && config().containsKey(VerticleConstants.HTTP_PORT_KEY)) {
             String portKey = config().getValue(VerticleConstants.HTTP_PORT_KEY).toString();
             port = Integer.parseInt(portKey);
         } else {
@@ -77,7 +77,7 @@ public abstract  class BaseRoutableVerticle extends AbstractVerticle implements 
     @Override
     public void stop() throws Exception {
         super.stop();
-        if(vertx != null) {
+        if (vertx != null) {
             vertx.close(handler -> log.debug("Shut down server."));
         }
     }

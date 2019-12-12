@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>konduit-serving</artifactId>
@@ -36,7 +36,6 @@
         </dependency>
 
 
-
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-cuda-${cuda.version}-platform</artifactId>
@@ -52,7 +51,9 @@
         <profile>
             <id>tensorflow-windows-os-gpu</id>
             <activation>
-                <os><family>windows</family></os>
+                <os>
+                    <family>windows</family>
+                </os>
             </activation>
             <dependencies>
                 <dependency>
@@ -76,7 +77,9 @@
         <profile>
             <id>tensorflow-mac-os-gpu</id>
             <activation>
-                <os><family>mac</family></os>
+                <os>
+                    <family>mac</family>
+                </os>
             </activation>
             <dependencies>
                 <dependency>
@@ -100,7 +103,9 @@
         <profile>
             <id>tensorflow-linux-os-gpu</id>
             <activation>
-                <os><family>linux</family></os>
+                <os>
+                    <family>linux</family>
+                </os>
             </activation>
             <dependencies>
                 <dependency>

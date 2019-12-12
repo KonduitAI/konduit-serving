@@ -38,25 +38,33 @@ import org.nd4j.shade.guava.primitives.Longs;
 import java.util.Map;
 
 /**
- * Reads in {@link Buffer}
- * containing raw numpy arrays
- * converting them to {@link INDArray}
+ * Reads in {@link Buffer} containing raw numpy arrays and converts them to {@link NDArrayWritable},
+ * using {@link ConverterArgs}.
  *
  * @author Adam Gibson
  */
 public class VertxBufferNumpyInputAdapter implements InputAdapter<Buffer, Writable> {
 
+    private boolean permuteRequired(ConverterArgs parameters) {
+        return parameters != null && parameters.getImageProcessingInitialLayout() != null
+                && !parameters.getImageProcessingInitialLayout().equals(parameters.getImageProcessingRequiredLayout());
+    }
 
+    /**
+     * Convert Buffer input to NDArray writable. Note that contextData is unused in this implementation of InputAdapter.
+     */
     @Override
     public NDArrayWritable convert(Buffer input, ConverterArgs parameters, Map<String, Object> contextData) {
-        Preconditions.checkState(input.length() > 0,"Buffer appears to be empty!");
-        INDArray fromNpyPointer = Nd4j.getNDArrayFactory().createFromNpyPointer(new BytePointer(input.getByteBuf().nioBuffer()));
-        if(fromNpyPointer.rank() < 4) {
-            fromNpyPointer = fromNpyPointer.reshape(Longs.concat(new long[]{1},fromNpyPointer.shape()));
-        }
-        //permute required
-        if(parameters != null && parameters.getImageProcessingInitialLayout() != null && !parameters.getImageProcessingInitialLayout().equals(parameters.getImageProcessingRequiredLayout())) {
-            fromNpyPointer = ImagePermuter.permuteOrder(fromNpyPointer,parameters.getImageProcessingInitialLayout(),parameters.getImageProcessingRequiredLayout());
+        Preconditions.checkState(input.length() > 0, "Buffer appears to be empty!");
+        INDArray fromNpyPointer = Nd4j.getNDArrayFactory().createFromNpyPointer(
+                new BytePointer(input.getByteBuf().nioBuffer())
+        );
+        if (permuteRequired(parameters)) {
+            fromNpyPointer = ImagePermuter.permuteOrder(
+                    fromNpyPointer,
+                    parameters.getImageProcessingInitialLayout(),
+                    parameters.getImageProcessingRequiredLayout()
+            );
         }
 
         return new NDArrayWritable(fromNpyPointer);

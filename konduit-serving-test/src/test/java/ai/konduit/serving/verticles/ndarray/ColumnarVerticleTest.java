@@ -47,8 +47,8 @@ public class ColumnarVerticleTest extends BaseDl4JVerticalTest {
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) {
         JsonArray jsonArray = new JsonArray();
-        double[] vals = {5.1,3.5,1.4,0.2};
-        for(int i = 0; i < 4; i++)  {
+        double[] vals = {5.1, 3.5, 1.4, 0.2};
+        for (int i = 0; i < 4; i++) {
             jsonArray.add(vals[i]);
         }
 

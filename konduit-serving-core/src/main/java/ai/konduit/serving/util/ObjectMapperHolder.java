@@ -30,18 +30,19 @@ import org.nd4j.shade.jackson.databind.ObjectMapper;
  * A simple object mapper holder for
  * using one single {@link ObjectMapper}
  * across the whole project.
- *
  */
 public class ObjectMapperHolder {
 
     private static ObjectMapper objectMapper = getMapper();
 
-    private ObjectMapperHolder() {}
+    private ObjectMapperHolder() {
+    }
 
 
     /**
      * Get a single object mapper for use
      * with reading and writing json
+     *
      * @return object mapper
      */
     public static ObjectMapper getJsonMapper() {
@@ -61,7 +62,6 @@ public class ObjectMapperHolder {
         om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return om;
     }
-
 
 
 }

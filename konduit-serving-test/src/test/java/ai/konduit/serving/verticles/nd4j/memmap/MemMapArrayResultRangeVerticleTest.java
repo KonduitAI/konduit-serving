@@ -67,22 +67,24 @@ public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verti
                         System.out.println("Found numpy array bytes with length " + npyArray.length);
                         System.out.println("Contents: " + new String(npyArray));
                         INDArray arrFromNumpy = Nd4j.createNpyFromByteArray(npyArray);
-                        INDArray assertion = Nd4j.create(new float[]{1,2}).reshape(2);
-                        context.assertEquals(assertion,arrFromNumpy);
+                        INDArray assertion = Nd4j.create(new float[]{1, 2}).reshape(2);
+                        context.assertEquals(assertion, arrFromNumpy);
                         System.out.println(arrFromNumpy);
                         async.complete();
 
                     });
 
                     handler.exceptionHandler(exception -> {
-                        if(exception.getCause() != null)
+                        if (exception.getCause() != null)
                             context.fail(exception.getCause());
                     });
 
-                }).putHeader("Content-Type","application/json")
-                .putHeader("Content-Length",String.valueOf(0))
+                }).putHeader("Content-Type", "application/json")
+                .putHeader("Content-Length", String.valueOf(0))
                 .write("");
 
         async.await();
     }
+
+
 }

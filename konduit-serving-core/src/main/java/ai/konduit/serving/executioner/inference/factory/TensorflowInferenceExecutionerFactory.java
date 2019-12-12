@@ -22,11 +22,11 @@
 
 package ai.konduit.serving.executioner.inference.factory;
 
+import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.TensorflowInferenceExecutioner;
+import ai.konduit.serving.model.TensorFlowConfig;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
-import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
-import ai.konduit.serving.model.TensorFlowConfig;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +49,7 @@ public class TensorflowInferenceExecutionerFactory implements InferenceExecution
         log.debug("Loading model loader from configuration " + tensorFlowConfig);
         TensorflowModelLoader tensorflowModelLoader = TensorflowModelLoader.createFromConfig(modelPipelineStepConfig);
         TensorflowInferenceExecutioner inferenceExecutioner = new TensorflowInferenceExecutioner();
-        Preconditions.checkNotNull(modelPipelineStepConfig.getParallelInferenceConfig(),"No parallel inference config found on model pipeline step!");
+        Preconditions.checkNotNull(modelPipelineStepConfig.getParallelInferenceConfig(), "No parallel inference config found on model pipeline step!");
         inferenceExecutioner.initialize(tensorflowModelLoader, modelPipelineStepConfig.getParallelInferenceConfig());
 
         /**
@@ -72,6 +72,6 @@ public class TensorflowInferenceExecutionerFactory implements InferenceExecution
 
 
         graphRunner.close();
-        return new InitializedInferenceExecutionerConfig(inferenceExecutioner,inputNames,outputNames);
+        return new InitializedInferenceExecutionerConfig(inferenceExecutioner, inputNames, outputNames);
     }
 }

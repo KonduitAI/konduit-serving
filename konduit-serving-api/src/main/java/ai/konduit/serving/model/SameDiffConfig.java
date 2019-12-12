@@ -37,4 +37,5 @@ public class SameDiffConfig extends ModelConfig {
     public final static String SAME_DIFF_EXECUTION_CONFIG_KEY = "sameDiffConfig";
     private TensorDataTypesConfig tensorDataTypesConfig;
 
+
 }

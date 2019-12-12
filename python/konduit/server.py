@@ -3,6 +3,7 @@ import logging
 import os
 import signal
 import subprocess
+
 import requests
 import time
 
@@ -10,6 +11,7 @@ from konduit.base_inference import PipelineStep
 from konduit.inference import InferenceConfiguration
 from konduit.json_utils import config_to_dict_with_type
 from konduit.client import Client
+from konduit import KONDUIT_DIR
 
 
 def stop_server_by_pid(pid):
@@ -53,7 +55,9 @@ class Server(object):
         :param jar_path: path to the konduit uberjar
         """
         if jar_path is None:
-            jar_path = os.getenv("KONDUIT_JAR_PATH", "konduit.jar")
+            jar_path = os.getenv(
+                "KONDUIT_JAR_PATH", os.path.join(KONDUIT_DIR, "konduit.jar")
+            )
 
         if inference_config:
             self.config = inference_config

@@ -42,8 +42,6 @@ public class VerticleConstants {
     public final static String ORIGINAL_IMAGE_WIDTH = "originalImageWidth";
 
 
-
-
     // Mem map
     public final static String MEM_MAP_VECTOR_PATH = "memMapVectorPath";
 

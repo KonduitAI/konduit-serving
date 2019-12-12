@@ -15,8 +15,8 @@ steps:
     python_outputs:
       second: NDARRAY
 client:
-    input_names:
-      - default
-    output_names:
-      - default
-    port: 1337
+  input_names:
+    - default
+  output_names:
+    - default
+  port: 1337

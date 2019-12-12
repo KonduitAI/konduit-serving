@@ -1,12 +1,12 @@
-import requests
-import re
-import numpy as np
 import io
 import json
+import logging
+import numpy as np
+import re
+import requests
+from konduit.utils import validate_server
 from pyarrow.ipc import RecordBatchFileReader
 from requests_toolbelt.multipart import decoder, encoder
-import logging
-from konduit.utils import validate_server
 
 
 class Client(object):
@@ -45,36 +45,46 @@ class Client(object):
 
         url = "{}:{}".format(host, port)
 
-        if input_names is None:
-            if not validate_server(url):
-                raise RuntimeError("Unable to connect to the server at {}".format(url))
-            else:
-                try:
-                    response = requests.get("{}/config".format(url))
-                    config = response.json()
-                    logging.info("Retrieved config is".format(json.dumps(config)))
-                    steps = config["steps"]
-                    config = config["servingConfig"]
-                    input_names = []
+        server_running = validate_server(url)
+        insufficient_data = input_data_format is None and output_data_format is None
+        if server_running:
+            try:
+                response = requests.get("{}/config".format(url))
+                config = response.json()
+                logging.info("Retrieved config is".format(json.dumps(config)))
+                steps = config["steps"]
+                config = config["servingConfig"]
+                input_names = []
+                for step in steps:
+                    input_names += step["inputNames"]
+                if output_names is None:
+                    output_names = []
                     for step in steps:
-                        input_names += step["inputNames"]
-                    if output_names is None:
-                        output_names = []
-                        for step in steps:
-                            output_names += step["outputNames"]
-                    if input_data_format is None:
-                        input_data_format = config["inputDataFormat"]
-                    if output_data_format is None:
-                        output_data_format = config["outputDataFormat"]
-                    if prediction_type is None:
-                        prediction_type = config["predictionType"]
-                except Exception as ex:
-                    logging.error(
-                        "{}\nUnable to get configuration from the server. Please verify that the server is "
-                        "running without any issues...".format(str(ex))
-                    )
-                    raise RuntimeError(ex)
+                        output_names += step["outputNames"]
+                if input_data_format is None:
+                    input_data_format = config["inputDataFormat"]
+                if output_data_format is None:
+                    output_data_format = config["outputDataFormat"]
+                if prediction_type is None:
+                    prediction_type = config["predictionType"]
+            except Exception as ex:
+                logging.error(
+                    "{}\nUnable to get configuration from the server. Please verify that the server is "
+                    "running without any issues...".format(str(ex))
+                )
+                raise RuntimeError(ex)
+        elif not server_running and insufficient_data:
+            raise RuntimeError(
+                "Unable to connect to the server at {}, not enough data provided to initialize "
+                "the Client".format(url)
+            )
+        else:
+            logging.info(
+                "No server-side validation needed, enough information available to create Client."
+            )
 
+        if input_names is None:
+            input_names = ["default"]
         assert isinstance(input_names, list), "Input names should be a list!"
         assert len(input_names) > 0, "Input names must not be empty!"
 

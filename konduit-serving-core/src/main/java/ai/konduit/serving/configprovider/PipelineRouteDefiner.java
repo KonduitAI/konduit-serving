@@ -21,6 +21,7 @@
  */
 
 package ai.konduit.serving.configprovider;
+
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
@@ -38,6 +39,7 @@ import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
+import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.LongTaskTimer.Sample;
@@ -62,10 +64,8 @@ import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.base.Preconditions;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -80,8 +80,8 @@ public class PipelineRouteDefiner {
     protected PipelineExecutioner pipelineExecutioner;
     protected InferenceConfiguration inferenceConfiguration;
     //cached for columnar inputs, not used in binary endpoints
-    protected Schema inputSchema,outputSchema = null;
-    protected LongTaskTimer inferenceExecutionTimer,batchCreationTimer;
+    protected Schema inputSchema, outputSchema = null;
+    protected LongTaskTimer inferenceExecutionTimer, batchCreationTimer;
     protected HealthCheckHandler healthCheckHandler;
 
     public List<String> inputNames() {
@@ -100,28 +100,28 @@ public class PipelineRouteDefiner {
      * Note this will also initialize the {@link PipelineExecutioner}
      * property on this class. If you need access to any of the internals,
      * they are available as getters.
-     *
-     * Metric definitions get defined
+     * <p>
+     * Metric definitions  get defined
      * relative to what was configured in the {@link InferenceConfiguration}
      * Everything implementing the {@link MeterBinder}
      * interface can be configured here.
      * Of note are a few specific ones for machine learning including:
      * {@link NativeMetrics}
      * which covers off heap memory allocation among other things.
-     *
+     * <p>
      * Health checks are automatically added at /healthcheck endpoints
-     * @see <a href="https://vertx.io/docs/vertx-health-check/java/">Vertx health checks</a>
      *
-     * @param vertx the input vertx instance for setting up
-     *              the returned {@link Router} instance and endpoints
+     * @param vertx                  the input vertx instance for setting up
+     *                               the returned {@link Router} instance and endpoints
      * @param inferenceConfiguration the configuration to use for the {@link PipelineExecutioner}
      * @return the router with the endpoints defined
+     * @see <a href="https://vertx.io/docs/vertx-health-check/java/">Vertx health checks</a>
      */
     public Router defineRoutes(Vertx vertx, InferenceConfiguration inferenceConfiguration) {
         Router router = Router.router(vertx);
 
         MeterRegistry registry = BackendRegistries.getDefaultNow();
-        if(registry != null) {
+        if (registry != null) {
             log.info("Using metrics registry " + registry.getClass().getName() + " for inference");
             inferenceExecutionTimer = LongTaskTimer
                     .builder("inference")
@@ -133,10 +133,10 @@ public class PipelineRouteDefiner {
 
         }
 
-        if(inferenceConfiguration.getServingConfig().getMetricTypes() != null && registry != null) {
+        if (inferenceConfiguration.getServingConfig().getMetricTypes() != null && registry != null) {
             //don't add more than one type
-            for(MetricType metricType : new HashSet<>(inferenceConfiguration.getServingConfig().getMetricTypes())) {
-                switch(metricType) {
+            for (MetricType metricType : new HashSet<>(inferenceConfiguration.getServingConfig().getMetricTypes())) {
+                switch (metricType) {
                     case CLASS_LOADER:
                         new ClassLoaderMetrics().bindTo(registry);
                         break;
@@ -163,7 +163,7 @@ public class PipelineRouteDefiner {
                             MeterBinder meterBinder = (MeterBinder) Class.forName("ai.konduit.serving.gpu.GpuMetrics").newInstance();
                             meterBinder.bindTo(registry);
                         } catch (Exception e) {
-                            log.error("Unable to setup gpu metrics. Please ensure the gpu dependency has been properly included in the classpath.",e);
+                            log.error("Unable to setup gpu metrics. Please ensure the gpu dependency has been properly included in the classpath.", e);
                         }
                         break;
                 }
@@ -172,8 +172,16 @@ public class PipelineRouteDefiner {
         }
 
         healthCheckHandler = HealthCheckHandler.create(vertx);
+
+        /**
+         * Get a basic health check for a running Konduit server.
+         * If a server is up, this endpoint will return status of 204.
+         */
         router.get("/healthcheck*").handler(healthCheckHandler);
 
+        /**
+         * Get the Konduit server configuration in raw JSON format
+         */
         router.get("/config")
                 .produces("application/json").handler(ctx -> {
             try {
@@ -184,6 +192,9 @@ public class PipelineRouteDefiner {
             }
         });
 
+        /**
+         * Get the Konduit server configuration in formatted, "pretty" JSON format
+         */
         router.get("/config/pretty")
                 .produces("application/json").handler(ctx -> {
             try {
@@ -194,29 +205,29 @@ public class PipelineRouteDefiner {
             }
         });
 
+        /**
+         * Get prometheus metrics from this endpoint.
+         */
         router.get("/metrics").handler(io.vertx.micrometer.PrometheusScrapingHandler.create())
                 .failureHandler(failureHandler -> {
-                    if(failureHandler.failure() != null) {
-                        log.error("Failed to scrape metrics",failureHandler.failure());
+                    if (failureHandler.failure() != null) {
+                        log.error("Failed to scrape metrics", failureHandler.failure());
                     }
                 });
 
 
-
-        Preconditions.checkNotNull(inferenceConfiguration.getServingConfig(),"Please define a serving configuration.");
+        Preconditions.checkNotNull(inferenceConfiguration.getServingConfig(), "Please define a serving configuration.");
         router.post().handler(BodyHandler.create()
                 .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
                 .setDeleteUploadedFilesOnEnd(true)
                 .setMergeFormAttributes(true))
                 .failureHandler(failureHandlder -> {
-                    if(failureHandlder.statusCode() == 404) {
+                    if (failureHandlder.statusCode() == 404) {
                         log.warn("404 at route " + failureHandlder.request().path());
-                    }
-                    else if(failureHandlder.failed()) {
-                        if(failureHandlder.failure() != null) {
-                            log.error("Request failed with cause ",failureHandlder.failure());
-                        }
-                        else {
+                    } else if (failureHandlder.failed()) {
+                        if (failureHandlder.failure() != null) {
+                            log.error("Request failed with cause ", failureHandlder.failure());
+                        } else {
                             log.error("Request failed with unknown cause.");
                         }
                     }
@@ -224,54 +235,48 @@ public class PipelineRouteDefiner {
 
 
 
-        // TODO: this json specific route assumes a single input and output called "default". That seems very restrictive.
-        router.post("/:predictionType/:inputType")
+        /**
+         * Get the output of a pipeline for a given prediction type for JSON input data format.
+         */
+        // TODO: this json specific route assumes a single input and output called "default".
+        //  That seems very restrictive. Also, using this for a data format other than JSON does not make sense.
+        //  Consider renaming this route to "/:predictionType/JSON" for clarity.
+        router.post("/:predictionType/:inputDataFormat")
                 .consumes("application/json")
                 .produces("application/json").handler(ctx -> {
             PredictionType predictionType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
-            if(inputSchema == null) {
-                for(PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                    if(pipelineStep instanceof ModelStep || pipelineStep instanceof  PythonStep
-                            || pipelineStep instanceof  TransformProcessStep) {
-                        inputSchema = pipelineStep.inputSchemaForName("default");
-                    }
-                }
-            }
-
-            if(outputSchema == null) {
-                for(PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                    if(pipelineStep instanceof ModelStep || pipelineStep instanceof  PythonStep
-                            || pipelineStep instanceof  TransformProcessStep) {
-                        outputSchema = pipelineStep.outputSchemaForName("default");
-                    }
-                }
-            }
+            initializeSchemas(inferenceConfiguration, true);
 
             try {
                 LongTaskTimer.Sample start = null;
-                if(inferenceExecutionTimer != null) {
+                if (inferenceExecutionTimer != null) {
                     start = inferenceExecutionTimer.start();
                 }
+                String jsonString = ctx.getBody().toString();
                 pipelineExecutioner.doInference(
                         ctx,
                         predictionType,
-                        ctx.getBody().toString(),
+                        jsonString,
                         inputSchema,
                         null,
                         outputSchema,
                         inferenceConfiguration.getServingConfig().getOutputDataFormat());
-                if(start != null)
+                if (start != null)
                     start.stop();
             } catch (Exception e) {
-                log.error("Unable to perform json inference",e);
+                log.error("Unable to perform json inference", e);
                 ctx.response().setStatusCode(500);
                 ctx.response().setStatusMessage("Failed to perform json inference");
                 ctx.response().end();
             }
         });
 
+
+        /**
+         * Multi-part request for pipeline outputs of given predictionType for
+         */
         // TODO: predictionType is unused, why put it into the route?
-        router.post("/:predictionType/:inputType")
+        router.post("/:predictionType/:inputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed").handler(ctx -> {
             Map<String, InputAdapter<io.vertx.core.buffer.Buffer, ?>> adapters = getInputAdapterMap(ctx);
@@ -287,50 +292,56 @@ public class PipelineRouteDefiner {
                 Record[] batch = null;
                 try {
                     LongTaskTimer.Sample start = null;
-                    if(batchCreationTimer != null) {
+                    if (batchCreationTimer != null) {
                         start = batchCreationTimer.start();
                     }
 
-                    batch =  batchInputParser.createBatch(ctx);
-                    if(start != null)
+                    batch = batchInputParser.createBatch(ctx);
+                    if (start != null)
                         start.stop();
-                } catch(Exception e) {
-                    log.error("Unable to convert data for batch",e);
+                } catch (Exception e) {
+                    log.error("Unable to convert data for batch", e);
 
                 }
 
                 long endNanos = System.nanoTime();
-                if(inferenceConfiguration.serving().isLogTimings()) {
+                if (inferenceConfiguration.serving().isLogTimings()) {
                     log.info("Timing for batch creation was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                 }
-                if(batch == null) {
+                if (batch == null) {
                     ctx.response().setStatusCode(400);
                     ctx.response().setStatusMessage("NDArrays failed to de serialize.");
                     handler.complete();
-                }
-                else {
-                    log.debug("Created batch for request " );
+                } else {
+                    log.debug("Created batch for request ");
                 }
 
-                ctx.put(ai.konduit.serving.verticles.VerticleConstants.CONVERTED_INFERENCE_DATA,batch);
+                ctx.put(VerticleConstants.CONVERTED_INFERENCE_DATA, batch);
                 handler.complete();
-            },true, result -> ctx.next());
+            }, true, result -> ctx.next());
 
         });
 
         // TODO: predictionType is unused, why put it into the route?
-        router.post("/:predictionType/:inputType")
+        router.post("/:predictionType/:inputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed")
                 .produces("application/json").handler(ctx -> {
-            String transactionUUID = ctx.get(ai.konduit.serving.verticles.VerticleConstants.TRANSACTION_ID);
+            String transactionUUID = ctx.get(VerticleConstants.TRANSACTION_ID);
+            //need to initialize schemas for output
+            initializeSchemas(inferenceConfiguration, false);
 
             log.debug("Processing transaction id " + transactionUUID);
-            org.datavec.api.records.Record[] inputs = ctx.get(ai.konduit.serving.verticles.VerticleConstants.CONVERTED_INFERENCE_DATA);
+            Record[] inputs = ctx.get(VerticleConstants.CONVERTED_INFERENCE_DATA);
 
-            if(inputs == null) {
+            if (inputs == null) {
                 ctx.response().setStatusCode(400);
                 ctx.response().setStatusMessage("NDArrays failed to de serialize.");
+                ctx.next();
+                return;
+            } else if (!SchemaTypeUtils.recordsAllArrayType(inputs)) {
+                ctx.response().setStatusCode(400);
+                ctx.response().setStatusMessage("Invalid inputs found. All types must be valid numpy or nd4j arrays.");
                 ctx.next();
                 return;
             }
@@ -338,43 +349,47 @@ public class PipelineRouteDefiner {
             ctx.vertx().executeBlocking(blockingCall -> {
                 try {
                     long nanos = System.nanoTime();
-                    io.micrometer.core.instrument.LongTaskTimer.Sample start = null;
-                    if(inferenceExecutionTimer != null)
+                    LongTaskTimer.Sample start = null;
+                    if (inferenceExecutionTimer != null)
                         start = inferenceExecutionTimer.start();
+
                     pipelineExecutioner.doInference(
                             ctx,
-                            inferenceConfiguration.serving().getOutputDataFormat(),
-                            inputs);
+                            inferenceConfiguration.getServingConfig().getPredictionType(),
+                            inputs,
+                            inputSchema,
+                            null,
+                            outputSchema,
+                            inferenceConfiguration.getServingConfig().getOutputDataFormat());
 
-                    if(start != null)
+                    if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
-                    if(inferenceConfiguration.serving().isLogTimings()) {
-                        log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos))
-                                + " milliseconds");
+                    if (inferenceConfiguration.serving().isLogTimings()) {
+                        log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
 
                     blockingCall.complete();
-                } catch(Exception e) {
-                    log.error("Failed to do inference ",e);
+                } catch (Exception e) {
+                    log.error("Failed to do inference ", e);
                     ctx.fail(e);
                     blockingCall.fail(e);
                 }
 
-            },true, result -> {
-                if(result.failed()) {
+            }, true, result -> {
+                if (result.failed()) {
                     ctx.fail(result.cause());
                 }
             });
 
         });
 
-        router.post("/:inputType/:predictionType")
+        router.post("/:predictionType/:inputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed").handler(ctx -> {
-            Map<String, InputAdapter<io.vertx.core.buffer.Buffer, ?>> adapters = getInputAdapterMap(ctx);
+            Map<String, InputAdapter<Buffer, ?>> adapters = getInputAdapterMap(ctx);
 
-            String transactionUUID = java.util.UUID.randomUUID().toString();
+            String transactionUUID = UUID.randomUUID().toString();
             ctx.vertx().executeBlocking(handler -> {
                 BatchInputParser batchInputParser = BatchInputParser.builder()
                         .converters(adapters)
@@ -383,43 +398,41 @@ public class PipelineRouteDefiner {
                         .build();
                 try {
                     long nanos = System.nanoTime();
-                    io.micrometer.core.instrument.LongTaskTimer.Sample start = null;
-                    if(batchCreationTimer != null) {
+                    LongTaskTimer.Sample start = null;
+                    if (batchCreationTimer != null) {
                         start = batchCreationTimer.start();
                     }
 
                     Record[] batch = batchInputParser.createBatch(ctx);
-                    if(start != null)
+                    if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
-                    if(inferenceConfiguration.serving().isLogTimings()) {
-                        log.info("Timing for batch creation was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos))
-                                + " milliseconds");
+                    if (inferenceConfiguration.serving().isLogTimings()) {
+                        log.info("Timing for batch creation was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
-                    if(batch == null) {
+                    if (batch == null) {
                         log.warn("Created invalid null batch.");
                     }
 
-                    ctx.put(VerticleConstants.TRANSACTION_ID,transactionUUID);
-                    ctx.put(VerticleConstants.CONVERTED_INFERENCE_DATA,batch);
+                    ctx.put(VerticleConstants.TRANSACTION_ID, transactionUUID);
+                    ctx.put(VerticleConstants.CONVERTED_INFERENCE_DATA, batch);
                     handler.complete();
 
 
-                } catch (java.io.IOException e) {
+                } catch (IOException e) {
                     ctx.fail(e);
-                    log.error("Unable to convert inputs",e);
+                    log.error("Unable to convert inputs", e);
                     handler.fail(e);
                 }
-            },true, result -> ctx.next());
+            }, true, result -> ctx.next());
         });
 
-        // TODO: this seems bad for consistency reasons. All routes before flip input and prediction type
-        router.post("/:inputType/:outputDataFormat")
+        router.post("/:outputDataFormat/:inputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed")
                 .produces("application/octet-stream").handler((RoutingContext ctx) -> {
             Record[] inputs = ctx.get(VerticleConstants.CONVERTED_INFERENCE_DATA);
-            if(inputs == null) {
+            if (inputs == null) {
                 log.warn("No inputs found. Bad request");
                 ctx.response().setStatusCode(400);
                 ctx.response().end("No  inputs found. Bad request.");
@@ -432,28 +445,29 @@ public class PipelineRouteDefiner {
                 try {
                     long nanos = System.nanoTime();
                     Sample start = null;
-                    if(batchCreationTimer != null) {
+                    if (batchCreationTimer != null) {
                         start = batchCreationTimer.start();
                     }
                     pipelineExecutioner.doInference(ctx, dataFormat, inputs);
-                    if(start != null)
+                    if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
-                    if(inferenceConfiguration.serving().isLogTimings()) {
+                    if (inferenceConfiguration.serving().isLogTimings()) {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos))
                                 + " milliseconds");
                     }
                     handler.complete();
-                }catch(Exception e) {
-                    log.error("Failed to do inference ",e);
+                } catch (Exception e) {
+                    log.error("Failed to do inference ", e);
                     ctx.fail(e);
                     handler.fail(e);
                 }
 
-            },true, result -> {
+            }, true, result -> {
             });
 
         });
+
 
         if (pipelineExecutioner == null) {
             log.debug("Initializing inference executioner after starting verticle");
@@ -463,8 +477,8 @@ public class PipelineRouteDefiner {
                 pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration);
                 pipelineExecutioner.init();
 
-            } catch(Exception e) {
-                log.error("Failed to initialize. Shutting down.",e);
+            } catch (Exception e) {
+                log.error("Failed to initialize. Shutting down.", e);
             }
 
         } else {
@@ -474,15 +488,29 @@ public class PipelineRouteDefiner {
         return router;
     }
 
-    /**
-     * Get a map of input names to input adapters for a given routing context.
-     *
-     * @param ctx Routing context
-     * @return input name to input adapter map
-     */
+    private void initializeSchemas(InferenceConfiguration inferenceConfiguration, boolean inputRequired) {
+        if (inputSchema == null && inputRequired) {
+            for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
+                if (pipelineStep instanceof ModelStep || pipelineStep instanceof  PythonStep || pipelineStep
+                        instanceof TransformProcessStep) {
+                    inputSchema = pipelineStep.inputSchemaForName("default");
+                }
+            }
+        }
+
+        if (outputSchema == null) {
+            for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
+                if (pipelineStep instanceof ModelStep || pipelineStep instanceof  PythonStep || pipelineStep
+                        instanceof TransformProcessStep) {
+                    outputSchema = pipelineStep.outputSchemaForName("default");
+                }
+            }
+        }
+    }
+
     private Map<String, InputAdapter<Buffer, ?>> getInputAdapterMap(RoutingContext ctx) {
         Map<String, InputAdapter<Buffer, ?>> adapters = new HashMap<>();
-        Input.DataFormat inputAdapterType = Input.DataFormat.valueOf(ctx.pathParam("inputType").toUpperCase());
+        Input.DataFormat inputAdapterType = Input.DataFormat.valueOf(ctx.pathParam("inputDataFormat").toUpperCase());
         InputAdapter<Buffer,?> adapter = getInputAdapter(inputAdapterType);
         for(String inputName : inputNames()) {
             adapters.put(inputName,adapter);
@@ -510,7 +538,6 @@ public class PipelineRouteDefiner {
                 throw new IllegalStateException("Illegal adapter type!");
         }
     }
-
 
 
 }

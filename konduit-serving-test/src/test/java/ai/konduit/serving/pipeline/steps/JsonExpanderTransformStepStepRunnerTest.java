@@ -40,17 +40,17 @@ public class JsonExpanderTransformStepStepRunnerTest {
         JsonExpanderTransformStepRunner runner = new JsonExpanderTransformStepRunner(new JsonExpanderTransformStep());
         Record[] input = new Record[1];
         JsonObject jsonObject = new JsonObject();
-        jsonObject.put("first",1.0);
-        jsonObject.put("second","hello world");
+        jsonObject.put("first", 1.0);
+        jsonObject.put("second", "hello world");
         input[0] = new org.datavec.api.records.impl.Record(
                 Arrays.asList(new Text(jsonObject.encodePrettily()))
-        ,null);
+                , null);
 
         Record[] transform = runner.transform(input);
-        assertEquals(1,transform.length);
-        assertEquals(2,transform[0].getRecord().size());
-        assertEquals(1.0,transform[0].getRecord().get(0).toDouble(),1e-1);
-        assertEquals("hello world",transform[0].getRecord().get(1).toString());
+        assertEquals(1, transform.length);
+        assertEquals(2, transform[0].getRecord().size());
+        assertEquals(1.0, transform[0].getRecord().get(0).toDouble(), 1e-1);
+        assertEquals("hello world", transform[0].getRecord().get(1).toString());
     }
 
     @Test
@@ -59,19 +59,19 @@ public class JsonExpanderTransformStepStepRunnerTest {
         Record[] input = new Record[1];
         JsonArray inputArraysJson = new JsonArray();
         JsonObject jsonObject = new JsonObject();
-        jsonObject.put("first",1.0);
-        jsonObject.put("second","hello world");
+        jsonObject.put("first", 1.0);
+        jsonObject.put("second", "hello world");
         inputArraysJson.add(jsonObject);
 
         input[0] = new org.datavec.api.records.impl.Record(
                 Arrays.asList(new Text(inputArraysJson.encodePrettily()))
-                ,null);
+                , null);
 
         Record[] transform = runner.transform(input);
-        assertEquals(1,transform.length);
-        assertEquals(2,transform[0].getRecord().size());
-        assertEquals(1.0,transform[0].getRecord().get(0).toDouble(),1e-1);
-        assertEquals("hello world",transform[0].getRecord().get(1).toString());
+        assertEquals(1, transform.length);
+        assertEquals(2, transform[0].getRecord().size());
+        assertEquals(1.0, transform[0].getRecord().get(0).toDouble(), 1e-1);
+        assertEquals("hello world", transform[0].getRecord().get(1).toString());
     }
 
 }

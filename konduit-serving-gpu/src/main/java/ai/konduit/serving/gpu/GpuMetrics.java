@@ -65,9 +65,9 @@ public class GpuMetrics implements MeterBinder {
         checkReturn(nvmlDeviceGetCount_v2(resultArr));
         deviceCount = resultArr[0];
 
-        for(int i = 0; i < deviceCount; i++) {
+        for (int i = 0; i < deviceCount; i++) {
             nvmlDevice_st device = new nvmlDevice_st();
-            nvmlDeviceGetHandleByIndex_v2(i,device);
+            nvmlDeviceGetHandleByIndex_v2(i, device);
 
             StringBuffer deviceStats = new StringBuffer();
             deviceStats.append(baseName);
@@ -86,14 +86,14 @@ public class GpuMetrics implements MeterBinder {
              */
             resultArr[0] = 0;
             nvmlProcessInfo_t processInfoT = new nvmlProcessInfo_t();
-            int result = nvmlDeviceGetGraphicsRunningProcesses(device,resultArr,processInfoT);
-            if(result != NVML_ERROR_INSUFFICIENT_SIZE && result != NVML_SUCCESS) {
-                throw new IllegalStateException("Number of running processes query failed "  + nvmlErrorString(result));
+            int result = nvmlDeviceGetGraphicsRunningProcesses(device, resultArr, processInfoT);
+            if (result != NVML_ERROR_INSUFFICIENT_SIZE && result != NVML_SUCCESS) {
+                throw new IllegalStateException("Number of running processes query failed " + nvmlErrorString(result));
             }
 
 
             final int numRunningProcesses = resultArr[0];
-            Gauge.builder(".processes.count",() -> numRunningProcesses)
+            Gauge.builder(".processes.count", () -> numRunningProcesses)
                     .tags(tags)
                     .description("Number of running processes on the gpu")
                     .baseUnit(deviceStats.toString())
@@ -107,23 +107,23 @@ public class GpuMetrics implements MeterBinder {
              * Percent of time over the past sample period during which global (device) memory was being read or written.
              */
             nvmlUtilization_t utilization_t = new nvmlUtilization_t();
-            checkReturn(nvmlDeviceGetUtilizationRates(device,utilization_t));
+            checkReturn(nvmlDeviceGetUtilizationRates(device, utilization_t));
             final int percentMemoryUsed = utilization_t.memory();
-            Gauge.builder(".percent.memory.used",() -> percentMemoryUsed)
+            Gauge.builder(".percent.memory.used", () -> percentMemoryUsed)
                     .tags(tags)
                     .description("Percent memory used for device by index")
                     .baseUnit(deviceStats.toString())
                     .register(registry);
             final int percentKernelExecuted = utilization_t.gpu();
-            Gauge.builder(".percent.kernel.executed",() -> percentKernelExecuted)
+            Gauge.builder(".percent.kernel.executed", () -> percentKernelExecuted)
                     .tags(tags)
                     .description("Percent time kernel was being executed on gpu")
                     .baseUnit(deviceStats.toString())
                     .register(registry);
             nvmlMemory_t memory = new nvmlMemory_t();
-            nvmlDeviceGetMemoryInfo(device,memory);
+            nvmlDeviceGetMemoryInfo(device, memory);
             final long deviceUsedMemoryInBytes = memory.used();
-            Gauge.builder(".memory.used",() -> deviceUsedMemoryInBytes)
+            Gauge.builder(".memory.used", () -> deviceUsedMemoryInBytes)
                     .tags(tags)
                     .description("Device memory used in bytes")
                     .baseUnit(deviceStats.toString())
@@ -143,14 +143,14 @@ public class GpuMetrics implements MeterBinder {
                     .baseUnit(deviceStats.toString())
                     .register(registry);
             final int tempF = tempC * 9 / 5 + 32;
-            Gauge.builder(".temp.farenheit",() -> tempF)
+            Gauge.builder(".temp.farenheit", () -> tempF)
                     .tags(tags)
                     .description("Temperature of gpu in farenheit")
                     .baseUnit(deviceStats.toString())
                     .register(registry);
-            checkReturn(nvmlDeviceGetPowerUsage(device,resultArr));
+            checkReturn(nvmlDeviceGetPowerUsage(device, resultArr));
             final int powerUsedMilliWatts = resultArr[0];
-            Gauge.builder(".power.used.milliwatts",() -> powerUsedMilliWatts)
+            Gauge.builder(".power.used.milliwatts", () -> powerUsedMilliWatts)
                     .tags(tags)
                     .description("Power used by gpu in milliwatts")
                     .baseUnit(deviceStats.toString())

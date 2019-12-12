@@ -23,12 +23,10 @@
 package ai.konduit.serving.verticles.nd4j.memmap;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.config.MemMapConfig;
-
+import ai.konduit.serving.config.ServingConfig;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
@@ -53,7 +51,6 @@ public class MemMapSpecificVerticleTest extends BaseMemMapTest {
     private INDArray unknownVector = Nd4j.linspace(1,4,4).addi(2);
 
 
-
     @Test(timeout = 60000)
     public void testArrayResultRangeJson(TestContext context) {
         JsonArray jsonArray = new JsonArray();
@@ -61,7 +58,7 @@ public class MemMapSpecificVerticleTest extends BaseMemMapTest {
         jsonArray.add(1);
         Response response = given().contentType(ContentType.JSON)
                 .body(jsonArray.toString())
-                .header("Content-Type","application/json")
+                .header("Content-Type", "application/json")
                 .port(port)
                 .post("/array/indices/numpy")
                 .andReturn();
@@ -81,7 +78,7 @@ public class MemMapSpecificVerticleTest extends BaseMemMapTest {
         INDArray arr = Nd4j.linspace(1,8,8).reshape(2,4);
         File tmpFile = new File(temporary.getRoot(),"tmpfile.npy");
         byte[] save = Nd4j.toNpyByteArray(arr);
-        FileUtils.writeByteArrayToFile(tmpFile,save);
+        FileUtils.writeByteArrayToFile(tmpFile, save);
         InferenceConfiguration inferenceConfiguration =
                 InferenceConfiguration.builder()
                         .servingConfig(ServingConfig.builder()

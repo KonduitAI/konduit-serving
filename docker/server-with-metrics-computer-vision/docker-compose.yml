@@ -5,30 +5,30 @@ services:
   # prometheus
   # ---------------------------
   prometheus:
-   image: prom/prometheus
-   container_name: prometheus
-   ports:
-    - 9090:9090
-   volumes:
-    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
 
   pipeline:
     image: pipeline-with-conda-tensorflow
     ports:
-     - 65535:65535
+      - 65535:65535
     volumes:
-     - ./input-data:/usr/share/input-data
+      - ./input-data:/usr/share/input-data
     entrypoint:
-     - java
-     - -Dorg.bytedeco.javacpp.logger.debug=true
-     - -Dorg.bytedeco.javacpp.logger=slf4j
-     - -Dai.konduit.serving.python.javacpp.path.append=none
-     - -Dvertx.options.maxEventLoopExecuteTime=10000000000000
-     - -cp
-     - /srv/konduit-serving.jar
-     - ai.konduit.serving.configprovider.KonduitServingMain
-     - --configPath
-     - /usr/share/input-data/config.json
+      - java
+      - -Dorg.bytedeco.javacpp.logger.debug=true
+      - -Dorg.bytedeco.javacpp.logger=slf4j
+      - -Dai.konduit.serving.python.javacpp.path.append=none
+      - -Dvertx.options.maxEventLoopExecuteTime=10000000000000
+      - -cp
+      - /srv/konduit-serving.jar
+      - ai.konduit.serving.configprovider.KonduitServingMain
+      - --configPath
+      - /usr/share/input-data/config.json
 
   # ---------------------------
   # grafana

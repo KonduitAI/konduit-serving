@@ -23,27 +23,27 @@
 package ai.konduit.serving.executioner;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.pipeline.step.ImageLoadingStep;
-import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.*;
+import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import java.util.Arrays;
+import java.util.Collections;
 
-import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 public class PipelineExecutionerTests {
-    
-    
+
+
     @Test
     public void testInitPipeline() throws Exception {
         ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
@@ -54,8 +54,8 @@ public class PipelineExecutionerTests {
         TensorDataTypesConfig tensorDataTypesConfig = TensorDataTypesConfig.builder()
                 .inputDataType("image_tensor", TensorDataType.INT64)
                 .build();
-        
-        
+
+
         TensorFlowConfig modelConfig = TensorFlowConfig.builder()
                 .tensorDataTypesConfig(tensorDataTypesConfig)
                 .modelConfigType(
@@ -63,94 +63,90 @@ public class PipelineExecutionerTests {
                                 .modelLoadingPath(path)
                                 .modelType(ModelConfig.ModelType.TENSORFLOW)
                                 .build()
-                )                .build();
-        
-        
+                ).build();
+
+
         ServingConfig servingConfig = ServingConfig.builder()
                 .predictionType(Output.PredictionType.RAW)
                 .inputDataFormat(Input.DataFormat.IMAGE)
                 .httpPort(port)
                 .build();
-        
+
         ModelStep modelStepConfig = ModelStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)
-                .inputNames(Arrays.asList(new String[]{"image_tensor"}))
-                .outputNames(Arrays.asList(new String[]{"detection_classes"}))
+                .inputNames(Collections.singletonList("image_tensor"))
+                .outputNames(Collections.singletonList("detection_classes"))
                 .modelConfig(modelConfig)
                 .build();
-        
-        
-        
+
+
         InferenceConfiguration configuration = InferenceConfiguration.builder()
                 .step(modelStepConfig)
                 .servingConfig(servingConfig)
                 .build();
-        
+
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);
         pipelineExecutioner.init();
-        assertNotNull("Input names should not be null.",pipelineExecutioner.inputNames());
-        assertNotNull("Output names should not be null.",pipelineExecutioner.outputNames());
+        assertNotNull("Input names should not be null.", pipelineExecutioner.inputNames());
+        assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         assertNotNull(pipelineExecutioner.inputDataTypes);
         assertFalse(pipelineExecutioner.inputDataTypes.isEmpty());
-        TestCase.assertEquals(TensorDataType.INT64,pipelineExecutioner.inputDataTypes.get("image_tensor"));
+        TestCase.assertEquals(TensorDataType.INT64, pipelineExecutioner.inputDataTypes.get("image_tensor"));
     }
-    
+
     @Test
     public void testInitPipelineYolo() throws Exception {
         ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
         int port = 1111;
         System.out.println("Started on port " + port);
         String path = new ClassPathResource("inference/tensorflow/mnist/lenet_frozen.pb").getFile().getAbsolutePath();
-        
+
         TensorDataTypesConfig tensorDataTypesConfig = TensorDataTypesConfig.builder()
-                .inputDataType("image_tensor",TensorDataType.INT64)
+                .inputDataType("image_tensor", TensorDataType.INT64)
                 .build();
-        
+
         ObjectDetectionConfig objectRecognitionConfig = ObjectDetectionConfig
                 .builder()
                 .numLabels(80)
                 .build();
         ImageLoadingStep imageLoadingStepConfig = ImageLoadingStep.builder()
-                .inputNames(Arrays.asList(new String[]{"image_tensor"}))
-                .outputNames(Arrays.asList(new String[]{"detection_classes"}))
+                .inputNames(Collections.singletonList("image_tensor"))
+                .outputNames(Collections.singletonList("detection_classes"))
                 .objectDetectionConfig(objectRecognitionConfig)
                 .build();
-        
+
         ServingConfig servingConfig = ServingConfig.builder()
                 .inputDataFormat(Input.DataFormat.IMAGE)
                 .predictionType(Output.PredictionType.YOLO)
                 .outputDataFormat(Output.DataFormat.JSON)
                 .httpPort(port)
                 .build();
-        
+
         TensorFlowConfig modelConfig = TensorFlowConfig.builder()
                 .tensorDataTypesConfig(tensorDataTypesConfig)
-                 .modelConfigType(ModelConfigType.tensorFlow(path))
+                .modelConfigType(ModelConfigType.tensorFlow(path))
                 .build();
-        
+
         ModelStep modelStepConfig = ModelStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)
                 .modelConfig(modelConfig)
-                .inputNames(Arrays.asList(new String[]{"image_tensor"}))
-                .outputNames(Arrays.asList(new String[]{"detection_classes"}))
+                .inputNames(Collections.singletonList("image_tensor"))
+                .outputNames(Collections.singletonList("detection_classes"))
                 .build();
-        
-        
-        
-        
+
         InferenceConfiguration configuration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .step(imageLoadingStepConfig)
                 .step(modelStepConfig)
                 .build();
-        
+
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);
         pipelineExecutioner.init();
-        assertNotNull("Input names should not be null.",pipelineExecutioner.inputNames());
-        assertNotNull("Output names should not be null.",pipelineExecutioner.outputNames());
-        TestCase.assertEquals(TensorDataType.INT64,pipelineExecutioner.inputDataTypes.get("image_tensor"));
+        assertNotNull("Input names should not be null.", pipelineExecutioner.inputNames());
+        assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
+        TestCase.assertEquals(TensorDataType.INT64, pipelineExecutioner.inputDataTypes.get("image_tensor"));
         assertNotNull(pipelineExecutioner.getMultiOutputAdapter());
     }
-    
-    
+
+
 }
