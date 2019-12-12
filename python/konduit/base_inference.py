@@ -201,6 +201,7 @@ class ParallelInferenceConfig(object):
     Configuration for parallel inference.
 
     :param queue_limit:
+    :param queue_limit:
     :param batch_limit:
     :param workers:
     :param max_train_epochs:
@@ -1365,8 +1366,155 @@ class PipelineStep(object):
            { "input_1": ["col1", "col2"]}
     :param output_column_names: dictionary mapping output names to lists of names of your columnar data (e.g.
            { "output_1": ["col1", "col2"]}
-    :param runner: do not touch. internally used to infer the "runner" for this step configuration.
     """
+
+    _types_map = {
+        "outputSchemas": {"type": dict, "subtype": None},
+        "inputColumnNames": {"type": dict, "subtype": None},
+        "outputColumnNames": {"type": dict, "subtype": None},
+        "inputSchemas": {"type": dict, "subtype": None},
+        "inputNames": {"type": list, "subtype": str},
+        "outputNames": {"type": list, "subtype": str},
+    }
+    _formats_map = {
+        "inputNames": "table",
+        "outputNames": "table",
+    }
+
+    def __init__(
+        self,
+        output_schemas=None,
+        input_column_names=None,
+        output_column_names=None,
+        input_schemas=None,
+        input_names=None,
+        output_names=None,
+    ):
+        self.__output_schemas = output_schemas
+        self.__input_column_names = input_column_names
+        self.__output_column_names = output_column_names
+        self.__input_schemas = input_schemas
+        self.__input_names = input_names
+        self.__output_names = output_names
+
+    def _get_output_schemas(self):
+        return self.__output_schemas
+
+    def _set_output_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
+
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
+
+    def _get_input_column_names(self):
+        return self.__input_column_names
+
+    def _set_input_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputColumnNames must be type")
+        self.__input_column_names = value
+
+    input_column_names = property(_get_input_column_names, _set_input_column_names)
+
+    def _get_output_column_names(self):
+        return self.__output_column_names
+
+    def _set_output_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputColumnNames must be type")
+        self.__output_column_names = value
+
+    output_column_names = property(_get_output_column_names, _set_output_column_names)
+
+    def _get_input_schemas(self):
+        return self.__input_schemas
+
+    def _set_input_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputSchemas must be type")
+        self.__input_schemas = value
+
+    input_schemas = property(_get_input_schemas, _set_input_schemas)
+
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
+    def _get_output_names(self):
+        return self.__output_names
+
+    def _set_output_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("outputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("outputNames list valeus must be str")
+        self.__output_names = value
+
+    output_names = property(_get_output_names, _set_output_names)
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
+        if self.__input_column_names is not None:
+            d["inputColumnNames"] = (
+                self.__input_column_names.as_dict()
+                if hasattr(self.__input_column_names, "as_dict")
+                else self.__input_column_names
+            )
+        if self.__output_column_names is not None:
+            d["outputColumnNames"] = (
+                self.__output_column_names.as_dict()
+                if hasattr(self.__output_column_names, "as_dict")
+                else self.__output_column_names
+            )
+        if self.__input_schemas is not None:
+            d["inputSchemas"] = (
+                self.__input_schemas.as_dict()
+                if hasattr(self.__input_schemas, "as_dict")
+                else self.__input_schemas
+            )
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
+            ]
+        if self.__output_names is not None:
+            d["outputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        return d
+
+
+class BasePipelineStep(PipelineStep):
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -1375,7 +1523,6 @@ class PipelineStep(object):
         "outputNames": {"type": list, "subtype": str},
         "inputColumnNames": {"type": dict, "subtype": None},
         "outputColumnNames": {"type": dict, "subtype": None},
-        "runner": {"type": None, "subtype": None},
     }
     _formats_map = {
         "inputNames": "table",
@@ -1390,7 +1537,6 @@ class PipelineStep(object):
         output_names=None,
         input_column_names=None,
         output_column_names=None,
-        runner=None,
     ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1398,7 +1544,6 @@ class PipelineStep(object):
         self.__output_names = output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
-        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1480,14 +1625,6 @@ class PipelineStep(object):
 
     output_column_names = property(_get_output_column_names, _set_output_column_names)
 
-    def _get_runner(self):
-        return self.__runner
-
-    def _set_runner(self, value):
-        self.__runner = value
-
-    runner = property(_get_runner, _set_runner)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1521,12 +1658,6 @@ class PipelineStep(object):
                 self.__output_column_names.as_dict()
                 if hasattr(self.__output_column_names, "as_dict")
                 else self.__output_column_names
-            )
-        if self.__runner is not None:
-            d["runner"] = (
-                self.__runner.as_dict()
-                if hasattr(self.__runner, "as_dict")
-                else self.__runner
             )
         return d
 
@@ -1573,6 +1704,18 @@ class NormalizationConfig(object):
 
 
 class PythonStep(PipelineStep):
+    """PythonStep
+
+    PythonStep defines a custom Python konduit.PipelineStep from a konduit.PythonConfig.
+
+    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.
+    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.
+    :param input_names: list of step input names, see konduit.PipelineStep.
+    :param output_names: list of step input names, see konduit.PipelineStep.
+    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param python_configs: konduit.PythonConfig
+    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -1582,7 +1725,6 @@ class PythonStep(PipelineStep):
         "inputColumnNames": {"type": dict, "subtype": None},
         "outputColumnNames": {"type": dict, "subtype": None},
         "pythonConfigs": {"type": dict, "subtype": None},
-        "runner": {"type": None, "subtype": None},
     }
     _formats_map = {
         "inputNames": "table",
@@ -1598,7 +1740,6 @@ class PythonStep(PipelineStep):
         input_column_names=None,
         output_column_names=None,
         python_configs=None,
-        runner=None,
     ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1607,7 +1748,6 @@ class PythonStep(PipelineStep):
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__python_configs = python_configs
-        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1703,14 +1843,6 @@ class PythonStep(PipelineStep):
 
     python_configs = property(_get_python_configs, _set_python_configs)
 
-    def _get_runner(self):
-        return self.__runner
-
-    def _set_runner(self, value):
-        self.__runner = value
-
-    runner = property(_get_runner, _set_runner)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1751,16 +1883,22 @@ class PythonStep(PipelineStep):
                 if hasattr(self.__python_configs, "as_dict")
                 else self.__python_configs
             )
-        if self.__runner is not None:
-            d["runner"] = (
-                self.__runner.as_dict()
-                if hasattr(self.__runner, "as_dict")
-                else self.__runner
-            )
         return d
 
 
 class TransformProcessStep(PipelineStep):
+    """TransformProcessStep
+
+    TransformProcessStep defines a konduit.PipelineStep from a DataVec TransformProcess
+
+    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.
+    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.
+    :param input_names: list of step input names, see konduit.PipelineStep.
+    :param output_names: list of step input names, see konduit.PipelineStep.
+    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param transform_processes: DataVec TransformProcess
+    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -1770,7 +1908,6 @@ class TransformProcessStep(PipelineStep):
         "inputColumnNames": {"type": dict, "subtype": None},
         "outputColumnNames": {"type": dict, "subtype": None},
         "transformProcesses": {"type": dict, "subtype": None},
-        "runner": {"type": None, "subtype": None},
     }
     _formats_map = {
         "inputNames": "table",
@@ -1786,7 +1923,6 @@ class TransformProcessStep(PipelineStep):
         input_column_names=None,
         output_column_names=None,
         transform_processes=None,
-        runner=None,
     ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1795,7 +1931,6 @@ class TransformProcessStep(PipelineStep):
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__transform_processes = transform_processes
-        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1891,14 +2026,6 @@ class TransformProcessStep(PipelineStep):
 
     transform_processes = property(_get_transform_processes, _set_transform_processes)
 
-    def _get_runner(self):
-        return self.__runner
-
-    def _set_runner(self, value):
-        self.__runner = value
-
-    runner = property(_get_runner, _set_runner)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -1939,16 +2066,25 @@ class TransformProcessStep(PipelineStep):
                 if hasattr(self.__transform_processes, "as_dict")
                 else self.__transform_processes
             )
-        if self.__runner is not None:
-            d["runner"] = (
-                self.__runner.as_dict()
-                if hasattr(self.__runner, "as_dict")
-                else self.__runner
-            )
         return d
 
 
 class ModelStep(PipelineStep):
+    """ModelStep
+
+    ModelStep extends konduit.PipelineStep and is the base class for all pipeline steps
+    involving machine learning models.
+
+    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.
+    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.
+    :param input_names: list of step input names, see konduit.PipelineStep.
+    :param output_names: list of step input names, see konduit.PipelineStep.
+    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param model_config: konduit.ModelConfig
+    :param parallel_inference_config: konduit.ParallelInferenceConfig
+    :param normalization_config: konduit.NormalizationConfig
+    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -1960,7 +2096,6 @@ class ModelStep(PipelineStep):
         "modelConfig": {"type": ModelConfig, "subtype": None},
         "parallelInferenceConfig": {"type": ParallelInferenceConfig, "subtype": None},
         "normalizationConfig": {"type": NormalizationConfig, "subtype": None},
-        "runner": {"type": None, "subtype": None},
     }
     _formats_map = {
         "inputNames": "table",
@@ -1978,7 +2113,6 @@ class ModelStep(PipelineStep):
         model_config=None,
         parallel_inference_config=None,
         normalization_config=None,
-        runner=None,
     ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -1989,7 +2123,6 @@ class ModelStep(PipelineStep):
         self.__model_config = model_config
         self.__parallel_inference_config = parallel_inference_config
         self.__normalization_config = normalization_config
-        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -2105,14 +2238,6 @@ class ModelStep(PipelineStep):
         _get_normalization_config, _set_normalization_config
     )
 
-    def _get_runner(self):
-        return self.__runner
-
-    def _set_runner(self, value):
-        self.__runner = value
-
-    runner = property(_get_runner, _set_runner)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -2165,16 +2290,22 @@ class ModelStep(PipelineStep):
                 if hasattr(self.__normalization_config, "as_dict")
                 else self.__normalization_config
             )
-        if self.__runner is not None:
-            d["runner"] = (
-                self.__runner.as_dict()
-                if hasattr(self.__runner, "as_dict")
-                else self.__runner
-            )
         return d
 
 
 class ArrayConcatenationStep(PipelineStep):
+    """ArrayConcatenationStep
+
+    konduit.PipelineStep that concatenates two or more arrays along the specified dimensions.
+
+    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.
+    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.
+    :param input_names: list of step input names, see konduit.PipelineStep.
+    :param output_names: list of step input names, see konduit.PipelineStep.
+    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param concat_dimensions: dictionary of array indices to concatenation dimension
+    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -2184,7 +2315,6 @@ class ArrayConcatenationStep(PipelineStep):
         "inputColumnNames": {"type": dict, "subtype": None},
         "outputColumnNames": {"type": dict, "subtype": None},
         "concatDimensions": {"type": dict, "subtype": None},
-        "runner": {"type": None, "subtype": None},
     }
     _formats_map = {
         "inputNames": "table",
@@ -2200,7 +2330,6 @@ class ArrayConcatenationStep(PipelineStep):
         input_column_names=None,
         output_column_names=None,
         concat_dimensions=None,
-        runner=None,
     ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -2209,7 +2338,6 @@ class ArrayConcatenationStep(PipelineStep):
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__concat_dimensions = concat_dimensions
-        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -2305,14 +2433,6 @@ class ArrayConcatenationStep(PipelineStep):
 
     concat_dimensions = property(_get_concat_dimensions, _set_concat_dimensions)
 
-    def _get_runner(self):
-        return self.__runner
-
-    def _set_runner(self, value):
-        self.__runner = value
-
-    runner = property(_get_runner, _set_runner)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -2353,16 +2473,27 @@ class ArrayConcatenationStep(PipelineStep):
                 if hasattr(self.__concat_dimensions, "as_dict")
                 else self.__concat_dimensions
             )
-        if self.__runner is not None:
-            d["runner"] = (
-                self.__runner.as_dict()
-                if hasattr(self.__runner, "as_dict")
-                else self.__runner
-            )
         return d
 
 
 class JsonExpanderTransformStep(PipelineStep):
+    """JsonExpanderTransformStep
+
+    Executes expansion of JSON objects in to "real" objects.
+    This is needed when integrating with PipelineStepRunner
+    that may output {@link Text} with json arrays or json objects.
+    This kind of output is generally expected from Python or PMML based pipelines
+    which have a lot more complicated output and schema based values
+    rather than straight NDArrays like
+    most deep learning pipelines will be.
+
+    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.
+    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.
+    :param input_names: list of step input names, see konduit.PipelineStep.
+    :param output_names: list of step input names, see konduit.PipelineStep.
+    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.
+        """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -2371,7 +2502,6 @@ class JsonExpanderTransformStep(PipelineStep):
         "outputNames": {"type": list, "subtype": str},
         "inputColumnNames": {"type": dict, "subtype": None},
         "outputColumnNames": {"type": dict, "subtype": None},
-        "runner": {"type": None, "subtype": None},
     }
     _formats_map = {
         "inputNames": "table",
@@ -2386,7 +2516,6 @@ class JsonExpanderTransformStep(PipelineStep):
         output_names=None,
         input_column_names=None,
         output_column_names=None,
-        runner=None,
     ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -2394,7 +2523,6 @@ class JsonExpanderTransformStep(PipelineStep):
         self.__output_names = output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
-        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -2476,14 +2604,6 @@ class JsonExpanderTransformStep(PipelineStep):
 
     output_column_names = property(_get_output_column_names, _set_output_column_names)
 
-    def _get_runner(self):
-        return self.__runner
-
-    def _set_runner(self, value):
-        self.__runner = value
-
-    runner = property(_get_runner, _set_runner)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -2518,16 +2638,31 @@ class JsonExpanderTransformStep(PipelineStep):
                 if hasattr(self.__output_column_names, "as_dict")
                 else self.__output_column_names
             )
-        if self.__runner is not None:
-            d["runner"] = (
-                self.__runner.as_dict()
-                if hasattr(self.__runner, "as_dict")
-                else self.__runner
-            )
         return d
 
 
 class ImageLoadingStep(PipelineStep):
+    """ImageLoadingStep
+
+    Loads an input image into an NDArray.
+
+    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.
+    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.
+    :param input_names: list of step input names, see konduit.PipelineStep.
+    :param output_names: list of step input names, see konduit.PipelineStep.
+    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.
+    :param original_image_height: input image height in pixels
+    :param original_image_width: input image width in pixels
+    :param update_ordering_before_transform: boolean, defaults to False
+    :param dimensions_configs: dictionary defining input shapes per input name, e.g. {"input", [28,28,3]}
+    :param image_processing_required_layout: desired channel ordering after this pipeline step has been applied,
+           either "NCHW" or "NHWC", defaults to the prior
+    :param image_processing_initial_layout: channel ordering before processing, either
+           "NCHW" or "NHWC", defaults to the prior
+    :param image_transform_processes: a DataVec ImageTransformProcess
+    :param object_detection_config: konduit.ObjectDetectionConfig
+    """
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -2544,7 +2679,6 @@ class ImageLoadingStep(PipelineStep):
         "imageProcessingInitialLayout": {"type": str, "subtype": None},
         "imageTransformProcesses": {"type": dict, "subtype": None},
         "objectDetectionConfig": {"type": ObjectDetectionConfig, "subtype": None},
-        "runner": {"type": None, "subtype": None},
     }
     _formats_map = {
         "inputNames": "table",
@@ -2567,7 +2701,6 @@ class ImageLoadingStep(PipelineStep):
         image_processing_initial_layout=None,
         image_transform_processes=None,
         object_detection_config=None,
-        runner=None,
     ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -2583,7 +2716,6 @@ class ImageLoadingStep(PipelineStep):
         self.__image_processing_initial_layout = image_processing_initial_layout
         self.__image_transform_processes = image_transform_processes
         self.__object_detection_config = object_detection_config
-        self.__runner = runner
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -2767,14 +2899,6 @@ class ImageLoadingStep(PipelineStep):
         _get_object_detection_config, _set_object_detection_config
     )
 
-    def _get_runner(self):
-        return self.__runner
-
-    def _set_runner(self, value):
-        self.__runner = value
-
-    runner = property(_get_runner, _set_runner)
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -2856,12 +2980,6 @@ class ImageLoadingStep(PipelineStep):
                 self.__object_detection_config.as_dict()
                 if hasattr(self.__object_detection_config, "as_dict")
                 else self.__object_detection_config
-            )
-        if self.__runner is not None:
-            d["runner"] = (
-                self.__runner.as_dict()
-                if hasattr(self.__runner, "as_dict")
-                else self.__runner
             )
         return d
 
