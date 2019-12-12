@@ -52,7 +52,7 @@ def to_unix_path(file_path):
     :param file_path: path to your file
     :return: Unix-style version of your file
     """
-    return file_path.replace("\\", "/")
+    return file_path.replace("\\", "/").replace(";", ":")
 
 
 def update_dict_with_unix_paths(config):
