@@ -47,12 +47,14 @@ def validate_server(url):
 
 def to_unix_path(file_path):
     """Utility function to turn a Windows-style path into Unix-style. Windows
-    can handle the latter, so we use this representation internally
+    can handle the latter, so we use this representation internally. Python can
+    handle this in any case. We also replace Windows' ";" for path separation by
+    os.pathsep to make sure this runs on every system.
 
     :param file_path: path to your file
     :return: Unix-style version of your file
     """
-    return file_path.replace("\\", "/").replace(";", ":")
+    return file_path.replace("\\", "/").replace(";", os.pathsep)
 
 
 def update_dict_with_unix_paths(config):
