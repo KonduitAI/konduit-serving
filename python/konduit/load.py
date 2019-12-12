@@ -96,7 +96,8 @@ def from_file(file_path, start_server=True, use_yaml=True):
     """Create Konduit Server and Client from file
 
     :param file_path: path to your konduit.yaml
-    :param start_server: whether to start the server instance or not (if not you can start it later).
+    :param start_server: whether to start the server instance or not (if not you can start it later). Defaults to
+           True so that the client can be loaded successfully.
     :param use_yaml: use yaml or json
     :return: konduit.server.Server and konduit.client.Client instances
     """
@@ -106,11 +107,12 @@ def from_file(file_path, start_server=True, use_yaml=True):
     )
 
 
-def server_from_file(file_path, start_server=True, use_yaml=True):
+def server_from_file(file_path, start_server=False, use_yaml=True):
     """Create a Konduit Server from a from a configuration file.
 
     :param file_path: path to your konduit.yaml
-    :param start_server: whether to start the server instance or not (if not you can start it later).
+    :param start_server: whether to start the server instance or not (if not you can start it later). Defaults to
+           False, meaning you have to start the server manually by calling "start()" explicitly.
     :param use_yaml: use yaml or json
     :return: konduit.server.Server instance
     """
