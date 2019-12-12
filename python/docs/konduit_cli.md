@@ -19,7 +19,7 @@ Options:
 
 Commands:
   build          Build the underlying konduit.jar (again).
-  init           Initialize the konduit-python CLI.
+  init           Initialize the konduit CLI.
   predict-numpy  Get predictions for your pipeline from numpy input.
   serve          Serve a pipeline from a konduit.yaml
   stop-server    Stop the Konduit server associated with a given config...
