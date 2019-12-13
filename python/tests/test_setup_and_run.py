@@ -13,7 +13,7 @@ def test_setup_and_run_start():
     serving_config = ServingConfig(http_port=port)
 
     python_config = PythonConfig(
-        python_code="def setup(): pass\ndef run(input): output = np.array(input + 2); {'output': output}",
+        python_code="def setup(): pass\ndef run(input): {'output': np.array(input + 2)}",
         python_inputs={"input": "NDARRAY"},
         python_outputs={"output": "NDARRAY"},
         setup_and_run=True,
