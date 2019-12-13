@@ -114,8 +114,9 @@ public class PythonStepRunner extends BaseStepRunner {
             PythonTransform pythonTransform = PythonTransform.builder()
                     .code(code)
                     .returnAllInputs(currConfig.isReturnAllInputs())
-                    .inputs(currConfig.getPythonInputs() != null ? PythonVariables.schemaFromMap(currConfig.getPythonInputs()) : null)
-                    .outputs(currConfig.getPythonOutputs() != null ? PythonVariables.schemaFromMap(currConfig.getPythonOutputs()) : null)
+                    .setupAndRun(currConfig.isSetupAndRun())
+                    .inputs(currConfig.getPythonInputs() != null ? ai.konduit.serving.util.python.PythonVariables.schemaFromMap(currConfig.getPythonInputs()) : null)
+                    .outputs(currConfig.getPythonOutputs() != null ? ai.konduit.serving.util.python.PythonVariables.schemaFromMap(currConfig.getPythonOutputs()) : null)
                     .inputSchema(pythonConfig.inputSchemaForName(configEntry.getKey()))
                     .outputSchema(pythonConfig.outputSchemaForName(configEntry.getKey()))
                     .build();

@@ -47,6 +47,8 @@ public class PythonConfig extends ModelConfig {
 
     private boolean returnAllInputs;
 
+    private boolean setupAndRun;
+
     private static String defaultPythonPath;
 
 
