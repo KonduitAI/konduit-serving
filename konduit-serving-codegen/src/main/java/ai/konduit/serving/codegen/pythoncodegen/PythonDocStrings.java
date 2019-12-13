@@ -212,6 +212,7 @@ public class PythonDocStrings {
                         "    :param extra_inputs: potential extra input variables\n" +
                         "    :param python_path: your desired Python PATH as str\n" +
                         "    :param return_all_inputs: whether or not to return all inputs additionally to outputs\n" +
+                        "    :param setup_and_run: whether or not to use the setup-and-run schematics, defaults to False.\n" +
                         "    \"\"\""
         );
 

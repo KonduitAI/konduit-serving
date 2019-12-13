@@ -944,6 +944,7 @@ class PythonConfig(object):
     :param extra_inputs: potential extra input variables
     :param python_path: your desired Python PATH as str
     :param return_all_inputs: whether or not to return all inputs additionally to outputs
+    :param setup_and_run: whether or not to use the setup-and-run schematics, defaults to False.
     """
 
     _types_map = {
@@ -956,6 +957,7 @@ class PythonConfig(object):
         "pythonOutputs": {"type": dict, "subtype": None},
         "extraInputs": {"type": dict, "subtype": None},
         "returnAllInputs": {"type": bool, "subtype": None},
+        "setupAndRun": {"type": bool, "subtype": None},
     }
     _formats_map = {}
 
@@ -970,6 +972,7 @@ class PythonConfig(object):
         python_outputs=None,
         extra_inputs=None,
         return_all_inputs=None,
+        setup_and_run=False,
     ):
         self.__tensor_data_types_config = tensor_data_types_config
         self.__model_config_type = model_config_type
@@ -980,6 +983,7 @@ class PythonConfig(object):
         self.__python_outputs = python_outputs
         self.__extra_inputs = extra_inputs
         self.__return_all_inputs = return_all_inputs
+        self.__setup_and_run = setup_and_run
 
     def _get_tensor_data_types_config(self):
         return self.__tensor_data_types_config
@@ -1085,6 +1089,16 @@ class PythonConfig(object):
 
     return_all_inputs = property(_get_return_all_inputs, _set_return_all_inputs)
 
+    def _get_setup_and_run(self):
+        return self.__setup_and_run
+
+    def _set_setup_and_run(self, value):
+        if not isinstance(value, bool):
+            raise TypeError("setupAndRun must be bool")
+        self.__setup_and_run = value
+
+    setup_and_run = property(_get_setup_and_run, _set_setup_and_run)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__tensor_data_types_config is not None:
@@ -1140,6 +1154,12 @@ class PythonConfig(object):
                 self.__return_all_inputs.as_dict()
                 if hasattr(self.__return_all_inputs, "as_dict")
                 else self.__return_all_inputs
+            )
+        if self.__setup_and_run is not None:
+            d["setupAndRun"] = (
+                self.__setup_and_run.as_dict()
+                if hasattr(self.__setup_and_run, "as_dict")
+                else self.__setup_and_run
             )
         return d
 

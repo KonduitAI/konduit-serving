@@ -1,9 +1,10 @@
 import torch
-from model.train import Model
+from .model.train import Model
 import torchvision.transforms as transforms
 
 transform = None
 model = None
+first = None
 second = None
 
 
