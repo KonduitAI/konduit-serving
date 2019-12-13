@@ -254,8 +254,7 @@ public class CodeGen {
 
         loadedModule = loadedModule.replace("setup_and_run=None", "setup_and_run=False");
 
-        loadedModule = loadedModule.replace("log_timings=None", "log_timings=False");
-        loadedModule = loadedModule.replace("listen_host=None", "listen_host='localhost'");
+
         loadedModule = loadedModule.replace("uploads_directory=None", "uploads_directory='file-uploads/'");
 
         return loadedModule;
