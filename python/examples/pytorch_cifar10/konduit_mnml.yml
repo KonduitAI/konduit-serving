@@ -1,0 +1,23 @@
+serving:
+  http_port: 1337
+  input_data_format: IMAGE
+  output_data_format: NUMPY
+  log_timings: True
+steps:
+  image_loading_step:
+    type: IMAGE_LOADING
+    image_processing_required_layout: CHW # TODO: Need an optional no minibach option
+    dimensions_configs: # TODO we should replace the list with a dictionary to prevent confusion.
+      width: 32
+      height: 32
+      channels: 3
+  python_step:
+    type: PYTHON
+    python_path: .;.\\venv # TODO: Should detect and auto add venv/lib/site-packages to the python_path
+    python_code_path: ./serve.py # TODO: Should detect setup()/run(request).
+    python_inputs:
+      the_input: NDARRAY
+    python_outputs:
+      the_prediction: NDARRAY
+client:
+    port: 1337
