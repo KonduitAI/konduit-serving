@@ -2,25 +2,8 @@ package ai.konduit.serving.verticles.python;
 
 import ai.konduit.serving.util.python.PythonVariables;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class PythonTestGenerator{
-
-    static Map<PythonVariables.Type, List<Object>> sampleValues = new HashMap<>();
-
-    static {
-        sampleValues.put(PythonVariables.Type.NDARRAY, Arrays.asList(Nd4j.zeros(1), Nd4j.rand(3, 2), Nd4j.ones(4, 5, 6)));
-        sampleValues.put(PythonVariables.Type.INT, Arrays.asList(1, 2, 3));
-        sampleValues.put(PythonVariables.Type.STR, Arrays.asList("a", "abc", "abcdef"));
-        sampleValues.put(PythonVariables.Type.FLOAT, Arrays.asList(1f, 2f, 3f));
-        sampleValues.put(PythonVariables.Type.BOOL, Arrays.asList(true, false, true));
-    }
-
 
     private static String getPythonRepr(Object obj, PythonVariables.Type pythonType){
         switch (pythonType){
