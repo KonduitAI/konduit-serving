@@ -58,7 +58,7 @@ public class PythonPipelineGenerator implements PipelineGenerator {
          */
         StringBuffer sb = new StringBuffer();
         for(Map.Entry<String,String> entry : outputs.entrySet()) {
-          //  sb.append(co);
+            //  sb.append(co);
         }
 
         return builder.build();
@@ -109,8 +109,10 @@ public class PythonPipelineGenerator implements PipelineGenerator {
                 break;
 
             case FLOAT:
-                Float inputFloat = (Float) input;
-                String boolean2 = inputFloat > 0 ? "True" : "false";
+            case INT:
+                Preconditions.checkState(input instanceof Number,"Input must be an instance of number!");
+                Number inputFloat = (Number) input;
+                String boolean2 = inputFloat.floatValue() > 0 ? "True" : "false";
                 switch(outputType) {
                     case BOOL:
                         sb.append(boolean2);
@@ -141,6 +143,7 @@ public class PythonPipelineGenerator implements PipelineGenerator {
                 break;
 
             case NDARRAY:
+                Preconditions.checkState(input instanceof INDArray,"Input not an ndarray!");
                 INDArray inputArr = (INDArray) input;
                 Preconditions.checkState(inputArr.length() == 1);
                 switch(outputType) {
@@ -180,6 +183,8 @@ public class PythonPipelineGenerator implements PipelineGenerator {
                     Object[] o2 = (Object[]) input;
                     firstElement = o2[0];
                 }
+                else
+                    throw new IllegalArgumentException("Input element must be  a list or object array!");
 
                 switch(outputType) {
                     case BOOL:
@@ -202,6 +207,7 @@ public class PythonPipelineGenerator implements PipelineGenerator {
                 break;
 
             case DICT:
+                Preconditions.checkState(input instanceof Map,"Input must be a map!");
                 switch(outputType) {
                     case BOOL:
                         break;
@@ -242,51 +248,35 @@ public class PythonPipelineGenerator implements PipelineGenerator {
             default:
                 throw new UnsupportedOperationException();
 
-            case INT:
-                Integer intCase = (Integer) input;
-                String boolean3 = intCase > 0 ? "True" : "false";
-
-                switch(outputType) {
-                    case BOOL:
-                        sb.append(boolean3);
-                        break;
-                    case FLOAT:
-                        sb.append(intCase.floatValue());
-                        break;
-                    case NDARRAY:
-                        sb.append("np.array([" + intCase  + "])");
-                        break;
-                    case LIST:
-                        sb.append("[" + intCase + "]");
-                    case DICT:
-                    case FILE:
-                    default:
-                        throw new UnsupportedOperationException();
-                    case INT:
-                        sb.append(intCase);
-                        break;
-                    case STR:
-                        sb.append("'" + intCase + "'");
-                        break;
-                }
-                break;
-
             case STR:
+                Preconditions.checkState(input instanceof String,"Input must be a string!");
                 switch(outputType) {
                     case BOOL:
+                        boolean parsedBool = Boolean.parseBoolean(input.toString().toLowerCase());
+                        sb.append(parsedBool ? "True" : "False");
                         break;
                     case FLOAT:
+                        Float parsedValue = Float.parseFloat(input.toString());
+                        sb.append(parsedValue);
                         break;
                     case NDARRAY:
+                        sb.append("np.array([" + input.toString() + "])");
                         break;
                     case LIST:
+                        sb.append("[" + input.toString() + "]");
+                        break;
                     case DICT:
+                        sb.append("{'" + outputVariableName + "':" + input.toString() + "}");
+                        break;
                     case FILE:
                     default:
                         throw new UnsupportedOperationException();
                     case INT:
+                        Integer validInteger = Integer.parseInt(input.toString());
+                        sb.append(validInteger);
                         break;
                     case STR:
+                        sb.append("'" + input + "'");
                         break;
                 }
                 break;
