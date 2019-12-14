@@ -41,13 +41,14 @@ import java.util.Map;
 
 
 /**
- * PythonStep defines a custom Python {@link PipelineStep} from a {@link PythonConfig}.
+ * PythonStep defines a custom Python {@link PipelineStep}
+ * from a {@link PythonConfig}.
  */
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
-public class PythonStep extends BasePipelineStep {
+public class PythonStep extends BasePipelineStep<PythonStep> {
 
     @Getter
     @Setter
@@ -168,45 +169,6 @@ public class PythonStep extends BasePipelineStep {
         };
     }
 
-    @Override
-    public PipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setInput("default", columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setOutput("default", columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setInput(Schema inputSchema) throws Exception {
-        return (PythonStep) super.setInput("default", inputSchema);
-    }
-
-    @Override
-    public PipelineStep setOutput(Schema outputSchema) throws Exception {
-        return (PythonStep) super.setOutput("default", outputSchema);
-    }
-
-    @Override
-    public PipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setInput(inputName, columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setOutput(outputName, columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
-        return (PythonStep) super.setInput(inputName, inputSchema);
-    }
-
-    @Override
-    public PipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
-        return (PythonStep) super.setOutput(outputName, outputSchema);
-    }
 
     /**
      * Define a single, named step for a Python pipeline.
@@ -346,9 +308,6 @@ public class PythonStep extends BasePipelineStep {
 
         return this;
     }
-
-
-
 
 
     @Override

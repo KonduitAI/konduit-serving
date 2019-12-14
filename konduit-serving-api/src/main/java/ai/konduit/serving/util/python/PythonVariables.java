@@ -83,8 +83,8 @@ public class PythonVariables implements java.io.Serializable {
      * @param jsonArray the input json array
      * @return the python variables based on the input json array
      */
-    public static ai.konduit.serving.util.python.PythonVariables fromJSON(org.json.JSONArray jsonArray) {
-        ai.konduit.serving.util.python.PythonVariables pyvars = new ai.konduit.serving.util.python.PythonVariables();
+    public static PythonVariables fromJSON(org.json.JSONArray jsonArray) {
+        PythonVariables pyvars = new PythonVariables();
         for (int i = 0; i < jsonArray.length(); i++) {
             org.json.JSONObject input = (org.json.JSONObject) jsonArray.get(i);
             String varName = (String) input.get("name");
@@ -118,7 +118,7 @@ public class PythonVariables implements java.io.Serializable {
      * @return an empty variables clone
      * with no values
      */
-    public ai.konduit.serving.util.python.PythonVariables copySchema() {
+    public PythonVariables copySchema() {
         ai.konduit.serving.util.python.PythonVariables ret = new ai.konduit.serving.util.python.PythonVariables();
         for (String varName : getVariables()) {
             Type type = getType(varName);

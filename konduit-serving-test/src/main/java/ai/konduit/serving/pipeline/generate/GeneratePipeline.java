@@ -1,6 +1,8 @@
 package ai.konduit.serving.pipeline.generate;
 
 import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.generator.PipelineGenerator;
+import ai.konduit.serving.pipeline.generator.impl.PythonPipelineGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,13 @@ public class GeneratePipeline {
 
 
     private PipelineStep getRandomStep() {
+        PythonPipelineGenerator pythonPipelineGenerator =  PythonPipelineGenerator.builder()
+                .inputVariables(null)
+                .numNames(1)
+                .outputVariables(null)
+                .build();
 
+        return pythonPipelineGenerator.generate();
     }
 
 }
