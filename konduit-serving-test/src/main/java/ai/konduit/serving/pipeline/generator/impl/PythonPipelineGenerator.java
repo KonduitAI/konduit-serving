@@ -12,65 +12,107 @@ import com.github.javafaker.Faker;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.nd4j.base.Preconditions;
-import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.primitives.Pair;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Builder
 @Data
+@Slf4j
 public class PythonPipelineGenerator implements PipelineGenerator {
 
     @Default
     private int numNames = 1;
     @Default
-    private Faker faker = new Faker();
-    private PythonVariables inputVariables,outputVariables;
+    private Faker faker;
+
+    private int numVariables;
+    @Default
+    private long seed;
+
+    private static Type[] singleTypes = {
+            Type.FILE,
+            Type.FLOAT,
+            Type.INT,
+            Type.NDARRAY,
+            Type.BOOL,
+            Type.STR
+    };
+
+    public PythonPipelineGenerator(int numNames, Faker faker, int numVariables, long seed) {
+        this.numNames = numNames;
+        this.faker = faker;
+        this.numVariables = numVariables;
+        this.seed = seed;
+        if(seed != 0) {
+            if(faker != null) {
+                throw new IllegalArgumentException("Please either only specify a faker instance or a non zero seed.");
+            }
+            //set both the random seed and the faker seed for complete
+            //reproducibility
+            Nd4j.getRandom().setSeed(seed);
+            this.faker = new Faker(new Random(seed));
+        }
+
+        if(faker == null && seed == 0) {
+            throw new IllegalStateException("Faker instance not specified and seed appears to be zero. Please specify either a faker instance or a non zero seed.");
+        }
+     }
 
     @Override
     public PipelineStep generate() {
         PythonStepBuilder<?, ?> builder = PythonStep.builder();
         //generate random python configuration
         for(int i = 0; i < numNames; i++)
-            builder.pythonConfig(UUID.randomUUID().toString(),getConfig());
+            builder.pythonConfig(UUID.randomUUID().toString().replace("-","_"), createRandomConfiguration());
 
         return builder.build();
     }
 
-    private PythonConfig getConfig() {
+    protected PythonConfig createRandomConfiguration() {
+        if(numVariables < 1) {
+            numVariables = randomNumberOfVariables();
+            log.warn("No number of variables specified. Picking random number of " + numVariables);
+        }
+
         PythonConfigBuilder<?, ?> builder = PythonConfig.builder();
         Map<String,String> inputs = randomPythonVariables();
+        List<Map.Entry<String,String>> inputsOrdered = inputs.entrySet().stream().collect(Collectors.toList());
         Map<String,String> outputs = randomPythonVariables();
+        List<Map.Entry<String,String>> outputsOrdered = outputs.entrySet().stream().collect(Collectors.toList());
+        Preconditions.checkState(inputs.size() == outputs.size(),"Inputs and outputs must be same size!");
         builder.pythonInputs(inputs);
         builder.pythonOutputs(outputs);
-        /**
-         * Need to figure out python code relative to variables.
-         *
-         * Need to figure out logic we want for each kind of
-         * input/output type combination
-         *
-         */
+
         StringBuffer sb = new StringBuffer();
-        for(Map.Entry<String,String> entry : outputs.entrySet()) {
-            //  sb.append(co);
+        for(int i = 0; i <inputsOrdered.size(); i++) {
+            Type inputType = Type.valueOf(inputsOrdered.get(i).getValue());
+            Type outputType = Type.valueOf(outputsOrdered.get(i).getValue());
+            sb.append(conversionCode(
+                    inputType,
+                    outputType,
+                    randomObjectForType(inputType),
+                    outputsOrdered.get(i).getKey()
+            ));
         }
 
         return builder.build();
     }
 
-    public String codeRepresentationForType(Object o,PythonVariables.Type type) {
-        switch(type) {
-            case STR: return "'" + o.toString() + "'";
-            default: return o.toString();
-        }
-    }
 
+    /**
+     *
+     * @param type
+     * @param outputType
+     * @param input
+     * @param outputVariableName
+     * @return
+     */
     public  static String conversionCode(PythonVariables.Type type,PythonVariables.Type outputType,Object input,String outputVariableName) {
         StringBuffer sb = new StringBuffer();
         sb.append(outputVariableName  + " = ");
@@ -78,7 +120,7 @@ public class PythonPipelineGenerator implements PipelineGenerator {
             case BOOL:
                 Preconditions.checkState(input instanceof Boolean);
                 Boolean inputBoolean = (Boolean) input;
-                String pythonBoolean = inputBoolean ? "True" : "false";
+                String pythonBoolean = inputBoolean ? "True" : "False";
                 switch(outputType) {
                     case BOOL:
                         sb.append(pythonBoolean);
@@ -95,13 +137,10 @@ public class PythonPipelineGenerator implements PipelineGenerator {
                     case DICT:
                         sb.append("{'" + outputVariableName + "':" + pythonBoolean + "}");
                         break;
-                    case FILE:
-                    default:
-                        throw new UnsupportedOperationException();
                     case INT:
                         sb.append(inputBoolean ? "1" : "0");
                         break;
-                    case STR:
+                    default:
                         sb.append("'" + pythonBoolean + "'");
                         break;
                 }
@@ -112,7 +151,7 @@ public class PythonPipelineGenerator implements PipelineGenerator {
             case INT:
                 Preconditions.checkState(input instanceof Number,"Input must be an instance of number!");
                 Number inputFloat = (Number) input;
-                String boolean2 = inputFloat.floatValue() > 0 ? "True" : "false";
+                String boolean2 = inputFloat.floatValue() > 0 ? "True" : "False";
                 switch(outputType) {
                     case BOOL:
                         sb.append(boolean2);
@@ -129,13 +168,10 @@ public class PythonPipelineGenerator implements PipelineGenerator {
                     case DICT:
                         sb.append("{'" + outputVariableName + "':" + inputFloat + "}");
                         break;
-                    case FILE:
-                    default:
-                        throw new UnsupportedOperationException();
                     case INT:
                         sb.append(inputFloat.intValue());
                         break;
-                    case STR:
+                    default:
                         sb.append("'" + inputFloat + "'");
                         break;
                 }
@@ -148,27 +184,27 @@ public class PythonPipelineGenerator implements PipelineGenerator {
                 Preconditions.checkState(inputArr.length() == 1);
                 switch(outputType) {
                     case BOOL:
-                        Preconditions.checkState(inputArr.dataType() == DataType.BOOL);
-                        Boolean value2 = (Boolean) inputArr.element();
+                        Number number1 = inputArr.elementWiseStride();
+                        Boolean value2 = number1.doubleValue() > 0;
                         sb.append(value2 ? "True" : "False");
                         break;
                     case FLOAT:
                         sb.append(inputArr.element());
                         break;
+                    case INT:
+                        Number number = (Number) inputArr.element();
+                        sb.append(number.intValue());
+                        break;
                     case NDARRAY:
-                        sb.append("{'" + outputVariableName + "':" + inputArr.element() + "}");
                         break;
                     case LIST:
                         sb.append("[" + inputArr.element() + "]");
-                    case DICT:
-                    case FILE:
-                    default:
-                        throw new UnsupportedOperationException();
-                    case INT:
-                        sb.append(inputArr.element());
                         break;
-                    case STR:
-                        sb.append("str(" + inputArr.element() +  ")");
+                    case DICT:
+                        sb.append("{'" + outputVariableName + "':" + inputArr.element() + "}");
+                        break;
+                    default:
+                        sb.append("'" + inputArr.element() +  "'");
                         break;
                 }
                 break;
@@ -186,69 +222,25 @@ public class PythonPipelineGenerator implements PipelineGenerator {
                 else
                     throw new IllegalArgumentException("Input element must be  a list or object array!");
 
-                switch(outputType) {
-                    case BOOL:
-                        break;
-                    case FLOAT:
-                        break;
-                    case NDARRAY:
-                        break;
-                    case LIST:
-                    case DICT:
-                    case FILE:
-                    default:
-                        throw new UnsupportedOperationException();
-                    case INT:
-                        break;
-                    case STR:
-                        break;
-                }
+                return conversionCode(
+                        typeForObject(firstElement),
+                        outputType,
+                        firstElement,
+                        outputVariableName);
 
-                break;
 
             case DICT:
                 Preconditions.checkState(input instanceof Map,"Input must be a map!");
-                switch(outputType) {
-                    case BOOL:
-                        break;
-                    case FLOAT:
-                        break;
-                    case NDARRAY:
-                        break;
-                    case LIST:
-                    case DICT:
-                    case FILE:
-                    default:
-                        throw new UnsupportedOperationException();
-                    case INT:
-                        break;
-                    case STR:
-                        break;
-                }
-                break;
+                Map inputMap = (Map) input;
+                Preconditions.checkState(inputMap.size() == 1,"Input map must not be empty and only be size 1");
+                Object value = inputMap.values().iterator().next();
+                return conversionCode(
+                        typeForObject(value),
+                        outputType,
+                        value,
+                        outputVariableName);
 
-            case FILE:
-                switch(outputType) {
-                    case BOOL:
-                        break;
-                    case FLOAT:
-                        break;
-                    case NDARRAY:
-                        break;
-                    case LIST:
-                    case DICT:
-                    case FILE:
-                    default:
-                        throw new UnsupportedOperationException();
-                    case INT:
-                        break;
-                    case STR:
-                        break;
-                }
             default:
-                throw new UnsupportedOperationException();
-
-            case STR:
                 Preconditions.checkState(input instanceof String,"Input must be a string!");
                 switch(outputType) {
                     case BOOL:
@@ -268,14 +260,11 @@ public class PythonPipelineGenerator implements PipelineGenerator {
                     case DICT:
                         sb.append("{'" + outputVariableName + "':" + input.toString() + "}");
                         break;
-                    case FILE:
-                    default:
-                        throw new UnsupportedOperationException();
                     case INT:
                         Integer validInteger = Integer.parseInt(input.toString());
                         sb.append(validInteger);
                         break;
-                    case STR:
+                    default:
                         sb.append("'" + input + "'");
                         break;
                 }
@@ -286,29 +275,83 @@ public class PythonPipelineGenerator implements PipelineGenerator {
         return sb.toString();
     }
 
-    public  Object randomObjectForType(PythonVariables.Type type) {
+
+    /**
+     * Returns a {@link Type}
+     * for a given input object
+     * @param input the input object
+     * @return the type for that object
+     */
+    public static Type typeForObject(Object input) {
+        if(input instanceof Boolean) {
+            return Type.BOOL;
+        }
+        else if(input instanceof Integer) {
+            return Type.INT;
+        }
+        else if(input instanceof Float || input instanceof Double) {
+            return Type.FLOAT;
+        }
+        else if(input instanceof Map) {
+            return Type.DICT;
+        }
+        else if(input instanceof Object[] || input instanceof List) {
+            return Type.LIST;
+        }
+        else if(input instanceof java.io.File) {
+            return Type.FILE;
+        }
+        else if(input instanceof INDArray) {
+            return Type.NDARRAY;
+        }
+        else {
+            return Type.STR;
+        }
+    }
+
+    protected   Object randomObjectForType(PythonVariables.Type type) {
+        switch(type) {
+            case LIST:
+                List<Object> list = new ArrayList<>();
+                list.add(randomObjectForType(randomSingleType()));
+                return list;
+            case DICT:
+                Map<String,Object> ret = new HashMap<>();
+                ret.put("output",randomObjectForType(randomSingleType()));
+                return ret;
+
+            default:
+                return randomObjectForTypeSingle(type);
+
+        }
+    }
+
+    private Type randomSingleType() {
+        return singleTypes[faker.random().nextInt(singleTypes.length)];
+    }
+
+    private  Object randomObjectForTypeSingle(PythonVariables.Type type) {
         switch(type) {
             case BOOL:
                 return faker.bool().bool();
             case FLOAT:
                 return faker.number().randomDouble(4,0,10);
             case NDARRAY:
-                return Nd4j.rand(2,2);
-            case LIST:
-            case DICT:
-            case FILE:
-            default:
-                throw new UnsupportedOperationException();
+                //note that only scalars are allowed if we want
+                //consistent end to end testing.
+                //an assumption is made that all ndarrays are only scalar values
+                return Nd4j.rand(1,1);
             case INT:
                 return faker.number().numberBetween(0,10);
-            case STR:
-                return faker.esports().game();
+            default:
+                return String.valueOf(faker.number().numberBetween(0,10));
         }
     }
 
+
     private Map<String,String> randomPythonVariables() {
-        Map<String,String> ret = new HashMap<>();
-        for(int i = 0; i < randomNumberOfVariables(); i++) {
+        Map<String,String> ret = new LinkedHashMap<>();
+        for(int i = 0; i < numVariables; i++) {
             Pair<String, String> var = randomVariable();
             ret.put(var.getKey(),var.getValue());
         }
@@ -317,11 +360,11 @@ public class PythonPipelineGenerator implements PipelineGenerator {
     }
 
     private int randomNumberOfVariables() {
-        return faker.number().numberBetween(0,10);
+        return faker.number().numberBetween(1,10);
     }
 
     private Pair<String,String> randomVariable() {
-        return Pair.of(faker.ancient().god(),type().name());
+        return Pair.of(UUID.randomUUID().toString().replace("-","_"),type().name());
     }
 
     private PythonVariables.Type type() {

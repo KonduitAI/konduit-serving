@@ -25,9 +25,7 @@ public class GeneratePipeline {
 
     private PipelineStep getRandomStep() {
         PythonPipelineGenerator pythonPipelineGenerator =  PythonPipelineGenerator.builder()
-                .inputVariables(null)
                 .numNames(1)
-                .outputVariables(null)
                 .build();
 
         return pythonPipelineGenerator.generate();
