@@ -55,6 +55,8 @@ public class PythonConfig implements Serializable {
 
     private boolean returnAllInputs;
 
+    private boolean setupAndRun;
+
     private static String defaultPythonPath;
 
 

@@ -55,7 +55,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
+public class TestPythonSetupRun extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -84,9 +84,10 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
     @Override
     public JsonObject getConfigObject() throws Exception {
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonCode("first += 2; output = first")
-                .pythonInput("first", PythonVariables.Type.NDARRAY.name())
+                .pythonCode("def setup(): pass\ndef run(input): return {'output': np.array(input + 2)}")
+                .pythonInput("input", PythonVariables.Type.NDARRAY.name())
                 .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
+                .setupAndRun(true)
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -112,7 +113,7 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
-        jsonObject.put("first", Nd4j.scalar(2.0).toString());
+        jsonObject.put("input", Nd4j.scalar(2.0).toString());
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "application/json");
         String body = requestSpecification.when()

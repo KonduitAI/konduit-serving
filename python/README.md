@@ -22,7 +22,7 @@ The `dev` dependencies use `black` as a pre-commit hook to lint your code automa
 this functionality run `pre-commit install` on the command line first.
 
 Once the package itself is installed, you have access to a command line interface (CLI) tool
-called `konduit-python`. This helper tool can build the Java dependencies needed for `konduit`
+called `konduit`. This helper tool can build the Java dependencies needed for `konduit`
 for you under the hood. All you need to do is run:
 
 ```shell script
@@ -31,13 +31,12 @@ konduit init --os <your-platform>
 
 where `<your-platform>` is picked from `windows-x86_64`,`linux-x86_64`,`linux-x86_64-gpu`,
 `macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`, depending on your operating system
-and architecture. This tool assumes that you have `git` installed on your system and that `python3` is
-available. If you don't want to use the CLI tool and have cloned this repository, you can also build
+and architecture. This tool assumes that you have `git` installed on your system. If you don't want to use the CLI tool and have cloned this repository, you can also build
 the necessary jar on your own like this:
 
 ```shell script
 cd ..
-python3 build_jar.py --os <your-platform>
+python build_jar.py --os <your-platform>
 ```
 
 ## Using Konduit
