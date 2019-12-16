@@ -36,16 +36,13 @@
     <name>konduit-serving-tar</name>
 
     <properties>
-        <konduit-serving.src.dir>../../${project.build.directory}</konduit-serving.src.dir>
-        <konduit-serving.base.dir>${project.build.directory}/konduit-serving-distro-${project.version}-dist/
-        </konduit-serving.base.dir>
+        <konduit-serving.root.dir>${project.build.directory}/../..</konduit-serving.root.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-
     <profiles>
         <profile>
-            <id>generate-tarball</id>
+            <id>tar</id>
             <build>
                 <plugins>
                     <plugin>
@@ -71,4 +68,23 @@
             </build>
         </profile>
     </profiles>
+
+    <!-- This is to avoid creating the jar file, since we don't need it for the tarball generation-->
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>none</phase>
+                        <configuration>
+                            <finalName>unwanted</finalName>
+                            <classifier>unwanted</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
