@@ -55,8 +55,8 @@ import static java.lang.System.setProperty;
  * such as metrics initialization, logging,..
  *
  * @author Adam Gibson
- * @see {@link #configureWithJson(JsonObject)}
- * @see {@link #setupVertxOptions()}
+ * {@link #configureWithJson(JsonObject)}
+ * {@link #setupVertxOptions()}
  * <p>
  * Generally, you call setup vertx options first.
  * This provides the necessary configuration to create a vertx instance.
