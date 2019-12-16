@@ -36,8 +36,8 @@ import java.util.Map;
  */
 public class TensorDataTypesConfig {
     @Singular
-    private Map<String, TensorDataType> inputDataTypes;
+    private Map<String, org.nd4j.tensorflow.conversion.TensorDataType> inputDataTypes;
     @Singular
-    private Map<String, TensorDataType> outputDataTypes;
+    private Map<String, org.nd4j.tensorflow.conversion.TensorDataType> outputDataTypes;
 
 }

@@ -25,8 +25,8 @@ package ai.konduit.serving.threadpool.tensorflow;
 
 import ai.konduit.serving.model.loader.ModelLoader;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
-import ai.konduit.serving.threadpool.tensorflow.conversion.TensorflowConversion;
-import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
+import org.nd4j.tensorflow.conversion.TensorflowConversion;
+import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 import ai.konduit.serving.threadpool.tensorflow.observables.BasicTensorflowInferenceObservable;
 import ai.konduit.serving.threadpool.tensorflow.observables.BatchedTensorflowInferenceObservable;
 import ai.konduit.serving.threadpool.tensorflow.observables.TensorflowObservable;
