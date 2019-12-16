@@ -39,7 +39,7 @@ public class TensorFlowConfig extends ModelConfig {
 
     public final static String TENSORFLOW_EXECUTION_CONFIG_KEY = "tensorFlowConfig";
     private String configProtoPath;
-    private SavedModelConfig savedModelConfig;
+    private org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig savedModelConfig;
 
 
 }
