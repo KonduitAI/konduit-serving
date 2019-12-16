@@ -53,3 +53,6 @@ konduit-serving.pid
 # uberjar creation
 konduit-serving.jar
 konduit.jar
+
+# pom.xml backups while updating konduit-serving version
+pom.xml.versionsBackup
