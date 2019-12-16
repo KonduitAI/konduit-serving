@@ -29,7 +29,7 @@ import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
-import ai.konduit.serving.util.python.PythonVariables;
+import org.datavec.python.PythonVariables;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
