@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.executioner;
 
+import org.nd4j.tensorflow.conversion.TensorDataType;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;

@@ -23,7 +23,7 @@
 package ai.konduit.serving.executioner.inference;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
-import ai.konduit.serving.model.SavedModelConfig;
+import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import org.deeplearning4j.parallelism.inference.InferenceMode;
 import org.junit.Rule;
