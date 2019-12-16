@@ -44,6 +44,15 @@ public class PythonPipelineGenerator implements PipelineGenerator {
             Type.STR
     };
 
+    /**
+     * Builder constructor. Contains all variables
+     * @param numNames the number of input names to use (
+     *                 the number of configurations to generate)
+     * @param faker the faker instance to use. Only a seed or faker instance maybe specified.
+     * @param numVariables the number of variables for input and output
+     * @param seed the random seed for use in faker. Only a seed or a faker
+     *             instance maybe specified
+     */
     public PythonPipelineGenerator(int numNames, Faker faker, int numVariables, long seed) {
         this.numNames = numNames;
         this.faker = faker;
@@ -69,7 +78,7 @@ public class PythonPipelineGenerator implements PipelineGenerator {
         PythonStepBuilder<?, ?> builder = PythonStep.builder();
         //generate random python configuration
         for(int i = 0; i < numNames; i++)
-            builder.pythonConfig(UUID.randomUUID().toString().replace("-","_"), createRandomConfiguration());
+            builder.pythonConfig(UUID.randomUUID().toString().replaceAll("[-0-9]+",""), createRandomConfiguration());
 
         return builder.build();
     }
@@ -90,7 +99,7 @@ public class PythonPipelineGenerator implements PipelineGenerator {
         builder.pythonOutputs(outputs);
 
         StringBuffer sb = new StringBuffer();
-        for(int i = 0; i <inputsOrdered.size(); i++) {
+        for(int i = 0; i < inputsOrdered.size(); i++) {
             Type inputType = Type.valueOf(inputsOrdered.get(i).getValue());
             Type outputType = Type.valueOf(outputsOrdered.get(i).getValue());
             sb.append(conversionCode(
@@ -100,6 +109,10 @@ public class PythonPipelineGenerator implements PipelineGenerator {
                     outputsOrdered.get(i).getKey()
             ));
         }
+
+        //sets the code for execution
+        //based on the random output
+        builder.pythonCode(sb.toString());
 
         return builder.build();
     }
@@ -309,7 +322,7 @@ public class PythonPipelineGenerator implements PipelineGenerator {
         }
     }
 
-    protected   Object randomObjectForType(PythonVariables.Type type) {
+    protected  Object randomObjectForType(PythonVariables.Type type) {
         switch(type) {
             case LIST:
                 List<Object> list = new ArrayList<>();
@@ -340,6 +353,8 @@ public class PythonPipelineGenerator implements PipelineGenerator {
                 //note that only scalars are allowed if we want
                 //consistent end to end testing.
                 //an assumption is made that all ndarrays are only scalar values
+                //TODO: Figure out if this breaks when generalizing the pipeline
+                //for interop
                 return Nd4j.rand(1,1);
             case INT:
                 return faker.number().numberBetween(0,10);
@@ -364,7 +379,7 @@ public class PythonPipelineGenerator implements PipelineGenerator {
     }
 
     private Pair<String,String> randomVariable() {
-        return Pair.of(UUID.randomUUID().toString().replace("-","_"),type().name());
+        return Pair.of(UUID.randomUUID().toString().replaceAll("[-0-9]+",""),type().name());
     }
 
     private PythonVariables.Type type() {

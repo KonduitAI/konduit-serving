@@ -15,22 +15,29 @@
  *
  */
 
-package ai.konduit.serving.pipeline.generator;
+package ai.konduit.serving.pipeline.generator.data.impl.str;
 
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.pipeline.PipelineStep;
-import ai.konduit.serving.pipeline.generator.data.DataGenerator;
-import org.nd4j.linalg.primitives.Pair;
+import ai.konduit.serving.pipeline.generator.data.BaseFakerDataGenerator;
+import com.github.javafaker.Faker;
 
-import java.util.Map;
+public class FakerStringDataGenerator extends BaseFakerDataGenerator<String> {
+    public FakerStringDataGenerator(Faker faker) {
+        super(faker);
+    }
 
-public interface PipelineGenerator {
+    public FakerStringDataGenerator(long seed) {
+        super(seed);
+    }
 
 
+    @Override
+    public SchemaType typeForGeneration() {
+        return SchemaType.String;
+    }
 
-     Map<String, Pair<SchemaType,DataGenerator>> inputDataGenerators();
-
-
-     PipelineStep generate();
-
+    @Override
+    public String generate() {
+        return String.valueOf(faker.number().digit());
+    }
 }

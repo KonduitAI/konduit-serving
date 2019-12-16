@@ -15,22 +15,31 @@
  *
  */
 
-package ai.konduit.serving.pipeline.generator;
+package ai.konduit.serving.pipeline.generator.data.impl.ndarray;
 
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.generator.data.DataGenerator;
-import org.nd4j.linalg.primitives.Pair;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
-import java.util.Map;
+public class NdarrayDataGenerator implements DataGenerator<INDArray> {
 
-public interface PipelineGenerator {
+    protected long seed;
+    protected long[] shape;
 
+    public NdarrayDataGenerator(long seed, long[] shape) {
+        this.seed = seed;
+        this.shape = shape;
+        Nd4j.getRandom().setSeed(seed);
+    }
 
+    @Override
+    public SchemaType typeForGeneration() {
+        return SchemaType.NDArray;
+    }
 
-     Map<String, Pair<SchemaType,DataGenerator>> inputDataGenerators();
-
-
-     PipelineStep generate();
-
+    @Override
+    public INDArray generate() {
+        return Nd4j.rand(shape);
+    }
 }

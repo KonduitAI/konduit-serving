@@ -15,22 +15,13 @@
  *
  */
 
-package ai.konduit.serving.pipeline.generator;
+package ai.konduit.serving.pipeline.generator.data;
 
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.pipeline.PipelineStep;
-import ai.konduit.serving.pipeline.generator.data.DataGenerator;
-import org.nd4j.linalg.primitives.Pair;
 
-import java.util.Map;
+public interface DataGenerator<T> {
 
-public interface PipelineGenerator {
+    SchemaType typeForGeneration();
 
-
-
-     Map<String, Pair<SchemaType,DataGenerator>> inputDataGenerators();
-
-
-     PipelineStep generate();
-
+    T generate();
 }

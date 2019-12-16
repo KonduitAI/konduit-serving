@@ -15,22 +15,33 @@
  *
  */
 
-package ai.konduit.serving.pipeline.generator;
+package ai.konduit.serving.pipeline.generator.data.impl.numerical;
 
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.generator.data.BaseFakerDataGenerator;
 import ai.konduit.serving.pipeline.generator.data.DataGenerator;
-import org.nd4j.linalg.primitives.Pair;
+import com.github.javafaker.Faker;
 
-import java.util.Map;
+public class FakerLongDataGenerator extends BaseFakerDataGenerator<Long> {
 
-public interface PipelineGenerator {
+    public FakerLongDataGenerator(Faker faker) {
+        super(faker);
+    }
 
+    public FakerLongDataGenerator(long seed) {
+        super(seed);
+    }
 
+    public FakerLongDataGenerator() {
+    }
 
-     Map<String, Pair<SchemaType,DataGenerator>> inputDataGenerators();
+    @Override
+    public SchemaType typeForGeneration() {
+        return SchemaType.Long;
+    }
 
-
-     PipelineStep generate();
-
+    @Override
+    public Long generate() {
+        return Long.valueOf(faker.number().numberBetween(0,10));
+    }
 }
