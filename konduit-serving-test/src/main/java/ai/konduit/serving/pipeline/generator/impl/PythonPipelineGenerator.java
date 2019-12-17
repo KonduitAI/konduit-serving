@@ -1,9 +1,11 @@
 package ai.konduit.serving.pipeline.generator.impl;
 
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.model.PythonConfig.PythonConfigBuilder;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.generator.PipelineGenerator;
+import ai.konduit.serving.pipeline.generator.data.DataGenerator;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.PythonStep.PythonStepBuilder;
 import ai.konduit.serving.util.python.PythonVariables;
@@ -13,6 +15,7 @@ import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -28,12 +31,11 @@ public class PythonPipelineGenerator implements PipelineGenerator {
 
     @Default
     private int numNames = 1;
-    @Default
-    private Faker faker;
-
     private int numVariables;
     @Default
     private long seed;
+
+    private Map<String, Pair<SchemaType, DataGenerator>> dataGenerators;
 
     private static Type[] singleTypes = {
             Type.FILE,
@@ -48,30 +50,18 @@ public class PythonPipelineGenerator implements PipelineGenerator {
      * Builder constructor. Contains all variables
      * @param numNames the number of input names to use (
      *                 the number of configurations to generate)
-     * @param faker the faker instance to use. Only a seed or faker instance maybe specified.
      * @param numVariables the number of variables for input and output
-     * @param seed the random seed for use in faker. Only a seed or a faker
-     *             instance maybe specified
      */
-    public PythonPipelineGenerator(int numNames, Faker faker, int numVariables, long seed) {
+    public PythonPipelineGenerator(int numNames, int numVariables, Map<String, Pair<SchemaType, DataGenerator>> dataGenerators) {
         this.numNames = numNames;
-        this.faker = faker;
         this.numVariables = numVariables;
-        this.seed = seed;
-        if(seed != 0) {
-            if(faker != null) {
-                throw new IllegalArgumentException("Please either only specify a faker instance or a non zero seed.");
-            }
-            //set both the random seed and the faker seed for complete
-            //reproducibility
-            Nd4j.getRandom().setSeed(seed);
-            this.faker = new Faker(new Random(seed));
-        }
+        this.dataGenerators = dataGenerators;
+    }
 
-        if(faker == null && seed == 0) {
-            throw new IllegalStateException("Faker instance not specified and seed appears to be zero. Please specify either a faker instance or a non zero seed.");
-        }
-     }
+    @Override
+    public Map<String, Pair<SchemaType, DataGenerator>> inputDataGenerators() {
+        return dataGenerators;
+    }
 
     @Override
     public PipelineStep generate() {
@@ -89,6 +79,7 @@ public class PythonPipelineGenerator implements PipelineGenerator {
             log.warn("No number of variables specified. Picking random number of " + numVariables);
         }
 
+        val randomData = generateRandom();
         PythonConfigBuilder<?, ?> builder = PythonConfig.builder();
         Map<String,String> inputs = randomPythonVariables();
         List<Map.Entry<String,String>> inputsOrdered = inputs.entrySet().stream().collect(Collectors.toList());
@@ -322,15 +313,15 @@ public class PythonPipelineGenerator implements PipelineGenerator {
         }
     }
 
-    protected  Object randomObjectForType(PythonVariables.Type type) {
+    protected  Object randomObjectForType(PythonVariables.Type type,String inputName) {
         switch(type) {
             case LIST:
                 List<Object> list = new ArrayList<>();
-                list.add(randomObjectForType(randomSingleType()));
+                list.add(randomObjectForType(randomSingleType(),inputName));
                 return list;
             case DICT:
                 Map<String,Object> ret = new HashMap<>();
-                ret.put("output",randomObjectForType(randomSingleType()));
+                ret.put("output",randomObjectForType(randomSingleType(),inputName));
                 return ret;
 
             default:
@@ -340,7 +331,7 @@ public class PythonPipelineGenerator implements PipelineGenerator {
     }
 
     private Type randomSingleType() {
-        return singleTypes[faker.random().nextInt(singleTypes.length)];
+        return singleTypes[Nd4j.getRandom().nextInt(singleTypes.length)];
     }
 
     private  Object randomObjectForTypeSingle(PythonVariables.Type type) {

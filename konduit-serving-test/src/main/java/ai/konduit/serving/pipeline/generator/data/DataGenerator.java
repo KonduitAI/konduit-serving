@@ -24,4 +24,6 @@ public interface DataGenerator<T> {
     SchemaType typeForGeneration();
 
     T generate();
+
+
 }
