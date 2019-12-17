@@ -19,6 +19,14 @@
         <distro.target.dir>${tar.distro.dir}/target/konduit-serving-tar-${project.version}-dist</distro.target.dir>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-tar</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <finalName>konduit-serving</finalName>
         <plugins>
