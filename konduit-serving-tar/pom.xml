@@ -40,6 +40,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-uberjar</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
     <profiles>
         <profile>
             <id>tar</id>
