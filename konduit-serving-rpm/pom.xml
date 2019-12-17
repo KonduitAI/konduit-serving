@@ -15,22 +15,35 @@
     <properties>
         <rpm-maven-plugin.version>2.1.5</rpm-maven-plugin.version>
         <resource.dir>src/main/resources</resource.dir>
-        <prefix>/konduit-serving</prefix>
-        <pipeline.dir>${project.artifactId}</pipeline.dir>
-
+        <prefix>/opt/konduit/serving</prefix>
+        <distro.target.dir>${tar.distro.dir}/target/konduit-serving-tar-${project.version}-dist</distro.target.dir>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-distro-bom</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 
     <build>
         <finalName>konduit-serving</finalName>
         <plugins>
+            <plugin>
+                <groupId>org.commonjava.maven.plugins</groupId>
+                <artifactId>directory-maven-plugin</artifactId>
+                <version>0.1</version>
+                <executions>
+                    <execution>
+                        <id>directories</id>
+                        <goals>
+                            <goal>directory-of</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <property>tar.distro.dir</property>
+                            <project>
+                                <groupId>ai.konduit.serving</groupId>
+                                <artifactId>konduit-serving-tar</artifactId>
+                            </project>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -54,39 +67,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.commonjava.maven.plugins</groupId>
-                <artifactId>directory-maven-plugin</artifactId>
-                <version>0.1</version>
-                <executions>
-                    <execution>
-                        <id>directories</id>
-                        <goals>
-                            <goal>directory-of</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <property>pipeline.dir</property>
-                            <project>
-                                <groupId>ai.konduit.serving</groupId>
-                                <artifactId>konduit-serving-rpm</artifactId>
-                            </project>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>dist</id>
-                        <phase>none</phase>
-                    </execution>
-                </executions>
-            </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -105,8 +85,8 @@
                 </executions>
 
                 <configuration>
-                    <name>konduit-serving</name>
-                    <license>(C) 2019 Skymind.ai, https://www.apache.org/licenses/LICENSE-2.0</license>
+                    <name>Konduit Serving</name>
+                    <license>(C) 2019 Konduit AI, https://www.apache.org/licenses/LICENSE-2.0</license>
                     <group>Application/Misc</group>
                     <targetVendor>redhat</targetVendor>
                     <targetOS>linux</targetOS>
@@ -137,33 +117,32 @@
                     <mappings>
                         <mapping>
                             <directory>${prefix}</directory>
-                            <username>konduit-serving</username>
-                        </mapping>
-
-                        <mapping>
-                            <directory>/etc/konduit-serving</directory>
-                            <configuration>true</configuration>
-                            <sources>
-                                <source>
-                                    <location>${resource.dir}/etc/konduit-serving/logback.xml</location>
-                                </source>
-                            </sources>
-                            <username>konduit-serving</username>
+                            <username>konduit</username>
                             <groupname>daemon</groupname>
                         </mapping>
 
                         <mapping>
-                            <directory>/etc/konduit-serving</directory>
-                            <configuration>true</configuration>
+                            <directory>${prefix}</directory>
                             <sources>
                                 <source>
-                                    <location>${resource.dir}/etc/konduit-serving/konduit-serving-env.sh</location>
+                                    <location>${distro.target.dir}</location>
                                 </source>
                             </sources>
-                            <username>konduit-serving</username>
+                            <username>konduit</username>
                             <groupname>daemon</groupname>
                         </mapping>
 
+                        <mapping>
+                            <directory>/etc/konduit/serving</directory>
+                            <configuration>true</configuration>
+                            <sources>
+                                <source>
+                                    <location>${resource.dir}/etc/konduit/serving/logback.xml</location>
+                                </source>
+                            </sources>
+                            <username>konduit</username>
+                            <groupname>daemon</groupname>
+                        </mapping>
 
                         <mapping>
                             <directory>/etc/profile.d</directory>
@@ -176,6 +155,11 @@
                             </sources>
                         </mapping>
 
+                        <mapping>
+                            <directory>/var/log/konduit/serving</directory>
+                            <username>konduit</username>
+                            <groupname>daemon</groupname>
+                        </mapping>
 
                     </mappings>
 
@@ -195,6 +179,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>
