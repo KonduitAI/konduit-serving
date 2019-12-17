@@ -172,7 +172,7 @@ public class JsonArrayMapConverter extends BaseJsonArrayConverter {
                         ArrowConverter.setValue(schema.getType(j), vectors.get(j), ndArrayWritable, i);
                     } else if (value instanceof JsonArray) {
                         JsonArray jsonArray1 = (JsonArray) value;
-                        INDArray arr = Nd4j.create(jsonArray1.size(), jsonArray.getJsonArray(0).size());
+                        INDArray arr = Nd4j.create(jsonArray1.size(), jsonArray1.getJsonArray(0).size());
                         for (int k = 0; k < arr.rows(); k++) {
                             JsonArray row = jsonArray1.getJsonArray(k);
                             for (int l = 0; l < arr.columns(); l++) {
