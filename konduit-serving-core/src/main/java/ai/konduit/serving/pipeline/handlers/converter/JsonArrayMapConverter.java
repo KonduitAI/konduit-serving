@@ -23,7 +23,6 @@
 package ai.konduit.serving.pipeline.handlers.converter;
 
 import ai.konduit.serving.util.ArrowUtils;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +37,6 @@ import org.datavec.arrow.ArrowConverter;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.datavec.local.transforms.LocalTransformExecutor;
 import org.dmg.pmml.FieldName;
-import org.json.JSONArray;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
