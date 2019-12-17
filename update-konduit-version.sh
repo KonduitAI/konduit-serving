@@ -6,7 +6,7 @@ if [ -z "$1" ]
   then
     echo No version specified
     echo ""
-    echo Usage: sh update-konduit-version.sh 1.3.0-SNAPSHOT
+    echo Usage: sh update-konduit-version.sh 0.2.0-SNAPSHOT
     exit 0
 fi
 
