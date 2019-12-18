@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+source "${CONDA_INSTALL_PATH}"/bin/activate "${KONDUIT_SERVING_BACKEND}"
+
+konduit "$@"
