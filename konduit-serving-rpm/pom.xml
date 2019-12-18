@@ -43,7 +43,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <file>${resource.dir}/templates/konduit-serving-env.sh.template</file>
+                    <file>${project.basedir}/${resource.dir}/templates/konduit-serving-env.sh.template</file>
                     <replacements>
                         <replacement>
                             <token>##PROJECT_VERSION##</token>
@@ -54,7 +54,7 @@
                             <value>${chip}</value>
                         </replacement>
                     </replacements>
-                    <outputFile>${resource.dir}/etc/profile.d/konduit-serving-env.sh</outputFile>
+                    <outputFile>${project.basedir}/${resource.dir}/etc/profile.d/konduit-serving-env.sh</outputFile>
                 </configuration>
             </plugin>
 
