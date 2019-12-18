@@ -45,6 +45,7 @@ public interface PipelineGenerator {
      PipelineStep generate();
 
 
+/*
      default  Map<String,Object> generateDataSetForName(String name) {
           val generators = inputDataGenerators();
           Map<String,Object> mapPut = new HashMap<>();
@@ -55,6 +56,7 @@ public interface PipelineGenerator {
           }
      }
 
+*/
 
      /**
       * Generate a random dataset
