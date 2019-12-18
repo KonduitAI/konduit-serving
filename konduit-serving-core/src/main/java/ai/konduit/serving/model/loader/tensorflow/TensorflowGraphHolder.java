@@ -21,11 +21,10 @@
  */
 
 package ai.konduit.serving.model.loader.tensorflow;
-
-import ai.konduit.serving.model.SavedModelConfig;
-import ai.konduit.serving.model.TensorDataType;
-import ai.konduit.serving.threadpool.tensorflow.conversion.TensorflowConversion;
-import ai.konduit.serving.threadpool.tensorflow.conversion.graphrunner.GraphRunner;
+import org.nd4j.tensorflow.conversion.TensorDataType;
+import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
+import org.nd4j.tensorflow.conversion.TensorflowConversion;
+import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

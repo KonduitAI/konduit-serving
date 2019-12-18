@@ -25,6 +25,8 @@ package ai.konduit.serving.util.python;
 import org.datavec.api.transform.ColumnType;
 import org.datavec.api.transform.metadata.BooleanMetaData;
 import org.datavec.api.transform.schema.Schema;
+import org.datavec.python.NumpyArray;
+import org.datavec.python.PythonVariables;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.nd4j.base.Preconditions;
