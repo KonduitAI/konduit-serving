@@ -33,6 +33,9 @@
             <source>${konduit-serving.root.dir}/konduit-serving-uberjar/target/konduit-serving-uberjar-${project.version}-bin.jar</source>
             <destName>konduit-${project.version}.jar</destName>
         </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/scripts/install-python.sh</source>
+        </file>
     </files>
 
 </assembly>
