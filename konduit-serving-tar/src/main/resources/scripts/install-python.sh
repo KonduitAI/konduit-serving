@@ -74,7 +74,7 @@ bootstrap_conda() {
                         pytorch="${PYTORCH_VERSION}" \
                         torchvision="${TORCHVISION_VERSION}" \
                         cpuonly="${CPUONLY_VERSION}" \
-                        konduit"${KONDUIT_VERSION}"
+                        konduit="${KONDUIT_VERSION}"
     fi
 
     # Install dependencies for GPU
@@ -96,7 +96,7 @@ bootstrap_conda() {
                       pytorch="${PYTORCH_VERSION}" \
                       torchvision="${TORCHVISION_VERSION}" \
                       cudatoolkit="${CUDATOOLKIT_VERSION}" \
-                      konduit"${KONDUIT_VERSION}"
+                      konduit="${KONDUIT_VERSION}"
     fi
 
     conda clean --all
