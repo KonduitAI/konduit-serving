@@ -204,13 +204,13 @@
                         <scriptFile>${resource.dir}/scripts/pre-install.sh</scriptFile>
                     </preinstallScriptlet>
 
-                    <postinstallScriptlet>
-                        <scriptFile>${resource.dir}/scripts/post-install.sh</scriptFile>
-                    </postinstallScriptlet>
-
                     <preremoveScriptlet>
                         <scriptFile>${resource.dir}/scripts/pre-remove.sh</scriptFile>
                     </preremoveScriptlet>
+
+                    <installScriptlet>
+                        <scriptFile>${resource.dir}/scripts/post-install.sh</scriptFile>
+                    </installScriptlet>
                 </configuration>
             </plugin>
         </plugins>
