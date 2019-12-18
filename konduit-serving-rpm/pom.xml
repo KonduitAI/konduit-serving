@@ -202,9 +202,9 @@
                         <scriptFile>${resource.dir}/scripts/pre-install.sh</scriptFile>
                     </preinstallScriptlet>
 
-                    <postinstallScriptlet>
+                    <posttransScriptlet>
                         <scriptFile>${resource.dir}/scripts/post-install.sh</scriptFile>
-                    </postinstallScriptlet>
+                    </posttransScriptlet>
                 </configuration>
             </plugin>
         </plugins>
