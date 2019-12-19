@@ -135,6 +135,8 @@
                     <autoRequires>false</autoRequires>
                     <prefix>${prefix}</prefix>
                     <needarch>true</needarch>
+                    <defaultUsername>konduit</defaultUsername>
+                    <defaultGroupname>konduit</defaultGroupname>
 
                     <defineStatements>
                         <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
