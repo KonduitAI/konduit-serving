@@ -30,7 +30,7 @@ import lombok.experimental.SuperBuilder;
 
 @Data
 @SuperBuilder
-public class CustomPipelineStep extends BasePipelineStep {
+public class CustomPipelineStep extends BasePipelineStep<CustomPipelineStep> {
 
     private String customUdfClazz;
 

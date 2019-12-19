@@ -36,7 +36,7 @@ import java.util.Map;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-public class ArrayConcatenationStep extends BasePipelineStep {
+public class ArrayConcatenationStep extends BasePipelineStep<ArrayConcatenationStep> {
 
     @Singular
     private Map<Integer, Integer> concatDimensions;
