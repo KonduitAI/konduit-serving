@@ -58,7 +58,7 @@ bootstrap_conda() {
     # Install dependencies for CPU
     if [ "${KONDUIT_SERVING_BACKEND}" == "cpu" ]; then
       if ! [[ -d "${KONDUIT_SERVING_HOME}/miniconda/envs/cpu" ]]; then
-          conda create -q -n cpu python="${PYTHON_VERSION}"
+          conda create -y -q -n cpu python="${PYTHON_VERSION}"
       fi
 
       conda install -p "${KONDUIT_SERVING_HOME}/miniconda/envs/cpu" -y --copy --override-channels -c conda-forge -c anaconda -c pytorch -c konduitai \
@@ -80,7 +80,7 @@ bootstrap_conda() {
     # Install dependencies for GPU
     if [ "${KONDUIT_SERVING_BACKEND}" == "gpu" ]; then
       if ! [[ -d $KONDUIT_SERVING_HOME/miniconda/envs/gpu ]]; then
-          conda create -q -n gpu python="${PYTHON_VERSION}"
+          conda create -y -q -n gpu python="${PYTHON_VERSION}"
       fi
 
       conda install -p "${KONDUIT_SERVING_HOME}/miniconda/envs/gpu" -y --copy --override-channels -c conda-forge -c anaconda -c pytorch -c konduitai \
