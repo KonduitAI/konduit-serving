@@ -135,8 +135,6 @@
                     <autoRequires>false</autoRequires>
                     <prefix>${prefix}</prefix>
                     <needarch>true</needarch>
-                    <defaultUsername>konduit</defaultUsername>
-                    <defaultGroupname>daemon</defaultGroupname>
 
                     <defineStatements>
                         <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
@@ -205,6 +203,10 @@
                     <preinstallScriptlet>
                         <scriptFile>${resource.dir}/scripts/pre-install.sh</scriptFile>
                     </preinstallScriptlet>
+
+                    <postinstallScriptlet>
+                        <scriptFile>${resource.dir}/scripts/post-install.sh</scriptFile>
+                    </postinstallScriptlet>
                 </configuration>
             </plugin>
         </plugins>

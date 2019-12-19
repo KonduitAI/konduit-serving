@@ -2,7 +2,7 @@
 
 . /etc/profile.d/konduit-serving-env.sh
 
-chmod +x "${KONDUIT_SERVING_BIN_DIRECTORY}"/konduit-serving
+chmod u+x "${KONDUIT_SERVING_BIN_DIRECTORY}"/konduit-serving
 # Installing miniconda and other package
 sh "${KONDUIT_SERVING_HOME}"/install-python.sh
 
