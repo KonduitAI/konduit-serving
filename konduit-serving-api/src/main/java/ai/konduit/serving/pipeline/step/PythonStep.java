@@ -145,7 +145,7 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
     @Override
     public PredictionType[] validPredictionTypes() {
         return new PredictionType[] {
-           PredictionType.RAW
+                PredictionType.RAW
         };
     }
 
