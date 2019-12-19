@@ -28,10 +28,18 @@ import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
- * Extension of {@link ModelConfig} for custom Python steps.
+ * Python configuration for specifying:
+ *   1. pythonCode: actual python source code
+ *   2. pythonCodePath: a path to a source file.
+ *   3. pythonPath: a python path for dependencies
+ *   4. pythonInputs/pythonOutputs/extraInputs: a map of variable name to python type
+ *   5. returnAllInputs: rather than specifying outputs explicitly, the python execution
+ *   will just return all created python variables during execution
+ *
  *
  * @author Adam Gibson
  */
@@ -39,7 +47,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Slf4j
 @SuperBuilder
-public class PythonConfig extends ModelConfig {
+public class PythonConfig implements Serializable {
 
     private String  pythonCode, pythonCodePath, pythonPath;
 
@@ -47,6 +55,8 @@ public class PythonConfig extends ModelConfig {
     private Map<String,String>  pythonInputs, pythonOutputs, extraInputs;
 
     private boolean returnAllInputs;
+
+    private boolean setupAndRun;
 
     private static String defaultPythonPath;
 
