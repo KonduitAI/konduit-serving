@@ -40,6 +40,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.ext.web.common.template.test;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +64,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
+
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return InferenceVerticle.class;

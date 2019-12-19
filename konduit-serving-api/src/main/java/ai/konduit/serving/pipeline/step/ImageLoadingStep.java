@@ -38,7 +38,7 @@ import java.util.Map;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-public class ImageLoadingStep extends BasePipelineStep implements Serializable {
+public class ImageLoadingStep extends BasePipelineStep<ImageLoadingStep> implements Serializable {
 
     private int originalImageHeight;
     private int originalImageWidth;
