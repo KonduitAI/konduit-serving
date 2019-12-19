@@ -28,6 +28,7 @@ import com.beust.jcommander.Parameter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.DeploymentOptions;
@@ -44,9 +45,12 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
 import static java.lang.System.setProperty;
+
+import lombok.*;
 
 /**
  * Core node configurer based on both command line and builder arguments.
@@ -64,11 +68,11 @@ import static java.lang.System.setProperty;
  * to give you a completed object.
  */
 
-@lombok.NoArgsConstructor
-@lombok.Getter
-@lombok.Setter
-@lombok.AllArgsConstructor
-@lombok.Builder
+@NoArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
+@Builder
 public class KonduitServingNodeConfigurer {
 
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
@@ -82,52 +86,52 @@ public class KonduitServingNodeConfigurer {
     private String configHost;
     @Parameter(names = {"--configPort"}, help = true, description = "The port for downloading the configuration from")
     private int configPort;
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--eventBusHost"}, help = true, description = "The event bus host for connecting to other vertx nodes.")
     private String eventBusHost = "0.0.0.0";
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--eventBusPort"}, help = true, description = "The event bus port for connecting to other vertx nodes.")
     private int eventBusPort = 0;
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--eventBusConnectTimeout"}, help = true, description = "The timeout for connecting to an event bus.")
     private int eventBusConnectTimeout = 20000;
     @Parameter(names = {"--configStoreType"}, help = true, description = "The configuration store type (usually http " +
             "or file) where the configuration is stored")
-    @lombok.Builder.Default
+    @Builder.Default
     private String configStoreType = "file";
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--configPath"}, help = true, description = "The path to the configuration. With http, this " +
             "will be the path after host:port. With files, this will be an absolute path.")
     private String configPath = "/srv/";
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--workerNode"}, help = true, description = "Whether this is a worker node or not")
     private boolean workerNode = true;
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--ha"}, help = true, description = "Whether this node is deployed as Highly available or not.")
     private boolean ha = false;
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--numInstances"}, help = true, description = "The number of instances to deploy of this verticle.")
     private int numInstances = 1;
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--workerPoolSize"}, help = true, description = "The number of workers for use with this verticle.")
     private int workerPoolSize = 20;
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--verticleClassName"}, help = true, description = "The fully qualified class name to the verticle to be used.")
     private String verticleClassName = InferenceVerticle.class.getName();
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = "--vertxWorkingDirectory", help = true, description = "The absolute path to use for vertx. This defaults to the user's home directory.")
     private String vertxWorkingDirectory = System.getProperty("user.home");
     private MeterRegistry registry = BackendRegistries.getDefaultNow();
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = "--pidFile", help = true, description = "The absolute path to use for creating the pid file. This defaults to the <current_dir>/konduit-serving.pid")
     private String pidFile = new File(System.getProperty("user.dir"), "konduit-serving.pid").getAbsolutePath();
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--eventLoopTimeout"}, help = true, description = "The event loop timeout")
     private long eventLoopTimeout = 120000;
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--eventLoopExecutionTimeout"}, help = true, description = "The event loop timeout")
     private long eventLoopExecutionTimeout = 120000;
-    @lombok.Builder.Default
+    @Builder.Default
     @Parameter(names = {"--isClustered"}, help = true, description = "Whether an instance is clustered or not")
     private boolean isClustered = false;
     private ConfigStoreOptions httpStore;
@@ -183,7 +187,7 @@ public class KonduitServingNodeConfigurer {
 
         MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
                 .setMicrometerRegistry(registry)
-                .setPrometheusOptions(new io.vertx.micrometer.VertxPrometheusOptions()
+                .setPrometheusOptions(new VertxPrometheusOptions()
                         .setEnabled(true));
         BackendRegistries.setupBackend(micrometerMetricsOptions);
 
@@ -238,7 +242,7 @@ public class KonduitServingNodeConfigurer {
                 .setWorker(workerNode)
                 .setHa(ha).setInstances(numInstances)
                 .setConfig(config)
-                .setExtraClasspath(java.util.Arrays.asList(System.getProperty("java.class.path").split(":")))
+                .setExtraClasspath(Arrays.asList(System.getProperty("java.class.path").split(":")))
                 .setWorkerPoolSize(workerPoolSize);
 
         if (configHost != null)

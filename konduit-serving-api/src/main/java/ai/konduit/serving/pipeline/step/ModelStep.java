@@ -38,7 +38,7 @@ import org.datavec.api.transform.schema.Schema;
 
 @SuperBuilder
 @Data
-public class ModelStep extends BasePipelineStep {
+public class ModelStep extends BasePipelineStep<ModelStep> {
 
     private ModelConfig modelConfig;
 
@@ -79,46 +79,6 @@ public class ModelStep extends BasePipelineStep {
                 Output.DataFormat.JSON,
                 Output.DataFormat.ARROW,
         };
-    }
-
-    @Override
-    public PipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (ModelStep) super.setInput("default", columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (ModelStep) super.setOutput("default", columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setInput(Schema inputSchema) throws Exception {
-        return (ModelStep) super.setInput("default", inputSchema);
-    }
-
-    @Override
-    public PipelineStep setOutput(Schema outputSchema) throws Exception {
-        return (ModelStep) super.setOutput("default", outputSchema);
-    }
-
-    @Override
-    public PipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (ModelStep) super.setInput(inputName, columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (ModelStep) super.setOutput(outputName, columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
-        return (ModelStep) super.setInput(inputName, inputSchema);
-    }
-
-    @Override
-    public PipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
-        return (ModelStep) super.setOutput(outputName, outputSchema);
     }
 
     @Override

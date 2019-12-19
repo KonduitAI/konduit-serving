@@ -45,7 +45,7 @@ import java.util.*;
 @NoArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(callSuper = false)
-public abstract class BasePipelineStep implements PipelineStep {
+public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements PipelineStep<T> {
 
     @Singular
     protected Map<String, SchemaType[]> inputSchemas, outputSchemas;
@@ -69,25 +69,28 @@ public abstract class BasePipelineStep implements PipelineStep {
 
     /**
      *  {@inheritDoc}
+     * @return
      */
     @Override
-    public PipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
+    public T setInput(String[] columnNames, SchemaType[] types) throws Exception {
         return setInput("default", columnNames, types);
     }
 
     /**
      *  {@inheritDoc}
+     * @return
      */
     @Override
-    public PipelineStep setInput(Schema inputSchema) throws Exception {
+    public T setInput(Schema inputSchema) throws Exception {
         return setInput("default", inputSchema);
     }
 
     /**
      *  {@inheritDoc}
+     * @return
      */
     @Override
-    public PipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types)
+    public T setInput(String inputName, String[] columnNames, SchemaType[] types)
             throws Exception {
 
         List<String> names = getInputNames();
@@ -102,7 +105,7 @@ public abstract class BasePipelineStep implements PipelineStep {
             setInputColumns(inputName, Arrays.asList(columnNames));
             setInputTypes(inputName, types);
 
-            return this;
+            return (T) this;
         } else {
             throw new Exception("Input name " + inputName + "is already configured for this PipelineStep," +
                     " choose another naming convention for your next step.");
@@ -111,9 +114,10 @@ public abstract class BasePipelineStep implements PipelineStep {
 
     /**
      *  {@inheritDoc}
+     * @return
      */
     @Override
-    public PipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
+    public T setInput(String inputName, Schema inputSchema) throws Exception {
 
         List<String> names = getInputNames();
         if (names == null) {
@@ -130,7 +134,7 @@ public abstract class BasePipelineStep implements PipelineStep {
             SchemaType[] types = SchemaTypeUtils.typesForSchema(inputSchema);
             setInputTypes(inputName, types);
 
-            return this;
+            return (T) this;
         } else {
             throw new Exception("Input name " + inputName + "is already configured for this PipelineStep," +
                     " choose another naming convention for your next step.");
@@ -139,26 +143,29 @@ public abstract class BasePipelineStep implements PipelineStep {
 
     /**
      *  {@inheritDoc}
+     * @return
      */
     @Override
-    public PipelineStep setOutput(String[] columnNames, SchemaType[] types)
+    public T setOutput(String[] columnNames, SchemaType[] types)
             throws Exception {
         return this.setOutput("default", columnNames, types);
     }
 
     /**
      *  {@inheritDoc}
+     * @return
      */
     @Override
-    public PipelineStep setOutput(Schema outputSchema) throws Exception {
+    public T setOutput(Schema outputSchema) throws Exception {
         return this.setOutput("default", outputSchema);
     }
 
     /**
      *  {@inheritDoc}
+     * @return
      */
     @Override
-    public PipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types)
+    public T setOutput(String outputName, String[] columnNames, SchemaType[] types)
             throws Exception {
 
         List<String> names = getOutputNames();
@@ -173,7 +180,7 @@ public abstract class BasePipelineStep implements PipelineStep {
             setOutputColumns(outputName, Arrays.asList(columnNames));
             setOutputTypes(outputName, types);
 
-            return this;
+            return (T) this;
         } else {
             throw new Exception("Output name " + outputName + "is already configured for this PipelineStep," +
                     " choose another naming convention for your next step.");
@@ -182,10 +189,11 @@ public abstract class BasePipelineStep implements PipelineStep {
 
     /**
      *  {@inheritDoc}
+     * @return
      */
 
     @Override
-    public PipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
+    public T setOutput(String outputName, Schema outputSchema) throws Exception {
 
         List<String> names = getOutputNames();
         if (names == null) {
@@ -202,7 +210,7 @@ public abstract class BasePipelineStep implements PipelineStep {
             SchemaType[] types = SchemaTypeUtils.typesForSchema(outputSchema);
             setOutputTypes(outputName, types);
 
-            return this;
+            return (T) this;
         } else {
             throw new Exception("Output name " + outputName + "is already configured for this PipelineStep," +
                     " choose another naming convention for your next step.");
