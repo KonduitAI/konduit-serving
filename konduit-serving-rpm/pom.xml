@@ -209,6 +209,11 @@
                     <postinstallScriptlet>
                         <scriptFile>${resource.dir}/scripts/post-install.sh</scriptFile>
                     </postinstallScriptlet>
+
+                    <posttransScriptlet>
+                        <scriptFile>${resource.dir}/scripts/post-trans.sh</scriptFile>
+                        <program>/bin/sh</program>
+                    </posttransScriptlet>
                 </configuration>
             </plugin>
         </plugins>
