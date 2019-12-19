@@ -198,9 +198,9 @@
                     </mappings>
 
                     <!-- RPM scripts -->
-                    <preremoveScriptlet>
-                        <scriptFile>${resource.dir}/scripts/pre-remove.sh</scriptFile>
-                    </preremoveScriptlet>
+                    <pretransScriptlet>
+                        <scriptFile>${resource.dir}/scripts/pre-trans.sh</scriptFile>
+                    </pretransScriptlet>
 
                     <preinstallScriptlet>
                         <scriptFile>${resource.dir}/scripts/pre-install.sh</scriptFile>
