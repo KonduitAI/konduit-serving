@@ -26,6 +26,7 @@ import ai.konduit.serving.config.Input.DataFormat;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
@@ -38,6 +39,7 @@ import java.util.Map;
 @Data
 @SuperBuilder
 @NoArgsConstructor
+@AllArgsConstructor
 public class ImageLoadingStep extends BasePipelineStep<ImageLoadingStep> implements Serializable {
 
     private int originalImageHeight;
