@@ -32,7 +32,6 @@ import org.datavec.api.writable.Writable;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.serde.binary.BinarySerde;
-import org.nd4j.shade.guava.primitives.Longs;
 
 import java.util.Map;
 
@@ -50,9 +49,7 @@ public class VertxBufferNd4jInputAdapter implements InputAdapter<Buffer, Writabl
     public NDArrayWritable convert(Buffer input, ConverterArgs parameters, Map<String, Object> contextData) {
         Preconditions.checkState(input.length() > 0, "Buffer appears to be empty!");
         INDArray fromNpyPointer = BinarySerde.toArray(input.getByteBuf().nioBuffer());
-        if (fromNpyPointer.rank() < 4) {
-            fromNpyPointer = fromNpyPointer.reshape(Longs.concat(new long[]{1}, fromNpyPointer.shape()));
-        }
+
         //permute required
         if (parameters != null && parameters.getImageProcessingInitialLayout() != null && !parameters.getImageProcessingInitialLayout().equals(parameters.getImageProcessingRequiredLayout())) {
             fromNpyPointer = ImagePermuter.permuteOrder(fromNpyPointer, parameters.getImageProcessingInitialLayout(), parameters.getImageProcessingRequiredLayout());
