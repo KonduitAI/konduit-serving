@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
  */
 public abstract class BaseStepRunner implements PipelineStepRunner {
 
-    protected PipelineStep pipelineStep;
+    protected PipelineStep<PipelineStep> pipelineStep;
 
     public BaseStepRunner(PipelineStep pipelineStep) {
         this.pipelineStep = pipelineStep;

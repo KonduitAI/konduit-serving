@@ -116,7 +116,7 @@ public class PipelineTests {
 
 
         INDArray[] transformed = SchemaTypeUtils.toArrays(transform);
-        assertEquals(Nd4j.scalar(2.0), transformed[0]);
+        assertEquals(Nd4j.scalar(2.0).reshape(1), transformed[0]);
 
     }
 

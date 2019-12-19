@@ -95,7 +95,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <repository>skymind/konduit-serving</repository>
+                    <repository>konduitai/konduit-serving</repository>
                     <tag>${project.version}</tag>
                     <buildArgs>
                         <JAR_FILE>${project.artifactId}-${project.version}-bin.jar</JAR_FILE>

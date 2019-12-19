@@ -23,6 +23,7 @@
 package ai.konduit.serving.pipeline.steps;
 
 import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.TransformProcess;
@@ -49,7 +50,7 @@ public class TransformProcessStepRunner extends BaseStepRunner {
 
     private Map<String, TransformProcess> transformProcesses;
 
-    public TransformProcessStepRunner(BasePipelineStep pipelineStep) {
+    public TransformProcessStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
         TransformProcessStep transformProcessStepConfig = (TransformProcessStep) pipelineStep;
         this.transformProcesses = transformProcessStepConfig.getTransformProcesses();
