@@ -17,7 +17,7 @@ REQUESTS_VERSION="2.22.0"
 PANDAS_VERSION="0.24.2" # For compatibility with python 2
 TENSORFLOW_VERSION="1.15.0"
 KERAS_VERSION="2.2.4"
-KONDUIT_VERSION="0.1.2"
+KONDUIT_VERSION="0.1.3rc1"
 SKLEARN_VERSION="0.22"
 MATPLOTLIB_VERSION="3.1.2"
 PYTORCH_VERSION="1.3.1"
@@ -58,7 +58,7 @@ bootstrap_conda() {
     # Install dependencies for CPU
     if [ "${KONDUIT_SERVING_BACKEND}" == "cpu" ]; then
       if ! [[ -d "${KONDUIT_SERVING_HOME}/miniconda/envs/cpu" ]]; then
-          conda create -y -q -n cpu python="${PYTHON_VERSION}"
+          conda create -y -n cpu python="${PYTHON_VERSION}"
       fi
 
       conda install -p "${KONDUIT_SERVING_HOME}/miniconda/envs/cpu" -y --copy --override-channels -c conda-forge -c anaconda -c pytorch -c konduitai \
@@ -80,7 +80,7 @@ bootstrap_conda() {
     # Install dependencies for GPU
     if [ "${KONDUIT_SERVING_BACKEND}" == "gpu" ]; then
       if ! [[ -d $KONDUIT_SERVING_HOME/miniconda/envs/gpu ]]; then
-          conda create -y -q -n gpu python="${PYTHON_VERSION}"
+          conda create -y -n gpu python="${PYTHON_VERSION}"
       fi
 
       conda install -p "${KONDUIT_SERVING_HOME}/miniconda/envs/gpu" -y --copy --override-channels -c conda-forge -c anaconda -c pytorch -c konduitai \
