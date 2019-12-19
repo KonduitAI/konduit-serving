@@ -115,7 +115,7 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
-        INDArray inputArray = Nd4j.ones(3, 2);
+        INDArray inputArray = Nd4j.ones(4, 3, 2, 1);
         jsonObject.put("first", new JsonArray(inputArray.toString()));
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "application/json");
