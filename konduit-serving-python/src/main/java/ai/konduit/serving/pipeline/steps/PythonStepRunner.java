@@ -26,6 +26,7 @@ import ai.konduit.serving.executioner.Pipeline;
 import ai.konduit.serving.executioner.PythonExecutioner;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.python.PythonTransform;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +81,7 @@ public class PythonStepRunner extends BaseStepRunner {
     private Map<String, PythonTransform> pythonTransform;
     private Map<String, TransformProcess> transformProcesses;
 
-    public PythonStepRunner(BasePipelineStep pipelineStep) {
+    public PythonStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
         PythonStep pythonConfig = (PythonStep) pipelineStep;
         pythonTransform = new HashMap<>();

@@ -36,7 +36,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = ArrayConcatenationStep.class, name = "ArrayConcatenationStep"),
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
-public interface PipelineStep<T extends PipelineStep<T>> extends Serializable {
+public interface PipelineStep<T extends PipelineStep> extends Serializable {
 
 
     /**

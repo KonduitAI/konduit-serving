@@ -23,6 +23,7 @@
 package ai.konduit.serving.pipeline.steps;
 
 import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.util.ImagePermuter;
 import org.datavec.api.writable.BytesWritable;
@@ -47,7 +48,7 @@ public class ImageTransformProcessStepRunner extends BaseStepRunner {
     private Map<String, NativeImageLoader> imageLoaders;
     private ImageLoadingStep imageLoadingStepConfig;
 
-    public ImageTransformProcessStepRunner(BasePipelineStep pipelineStep) {
+    public ImageTransformProcessStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
 
         this.imageLoadingStepConfig = (ImageLoadingStep) pipelineStep;

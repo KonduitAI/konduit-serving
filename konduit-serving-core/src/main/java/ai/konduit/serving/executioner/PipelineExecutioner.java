@@ -202,7 +202,7 @@ public class PipelineExecutioner {
         return config;
     }
 
-    private void inferInputAndOutputSchemas(PipelineStep pipelineStep) {
+    private void inferInputAndOutputSchemas(PipelineStep<PipelineStep> pipelineStep) {
         if (inputSchema == null && pipelineStep.getInputSchemas() != null &&
                 !pipelineStep.getInputSchemas().isEmpty() &&
                 pipelineStep.getInputSchemas().get("default") != null &&

@@ -313,7 +313,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
     public PipelineStepRunner createRunner() {
         try {
             Class<? extends PipelineStepRunner> clazz = (Class<? extends PipelineStepRunner>) Class.forName(this.pipelineStepClazz());
-            Constructor constructor = clazz.getConstructor(BasePipelineStep.class);
+            Constructor constructor = clazz.getConstructor(PipelineStep.class);
             return (PipelineStepRunner) constructor.newInstance(this);
         } catch (Exception e) {
             throw new IllegalStateException("Unable to instantiate pipeline step from class " + this.pipelineStepClazz(), e);

@@ -1,7 +1,7 @@
 {
   "memMapConfig" : null,
   "servingConfig" : {
-    "httpPort" : 57538,
+    "httpPort" : 57748,
     "inputDataFormat" : "JSON",
     "listenHost" : "localhost",
     "logTimings" : false,
