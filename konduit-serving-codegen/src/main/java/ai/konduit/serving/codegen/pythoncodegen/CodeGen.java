@@ -186,32 +186,9 @@ public class CodeGen {
         }
 
         String loadedModule = FileUtils.readFileToString(newModule, Charset.defaultCharset());
-        loadedModule = loadedModule.replace("import enum","");
-        loadedModule = loadedModule.replace("#!/usr/bin/env/python","");
-        loadedModule = loadedModule.replace("def __init__(self\n" +
-                "            ):","def __init__(self):\n\t\tpass");
-        loadedModule = loadedModule.replace("if not isinstance(value, type)",
-                "if not isinstance(value, dict) and not isinstance(value, DictWrapper)");
-        loadedModule = loadedModule.replace("if not isinstance(value, type)",
-                "if not isinstance(value, list) and not isinstance(value, ListWrapper)");
-        loadedModule = loadedModule.replace("if not isinstance(value, dict)",
-                "if not isinstance(value, dict) and not isinstance(value, DictWrapper)");
-        loadedModule = loadedModule.replace("if not isinstance(value, list)",
-                "if not isinstance(value, list) and not isinstance(value, ListWrapper)");
-        loadedModule = loadedModule.replace("'type': type","'type': dict");
 
-        // Modify some constructor defaults to leverage Python's strengths
-        // By default we work with numpy-in-numpy-out and "raw" predictions to cause minimal harm to the intended
-        // audience.
-        loadedModule = loadedModule.replace("input_data_format=None", "input_data_format='NUMPY'");
-        loadedModule = loadedModule.replace("output_data_format=None", "output_data_format='NUMPY'");
-        loadedModule = loadedModule.replace("prediction_type=None", "prediction_type='RAW'");
-
-        loadedModule = loadedModule.replace("log_timings=None", "log_timings=False");
-        loadedModule = loadedModule.replace("listen_host=None", "listen_host='localhost'");
-        loadedModule = loadedModule.replace("uploads_directory=None", "uploads_directory='file-uploads/'");
-
-
+        loadedModule = applyPythonWrappers(loadedModule);
+        loadedModule = patchPythonDefaultValues(loadedModule);
         loadedModule = PythonDocStrings.generateDocs(loadedModule);
 
         String sb = "import enum\nfrom konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n" +
@@ -242,5 +219,44 @@ public class CodeGen {
             throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
         }
         blackLinting.destroy();
+    }
+
+    private static String applyPythonWrappers(String loadedModule) {
+        loadedModule = loadedModule.replace("import enum","");
+        loadedModule = loadedModule.replace("#!/usr/bin/env/python","");
+        loadedModule = loadedModule.replace("def __init__(self\n" +
+                "            ):","def __init__(self):\n\t\tpass");
+        loadedModule = loadedModule.replace("if not isinstance(value, type)",
+                "if not isinstance(value, dict) and not isinstance(value, DictWrapper)");
+        loadedModule = loadedModule.replace("if not isinstance(value, type)",
+                "if not isinstance(value, list) and not isinstance(value, ListWrapper)");
+        loadedModule = loadedModule.replace("if not isinstance(value, dict)",
+                "if not isinstance(value, dict) and not isinstance(value, DictWrapper)");
+        loadedModule = loadedModule.replace("if not isinstance(value, list)",
+                "if not isinstance(value, list) and not isinstance(value, ListWrapper)");
+        loadedModule = loadedModule.replace("'type': type","'type': dict");
+        return loadedModule;
+    }
+
+    /**
+     * Modify some constructor defaults to leverage Python's strengths
+     * By default we work with numpy-in-numpy-out and "raw" predictions to cause minimal harm to the intended
+     * audience.
+     * @param loadedModule String containing all Python code up to this point
+     * @return patched Python code
+     */
+    private static String patchPythonDefaultValues(String loadedModule) {
+
+        // Input and output formats
+        loadedModule = loadedModule.replace("input_data_format=None", "input_data_format='NUMPY'");
+        loadedModule = loadedModule.replace("output_data_format=None", "output_data_format='NUMPY'");
+        loadedModule = loadedModule.replace("prediction_type=None", "prediction_type='RAW'");
+
+        loadedModule = loadedModule.replace("setup_and_run=None", "setup_and_run=False");
+
+
+        loadedModule = loadedModule.replace("uploads_directory=None", "uploads_directory='file-uploads/'");
+
+        return loadedModule;
     }
 }
