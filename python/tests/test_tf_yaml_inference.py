@@ -9,7 +9,7 @@ def test_yaml_server_python_prediction():
     try:
         konduit_yaml_path = "yaml/konduit_tf_inference.yaml"
         img = np.load("../data/input_layer.npy")
-        server = server_from_file(konduit_yaml_path)
+        server = server_from_file(konduit_yaml_path, start_server=True)
         client = client_from_file(konduit_yaml_path)
         predicted = client.predict(data_input={"input_layer": img})
         result = dict(zip(np.arange(10), predicted[0].round(3)))

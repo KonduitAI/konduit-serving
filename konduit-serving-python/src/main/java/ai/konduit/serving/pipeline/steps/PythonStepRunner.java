@@ -23,12 +23,13 @@
 package ai.konduit.serving.pipeline.steps;
 
 import ai.konduit.serving.executioner.Pipeline;
-import ai.konduit.serving.executioner.PythonExecutioner;
+import org.datavec.python.PythonExecutioner;
+import org.datavec.python.PythonTransform;
+import org.datavec.python.PythonVariables;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.python.PythonTransform;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.records.Record;
@@ -114,8 +115,9 @@ public class PythonStepRunner extends BaseStepRunner {
             PythonTransform pythonTransform = PythonTransform.builder()
                     .code(code)
                     .returnAllInputs(currConfig.isReturnAllInputs())
-                    .inputs(currConfig.getPythonInputs() != null ? ai.konduit.serving.util.python.PythonVariables.schemaFromMap(currConfig.getPythonInputs()) : null)
-                    .outputs(currConfig.getPythonOutputs() != null ? ai.konduit.serving.util.python.PythonVariables.schemaFromMap(currConfig.getPythonOutputs()) : null)
+                    .setupAndRun(currConfig.isSetupAndRun())
+                    .inputs(currConfig.getPythonInputs() != null ? PythonVariables.schemaFromMap(currConfig.getPythonInputs()) : null)
+                    .outputs(currConfig.getPythonOutputs() != null ? PythonVariables.schemaFromMap(currConfig.getPythonOutputs()) : null)
                     .inputSchema(pythonConfig.inputSchemaForName(configEntry.getKey()))
                     .outputSchema(pythonConfig.outputSchemaForName(configEntry.getKey()))
                     .build();

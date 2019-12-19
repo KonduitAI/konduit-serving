@@ -14,22 +14,22 @@ install `kondut` from PyPI with `pip install konduit`. You can also install this
 from source, run `pip install .` in this directory. We recommend using Python 3.7+.
 
 Once the package itself is installed, you have access to a command line interface (CLI) tool
-called `konduit-python`. This helper tool can build the Java dependencies needed for `konduit`
+called `konduit`. This helper tool can build the Java dependencies needed for `konduit`
 for you under the hood. All you need to do is run:
 
 ```bash
-konduit-python --os <your-platform>
+konduit --os <your-platform>
 ```
 
 where `<your-platform>` is picked from `windows-x86_64`,`linux-x86_64`,`linux-x86_64-gpu`,
 `macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`, depending on your operating system
-and architecture. This tool assumes that you have `git` installed on your system and that `python3` is
-available. If you don't want to use the CLI tool and have cloned this repository, you can also build
+and architecture. This tool assumes that you have `git` installed on your system . If you don't want to use the CLI
+tool and have cloned this repository, you can also build
 the necessary jar on your own like this:
 
 ```bash
 cd ..
-python3 build_jar.py --os <your-platform>
+python build_jar.py --os <your-platform>
 ```
 
 ## Using Konduit
@@ -49,7 +49,9 @@ base of the Python script you want to execute, it will work without setting the 
 
 Install test dependencies using `pip install 'konduit[tests]'` if you want to run tests. 
 
-On Windows, compiling the test dependencies requires Visual Studio Build Tools 14.0, which can be installed from [here](https://visualstudio.microsoft.com/downloads/). You may also need to install the Windows 8.1 / 10 SDK. See Python's [*WindowsCompilers*](https://wiki.python.org/moin/WindowsCompilers) page for details. 
+On Windows, compiling the test dependencies requires Visual Studio Build Tools 14.0, which can be installed from
+[here](https://visualstudio.microsoft.com/downloads/). You may also need to install the Windows 8.1 / 10 SDK.
+See Python's [*WindowsCompilers*](https://wiki.python.org/moin/WindowsCompilers) page for details. 
 
 The tests also require `bert_mrpc_frozen.pb` to be placed in the `python/tests` folder. Run the following code in `python/tests`: 
 ```

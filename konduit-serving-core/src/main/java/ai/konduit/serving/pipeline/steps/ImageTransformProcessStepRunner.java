@@ -72,7 +72,11 @@ public class ImageTransformProcessStepRunner extends BaseStepRunner {
         String inputName = imageLoadingStepConfig.getInputNames().get(inputIndex);
 
         NativeImageLoader nativeImageLoader = imageLoaders.get(inputName);
-        ImageTransformProcess imageTransformProcess = imageLoadingStepConfig.getImageTransformProcesses().get(inputName);
+
+        ImageTransformProcess imageTransformProcess = null;
+        if (imageLoadingStepConfig.getImageTransformProcesses() != null) {
+            imageTransformProcess = imageLoadingStepConfig.getImageTransformProcesses().get(inputName);
+        }
 
         INDArray input;
 
