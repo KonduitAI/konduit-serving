@@ -63,6 +63,10 @@
     </profiles>
     <dependencies>
         <dependency>
+            <groupId>org.datavec</groupId>
+            <artifactId>datavec-python</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>openblas</artifactId>
         </dependency>
@@ -189,6 +193,17 @@
         <dependency>
             <groupId>org.datavec</groupId>
             <artifactId>datavec-api</artifactId>
+            <version>${datavec.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.datavec</groupId>
+            <artifactId>datavec-python</artifactId>
             <version>${datavec.version}</version>
             <exclusions>
                 <exclusion>

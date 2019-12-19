@@ -27,6 +27,7 @@ import ai.konduit.serving.executioner.inference.InferenceExecutioner;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.factory.InferenceExecutionerFactory;
 import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.Getter;
@@ -61,7 +62,7 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
     @Getter
     private InferenceExecutioner inferenceExecutioner;
 
-    public InferenceExecutionerStepRunner(BasePipelineStep pipelineStep) {
+    public InferenceExecutionerStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
         ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
         InferenceExecutionerFactory inferenceExecutionerFactory;

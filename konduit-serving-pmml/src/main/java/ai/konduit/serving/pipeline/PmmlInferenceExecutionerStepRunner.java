@@ -45,7 +45,7 @@ public class PmmlInferenceExecutionerStepRunner extends BaseStepRunner {
     private PmmlInferenceExecutioner pmmlInferenceExecutioner;
     private Evaluator evaluator;
 
-    public PmmlInferenceExecutionerStepRunner(BasePipelineStep pipelineStep) {
+    public PmmlInferenceExecutionerStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
         PmmlStep pmmlStepConfig = (PmmlStep) pipelineStep;
         PmmlInferenceExecutionerFactory inferenceExecutionerFactory = new PmmlInferenceExecutionerFactory();

@@ -30,8 +30,6 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMapperHolder;
-import io.vertx.core.json.JsonArray;
-import org.datavec.python.PythonVariables;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -41,24 +39,23 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
+public class TestPythonJsonNdArrayScalarInput extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -115,8 +112,7 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
-        INDArray inputArray = Nd4j.ones(4, 3, 2, 1);
-        jsonObject.put("first", new JsonArray(inputArray.toString()));
+        jsonObject.put("first", Nd4j.scalar(2.0).toString());
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "application/json");
         String body = requestSpecification.when()
@@ -128,9 +124,8 @@ public class TestPythonJsonNdArrayInput extends BaseMultiNumpyVerticalTest {
         JsonObject jsonObject1 = new JsonObject(body);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
-        INDArray expected = inputArray.add(2);
-        assertEquals(expected, outputArray);
+        INDArray value = nd.getNdArray();
+        assertEquals(4, value.getDouble(0), 1e-1);
 
     }
 
