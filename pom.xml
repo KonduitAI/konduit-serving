@@ -76,6 +76,7 @@
     </scm>
 
     <properties>
+        <spin.version>minimal</spin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
         <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
@@ -83,7 +84,6 @@
         <maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-        <javacpp.platform>${os.name}-${os.arch}</javacpp.platform>
         <logback.version>1.2.3</logback.version>
         <micrometer.version>1.2.0</micrometer.version>
         <netty.version>4.1.42.Final</netty.version>
@@ -712,7 +712,7 @@
             </modules>
         </profile>
         <profile>
-            <id>gpu</id>
+            <id>gpu</id> 
             <activation>
                 <property>
                     <name>chip</name>

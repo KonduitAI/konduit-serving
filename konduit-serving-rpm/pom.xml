@@ -50,6 +50,10 @@
                             <value>${project.version}</value>
                         </replacement>
                         <replacement>
+                            <token>##SPIN_VERSION##</token>
+                            <value>${spin.version}</value>
+                        </replacement>
+                        <replacement>
                             <token>##CHIP_TYPE##</token>
                             <value>${chip}</value>
                         </replacement>
@@ -121,7 +125,7 @@
                 </executions>
 
                 <configuration>
-                    <name>konduit-serving</name>
+                    <name>konduit-serving-${spin.version}-${chip}</name>
                     <license>(C) 2019 Konduit AI, https://www.apache.org/licenses/LICENSE-2.0</license>
                     <group>Application/Misc</group>
                     <targetVendor>redhat</targetVendor>

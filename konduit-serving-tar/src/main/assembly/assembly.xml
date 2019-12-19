@@ -30,8 +30,8 @@
 
     <files>
         <file>
-            <source>${konduit-serving.root.dir}/konduit-serving-uberjar/target/konduit-serving-uberjar-${project.version}-bin.jar</source>
-            <destName>konduit-serving-${project.version}.jar</destName>
+            <source>${konduit-serving.root.dir}/konduit-serving-uberjar/target/konduit-serving-uberjar-${project.version}-${spin.version}-${javacpp.platform}-${chip}.jar</source>
+            <destName>konduit-serving-${project.version}-${spin.version}-${chip}.jar</destName>
         </file>
         <file>
             <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/scripts/install-python.sh</source>
