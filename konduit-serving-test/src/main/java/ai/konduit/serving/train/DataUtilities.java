@@ -1,22 +1,17 @@
 /*
+ *       Copyright (c) 2019 Konduit AI.
  *
- *  * ******************************************************************************
- *  *  * Copyright (c) 2015-2019 Skymind Inc.
- *  *  * Copyright (c) 2019 Konduit AI.
- *  *  *
- *  *  * This program and the accompanying materials are made available under the
- *  *  * terms of the Apache License, Version 2.0 which is available at
- *  *  * https://www.apache.org/licenses/LICENSE-2.0.
- *  *  *
- *  *  * Unless required by applicable law or agreed to in writing, software
- *  *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- *  *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- *  *  * License for the specific language governing permissions and limitations
- *  *  * under the License.
- *  *  *
- *  *  * SPDX-License-Identifier: Apache-2.0
- *  *  *****************************************************************************
+ *       This program and the accompanying materials are made available under the
+ *       terms of the Apache License, Version 2.0 which is available at
+ *       https://www.apache.org/licenses/LICENSE-2.0.
  *
+ *       Unless required by applicable law or agreed to in writing, software
+ *       distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *       WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *       License for the specific language governing permissions and limitations
+ *       under the License.
+ *
+ *       SPDX-License-Identifier: Apache-2.0
  *
  */
 
@@ -39,7 +34,7 @@ public class DataUtilities {
      * @return True if and only if the file has been downloaded.
      * @throws Exception IO error.
      */
-    public static boolean downloadFile(String remoteUrl, String localPath) throws java.io.IOException {
+    public static boolean downloadFile(String remoteUrl, String localPath) throws IOException {
         boolean downloaded = false;
         if (remoteUrl == null || localPath == null)
             return downloaded;
@@ -61,7 +56,7 @@ public class DataUtilities {
             downloaded = true;
         }
         if (!file.exists())
-            throw new java.io.IOException("File doesn't exist: " + localPath);
+            throw new IOException("File doesn't exist: " + localPath);
         return downloaded;
     }
 
@@ -72,7 +67,7 @@ public class DataUtilities {
      * @param outputPath Output directory path.
      * @throws IOException IO error.
      */
-    public static void extractTarGz(String inputPath, String outputPath) throws java.io.IOException {
+    public static void extractTarGz(String inputPath, String outputPath) throws IOException {
         if (inputPath == null || outputPath == null)
             return;
         final int bufferSize = 4096;

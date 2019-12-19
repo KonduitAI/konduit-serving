@@ -1,45 +1,397 @@
+/*
+ *       Copyright (c) 2019 Konduit AI.
+ *
+ *       This program and the accompanying materials are made available under the
+ *       terms of the Apache License, Version 2.0 which is available at
+ *       https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ *       Unless required by applicable law or agreed to in writing, software
+ *       distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *       WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *       License for the specific language governing permissions and limitations
+ *       under the License.
+ *
+ *       SPDX-License-Identifier: Apache-2.0
+ *
+ */
+
 package ai.konduit.serving.pipeline.generator.impl;
 
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.model.PythonConfig.PythonConfigBuilder;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.generator.PipelineGenerator;
+import ai.konduit.serving.pipeline.generator.data.DataGenerator;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.PythonStep.PythonStepBuilder;
-import ai.konduit.serving.util.python.PythonVariables;
+import org.datavec.python.PythonVariables;
+import org.datavec.python.PythonVariables.Type;
+import com.github.javafaker.Faker;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.nd4j.base.Preconditions;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.primitives.Pair;
 
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Builder
 @Data
+@Slf4j
 public class PythonPipelineGenerator implements PipelineGenerator {
+
     @Default
     private int numNames = 1;
+    private int numVariables;
+    @Default
+    private long seed;
 
-    private PythonVariables inputVariables,outputVariables;
+    private Map<String, Pair<SchemaType, DataGenerator>> dataGenerators;
+
+    private static Type[] singleTypes = {
+            Type.FILE,
+            Type.FLOAT,
+            Type.INT,
+            Type.NDARRAY,
+            Type.BOOL,
+            Type.STR
+    };
+
+    /**
+     * Builder constructor. Contains all variables
+     * @param numNames the number of input names to use (
+     *                 the number of configurations to generate)
+     * @param numVariables the number of variables for input and output
+     */
+    public PythonPipelineGenerator(int numNames, int numVariables, Map<String, Pair<SchemaType, DataGenerator>> dataGenerators) {
+        this.numNames = numNames;
+        this.numVariables = numVariables;
+        this.dataGenerators = dataGenerators;
+    }
+
+    @Override
+    public Map<String, Pair<SchemaType, DataGenerator>> inputDataGenerators() {
+        return dataGenerators;
+    }
 
     @Override
     public PipelineStep generate() {
         PythonStepBuilder<?, ?> builder = PythonStep.builder();
         //generate random python configuration
         for(int i = 0; i < numNames; i++)
-            builder.pythonConfig(UUID.randomUUID().toString(),getConfig());
+            builder.pythonConfig(UUID.randomUUID().toString().replaceAll("[-0-9]+",""), createRandomConfiguration());
 
         return builder.build();
     }
 
-    private PythonConfig getConfig() {
-        /**
-         * Need to figure out how we want to generate random input variables
-         * and code
-         */
-        PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonCode("")
-                .build();
+    protected PythonConfig createRandomConfiguration() {
+        if(numVariables < 1) {
+            numVariables = randomNumberOfVariables();
+            log.warn("No number of variables specified. Picking random number of " + numVariables);
+        }
 
-        return pythonConfig;
+        val randomData = generateRandom();
+        PythonConfigBuilder<?, ?> builder = PythonConfig.builder();
+        Map<String,String> inputs = randomPythonVariables();
+        List<Map.Entry<String,String>> inputsOrdered = inputs.entrySet().stream().collect(Collectors.toList());
+        Map<String,String> outputs = randomPythonVariables();
+        List<Map.Entry<String,String>> outputsOrdered = outputs.entrySet().stream().collect(Collectors.toList());
+        Preconditions.checkState(inputs.size() == outputs.size(),"Inputs and outputs must be same size!");
+        builder.pythonInputs(inputs);
+        builder.pythonOutputs(outputs);
+
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < inputsOrdered.size(); i++) {
+            Type inputType = Type.valueOf(inputsOrdered.get(i).getValue());
+            Type outputType = Type.valueOf(outputsOrdered.get(i).getValue());
+            sb.append(conversionCode(
+                    inputType,
+                    outputType,
+                    randomObjectForType(inputType),
+                    outputsOrdered.get(i).getKey()
+            ));
+        }
+
+        //sets the code for execution
+        //based on the random output
+        builder.pythonCode(sb.toString());
+
+        return builder.build();
+    }
+
+
+    /**
+     *
+     * @param type
+     * @param outputType
+     * @param input
+     * @param outputVariableName
+     * @return
+     */
+    public  static String conversionCode(Type type, Type outputType, Object input, String outputVariableName) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(outputVariableName  + " = ");
+        switch(type) {
+            case BOOL:
+                Preconditions.checkState(input instanceof Boolean);
+                Boolean inputBoolean = (Boolean) input;
+                String pythonBoolean = inputBoolean ? "True" : "False";
+                switch(outputType) {
+                    case BOOL:
+                        sb.append(pythonBoolean);
+                        break;
+                    case FLOAT:
+                        sb.append(inputBoolean ? "1.0" : "0.0");
+                        break;
+                    case NDARRAY:
+                        sb.append("np.array(" + pythonBoolean + ")");
+                        break;
+                    case LIST:
+                        sb.append("[" + pythonBoolean + "]");
+                        break;
+                    case DICT:
+                        sb.append("{'" + outputVariableName + "':" + pythonBoolean + "}");
+                        break;
+                    case INT:
+                        sb.append(inputBoolean ? "1" : "0");
+                        break;
+                    default:
+                        sb.append("'" + pythonBoolean + "'");
+                        break;
+                }
+
+                break;
+
+            case FLOAT:
+            case INT:
+                Preconditions.checkState(input instanceof Number,"Input must be an instance of number!");
+                Number inputFloat = (Number) input;
+                String boolean2 = inputFloat.floatValue() > 0 ? "True" : "False";
+                switch(outputType) {
+                    case BOOL:
+                        sb.append(boolean2);
+                        break;
+                    case FLOAT:
+                        sb.append(inputFloat);
+                        break;
+                    case NDARRAY:
+                        sb.append("np.array(["  + inputFloat + "])");
+                        break;
+                    case LIST:
+                        sb.append("[" + inputFloat + "]");
+                        break;
+                    case DICT:
+                        sb.append("{'" + outputVariableName + "':" + inputFloat + "}");
+                        break;
+                    case INT:
+                        sb.append(inputFloat.intValue());
+                        break;
+                    default:
+                        sb.append("'" + inputFloat + "'");
+                        break;
+                }
+
+                break;
+
+            case NDARRAY:
+                Preconditions.checkState(input instanceof INDArray,"Input not an ndarray!");
+                INDArray inputArr = (INDArray) input;
+                Preconditions.checkState(inputArr.length() == 1);
+                switch(outputType) {
+                    case BOOL:
+                        Number number1 = inputArr.elementWiseStride();
+                        Boolean value2 = number1.doubleValue() > 0;
+                        sb.append(value2 ? "True" : "False");
+                        break;
+                    case FLOAT:
+                        sb.append(inputArr.element());
+                        break;
+                    case INT:
+                        Number number = (Number) inputArr.element();
+                        sb.append(number.intValue());
+                        break;
+                    case NDARRAY:
+                        break;
+                    case LIST:
+                        sb.append("[" + inputArr.element() + "]");
+                        break;
+                    case DICT:
+                        sb.append("{'" + outputVariableName + "':" + inputArr.element() + "}");
+                        break;
+                    default:
+                        sb.append("'" + inputArr.element() +  "'");
+                        break;
+                }
+                break;
+
+            case LIST:
+                Object firstElement;
+                if(input instanceof List) {
+                    List arr = (List) input;
+                    firstElement = arr.get(0);
+                }
+                else if(input instanceof Object[]) {
+                    Object[] o2 = (Object[]) input;
+                    firstElement = o2[0];
+                }
+                else
+                    throw new IllegalArgumentException("Input element must be  a list or object array!");
+
+                return conversionCode(
+                        typeForObject(firstElement),
+                        outputType,
+                        firstElement,
+                        outputVariableName);
+
+
+            case DICT:
+                Preconditions.checkState(input instanceof Map,"Input must be a map!");
+                Map inputMap = (Map) input;
+                Preconditions.checkState(inputMap.size() == 1,"Input map must not be empty and only be size 1");
+                Object value = inputMap.values().iterator().next();
+                return conversionCode(
+                        typeForObject(value),
+                        outputType,
+                        value,
+                        outputVariableName);
+
+            default:
+                Preconditions.checkState(input instanceof String,"Input must be a string!");
+                switch(outputType) {
+                    case BOOL:
+                        boolean parsedBool = Boolean.parseBoolean(input.toString().toLowerCase());
+                        sb.append(parsedBool ? "True" : "False");
+                        break;
+                    case FLOAT:
+                        Float parsedValue = Float.parseFloat(input.toString());
+                        sb.append(parsedValue);
+                        break;
+                    case NDARRAY:
+                        sb.append("np.array([" + input.toString() + "])");
+                        break;
+                    case LIST:
+                        sb.append("[" + input.toString() + "]");
+                        break;
+                    case DICT:
+                        sb.append("{'" + outputVariableName + "':" + input.toString() + "}");
+                        break;
+                    case INT:
+                        Integer validInteger = Integer.parseInt(input.toString());
+                        sb.append(validInteger);
+                        break;
+                    default:
+                        sb.append("'" + input + "'");
+                        break;
+                }
+                break;
+        }
+
+        sb.append("\n");
+        return sb.toString();
+    }
+
+
+    /**
+     * Returns a {@link Type}
+     * for a given input object
+     * @param input the input object
+     * @return the type for that object
+     */
+    public static Type typeForObject(Object input) {
+        if(input instanceof Boolean) {
+            return Type.BOOL;
+        }
+        else if(input instanceof Integer) {
+            return Type.INT;
+        }
+        else if(input instanceof Float || input instanceof Double) {
+            return Type.FLOAT;
+        }
+        else if(input instanceof Map) {
+            return Type.DICT;
+        }
+        else if(input instanceof Object[] || input instanceof List) {
+            return Type.LIST;
+        }
+        else if(input instanceof java.io.File) {
+            return Type.FILE;
+        }
+        else if(input instanceof INDArray) {
+            return Type.NDARRAY;
+        }
+        else {
+            return Type.STR;
+        }
+    }
+
+    protected  Object randomObjectForType(Type type, String inputName) {
+        switch(type) {
+            case LIST:
+                List<Object> list = new ArrayList<>();
+                list.add(randomObjectForType(randomSingleType(),inputName));
+                return list;
+            case DICT:
+                Map<String,Object> ret = new HashMap<>();
+                ret.put("output",randomObjectForType(randomSingleType(),inputName));
+                return ret;
+
+            default:
+                return randomObjectForTypeSingle(type);
+
+        }
+    }
+
+    private Type randomSingleType() {
+        return singleTypes[Nd4j.getRandom().nextInt(singleTypes.length)];
+    }
+
+    private  Object randomObjectForTypeSingle(Type type) {
+        switch(type) {
+            case BOOL:
+                return faker.bool().bool();
+            case FLOAT:
+                return faker.number().randomDouble(4,0,10);
+            case NDARRAY:
+                //note that only scalars are allowed if we want
+                //consistent end to end testing.
+                //an assumption is made that all ndarrays are only scalar values
+                //TODO: Figure out if this breaks when generalizing the pipeline
+                //for interop
+                return Nd4j.rand(1,1);
+            case INT:
+                return faker.number().numberBetween(0,10);
+            default:
+                return String.valueOf(faker.number().numberBetween(0,10));
+        }
+    }
+
+
+    private Map<String,String> randomPythonVariables() {
+        Map<String,String> ret = new LinkedHashMap<>();
+        for(int i = 0; i < numVariables; i++) {
+            Pair<String, String> var = randomVariable();
+            ret.put(var.getKey(),var.getValue());
+        }
+
+        return ret;
+    }
+
+    private int randomNumberOfVariables() {
+        return faker.number().numberBetween(1,10);
+    }
+
+    private Pair<String,String> randomVariable() {
+        return Pair.of(UUID.randomUUID().toString().replaceAll("[-0-9]+",""),type().name());
+    }
+
+    private Type type() {
+        return Type.values()[faker.number().numberBetween(0, Type.values().length)];
     }
 
 }
