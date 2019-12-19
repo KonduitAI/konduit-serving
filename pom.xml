@@ -102,8 +102,6 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <jpmml.version>1.4.1</jpmml.version>
-        <datavec.version>1.0.0-SNAPSHOT</datavec.version>
-        <dl4j.version>${datavec.version}</dl4j.version>
         <vertx-stack.version>3.8.3</vertx-stack.version>
         <lombok.version>1.18.2</lombok.version>
         <jackson.version>2.10.0</jackson.version>
