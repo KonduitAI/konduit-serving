@@ -5,10 +5,10 @@ import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.generator.PipelineGenerator;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.PythonStep.PythonStepBuilder;
-import ai.konduit.serving.util.python.PythonVariables;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
+import org.datavec.python.PythonVariables;
 
 import java.util.UUID;
 

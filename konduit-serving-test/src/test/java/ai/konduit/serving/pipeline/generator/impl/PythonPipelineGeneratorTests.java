@@ -1,8 +1,8 @@
 package ai.konduit.serving.pipeline.generator.impl;
 
-import ai.konduit.serving.executioner.PythonExecutioner;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.util.python.PythonVariables.Type;
+import org.datavec.python.PythonExecutioner;
+import org.datavec.python.PythonVariables.Type;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,7 +26,6 @@ public class PythonPipelineGeneratorTests {
                 System.out.println("Input type " + inputType + " Output Type " + outputType + " with conversion code " + value);
             }
         }
-
     }
 
     @Test
@@ -40,6 +39,4 @@ public class PythonPipelineGeneratorTests {
         Assert.assertNotNull(pythonConfig.getPythonCode());
 
     }
-
-
 }
