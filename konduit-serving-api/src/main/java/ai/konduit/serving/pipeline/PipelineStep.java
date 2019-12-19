@@ -156,7 +156,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable {
 
 
     /**
-     * Define a single input for a TransformProcess Step from explicit
+     * Define a single input for a Pipeline Step from explicit
      * column names and types for this input.
      *
      * @param inputName   input name
