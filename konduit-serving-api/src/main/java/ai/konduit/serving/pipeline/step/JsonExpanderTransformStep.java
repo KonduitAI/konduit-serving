@@ -38,7 +38,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Data
 @NoArgsConstructor
-public class JsonExpanderTransformStep extends BasePipelineStep {
+public class JsonExpanderTransformStep extends BasePipelineStep<JsonExpanderTransformStep> {
 
 
     @Override

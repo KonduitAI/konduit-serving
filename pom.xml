@@ -44,7 +44,7 @@
     <description>
         Enterprise runtime for machine learning models
     </description>
-    <url>http://skymind.ai/</url>
+    <url>http://konduit.ai/</url>
 
     <licenses>
         <license>
@@ -88,7 +88,7 @@
         <micrometer.version>1.2.0</micrometer.version>
         <netty.version>4.1.42.Final</netty.version>
         <arrow.version>0.15.1</arrow.version>
-        <dl4j.version>1.0.0-SNAPSHOT</dl4j.version>
+        <dl4j.version>1.0.0-beta6</dl4j.version>
         <datavec.version>${dl4j.version}</datavec.version>
         <nd4j.version>${dl4j.version}</nd4j.version>
         <slf4j.version>1.7.26</slf4j.version>
@@ -107,27 +107,30 @@
         <vertx-stack.version>3.8.3</vertx-stack.version>
         <lombok.version>1.18.2</lombok.version>
         <jackson.version>2.10.0</jackson.version>
-        <tensorflow.version>1.14.0</tensorflow.version>
-        <javacpp.version>1.5.1</javacpp.version>
-        <opencv.version>4.1.0</opencv.version>
-        <cpython.version>3.7.3</cpython.version>
-        <mkl.version>2019.4</mkl.version>
+        <tensorflow.version>1.15.0</tensorflow.version>
+
+        <javacpp.version>1.5.2</javacpp.version>
+        <javacpp-presets.version>1.5.2</javacpp-presets.version>
+        <javacv.version>1.5.2</javacv.version>
+        <opencv.version>4.1.2</opencv.version>
+        <cpython.version>3.7.5</cpython.version>
+        <mkl.version>2019.5</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
         <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}
         </tensorflow.javacpp.version>
-        <mkl-dnn.version>0.20</mkl-dnn.version>
+        <mkl-dnn.version>0.21.2</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
-        <numpy.version>1.16.4</numpy.version>
+        <numpy.version>1.17.3</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
-        <openblas.version>0.3.6</openblas.version>
+        <openblas.version>0.3.7</openblas.version>
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>
         <leptonica.version>1.78.0</leptonica.version>
-        <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}
-        </leptonica.javacpp.version>
+        <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
         <hdf5.version>1.10.5</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
+
         <cuda>10.1</cuda>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>

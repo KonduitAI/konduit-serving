@@ -38,7 +38,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class TransformProcessStep extends BasePipelineStep {
+public class TransformProcessStep extends BasePipelineStep<TransformProcessStep> {
 
     @Getter
     @Setter
@@ -78,45 +78,6 @@ public class TransformProcessStep extends BasePipelineStep {
         };
     }
 
-    @Override
-    public PipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (TransformProcessStep) super.setInput("default", columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (TransformProcessStep) super.setOutput("default", columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setInput(Schema inputSchema) throws Exception {
-        return (TransformProcessStep) super.setInput("default", inputSchema);
-    }
-
-    @Override
-    public PipelineStep setOutput(Schema outputSchema) throws Exception {
-        return (TransformProcessStep) super.setOutput("default", outputSchema);
-    }
-
-    @Override
-    public PipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (TransformProcessStep) super.setInput(inputName, columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (TransformProcessStep) super.setOutput(outputName, columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
-        return (TransformProcessStep) super.setInput(inputName, inputSchema);
-    }
-
-    @Override
-    public PipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
-        return (TransformProcessStep) super.setOutput(outputName, outputSchema);
-    }
 
     /**
      * Define a single, named step for a transform process.
