@@ -73,7 +73,6 @@ public class KonduitServingMainArgs implements Serializable {
     public String[] toArgs() {
         if (fields == null) {
             fields = KonduitServingMainArgs.class.getDeclaredFields();
-
         }
 
         List<String> args = new ArrayList<>();
