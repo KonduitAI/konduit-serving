@@ -1,21 +1,18 @@
 #!/bin/sh
 
-if ! getent passwd konduit-serving > /dev/null
-then
-    echo "adding user konduit-serving:daemon"
-    useradd -r -M -d /srv/konduit-serving -s /sbin/nologin \
-    -c "konduit serving Daemon" konduit-serving
+# Check if the user konduit exists in the system database if not then create it
+# and add /opt/konduit as it's home directory
+if ! getent passwd konduit >/dev/null; then
+  echo "adding user konduit:daemon"
+  # Adding /opt/konduit as the home directory for the user "konduit"
+  useradd -r -M -d /opt/konduit -s /sbin/nologin -c "konduit Daemon" konduit
 fi
 
-mkdir /var/run/konduit-serving
-mkdir /var/konduit-serving
-mkdir /var/log/konduit-serving
-chown -R konduit-serving:daemon /var/run/konduit-serving
-chown -R konduit-serving:daemon /opt/konduit-serving
-chown -R konduit-serving:daemon /var/konduit-serving
-chown -R konduit-serving:daemon /var/log/konduit-serving
-chmod 755 /var/konduit-serving
-chmod 755 /var/run/konduit-serving
-chmod 755 /var/log/konduit-serving
+mkdir -p /opt/konduit/serving
+mkdir -p /var/log/konduit/serving
+chown -R konduit:konduit /opt/konduit
+chown -R konduit:konduit /var/log/konduit/serving
+chmod -R 755 /opt/konduit
+chmod -R 755 /var/log/konduit/serving
 
 exit 0
