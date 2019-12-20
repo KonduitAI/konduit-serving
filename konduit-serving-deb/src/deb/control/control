@@ -1,4 +1,4 @@
-Package: [[konduit-serving-server.deb.package.name]]
+Package: [[deb.package.name]]
 Version: [[version]]
 Section: misc
 Priority: optional
