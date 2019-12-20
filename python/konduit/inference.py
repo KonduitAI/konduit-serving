@@ -171,6 +171,8 @@ def python_step_func(
         else:
             output_column_names = list(outputs.keys())
             output_types = [konduit_type_mapping(v) for v in outputs.values()]
+        # if no names are set we default to "default".
+        input_name = "default"
 
     self.set_input(
         schema=input_schema,
