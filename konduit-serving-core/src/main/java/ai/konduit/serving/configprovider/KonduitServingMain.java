@@ -28,6 +28,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 import java.util.Arrays;
@@ -43,6 +44,7 @@ import static java.lang.System.setProperty;
  *
  * @author Adam Gibson
  */
+@AllArgsConstructor
 @Builder
 public class KonduitServingMain {
 

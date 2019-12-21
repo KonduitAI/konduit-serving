@@ -23,9 +23,9 @@
 package ai.konduit.serving.configprovider;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
@@ -37,6 +37,7 @@ import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.junit.Assert;
 import org.junit.Test;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
@@ -45,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.charset.Charset;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KonduitServingMainTest {
 
@@ -82,6 +84,72 @@ public class KonduitServingMainTest {
         konduitServingMain.runMain(args.toArgs());
 
         Thread.sleep(10000);
+    }
+
+    @Test(timeout = 60000)
+    public void testOnSuccessHook() throws Exception {
+        JsonObject config = getConfig();
+        File jsonConfigPath = new File(System.getProperty("java.io.tmpdir"), "config.json");
+        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
+        int port = getAvailablePort();
+
+        AtomicBoolean onSuccessCalled = new AtomicBoolean(false);
+        AtomicBoolean failTest = new AtomicBoolean(false); // to avoid waiting for the test timeout
+
+        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
+                .configStoreType("file").ha(false)
+                .multiThreaded(false).configPort(port)
+                .verticleClassName(InferenceVerticle.class.getName())
+                .configPath(jsonConfigPath.getAbsolutePath())
+                .build();
+
+        KonduitServingMain.builder()
+                .onSuccess(() -> onSuccessCalled.set(true))
+                .onFailure(() -> failTest.set(true))
+                .build()
+                .runMain(args.toArgs());
+
+        while(!onSuccessCalled.get()) {
+            if(!failTest.get())
+                Thread.sleep(2000);
+            else {
+                Assert.fail("onFailure called instead of onSuccess hook");
+                break;
+            }
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testOnFailureHook() throws Exception {
+        JsonObject config = getConfig();
+        File jsonConfigPath = new File(System.getProperty("java.io.tmpdir"), "config.json");
+        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
+        int port = getAvailablePort();
+
+        AtomicBoolean onFailureCalled = new AtomicBoolean(false);
+        AtomicBoolean failTest = new AtomicBoolean(false); // to avoid waiting for the test timeout
+
+        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
+                .configStoreType("file").ha(false)
+                .multiThreaded(false).configPort(port)
+                .verticleClassName(BatchInputParser.class.getName()) // Invalid verticle class name
+                .configPath(jsonConfigPath.getAbsolutePath())
+                .build();
+
+        KonduitServingMain.builder()
+                .onSuccess(() -> failTest.set(true))
+                .onFailure(() -> onFailureCalled.set(true))
+                .build()
+                .runMain(args.toArgs());
+
+        while(!onFailureCalled.get()) {
+            if(!failTest.get())
+                Thread.sleep(2000);
+            else {
+                Assert.fail("onSuccess called instead of onFailure hook");
+                break;
+            }
+        }
     }
 
     public JsonObject getConfig() throws Exception {
@@ -130,7 +198,6 @@ public class KonduitServingMainTest {
                 .servingConfig(servingConfig)
                 .step(modelPipelineStep)
                 .build();
-
 
         return new JsonObject(inferenceConfiguration.toJson());
     }
