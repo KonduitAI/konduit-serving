@@ -145,7 +145,6 @@
                     </defineStatements>
 
                     <requires>
-                        <require>java-1.8.0-openjdk-devel &gt;= 1.8</require>
                         <require>which</require>
                         <require>curl</require>
                         <require>wget</require>

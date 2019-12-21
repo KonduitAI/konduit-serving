@@ -8,4 +8,6 @@ sh "${KONDUIT_SERVING_HOME}"/install-python.sh >/dev/tty 2>&1 # Sending stdout t
 
 chown -R konduit:konduit /opt/konduit
 
+ln -s "${KONDUIT_SERVING_BIN_DIRECTORY}"/konduit-serving /usr/bin/konduit-serving
+
 exit 0

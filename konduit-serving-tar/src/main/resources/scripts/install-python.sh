@@ -24,6 +24,7 @@ PYTORCH_VERSION="1.3.1"
 TORCHVISION_VERSION="0.4.2"
 CPUONLY_VERSION="1.0"
 CUDATOOLKIT_VERSION="10.1"
+OPENJDK_VERSION="8"
 
 echo "-------------------------------------------------"
 echo "Miniconda Version: ${CONDA_VERSION}"
@@ -61,7 +62,8 @@ bootstrap_conda() {
           conda create -y -n cpu python="${PYTHON_VERSION}"
       fi
 
-      conda install -p "${KONDUIT_SERVING_HOME}/miniconda/envs/cpu" -y --copy --override-channels -c conda-forge -c anaconda -c pytorch -c konduitai \
+      conda install -p "${KONDUIT_SERVING_HOME}/miniconda/envs/cpu" -y --copy --override-channels -c pytorch -c conda-forge -c anaconda -c konduitai \
+                        openjdk="${OPENJDK_VERSION}" \
                         numpy="${NUMPY_VERSION}" \
                         requests="${REQUESTS_VERSION}" \
                         jupyter="${JUPYTER_VERSION}" \
@@ -83,7 +85,8 @@ bootstrap_conda() {
           conda create -y -n gpu python="${PYTHON_VERSION}"
       fi
 
-      conda install -p "${KONDUIT_SERVING_HOME}/miniconda/envs/gpu" -y --copy --override-channels -c conda-forge -c anaconda -c pytorch -c konduitai \
+      conda install -p "${KONDUIT_SERVING_HOME}/miniconda/envs/gpu" -y --copy --override-channels -c pytorch -c conda-forge -c anaconda -c konduitai \
+                      openjdk="${OPENJDK_VERSION}" \
                       numpy="${NUMPY_VERSION}" \
                       requests="${REQUESTS_VERSION}" \
                       jupyter="${JUPYTER_VERSION}" \
@@ -99,7 +102,7 @@ bootstrap_conda() {
                       konduit="${KONDUIT_VERSION}"
     fi
 
-    conda clean --all
+    conda clean -y --all
 
     conda info --all
     conda list

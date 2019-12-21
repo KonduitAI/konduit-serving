@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
-source "${CONDA_INSTALL_PATH}"/bin/activate "${KONDUIT_SERVING_BACKEND}"
+. /etc/profile.d/konduit-serving-env.sh
 
-konduit "$@"
+if [ "$1" == "conda" ]; then
+  "${CONDA_INSTALL_PATH}"/bin/"$*"
+else
+  . "${CONDA_INSTALL_PATH}"/bin/activate "${KONDUIT_SERVING_BACKEND}"
+  konduit "$@"
+fi
