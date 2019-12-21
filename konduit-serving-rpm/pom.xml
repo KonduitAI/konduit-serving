@@ -145,14 +145,8 @@
                     </defineStatements>
 
                     <requires>
-                        <require>which</require>
                         <require>curl</require>
-                        <require>wget</require>
-                        <require>bzip2</require>
-                        <require>gcc</require>
-                        <require>gcc-c++</require>
-                        <require>make</require>
-                        <require>openssl-devel</require>
+                        <require>git</require>
                     </requires>
 
                     <mappings>
