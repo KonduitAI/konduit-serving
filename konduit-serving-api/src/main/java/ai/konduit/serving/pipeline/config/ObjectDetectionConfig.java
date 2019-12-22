@@ -22,17 +22,21 @@
 
 package ai.konduit.serving.pipeline.config;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
 @Data
-@SuperBuilder
 /**
  * Configuration for object detection output of models.
  */
+@AllArgsConstructor
+@Builder
+@NoArgsConstructor
 public class ObjectDetectionConfig  implements Serializable {
     @Builder.Default
     private double threshold = 0.5;
