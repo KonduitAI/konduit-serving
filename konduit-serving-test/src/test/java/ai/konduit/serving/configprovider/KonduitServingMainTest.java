@@ -38,7 +38,9 @@ import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
 
@@ -50,6 +52,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KonduitServingMainTest {
 
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     /**
      * @return single available port number
@@ -71,7 +75,7 @@ public class KonduitServingMainTest {
     public void testFile() throws Exception {
         KonduitServingMain konduitServingMain = new KonduitServingMain();
         JsonObject config = getConfig();
-        File jsonConfigPath = new File(System.getProperty("java.io.tmpdir"), "config.json");
+        File jsonConfigPath = folder.newFile("config.json");
         FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
         int port = getAvailablePort();
 
@@ -89,7 +93,7 @@ public class KonduitServingMainTest {
     @Test(timeout = 60000)
     public void testOnSuccessHook() throws Exception {
         JsonObject config = getConfig();
-        File jsonConfigPath = new File(System.getProperty("java.io.tmpdir"), "config.json");
+        File jsonConfigPath = folder.newFile("config.json");
         FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
         int port = getAvailablePort();
 
@@ -122,7 +126,7 @@ public class KonduitServingMainTest {
     @Test(timeout = 60000)
     public void testOnFailureHook() throws Exception {
         JsonObject config = getConfig();
-        File jsonConfigPath = new File(System.getProperty("java.io.tmpdir"), "config.json");
+        File jsonConfigPath = folder.newFile("config.json");
         FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
         int port = getAvailablePort();
 
@@ -154,7 +158,7 @@ public class KonduitServingMainTest {
 
     public JsonObject getConfig() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
-        File modelSave = new File(System.getProperty("java.io.tmpdir"), "model.zip");
+        File modelSave = folder.newFile("model.zip");
         ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
 
 
