@@ -36,7 +36,6 @@
         </profile>
     </profiles>
 
-
     <dependencies>
         <dependency>
             <groupId>com.github.javafaker</groupId>
@@ -128,6 +127,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>concurrentunit</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-api</artifactId>
             <version>${nd4j.version}</version>
@@ -148,7 +152,6 @@
             <version>3.0.2</version>
         </dependency>
     </dependencies>
-
 
     <build>
         <plugins>

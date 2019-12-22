@@ -36,6 +36,7 @@ import org.nd4j.linalg.io.ClassPathResource;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
@@ -44,13 +45,11 @@ public class TensorflowInferenceExecutionerTests {
     @Rule
     public TemporaryFolder testDir = new TemporaryFolder();
 
-
     @Test(timeout = 60000)
-
     public void testInferenceExecutioner() throws Exception {
         TensorflowModelLoader tensorflowModelLoader = TensorflowModelLoader.builder()
                 .inputNames(Arrays.asList("input_0", "input_1"))
-                .outputNames(Arrays.asList("output"))
+                .outputNames(Collections.singletonList("output"))
                 .protoFile(new ClassPathResource("inference/tensorflow/frozen_model.pb").getFile())
                 .build();
 
@@ -69,7 +68,7 @@ public class TensorflowInferenceExecutionerTests {
         tensorflowInferenceExecutioner.stop();
     }
 
-    @Test()
+    @Test
     public void testSavedModelInferenceExecutioner() throws Exception {
         File f = testDir.newFolder();
         new ClassPathResource("/inference/tensorflow/saved_model_counter/00000123/").copyDirectory(f);
@@ -83,7 +82,6 @@ public class TensorflowInferenceExecutionerTests {
         TensorflowModelLoader tensorflowModelLoader = TensorflowModelLoader.builder()
                 .savedModelConfig(savedModelConfig)
                 .build();
-
 
         TensorflowInferenceExecutioner tensorflowInferenceExecutioner = new TensorflowInferenceExecutioner();
 
@@ -99,5 +97,4 @@ public class TensorflowInferenceExecutionerTests {
         assertEquals(assertion.getDouble(0), output[0].getDouble(0), 1e-1);
         tensorflowInferenceExecutioner.stop();
     }
-
 }
