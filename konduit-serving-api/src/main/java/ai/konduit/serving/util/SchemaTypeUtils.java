@@ -24,10 +24,15 @@ package ai.konduit.serving.util;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.SchemaType;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.ColumnType;
 import org.datavec.api.transform.TransformProcess;
+import org.datavec.api.transform.metadata.BinaryMetaData;
+import org.datavec.api.transform.metadata.ColumnMetaData;
 import org.datavec.api.transform.schema.Schema;
+import org.datavec.api.transform.schema.Schema.Builder;
 import org.datavec.api.writable.DoubleWritable;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
@@ -43,6 +48,73 @@ import java.util.*;
  */
 public class SchemaTypeUtils {
 
+
+    /**
+     * Create a {@link Schema} from a {@link JsonObject}
+     *  schema descriptor. The schema descriptor contains a json object of keys
+     *  of type {@link ColumnType} values in the form of:
+     *  name : {@link ColumnType} value
+     *
+     * There are 2 exceptions to this rule.
+     * {@link ColumnType#NDArray} and {@link ColumnType#Categorical}
+     * both are json objects.
+     * {@link ColumnType#NDArray} has the form:
+     * {name : shape: [], serialization type: "json" | "b64"}
+     * {@link ColumnType#Categorical} has the form:
+     * {categories: []}
+     *
+     *
+     * @param schemaDescriptor a {@link JsonObject} with the form
+     *                         described above
+     * @return the equivalent {@link Schema} derived from the given descriptor
+     */
+    public static Schema schemaFromDynamicSchemaDefinition(JsonObject schemaDescriptor) {
+        Schema.Builder schemaBuilder = new Builder();
+        for(String key : schemaDescriptor.fieldNames()) {
+            switch(ColumnType.valueOf(schemaDescriptor.getString(key))) {
+                case Boolean:
+                    schemaBuilder.addColumnBoolean(key);
+                    break;
+                case Double:
+                    schemaBuilder.addColumnDouble(key);
+                    break;
+                case Float:
+                    schemaBuilder.addColumnFloat(key);
+                    break;
+                case Long:
+                    schemaBuilder.addColumnLong(key);
+                    break;
+                case String:
+                    schemaBuilder.addColumnString(key);
+                    break;
+                case NDArray:
+                    JsonObject shapeValue = schemaDescriptor.getJsonObject(key);
+                    JsonArray shapeArr = shapeValue.getJsonArray("shape");
+                    long[] shape = new long[shapeArr.size()];
+                    for(int i = 0; i < shape.length; i++) {
+                        shape[i] = shapeArr.getLong(i);
+                    }
+                    schemaBuilder.addColumnNDArray(key,shape);
+                    break;
+                case Categorical:
+                    JsonObject categoricalMetaData = schemaDescriptor.getJsonObject(key);
+                    JsonArray jsonArray = categoricalMetaData.getJsonArray("categories");
+                    String[] categories = new String[jsonArray.size()];
+                    for(int i = 0; i < categories.length; i++) {
+                        categories[i] = jsonArray.getString(i);
+                    }
+                    schemaBuilder.addColumnCategorical(key,categories);
+                    break;
+                case Bytes:
+                    ColumnMetaData columnMetaData = new BinaryMetaData(key);
+                    schemaBuilder.addColumn(columnMetaData);
+                    break;
+
+            }
+        }
+
+        return schemaBuilder.build();
+    }
 
     /**
      * Get record for all values

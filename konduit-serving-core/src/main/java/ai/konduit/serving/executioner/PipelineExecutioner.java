@@ -99,13 +99,16 @@ public class PipelineExecutioner {
     @Getter
     protected Labels yoloLabels, ssdLabels;
     //the output type for the response: default json
+    @Getter
     protected InferenceConfiguration config;
+    @Getter
     private Pipeline pipeline;
     private TensorDataTypesConfig tensorDataTypesConfig;
     private Schema inputSchema = null;
     private Schema outputSchema = null;
     private ModelConfig modelConfig = null;
     private ObjectDetectionConfig objectDetectionConfig = null;
+    @Getter
     private static JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
 
     private static ClassificationMultiOutputAdapter classificationMultiOutputAdapter = new ClassificationMultiOutputAdapter();
@@ -459,6 +462,7 @@ public class PipelineExecutioner {
                 default:
                     throw new IllegalStateException("Illegal type for json.");
             }
+
             writeResponse(adapt, outputDataFormat, UUID.randomUUID().toString(), ctx);
 
         } else if (records.length == 1 && records[0].getRecord().get(0) instanceof Text) {
@@ -478,7 +482,6 @@ public class PipelineExecutioner {
                     }
                 }
 
-                log.debug("Writing json response.");
                 String write = writeJson.encodePrettily();
                 ctx.response().putHeader("Content-Type", "application/json");
                 ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
@@ -540,12 +543,22 @@ public class PipelineExecutioner {
         }
     }
 
-    // TODO: unused, do we need it?
+    /**
+     * Destroys the executioner (shuts down {@link ai.konduit.serving.executioner.inference.InferenceExecutioner}
+     * among other components)
+     */
     public void destroy() {
         pipeline.destroy();
     }
 
 
+    /**
+     * Creates input for use in the {@link PipelineExecutioner}
+     * @param input the input object
+     * @param transformProcess the {@link TransformProcess} to use
+     * @param conversionSchema The {@link Schema} to use
+     * @return
+     */
     public static Record[] createInput(Object input,TransformProcess transformProcess,Schema conversionSchema) {
         Preconditions.checkNotNull(input, "Input data was null!");
 

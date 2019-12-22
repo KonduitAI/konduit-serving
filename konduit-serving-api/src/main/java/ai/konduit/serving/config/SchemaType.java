@@ -36,6 +36,6 @@ public enum SchemaType {
     Bytes,
     Boolean,
     NDArray,
-    Image;
+    Image
 
 }

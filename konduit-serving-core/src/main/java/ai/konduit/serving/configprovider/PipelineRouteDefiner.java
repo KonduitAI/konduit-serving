@@ -25,13 +25,16 @@ package ai.konduit.serving.configprovider;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.Output.DataFormat;
 import ai.konduit.serving.config.Output.PredictionType;
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.metrics.NativeMetrics;
 import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.image.VertxBufferImageInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.nd4j.VertxBufferNd4jInputAdapter;
@@ -53,6 +56,8 @@ import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.healthchecks.HealthCheckHandler;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -62,6 +67,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
+import org.datavec.api.writable.Text;
+import org.datavec.arrow.recordreader.ArrowRecord;
+import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.nd4j.base.Preconditions;
 
 import java.io.IOException;
@@ -83,6 +91,8 @@ public class PipelineRouteDefiner {
     protected Schema inputSchema, outputSchema = null;
     protected LongTaskTimer inferenceExecutionTimer, batchCreationTimer;
     protected HealthCheckHandler healthCheckHandler;
+    private static JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
+
 
     public List<String> inputNames() {
         return pipelineExecutioner.inputNames();
@@ -234,6 +244,62 @@ public class PipelineRouteDefiner {
                 });
 
 
+
+        router.post("/dynamicschema/")
+                .consumes("application/json")
+                .produces("application/json")
+                .handler(ctx -> {
+                    JsonObject jsonBody = ctx.getBodyAsJson();
+                    JsonObject schema = jsonBody.getJsonObject("schema");
+                    JsonObject values = jsonBody.getJsonObject("values");
+
+                    Map<String, Schema> schemas = new LinkedHashMap<>();
+                    Record[] pipelineInput = new Record[schema.fieldNames().size()];
+                    int count = 0;
+                    for(String key : schema.fieldNames()) {
+                        JsonObject schemaJson = schema.getJsonObject(key);
+                        Schema schema1 = SchemaTypeUtils.schemaFromDynamicSchemaDefinition(schemaJson);
+                        schemas.put(key,SchemaTypeUtils.schemaFromDynamicSchemaDefinition(schemaJson));
+                        JsonArray jsonArray = values.getJsonArray(key);
+                        ArrowWritableRecordBatch convert = null;
+                        try {
+                            convert = mapConverter.convert(schema1, jsonArray, null);
+                        } catch (Exception e) {
+                            log.error("Error performing conversion", e);
+                            throw e;
+                        }
+
+                        Preconditions.checkNotNull(convert, "Conversion was null!");
+                        pipelineInput[count] = new ArrowRecord(convert, count, null);
+                        count++;
+                    }
+
+
+                    Record[] records = pipelineExecutioner.getPipeline().doPipeline(pipelineInput);
+                    JsonObject outputSchemaJson = jsonBody.getJsonObject("outputSchema");
+                    JsonObject writeJson = new JsonObject();
+                    int recordIdx = 0;
+                    for(String outputName : outputSchemaJson.fieldNames()) {
+                        Text text = (Text) records[0].getRecord().get(recordIdx);
+
+                        if (text.toString().charAt(0) == '{') {
+                            JsonObject jsonObject1 = new JsonObject(text.toString());
+                            writeJson.put(outputName, jsonObject1);
+                        } else if (text.toString().charAt(0) == '[') {
+                            JsonArray jsonObject = new JsonArray(text.toString());
+                            writeJson.put(outputName, jsonObject);
+                        } else {
+                            writeJson.put(outputName, text.toString());
+                        }
+
+                        recordIdx++;
+                    }
+
+                    String write = writeJson.encodePrettily();
+                    ctx.response().putHeader("Content-Type", "application/json");
+                    ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
+                    ctx.response().end(write);
+                });
 
         /**
          * Get the output of a pipeline for a given prediction type for JSON input data format.

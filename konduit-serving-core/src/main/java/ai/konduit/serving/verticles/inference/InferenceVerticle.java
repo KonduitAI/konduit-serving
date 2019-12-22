@@ -56,6 +56,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
 
 
     private InferenceConfiguration inferenceConfiguration;
+    private PipelineRouteDefiner pipelineRouteDefiner;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -65,12 +66,13 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     @Override
     public void start() throws Exception {
         super.start();
-
     }
 
     @Override
     public void stop() throws Exception {
         super.stop();
+        if(pipelineRouteDefiner.getPipelineExecutioner() != null)
+            pipelineRouteDefiner.getPipelineExecutioner().destroy();
         log.debug("Stopping model server.");
     }
 
@@ -80,12 +82,13 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         this.vertx = vertx;
         try {
             inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
-            this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+            pipelineRouteDefiner = new PipelineRouteDefiner();
+            this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
             //define the memory map endpoints if the user specifies the memory map configuration
             if (inferenceConfiguration.getMemMapConfig() != null) {
                 this.router = new MemMapRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
             } else {
-                this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+                this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
 
             }
             setupWebServer();

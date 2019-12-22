@@ -170,7 +170,7 @@ public class JsonArrayMapConverter extends BaseJsonArrayConverter {
     @Override
     public ArrowWritableRecordBatch convert(Schema schema, JsonArray jsonArray, TransformProcess transformProcess) {
         Preconditions.checkNotNull(schema, "Please specify a schema for conversion!");
-        log.info("Converting " + jsonArray);
+        log.debug("Converting " + jsonArray);
         List<FieldVector> vectors = ArrowUtils.createFieldVectors(bufferAllocator, schema, jsonArray.size());
         //all numbers case, convert to json object
         if (jsonArray.getValue(0) instanceof JsonArray) {
