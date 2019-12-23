@@ -5,7 +5,7 @@
     <parent>
         <artifactId>konduit-serving</artifactId>
         <groupId>ai.konduit.serving</groupId>
-        <version>1.2.1</version>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,15 +15,14 @@
     <properties>
         <rpm-maven-plugin.version>2.1.5</rpm-maven-plugin.version>
         <resource.dir>src/main/resources</resource.dir>
-        <prefix>/konduit-serving</prefix>
-        <pipeline.dir>${project.artifactId}</pipeline.dir>
-
+        <prefix>/opt/konduit/serving</prefix>
+        <distro.target.dir>${tar.distro.dir}/target/konduit-serving-tar-${project.version}-dist</distro.target.dir>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-distro-bom</artifactId>
+            <artifactId>konduit-serving-tar</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -31,6 +30,60 @@
     <build>
         <finalName>konduit-serving</finalName>
         <plugins>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                           <goal>replace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <file>${project.basedir}/${resource.dir}/templates/konduit-serving-env.sh.template</file>
+                    <replacements>
+                        <replacement>
+                            <token>##PROJECT_VERSION##</token>
+                            <value>${project.version}</value>
+                        </replacement>
+                        <replacement>
+                            <token>##SPIN_VERSION##</token>
+                            <value>${spin.version}</value>
+                        </replacement>
+                        <replacement>
+                            <token>##CHIP_TYPE##</token>
+                            <value>${chip}</value>
+                        </replacement>
+                    </replacements>
+                    <outputFile>${project.basedir}/${resource.dir}/etc/profile.d/konduit-serving-env.sh</outputFile>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.commonjava.maven.plugins</groupId>
+                <artifactId>directory-maven-plugin</artifactId>
+                <version>0.1</version>
+                <executions>
+                    <execution>
+                        <id>directories</id>
+                        <goals>
+                            <goal>directory-of</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <property>tar.distro.dir</property>
+                            <project>
+                                <groupId>ai.konduit.serving</groupId>
+                                <artifactId>konduit-serving-tar</artifactId>
+                            </project>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -54,39 +107,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.commonjava.maven.plugins</groupId>
-                <artifactId>directory-maven-plugin</artifactId>
-                <version>0.1</version>
-                <executions>
-                    <execution>
-                        <id>directories</id>
-                        <goals>
-                            <goal>directory-of</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <property>pipeline.dir</property>
-                            <project>
-                                <groupId>ai.konduit.serving</groupId>
-                                <artifactId>konduit-serving-rpm</artifactId>
-                            </project>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>dist</id>
-                        <phase>none</phase>
-                    </execution>
-                </executions>
-            </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -105,8 +125,8 @@
                 </executions>
 
                 <configuration>
-                    <name>konduit-serving</name>
-                    <license>(C) 2019 Skymind.ai, https://www.apache.org/licenses/LICENSE-2.0</license>
+                    <name>konduit-serving-${spin.version}-${chip}</name>
+                    <license>(C) 2019 Konduit AI, https://www.apache.org/licenses/LICENSE-2.0</license>
                     <group>Application/Misc</group>
                     <targetVendor>redhat</targetVendor>
                     <targetOS>linux</targetOS>
@@ -115,6 +135,8 @@
                     <autoRequires>false</autoRequires>
                     <prefix>${prefix}</prefix>
                     <needarch>true</needarch>
+                    <defaultUsername>konduit</defaultUsername>
+                    <defaultGroupname>konduit</defaultGroupname>
 
                     <defineStatements>
                         <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
@@ -123,47 +145,33 @@
                     </defineStatements>
 
                     <requires>
-                        <require>java-1.8.0-openjdk-devel &gt;= 1.8</require>
-                        <require>which</require>
                         <require>curl</require>
-                        <require>wget</require>
-                        <require>bzip2</require>
-                        <require>gcc</require>
-                        <require>gcc-c++</require>
-                        <require>make</require>
-                        <require>openssl-devel</require>
+                        <require>git</require>
                     </requires>
 
                     <mappings>
                         <mapping>
                             <directory>${prefix}</directory>
-                            <username>konduit-serving</username>
                         </mapping>
 
                         <mapping>
-                            <directory>/etc/konduit-serving</directory>
-                            <configuration>true</configuration>
+                            <directory>${prefix}</directory>
                             <sources>
                                 <source>
-                                    <location>${resource.dir}/etc/konduit-serving/logback.xml</location>
+                                    <location>${distro.target.dir}</location>
                                 </source>
                             </sources>
-                            <username>konduit-serving</username>
-                            <groupname>daemon</groupname>
                         </mapping>
 
                         <mapping>
-                            <directory>/etc/konduit-serving</directory>
+                            <directory>/etc/konduit/serving</directory>
                             <configuration>true</configuration>
                             <sources>
                                 <source>
-                                    <location>${resource.dir}/etc/konduit-serving/konduit-serving-env.sh</location>
+                                    <location>${resource.dir}/etc/konduit/serving/logback.xml</location>
                                 </source>
                             </sources>
-                            <username>konduit-serving</username>
-                            <groupname>daemon</groupname>
                         </mapping>
-
 
                         <mapping>
                             <directory>/etc/profile.d</directory>
@@ -176,10 +184,17 @@
                             </sources>
                         </mapping>
 
+                        <mapping>
+                            <directory>/var/log/konduit/serving</directory>
+                        </mapping>
 
                     </mappings>
 
                     <!-- RPM scripts -->
+                    <pretransScriptlet>
+                        <scriptFile>${resource.dir}/scripts/pre-trans.sh</scriptFile>
+                    </pretransScriptlet>
+
                     <preinstallScriptlet>
                         <scriptFile>${resource.dir}/scripts/pre-install.sh</scriptFile>
                     </preinstallScriptlet>
@@ -188,13 +203,13 @@
                         <scriptFile>${resource.dir}/scripts/post-install.sh</scriptFile>
                     </postinstallScriptlet>
 
-                    <preremoveScriptlet>
-                        <scriptFile>${resource.dir}/scripts/pre-remove.sh</scriptFile>
-                    </preremoveScriptlet>
+                    <posttransScriptlet>
+                        <scriptFile>${resource.dir}/scripts/post-trans.sh</scriptFile>
+                        <program>/bin/sh</program>
+                    </posttransScriptlet>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
 
 </project>

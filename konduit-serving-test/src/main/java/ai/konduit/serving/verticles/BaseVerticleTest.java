@@ -44,9 +44,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 @NotThreadSafe
 public abstract class BaseVerticleTest {
+
     @Rule
     public Timeout timeout = new Timeout(240, SECONDS);
-
 
     @Rule
     public TemporaryFolder temporary = new TemporaryFolder();
@@ -83,6 +83,7 @@ public abstract class BaseVerticleTest {
         String verticleClassName = getVertexName();
         String[] split = verticleClassName.split("\\.");
         vertx.registerVerticleFactory(new VerticleFactory() {
+
             @Override
             public String prefix() {
                 return split[split.length - 1];
@@ -96,8 +97,8 @@ public abstract class BaseVerticleTest {
             }
         });
 
-
         vertx.registerVerticleFactory(new VerticleFactory() {
+
             @Override
             public String prefix() {
                 return getVertexName();
@@ -109,7 +110,6 @@ public abstract class BaseVerticleTest {
                 return verticle;
             }
         });
-
 
         vertx.deployVerticle(getVertexName(), options, context.asyncAssertSuccess());
     }
@@ -127,7 +127,6 @@ public abstract class BaseVerticleTest {
             normalServer.close();
     }
 
-
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return ai.konduit.serving.verticles.inference.InferenceVerticle.class;
     }
@@ -143,10 +142,7 @@ public abstract class BaseVerticleTest {
 
     public abstract JsonObject getConfigObject() throws Exception;
 
-    public void setupVertx(Vertx vertx) {
-
-    }
-
+    public void setupVertx(Vertx vertx) { }
 
     public boolean isPubSub() {
         return false;
