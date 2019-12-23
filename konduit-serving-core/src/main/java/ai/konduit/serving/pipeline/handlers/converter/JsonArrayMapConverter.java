@@ -23,6 +23,7 @@
 package ai.konduit.serving.pipeline.handlers.converter;
 
 import ai.konduit.serving.util.ArrowUtils;
+import ai.konduit.serving.util.JsonSerdeUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
@@ -125,45 +126,6 @@ public class JsonArrayMapConverter extends BaseJsonArrayConverter {
     }
 
 
-    private static INDArray jsonToNDArray(JsonArray arr){
-        List<Integer> shapeList = new ArrayList<>();
-        JsonArray currArr = arr;
-        while(true){
-           shapeList.add(currArr.size());
-           Object firstElement = currArr.getValue(0);
-           if (firstElement instanceof JsonArray){
-               currArr = (JsonArray)firstElement;
-           }
-           else{
-               break;
-           }
-        }
-        long[] shape = new long[shapeList.size()];
-        for (int i=0; i<shape.length; i++){
-            shape[i] = shapeList.get(i).longValue();
-        }
-        INDArray ndArray = Nd4j.zeros(shape);
-        INDArray flatNdArray = ndArray.reshape(-1);
-        int idx = 0;
-        Stack<JsonArray> stack = new Stack<>();
-        stack.push(arr);
-        while(!stack.isEmpty()){
-            JsonArray popped = stack.pop();
-            Object first = popped.getValue(0);
-            if (first instanceof JsonArray){
-                for (int i=popped.size()-1; i >=0; i--){
-                    stack.push(popped.getJsonArray(i));
-                }
-            }
-            else{
-                for (int i=0; i < popped.size(); i++){
-                    flatNdArray.putScalar(idx++, ((Number)popped.getValue(i)).doubleValue());
-                }
-            }
-        }
-        return ndArray;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -207,7 +169,7 @@ public class JsonArrayMapConverter extends BaseJsonArrayConverter {
                         NDArrayWritable ndArrayWritable = new NDArrayWritable(arr);
                         ArrowConverter.setValue(schema.getType(j), vectors.get(j), ndArrayWritable, i);
                     } else if (value instanceof JsonArray) {
-                        INDArray arr = jsonToNDArray((JsonArray)value);
+                        INDArray arr = JsonSerdeUtils.jsonToNDArray((JsonArray)value);
                         NDArrayWritable ndArrayWritable = new NDArrayWritable(arr);
                         ArrowConverter.setValue(schema.getType(j), vectors.get(j), ndArrayWritable, i);
 

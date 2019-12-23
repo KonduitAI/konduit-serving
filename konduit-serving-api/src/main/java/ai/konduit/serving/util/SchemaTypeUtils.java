@@ -45,6 +45,8 @@ import java.util.*;
 /**
  * Utils for a mix of data vec {@link Schema} manipulation
  * and configuration for {@link InferenceConfiguration}
+ *
+ * @author Adam Gibson
  */
 public class SchemaTypeUtils {
 
@@ -62,6 +64,8 @@ public class SchemaTypeUtils {
      * {name : shape: [], serialization type: "json" | "b64"}
      * {@link ColumnType#Categorical} has the form:
      * {categories: []}
+     * {@link ColumnType#Time} has the form:
+     * {timeZoneId: timeZoneId}
      *
      *
      * @param schemaDescriptor a {@link JsonObject} with the form
@@ -71,7 +75,21 @@ public class SchemaTypeUtils {
     public static Schema schemaFromDynamicSchemaDefinition(JsonObject schemaDescriptor) {
         Schema.Builder schemaBuilder = new Builder();
         for(String key : schemaDescriptor.fieldNames()) {
-            switch(ColumnType.valueOf(schemaDescriptor.getString(key))) {
+            JsonObject fieldInfo = schemaDescriptor.getJsonObject(key);
+            JsonObject fieldInfoObject = fieldInfo.getJsonObject("fieldInfo");
+            if(fieldInfoObject == null) {
+                throw new IllegalArgumentException("Unable to find object fieldInfo!");
+            }
+
+            if(!fieldInfoObject.containsKey("type")) {
+                throw new IllegalArgumentException("Illegal field info. Missing key type for identifying type of field");
+            }
+            //convert image to bytes and let user pre process accordingly
+            String type = fieldInfoObject.getString("type");
+            if(type.equals("Image")) {
+                type = "Bytes";
+            }
+            switch(ColumnType.valueOf(type)) {
                 case Boolean:
                     schemaBuilder.addColumnBoolean(key);
                     break;
@@ -87,9 +105,11 @@ public class SchemaTypeUtils {
                 case String:
                     schemaBuilder.addColumnString(key);
                     break;
+                case Integer:
+                    schemaBuilder.addColumnInteger(key);
+                    break;
                 case NDArray:
-                    JsonObject shapeValue = schemaDescriptor.getJsonObject(key);
-                    JsonArray shapeArr = shapeValue.getJsonArray("shape");
+                    JsonArray shapeArr = fieldInfoObject.getJsonArray("shape");
                     long[] shape = new long[shapeArr.size()];
                     for(int i = 0; i < shape.length; i++) {
                         shape[i] = shapeArr.getLong(i);
@@ -97,8 +117,7 @@ public class SchemaTypeUtils {
                     schemaBuilder.addColumnNDArray(key,shape);
                     break;
                 case Categorical:
-                    JsonObject categoricalMetaData = schemaDescriptor.getJsonObject(key);
-                    JsonArray jsonArray = categoricalMetaData.getJsonArray("categories");
+                    JsonArray jsonArray = fieldInfoObject.getJsonArray("categories");
                     String[] categories = new String[jsonArray.size()];
                     for(int i = 0; i < categories.length; i++) {
                         categories[i] = jsonArray.getString(i);
@@ -109,12 +128,18 @@ public class SchemaTypeUtils {
                     ColumnMetaData columnMetaData = new BinaryMetaData(key);
                     schemaBuilder.addColumn(columnMetaData);
                     break;
+                case Time:
+                    TimeZone zoneById = TimeZone.getTimeZone(fieldInfoObject.getString("timeZoneId"));
+                    schemaBuilder.addColumnTime(key,zoneById);
+                    break;
 
             }
         }
 
         return schemaBuilder.build();
     }
+
+
 
     /**
      * Get record for all values
@@ -263,7 +288,13 @@ public class SchemaTypeUtils {
                     builder.addColumnLong(names.get(i));
                     break;
                 case Bytes:
-                    throw new UnsupportedOperationException();
+                case Image:
+                    BinaryMetaData binaryMetaData = new BinaryMetaData(names.get(i));
+                    builder.addColumn(binaryMetaData);
+                    break;
+                case Time:
+                    builder.addColumnTime(names.get(i),TimeZone.getDefault());
+                    break;
                 default:
                     throw new UnsupportedOperationException("Unknown type " + types[i]);
 

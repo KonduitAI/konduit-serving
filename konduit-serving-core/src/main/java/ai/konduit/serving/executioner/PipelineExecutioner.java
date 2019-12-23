@@ -422,6 +422,65 @@ public class PipelineExecutioner {
         }
     }
 
+
+    /**
+     *
+     * @param ctx
+     */
+    public void doJsonInference(RoutingContext ctx) {
+        JsonObject jsonBody = ctx.getBodyAsJson();
+        JsonObject schema = jsonBody.getJsonObject("schema");
+        JsonObject values = jsonBody.getJsonObject("values");
+
+        Map<String, Schema> schemas = new LinkedHashMap<>();
+        Record[] pipelineInput = new Record[schema.fieldNames().size()];
+        int count = 0;
+        for(String key : schema.fieldNames()) {
+            JsonObject schemaJson = schema.getJsonObject(key);
+            Schema schema1 = SchemaTypeUtils.schemaFromDynamicSchemaDefinition(schemaJson);
+            schemas.put(key,SchemaTypeUtils.schemaFromDynamicSchemaDefinition(schemaJson));
+            JsonArray jsonArray = values.getJsonArray(key);
+            ArrowWritableRecordBatch convert = null;
+            try {
+                convert = mapConverter.convert(schema1, jsonArray, null);
+            } catch (Exception e) {
+                log.error("Error performing conversion", e);
+                throw e;
+            }
+
+            Preconditions.checkNotNull(convert, "Conversion was null!");
+            pipelineInput[count] = new ArrowRecord(convert, count, null);
+            count++;
+        }
+
+
+        Record[] records = pipeline.doPipeline(pipelineInput);
+        JsonObject outputSchemaJson = jsonBody.getJsonObject("outputSchema");
+        JsonObject writeJson = new JsonObject();
+        int recordIdx = 0;
+        for(String outputName : outputSchemaJson.fieldNames()) {
+            Text text = (Text) records[0].getRecord().get(recordIdx);
+
+            if (text.toString().charAt(0) == '{') {
+                JsonObject jsonObject1 = new JsonObject(text.toString());
+                writeJson.put(outputName, jsonObject1);
+            } else if (text.toString().charAt(0) == '[') {
+                JsonArray jsonObject = new JsonArray(text.toString());
+                writeJson.put(outputName, jsonObject);
+            } else {
+                writeJson.put(outputName, text.toString());
+            }
+
+            recordIdx++;
+        }
+
+        String write = writeJson.encodePrettily();
+        ctx.response().putHeader("Content-Type", "application/json");
+        ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
+        ctx.response().end(write);
+    }
+
+
     /**
      * Perform inference. Two endpoints in the pipeline route definer use this inference runner, both produce
      * JSON output, but take either JSON or multi-part input. See
@@ -717,7 +776,8 @@ public class PipelineExecutioner {
 
     }
 
-    private Map<String, TensorDataType> initDataTypes(List<String> namesValidation, Map<String, TensorDataType> types,
+    private Map<String, TensorDataType> initDataTypes(List<String> namesValidation,
+                                                      Map<String, TensorDataType> types,
                                                       String inputOrOutputType) {
         Preconditions.checkNotNull(namesValidation, "Names validation must not be null!");
         Preconditions.checkNotNull(types, "Types must not be null!");
