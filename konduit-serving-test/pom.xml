@@ -5,7 +5,7 @@
     <parent>
         <artifactId>konduit-serving</artifactId>
         <groupId>ai.konduit.serving</groupId>
-        <version>1.2.1</version>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -35,7 +35,6 @@
             </dependencies>
         </profile>
     </profiles>
-
 
     <dependencies>
         <dependency>
@@ -128,6 +127,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>concurrentunit</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-api</artifactId>
             <version>${nd4j.version}</version>
@@ -149,18 +153,11 @@
         </dependency>
     </dependencies>
 
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
-                <configuration>
-                    <forkCount>1</forkCount>
-                    <reuseForks>false</reuseForks>
-                    <argLine>-Xmx8g</argLine>
-                </configuration>
             </plugin>
         </plugins>
     </build>
