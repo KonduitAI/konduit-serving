@@ -166,35 +166,6 @@ public class SchemaTypeUtils {
         return schema.getColumnNames();
     }
 
-    /**
-     * Compute input types for the given set of transform processes
-     *
-     * @param transformProcesses the input transform processes
-     * @return the input types for the given transform processes
-     */
-    public static SchemaType[][] inputTypes(TransformProcess[] transformProcesses) {
-        SchemaType[][] types = new SchemaType[transformProcesses.length][];
-        for (int i = 0; i < types.length; i++) {
-            types[i] = SchemaTypeUtils.typesForSchema(transformProcesses[i].getInitialSchema());
-        }
-
-        return types;
-    }
-
-    /**
-     * Compute output types for the given set of transform processes
-     *
-     * @param transformProcesses the input transform processes
-     * @return the input types for the given transform processes
-     */
-    public static SchemaType[][] outputTypes(TransformProcess[] transformProcesses) {
-        SchemaType[][] types = new SchemaType[transformProcesses.length][];
-        for (int i = 0; i < types.length; i++) {
-            types[i] = SchemaTypeUtils.typesForSchema(transformProcesses[i].getFinalSchema());
-        }
-
-        return types;
-    }
 
 
     /**
@@ -302,39 +273,6 @@ public class SchemaTypeUtils {
         }
 
         return builder.build();
-    }
-
-    /**
-     * Convert a set of {@link INDArray}
-     * to an equivalent {@link NDArrayWritable}
-     *
-     * @param writables the writables to convert
-     * @return the underlying {@link INDArray}
-     */
-    public static Writable[] fromArrays(INDArray[] writables) {
-        Writable[] ret = new Writable[writables.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = new NDArrayWritable(writables[i]);
-        }
-
-        return ret;
-    }
-
-    /**
-     * Convert a set of {@link NDArrayWritable}
-     * to their underlying ndarrays
-     *
-     * @param writables the writables to convert
-     * @return the underlying {@link INDArray}
-     */
-    public static INDArray[] fromWritables(Writable[] writables) {
-        INDArray[] ret = new INDArray[writables.length];
-        for (int i = 0; i < ret.length; i++) {
-            NDArrayWritable ndArrayWritable = (NDArrayWritable) writables[i];
-            ret[i] = ndArrayWritable.get();
-        }
-
-        return ret;
     }
 
     /**

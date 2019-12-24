@@ -20,33 +20,83 @@ package ai.konduit.serving.util;
 import ai.konduit.serving.config.SchemaType;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  *
+ * Contains utilities for dealing with {@link JsonObject}
+ * and serializing/de serializing result numpy arrays.
+ *
+ * @author Adam Gibson
  */
 public class JsonSerdeUtils {
 
 
     /**
-     *
-     * @param schemaWithValues
-     * @param fieldName
-     * @return
+     * De serialize a base 64 numpy array.
+     * @param schemaWithValues a json object in the form of:
+     *                         {"values : {"fieldName": base64 string}}
+     * @param fieldName the field name of the numpy array to de serialize
+     * @return the de serialized numpy array using {@link Nd4j#createNpyFromByteArray(byte[])}
      */
     public static INDArray deSerializeBase64Numpy(JsonObject schemaWithValues,String fieldName) {
         byte[] numpyValue  = schemaWithValues.getJsonObject("values").getBinary(fieldName);
         return Nd4j.createNpyFromByteArray(numpyValue);
     }
 
+    /**
+     * De serializes a schema using the
+     * {@link JsonObject} methods
+     * where schemaValues is just a set of field name -> json value
+     * @param schemaValues the values of the schema
+     * @param schemaTypes the schema types
+     * @return a map of de serialized objects
+     */
     public static Map<String,Object> deSerializeSchemaValues(JsonObject schemaValues, Map<String, SchemaType> schemaTypes) {
-        return null;
+        Preconditions.checkState(schemaValues.fieldNames().equals(schemaTypes.keySet()),"Schema value key names are not the same as the schema types!");
+        Map<String,Object> ret = new LinkedHashMap<>();
+        for(String fieldName : schemaValues.fieldNames()) {
+            SchemaType schemaType = schemaTypes.get(fieldName);
+            switch (schemaType) {
+                case NDArray:
+                    INDArray arr = Nd4j.createNpyFromByteArray(schemaValues.getBinary(fieldName));
+                    ret.put(fieldName,arr);
+                    break;
+                case Boolean:
+                    ret.put(fieldName,schemaValues.getBoolean(fieldName));
+                    break;
+                case Long:
+                    ret.put(fieldName,schemaValues.getLong(fieldName));
+                    break;
+                case Float:
+                    ret.put(fieldName,schemaValues.getFloat(fieldName));
+                    break;
+                case Image:
+                case Bytes:
+                    ret.put(fieldName,schemaValues.getBinary(fieldName));
+                    break;
+                case Integer:
+                    ret.put(fieldName,schemaValues.getInteger(fieldName));
+                    break;
+                case Double:
+                    ret.put(fieldName,schemaValues.getDouble(fieldName));
+                    break;
+                case Time:
+                    ret.put(fieldName,schemaValues.getInstant(fieldName));
+                    break;
+                case String:
+                case Categorical:
+                    ret.put(fieldName,schemaValues.getString(fieldName));
+                    break;
+
+            }
+        }
+
+        return ret;
     }
 
     /**

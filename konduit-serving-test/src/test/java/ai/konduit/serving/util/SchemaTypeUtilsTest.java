@@ -154,7 +154,6 @@ public class SchemaTypeUtilsTest {
 
     @Test
     public void testToSchema() {
-        // Setup
         SchemaType[] values = SchemaType.values();
         Schema.Builder schemaBuilder = new Schema.Builder();
 
