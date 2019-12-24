@@ -70,11 +70,13 @@ if __name__ == "__main__":
     ]
 
     if "arm" in args.os:
-        command.append("-Dchip=arm")
+        arch = "arm"
     elif "gpu" in args.os:
-        command.append("-Dchip=gpu")
+        arch = "gpu"
     else:
-        command.append("-Dchip=cpu")
+        arch = "cpu"
+
+    command.append("-Dchip={}".format(arch))
 
     if strtobool(args.usePython):
         command.append("-Ppython")
@@ -83,7 +85,7 @@ if __name__ == "__main__":
 
     with open(os.path.join(args.source, "pom.xml"), "r") as pom:
         content = pom.read()
-        regex = r"<version>(\d+.\d+.\d+)</version>"
+        regex = r"<version>(\d+.\d+.\d+\S*)</version>"
         version = re.findall(regex, content)
 
     print("Running command: " + " ".join(command))
@@ -95,7 +97,7 @@ if __name__ == "__main__":
             args.source,
             "konduit-serving-uberjar",
             "target",
-            "konduit-serving-uberjar-{}-bin.jar".format(version[0]),
+            "konduit-serving-uberjar-{}-custom-{}-{}.jar".format(version[0], args.os, arch),
         ),
         os.path.join(args.source, args.target),
     )
