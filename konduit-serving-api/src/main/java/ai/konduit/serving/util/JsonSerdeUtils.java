@@ -20,6 +20,9 @@ package ai.konduit.serving.util;
 import ai.konduit.serving.config.SchemaType;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.datavec.api.records.Record;
+import org.datavec.api.writable.*;
+import org.datavec.image.data.ImageWritable;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -46,6 +49,118 @@ public class JsonSerdeUtils {
     public static INDArray deSerializeBase64Numpy(JsonObject schemaWithValues,String fieldName) {
         byte[] numpyValue  = schemaWithValues.getJsonObject("values").getBinary(fieldName);
         return Nd4j.createNpyFromByteArray(numpyValue);
+    }
+
+
+    /**
+     * Convert a {@link Record} array to a
+     * named dictionary
+     * @param records the records to convert
+     * @param names the list of the names of each record to convert
+     * @return
+     */
+    public static JsonObject convertRecords(Record[] records,List<String> names) {
+        JsonObject jsonObject = new JsonObject();
+        for(int i = 0; i < records.length; i++) {
+            JsonArray array = new JsonArray();
+            for(Writable writable : records[i].getRecord()) {
+                switch(writable.getType()) {
+                    case Long:
+                        array.add(writable.toLong());
+                        break;
+                    case Boolean:
+                        BooleanWritable booleanWritable = (BooleanWritable) writable;
+                        array.add(booleanWritable.get());
+                        break;
+                    case Double:
+                        array.add(writable.toDouble());
+                        break;
+                    case NDArray:
+                        NDArrayWritable ndArrayWritable = (NDArrayWritable) writable;
+                        array.add(Nd4j.toNpyByteArray(ndArrayWritable.get()));
+                        break;
+                    case Int:
+                        array.add(writable.toInt());
+                        break;
+                    case Text:
+                        array.add(writable.toString());
+                        break;
+                    case Float:
+                        array.add(writable.toFloat());
+                        break;
+                    case Arrow:
+                        break;
+                    case Bytes:
+                        BytesWritable bytesWritable = (BytesWritable) writable;
+                        array.add(bytesWritable.getContent());
+                        break;
+                    case Image:
+                        break;
+                }
+
+
+            }
+
+            jsonObject.put(names.get(i),array);
+
+        }
+
+        return jsonObject;
+    }
+
+    /**
+     *
+     * @param jsonDeSerializedValues
+     * @param schemaTypes
+     * @return
+     */
+    public static Record toRecord(Map<String,Object> jsonDeSerializedValues, Map<String,SchemaType> schemaTypes) {
+        List<Writable> record = new ArrayList<>();
+        for(Map.Entry<String,Object> entry : jsonDeSerializedValues.entrySet()) {
+            switch(schemaTypes.get(entry.getKey())) {
+                case NDArray:
+                    INDArray arr = (INDArray) jsonDeSerializedValues.get(entry.getKey());
+                    record.add(new NDArrayWritable(arr));
+                    break;
+                case Image:
+                    ImageWritable imageWritable = new ImageWritable();
+                    record.add(imageWritable);
+                    break;
+                case Time:
+                    break;
+                case Boolean:
+                    Boolean bool = (Boolean) jsonDeSerializedValues.get(entry.getKey());
+                    record.add(new BooleanWritable(bool));
+                    break;
+                case Long:
+                    Long l = (Long) jsonDeSerializedValues.get(entry.getKey());
+                    record.add(new LongWritable(l));
+                    break;
+                case Integer:
+                    Integer integer = (Integer) jsonDeSerializedValues.get(entry.getKey());
+                    record.add(new IntWritable(integer));
+                    break;
+                case Bytes:
+                    byte[] data = (byte[]) jsonDeSerializedValues.get(entry.getKey());
+                    record.add(new BytesWritable(data));
+                    break;
+                case Double:
+                    Double d = (Double) jsonDeSerializedValues.get(entry.getKey());
+                    record.add(new DoubleWritable(d));
+                    break;
+                case Float:
+                    Float f = (Float) jsonDeSerializedValues.get(entry.getKey());
+                    record.add(new FloatWritable(f));
+                    break;
+                case String:
+                case Categorical:
+                    Text text = (Text) jsonDeSerializedValues.get(entry.getKey());
+                    record.add(text);
+                    break;
+            }
+        }
+
+        return new org.datavec.api.records.impl.Record(record,null);
     }
 
     /**

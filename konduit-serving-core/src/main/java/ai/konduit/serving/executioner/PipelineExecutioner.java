@@ -26,9 +26,11 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.DataFormat;
 import ai.konduit.serving.config.Output.PredictionType;
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.model.ModelConfig;
+import ai.konduit.serving.util.JsonSerdeUtils;
 import org.nd4j.tensorflow.conversion.TensorDataType;
 import ai.konduit.serving.model.TensorDataTypesConfig;
 import ai.konduit.serving.output.adapter.*;
@@ -439,41 +441,17 @@ public class PipelineExecutioner {
             JsonObject schemaJson = schema.getJsonObject(key);
             Schema schema1 = SchemaTypeUtils.schemaFromDynamicSchemaDefinition(schemaJson);
             schemas.put(key,SchemaTypeUtils.schemaFromDynamicSchemaDefinition(schemaJson));
-            JsonArray jsonArray = values.getJsonArray(key);
-            ArrowWritableRecordBatch convert = null;
-            try {
-                convert = mapConverter.convert(schema1, jsonArray, null);
-            } catch (Exception e) {
-                log.error("Error performing conversion", e);
-                throw e;
-            }
-
-            Preconditions.checkNotNull(convert, "Conversion was null!");
-            pipelineInput[count] = new ArrowRecord(convert, count, null);
+            JsonObject valuesJsonObject = values.getJsonObject(key);
+            Map<String, SchemaType> schemaTypeMap = SchemaTypeUtils.typeMappingsForSchema(schema1);
+            Map<String,Object> deSerializedValues = JsonSerdeUtils.deSerializeSchemaValues(valuesJsonObject,schemaTypeMap);
+            Record record = JsonSerdeUtils.toRecord(deSerializedValues,schemaTypeMap);
+            pipelineInput[count] = record;
             count++;
         }
 
 
         Record[] records = pipeline.doPipeline(pipelineInput);
-        JsonObject outputSchemaJson = jsonBody.getJsonObject("outputSchema");
-        JsonObject writeJson = new JsonObject();
-        int recordIdx = 0;
-        for(String outputName : outputSchemaJson.fieldNames()) {
-            Text text = (Text) records[0].getRecord().get(recordIdx);
-
-            if (text.toString().charAt(0) == '{') {
-                JsonObject jsonObject1 = new JsonObject(text.toString());
-                writeJson.put(outputName, jsonObject1);
-            } else if (text.toString().charAt(0) == '[') {
-                JsonArray jsonObject = new JsonArray(text.toString());
-                writeJson.put(outputName, jsonObject);
-            } else {
-                writeJson.put(outputName, text.toString());
-            }
-
-            recordIdx++;
-        }
-
+        JsonObject writeJson = JsonSerdeUtils.convertRecords(records,outputNames());
         String write = writeJson.encodePrettily();
         ctx.response().putHeader("Content-Type", "application/json");
         ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
