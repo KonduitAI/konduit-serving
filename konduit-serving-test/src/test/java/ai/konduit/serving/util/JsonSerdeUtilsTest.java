@@ -21,15 +21,17 @@ import ai.konduit.serving.config.SchemaType;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
-import org.datavec.api.writable.*;
+import org.datavec.api.writable.BooleanWritable;
+import org.datavec.api.writable.BytesWritable;
+import org.datavec.api.writable.NDArrayWritable;
+import org.datavec.api.writable.Writable;
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
@@ -142,6 +144,7 @@ public class JsonSerdeUtilsTest {
         JsonObject schemaValues = new JsonObject();
         JsonObject jsonSchema = new JsonObject();
         SchemaType[] values = SchemaType.values();
+        List<String> fieldNames = Arrays.stream(values).map(input -> input.name()).collect(Collectors.toList());
         for (SchemaType value : values) {
             JsonObject fieldInfo = new JsonObject();
             JsonObject topLevel = new JsonObject();
@@ -190,47 +193,64 @@ public class JsonSerdeUtilsTest {
             }
 
 
-            // Run the test
-            final Record result = JsonSerdeUtils.createRecordFromJson(schemaValues, jsonSchema);
-            for(int i = 0; i < result.getRecord().size(); i++) {
-                Writable writable = (Writable) result.getRecord().get(i);
-                SchemaType schemaType = values[i];
-                switch(schemaType) {
-                    case NDArray:
-                        NDArrayWritable ndArrayWritable = (NDArrayWritable) writable;
-                        assertEquals(Nd4j.scalar(1.0),ndArrayWritable.get());
-                        break;
-                    case Long:
-                        assertEquals(1L,writable.toLong());
-                        break;
-                    case Image:
-                        break;
-                    case Integer:
-                        assertEquals(1,writable.toInt());
-                        break;
-                    case Float:
-                        assertEquals(1.0f,writable.toFloat(),1e-3);
-                        break;
-                    case Double:
-                        assertEquals(1.0d,writable.toDouble(),1e-3);
-                        break;
-                    case String:
-                        assertEquals("1.0",writable.toString());
-                        break;
-                    case Categorical:
-                        assertEquals("cat",writable.toString());
-                        break;
-                    case Bytes:
-                        BytesWritable bytesWritable = (BytesWritable) writable;
-                        byte[] content = bytesWritable.getContent();
-                        assertArrayEquals(new byte[]{1, 0},content);
-                        break;
-                    case Boolean:
-                        BooleanWritable booleanWritable = (BooleanWritable) writable;
-                        assertTrue(booleanWritable.get());
-                        break;
-                }
+
+        }
+
+        // Run the test
+        final Record result = JsonSerdeUtils.createRecordFromJson(schemaValues, jsonSchema);
+        for(int i = 0; i < result.getRecord().size(); i++) {
+            Writable writable = result.getRecord().get(i);
+            SchemaType schemaType = values[i];
+            switch(schemaType) {
+                case NDArray:
+                    NDArrayWritable ndArrayWritable = (NDArrayWritable) writable;
+                    assertEquals(Nd4j.scalar(1.0),ndArrayWritable.get());
+                    break;
+                case Long:
+                    assertEquals(1L,writable.toLong());
+                    break;
+                case Image:
+                    break;
+                case Integer:
+                    assertEquals(1,writable.toInt());
+                    break;
+                case Float:
+                    assertEquals(1.0f,writable.toFloat(),1e-3);
+                    break;
+                case Double:
+                    assertEquals(1.0d,writable.toDouble(),1e-3);
+                    break;
+                case String:
+                    assertEquals("1.0",writable.toString());
+                    break;
+                case Categorical:
+                    assertEquals("cat",writable.toString());
+                    break;
+                case Bytes:
+                    BytesWritable bytesWritable = (BytesWritable) writable;
+                    byte[] content = bytesWritable.getContent();
+                    assertArrayEquals(new byte[]{1, 0},content);
+                    break;
+                case Boolean:
+                    BooleanWritable booleanWritable = (BooleanWritable) writable;
+                    assertTrue(booleanWritable.get());
+                    break;
             }
         }
+
+
+        final List<String> names = Arrays.asList("name1","name2");
+        final Record[] records = new Record[]{result,result};
+        final JsonObject resultTest = JsonSerdeUtils.convertRecords(records, names);
+        assertEquals(names.size(),resultTest.size());
+        assertEquals(new HashSet<>(names),resultTest.fieldNames());
+        for(String name : names) {
+            JsonArray conversion = resultTest.getJsonArray(name);
+            assertEquals(result.getRecord().size(),conversion.size());
+            JsonObject mapped = JsonSerdeUtils.convertArray(conversion,fieldNames);
+            assertEquals(schemaValues,mapped);
+
+        }
     }
+
 }

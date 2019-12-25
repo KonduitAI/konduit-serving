@@ -432,7 +432,7 @@ public class PipelineExecutioner {
         JsonObject jsonBody = ctx.getBodyAsJson();
         JsonObject schema = jsonBody.getJsonObject("schema");
         JsonObject values = jsonBody.getJsonObject("values");
-
+        Preconditions.checkState(schema.fieldNames().equals(values.fieldNames()),"Schema and Values must be the same field names!");
         Record[] pipelineInput = new Record[schema.fieldNames().size()];
         int count = 0;
         for(String key : schema.fieldNames()) {

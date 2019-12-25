@@ -55,6 +55,23 @@ public class JsonSerdeUtils {
 
 
     /**
+     * Converts a {@link JsonArray}
+     * to a {@link JsonObject} to a named json object
+     * @param jsonArray the json array to convert
+     * @param namesToConvert the names of each value by index (order matters)
+     * @return the converted json object
+     */
+    public static JsonObject convertArray(JsonArray jsonArray,List<String> namesToConvert) {
+        Preconditions.checkState(jsonArray.size() == namesToConvert.size(),"The sizes of the json array and the input names for mapping should be the same.");
+        JsonObject ret = new JsonObject();
+        for(int i = 0; i < jsonArray.size(); i++) {
+            ret.put(namesToConvert.get(i),jsonArray.getValue(i));
+        }
+
+        return ret;
+    }
+
+    /**
      * Convert a {@link Record} array to a
      * named dictionary
      * @param records the records to convert
