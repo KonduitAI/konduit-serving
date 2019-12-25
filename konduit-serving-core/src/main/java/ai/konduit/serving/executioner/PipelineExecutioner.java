@@ -26,7 +26,6 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.DataFormat;
 import ai.konduit.serving.config.Output.PredictionType;
-import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.model.ModelConfig;
@@ -434,17 +433,12 @@ public class PipelineExecutioner {
         JsonObject schema = jsonBody.getJsonObject("schema");
         JsonObject values = jsonBody.getJsonObject("values");
 
-        Map<String, Schema> schemas = new LinkedHashMap<>();
         Record[] pipelineInput = new Record[schema.fieldNames().size()];
         int count = 0;
         for(String key : schema.fieldNames()) {
             JsonObject schemaJson = schema.getJsonObject(key);
-            Schema schema1 = SchemaTypeUtils.schemaFromDynamicSchemaDefinition(schemaJson);
-            schemas.put(key,SchemaTypeUtils.schemaFromDynamicSchemaDefinition(schemaJson));
-            JsonObject valuesJsonObject = values.getJsonObject(key);
-            Map<String, SchemaType> schemaTypeMap = SchemaTypeUtils.typeMappingsForSchema(schema1);
-            Map<String,Object> deSerializedValues = JsonSerdeUtils.deSerializeSchemaValues(valuesJsonObject,schemaTypeMap);
-            Record record = JsonSerdeUtils.toRecord(deSerializedValues,schemaTypeMap);
+            JsonObject recordAsJson = values.getJsonObject(key);
+            Record record = JsonSerdeUtils.createRecordFromJson(recordAsJson, schemaJson);
             pipelineInput[count] = record;
             count++;
         }

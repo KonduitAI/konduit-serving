@@ -21,12 +21,14 @@ import ai.konduit.serving.config.SchemaType;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
+import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.*;
 import org.datavec.image.data.ImageWritable;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -89,13 +91,14 @@ public class JsonSerdeUtils {
                         array.add(writable.toFloat());
                         break;
                     case Arrow:
-                        break;
+                        throw new UnsupportedOperationException("Arrow is an unsupported writable type.");
                     case Bytes:
                         BytesWritable bytesWritable = (BytesWritable) writable;
                         array.add(bytesWritable.getContent());
                         break;
                     case Image:
-                        break;
+                        throw new UnsupportedOperationException("Image is an unsupported writable type.");
+
                 }
 
 
@@ -123,10 +126,10 @@ public class JsonSerdeUtils {
                     record.add(new NDArrayWritable(arr));
                     break;
                 case Image:
-                    ImageWritable imageWritable = new ImageWritable();
-                    record.add(imageWritable);
-                    break;
+                    throw new UnsupportedOperationException("Image is an unsupported type!");
                 case Time:
+                    Instant instant = (Instant) jsonDeSerializedValues.get(entry.getKey());
+                    record.add(new Text(instant.toString()));
                     break;
                 case Boolean:
                     Boolean bool = (Boolean) jsonDeSerializedValues.get(entry.getKey());
@@ -154,8 +157,8 @@ public class JsonSerdeUtils {
                     break;
                 case String:
                 case Categorical:
-                    Text text = (Text) jsonDeSerializedValues.get(entry.getKey());
-                    record.add(text);
+                    String text = (String) jsonDeSerializedValues.get(entry.getKey());
+                    record.add(new Text(text));
                     break;
             }
         }
@@ -261,5 +264,24 @@ public class JsonSerdeUtils {
         }
 
         return ndArray;
+    }
+
+    /**
+     * Convert a json object to a {@link Record}
+     * by dynamically creating the record based on the passed in
+     * schema json.
+     * See {@link SchemaTypeUtils#schemaFromDynamicSchemaDefinition(JsonObject)}
+     * for more information about the format.
+     * @param jsonRecord the input json record
+     * @param schemaJson the json to convert to a {@link Schema} using
+     *                   {@link SchemaTypeUtils#schemaFromDynamicSchemaDefinition(JsonObject)}
+     *                   and {@link SchemaTypeUtils#typeMappingsForSchema(Schema)}
+     * @return
+     */
+    public static Record createRecordFromJson(JsonObject jsonRecord, JsonObject schemaJson) {
+        Schema schema1 = SchemaTypeUtils.schemaFromDynamicSchemaDefinition(schemaJson);
+        Map<String, SchemaType> schemaTypeMap = SchemaTypeUtils.typeMappingsForSchema(schema1);
+        Map<String,Object> deSerializedValues = deSerializeSchemaValues(jsonRecord,schemaTypeMap);
+        return toRecord(deSerializedValues,schemaTypeMap);
     }
 }
