@@ -27,7 +27,7 @@
     <parent>
         <artifactId>konduit-serving</artifactId>
         <groupId>ai.konduit.serving</groupId>
-        <version>1.2.1</version>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -193,17 +193,6 @@
         <dependency>
             <groupId>org.datavec</groupId>
             <artifactId>datavec-api</artifactId>
-            <version>${datavec.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.datavec</groupId>
-            <artifactId>datavec-python</artifactId>
             <version>${datavec.version}</version>
             <exclusions>
                 <exclusion>
