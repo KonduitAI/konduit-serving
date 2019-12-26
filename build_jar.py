@@ -41,9 +41,9 @@ if __name__ == "__main__":
             "pmml", 
             "all"
         ], 
-        help = "whether to bundle Python, PMML, both or neither. Python bundling is\
-         not encouraged with ARM, and PMML bundling is not encouraged if agpl \
-         license is an issue."
+        help = "whether to bundle Python, PMML, both or neither. Python bundling is" + 
+         "not encouraged with ARM, and PMML bundling is not encouraged if agpl" + 
+         "license is an issue."
     )
 
     parser.add_argument(
@@ -77,6 +77,11 @@ if __name__ == "__main__":
         arch = "cpu"
 
     command.append("-Dchip={}".format(arch))
+
+    if args.spin == "all" or args.spin == "python":
+        command.append("-Ppython")
+    if args.spin == "all" or args.spin == "pmml":
+        command.append("-Ppmml")
 
     command.append("-Dspin.version={}".format(args.spin))
 
