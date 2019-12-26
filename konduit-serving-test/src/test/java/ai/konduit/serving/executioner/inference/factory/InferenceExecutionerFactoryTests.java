@@ -110,9 +110,7 @@ public class InferenceExecutionerFactoryTests {
         assertNotNull(computationGraphInferenceExecutioner);
         assertNotNull(computationGraphInferenceExecutioner.model());
         assertNotNull(computationGraphInferenceExecutioner.modelLoader());
-
     }
-
 
     @Test
     public void testSameDiff() throws Exception {
@@ -130,7 +128,6 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfig(tensorFlowConfig)
                 .build();
 
-
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = tensorflowInferenceExecutionerFactory.create(modelPipelineStep);
         InferenceExecutioner inferenceExecutioner = initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(inferenceExecutioner);
@@ -138,7 +135,6 @@ public class InferenceExecutionerFactoryTests {
         SameDiffInferenceExecutioner tensorflowInferenceExecutioner = (SameDiffInferenceExecutioner) inferenceExecutioner;
         assertNotNull(tensorflowInferenceExecutioner.model());
         assertNotNull(tensorflowInferenceExecutioner.modelLoader());
-
     }
 
     @Test
@@ -168,7 +164,6 @@ public class InferenceExecutionerFactoryTests {
         assertNotNull(computationGraphInferenceExecutioner);
         assertNotNull(computationGraphInferenceExecutioner.model());
         assertNotNull(computationGraphInferenceExecutioner.modelLoader());
-
     }
 
     @Test
@@ -180,10 +175,6 @@ public class InferenceExecutionerFactoryTests {
         ModelSerializer.writeModel(save, tmpZip, true);
         ModelConfig modelConfig = ModelConfig.builder()
                 .modelConfigType(ModelConfigType.computationGraph(tmpZip.getAbsolutePath()))
-                .build();
-
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(1139)
                 .build();
 
         ModelStep modelPipelineStep = ModelStep.builder()
@@ -198,8 +189,6 @@ public class InferenceExecutionerFactoryTests {
         assertNotNull(computationGraphInferenceExecutioner);
         assertNotNull(computationGraphInferenceExecutioner.model());
         assertNotNull(computationGraphInferenceExecutioner.modelLoader());
-
-
     }
 
 }

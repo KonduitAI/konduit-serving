@@ -89,7 +89,7 @@
         <micrometer.version>1.2.0</micrometer.version>
         <netty.version>4.1.42.Final</netty.version>
         <arrow.version>0.15.1</arrow.version>
-        <dl4j.version>1.0.0-beta6</dl4j.version>
+        <dl4j.version>1.0.0-SNAPSHOT</dl4j.version>
         <datavec.version>${dl4j.version}</datavec.version>
         <nd4j.version>${dl4j.version}</nd4j.version>
         <slf4j.version>1.7.26</slf4j.version>
