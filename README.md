@@ -48,7 +48,7 @@
 ## Overview
 
 Konduit Serving is a serving system and framework focused on deploying machine learning
-konduit-serving to production. The core abstraction is an idea called a "pipeline step".
+pipelines to production. The core abstraction is an idea called a "pipeline step".
 An individual step is meant to perform a task as part of using a machine learning
 model in a deployment scenario. These steps generally include:
 
