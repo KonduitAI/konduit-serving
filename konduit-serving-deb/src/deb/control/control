@@ -6,4 +6,5 @@ Architecture: all
 Maintainer: KonduitAI <info@konduit.ai>
 Description: Konduit Serving Package
 Distribution: development
-Depends: git
+Depends: curl, git
+Recommends: openjdk-8-jdk
