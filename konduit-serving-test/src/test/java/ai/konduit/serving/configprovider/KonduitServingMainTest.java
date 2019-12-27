@@ -33,11 +33,11 @@ import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.json.JsonObject;
+import net.jodah.concurrentunit.Waiter;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -48,7 +48,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.charset.Charset;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KonduitServingMainTest {
 
@@ -60,11 +59,8 @@ public class KonduitServingMainTest {
      */
     public static int getAvailablePort() {
         try {
-            ServerSocket socket = new ServerSocket(0);
-            try {
+            try (ServerSocket socket = new ServerSocket(0)) {
                 return socket.getLocalPort();
-            } finally {
-                socket.close();
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot find available port: " + e.getMessage(), e);
@@ -73,7 +69,8 @@ public class KonduitServingMainTest {
 
     @Test
     public void testFile() throws Exception {
-        KonduitServingMain konduitServingMain = new KonduitServingMain();
+        final Waiter waiter = new Waiter();
+
         JsonObject config = getConfig();
         File jsonConfigPath = folder.newFile("config.json");
         FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
@@ -85,20 +82,22 @@ public class KonduitServingMainTest {
                 .verticleClassName(InferenceVerticle.class.getName())
                 .configPath(jsonConfigPath.getAbsolutePath())
                 .build();
-        konduitServingMain.runMain(args.toArgs());
+        KonduitServingMain.builder()
+                .onSuccess(waiter::resume)
+                .onFailure(waiter::fail)
+                .build().runMain(args.toArgs());
 
-        Thread.sleep(10000);
+        waiter.await(60000);
     }
 
-    @Test(timeout = 60000)
+    @Test
     public void testOnSuccessHook() throws Exception {
+        final Waiter waiter = new Waiter();
+
         JsonObject config = getConfig();
         File jsonConfigPath = folder.newFile("config.json");
         FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
         int port = getAvailablePort();
-
-        AtomicBoolean onSuccessCalled = new AtomicBoolean(false);
-        AtomicBoolean failTest = new AtomicBoolean(false); // to avoid waiting for the test timeout
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
@@ -108,30 +107,22 @@ public class KonduitServingMainTest {
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(() -> onSuccessCalled.set(true))
-                .onFailure(() -> failTest.set(true))
+                .onSuccess(waiter::resume)
+                .onFailure(() -> waiter.fail("onFailure called instead of onSuccess hook"))
                 .build()
                 .runMain(args.toArgs());
 
-        while(!onSuccessCalled.get()) {
-            if(!failTest.get())
-                Thread.sleep(2000);
-            else {
-                Assert.fail("onFailure called instead of onSuccess hook");
-                break;
-            }
-        }
+        waiter.await(60000);
     }
 
-    @Test(timeout = 60000)
+    @Test
     public void testOnFailureHook() throws Exception {
+        final Waiter waiter = new Waiter();
+
         JsonObject config = getConfig();
         File jsonConfigPath = folder.newFile("config.json");
         FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
         int port = getAvailablePort();
-
-        AtomicBoolean onFailureCalled = new AtomicBoolean(false);
-        AtomicBoolean failTest = new AtomicBoolean(false); // to avoid waiting for the test timeout
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
@@ -141,19 +132,12 @@ public class KonduitServingMainTest {
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(() -> failTest.set(true))
-                .onFailure(() -> onFailureCalled.set(true))
+                .onSuccess(() -> waiter.fail("onSuccess called instead of onFailure hook"))
+                .onFailure(waiter::resume)
                 .build()
                 .runMain(args.toArgs());
 
-        while(!onFailureCalled.get()) {
-            if(!failTest.get())
-                Thread.sleep(2000);
-            else {
-                Assert.fail("onSuccess called instead of onFailure hook");
-                break;
-            }
-        }
+        waiter.await(60000);
     }
 
     public JsonObject getConfig() throws Exception {
@@ -180,7 +164,6 @@ public class KonduitServingMainTest {
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
 
-
         ModelConfig modelConfig = ModelConfig.builder()
                 .modelConfigType(
                         ModelConfigType.builder().modelLoadingPath(modelSave.getAbsolutePath())
@@ -196,7 +179,6 @@ public class KonduitServingMainTest {
                 .modelConfig(modelConfig)
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .build();
-
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
