@@ -46,6 +46,6 @@ public class CustomPipelineStep extends BasePipelineStep<CustomPipelineStep> {
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.step.CustomPipelineStepRunner";
+        return "ai.konduit.serving.pipeline.steps.CustomStepRunner";
     }
 }

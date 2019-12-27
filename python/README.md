@@ -26,17 +26,19 @@ called `konduit`. This helper tool can build the Java dependencies needed for `k
 for you under the hood. All you need to do is run:
 
 ```shell script
-konduit init --os <your-platform>
+konduit init --os <your-platform> --spin <spin>
 ```
 
 where `<your-platform>` is picked from `windows-x86_64`,`linux-x86_64`,`linux-x86_64-gpu`,
 `macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`, depending on your operating system
-and architecture. This tool assumes that you have `git` installed on your system. If you don't want to use the CLI tool and have cloned this repository, you can also build
+and architecture, and <spin> is picked from `minimal`, `python`, `pmml` and `all`. This tool assumes that you have `git` installed on your system. 
+
+If you don't want to use the CLI tool and have cloned this repository, you can also build
 the necessary jar on your own like this:
 
 ```shell script
 cd ..
-python build_jar.py --os <your-platform>
+python build_jar.py --os <your-platform> --spin <spin>
 ```
 
 ## Using Konduit
