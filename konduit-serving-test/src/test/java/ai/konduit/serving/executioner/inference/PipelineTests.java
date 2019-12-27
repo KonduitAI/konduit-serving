@@ -23,9 +23,11 @@
 package ai.konduit.serving.executioner.inference;
 
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.pipeline.step.TransformProcessStep;
-import ai.konduit.serving.pipeline.steps.TransformProcessStepRunner;
+import ai.konduit.serving.pipeline.PmmlInferenceExecutionerStepRunner;
+import ai.konduit.serving.pipeline.step.*;
+import ai.konduit.serving.pipeline.steps.*;
 import ai.konduit.serving.util.SchemaTypeUtils;
+import org.bytedeco.tensorflow.Mod;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.MathOp;
 import org.datavec.api.transform.TransformProcess;
@@ -120,5 +122,29 @@ public class PipelineTests {
 
     }
 
+
+    @Test
+    public void testStepToRunnerMapping() {
+        ArrayConcatenationStep arrayConcatStep = ArrayConcatenationStep.builder().build();
+        assertEquals(ArrayConcatenationStepRunner.class.getName(), arrayConcatStep.pipelineStepClazz());
+
+        CustomPipelineStep customStep = CustomPipelineStep.builder().build();
+        assertEquals(CustomStepRunner.class.getName(), customStep.pipelineStepClazz());
+
+        JsonExpanderTransformStep jsonStep = JsonExpanderTransformStep.builder().build();
+        assertEquals(JsonExpanderTransformStepRunner.class.getName(), jsonStep.pipelineStepClazz());
+
+        TransformProcessStep config = TransformProcessStep.builder().build();
+        assertEquals(TransformProcessStepRunner.class.getName(), config.pipelineStepClazz());
+
+        ModelStep modelStep = ModelStep.builder().build();
+        assertEquals(InferenceExecutionerStepRunner.class.getName(), modelStep.pipelineStepClazz());
+
+        PmmlStep pmmlStep = PmmlStep.builder().build();
+        assertEquals(PmmlInferenceExecutionerStepRunner.class.getName(), pmmlStep.pipelineStepClazz());
+
+        TransformProcessStep tpStep = TransformProcessStep.builder().build();
+        assertEquals(TransformProcessStepRunner.class.getName(), tpStep.pipelineStepClazz());
+    }
 
 }
