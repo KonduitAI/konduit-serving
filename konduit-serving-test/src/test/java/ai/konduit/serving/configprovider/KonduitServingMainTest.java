@@ -59,11 +59,8 @@ public class KonduitServingMainTest {
      */
     public static int getAvailablePort() {
         try {
-            ServerSocket socket = new ServerSocket(0);
-            try {
+            try (ServerSocket socket = new ServerSocket(0)) {
                 return socket.getLocalPort();
-            } finally {
-                socket.close();
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot find available port: " + e.getMessage(), e);
@@ -93,7 +90,7 @@ public class KonduitServingMainTest {
         waiter.await(60000);
     }
 
-    @Test()
+    @Test
     public void testOnSuccessHook() throws Exception {
         final Waiter waiter = new Waiter();
 
@@ -118,7 +115,7 @@ public class KonduitServingMainTest {
         waiter.await(60000);
     }
 
-    @Test()
+    @Test
     public void testOnFailureHook() throws Exception {
         final Waiter waiter = new Waiter();
 
@@ -167,7 +164,6 @@ public class KonduitServingMainTest {
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
 
-
         ModelConfig modelConfig = ModelConfig.builder()
                 .modelConfigType(
                         ModelConfigType.builder().modelLoadingPath(modelSave.getAbsolutePath())
@@ -183,7 +179,6 @@ public class KonduitServingMainTest {
                 .modelConfig(modelConfig)
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .build();
-
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
