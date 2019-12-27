@@ -29,7 +29,7 @@
 
     <groupId>ai.konduit.serving</groupId>
     <artifactId>konduit-serving</artifactId>
-    <version>1.2.1</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -76,14 +76,15 @@
     </scm>
 
     <properties>
+        <spin.version>custom</spin.version>
+        <jna.platform.version>5.3.1</jna.platform.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
         <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
         <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-        <javacpp.platform>${os.name}-${os.arch}</javacpp.platform>
         <logback.version>1.2.3</logback.version>
         <micrometer.version>1.2.0</micrometer.version>
         <netty.version>4.1.42.Final</netty.version>
@@ -132,14 +133,34 @@
         <cuda>10.1</cuda>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
+
+        <commons-lang3.version>3.6</commons-lang3.version>
+        <snakeyaml.version>1.20</snakeyaml.version>
+
+        <oshi.version>3.13.4</oshi.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core</artifactId>
+                <version>${oshi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-json</artifactId>
+                <version>${oshi.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna-platform</artifactId>
                 <version>${jna.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.reactivestreams</groupId>
@@ -179,6 +200,10 @@
                     <exclusion>
                         <groupId>org.nd4j</groupId>
                         <artifactId>nd4j-native</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -226,11 +251,6 @@
                 <groupId>org.bytedeco</groupId>
                 <artifactId>javacpp</artifactId>
                 <version>${javacpp.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.bytedeco</groupId>
-                <artifactId>mkl</artifactId>
-                <version>${mkl.javacpp.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.bytedeco</groupId>
@@ -330,11 +350,6 @@
             </dependency>
             <dependency>
                 <groupId>org.bytedeco</groupId>
-                <artifactId>openblas</artifactId>
-                <version>${openblas.javacpp.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.bytedeco</groupId>
                 <artifactId>numpy</artifactId>
                 <version>${numpy.javacpp.version}</version>
             </dependency>
@@ -405,9 +420,15 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>net.jodah</groupId>
+                <artifactId>concurrentunit</artifactId>
+                <version>0.4.6</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
-                <version>1.18</version>
+                <version>${snakeyaml.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.vertx</groupId>
@@ -575,22 +596,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
             </plugin>
@@ -606,10 +611,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
-                    <configuration>
-                        <forkCount>1.5C</forkCount>
-                        <reuseForks>true</reuseForks>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.projectlombok</groupId>
@@ -731,7 +732,7 @@
             </modules>
         </profile>
         <profile>
-            <id>gpu</id>
+            <id>gpu</id> 
             <activation>
                 <property>
                     <name>chip</name>
@@ -757,6 +758,20 @@
         <profile>
             <id>release</id>
             <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                    </plugin>
+                </plugins>
                 <pluginManagement>
                     <plugins>
                         <plugin>

@@ -22,7 +22,7 @@
 
 <configuration scan="true" scanPeriod="30 seconds">
     <appender name="FILE" class="ch.qos.logback.core.ConsoleAppender">
-        <file>${KONDUIT_SERVING_LOG_DIR:-/var/log/konduit-serving}/${service.type}-${service.id}.log</file>
+        <file>${KONDUIT_SERVING_LOG_DIR:-/var/log/konduit/serving}/${service.type}-${service.id}.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>

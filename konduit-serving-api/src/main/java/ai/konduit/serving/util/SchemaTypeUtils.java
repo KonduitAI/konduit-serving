@@ -36,6 +36,7 @@ import org.datavec.api.transform.schema.Schema.Builder;
 import org.datavec.api.writable.DoubleWritable;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
+import org.datavec.image.data.ImageWritable;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -342,7 +343,7 @@ public class SchemaTypeUtils {
     public static boolean recordsAllArrayType(org.datavec.api.records.Record[] records) {
         for (int i = 0; i < records.length; i++) {
             for (Writable writable : records[i].getRecord()) {
-                if (!(writable instanceof org.datavec.api.writable.NDArrayWritable)) {
+                if (!(writable instanceof NDArrayWritable || writable instanceof ImageWritable)) {
                     return false;
                 }
             }

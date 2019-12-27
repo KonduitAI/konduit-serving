@@ -1,9 +1,9 @@
-Package: [[konduit-serving-server.deb.package.name]]
+Package: [[deb.package.name]]
 Version: [[version]]
 Section: misc
 Priority: optional
 Architecture: all
-Maintainer: Skymind <help@skymind.ai>
+Maintainer: KonduitAI <info@konduit.ai>
 Description: Konduit Serving Package
 Distribution: development
-Depends: openjdk-8-jdk-headless
+Depends: git
