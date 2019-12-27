@@ -117,7 +117,6 @@ public abstract class BaseVerticleTest {
 
     @After
     public void after(TestContext context) {
-        context.asser
         vertx.close(context.asyncAssertSuccess());
         if (httpServer != null)
             httpServer.close();
