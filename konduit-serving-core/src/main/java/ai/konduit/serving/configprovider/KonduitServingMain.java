@@ -28,6 +28,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 import java.util.Arrays;
 
@@ -42,9 +44,13 @@ import static java.lang.System.setProperty;
  *
  * @author Adam Gibson
  */
+@AllArgsConstructor
+@Builder
 public class KonduitServingMain {
 
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
+    private Runnable onSuccess;
+    private Runnable onFailure;
 
     static {
         setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
@@ -89,8 +95,14 @@ public class KonduitServingMain {
                 vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
                     if (handler.failed()) {
                         log.error("Unable to deploy verticle {}", konduitServingNodeConfigurer.getVerticleClassName(), handler.cause());
+                        if(onFailure != null) {
+                            onFailure.run();
+                        }
                     } else {
                         log.info("Deployed verticle {}", konduitServingNodeConfigurer.getVerticleClassName());
+                        if(onSuccess != null) {
+                            onSuccess.run();
+                        }
                     }
                 });
             }

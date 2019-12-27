@@ -23,9 +23,9 @@
 package ai.konduit.serving.configprovider;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
@@ -33,11 +33,14 @@ import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.json.JsonObject;
+import net.jodah.concurrentunit.Waiter;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
 
@@ -48,6 +51,8 @@ import java.nio.charset.Charset;
 
 public class KonduitServingMainTest {
 
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     /**
      * @return single available port number
@@ -67,9 +72,10 @@ public class KonduitServingMainTest {
 
     @Test
     public void testFile() throws Exception {
-        KonduitServingMain konduitServingMain = new KonduitServingMain();
+        final Waiter waiter = new Waiter();
+
         JsonObject config = getConfig();
-        File jsonConfigPath = new File(System.getProperty("java.io.tmpdir"), "config.json");
+        File jsonConfigPath = folder.newFile("config.json");
         FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
         int port = getAvailablePort();
 
@@ -79,14 +85,67 @@ public class KonduitServingMainTest {
                 .verticleClassName(InferenceVerticle.class.getName())
                 .configPath(jsonConfigPath.getAbsolutePath())
                 .build();
-        konduitServingMain.runMain(args.toArgs());
+        KonduitServingMain.builder()
+                .onSuccess(waiter::resume)
+                .onFailure(waiter::fail)
+                .build().runMain(args.toArgs());
 
-        Thread.sleep(10000);
+        waiter.await(60000);
+    }
+
+    @Test()
+    public void testOnSuccessHook() throws Exception {
+        final Waiter waiter = new Waiter();
+
+        JsonObject config = getConfig();
+        File jsonConfigPath = folder.newFile("config.json");
+        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
+        int port = getAvailablePort();
+
+        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
+                .configStoreType("file").ha(false)
+                .multiThreaded(false).configPort(port)
+                .verticleClassName(InferenceVerticle.class.getName())
+                .configPath(jsonConfigPath.getAbsolutePath())
+                .build();
+
+        KonduitServingMain.builder()
+                .onSuccess(waiter::resume)
+                .onFailure(() -> waiter.fail("onFailure called instead of onSuccess hook"))
+                .build()
+                .runMain(args.toArgs());
+
+        waiter.await(60000);
+    }
+
+    @Test()
+    public void testOnFailureHook() throws Exception {
+        final Waiter waiter = new Waiter();
+
+        JsonObject config = getConfig();
+        File jsonConfigPath = folder.newFile("config.json");
+        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
+        int port = getAvailablePort();
+
+        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
+                .configStoreType("file").ha(false)
+                .multiThreaded(false).configPort(port)
+                .verticleClassName(BatchInputParser.class.getName()) // Invalid verticle class name
+                .configPath(jsonConfigPath.getAbsolutePath())
+                .build();
+
+        KonduitServingMain.builder()
+                .onSuccess(() -> waiter.fail("onSuccess called instead of onFailure hook"))
+                .onFailure(waiter::resume)
+                .build()
+                .runMain(args.toArgs());
+
+        waiter.await(60000);
     }
 
     public JsonObject getConfig() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
-        File modelSave = new File(System.getProperty("java.io.tmpdir"), "model.zip");
+        File modelSave = folder.newFile("model.zip");
         ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
 
 
@@ -130,7 +189,6 @@ public class KonduitServingMainTest {
                 .servingConfig(servingConfig)
                 .step(modelPipelineStep)
                 .build();
-
 
         return new JsonObject(inferenceConfiguration.toJson());
     }
