@@ -148,8 +148,8 @@ def python_step_func(
     output_column_names=None,
     output_types=None,
 ):
-    if input_name is None: 
-        raise TypeError("input_name must not be None")
+    if bool(input_name and input_name.strip()): 
+        raise TypeError("input_name must not be None or empty string")
 
     # if nothing else is defined, we can derive all properties just from the Python configuration
     if (
@@ -174,7 +174,6 @@ def python_step_func(
         else:
             output_column_names = list(outputs.keys())
             output_types = [konduit_type_mapping(v) for v in outputs.values()]
-        # if no names are set we default to "default".
 
     self.set_input(
         schema=input_schema,
