@@ -191,9 +191,6 @@ public class JsonSerdeUtilsTest {
                     break;
 
             }
-
-
-
         }
 
         // Run the test

@@ -425,11 +425,14 @@ public class PipelineExecutioner {
 
 
     /**
-     *
-     * @param ctx
+     * Perform json inference using the given {@link JsonObject}
+     *  containing 2 objects: a schema and values
+     *  and if a {@link RoutingContext} is provided, it will also
+     *  write the result as a response
+     * @param jsonBody the input
+     * @param ctx the context
      */
-    public void doJsonInference(RoutingContext ctx) {
-        JsonObject jsonBody = ctx.getBodyAsJson();
+    public void doJsonInference(JsonObject jsonBody,RoutingContext ctx) {
         JsonObject schema = jsonBody.getJsonObject("schema");
         JsonObject values = jsonBody.getJsonObject("values");
         Preconditions.checkState(schema.fieldNames().equals(values.fieldNames()),"Schema and Values must be the same field names!");
@@ -444,12 +447,16 @@ public class PipelineExecutioner {
         }
 
 
+        Preconditions.checkNotNull(pipeline,"Pipeline must not be null!");
         Record[] records = pipeline.doPipeline(pipelineInput);
         JsonObject writeJson = JsonSerdeUtils.convertRecords(records,outputNames());
         String write = writeJson.encodePrettily();
-        ctx.response().putHeader("Content-Type", "application/json");
-        ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
-        ctx.response().end(write);
+        if(ctx != null) {
+            ctx.response().putHeader("Content-Type", "application/json");
+            ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
+            ctx.response().end(write);
+        }
+
     }
 
 

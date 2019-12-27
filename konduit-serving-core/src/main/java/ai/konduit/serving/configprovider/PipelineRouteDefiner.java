@@ -249,7 +249,7 @@ public class PipelineRouteDefiner {
                 .consumes("application/json")
                 .produces("application/json")
                 .handler(ctx -> {
-                    pipelineExecutioner.doJsonInference(ctx);
+                    pipelineExecutioner.doJsonInference(ctx.getBodyAsJson(),ctx);
                 });
 
         /**

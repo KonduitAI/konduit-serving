@@ -43,6 +43,8 @@ import java.util.Map;
 /**
  * PythonStep defines a custom Python {@link PipelineStep}
  * from a {@link PythonConfig}.
+ *
+ * @author Adam Gibson
  */
 @SuperBuilder
 @AllArgsConstructor
@@ -60,10 +62,10 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
     }
 
     /**
-     * Create a PythonConfig Step with default input and output names
-     * from column names, schema types and the actual PythonConfig
+     * Create a {@link PythonConfig} Step with default input and output names
+     * from column names, schema types and the actual {@link PythonConfig}
      *
-     * @param pythonConfig      Konduit PythonConfig
+     * @param pythonConfig      {@link PythonConfig}
      * @param inputColumnNames  input column names
      * @param inputTypes        input schema types
      * @param outputColumnNames output column names

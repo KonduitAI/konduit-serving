@@ -50,6 +50,60 @@ import java.util.*;
  */
 public class SchemaTypeUtils {
 
+    /**
+     * Returns true if the passed in {@link Collection}
+     *  or {@link Map }is null or empty
+     * @param collections the collection to check
+     * @return
+     */
+    public static  boolean allIsNullOrEmpty(Object...collections) {
+        if(collections == null)
+            return true;
+
+        boolean ret = isNullOrEmpty(collections[0]);
+        for(int i = 1; i < collections.length; i++) {
+            ret = ret && isNullOrEmpty(collections[i]);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Returns true if the passed in {@link Collection}
+     *  or {@link Map} is null or empty
+     * @param collections the collection to check
+     * @return
+     */
+    public static  boolean anyIsNullOrEmpty(Object...collections) {
+        if(collections == null)
+            return true;
+
+        boolean ret = isNullOrEmpty(collections[0]);
+        for(int i = 1; i < collections.length; i++) {
+            ret = ret || isNullOrEmpty(collections[i]);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Returns true if the passed in {@link Collection} or
+     * {@link Map}
+     *  is null or empty
+     * @param collection the collection to check* @return
+     */
+    public static  boolean isNullOrEmpty(Object collection) {
+        if(collection instanceof Map) {
+            Map map = (Map) collection;
+            return map == null || map.isEmpty();
+        }
+        else if(collection instanceof Collection) {
+            Collection collection1 = (Collection) collection;
+            return collection1 == null || collection1.isEmpty();
+        }
+        else
+            throw new IllegalArgumentException("Passed in type must be a collection or map");
+    }
 
     /**
      * Create a {@link Schema} from a {@link JsonObject}
