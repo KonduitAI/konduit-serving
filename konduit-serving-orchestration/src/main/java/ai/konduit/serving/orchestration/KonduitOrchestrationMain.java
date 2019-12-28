@@ -89,8 +89,10 @@ public class KonduitOrchestrationMain {
                 if (result.failed()) {
                     log.error("Unable to retrieve configuration " + result.cause());
                 } else {
-                    JsonObject result1 = result.result();
-                    konduitServingNodeConfigurer.configureWithJson(result1);
+                    configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
+
+                    JsonObject json = result.result();
+                    konduitServingNodeConfigurer.configureWithJson(json);
                     konduitServingNodeConfigurer.setVerticleClassName(ClusteredInferenceVerticle.class.getName());
 
 

@@ -49,6 +49,7 @@ public class KonduitOrchestrationMainTest {
         KonduitServingNodeConfigurer configurer = KonduitServingNodeConfigurer.builder()
                 .configPath(tmpFile.getAbsolutePath())
                 .build();
+
         KonduitOrchestrationMain.builder()
                 .onSuccess(() -> {
                     try {
