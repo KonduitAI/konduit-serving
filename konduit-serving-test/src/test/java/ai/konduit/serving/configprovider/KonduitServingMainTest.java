@@ -32,7 +32,6 @@ import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -41,7 +40,8 @@ import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -56,8 +56,25 @@ import java.nio.charset.Charset;
 
 @RunWith(VertxUnitRunner.class)
 public class KonduitServingMainTest {
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+
+    public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
+    public static TemporaryFolder folder = new TemporaryFolder();
+
+    @BeforeClass
+    public static void beforeClass(TestContext testContext) throws Exception {
+        folder.create();
+
+        JsonObject config = getConfig();
+        File jsonConfigPath = folder.newFile("config.json");
+        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
+
+        testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
+    }
+
+    @AfterClass
+    public static void afterClass(TestContext testContext) {
+        folder.delete();
+    }
 
     /**
      * @return single available port number
@@ -73,20 +90,16 @@ public class KonduitServingMainTest {
     }
 
     @Test
-    public void testFile(TestContext testContext) throws Exception {
+    public void testFile(TestContext testContext) {
         Async async = testContext.async();
-
-        JsonObject config = getConfig();
-        File jsonConfigPath = folder.newFile("config.json");
-        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
-        int port = getAvailablePort();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
-                .multiThreaded(false).configPort(port)
+                .multiThreaded(false).configPort(getAvailablePort())
                 .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(jsonConfigPath.getAbsolutePath())
+                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
                 .build();
+
         KonduitServingMain.builder()
                 .onSuccess(async::complete)
                 .onFailure(testContext::fail)
@@ -97,16 +110,11 @@ public class KonduitServingMainTest {
     public void testOnSuccessHook(TestContext testContext) throws Exception {
         Async async = testContext.async();
 
-        JsonObject config = getConfig();
-        File jsonConfigPath = folder.newFile("config.json");
-        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
-        int port = getAvailablePort();
-
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
-                .multiThreaded(false).configPort(port)
+                .multiThreaded(false).configPort(getAvailablePort())
                 .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(jsonConfigPath.getAbsolutePath())
+                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
                 .build();
 
         KonduitServingMain.builder()
@@ -120,16 +128,11 @@ public class KonduitServingMainTest {
     public void testOnFailureHook(TestContext testContext) throws Exception {
         Async async = testContext.async();
 
-        JsonObject config = getConfig();
-        File jsonConfigPath = folder.newFile("config.json");
-        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
-        int port = getAvailablePort();
-
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
-                .multiThreaded(false).configPort(port)
+                .multiThreaded(false).configPort(getAvailablePort())
                 .verticleClassName(BatchInputParser.class.getName()) // Invalid verticle class name
-                .configPath(jsonConfigPath.getAbsolutePath())
+                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
                 .build();
 
         KonduitServingMain.builder()
@@ -139,7 +142,7 @@ public class KonduitServingMainTest {
                 .runMain(args.toArgs());
     }
 
-    public JsonObject getConfig() throws Exception {
+    public static JsonObject getConfig() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
         File modelSave = folder.newFile("model.zip");
         ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
