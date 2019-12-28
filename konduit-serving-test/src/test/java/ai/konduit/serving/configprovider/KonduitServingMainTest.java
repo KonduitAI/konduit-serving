@@ -32,15 +32,20 @@ import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.vertx.core.json.JsonObject;
-import net.jodah.concurrentunit.Waiter;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
 
@@ -49,8 +54,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.charset.Charset;
 
+@RunWith(VertxUnitRunner.class)
 public class KonduitServingMainTest {
-
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
@@ -68,8 +73,8 @@ public class KonduitServingMainTest {
     }
 
     @Test
-    public void testFile() throws Exception {
-        final Waiter waiter = new Waiter();
+    public void testFile(TestContext testContext) throws Exception {
+        Async async = testContext.async();
 
         JsonObject config = getConfig();
         File jsonConfigPath = folder.newFile("config.json");
@@ -83,16 +88,14 @@ public class KonduitServingMainTest {
                 .configPath(jsonConfigPath.getAbsolutePath())
                 .build();
         KonduitServingMain.builder()
-                .onSuccess(waiter::resume)
-                .onFailure(waiter::fail)
+                .onSuccess(async::complete)
+                .onFailure(testContext::fail)
                 .build().runMain(args.toArgs());
-
-        waiter.await(60000);
     }
 
     @Test
-    public void testOnSuccessHook() throws Exception {
-        final Waiter waiter = new Waiter();
+    public void testOnSuccessHook(TestContext testContext) throws Exception {
+        Async async = testContext.async();
 
         JsonObject config = getConfig();
         File jsonConfigPath = folder.newFile("config.json");
@@ -107,17 +110,15 @@ public class KonduitServingMainTest {
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(waiter::resume)
-                .onFailure(() -> waiter.fail("onFailure called instead of onSuccess hook"))
+                .onSuccess(async::complete)
+                .onFailure(() -> testContext.fail("onFailure called instead of onSuccess hook"))
                 .build()
                 .runMain(args.toArgs());
-
-        waiter.await(60000);
     }
 
     @Test
-    public void testOnFailureHook() throws Exception {
-        final Waiter waiter = new Waiter();
+    public void testOnFailureHook(TestContext testContext) throws Exception {
+        Async async = testContext.async();
 
         JsonObject config = getConfig();
         File jsonConfigPath = folder.newFile("config.json");
@@ -132,19 +133,16 @@ public class KonduitServingMainTest {
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(() -> waiter.fail("onSuccess called instead of onFailure hook"))
-                .onFailure(waiter::resume)
+                .onSuccess(() -> testContext.fail("onSuccess called instead of onFailure hook"))
+                .onFailure(async::complete)
                 .build()
                 .runMain(args.toArgs());
-
-        waiter.await(60000);
     }
 
     public JsonObject getConfig() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
         File modelSave = folder.newFile("model.zip");
         ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
-
 
         Schema.Builder schemaBuilder = new Schema.Builder();
         schemaBuilder.addColumnDouble("petal_length")
