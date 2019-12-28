@@ -25,8 +25,8 @@ public class KonduitOrchestrationMainTest {
     public void testClusterRun(TestContext testContext) throws Exception {
         Async async = testContext.async();
 
-        HazelcastInstance hzInstance = Hazelcast.newHazelcastInstance();
-        Thread.sleep(10000);
+        //HazelcastInstance hzInstance = Hazelcast.newHazelcastInstance();
+        //Thread.sleep(10000);
 
         int port = getRandomPort();
 

@@ -35,14 +35,13 @@ import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
@@ -57,22 +56,20 @@ import java.nio.charset.Charset;
 public class KonduitServingMainTest {
 
     public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
+
+    @Rule
+    public Timeout rule = Timeout.seconds(60);
+
+    @ClassRule
     public static TemporaryFolder folder = new TemporaryFolder();
 
     @BeforeClass
     public static void beforeClass(TestContext testContext) throws Exception {
-        folder.create();
-
         JsonObject config = getConfig();
         File jsonConfigPath = folder.newFile("config.json");
         FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
 
         testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
-    }
-
-    @AfterClass
-    public static void afterClass(TestContext testContext) {
-        folder.delete();
     }
 
     /**
@@ -89,9 +86,8 @@ public class KonduitServingMainTest {
     }
 
     @Test
-    public void testOnSuccessHook(TestContext testContext) throws Exception {
+    public void testOnSuccessHook(TestContext testContext) {
         Async async = testContext.async();
-
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
                 .multiThreaded(false).configPort(getAvailablePort())
@@ -107,7 +103,7 @@ public class KonduitServingMainTest {
     }
 
     @Test
-    public void testOnFailureHook(TestContext testContext) throws Exception {
+    public void testOnFailureHook(TestContext testContext) {
         Async async = testContext.async();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
