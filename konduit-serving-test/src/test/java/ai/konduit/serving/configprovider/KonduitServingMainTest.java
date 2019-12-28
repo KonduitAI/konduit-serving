@@ -42,7 +42,6 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
@@ -87,23 +86,6 @@ public class KonduitServingMainTest {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot find available port: " + e.getMessage(), e);
         }
-    }
-
-    @Test
-    public void testFile(TestContext testContext) {
-        Async async = testContext.async();
-
-        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                .configStoreType("file").ha(false)
-                .multiThreaded(false).configPort(getAvailablePort())
-                .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
-                .build();
-
-        KonduitServingMain.builder()
-                .onSuccess(async::complete)
-                .onFailure(testContext::fail)
-                .build().runMain(args.toArgs());
     }
 
     @Test
