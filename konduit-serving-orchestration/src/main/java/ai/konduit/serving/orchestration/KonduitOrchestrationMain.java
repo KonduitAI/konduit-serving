@@ -95,7 +95,6 @@ public class KonduitOrchestrationMain {
                     konduitServingNodeConfigurer.configureWithJson(json);
                     konduitServingNodeConfigurer.setVerticleClassName(ClusteredInferenceVerticle.class.getName());
 
-
                     vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
                         if (handler.failed()) {
                             log.error("Unable to deploy verticle {}", konduitServingNodeConfigurer.getVerticleClassName(), handler.cause());
@@ -129,12 +128,10 @@ public class KonduitOrchestrationMain {
                             }
                         }
                     });
-
                 }
             });
         });
     }
-
 
     private void registerHandler() {
         MessageConsumer<JsonObject> messageConsumer = eventBus.consumer(NODE_COMMUNICATION_TOPIC);
@@ -154,7 +151,6 @@ public class KonduitOrchestrationMain {
         });
     }
 
-
     public void runMain(String... args) {
         log.debug("Parsing args " + java.util.Arrays.toString(args));
         KonduitServingNodeConfigurer konduitServingNodeConfigurer = new KonduitServingNodeConfigurer();
@@ -162,5 +158,4 @@ public class KonduitOrchestrationMain {
         jCommander.parse(args);
         runMain(konduitServingNodeConfigurer);
     }
-
 }
