@@ -32,18 +32,18 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--usePython",
-        type=str,
-        default="true",
-        help="whether to bundle python " "or not (typically not encouraged with arm",
-    )
-
-    parser.add_argument(
-        "--usePmml",
-        type=str,
-        default="true",
-        help="whether to use pmml or not,"
-        " not encouraged if agpl license is an issue",
+        "--spin", 
+        type=str, 
+        default="all", 
+        choices=[
+            "minimal", 
+            "python", 
+            "pmml", 
+            "all"
+        ], 
+        help = "whether to bundle Python, PMML, both or neither. Python bundling is" + 
+         "not encouraged with ARM, and PMML bundling is not encouraged if agpl" + 
+         "license is an issue."
     )
 
     parser.add_argument(
@@ -70,20 +70,24 @@ if __name__ == "__main__":
     ]
 
     if "arm" in args.os:
-        command.append("-Dchip=arm")
+        arch = "arm"
     elif "gpu" in args.os:
-        command.append("-Dchip=gpu")
+        arch = "gpu"
     else:
-        command.append("-Dchip=cpu")
+        arch = "cpu"
 
-    if strtobool(args.usePython):
+    command.append("-Dchip={}".format(arch))
+
+    if args.spin == "all" or args.spin == "python":
         command.append("-Ppython")
-    if strtobool(args.usePmml):
+    if args.spin == "all" or args.spin == "pmml":
         command.append("-Ppmml")
+
+    command.append("-Dspin.version={}".format(args.spin))
 
     with open(os.path.join(args.source, "pom.xml"), "r") as pom:
         content = pom.read()
-        regex = r"<version>(\d+.\d+.\d+)</version>"
+        regex = r"<version>(\d+.\d+.\d+\S*)</version>"
         version = re.findall(regex, content)
 
     print("Running command: " + " ".join(command))
@@ -95,11 +99,15 @@ if __name__ == "__main__":
             args.source,
             "konduit-serving-uberjar",
             "target",
-            "konduit-serving-uberjar-{}-bin.jar".format(version[0]),
+            "konduit-serving-uberjar-{}-{}-{}-{}.jar"\
+            .format(version[0], args.spin, args.os, arch),
         ),
         os.path.join(args.source, args.target),
     )
 
     # Copy the built jar file to the "python/tests" folder if it exists.
     if os.path.isdir(os.path.join(args.source, "python", "tests")):
-        copyfile(os.path.join(args.source, args.target), os.path.join(args.source, "python", "tests", "konduit.jar"))
+        copyfile(
+            os.path.join(args.source, args.target), 
+            os.path.join(args.source, "python", "tests", "konduit.jar")
+        )
