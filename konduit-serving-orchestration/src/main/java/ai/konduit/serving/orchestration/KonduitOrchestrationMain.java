@@ -80,7 +80,7 @@ public class KonduitOrchestrationMain {
         konduitServingNodeConfigurer.setupVertxOptions();
         Vertx.clusteredVertx(konduitServingNodeConfigurer.getVertxOptions(), vertxAsyncResult -> {
             Vertx vertx = vertxAsyncResult.result();
-            ConfigRetriever configRetriever = ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getOptions());
+            ConfigRetriever configRetriever = ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getConfigRetrieverOptions());
             eventBus = vertx.eventBus();
             //registers a handler to assert that all configurations are the same
             registerHandler();

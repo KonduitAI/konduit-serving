@@ -154,6 +154,29 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <id>clean-numpy-javacpp-cache</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>python</executable>
+                    <arguments>
+                        <argument>${maven.multiModuleProjectDirectory}/clear_numpy_javacpp_cache.py</argument>
+                        <argument>${numpy.javacpp.version}</argument>
+                        <argument>${javacpp.platform}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

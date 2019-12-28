@@ -54,7 +54,6 @@ import java.io.IOException;
 @Slf4j
 public class InferenceVerticle extends BaseRoutableVerticle {
 
-
     private InferenceConfiguration inferenceConfiguration;
 
     @Override
@@ -94,7 +93,6 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         }
     }
 
-
     protected void setupWebServer() {
         int portValue = inferenceConfiguration.getServingConfig().getHttpPort();
         if (portValue == 0) {
@@ -117,5 +115,4 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                     }
                 });
     }
-
 }

@@ -28,7 +28,6 @@ import com.beust.jcommander.Parameter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.DeploymentOptions;
@@ -39,8 +38,14 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import io.vertx.micrometer.MicrometerMetricsOptions;
+import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
+import lombok.*;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.bytedeco.systems.global.linux;
+import org.bytedeco.systems.global.macosx;
+import org.bytedeco.systems.global.windows;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,10 +55,6 @@ import java.util.UUID;
 
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
 import static java.lang.System.setProperty;
-
-import lombok.*;
-import org.apache.commons.lang3.SystemUtils;
-import org.bytedeco.systems.global.*;
 
 /**
  * Core node configurer based on both command line and builder arguments.
@@ -174,9 +175,9 @@ public class KonduitServingNodeConfigurer {
     private boolean help = false;
 
     private MeterRegistry registry = BackendRegistries.getDefaultNow();
-    private ConfigStoreOptions httpStore;
+    private ConfigStoreOptions configStoreOptions;
     private DeploymentOptions deploymentOptions;
-    private ConfigRetrieverOptions options;
+    private ConfigRetrieverOptions configRetrieverOptions;
     private VertxOptions vertxOptions;
     private InferenceConfiguration inferenceConfiguration;
 
@@ -190,7 +191,7 @@ public class KonduitServingNodeConfigurer {
      * (vertx.logger-delegate-factory-class-name) gets set to io.vertx.core.logging.SLF4JLogDelegateFactory
      * The {@link #registry} field and associated prometheus configuration gets setup
      * The {@link #vertxOptions} event but options also get set
-     * Lastly the {@link #options} gets set for the configuration
+     * Lastly the {@link #configRetrieverOptions} gets set for the configuration
      */
     public void setupVertxOptions() {
         File workingDir = new File(vertxWorkingDirectory);
@@ -259,13 +260,13 @@ public class KonduitServingNodeConfigurer {
             }
         }
 
-        httpStore = new ConfigStoreOptions()
+        configStoreOptions = new ConfigStoreOptions()
                 .setType(configStoreType)
                 .setOptional(false)
                 .setConfig(new JsonObject().put("path", configPath));
 
-        options = new ConfigRetrieverOptions()
-                .addStore(httpStore);
+        configRetrieverOptions = new ConfigRetrieverOptions()
+                .addStore(configStoreOptions);
     }
 
     /**
