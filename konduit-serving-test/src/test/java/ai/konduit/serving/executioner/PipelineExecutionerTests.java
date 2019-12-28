@@ -67,11 +67,16 @@ public class PipelineExecutionerTests {
         JsonObject wrapper = new JsonObject();
         SchemaType[] values = SchemaType.values();
 
-        List<String> fieldNames = Arrays.stream(values).map(input -> input.name()).collect(Collectors.toList());
+        List<String> fieldNames = Arrays.stream(values)
+                .filter(input -> input == SchemaType.Boolean)
+                .map(input -> input.name())
+                .collect(Collectors.toList());
         Map<String,PythonConfig> namesToPythonConfig = new LinkedHashMap<>();
         PythonConfigBuilder pythonConfig = PythonConfig.builder();
 
         for (SchemaType value : values) {
+            if(value == SchemaType.Boolean)
+                continue;
             JsonObject fieldInfo = new JsonObject();
             JsonObject topLevel = new JsonObject();
             fieldInfo.put("type",value.name());
@@ -83,10 +88,11 @@ public class PipelineExecutionerTests {
                     fieldInfo.put("shape",new JsonArray().add(1).add(1));
                     schemaValues.put(value.name(), Nd4j.toNpyByteArray(Nd4j.scalar(1.0)));
                     break;
-                case Boolean:
+               //need to wait till dl4j can support the boolean type in the python executioner
+                    /* case Boolean:
                     pythonConfig.pythonInput(value.name(),Type.BOOL.name());
                     schemaValues.put(value.name(), true);
-                    break;
+                    break;*/
                 case Float:
                     pythonConfig.pythonInput(value.name(),Type.FLOAT.name());
                     schemaValues.put(value.name(), 1.0f);
@@ -97,7 +103,7 @@ public class PipelineExecutionerTests {
                     break;
                 case Image:
                     schemaValues.put(value.name(), new byte[]{0, 1});
-                    pythonConfig.pythonInput(value.name(),Type.LIST.name());
+                    pythonConfig.pythonInput(value.name(),Type.STR.name());
                     break;
                 case Integer:
                     pythonConfig.pythonInput(value.name(),Type.INT.name());
@@ -119,7 +125,7 @@ public class PipelineExecutionerTests {
                     schemaValues.put(value.name(), "cat");
                     break;
                 case Bytes:
-                    pythonConfig.pythonInput(value.name(),Type.LIST.name());
+                    pythonConfig.pythonInput(value.name(),Type.STR.name());
                     schemaValues.put(value.name(), new byte[]{1, 0});
                     break;
                 case Long:

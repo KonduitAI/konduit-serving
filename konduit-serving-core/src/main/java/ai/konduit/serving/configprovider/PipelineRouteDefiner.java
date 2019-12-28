@@ -245,7 +245,7 @@ public class PipelineRouteDefiner {
 
 
 
-        router.post("/dynamicschema/")
+        router.post("/dynamicschema")
                 .consumes("application/json")
                 .produces("application/json")
                 .handler(ctx -> {
