@@ -44,6 +44,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 @NotThreadSafe
 public abstract class BaseVerticleTest {
+
     @Rule
     public Timeout timeout = new Timeout(240, SECONDS);
 
@@ -79,26 +80,13 @@ public abstract class BaseVerticleTest {
                 .setWorker(true).setInstances(1)
                 .setWorkerPoolSize(1)
                 .setConfig(getConfigObject());
-        String verticleClassName = getVertexName();
-        String[] split = verticleClassName.split("\\.");
-        vertx.registerVerticleFactory(new VerticleFactory() {
-            @Override
-            public String prefix() {
-                return split[split.length - 1];
-            }
-
-            @Override
-            public Verticle createVerticle(String s, ClassLoader classLoader) throws Exception {
-                Verticle ret = (Verticle) classLoader.loadClass(verticleClassName).newInstance();
-                verticle = ret;
-                return ret;
-            }
-        });
 
         vertx.registerVerticleFactory(new VerticleFactory() {
+
             @Override
             public String prefix() {
-                return getVertexName();
+                String[] split = getVertexName().split("\\.");
+                return split[split.length -1];
             }
 
             @Override
@@ -124,7 +112,9 @@ public abstract class BaseVerticleTest {
             normalServer.close();
     }
 
-    public abstract Class<? extends AbstractVerticle> getVerticalClazz();
+    public Class<? extends AbstractVerticle> getVerticalClazz() {
+        return ai.konduit.serving.verticles.inference.InferenceVerticle.class;
+    }
 
     public int getRandomPort() throws IOException {
         ServerSocket pubSubSocket = new ServerSocket(0);

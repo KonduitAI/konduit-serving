@@ -24,7 +24,6 @@ package ai.konduit.serving.verticles.python;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
@@ -68,15 +67,12 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
     @Override
     public Handler<HttpServerRequest> getRequest() {
 
-        return req -> {
+        return req ->
             //should be json body of classification
             req.bodyHandler(body -> {
                 System.out.println(body.toJson());
                 System.out.println("Finish body" + body);
-            });
-
-            req.exceptionHandler(exception -> context.fail(exception));
-        };
+            }).exceptionHandler(exception -> context.fail(exception));
     }
 
     @Override
@@ -95,37 +91,33 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
                 .predictionType(PredictionType.RAW)
                 .build();
 
-
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
 
-
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-
     @Test(timeout = 60000)
-    public void testInferenceResult(TestContext context) throws Exception {
+    public void testInferenceResult(TestContext context) {
         this.context = context;
 
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.put("first", 2);
-        requestSpecification.body(jsonObject.encode().getBytes());
+        JsonObject inputJson = new JsonObject();
+        inputJson.put("first", 2);
+        requestSpecification.body(inputJson.encode().getBytes());
         requestSpecification.header("Content-Type", "application/json");
-        String body = requestSpecification.when()
+        String responseBody = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/dictionary").then()
                 .extract()
                 .body().asString();
-        JsonArray arr = new JsonArray(body);
-        JsonObject jsonObject1 = arr.getJsonObject(0);
-        assertTrue(jsonObject1.containsKey("second"));
-        assertEquals(4, jsonObject1.getInteger("second"), 1e-1);
-
+        JsonArray outputJsonArray = new JsonArray(responseBody);
+        JsonObject result = outputJsonArray.getJsonObject(0);
+        assertTrue(result.containsKey("second"));
+        assertEquals(4, result.getInteger("second"), 1e-1);
     }
 }
