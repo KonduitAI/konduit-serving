@@ -130,7 +130,6 @@ public class PipelineRouteDefiner {
             batchCreationTimer = LongTaskTimer
                     .builder("batch_creation")
                     .register(registry);
-
         }
 
         if (inferenceConfiguration.getServingConfig().getMetricTypes() != null && registry != null) {
