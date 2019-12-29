@@ -72,7 +72,6 @@ public class BatchInputParserMultiRecordTest extends BaseVerticleTest {
         return jsonObject;
     }
 
-
     @Test(timeout = 60000)
     public void runAdd(TestContext testContext) throws Exception {
         BatchInputArrowParserVerticle verticleRef = (BatchInputArrowParserVerticle) verticle;
@@ -87,7 +86,6 @@ public class BatchInputParserMultiRecordTest extends BaseVerticleTest {
         arrowRecordWriter.initialize(fileSplit, new NumberOfRecordsPartitioner());
         arrowRecordWriter.writeBatch(writables);
         byte[] arrowBytes = FileUtils.readFileToByteArray(tmpFile);
-
 
         given().port(port)
                 .multiPart("input1", tmpFile)
