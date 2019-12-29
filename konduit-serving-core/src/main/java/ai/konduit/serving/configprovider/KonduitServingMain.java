@@ -113,6 +113,8 @@ public class KonduitServingMain {
                         if(onFailure != null) {
                             onFailure.run();
                         }
+
+                        vertx.close();
                     } else {
                         log.info(String.format("Deployed verticle %s", konduitServingNodeConfigurer.getVerticleClassName()));
                         if(onSuccess != null) {

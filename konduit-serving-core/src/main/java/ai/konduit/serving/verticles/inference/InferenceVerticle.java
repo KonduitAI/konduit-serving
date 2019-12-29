@@ -27,6 +27,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.configprovider.MemMapRouteDefiner;
 import ai.konduit.serving.configprovider.PipelineRouteDefiner;
 import ai.konduit.serving.executioner.PipelineExecutioner;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
 import io.vertx.core.Context;
@@ -64,13 +65,12 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     @Override
     public void start() throws Exception {
         super.start();
-
     }
 
     @Override
     public void stop() throws Exception {
         super.stop();
-        log.debug("Stopping model server.");
+        log.debug("Stopping konduit server.");
     }
 
     @Override
@@ -86,7 +86,11 @@ public class InferenceVerticle extends BaseRoutableVerticle {
             } else {
                 this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
 
+                // Checking if the configuration runners can be created without problems or not
+                for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
+                    pipelineStep.createRunner();
             }
+
             setupWebServer();
         } catch (IOException e) {
             log.error("Unable to parse InferenceConfiguration", e);
