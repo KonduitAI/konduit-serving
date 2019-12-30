@@ -169,11 +169,16 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <executable>python</executable>
+                    <executable>java</executable>
                     <arguments>
-                        <argument>${maven.multiModuleProjectDirectory}/clear_numpy_javacpp_cache.py</argument>
-                        <argument>${numpy.javacpp.version}</argument>
-                        <argument>${javacpp.platform}</argument>
+                        <argument>-classpath</argument>
+                        <classpath>
+                            <dependency>com.beust:jcommander</dependency>
+                            <dependency>commons-io:commons-io</dependency>
+                        </classpath>
+                        <argument>ai.konduit.serving.miscutils.CleanNumpyJavaCppCache</argument>
+                        <argument>--numpyJavacppVersion=${numpy.javacpp.version}</argument>
+                        <argument>--javacppPlatform=${javacpp.platform}</argument>
                     </arguments>
                 </configuration>
             </plugin>
