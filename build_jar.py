@@ -93,8 +93,6 @@ if __name__ == "__main__":
     print("Running command: " + " ".join(command))
     subprocess.call(command, shell=sys.platform.startswith('win'), cwd=args.source)
 
-    _os = args.os[:-4] if arch == "gpu" else args.os
-
     # Copy the jar file to the path specified by the "target" argument
     copyfile(
         os.path.join(
@@ -102,7 +100,7 @@ if __name__ == "__main__":
             "konduit-serving-uberjar",
             "target",
             "konduit-serving-uberjar-{}-{}-{}-{}.jar"\
-            .format(version[0], args.spin, _os, arch),
+            .format(version[0], args.spin, platform, arch),
         ),
         os.path.join(args.source, args.target),
     )
