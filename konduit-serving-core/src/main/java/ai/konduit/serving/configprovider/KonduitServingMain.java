@@ -93,7 +93,7 @@ public class KonduitServingMain {
 
     public void runMain(KonduitServingNodeConfigurer konduitServingNodeConfigurer) {
         Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
-        ConfigRetriever configRetriever = ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getOptions());
+        ConfigRetriever configRetriever = ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getConfigRetrieverOptions());
         configRetriever.getConfig(result -> {
             if (result.failed()) {
                 log.error("Unable to retrieve configuration " + result.cause());
@@ -113,7 +113,7 @@ public class KonduitServingMain {
                             onFailure.run();
                         }
                     } else {
-                        log.info("Deployed verticle {}", konduitServingNodeConfigurer.getVerticleClassName());
+                        log.info(String.format("Deployed verticle %s", konduitServingNodeConfigurer.getVerticleClassName()));
                         if(onSuccess != null) {
                             onSuccess.run();
                         }
