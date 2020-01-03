@@ -101,6 +101,8 @@ public class KonduitOrchestrationMain {
                                 onFailure.run();
                             }
                         } else {
+                            configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
+
                             try {
                                 Preconditions.checkNotNull(konduitServingNodeConfigurer.getInferenceConfiguration(), "Node configurer inference configuration was null!");
                                 eventBus.request(NODE_COMMUNICATION_TOPIC, new JsonObject(konduitServingNodeConfigurer.getInferenceConfiguration().toJson()), replyHandler -> {

@@ -106,12 +106,15 @@ public class KonduitServingMain {
 
                 JsonObject json = result.result();
                 konduitServingNodeConfigurer.configureWithJson(json);
+              
                 vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
                     if (handler.failed()) {
                         log.error(String.format("Unable to deploy verticle %s", konduitServingNodeConfigurer.getVerticleClassName()), handler.cause());
                         if(onFailure != null) {
                             onFailure.run();
                         }
+
+                        vertx.close();
                     } else {
                         log.info(String.format("Deployed verticle %s", konduitServingNodeConfigurer.getVerticleClassName()));
                         if(onSuccess != null) {
