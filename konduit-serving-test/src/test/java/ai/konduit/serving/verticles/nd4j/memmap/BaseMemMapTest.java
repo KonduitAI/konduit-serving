@@ -1,5 +1,4 @@
 /*
- *
  *  * ******************************************************************************
  *  *  * Copyright (c) 2019 Konduit AI.
  *  *  *
@@ -15,8 +14,6 @@
  *  *  *
  *  *  * SPDX-License-Identifier: Apache-2.0
  *  *  *****************************************************************************
- *
- *
  */
 
 package ai.konduit.serving.verticles.nd4j.memmap;
@@ -31,6 +28,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
+import org.junit.After;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -38,35 +36,23 @@ import java.io.File;
 
 public abstract class BaseMemMapTest extends BaseVerticleTest {
 
-
     @Override
     public Handler<HttpServerRequest> getRequest() {
-        Handler<HttpServerRequest> ret = req -> {
-            //should be json body of classification
-            req.bodyHandler(body -> {
-                System.out.println("Finish body" + body);
-            });
 
-            req.exceptionHandler(exception -> {
-                exception.printStackTrace();
-            });
-
-        };
-
-        return ret;
+        //should be json body of classification
+        return req -> req.bodyHandler(body -> System.out.println("Finish body" + body))
+                    .exceptionHandler(Throwable::printStackTrace);
     }
-
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return InferenceVerticle.class;
     }
 
-    @org.junit.After
+    @After
     public void after(TestContext context) {
         vertx.close(context.asyncAssertSuccess());
     }
-
 
     @Override
     public io.vertx.core.json.JsonObject getConfigObject() throws Exception {
@@ -83,7 +69,6 @@ public abstract class BaseMemMapTest extends BaseVerticleTest {
                                 .arrayPath(tmpFile.getAbsolutePath())
                                 .build())
                         .build();
-
 
         return new JsonObject(inferenceConfiguration.toJson());
     }

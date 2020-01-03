@@ -33,14 +33,17 @@ import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
 
@@ -48,23 +51,34 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.charset.Charset;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+@RunWith(VertxUnitRunner.class)
 public class KonduitServingMainTest {
 
+    public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
+
     @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    public Timeout rule = Timeout.seconds(60);
+
+    @ClassRule
+    public static TemporaryFolder folder = new TemporaryFolder();
+
+    @BeforeClass
+    public static void beforeClass(TestContext testContext) throws Exception {
+        JsonObject config = getConfig();
+        File jsonConfigPath = folder.newFile("config.json");
+        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
+
+        testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
+    }
 
     /**
      * @return single available port number
      */
     public static int getAvailablePort() {
         try {
-            ServerSocket socket = new ServerSocket(0);
-            try {
+            try (ServerSocket socket = new ServerSocket(0)) {
                 return socket.getLocalPort();
-            } finally {
-                socket.close();
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot find available port: " + e.getMessage(), e);
@@ -72,95 +86,44 @@ public class KonduitServingMainTest {
     }
 
     @Test
-    public void testFile() throws Exception {
-        KonduitServingMain konduitServingMain = new KonduitServingMain();
-        JsonObject config = getConfig();
-        File jsonConfigPath = folder.newFile("config.json");
-        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
-        int port = getAvailablePort();
-
+    public void testOnSuccessHook(TestContext testContext) {
+        Async async = testContext.async();
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
-                .multiThreaded(false).configPort(port)
+                .multiThreaded(false).configPort(getAvailablePort())
                 .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(jsonConfigPath.getAbsolutePath())
-                .build();
-        konduitServingMain.runMain(args.toArgs());
-
-        Thread.sleep(10000);
-    }
-
-    @Test(timeout = 60000)
-    public void testOnSuccessHook() throws Exception {
-        JsonObject config = getConfig();
-        File jsonConfigPath = folder.newFile("config.json");
-        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
-        int port = getAvailablePort();
-
-        AtomicBoolean onSuccessCalled = new AtomicBoolean(false);
-        AtomicBoolean failTest = new AtomicBoolean(false); // to avoid waiting for the test timeout
-
-        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                .configStoreType("file").ha(false)
-                .multiThreaded(false).configPort(port)
-                .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(jsonConfigPath.getAbsolutePath())
+                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(() -> onSuccessCalled.set(true))
-                .onFailure(() -> failTest.set(true))
+                .onSuccess(async::complete)
+                .onFailure(() -> testContext.fail("onFailure called instead of onSuccess hook"))
                 .build()
                 .runMain(args.toArgs());
-
-        while(!onSuccessCalled.get()) {
-            if(!failTest.get())
-                Thread.sleep(2000);
-            else {
-                Assert.fail("onFailure called instead of onSuccess hook");
-                break;
-            }
-        }
     }
 
-    @Test(timeout = 60000)
-    public void testOnFailureHook() throws Exception {
-        JsonObject config = getConfig();
-        File jsonConfigPath = folder.newFile("config.json");
-        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
-        int port = getAvailablePort();
-
-        AtomicBoolean onFailureCalled = new AtomicBoolean(false);
-        AtomicBoolean failTest = new AtomicBoolean(false); // to avoid waiting for the test timeout
+    @Test
+    public void testOnFailureHook(TestContext testContext) {
+        Async async = testContext.async();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
-                .multiThreaded(false).configPort(port)
+                .multiThreaded(false).configPort(getAvailablePort())
                 .verticleClassName(BatchInputParser.class.getName()) // Invalid verticle class name
-                .configPath(jsonConfigPath.getAbsolutePath())
+                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(() -> failTest.set(true))
-                .onFailure(() -> onFailureCalled.set(true))
+                .onSuccess(() -> testContext.fail("onSuccess called instead of onFailure hook"))
+                .onFailure(async::complete)
                 .build()
                 .runMain(args.toArgs());
-
-        while(!onFailureCalled.get()) {
-            if(!failTest.get())
-                Thread.sleep(2000);
-            else {
-                Assert.fail("onSuccess called instead of onFailure hook");
-                break;
-            }
-        }
     }
 
-    public JsonObject getConfig() throws Exception {
+    public static JsonObject getConfig() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
         File modelSave = folder.newFile("model.zip");
         ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
-
 
         Schema.Builder schemaBuilder = new Schema.Builder();
         schemaBuilder.addColumnDouble("petal_length")
@@ -180,7 +143,6 @@ public class KonduitServingMainTest {
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
 
-
         ModelConfig modelConfig = ModelConfig.builder()
                 .modelConfigType(
                         ModelConfigType.builder().modelLoadingPath(modelSave.getAbsolutePath())
@@ -196,7 +158,6 @@ public class KonduitServingMainTest {
                 .modelConfig(modelConfig)
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .build();
-
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)

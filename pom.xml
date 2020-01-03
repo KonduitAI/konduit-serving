@@ -420,12 +420,6 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>net.jodah</groupId>
-                <artifactId>concurrentunit</artifactId>
-                <version>0.4.6</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>

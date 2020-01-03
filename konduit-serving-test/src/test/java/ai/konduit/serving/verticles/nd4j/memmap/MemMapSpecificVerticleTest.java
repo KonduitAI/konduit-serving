@@ -1,5 +1,4 @@
 /*
- *
  *  * ******************************************************************************
  *  *  * Copyright (c) 2015-2019 Skymind Inc.
  *  *  * Copyright (c) 2019 Konduit AI.
@@ -16,8 +15,6 @@
  *  *  *
  *  *  * SPDX-License-Identifier: Apache-2.0
  *  *  *****************************************************************************
- *
- *
  */
 
 package ai.konduit.serving.verticles.nd4j.memmap;
@@ -43,13 +40,11 @@ import java.io.File;
 import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class MemMapSpecificVerticleTest extends BaseMemMapTest {
 
     private INDArray unknownVector = Nd4j.linspace(1,4,4).addi(2);
-
 
     @Test(timeout = 60000)
     public void testArrayResultRangeJson(TestContext context) {
@@ -70,7 +65,6 @@ public class MemMapSpecificVerticleTest extends BaseMemMapTest {
         assertEquals(first,numpyTest);
     }
 
-
     @Override
     public JsonObject getConfigObject() throws Exception {
         File unkVectorPath = temporary.newFile();
@@ -89,7 +83,6 @@ public class MemMapSpecificVerticleTest extends BaseMemMapTest {
                                 .arrayPath(tmpFile.getAbsolutePath())
                                 .build())
                         .build();
-
 
         return new JsonObject(inferenceConfiguration.toJson());
     }
