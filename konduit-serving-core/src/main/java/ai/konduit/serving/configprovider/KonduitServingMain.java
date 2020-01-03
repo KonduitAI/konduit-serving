@@ -90,6 +90,8 @@ public class KonduitServingMain {
             if (result.failed()) {
                 log.error("Unable to retrieve configuration " + result.cause());
             } else {
+                configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
+
                 io.vertx.core.json.JsonObject result1 = result.result();
                 konduitServingNodeConfigurer.configureWithJson(result1);
                 vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
