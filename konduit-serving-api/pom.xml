@@ -27,7 +27,7 @@
     <parent>
         <artifactId>konduit-serving</artifactId>
         <groupId>ai.konduit.serving</groupId>
-        <version>1.2.1</version>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -62,6 +62,10 @@
         </profile>
     </profiles>
     <dependencies>
+        <dependency>
+            <groupId>org.datavec</groupId>
+            <artifactId>datavec-python</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>openblas</artifactId>

@@ -29,7 +29,7 @@ import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
-import ai.konduit.serving.util.python.PythonVariables;
+import org.datavec.python.PythonVariables;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -41,13 +41,14 @@ import java.util.Map;
 
 
 /**
- * PythonStep defines a custom Python {@link PipelineStep} from a {@link PythonConfig}.
+ * PythonStep defines a custom Python {@link PipelineStep}
+ * from a {@link PythonConfig}.
  */
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
-public class PythonStep extends BasePipelineStep {
+public class PythonStep extends BasePipelineStep<PythonStep> {
 
     @Getter
     @Setter
@@ -81,7 +82,7 @@ public class PythonStep extends BasePipelineStep {
      * Create a PythonConfig Step with default input and output names
      * from input column names, input schema types and the actual PythonConfig
      *
-     * @param pythonConfig     Konduit PythonConfig
+     * @param pythonConfig     {@link PythonConfig}
      * @param inputColumnNames input column names
      * @param inputTypes       input schema types
      * @throws Exception key error
@@ -144,7 +145,7 @@ public class PythonStep extends BasePipelineStep {
     @Override
     public PredictionType[] validPredictionTypes() {
         return new PredictionType[] {
-           PredictionType.RAW
+                PredictionType.RAW
         };
     }
 
@@ -166,46 +167,6 @@ public class PythonStep extends BasePipelineStep {
                 Output.DataFormat.NUMPY,
                 Output.DataFormat.JSON
         };
-    }
-
-    @Override
-    public PipelineStep setInput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setInput("default", columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setOutput(String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setOutput("default", columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setInput(Schema inputSchema) throws Exception {
-        return (PythonStep) super.setInput("default", inputSchema);
-    }
-
-    @Override
-    public PipelineStep setOutput(Schema outputSchema) throws Exception {
-        return (PythonStep) super.setOutput("default", outputSchema);
-    }
-
-    @Override
-    public PipelineStep setInput(String inputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setInput(inputName, columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setOutput(String outputName, String[] columnNames, SchemaType[] types) throws Exception {
-        return (PythonStep) super.setOutput(outputName, columnNames, types);
-    }
-
-    @Override
-    public PipelineStep setInput(String inputName, Schema inputSchema) throws Exception {
-        return (PythonStep) super.setInput(inputName, inputSchema);
-    }
-
-    @Override
-    public PipelineStep setOutput(String outputName, Schema outputSchema) throws Exception {
-        return (PythonStep) super.setOutput(outputName, outputSchema);
     }
 
     /**
@@ -346,10 +307,6 @@ public class PythonStep extends BasePipelineStep {
 
         return this;
     }
-
-
-
-
 
     @Override
     public String pipelineStepClazz() {

@@ -27,7 +27,7 @@
     <parent>
         <artifactId>konduit-serving</artifactId>
         <groupId>ai.konduit.serving</groupId>
-        <version>1.2.1</version>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -36,16 +36,21 @@
     <name>konduit-serving-tar</name>
 
     <properties>
-        <konduit-serving.src.dir>../../${project.build.directory}</konduit-serving.src.dir>
-        <konduit-serving.base.dir>${project.build.directory}/konduit-serving-distro-${project.version}-dist/
-        </konduit-serving.base.dir>
+        <konduit-serving.root.dir>${project.build.directory}/../..</konduit-serving.root.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-uberjar</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <profiles>
         <profile>
-            <id>generate-tarball</id>
+            <id>tar</id>
             <build>
                 <plugins>
                     <plugin>

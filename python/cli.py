@@ -1,6 +1,7 @@
 import click
 import logging
 import numpy as np
+import sys
 import os as opos
 import subprocess
 
@@ -33,13 +34,12 @@ def git_clone_konduit(use_https=True):
         except Exception as e:
             raise RuntimeError(
                 ">>> Could not clone konduit-serving repopository. Make sure to have "
-                "git installed. Type"
-                + "konduit-python --help for help resolving this.\n",
+                "git installed. Type" + "konduit --help for help resolving this.\n",
                 e,
             )
 
 
-def build_jar(operating_sys):
+def build_jar(operating_sys, spin):
     """Build the actual JAR, using our mvnw wrapper under the hood."""
     if operating_sys is None:
         raise RuntimeError("Specify an operating system to build a konduit jar.")
@@ -48,27 +48,20 @@ def build_jar(operating_sys):
     except Exception as e:
         raise RuntimeError(
             ">>> Could not clone konduit-serving repository. Make sure to have "
-            "git installed. Type " + "konduit-python --help for help resolving this.\n",
-            e,
-        )
-
-    try:
-        subprocess.call(["python3", "--version"])
-    except Exception as e:
-        raise RuntimeError(
-            ">>> No python3 found on your system. Make sure to install python3 first, "
-            "then run konduit-python again.\n",
+            "git installed. Type " + "konduit --help for help resolving this.\n",
             e,
         )
     try:
         subprocess.call(
             [
-                "python3",
+                "python",
                 opos.path.join(KONDUIT_DIR, "build_jar.py"),
                 "--os",
                 operating_sys,
                 "--source",
                 KONDUIT_DIR,
+                "--spin", 
+                spin
             ]
         )
     except Exception as e:
@@ -88,10 +81,18 @@ def build_jar(operating_sys):
     default=True,
     help="If True, use HTTPS to clone konduit-serving, else SSH.",
 )
-def init(os, https):
-    """Initialize the konduit-python CLI. You can also use this to build a new konduit-serving JAR."""
+@click.option(
+    "--spin",
+    default="all",
+    show_default=True,
+    help="Whether to bundle Python ('python'), PMML ('pmml'), both ('all') " + 
+		 "or neither ('minimal'). Python bundling is not encouraged with ARM, " + 
+		 "and PMML bundling is not encouraged if agpl license is an issue.",
+)
+def init(os, https, spin):
+    """Initialize the konduit CLI. You can also use this to build a new konduit-serving JAR."""
     git_clone_konduit(https)
-    build_jar(os)
+    build_jar(os, spin)
 
 
 @click.command()
@@ -101,9 +102,18 @@ def init(os, https):
     help="Your operating system. Choose from  `windows-x86_64`,`linux-x86_64`,"
     "`linux-x86_64-gpu`," + "`macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`",
 )
-def build(os):
+@click.option(
+    "--spin",
+    default="all",
+    show_default=True,
+    help="Whether to bundle Python ('python'), PMML ('pmml'), both ('all') " + 
+		 "or neither ('minimal'). Python bundling is not encouraged with ARM, " + 
+		 "and PMML bundling is not encouraged if agpl license is an issue.",
+)
+
+def build(os, spin):
     """Build the underlying konduit.jar (again)."""
-    build_jar(os)
+    build_jar(os, spin)
 
 
 @click.command()

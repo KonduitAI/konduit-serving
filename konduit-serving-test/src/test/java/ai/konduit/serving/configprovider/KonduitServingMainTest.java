@@ -23,9 +23,9 @@
 package ai.konduit.serving.configprovider;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
@@ -33,11 +33,17 @@ import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
 
@@ -46,19 +52,33 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.charset.Charset;
 
+@RunWith(VertxUnitRunner.class)
 public class KonduitServingMainTest {
 
+    public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
+
+    @Rule
+    public Timeout rule = Timeout.seconds(60);
+
+    @ClassRule
+    public static TemporaryFolder folder = new TemporaryFolder();
+
+    @BeforeClass
+    public static void beforeClass(TestContext testContext) throws Exception {
+        JsonObject config = getConfig();
+        File jsonConfigPath = folder.newFile("config.json");
+        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
+
+        testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
+    }
 
     /**
      * @return single available port number
      */
     public static int getAvailablePort() {
         try {
-            ServerSocket socket = new ServerSocket(0);
-            try {
+            try (ServerSocket socket = new ServerSocket(0)) {
                 return socket.getLocalPort();
-            } finally {
-                socket.close();
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot find available port: " + e.getMessage(), e);
@@ -66,29 +86,44 @@ public class KonduitServingMainTest {
     }
 
     @Test
-    public void testFile() throws Exception {
-        KonduitServingMain konduitServingMain = new KonduitServingMain();
-        JsonObject config = getConfig();
-        File jsonConfigPath = new File(System.getProperty("java.io.tmpdir"), "config.json");
-        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
-        int port = getAvailablePort();
+    public void testOnSuccessHook(TestContext testContext) {
+        Async async = testContext.async();
+        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
+                .configStoreType("file").ha(false)
+                .multiThreaded(false).configPort(getAvailablePort())
+                .verticleClassName(InferenceVerticle.class.getName())
+                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
+                .build();
+
+        KonduitServingMain.builder()
+                .onSuccess(async::complete)
+                .onFailure(() -> testContext.fail("onFailure called instead of onSuccess hook"))
+                .build()
+                .runMain(args.toArgs());
+    }
+
+    @Test
+    public void testOnFailureHook(TestContext testContext) {
+        Async async = testContext.async();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
-                .multiThreaded(false).configPort(port)
-                .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(jsonConfigPath.getAbsolutePath())
+                .multiThreaded(false).configPort(getAvailablePort())
+                .verticleClassName(BatchInputParser.class.getName()) // Invalid verticle class name
+                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
                 .build();
-        konduitServingMain.runMain(args.toArgs());
 
-        Thread.sleep(10000);
+        KonduitServingMain.builder()
+                .onSuccess(() -> testContext.fail("onSuccess called instead of onFailure hook"))
+                .onFailure(async::complete)
+                .build()
+                .runMain(args.toArgs());
     }
 
-    public JsonObject getConfig() throws Exception {
+    public static JsonObject getConfig() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
-        File modelSave = new File(System.getProperty("java.io.tmpdir"), "model.zip");
+        File modelSave = folder.newFile("model.zip");
         ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
-
 
         Schema.Builder schemaBuilder = new Schema.Builder();
         schemaBuilder.addColumnDouble("petal_length")
@@ -108,7 +143,6 @@ public class KonduitServingMainTest {
                 .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
 
-
         ModelConfig modelConfig = ModelConfig.builder()
                 .modelConfigType(
                         ModelConfigType.builder().modelLoadingPath(modelSave.getAbsolutePath())
@@ -125,12 +159,10 @@ public class KonduitServingMainTest {
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .build();
 
-
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .step(modelPipelineStep)
                 .build();
-
 
         return new JsonObject(inferenceConfiguration.toJson());
     }

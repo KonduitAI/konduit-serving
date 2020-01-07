@@ -29,7 +29,7 @@ import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.TensorDataType;
+import org.nd4j.tensorflow.conversion.TensorDataType;
 import ai.konduit.serving.model.TensorDataTypesConfig;
 import ai.konduit.serving.output.adapter.*;
 import ai.konduit.serving.output.types.BatchOutput;
@@ -202,7 +202,7 @@ public class PipelineExecutioner {
         return config;
     }
 
-    private void inferInputAndOutputSchemas(PipelineStep pipelineStep) {
+    private void inferInputAndOutputSchemas(PipelineStep<PipelineStep> pipelineStep) {
         if (inputSchema == null && pipelineStep.getInputSchemas() != null &&
                 !pipelineStep.getInputSchemas().isEmpty() &&
                 pipelineStep.getInputSchemas().get("default") != null &&

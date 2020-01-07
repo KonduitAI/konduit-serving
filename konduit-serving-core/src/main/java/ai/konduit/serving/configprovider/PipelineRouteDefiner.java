@@ -129,7 +129,6 @@ public class PipelineRouteDefiner {
             batchCreationTimer = LongTaskTimer
                     .builder("batch_creation")
                     .register(registry);
-
         }
 
         if (inferenceConfiguration.getServingConfig().getMetricTypes() != null && registry != null) {
@@ -383,7 +382,7 @@ public class PipelineRouteDefiner {
 
         });
 
-        router.post("/:inputDataFormat/:predictionType")
+        router.post("/:predictionType/:inputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed").handler(ctx -> {
             Map<String, InputAdapter<Buffer, ?>> adapters = getInputAdapterMap(ctx);
@@ -426,8 +425,7 @@ public class PipelineRouteDefiner {
             }, true, result -> ctx.next());
         });
 
-        // TODO: this seems bad for consistency reasons. All routes before flip input and prediction type
-        router.post("/:inputDataFormat/:outputDataFormat")
+        router.post("/:outputDataFormat/:inputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed")
                 .produces("application/octet-stream").handler((RoutingContext ctx) -> {

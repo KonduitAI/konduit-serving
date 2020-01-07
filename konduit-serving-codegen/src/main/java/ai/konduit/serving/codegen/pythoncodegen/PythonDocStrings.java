@@ -32,6 +32,7 @@ public class PythonDocStrings {
                         "    \"\"\""
         );
 
+        // TODO: write this properly
         code = code.replace(
                 "class ParallelInferenceConfig(object):\n",
                 "class ParallelInferenceConfig(object):\n" +
@@ -39,6 +40,7 @@ public class PythonDocStrings {
                         "\n" +
                         "    Configuration for parallel inference.\n" +
                         "\n" +
+                        "    :param queue_limit:\n" +
                         "    :param queue_limit:\n" +
                         "    :param batch_limit:\n" +
                         "    :param workers:\n" +
@@ -210,6 +212,7 @@ public class PythonDocStrings {
                         "    :param extra_inputs: potential extra input variables\n" +
                         "    :param python_path: your desired Python PATH as str\n" +
                         "    :param return_all_inputs: whether or not to return all inputs additionally to outputs\n" +
+                        "    :param setup_and_run: whether or not to use the setup-and-run schematics, defaults to False.\n" +
                         "    \"\"\""
         );
 
@@ -251,7 +254,6 @@ public class PythonDocStrings {
                         "           { \"input_1\": [\"col1\", \"col2\"]}\n" +
                         "    :param output_column_names: dictionary mapping output names to lists of names of your columnar data (e.g.\n" +
                         "           { \"output_1\": [\"col1\", \"col2\"]}\n" +
-                        "    :param runner: do not touch. internally used to infer the \"runner\" for this step configuration.\n" +
                         "    \"\"\""
         );
 
@@ -267,8 +269,8 @@ public class PythonDocStrings {
         );
 
         code = code.replace(
-                "class PythonStep(object):\n",
-                "class PythonStep(object):\n" +
+                "class PythonStep(PipelineStep):\n",
+                "class PythonStep(PipelineStep):\n" +
                         "    \"\"\"PythonStep\n" +
                         "\n" +
                         "    PythonStep defines a custom Python konduit.PipelineStep from a konduit.PythonConfig.\n" +
@@ -280,13 +282,12 @@ public class PythonDocStrings {
                         "    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
                         "    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
                         "    :param python_configs: konduit.PythonConfig\n" +
-                        "    :param runner: do not touch, used internally only.\n" +
                         "    \"\"\""
         );
 
         code = code.replace(
-                "class TransformProcessStep(object):\n",
-                "class TransformProcessStep(object):\n" +
+                "class TransformProcessStep(PipelineStep):\n",
+                "class TransformProcessStep(PipelineStep):\n" +
                         "    \"\"\"TransformProcessStep\n" +
                         "\n" +
                         "    TransformProcessStep defines a konduit.PipelineStep from a DataVec TransformProcess\n" +
@@ -298,13 +299,12 @@ public class PythonDocStrings {
                         "    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
                         "    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
                         "    :param transform_processes: DataVec TransformProcess\n" +
-                        "    :param runner: do not touch, used internally only.\n" +
                         "    \"\"\""
         );
 
         code = code.replace(
-                "class ModelStep(object):\n",
-                "class ModelStep(object):\n" +
+                "class ModelStep(PipelineStep):\n",
+                "class ModelStep(PipelineStep):\n" +
                         "    \"\"\"ModelStep\n" +
                         "\n" +
                         "    ModelStep extends konduit.PipelineStep and is the base class for all pipeline steps\n" +
@@ -319,13 +319,12 @@ public class PythonDocStrings {
                         "    :param model_config: konduit.ModelConfig\n" +
                         "    :param parallel_inference_config: konduit.ParallelInferenceConfig\n" +
                         "    :param normalization_config: konduit.NormalizationConfig\n" +
-                        "    :param runner: do not touch, only used internally/\n" +
                         "    \"\"\""
         );
 
         code = code.replace(
-                "class ArrayConcatenationStep(object):\n",
-                "class ArrayConcatenationStep(object):\n" +
+                "class ArrayConcatenationStep(PipelineStep):\n",
+                "class ArrayConcatenationStep(PipelineStep):\n" +
                         "    \"\"\"ArrayConcatenationStep\n" +
                         "\n" +
                         "    konduit.PipelineStep that concatenates two or more arrays along the specified dimensions.\n" +
@@ -337,36 +336,34 @@ public class PythonDocStrings {
                         "    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
                         "    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
                         "    :param concat_dimensions: dictionary of array indices to concatenation dimension\n" +
-                        "    :param runner: do not touch, only used internally.\n" +
                         "    \"\"\"\n"
         );
 
         code = code.replace(
-                "class JsonExpanderTransformStep(object):\n",
-                "class JsonExpanderTransformStep(object):\n" +
-                        "        \"\"\"JsonExpanderTransformStep\n" +
+                "class JsonExpanderTransformStep(PipelineStep):\n",
+                "class JsonExpanderTransformStep(PipelineStep):\n" +
+                        "    \"\"\"JsonExpanderTransformStep\n" +
                         "\n" +
-                        "        Executes expansion of JSON objects in to \"real\" objects.\n" +
-                        "        This is needed when integrating with PipelineStepRunner\n" +
-                        "        that may output {@link Text} with json arrays or json objects.\n" +
-                        "        This kind of output is generally expected from Python or PMML based pipelines\n" +
-                        "        which have a lot more complicated output and schema based values\n" +
-                        "        rather than straight NDArrays like\n" +
-                        "        most deep learning pipelines will be.\n" +
+                        "    Executes expansion of JSON objects in to \"real\" objects.\n" +
+                        "    This is needed when integrating with PipelineStepRunner\n" +
+                        "    that may output {@link Text} with json arrays or json objects.\n" +
+                        "    This kind of output is generally expected from Python or PMML based pipelines\n" +
+                        "    which have a lot more complicated output and schema based values\n" +
+                        "    rather than straight NDArrays like\n" +
+                        "    most deep learning pipelines will be.\n" +
                         "\n" +
-                        "        :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.\n" +
-                        "        :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.\n" +
-                        "        :param input_names: list of step input names, see konduit.PipelineStep.\n" +
-                        "        :param output_names: list of step input names, see konduit.PipelineStep.\n" +
-                        "        :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
-                        "        :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
-                        "        :param runner: do not touch, only used internally\n" +
+                        "    :param input_schemas: Input konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param output_schemas: Output konduit.SchemaTypes, see konduit.PipelineStep.\n" +
+                        "    :param input_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param output_names: list of step input names, see konduit.PipelineStep.\n" +
+                        "    :param input_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
+                        "    :param output_column_names: Input name to column name mapping, see konduit.PipelineStep.\n" +
                         "        \"\"\""
         );
 
         code = code.replace(
-                "class ImageLoadingStep(object):\n",
-                "class ImageLoadingStep(object):\n" +
+                "class ImageLoadingStep(PipelineStep):\n",
+                "class ImageLoadingStep(PipelineStep):\n" +
                         "    \"\"\"ImageLoadingStep\n" +
                         "\n" +
                         "    Loads an input image into an NDArray.\n" +
@@ -387,7 +384,6 @@ public class PythonDocStrings {
                         "           \"NCHW\" or \"NHWC\", defaults to the prior\n" +
                         "    :param image_transform_processes: a DataVec ImageTransformProcess\n" +
                         "    :param object_detection_config: konduit.ObjectDetectionConfig\n" +
-                        "    :param runner: do not touch, only used internally.\n" +
                         "    \"\"\""
         );
 

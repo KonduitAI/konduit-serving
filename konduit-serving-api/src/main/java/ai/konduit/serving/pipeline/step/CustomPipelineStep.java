@@ -30,7 +30,7 @@ import lombok.experimental.SuperBuilder;
 
 @Data
 @SuperBuilder
-public class CustomPipelineStep extends BasePipelineStep {
+public class CustomPipelineStep extends BasePipelineStep<CustomPipelineStep> {
 
     private String customUdfClazz;
 
@@ -46,6 +46,6 @@ public class CustomPipelineStep extends BasePipelineStep {
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.step.CustomPipelineStepRunner";
+        return "ai.konduit.serving.pipeline.steps.CustomStepRunner";
     }
 }

@@ -22,32 +22,50 @@
 
 package ai.konduit.serving.verticles;
 
+import io.vertx.core.*;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.spi.VerticleFactory;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
+import org.nd4j.linalg.api.memory.enums.DebugMode;
+import org.nd4j.linalg.factory.Nd4j;
+
+import javax.annotation.concurrent.NotThreadSafe;
+import java.io.IOException;
+import java.net.ServerSocket;
+
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-@javax.annotation.concurrent.NotThreadSafe
+@NotThreadSafe
 public abstract class BaseVerticleTest {
-    @org.junit.Rule
-    public io.vertx.ext.unit.junit.Timeout timeout = new io.vertx.ext.unit.junit.Timeout(240, SECONDS);
 
+    @Rule
+    public Timeout timeout = new Timeout(240, SECONDS);
 
-    @org.junit.Rule
-    public org.junit.rules.TemporaryFolder temporary = new org.junit.rules.TemporaryFolder();
+    @Rule
+    public TemporaryFolder temporary = new TemporaryFolder();
 
-    protected io.vertx.core.Vertx vertx;
+    protected Vertx vertx;
     protected int port, pubsubPort;
-    protected io.vertx.core.http.HttpServer httpServer, normalServer;
-    protected io.vertx.ext.unit.TestContext context;
-    protected io.vertx.core.Verticle verticle;
+    protected HttpServer httpServer, normalServer;
+    protected TestContext context;
+    protected Verticle verticle;
 
-    @org.junit.Before
-    public void before(io.vertx.ext.unit.TestContext context) throws Exception {
+    @Before
+    public void before(TestContext context) throws Exception {
         port = getRandomPort();
         pubsubPort = getRandomPort();
         System.setProperty("vertx.options.maxEventLoopExecuteTime", "240000");
-        io.vertx.core.VertxOptions vertxOptions = new io.vertx.core.VertxOptions();
+        VertxOptions vertxOptions = new VertxOptions();
         vertxOptions.setMaxEventLoopExecuteTime(240000);
-        vertx = io.vertx.core.Vertx.vertx(vertxOptions);
-        org.nd4j.linalg.factory.Nd4j.getWorkspaceManager().setDebugMode(org.nd4j.linalg.api.memory.enums.DebugMode.SPILL_EVERYTHING);
+        vertx = Vertx.vertx(vertxOptions);
+        Nd4j.getWorkspaceManager().setDebugMode(DebugMode.SPILL_EVERYTHING);
         setupVertx(vertx);
         if (isPubSub()) {
             httpServer = vertx.createHttpServer().requestHandler(getRequest());
@@ -56,42 +74,27 @@ public abstract class BaseVerticleTest {
 
         vertx.exceptionHandler(context.exceptionHandler());
 
-        org.nd4j.linalg.factory.Nd4j.getRandom().setSeed(42);
+        Nd4j.getRandom().setSeed(42);
 
-        io.vertx.core.DeploymentOptions options = new io.vertx.core.DeploymentOptions()
+        DeploymentOptions options = new DeploymentOptions()
                 .setWorker(true).setInstances(1)
                 .setWorkerPoolSize(1)
                 .setConfig(getConfigObject());
-        String verticleClassName = getVertexName();
-        String[] split = verticleClassName.split("\\.");
-        vertx.registerVerticleFactory(new io.vertx.core.spi.VerticleFactory() {
+
+        vertx.registerVerticleFactory(new VerticleFactory() {
+
             @Override
             public String prefix() {
-                return split[split.length - 1];
+                String[] split = getVertexName().split("\\.");
+                return split[split.length -1];
             }
 
             @Override
-            public io.vertx.core.Verticle createVerticle(String s, ClassLoader classLoader) throws Exception {
-                io.vertx.core.Verticle ret = (io.vertx.core.Verticle) classLoader.loadClass(verticleClassName).newInstance();
-                verticle = ret;
-                return ret;
-            }
-        });
-
-
-        vertx.registerVerticleFactory(new io.vertx.core.spi.VerticleFactory() {
-            @Override
-            public String prefix() {
-                return getVertexName();
-            }
-
-            @Override
-            public io.vertx.core.Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
-                verticle = (io.vertx.core.Verticle) classLoader.loadClass(verticleName).newInstance();
+            public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
+                verticle = (Verticle) classLoader.loadClass(verticleName).newInstance();
                 return verticle;
             }
         });
-
 
         vertx.deployVerticle(getVertexName(), options, context.asyncAssertSuccess());
     }
@@ -100,8 +103,8 @@ public abstract class BaseVerticleTest {
         return getVerticalClazz().getName();
     }
 
-    @org.junit.After
-    public void after(io.vertx.ext.unit.TestContext context) {
+    @After
+    public void after(TestContext context) {
         vertx.close(context.asyncAssertSuccess());
         if (httpServer != null)
             httpServer.close();
@@ -109,24 +112,22 @@ public abstract class BaseVerticleTest {
             normalServer.close();
     }
 
+    public Class<? extends AbstractVerticle> getVerticalClazz() {
+        return ai.konduit.serving.verticles.inference.InferenceVerticle.class;
+    }
 
-    public abstract Class<? extends io.vertx.core.AbstractVerticle> getVerticalClazz();
-
-    public int getRandomPort() throws java.io.IOException {
-        java.net.ServerSocket pubSubSocket = new java.net.ServerSocket(0);
+    public int getRandomPort() throws IOException {
+        ServerSocket pubSubSocket = new ServerSocket(0);
         int ret = pubSubSocket.getLocalPort();
         pubSubSocket.close();
         return ret;
     }
 
-    public abstract io.vertx.core.Handler<io.vertx.core.http.HttpServerRequest> getRequest();
+    public abstract Handler<HttpServerRequest> getRequest();
 
-    public abstract io.vertx.core.json.JsonObject getConfigObject() throws Exception;
+    public abstract JsonObject getConfigObject() throws Exception;
 
-    public void setupVertx(io.vertx.core.Vertx vertx) {
-
-    }
-
+    public void setupVertx(Vertx vertx) { }
 
     public boolean isPubSub() {
         return false;
