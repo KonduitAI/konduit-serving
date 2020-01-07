@@ -489,7 +489,7 @@ public class PipelineRouteDefiner {
     private void initializeSchemas(InferenceConfiguration inferenceConfiguration, boolean inputRequired) {
         if (inputSchema == null && inputRequired) {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                if (pipelineStep instanceof  PythonStep || pipelineStep
+                if (pipelineStep instanceof PmmlStep || pipelineStep instanceof PythonStep || pipelineStep
                         instanceof TransformProcessStep) {
                     inputSchema = pipelineStep.inputSchemaForName("default");
                 }
@@ -498,7 +498,7 @@ public class PipelineRouteDefiner {
 
         if (outputSchema == null) {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                if (pipelineStep instanceof  PythonStep || pipelineStep
+                if (pipelineStep instanceof PmmlStep || pipelineStep instanceof PythonStep || pipelineStep
                         instanceof TransformProcessStep) {
                     outputSchema = pipelineStep.outputSchemaForName("default");
                 }
