@@ -1,17 +1,43 @@
-import cv2
 import os
 import functools
+
+import numpy as np
 
 from .server import Server
 from .inference import PythonConfig
 from .utils import default_python_path
+from .types import Image, Json, Numpy
+
+def _type_to_konduit_type(t):
+    if t is np.ndarray:
+        return 'NDARRAY'
+    if t is float:
+        return 'FLOAT'
+
+    return 'RAW'
+
+def _type_to_data_format(t):
+    if t is Image:
+        return 'IMAGE'
+    if t is Json:
+        return 'JSON'
+    if t is Numpy:
+        return 'NUMPY'
+
+def _convert_types(d):
+    ret = {}
+
+    for key, value in d:
+        ret[key] = _type_to_konduit_type(value)
+
+    return ret
 
 def serving_config(http_port, input_data_format, output_data_format, log_timings = False):
     def serving_config_outer(cls):
         cls._konduit_config_class = True
         cls._konduit_http_port = http_port
-        cls._konduit_input_data_format = input_data_format
-        cls._konduit_output_data_format = output_data_format
+        cls._konduit_input_data_format = _type_to_data_format(input_data_format)
+        cls._konduit_output_data_format = _type_to_data_format(output_data_format)
         cls._konduit_log_timings = log_timings
 
         @functools.wraps(cls)
@@ -24,10 +50,10 @@ def serving_config(http_port, input_data_format, output_data_format, log_timings
 def serving_function(**kwargs):
     def serving_function_outer(fn):
         fn._konduit_prediction_fn = True
-        fn._konduit_inputs = fn.__annotations__
+        fn._konduit_inputs = _convert_types(fn.__annotations__)
         fn._konduit_outputs = {}
         for key, value in kwargs:
-            fn._konduit_outputs[key] = value
+            fn._konduit_outputs[key] = _type_to_konduit_type(value)
 
         @functools.wraps(fn)
         def serving_function_wrapper(*args, **kwargs):
