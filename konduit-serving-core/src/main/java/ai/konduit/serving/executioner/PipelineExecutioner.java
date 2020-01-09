@@ -115,8 +115,12 @@ public class PipelineExecutioner {
     private static RegressionMultiOutputAdapter regressionMultiOutputAdapter = new RegressionMultiOutputAdapter();
     private static RawMultiOutputAdapter rawMultiOutputAdapter = new RawMultiOutputAdapter();
 
-    public PipelineExecutioner(InferenceConfiguration inferenceConfiguration) {
+    public PipelineExecutioner(InferenceConfiguration inferenceConfiguration,
+                               Input.DataFormat inputDataFormat,
+                               PredictionType predictionType) {
         this.config = inferenceConfiguration;
+        this.inputDataFormat = inputDataFormat;
+        this.predictionType = predictionType;
     }
 
     /**
@@ -293,7 +297,7 @@ public class PipelineExecutioner {
 
         try {
             if (servingConfig.getOutputDataFormat() == Output.DataFormat.JSON) {
-                multiOutputAdapter = outputAdapterFor(config().serving().getPredictionType(), objectDetectionConfig);
+                multiOutputAdapter = outputAdapterFor(predictionType, objectDetectionConfig);
             } else {
                 log.info("Skipping initialization of multi input adapter due to binary output.");
             }
@@ -361,7 +365,7 @@ public class PipelineExecutioner {
                 multiOutputAdapter = new RegressionMultiOutputAdapter();
                 break;
             default:
-                throw new IllegalStateException("Illegal type for output type " + config.serving().getPredictionType());
+                throw new IllegalStateException("Illegal type for output type " + predictionType);
         }
 
         return multiOutputAdapter;

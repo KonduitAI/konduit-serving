@@ -321,11 +321,12 @@ public class PipelineRouteDefiner {
 
         });
 
-        // TODO: predictionType is unused, why put it into the route?
         router.post("/:predictionType/:inputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed")
                 .produces("application/json").handler(ctx -> {
+            PredictionType predictionType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
+
             String transactionUUID = ctx.get(VerticleConstants.TRANSACTION_ID);
             //need to initialize schemas for output
             initializeSchemas(inferenceConfiguration, false);
@@ -354,7 +355,7 @@ public class PipelineRouteDefiner {
 
                     pipelineExecutioner.doInference(
                             ctx,
-                            inferenceConfiguration.getServingConfig().getPredictionType(),
+                            predictionType,
                             inputs,
                             inputSchema,
                             null,
@@ -473,7 +474,7 @@ public class PipelineRouteDefiner {
             //note that we initialize this after the verticle is started
             //due to needing to sometime initialize retraining routes
             try {
-                pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration);
+                pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration, null, null);
                 pipelineExecutioner.init();
 
             } catch (Exception e) {
