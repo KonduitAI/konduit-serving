@@ -935,8 +935,6 @@ class PythonConfig(object):
     code either as string to `python_code` or as path to a Python script to `python_code_path`.
     Additionally, you can modify or extend your Python path by setting `python_path` accordingly.
 
-    :param tensor_data_types_config: konduit.TensorDataTypesConfig
-    :param model_config_type: konduit.ModelConfigType
     :param python_code: Python code as str
     :param python_code_path: full qualifying path to the Python script you want to run, as str
     :param python_inputs: list of Python input variable names
@@ -948,8 +946,6 @@ class PythonConfig(object):
     """
 
     _types_map = {
-        "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
-        "modelConfigType": {"type": ModelConfigType, "subtype": None},
         "pythonCode": {"type": str, "subtype": None},
         "pythonCodePath": {"type": str, "subtype": None},
         "pythonPath": {"type": str, "subtype": None},
@@ -963,8 +959,6 @@ class PythonConfig(object):
 
     def __init__(
         self,
-        tensor_data_types_config=None,
-        model_config_type=None,
         python_code=None,
         python_code_path=None,
         python_path=None,
@@ -974,8 +968,6 @@ class PythonConfig(object):
         return_all_inputs=None,
         setup_and_run=False,
     ):
-        self.__tensor_data_types_config = tensor_data_types_config
-        self.__model_config_type = model_config_type
         self.__python_code = python_code
         self.__python_code_path = python_code_path
         self.__python_path = python_path
@@ -984,28 +976,6 @@ class PythonConfig(object):
         self.__extra_inputs = extra_inputs
         self.__return_all_inputs = return_all_inputs
         self.__setup_and_run = setup_and_run
-
-    def _get_tensor_data_types_config(self):
-        return self.__tensor_data_types_config
-
-    def _set_tensor_data_types_config(self, value):
-        if not isinstance(value, TensorDataTypesConfig):
-            raise TypeError("tensorDataTypesConfig must be TensorDataTypesConfig")
-        self.__tensor_data_types_config = value
-
-    tensor_data_types_config = property(
-        _get_tensor_data_types_config, _set_tensor_data_types_config
-    )
-
-    def _get_model_config_type(self):
-        return self.__model_config_type
-
-    def _set_model_config_type(self, value):
-        if not isinstance(value, ModelConfigType):
-            raise TypeError("modelConfigType must be ModelConfigType")
-        self.__model_config_type = value
-
-    model_config_type = property(_get_model_config_type, _set_model_config_type)
 
     def _get_python_code(self):
         return self.__python_code
@@ -1101,18 +1071,6 @@ class PythonConfig(object):
 
     def as_dict(self):
         d = empty_type_dict(self)
-        if self.__tensor_data_types_config is not None:
-            d["tensorDataTypesConfig"] = (
-                self.__tensor_data_types_config.as_dict()
-                if hasattr(self.__tensor_data_types_config, "as_dict")
-                else self.__tensor_data_types_config
-            )
-        if self.__model_config_type is not None:
-            d["modelConfigType"] = (
-                self.__model_config_type.as_dict()
-                if hasattr(self.__model_config_type, "as_dict")
-                else self.__model_config_type
-            )
         if self.__python_code is not None:
             d["pythonCode"] = (
                 self.__python_code.as_dict()
@@ -1389,47 +1347,33 @@ class PipelineStep(object):
     """
 
     _types_map = {
-        "outputSchemas": {"type": dict, "subtype": None},
         "inputColumnNames": {"type": dict, "subtype": None},
         "outputColumnNames": {"type": dict, "subtype": None},
         "inputSchemas": {"type": dict, "subtype": None},
-        "inputNames": {"type": list, "subtype": str},
+        "outputSchemas": {"type": dict, "subtype": None},
         "outputNames": {"type": list, "subtype": str},
+        "inputNames": {"type": list, "subtype": str},
     }
     _formats_map = {
-        "inputNames": "table",
         "outputNames": "table",
+        "inputNames": "table",
     }
 
     def __init__(
         self,
-        output_schemas=None,
         input_column_names=None,
         output_column_names=None,
         input_schemas=None,
-        input_names=None,
+        output_schemas=None,
         output_names=None,
+        input_names=None,
     ):
-        self.__output_schemas = output_schemas
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__input_schemas = input_schemas
-        self.__input_names = input_names
+        self.__output_schemas = output_schemas
         self.__output_names = output_names
-
-    def _get_output_schemas(self):
-        return self.__output_schemas
-
-    def _set_output_schemas(self, value):
-        if (
-            not isinstance(value, dict)
-            and not isinstance(value, DictWrapper)
-            and not isinstance(value, DictWrapper)
-        ):
-            raise TypeError("outputSchemas must be type")
-        self.__output_schemas = value
-
-    output_schemas = property(_get_output_schemas, _set_output_schemas)
+        self.__input_names = input_names
 
     def _get_input_column_names(self):
         return self.__input_column_names
@@ -1473,17 +1417,19 @@ class PipelineStep(object):
 
     input_schemas = property(_get_input_schemas, _set_input_schemas)
 
-    def _get_input_names(self):
-        return self.__input_names
+    def _get_output_schemas(self):
+        return self.__output_schemas
 
-    def _set_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("inputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("inputNames list valeus must be str")
-        self.__input_names = value
+    def _set_output_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
 
-    input_names = property(_get_input_names, _set_input_names)
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
 
     def _get_output_names(self):
         return self.__output_names
@@ -1497,14 +1443,20 @@ class PipelineStep(object):
 
     output_names = property(_get_output_names, _set_output_names)
 
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
     def as_dict(self):
         d = empty_type_dict(self)
-        if self.__output_schemas is not None:
-            d["outputSchemas"] = (
-                self.__output_schemas.as_dict()
-                if hasattr(self.__output_schemas, "as_dict")
-                else self.__output_schemas
-            )
         if self.__input_column_names is not None:
             d["inputColumnNames"] = (
                 self.__input_column_names.as_dict()
@@ -1523,13 +1475,19 @@ class PipelineStep(object):
                 if hasattr(self.__input_schemas, "as_dict")
                 else self.__input_schemas
             )
-        if self.__input_names is not None:
-            d["inputNames"] = [
-                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
-            ]
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
         if self.__output_names is not None:
             d["outputNames"] = [
                 p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
             ]
         return d
 
@@ -3000,6 +2958,173 @@ class ImageLoadingStep(PipelineStep):
                 self.__object_detection_config.as_dict()
                 if hasattr(self.__object_detection_config, "as_dict")
                 else self.__object_detection_config
+            )
+        return d
+
+
+class CustomStep(PipelineStep):
+
+    _types_map = {
+        "inputSchemas": {"type": dict, "subtype": None},
+        "outputSchemas": {"type": dict, "subtype": None},
+        "inputNames": {"type": list, "subtype": str},
+        "outputNames": {"type": list, "subtype": str},
+        "inputColumnNames": {"type": dict, "subtype": None},
+        "outputColumnNames": {"type": dict, "subtype": None},
+        "customUdfClazz": {"type": str, "subtype": None},
+    }
+    _formats_map = {
+        "inputNames": "table",
+        "outputNames": "table",
+    }
+
+    def __init__(
+        self,
+        input_schemas=None,
+        output_schemas=None,
+        input_names=None,
+        output_names=None,
+        input_column_names=None,
+        output_column_names=None,
+        custom_udf_clazz=None,
+    ):
+        self.__input_schemas = input_schemas
+        self.__output_schemas = output_schemas
+        self.__input_names = input_names
+        self.__output_names = output_names
+        self.__input_column_names = input_column_names
+        self.__output_column_names = output_column_names
+        self.__custom_udf_clazz = custom_udf_clazz
+
+    def _get_input_schemas(self):
+        return self.__input_schemas
+
+    def _set_input_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputSchemas must be type")
+        self.__input_schemas = value
+
+    input_schemas = property(_get_input_schemas, _set_input_schemas)
+
+    def _get_output_schemas(self):
+        return self.__output_schemas
+
+    def _set_output_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
+
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
+
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
+    def _get_output_names(self):
+        return self.__output_names
+
+    def _set_output_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("outputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("outputNames list valeus must be str")
+        self.__output_names = value
+
+    output_names = property(_get_output_names, _set_output_names)
+
+    def _get_input_column_names(self):
+        return self.__input_column_names
+
+    def _set_input_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputColumnNames must be type")
+        self.__input_column_names = value
+
+    input_column_names = property(_get_input_column_names, _set_input_column_names)
+
+    def _get_output_column_names(self):
+        return self.__output_column_names
+
+    def _set_output_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputColumnNames must be type")
+        self.__output_column_names = value
+
+    output_column_names = property(_get_output_column_names, _set_output_column_names)
+
+    def _get_custom_udf_clazz(self):
+        return self.__custom_udf_clazz
+
+    def _set_custom_udf_clazz(self, value):
+        if not isinstance(value, str):
+            raise TypeError("customUdfClazz must be str")
+        self.__custom_udf_clazz = value
+
+    custom_udf_clazz = property(_get_custom_udf_clazz, _set_custom_udf_clazz)
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__input_schemas is not None:
+            d["inputSchemas"] = (
+                self.__input_schemas.as_dict()
+                if hasattr(self.__input_schemas, "as_dict")
+                else self.__input_schemas
+            )
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
+            ]
+        if self.__output_names is not None:
+            d["outputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        if self.__input_column_names is not None:
+            d["inputColumnNames"] = (
+                self.__input_column_names.as_dict()
+                if hasattr(self.__input_column_names, "as_dict")
+                else self.__input_column_names
+            )
+        if self.__output_column_names is not None:
+            d["outputColumnNames"] = (
+                self.__output_column_names.as_dict()
+                if hasattr(self.__output_column_names, "as_dict")
+                else self.__output_column_names
+            )
+        if self.__custom_udf_clazz is not None:
+            d["customUdfClazz"] = (
+                self.__custom_udf_clazz.as_dict()
+                if hasattr(self.__custom_udf_clazz, "as_dict")
+                else self.__custom_udf_clazz
             )
         return d
 

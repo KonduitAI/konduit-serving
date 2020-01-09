@@ -203,8 +203,6 @@ public class PythonDocStrings {
                         "    code either as string to `python_code` or as path to a Python script to `python_code_path`.\n" +
                         "    Additionally, you can modify or extend your Python path by setting `python_path` accordingly.\n" +
                         "\n" +
-                        "    :param tensor_data_types_config: konduit.TensorDataTypesConfig\n" +
-                        "    :param model_config_type: konduit.ModelConfigType\n" +
                         "    :param python_code: Python code as str\n" +
                         "    :param python_code_path: full qualifying path to the Python script you want to run, as str\n" +
                         "    :param python_inputs: list of Python input variable names\n" +

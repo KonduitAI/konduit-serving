@@ -107,7 +107,7 @@ public class CodeGen {
             ObjectNode objectNode = (ObjectNode) jsonNode;
             objectNode.putObject("definitions");
             objectNode.put("title",clazz.getSimpleName());
-            File classJson = new File("schema-%s.json", clazz.getSimpleName());
+            File classJson = new File(String.format("schema-%s.json", clazz.getSimpleName()));
             if(classJson.exists()) {
                 boolean deleted = classJson.delete();
                 System.out.println(deleted);
