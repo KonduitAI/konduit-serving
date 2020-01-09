@@ -1,0 +1,8 @@
+serving:
+  http_port: 1337
+steps:
+  custom_step_one:
+    type: CUSTOM
+    custom_udf_clazz: io.konduit.serving.custom.CustomStepClass # This is a dummy class name just to test the custom step initialization from yaml file
+client:
+  port: 1337

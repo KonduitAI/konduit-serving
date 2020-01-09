@@ -78,6 +78,13 @@ def test_tensor_flow_serving():
     del server
 
 
+@pytest.mark.unit
+def test_custom_step_serving():
+    file_path = "yaml/konduit_custom_step.yaml"
+    server = server_from_file(file_path=file_path)
+    del server
+
+
 @pytest.mark.integration
 def test_yaml_server_python_prediction():
     try:
