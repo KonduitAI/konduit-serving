@@ -195,6 +195,8 @@ def get_step(step_config):
         step = get_model_step(step_config, step_type)
     elif step_type == 'IMAGE_LOADING':
         step = get_image_load_step(step_config)
+    elif step_type == 'CUSTOM':
+        step = get_custom_step(step_config)
     else:
         raise Exception("Step type of type " + step_type + " currently not supported.")
     return step
@@ -209,6 +211,7 @@ def get_python_step(step_config):
     python_config = PythonConfig(**step_config)
     step = PythonStep().step(python_config)
     return step
+
 
 def get_image_load_step(step_config):
     """Get a ImageLoadingStep from a configuration object
@@ -233,7 +236,7 @@ def get_model_step(step_config, step_type):
     )
     if (
         step_type == "TENSORFLOW"
-    ):  # TF has to extra properties, all others are identical
+    ):  # TF has two extra properties, all others are identical
         model_config = TensorFlowConfig(
             config_proto_path=pop_data(step_config, "config_proto_path"),
             saved_model_config=pop_data(step_config, "saved_model_config"),
@@ -248,6 +251,16 @@ def get_model_step(step_config, step_type):
     step_config["model_config"] = model_config
     step_config = extract_parallel_inference(step_config)
     step = ModelStep(**step_config)
+    return step
+
+
+def get_custom_step(step_config):
+    """Get a CustomStep from a configuration object
+
+    :param step_config: python dictionary with properties to create a PipelineStep
+    :return: konduit.inference.CustomStep instance.
+    """
+    step = CustomStep(**step_config)
     return step
 
 
