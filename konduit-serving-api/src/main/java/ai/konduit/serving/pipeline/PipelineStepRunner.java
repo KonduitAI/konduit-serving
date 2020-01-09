@@ -23,7 +23,7 @@
 package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.pipeline.step.CustomPipelineStep;
+import ai.konduit.serving.pipeline.step.CustomStep;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.Writable;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -45,7 +45,7 @@ import java.util.Map;
  * {@link Record} and returns 1 or more output {@link Record}.
  * <p>
  * There are a  number of implementations. You can also create a custom one
- * using the {@link CustomPipelineStep} and {@link CustomPipelineStepUDF}
+ * using the {@link CustomStep} and {@link CustomStepUDF}
  * definitions. This is recommended as the easiest way of creating your own custom ones.
  * Otherwise, we try to provide any number of off the shelf ones
  * for running python scripts or machine learning models.

@@ -22,14 +22,14 @@
 
 package ai.konduit.serving.pipeline;
 
-import ai.konduit.serving.pipeline.step.CustomPipelineStep;
+import ai.konduit.serving.pipeline.step.CustomStep;
 import org.datavec.api.records.Record;
 
 /**
  * A user defined function for use with the
- * {@link CustomPipelineStep}. This is where
+ * {@link CustomStep}. This is where
  * a user defines an extension for use within a
- * {@link CustomPipelineStep}.
+ * {@link CustomStep}.
  * <p>
  * A user defined function should take in an
  * array of {@link Record} and output an array of {@link Record}
@@ -41,12 +41,12 @@ import org.datavec.api.records.Record;
  *
  * @author Adam Gibson
  */
-public interface CustomPipelineStepUDF {
+public interface CustomStepUDF {
 
 
     /**
      * The user defined function where a user can define custom behavior
-     * for a {@link CustomPipelineStep}
+     * for a {@link CustomStep}
      *
      * @param input the input records (generally 1 record per input name for the pipeline step)
      * @return the output records (generally 1 record per output name for the pipeline step)

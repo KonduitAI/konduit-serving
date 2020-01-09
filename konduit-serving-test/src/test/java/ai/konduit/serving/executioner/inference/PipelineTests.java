@@ -27,7 +27,6 @@ import ai.konduit.serving.pipeline.PmmlInferenceExecutionerStepRunner;
 import ai.konduit.serving.pipeline.step.*;
 import ai.konduit.serving.pipeline.steps.*;
 import ai.konduit.serving.util.SchemaTypeUtils;
-import org.bytedeco.tensorflow.Mod;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.MathOp;
 import org.datavec.api.transform.TransformProcess;
@@ -128,7 +127,7 @@ public class PipelineTests {
         ArrayConcatenationStep arrayConcatStep = ArrayConcatenationStep.builder().build();
         assertEquals(ArrayConcatenationStepRunner.class.getName(), arrayConcatStep.pipelineStepClazz());
 
-        CustomPipelineStep customStep = CustomPipelineStep.builder().build();
+        CustomStep customStep = CustomStep.builder().build();
         assertEquals(CustomStepRunner.class.getName(), customStep.pipelineStepClazz());
 
         JsonExpanderTransformStep jsonStep = JsonExpanderTransformStep.builder().build();

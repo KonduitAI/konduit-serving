@@ -22,9 +22,9 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.CustomPipelineStepUDF;
+import ai.konduit.serving.pipeline.CustomStepUDF;
 import ai.konduit.serving.pipeline.BasePipelineStep;
-import ai.konduit.serving.pipeline.step.CustomPipelineStep;
+import ai.konduit.serving.pipeline.step.CustomStep;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.Writable;
 
@@ -34,13 +34,13 @@ import static java.lang.Class.forName;
 
 public class CustomStepRunner extends BaseStepRunner {
 
-    private CustomPipelineStepUDF customPipelineStepUDF;
+    private CustomStepUDF customStepUDF;
 
     public CustomStepRunner(BasePipelineStep pipelineStep) {
         super(pipelineStep);
-        CustomPipelineStep customPipelineStep = (CustomPipelineStep) pipelineStep;
+        CustomStep customStep = (CustomStep) pipelineStep;
         try {
-            this.customPipelineStepUDF = (CustomPipelineStepUDF) forName(customPipelineStep.getCustomUdfClazz()).newInstance();
+            this.customStepUDF = (CustomStepUDF) forName(customStep.getCustomUdfClazz()).newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -48,7 +48,7 @@ public class CustomStepRunner extends BaseStepRunner {
 
     @Override
     public Record[] transform(Record[] input) {
-        return customPipelineStepUDF.udf(input);
+        return customStepUDF.udf(input);
     }
 
     @Override
