@@ -1167,12 +1167,12 @@ class ServingConfig(object):
     def __init__(
         self,
         http_port=None,
-        listen_host=None,
+        listen_host="localhost",
         input_data_format="NUMPY",
         output_data_format="NUMPY",
         prediction_type="RAW",
         uploads_directory="file-uploads/",
-        log_timings=None,
+        log_timings=False,
         metric_types=None,
     ):
         self.__http_port = http_port
