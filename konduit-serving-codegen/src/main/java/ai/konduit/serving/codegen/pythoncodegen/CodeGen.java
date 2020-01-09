@@ -198,7 +198,7 @@ public class CodeGen {
         FileUtils.writeStringToFile(newModule, sb,Charset.defaultCharset(),false);
 
         Process autopepLinting = runtime.exec("autopep8 --in-place " + newModule);
-        autopepLinting.waitFor(8, TimeUnit.SECONDS);
+        autopepLinting.waitFor(12, TimeUnit.SECONDS);
         if(autopepLinting.exitValue() != 0) {
             String errorMessage = "";
             try(InputStream is = autopepLinting.getInputStream()) {
