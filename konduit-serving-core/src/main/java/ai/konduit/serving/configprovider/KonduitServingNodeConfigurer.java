@@ -46,11 +46,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.UUID;
 
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
 import static java.lang.System.setProperty;
 
 import lombok.*;
+import org.apache.commons.lang3.SystemUtils;
+import org.bytedeco.systems.global.*;
 
 /**
  * Core node configurer based on both command line and builder arguments.
@@ -82,61 +85,98 @@ public class KonduitServingNodeConfigurer {
         LoggerFactory.getLogger(LoggerFactory.class); // Required for Logback to work in Vertx
     }
 
-    @Parameter(names = {"--configHost"}, help = true, description = "The host for downloading the configuration from")
+    @Parameter(names = {"--configHost"},
+            description = "The host for downloading the configuration from")
     private String configHost;
-    @Parameter(names = {"--configPort"}, help = true, description = "The port for downloading the configuration from")
+
+    @Parameter(names = {"--configPort"},
+            description = "The port for downloading the configuration from")
     private int configPort;
+
     @Builder.Default
-    @Parameter(names = {"--eventBusHost"}, help = true, description = "The event bus host for connecting to other vertx nodes.")
+    @Parameter(names = {"--eventBusHost"},
+            description = "The event bus host for connecting to other vertx nodes.")
     private String eventBusHost = "0.0.0.0";
+
     @Builder.Default
-    @Parameter(names = {"--eventBusPort"}, help = true, description = "The event bus port for connecting to other vertx nodes.")
+    @Parameter(names = {"--eventBusPort"},
+            description = "The event bus port for connecting to other vertx nodes.")
     private int eventBusPort = 0;
+
     @Builder.Default
-    @Parameter(names = {"--eventBusConnectTimeout"}, help = true, description = "The timeout for connecting to an event bus.")
+    @Parameter(names = {"--eventBusConnectTimeout"},
+            description = "The timeout for connecting to an event bus.")
     private int eventBusConnectTimeout = 20000;
-    @Parameter(names = {"--configStoreType"}, help = true, description = "The configuration store type (usually http " +
+
+    @Parameter(names = {"--configStoreType"},
+            description = "The configuration store type (usually http " +
             "or file) where the configuration is stored")
     @Builder.Default
     private String configStoreType = "file";
+
     @Builder.Default
-    @Parameter(names = {"--configPath"}, help = true, description = "The path to the configuration. With http, this " +
+    @Parameter(names = {"--configPath"},
+            description = "The path to the configuration. With http, this " +
             "will be the path after host:port. With files, this will be an absolute path.")
-    private String configPath = "/srv/";
+    private String configPath = new File(System.getProperty("user.dir"), "config.json").getAbsolutePath();
+
     @Builder.Default
-    @Parameter(names = {"--workerNode"}, help = true, description = "Whether this is a worker node or not")
+    @Parameter(names = {"--workerNode"},
+            description = "Whether this is a worker node or not")
     private boolean workerNode = true;
+
     @Builder.Default
-    @Parameter(names = {"--ha"}, help = true, description = "Whether this node is deployed as Highly available or not.")
+    @Parameter(names = {"--ha"},
+            description = "Whether this node is deployed as Highly available or not.")
     private boolean ha = false;
+
     @Builder.Default
-    @Parameter(names = {"--numInstances"}, help = true, description = "The number of instances to deploy of this verticle.")
+    @Parameter(names = {"--numInstances"},
+            description = "The number of instances to deploy of this verticle.")
     private int numInstances = 1;
+
     @Builder.Default
-    @Parameter(names = {"--workerPoolSize"}, help = true, description = "The number of workers for use with this verticle.")
+    @Parameter(names = {"--workerPoolSize"},
+            description = "The number of workers for use with this verticle.")
     private int workerPoolSize = 20;
+
     @Builder.Default
-    @Parameter(names = {"--verticleClassName"}, help = true, description = "The fully qualified class name to the verticle to be used.")
+    @Parameter(names = {"--verticleClassName"},
+            description = "The fully qualified class name to the verticle to be used.")
     private String verticleClassName = InferenceVerticle.class.getName();
     @Builder.Default
-    @Parameter(names = "--vertxWorkingDirectory", help = true, description = "The absolute path to use for vertx. This defaults to the user's home directory.")
+    @Parameter(names = "--vertxWorkingDirectory",
+            description = "The absolute path to use for vertx. This defaults to the user's home directory.")
     private String vertxWorkingDirectory = System.getProperty("user.home");
-    private MeterRegistry registry = BackendRegistries.getDefaultNow();
+
     @Builder.Default
-    @Parameter(names = "--pidFile", help = true, description = "The absolute path to use for creating the pid file. This defaults to the <current_dir>/konduit-serving.pid")
+    @Parameter(names = "--pidFile",
+            description = "The absolute path to use for creating the pid file. This defaults to the <current_dir>/konduit-serving.pid")
     private String pidFile = new File(System.getProperty("user.dir"), "konduit-serving.pid").getAbsolutePath();
+
     @Builder.Default
-    @Parameter(names = {"--eventLoopTimeout"}, help = true, description = "The event loop timeout")
+    @Parameter(names = {"--eventLoopTimeout"},
+            description = "The event loop timeout")
     private long eventLoopTimeout = 120000;
+
     @Builder.Default
-    @Parameter(names = {"--eventLoopExecutionTimeout"}, help = true, description = "The event loop timeout")
+    @Parameter(names = {"--eventLoopExecutionTimeout"},
+            description = "The event loop timeout")
     private long eventLoopExecutionTimeout = 120000;
+
     @Builder.Default
-    @Parameter(names = {"--isClustered"}, help = true, description = "Whether an instance is clustered or not")
+    @Parameter(names = {"--isClustered"},
+            description = "Whether an instance is clustered or not")
     private boolean isClustered = false;
-    private ConfigStoreOptions httpStore;
+
+    @Parameter(names = {"--help", "-h"}, arity = 0, help = true,
+            description = "See the help menu")
+    private boolean help = false;
+
+    private MeterRegistry registry = BackendRegistries.getDefaultNow();
+    private ConfigStoreOptions configStoreOptions;
     private DeploymentOptions deploymentOptions;
-    private ConfigRetrieverOptions options;
+    private ConfigRetrieverOptions configRetrieverOptions;
     private VertxOptions vertxOptions;
     private InferenceConfiguration inferenceConfiguration;
 
@@ -150,7 +190,7 @@ public class KonduitServingNodeConfigurer {
      * (vertx.logger-delegate-factory-class-name) gets set to io.vertx.core.logging.SLF4JLogDelegateFactory
      * The {@link #registry} field and associated prometheus configuration gets setup
      * The {@link #vertxOptions} event but options also get set
-     * Lastly the {@link #options} gets set for the configuration
+     * Lastly the {@link #configRetrieverOptions} gets set for the configuration
      */
     public void setupVertxOptions() {
         File workingDir = new File(vertxWorkingDirectory);
@@ -160,7 +200,6 @@ public class KonduitServingNodeConfigurer {
         }
 
         try {
-
             long pid = getPid();
             File write = new File(pidFile);
             if (!write.getParentFile().exists()) {
@@ -220,15 +259,13 @@ public class KonduitServingNodeConfigurer {
             }
         }
 
-        httpStore = new ConfigStoreOptions()
+        configStoreOptions = new ConfigStoreOptions()
                 .setType(configStoreType)
                 .setOptional(false)
                 .setConfig(new JsonObject().put("path", configPath));
 
-
-        options = new ConfigRetrieverOptions()
-                .addStore(httpStore);
-
+        configRetrieverOptions = new ConfigRetrieverOptions()
+                .addStore(configStoreOptions);
     }
 
     /**
@@ -263,7 +300,7 @@ public class KonduitServingNodeConfigurer {
                 throw new IllegalStateException("Path " + tmpFile.getAbsolutePath() + " does not exist!");
             } else if (configPath.endsWith(".yml")) {
                 File configInputYaml = new File(configPath);
-                File tmpConfigJson = new File(configInputYaml.getParent(), java.util.UUID.randomUUID() + "-config.json");
+                File tmpConfigJson = new File(configInputYaml.getParent(), UUID.randomUUID() + "-config.json");
                 log.info("Rewriting yml " + configPath + " to json " + tmpConfigJson + " . This file will disappear after server is stopped.");
                 tmpConfigJson.deleteOnExit();
 
@@ -284,16 +321,15 @@ public class KonduitServingNodeConfigurer {
 
             config.put("path", configPath);
         }
-
     }
 
     private int getPid() throws UnsatisfiedLinkError {
-        if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
-            return org.bytedeco.systems.global.windows.GetCurrentProcessId();
-        } else if (org.apache.commons.lang3.SystemUtils.IS_OS_MAC) {
-            return org.bytedeco.systems.global.macosx.getpid();
+        if (SystemUtils.IS_OS_WINDOWS) {
+            return windows.GetCurrentProcessId();
+        } else if (SystemUtils.IS_OS_MAC) {
+            return macosx.getpid();
         } else {
-            return org.bytedeco.systems.global.linux.getpid();
+            return linux.getpid();
         }
     }
 }

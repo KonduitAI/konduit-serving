@@ -171,7 +171,6 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
         };
     }
 
-
     /**
      * Define a single, named step for a Python pipeline.
      *
@@ -310,7 +309,6 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
 
         return this;
     }
-
 
     @Override
     public String pipelineStepClazz() {

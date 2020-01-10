@@ -62,7 +62,6 @@ public class BatchInputParser {
     private Map<String, ConverterArgs> converterArgs;
     private List<String> inputParts;
 
-
     /**
      * Create a batch from the {@link RoutingContext}
      *
@@ -74,14 +73,14 @@ public class BatchInputParser {
     public Record[] createBatch(RoutingContext routingContext) throws IOException {
         //partition the input content by name
         Map<String, List<BatchPartInfo>> partInfo = partInfoForUploads(routingContext);
-        if (partInfo == null || partInfo.isEmpty()) {
+        if (partInfo.isEmpty()) {
             throw new IllegalArgumentException("No parts resolved for file uploads!");
-        } else if (!partInfo.containsKey(inputParts.get(0))) {
+        } else if (!inputParts.containsAll(partInfo.keySet())) {
             throw new IllegalArgumentException("Illegal part info resolved. Part info keys were " + partInfo.keySet() + " while input parts were " + inputParts);
         }
 
-
         int batchSize = partInfo.get(inputParts.get(0)).size();
+
         //batch size
         Record[] inputBatches = new Record[batchSize];
         for (int j = 0; j < inputBatches.length; j++) {
@@ -95,7 +94,6 @@ public class BatchInputParser {
                 inputBatches[j].getRecord().add(null);
             }
         }
-
 
         Map<Integer, List<List<Writable>>> missingIndices = new LinkedHashMap<>();
         for (int i = 0; i < inputParts.size(); i++) {
@@ -115,30 +113,21 @@ public class BatchInputParser {
                 if (convert instanceof Writable) {
                     Writable writable = (Writable) convert;
                     inputBatches[j].getRecord().set(i, writable);
-
                 } else {
                     ArrowWritableRecordBatch arrow = (ArrowWritableRecordBatch) convert;
                     missingIndices.put(j, arrow);
                 }
-
             }
         }
 
         if (!missingIndices.isEmpty()) {
             List<Record> newRetRecords = new ArrayList<>();
-            List<Record> oldRecords = new ArrayList<>();
-            for (int i = 0; i < batchSize; i++) {
-                if (inputBatches[i] != null) {
-                    oldRecords.add(inputBatches[i]);
-                }
-            }
 
             for (Map.Entry<Integer, List<List<Writable>>> entry : missingIndices.entrySet()) {
                 for (List<Writable> record : entry.getValue()) {
                     newRetRecords.add(new org.datavec.api.records.impl.Record(record, null));
                 }
             }
-
 
             return newRetRecords.toArray(new Record[newRetRecords.size()]);
         }
@@ -176,7 +165,11 @@ public class BatchInputParser {
             //verify against the name in the configuration and set it to that
             if (name.contains(" ")) {
                 name = name.replace(" ", ":");
-                if (!inputParts.contains(name)) {
+                String inputName = name;
+                if(inputName.contains("[")) {
+                    inputName = inputName.substring(0, name.lastIndexOf("["));
+                }
+                if (!inputParts.contains(inputName)) {
                     throw new IllegalStateException("Illegal name for multi part passed in " + upload.name());
                 } else {
                     log.warn("Corrected input name " + upload.name() + " to " + name);

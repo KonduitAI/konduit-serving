@@ -127,7 +127,5 @@ public class TestPythonSetupRun extends BaseMultiNumpyVerticalTest {
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray value = nd.getNdArray();
         assertEquals(4, value.getDouble(0), 1e-1);
-
     }
-
 }

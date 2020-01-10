@@ -6,23 +6,27 @@ import ai.konduit.serving.configprovider.KonduitServingNodeConfigurer;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.jayway.restassured.response.Response;
-import net.jodah.concurrentunit.Waiter;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.nio.charset.Charset;
 
 import static com.jayway.restassured.RestAssured.given;
 
+@RunWith(VertxUnitRunner.class)
 public class KonduitOrchestrationMainTest {
 
     @Test
-    public void testClusterRun() throws Exception {
-        final Waiter waiter = new Waiter();
+    public void testClusterRun(TestContext testContext) throws Exception {
+        Async async = testContext.async();
 
-        HazelcastInstance hzInstance = Hazelcast.newHazelcastInstance();
-        Thread.sleep(10000);
+        //HazelcastInstance hzInstance = Hazelcast.newHazelcastInstance();
+        //Thread.sleep(10000);
 
         int port = getRandomPort();
 
@@ -56,18 +60,16 @@ public class KonduitOrchestrationMainTest {
                                 .extract().response();
                         System.out.println(response.body().prettyPrint());
 
-                        waiter.resume();
+                        async.complete();
                     } catch (Exception e) {
-                        waiter.fail("Orchestration main server failed to start." + e);
+                        testContext.fail("Orchestration main server failed to start." + e);
                     }
                 })
                 .onFailure(() -> {
-                    waiter.fail("Orchestration main server failed to start.");
+                    testContext.fail("Orchestration main server failed to start.");
                 })
                 .build()
                 .runMain(configurer);
-
-        waiter.await(60000);
     }
 
     public int getRandomPort() throws java.io.IOException {
