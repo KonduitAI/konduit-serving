@@ -30,6 +30,7 @@ class Server(object):
         serving_config=None,
         steps=None,
         extra_start_args="-Xmx8g",
+        extra_jar_args=None,
         config_path="config.json",
         jar_path=None,
         pid_file_path="konduit-serving.pid",
@@ -51,6 +52,7 @@ class Server(object):
         :param serving_config: ServingConfig instance
         :param steps: list (or single) PipelineSteps
         :param extra_start_args: list of string arguments to start the process with
+        :param extra_jar_args: extra jar files to add to the classpath
         :param config_path: path to write the config object to (as json)
         :param jar_path: path to the konduit uberjar
         """
@@ -77,11 +79,19 @@ class Server(object):
         if extra_start_args is None:
             extra_start_args = []
 
+        if extra_jar_args is None:
+            extra_jar_args = []
+
         # Handle singular element case
         if type(extra_start_args) is not list:
             self.extra_start_args = [extra_start_args]
         else:
             self.extra_start_args = extra_start_args
+
+        if type(extra_jar_args) is not list:
+            self.extra_jar_args = [extra_jar_args]
+        else:
+            self.extra_jar_args = extra_jar_args
 
     def get_client(self, output_data_format=None):
         """Get a Konduit Client instance from this Server instance.
@@ -222,12 +232,15 @@ class Server(object):
         :param absolute_path: absolute path of the configuration file
         :return: concatenated string arguments
         """
+        classpath = [self.jar_path]
+        classpath.extend(self.extra_jar_args)
+
         args = ["java"]
         # Pass extra jvm arguments such as memory.
         if self.extra_start_args:
             args.extend(self.extra_start_args)
         args.append("-cp")
-        args.append(self.jar_path)
+        args.append(os.pathsep.join(classpath))
         args.append("ai.konduit.serving.configprovider.KonduitServingMain")
         args.append("--pidFile")
         args.append(os.path.abspath(self.pid_file_path))

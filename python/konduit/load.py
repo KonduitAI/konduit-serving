@@ -121,6 +121,7 @@ def server_from_file(file_path, start_server=False, use_yaml=True):
     serving_data = data.get("serving", None)
 
     extra_start_args = pop_data(serving_data, "extra_start_args")
+    extra_jar_args = pop_data(serving_data, "extra_jar_args")
     jar_path = pop_data(serving_data, "jar_path")
     config_path = pop_data(serving_data, "config_path")
     if not config_path:
@@ -137,6 +138,7 @@ def server_from_file(file_path, start_server=False, use_yaml=True):
         serving_config=serving_config,
         steps=steps,
         extra_start_args=extra_start_args,
+        extra_jar_args=extra_jar_args,
         jar_path=jar_path,
         config_path=config_path,
     )
