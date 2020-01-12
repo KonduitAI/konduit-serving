@@ -94,16 +94,28 @@ if __name__ == "__main__":
     subprocess.call(command, shell=sys.platform.startswith('win'), cwd=args.source)
 
     # Copy the jar file to the path specified by the "target" argument
-    copyfile(
-        os.path.join(
-            args.source,
-            "konduit-serving-uberjar",
-            "target",
-            "konduit-serving-uberjar-{}-{}-{}-{}.jar"\
-            .format(version[0], args.spin, args.os, arch),
-        ),
-        os.path.join(args.source, args.target),
-    )
+    if arch != 'gpu':
+        copyfile(
+            os.path.join(
+                args.source,
+                "konduit-serving-uberjar",
+                "target",
+                "konduit-serving-uberjar-{}-{}-{}-{}.jar"\
+                .format(version[0], args.spin, args.os, arch),
+            ),
+            os.path.join(args.source, args.target),
+        )
+    else:
+        copyfile(
+            os.path.join(
+                args.source,
+                "konduit-serving-uberjar",
+                "target",
+                "konduit-serving-uberjar-{}-{}-{}.jar" \
+                    .format(version[0], args.spin, args.os),
+                    ),
+            os.path.join(args.source, args.target),
+        )
 
     # Copy the built jar file to the "python/tests" folder if it exists.
     if os.path.isdir(os.path.join(args.source, "python", "tests")):
