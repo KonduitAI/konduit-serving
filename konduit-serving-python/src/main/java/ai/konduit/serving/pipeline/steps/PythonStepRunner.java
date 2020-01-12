@@ -23,8 +23,12 @@
 package ai.konduit.serving.pipeline.steps;
 
 import ai.konduit.serving.executioner.Pipeline;
+import org.datavec.api.transform.schema.Schema;
+import org.datavec.api.transform.schema.Schema.Builder;
+import org.datavec.python.NumpyArray;
 import org.datavec.python.PythonExecutioner;
 import org.datavec.python.PythonTransform;
+import org.datavec.python.PythonTransform.PythonTransformBuilder;
 import org.datavec.python.PythonVariables;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
@@ -36,6 +40,7 @@ import org.datavec.api.records.Record;
 import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.writable.Writable;
 import org.datavec.local.transforms.LocalTransformExecutor;
+import org.datavec.python.PythonVariables.Type;
 import org.nd4j.base.Preconditions;
 
 import java.io.File;
@@ -80,13 +85,13 @@ import java.util.Map;
 public class PythonStepRunner extends BaseStepRunner {
 
     private Map<String, PythonTransform> pythonTransform;
-    private Map<String, TransformProcess> transformProcesses;
+    //private Map<String, TransformProcess> transformProcesses;
 
     public PythonStepRunner(PipelineStep pipelineStep) {
         super(pipelineStep);
         PythonStep pythonConfig = (PythonStep) pipelineStep;
         pythonTransform = new HashMap<>();
-        transformProcesses = new HashMap<>();
+        //transformProcesses = new HashMap<>();
         boolean setPath = false;
         for (Map.Entry<String, PythonConfig> configEntry : pythonConfig.getPythonConfigs().entrySet()) {
             Preconditions.checkState(pipelineStep.hasInputName(configEntry.getKey()),
@@ -112,24 +117,80 @@ public class PythonStepRunner extends BaseStepRunner {
 
             Preconditions.checkNotNull(code, "No code to run!");
             Preconditions.checkState(!code.isEmpty(), "Code resolved to an empty string!");
-            PythonTransform pythonTransform = PythonTransform.builder()
-                    .code(code)
+            PythonTransformBuilder pythonTransformBuilder = PythonTransform.builder();
+            pythonTransformBuilder.code(code)
                     .returnAllInputs(currConfig.isReturnAllInputs())
-                    .setupAndRun(currConfig.isSetupAndRun())
-                    .inputs(currConfig.getPythonInputs() != null ? PythonVariables.schemaFromMap(currConfig.getPythonInputs()) : null)
-                    .outputs(currConfig.getPythonOutputs() != null ? PythonVariables.schemaFromMap(currConfig.getPythonOutputs()) : null)
-                    .inputSchema(pythonConfig.inputSchemaForName(configEntry.getKey()))
-                    .outputSchema(pythonConfig.outputSchemaForName(configEntry.getKey()))
-                    .build();
+                    .setupAndRun(currConfig.isSetupAndRun());
+            PythonVariables pythonVariables = null;
+            if(currConfig.getPythonInputs() != null) {
+                pythonVariables = PythonVariables.schemaFromMap(currConfig.getPythonInputs());
+                pythonTransformBuilder.inputs(pythonVariables);
+                pythonTransformBuilder.inputSchema(schemaForVariables(pythonVariables));
+
+            }
+
+            if(currConfig.getPythonOutputs() != null) {
+                PythonVariables outputs = PythonVariables.schemaFromMap(currConfig.getPythonOutputs());
+                if(outputs.isEmpty()) {
+                    pythonTransformBuilder.outputs(pythonVariables);
+                    pythonTransformBuilder.outputSchema(schemaForVariables(pythonVariables));
+                }
+                else {
+                    pythonTransformBuilder.outputs(outputs);
+                    pythonTransformBuilder.outputSchema(schemaForVariables(outputs));
+                }
+
+
+            }
+
+            PythonTransform pythonTransform =  pythonTransformBuilder.build();
             this.pythonTransform.put(configEntry.getKey(), pythonTransform);
-            TransformProcess transformProcess = new TransformProcess.Builder(pythonConfig.inputSchemaForName(configEntry.getKey()))
+            /*TransformProcess transformProcess = new TransformProcess.Builder(pythonTransform.getInputSchema())
                     .transform(pythonTransform)
-                    .build();
-            this.transformProcesses.put(configEntry.getKey(), transformProcess);
+                    .build();*/
+            // this.transformProcesses.put(configEntry.getKey(), transformProcess);
         }
 
         PythonExecutioner.init();
     }
+
+
+    protected Schema schemaForVariables(PythonVariables pythonVariables) {
+        Schema.Builder schemaBuilder = new Schema.Builder();
+        String[] varNames = pythonVariables.getVariables();
+        for (int i = 0; i < varNames.length; i++) {
+            String name = varNames[i];
+            PythonVariables.Type pyType = pythonVariables.getType(name);
+            switch (pyType){
+                case INT:
+                    schemaBuilder.addColumnLong(name);
+                    break;
+                case FLOAT:
+                    schemaBuilder.addColumnDouble(name);
+                    break;
+                case STR:
+                case DICT:
+                case LIST:
+                    schemaBuilder.addColumnString(name);
+                    break;
+                case NDARRAY:
+                    NumpyArray arr = pythonVariables.getNDArrayValue(name);
+                    if(arr == null)
+                        schemaBuilder.addColumnNDArray(name,new long[]{1,1});
+                    else
+                        schemaBuilder.addColumnNDArray(name, arr.getShape());
+                    break;
+                case BOOL:
+                    schemaBuilder.addColumnBoolean(name);
+                    break;
+                default:
+                    throw new IllegalStateException("Unable to support type " + pyType.name());
+            }
+        }
+
+        return schemaBuilder.build();
+    }
+
 
     @Override
     public void destroy() {
@@ -142,14 +203,23 @@ public class PythonStepRunner extends BaseStepRunner {
     public Record[] transform(Record[] input) {
         Record[] ret = new Record[input.length];
         for (int i = 0; i < ret.length; i++) {
-            if (transformProcesses.containsKey(pipelineStep.inputNameAt(i))) {
+            if (pythonTransform.containsKey(pipelineStep.inputNameAt(i))) {
+                PythonTransform transformProcess = pythonTransform.get(pipelineStep.inputNameAt(i));
+                Preconditions.checkState(input[i].getRecord() != null && !input[i].getRecord().isEmpty(), "Record should not be empty!");
+                List<Writable> execute = transformProcess.map(input[i].getRecord());
+                ret[i] = new org.datavec.api.records.impl.Record(execute, null);
+            } else {
+                ret[i] = input[i];
+            }
+
+        /*    if (transformProcesses.containsKey(pipelineStep.inputNameAt(i))) {
                 TransformProcess transformProcess = transformProcesses.get(pipelineStep.inputNameAt(i));
                 Preconditions.checkState(input[i].getRecord() != null && !input[i].getRecord().isEmpty(), "Record should not be empty!");
                 List<List<Writable>> execute = LocalTransformExecutor.execute(Arrays.asList(input[i].getRecord()), transformProcess);
                 ret[i] = new org.datavec.api.records.impl.Record(execute.get(0), null);
             } else {
                 ret[i] = input[i];
-            }
+            }*/
         }
 
         log.debug("Post python transform execution");

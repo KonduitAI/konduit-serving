@@ -1,12 +1,11 @@
 ## Tar module
 
-This module contains a configuration for creating an uber jar based on
-the model server.
+This module contains a configuration for creating a tar distribution of konduit-serving
 
-In order to build the tar file, the generate-tarball profile must be enabled as follows:
+In order to build the tar file, the `tar` profile must be enabled as follows:
 
 ```bash
-mvn -Pgenerate-tarball clean install -DskipTests
+mvn -Ptar clean package -DskipTests
 ```
 
 Otherwise, when running the configuration from the top this module will just be skipped.

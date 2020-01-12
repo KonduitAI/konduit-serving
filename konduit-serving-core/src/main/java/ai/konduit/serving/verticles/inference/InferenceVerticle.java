@@ -27,6 +27,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.configprovider.MemMapRouteDefiner;
 import ai.konduit.serving.configprovider.PipelineRouteDefiner;
 import ai.konduit.serving.executioner.PipelineExecutioner;
+import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
 import io.vertx.core.Context;
@@ -54,8 +55,8 @@ import java.io.IOException;
 @Slf4j
 public class InferenceVerticle extends BaseRoutableVerticle {
 
-
     private InferenceConfiguration inferenceConfiguration;
+    private PipelineRouteDefiner pipelineRouteDefiner;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -65,13 +66,16 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     @Override
     public void start() throws Exception {
         super.start();
-
     }
 
     @Override
     public void stop() throws Exception {
         super.stop();
-        log.debug("Stopping model server.");
+
+        if(pipelineRouteDefiner.getPipelineExecutioner() != null)
+            pipelineRouteDefiner.getPipelineExecutioner().destroy();
+        
+        log.debug("Stopping konduit server.");
     }
 
     @Override
@@ -80,20 +84,24 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         this.vertx = vertx;
         try {
             inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
-            this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+            pipelineRouteDefiner = new PipelineRouteDefiner();
+            this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
             //define the memory map endpoints if the user specifies the memory map configuration
             if (inferenceConfiguration.getMemMapConfig() != null) {
                 this.router = new MemMapRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
             } else {
-                this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+                this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
 
+                // Checking if the configuration runners can be created without problems or not
+                for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
+                    pipelineStep.createRunner();
             }
+
             setupWebServer();
         } catch (IOException e) {
             log.error("Unable to parse InferenceConfiguration", e);
         }
     }
-
 
     protected void setupWebServer() {
         int portValue = inferenceConfiguration.getServingConfig().getHttpPort();
@@ -117,5 +125,4 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                     }
                 });
     }
-
 }

@@ -25,6 +25,7 @@ package ai.konduit.serving.configprovider;
 import com.beust.jcommander.JCommander;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
@@ -55,11 +56,9 @@ public class KonduitServingMain {
     static {
         setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
         LoggerFactory.getLogger(LoggerFactory.class); // Required for Logback to work in Vertx
-
     }
 
-    public KonduitServingMain() {
-    }
+    public KonduitServingMain() { }
 
     public static void main(String... args) {
         try {
@@ -78,28 +77,46 @@ public class KonduitServingMain {
         //ensure clustering is off
         konduitServingNodeConfigurer.setClustered(false);
         JCommander jCommander = new JCommander(konduitServingNodeConfigurer);
-        jCommander.parse(args);
-        konduitServingNodeConfigurer.setupVertxOptions();
-        runMain(konduitServingNodeConfigurer);
+        try {
+            jCommander.parse(args);
+            if (konduitServingNodeConfigurer.isHelp()) {
+                jCommander.usage();
+            } else {
+                konduitServingNodeConfigurer.setupVertxOptions();
+                runMain(konduitServingNodeConfigurer);
+            }
+        } catch (Exception exception) {
+            log.error(exception.getMessage(), exception);
+            jCommander.usage();
+        }
     }
 
     public void runMain(KonduitServingNodeConfigurer konduitServingNodeConfigurer) {
         Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
-        ConfigRetriever configRetriever = ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getOptions());
+        ConfigRetriever configRetriever = ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getConfigRetrieverOptions());
         configRetriever.getConfig(result -> {
             if (result.failed()) {
                 log.error("Unable to retrieve configuration " + result.cause());
+
+                if(onFailure != null) {
+                    onFailure.run();
+                }
             } else {
-                io.vertx.core.json.JsonObject result1 = result.result();
-                konduitServingNodeConfigurer.configureWithJson(result1);
+                configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
+
+                JsonObject json = result.result();
+                konduitServingNodeConfigurer.configureWithJson(json);
+              
                 vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
                     if (handler.failed()) {
-                        log.error("Unable to deploy verticle {}", konduitServingNodeConfigurer.getVerticleClassName(), handler.cause());
+                        log.error(String.format("Unable to deploy verticle %s", konduitServingNodeConfigurer.getVerticleClassName()), handler.cause());
                         if(onFailure != null) {
                             onFailure.run();
                         }
+
+                        vertx.close();
                     } else {
-                        log.info("Deployed verticle {}", konduitServingNodeConfigurer.getVerticleClassName());
+                        log.info(String.format("Deployed verticle %s", konduitServingNodeConfigurer.getVerticleClassName()));
                         if(onSuccess != null) {
                             onSuccess.run();
                         }
@@ -108,5 +125,4 @@ public class KonduitServingMain {
             }
         });
     }
-
 }

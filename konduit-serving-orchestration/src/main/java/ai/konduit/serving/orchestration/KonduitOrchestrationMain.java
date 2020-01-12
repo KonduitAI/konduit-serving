@@ -34,6 +34,9 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.nd4j.base.Preconditions;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 
@@ -47,7 +50,11 @@ import java.io.IOException;
  *
  * @author Adam Gibson
  */
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class KonduitOrchestrationMain {
+    private Runnable onSuccess, onFailure;
 
     public final static String NODE_COMMUNICATION_TOPIC = "NodeCommunication";
     private static Logger log = LoggerFactory.getLogger(KonduitOrchestrationMain.class.getName());
@@ -73,7 +80,7 @@ public class KonduitOrchestrationMain {
         konduitServingNodeConfigurer.setupVertxOptions();
         Vertx.clusteredVertx(konduitServingNodeConfigurer.getVertxOptions(), vertxAsyncResult -> {
             Vertx vertx = vertxAsyncResult.result();
-            ConfigRetriever configRetriever = ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getOptions());
+            ConfigRetriever configRetriever = ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getConfigRetrieverOptions());
             eventBus = vertx.eventBus();
             //registers a handler to assert that all configurations are the same
             registerHandler();
@@ -90,10 +97,15 @@ public class KonduitOrchestrationMain {
                     vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
                         if (handler.failed()) {
                             log.error("Unable to deploy verticle {}", konduitServingNodeConfigurer.getVerticleClassName(), handler.cause());
+                            if(onFailure != null) {
+                                onFailure.run();
+                            }
                         } else {
+                            configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
+
                             try {
                                 Preconditions.checkNotNull(konduitServingNodeConfigurer.getInferenceConfiguration(), "Node configurer inference configuration was null!");
-                                eventBus.send(NODE_COMMUNICATION_TOPIC, new JsonObject(konduitServingNodeConfigurer.getInferenceConfiguration().toJson()), replyHandler -> {
+                                eventBus.request(NODE_COMMUNICATION_TOPIC, new JsonObject(konduitServingNodeConfigurer.getInferenceConfiguration().toJson()), replyHandler -> {
                                     if (replyHandler.failed()) {
                                         log.error("Unable to get message reply", replyHandler.cause());
                                     } else {
@@ -106,9 +118,15 @@ public class KonduitOrchestrationMain {
                                 });
                             } catch (JsonProcessingException e) {
                                 log.error("Unable to parse json from configuration", e);
+                                if(onFailure != null) {
+                                    onFailure.run();
+                                }
                             }
 
                             log.info("Deployed verticle {}", konduitServingNodeConfigurer.getVerticleClassName());
+                            if(onSuccess != null) {
+                                onSuccess.run();
+                            }
                         }
                     });
 

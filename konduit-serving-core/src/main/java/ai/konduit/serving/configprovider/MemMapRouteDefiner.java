@@ -85,7 +85,7 @@ public class MemMapRouteDefiner {
      * specified to initialize the array.
      * <p>
      * The routes defined are as follows:
-     * /array/:arrayType -> where arrayType is a parameter value of json or binary.
+     * /array/:arrayType -&gt; where arrayType is a parameter value of json or binary.
      * If json is specified {@link #writeArrayJson(INDArray, RoutingContext)}
      * is called otherwise {@link #writeArrayBinary(INDArray, RoutingContext)} is called.
      * <p>
@@ -96,7 +96,7 @@ public class MemMapRouteDefiner {
      * is called otherwise {@link #writeArrayBinary(INDArray, RoutingContext)} is called.
      * Indices expects a post body of a json array containing a list of indices to return.
      * The indices will be used to determine what slices to return from an {@link INDArray}
-     * <p>
+     * <br>
      * <p>
      * /array/range/:from/:to/:arrayType where arrayType is a parameter value of json or binary.
      * If json is specified {@link #writeArrayJson(INDArray, RoutingContext)}
@@ -107,6 +107,7 @@ public class MemMapRouteDefiner {
      * @param vertx                  the vertx instance to use to define the routes
      * @param inferenceConfiguration the {@link InferenceConfiguration}
      *                               to use for configuration.
+     * @return the router with the endpoints defined
      */
     public Router defineRoutes(Vertx vertx, InferenceConfiguration inferenceConfiguration) {
         Long initialSize = inferenceConfiguration.getMemMapConfig().getInitialMemmapSize();

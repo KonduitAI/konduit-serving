@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+. /etc/profile.d/konduit-serving-env.sh
+
+if [ "$1" == "conda" ]; then
+  # shellcheck disable=SC2145
+  "${CONDA_INSTALL_PATH}"/bin/"$@"
+elif [ "$1" == "examples" ]; then
+  if ! [[ -d "${KONDUIT_SERVING_HOME}/examples" ]]; then
+    git clone --depth 1 https://github.com/KonduitAI/konduit-serving-examples.git "${KONDUIT_SERVING_HOME}/examples"
+  fi
+
+  cd "${KONDUIT_SERVING_HOME}/examples" || exit
+
+  if [ "$2" == "refresh" ]; then
+    git reset --hard
+    git pull
+  else
+    # shellcheck disable=SC1090
+    . "${CONDA_INSTALL_PATH}"/bin/activate "${KONDUIT_SERVING_BACKEND}"
+    jupyter notebook
+  fi
+elif [ "$1" == "jupyter" ]; then
+  # shellcheck disable=SC1090
+  . "${CONDA_INSTALL_PATH}"/bin/activate "${KONDUIT_SERVING_BACKEND}"
+  jupyter notebook
+else
+  # shellcheck disable=SC1090
+  . "${CONDA_INSTALL_PATH}"/bin/activate "${KONDUIT_SERVING_BACKEND}"
+  konduit "$@"
+fi
