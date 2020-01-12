@@ -42,22 +42,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Slf4j
 public class MultiLayerNetworkInferenceExecutioner implements
         InferenceExecutioner<ModelLoader<MultiLayerNetwork>, INDArray[], INDArray[], ParallelInferenceConfig, MultiLayerNetwork> {
-
-    private static Field zooField, protoModelField, replicateModelField;
-
-    static {
-        try {
-            zooField = ParallelInference.class.getDeclaredField("zoo");
-            zooField.setAccessible(true);
-        } catch (Exception e) {
-            log.error("Unable to access zoo field.");
-        }
-    }
-
-    private ParallelInference parallelInference;
     @Getter
     private MultiLayerNetwork multiLayerNetwork;
-    private ReentrantReadWriteLock modelReadWriteLock;
     @Getter
     private ModelLoader<MultiLayerNetwork> modelLoader;
 
@@ -68,64 +54,24 @@ public class MultiLayerNetworkInferenceExecutioner implements
 
     @Override
     public MultiLayerNetwork model() {
-        try {
-            modelReadWriteLock.readLock().lock();
-            return multiLayerNetwork;
-        } finally {
-            modelReadWriteLock.readLock().unlock();
-        }
+        return multiLayerNetwork;
     }
 
 
     @Override
     public void initialize(ModelLoader<MultiLayerNetwork> model, ParallelInferenceConfig parallelInferenceConfig) throws Exception {
-        MultiLayerNetwork multiLayerNetwork = model.loadModel();
-        this.multiLayerNetwork = multiLayerNetwork;
+        this.multiLayerNetwork = model.loadModel();
         this.modelLoader = model;
-        ParallelInference inference = new ParallelInference.Builder(multiLayerNetwork)
-                .batchLimit(parallelInferenceConfig.getBatchLimit())
-                .queueLimit(parallelInferenceConfig.getQueueLimit())
-                .inferenceMode(parallelInferenceConfig.getInferenceMode())
-                .workers(parallelInferenceConfig.getWorkers())
-                .build();
-
-        this.parallelInference = inference;
-
-        Object[] zoo = (Object[]) zooField.get(parallelInference);
-        if (protoModelField == null) {
-            protoModelField = zoo[0].getClass().getDeclaredField("protoModel");
-            protoModelField.setAccessible(true);
-        }
-
-        if (replicateModelField == null) {
-            replicateModelField = zoo[0].getClass().getDeclaredField("replicatedModel");
-            replicateModelField.setAccessible(true);
-        }
-
-        modelReadWriteLock = new ReentrantReadWriteLock();
     }
 
     @Override
     public INDArray[] execute(INDArray[] input) {
-        if (parallelInference == null) {
-            throw new IllegalStateException("Initialize not called. No ParallelInference found. Please call inferenceExecutioner.initialize(..)");
+        synchronized (multiLayerNetwork) {
+            return new INDArray[] { multiLayerNetwork.output(input[0]) };
         }
-
-        try {
-            modelReadWriteLock.readLock().lock();
-            INDArray[] output = parallelInference.output(input);
-            return output;
-
-        } finally {
-            modelReadWriteLock.readLock().unlock();
-        }
-
     }
 
     @Override
     public void stop() {
-        if (parallelInference != null) {
-            parallelInference.shutdown();
-        }
     }
 }
