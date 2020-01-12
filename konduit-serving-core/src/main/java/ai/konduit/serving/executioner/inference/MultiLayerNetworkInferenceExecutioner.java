@@ -44,7 +44,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class MultiLayerNetworkInferenceExecutioner implements
         InferenceExecutioner<ModelLoader<MultiLayerNetwork>, INDArray[], INDArray[], ParallelInferenceConfig, MultiLayerNetwork> {
 
-    private static Field zooField, protoModelField, replicateModelField;
+/*    private static Field zooField, protoModelField, replicateModelField;
 
     static {
         try {
@@ -54,7 +54,7 @@ public class MultiLayerNetworkInferenceExecutioner implements
             log.error("Unable to access zoo field.");
         }
     }
-
+*/
     private ParallelInference parallelInference;
     @Getter
     private MultiLayerNetwork multiLayerNetwork;
@@ -92,7 +92,7 @@ public class MultiLayerNetworkInferenceExecutioner implements
 
         this.parallelInference = inference;
 
-        Object[] zoo = (Object[]) zooField.get(parallelInference);
+        /*Object[] zoo = (Object[]) zooField.get(parallelInference);
         if (protoModelField == null) {
             protoModelField = zoo[0].getClass().getDeclaredField("protoModel");
             protoModelField.setAccessible(true);
@@ -101,7 +101,7 @@ public class MultiLayerNetworkInferenceExecutioner implements
         if (replicateModelField == null) {
             replicateModelField = zoo[0].getClass().getDeclaredField("replicatedModel");
             replicateModelField.setAccessible(true);
-        }
+        }*/
 
         modelReadWriteLock = new ReentrantReadWriteLock();
     }
