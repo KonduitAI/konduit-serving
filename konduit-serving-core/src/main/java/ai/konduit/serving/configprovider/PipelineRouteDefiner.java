@@ -25,13 +25,16 @@ package ai.konduit.serving.configprovider;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.Output.DataFormat;
 import ai.konduit.serving.config.Output.PredictionType;
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.metrics.NativeMetrics;
 import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.image.VertxBufferImageInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.nd4j.VertxBufferNd4jInputAdapter;
@@ -53,6 +56,8 @@ import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.healthchecks.HealthCheckHandler;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -62,6 +67,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
+import org.datavec.api.writable.Text;
+import org.datavec.arrow.recordreader.ArrowRecord;
+import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.nd4j.base.Preconditions;
 
 import java.io.IOException;
@@ -83,6 +91,8 @@ public class PipelineRouteDefiner {
     protected Schema inputSchema, outputSchema = null;
     protected LongTaskTimer inferenceExecutionTimer, batchCreationTimer;
     protected HealthCheckHandler healthCheckHandler;
+    private static JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
+
 
     public List<String> inputNames() {
         return pipelineExecutioner.inputNames();
@@ -233,6 +243,13 @@ public class PipelineRouteDefiner {
                 });
 
 
+
+        router.post("/dynamicschema")
+                .consumes("application/json")
+                .produces("application/json")
+                .handler(ctx -> {
+                    pipelineExecutioner.doJsonInference(ctx.getBodyAsJson(),ctx);
+                });
 
         /**
          * Get the output of a pipeline for a given prediction type for JSON input data format.
@@ -486,6 +503,7 @@ public class PipelineRouteDefiner {
 
         return router;
     }
+
 
     private void initializeSchemas(InferenceConfiguration inferenceConfiguration, boolean inputRequired) {
         if (inputSchema == null && inputRequired) {

@@ -22,9 +22,7 @@
 
 package ai.konduit.serving.model;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Singular;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,8 +44,10 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Slf4j
-@SuperBuilder
+@Builder
+@AllArgsConstructor
 public class PythonConfig implements Serializable {
+
 
     private String  pythonCode, pythonCodePath, pythonPath;
 
