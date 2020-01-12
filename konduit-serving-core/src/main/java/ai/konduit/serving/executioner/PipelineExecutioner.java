@@ -29,6 +29,7 @@ import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.model.ModelConfig;
+import ai.konduit.serving.util.JsonSerdeUtils;
 import org.nd4j.tensorflow.conversion.TensorDataType;
 import ai.konduit.serving.model.TensorDataTypesConfig;
 import ai.konduit.serving.output.adapter.*;
@@ -99,13 +100,16 @@ public class PipelineExecutioner {
     @Getter
     protected Labels yoloLabels, ssdLabels;
     //the output type for the response: default json
+    @Getter
     protected InferenceConfiguration config;
+    @Getter
     private Pipeline pipeline;
     private TensorDataTypesConfig tensorDataTypesConfig;
     private Schema inputSchema = null;
     private Schema outputSchema = null;
     private ModelConfig modelConfig = null;
     private ObjectDetectionConfig objectDetectionConfig = null;
+    @Getter
     private static JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
 
     private static ClassificationMultiOutputAdapter classificationMultiOutputAdapter = new ClassificationMultiOutputAdapter();
@@ -419,6 +423,43 @@ public class PipelineExecutioner {
         }
     }
 
+
+    /**
+     * Perform json inference using the given {@link JsonObject}
+     *  containing 2 objects: a schema and values
+     *  and if a {@link RoutingContext} is provided, it will also
+     *  write the result as a response
+     * @param jsonBody the input
+     * @param ctx the context
+     */
+    public void doJsonInference(JsonObject jsonBody,RoutingContext ctx) {
+        JsonObject schema = jsonBody.getJsonObject("schema");
+        JsonObject values = jsonBody.getJsonObject("values");
+        Preconditions.checkState(schema.fieldNames().equals(values.fieldNames()),"Schema and Values must be the same field names!");
+        Record[] pipelineInput = new Record[schema.fieldNames().size()];
+        int count = 0;
+        for(String key : schema.fieldNames()) {
+            JsonObject schemaJson = schema.getJsonObject(key);
+            JsonObject recordAsJson = values.getJsonObject(key);
+            Record record = JsonSerdeUtils.createRecordFromJson(recordAsJson, schemaJson);
+            pipelineInput[count] = record;
+            count++;
+        }
+
+
+        Preconditions.checkNotNull(pipeline,"Pipeline must not be null!");
+        Record[] records = pipeline.doPipeline(pipelineInput);
+        JsonObject writeJson = JsonSerdeUtils.convertRecords(records,outputNames());
+        String write = writeJson.encodePrettily();
+        if(ctx != null) {
+            ctx.response().putHeader("Content-Type", "application/json");
+            ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
+            ctx.response().end(write);
+        }
+
+    }
+
+
     /**
      * Perform inference. Two endpoints in the pipeline route definer use this inference runner, both produce
      * JSON output, but take either JSON or multi-part input. See
@@ -459,6 +500,7 @@ public class PipelineExecutioner {
                 default:
                     throw new IllegalStateException("Illegal type for json.");
             }
+
             writeResponse(adapt, outputDataFormat, UUID.randomUUID().toString(), ctx);
 
         } else if (records.length == 1 && records[0].getRecord().get(0) instanceof Text) {
@@ -478,7 +520,6 @@ public class PipelineExecutioner {
                     }
                 }
 
-                log.debug("Writing json response.");
                 String write = writeJson.encodePrettily();
                 ctx.response().putHeader("Content-Type", "application/json");
                 ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
@@ -540,12 +581,22 @@ public class PipelineExecutioner {
         }
     }
 
-    // TODO: unused, do we need it?
+    /**
+     * Destroys the executioner (shuts down {@link ai.konduit.serving.executioner.inference.InferenceExecutioner}
+     * among other components)
+     */
     public void destroy() {
         pipeline.destroy();
     }
 
 
+    /**
+     * Creates input for use in the {@link PipelineExecutioner}
+     * @param input the input object
+     * @param transformProcess the {@link TransformProcess} to use
+     * @param conversionSchema The {@link Schema} to use
+     * @return
+     */
     public static Record[] createInput(Object input,TransformProcess transformProcess,Schema conversionSchema) {
         Preconditions.checkNotNull(input, "Input data was null!");
 
@@ -704,7 +755,8 @@ public class PipelineExecutioner {
 
     }
 
-    private Map<String, TensorDataType> initDataTypes(List<String> namesValidation, Map<String, TensorDataType> types,
+    private Map<String, TensorDataType> initDataTypes(List<String> namesValidation,
+                                                      Map<String, TensorDataType> types,
                                                       String inputOrOutputType) {
         Preconditions.checkNotNull(namesValidation, "Names validation must not be null!");
         Preconditions.checkNotNull(types, "Types must not be null!");
