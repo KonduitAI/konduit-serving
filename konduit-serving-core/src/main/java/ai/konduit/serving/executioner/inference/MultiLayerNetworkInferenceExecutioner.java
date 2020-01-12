@@ -28,6 +28,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.parallelism.ParallelInference;
+import org.deeplearning4j.parallelism.inference.InferenceMode;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.lang.reflect.Field;
@@ -85,7 +86,7 @@ public class MultiLayerNetworkInferenceExecutioner implements
         ParallelInference inference = new ParallelInference.Builder(multiLayerNetwork)
                 .batchLimit(parallelInferenceConfig.getBatchLimit())
                 .queueLimit(parallelInferenceConfig.getQueueLimit())
-                .inferenceMode(parallelInferenceConfig.getInferenceMode())
+                .inferenceMode(InferenceMode.INPLACE)
                 .workers(parallelInferenceConfig.getWorkers())
                 .build();
 
