@@ -948,8 +948,6 @@ class PythonConfig(object):
     """
 
     _types_map = {
-        "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
-        "modelConfigType": {"type": ModelConfigType, "subtype": None},
         "pythonCode": {"type": str, "subtype": None},
         "pythonCodePath": {"type": str, "subtype": None},
         "pythonPath": {"type": str, "subtype": None},
@@ -963,8 +961,6 @@ class PythonConfig(object):
 
     def __init__(
         self,
-        tensor_data_types_config=None,
-        model_config_type=None,
         python_code=None,
         python_code_path=None,
         python_path=None,
@@ -974,8 +970,6 @@ class PythonConfig(object):
         return_all_inputs=None,
         setup_and_run=False,
     ):
-        self.__tensor_data_types_config = tensor_data_types_config
-        self.__model_config_type = model_config_type
         self.__python_code = python_code
         self.__python_code_path = python_code_path
         self.__python_path = python_path
@@ -984,28 +978,6 @@ class PythonConfig(object):
         self.__extra_inputs = extra_inputs
         self.__return_all_inputs = return_all_inputs
         self.__setup_and_run = setup_and_run
-
-    def _get_tensor_data_types_config(self):
-        return self.__tensor_data_types_config
-
-    def _set_tensor_data_types_config(self, value):
-        if not isinstance(value, TensorDataTypesConfig):
-            raise TypeError("tensorDataTypesConfig must be TensorDataTypesConfig")
-        self.__tensor_data_types_config = value
-
-    tensor_data_types_config = property(
-        _get_tensor_data_types_config, _set_tensor_data_types_config
-    )
-
-    def _get_model_config_type(self):
-        return self.__model_config_type
-
-    def _set_model_config_type(self, value):
-        if not isinstance(value, ModelConfigType):
-            raise TypeError("modelConfigType must be ModelConfigType")
-        self.__model_config_type = value
-
-    model_config_type = property(_get_model_config_type, _set_model_config_type)
 
     def _get_python_code(self):
         return self.__python_code
@@ -1101,18 +1073,6 @@ class PythonConfig(object):
 
     def as_dict(self):
         d = empty_type_dict(self)
-        if self.__tensor_data_types_config is not None:
-            d["tensorDataTypesConfig"] = (
-                self.__tensor_data_types_config.as_dict()
-                if hasattr(self.__tensor_data_types_config, "as_dict")
-                else self.__tensor_data_types_config
-            )
-        if self.__model_config_type is not None:
-            d["modelConfigType"] = (
-                self.__model_config_type.as_dict()
-                if hasattr(self.__model_config_type, "as_dict")
-                else self.__model_config_type
-            )
         if self.__python_code is not None:
             d["pythonCode"] = (
                 self.__python_code.as_dict()
@@ -1181,23 +1141,13 @@ class ServingConfig(object):
            extended from Java. don't modify this property.
     """
 
-    _inputDataFormat_enum = enum.Enum(
-        "_inputDataFormat_enum", "NUMPY JSON ND4J IMAGE ARROW", module=__name__
-    )
     _outputDataFormat_enum = enum.Enum(
         "_outputDataFormat_enum", "NUMPY JSON ND4J ARROW", module=__name__
-    )
-    _predictionType_enum = enum.Enum(
-        "_predictionType_enum",
-        "CLASSIFICATION YOLO SSD RCNN RAW REGRESSION",
-        module=__name__,
     )
     _types_map = {
         "httpPort": {"type": int, "subtype": None},
         "listenHost": {"type": str, "subtype": None},
-        "inputDataFormat": {"type": str, "subtype": None},
         "outputDataFormat": {"type": str, "subtype": None},
-        "predictionType": {"type": str, "subtype": None},
         "uploadsDirectory": {"type": str, "subtype": None},
         "logTimings": {"type": bool, "subtype": None},
         "metricTypes": {"type": list, "subtype": str},
@@ -1210,18 +1160,14 @@ class ServingConfig(object):
         self,
         http_port=None,
         listen_host="localhost",
-        input_data_format="NUMPY",
         output_data_format="NUMPY",
-        prediction_type="RAW",
         uploads_directory="file-uploads/",
         log_timings=False,
         metric_types=None,
     ):
         self.__http_port = http_port
         self.__listen_host = listen_host
-        self.__input_data_format = input_data_format
         self.__output_data_format = output_data_format
-        self.__prediction_type = prediction_type
         self.__uploads_directory = uploads_directory
         self.__log_timings = log_timings
         self.__metric_types = metric_types
@@ -1246,19 +1192,6 @@ class ServingConfig(object):
 
     listen_host = property(_get_listen_host, _set_listen_host)
 
-    def _get_input_data_format(self):
-        return self.__input_data_format
-
-    def _set_input_data_format(self, value):
-        if not isinstance(value, str):
-            raise TypeError("inputDataFormat must be str")
-        if value in self._inputDataFormat_enum.__members__:
-            self.__type = value
-        else:
-            raise ValueError("Value {} not in _inputDataFormat_enum list".format(value))
-
-    input_data_format = property(_get_input_data_format, _set_input_data_format)
-
     def _get_output_data_format(self):
         return self.__output_data_format
 
@@ -1273,19 +1206,6 @@ class ServingConfig(object):
             )
 
     output_data_format = property(_get_output_data_format, _set_output_data_format)
-
-    def _get_prediction_type(self):
-        return self.__prediction_type
-
-    def _set_prediction_type(self, value):
-        if not isinstance(value, str):
-            raise TypeError("predictionType must be str")
-        if value in self._predictionType_enum.__members__:
-            self.__type = value
-        else:
-            raise ValueError("Value {} not in _predictionType_enum list".format(value))
-
-    prediction_type = property(_get_prediction_type, _set_prediction_type)
 
     def _get_uploads_directory(self):
         return self.__uploads_directory
@@ -1333,23 +1253,11 @@ class ServingConfig(object):
                 if hasattr(self.__listen_host, "as_dict")
                 else self.__listen_host
             )
-        if self.__input_data_format is not None:
-            d["inputDataFormat"] = (
-                self.__input_data_format.as_dict()
-                if hasattr(self.__input_data_format, "as_dict")
-                else self.__input_data_format
-            )
         if self.__output_data_format is not None:
             d["outputDataFormat"] = (
                 self.__output_data_format.as_dict()
                 if hasattr(self.__output_data_format, "as_dict")
                 else self.__output_data_format
-            )
-        if self.__prediction_type is not None:
-            d["predictionType"] = (
-                self.__prediction_type.as_dict()
-                if hasattr(self.__prediction_type, "as_dict")
-                else self.__prediction_type
             )
         if self.__uploads_directory is not None:
             d["uploadsDirectory"] = (
@@ -1389,47 +1297,33 @@ class PipelineStep(object):
     """
 
     _types_map = {
-        "outputSchemas": {"type": dict, "subtype": None},
         "inputColumnNames": {"type": dict, "subtype": None},
         "outputColumnNames": {"type": dict, "subtype": None},
         "inputSchemas": {"type": dict, "subtype": None},
-        "inputNames": {"type": list, "subtype": str},
+        "outputSchemas": {"type": dict, "subtype": None},
         "outputNames": {"type": list, "subtype": str},
+        "inputNames": {"type": list, "subtype": str},
     }
     _formats_map = {
-        "inputNames": "table",
         "outputNames": "table",
+        "inputNames": "table",
     }
 
     def __init__(
         self,
-        output_schemas=None,
         input_column_names=None,
         output_column_names=None,
         input_schemas=None,
-        input_names=None,
+        output_schemas=None,
         output_names=None,
+        input_names=None,
     ):
-        self.__output_schemas = output_schemas
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__input_schemas = input_schemas
-        self.__input_names = input_names
+        self.__output_schemas = output_schemas
         self.__output_names = output_names
-
-    def _get_output_schemas(self):
-        return self.__output_schemas
-
-    def _set_output_schemas(self, value):
-        if (
-            not isinstance(value, dict)
-            and not isinstance(value, DictWrapper)
-            and not isinstance(value, DictWrapper)
-        ):
-            raise TypeError("outputSchemas must be type")
-        self.__output_schemas = value
-
-    output_schemas = property(_get_output_schemas, _set_output_schemas)
+        self.__input_names = input_names
 
     def _get_input_column_names(self):
         return self.__input_column_names
@@ -1473,17 +1367,19 @@ class PipelineStep(object):
 
     input_schemas = property(_get_input_schemas, _set_input_schemas)
 
-    def _get_input_names(self):
-        return self.__input_names
+    def _get_output_schemas(self):
+        return self.__output_schemas
 
-    def _set_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("inputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("inputNames list valeus must be str")
-        self.__input_names = value
+    def _set_output_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
 
-    input_names = property(_get_input_names, _set_input_names)
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
 
     def _get_output_names(self):
         return self.__output_names
@@ -1497,14 +1393,20 @@ class PipelineStep(object):
 
     output_names = property(_get_output_names, _set_output_names)
 
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
     def as_dict(self):
         d = empty_type_dict(self)
-        if self.__output_schemas is not None:
-            d["outputSchemas"] = (
-                self.__output_schemas.as_dict()
-                if hasattr(self.__output_schemas, "as_dict")
-                else self.__output_schemas
-            )
         if self.__input_column_names is not None:
             d["inputColumnNames"] = (
                 self.__input_column_names.as_dict()
@@ -1523,13 +1425,19 @@ class PipelineStep(object):
                 if hasattr(self.__input_schemas, "as_dict")
                 else self.__input_schemas
             )
-        if self.__input_names is not None:
-            d["inputNames"] = [
-                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
-            ]
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
         if self.__output_names is not None:
             d["outputNames"] = [
                 p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
             ]
         return d
 
