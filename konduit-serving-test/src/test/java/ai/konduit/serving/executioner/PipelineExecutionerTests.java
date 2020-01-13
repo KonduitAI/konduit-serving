@@ -68,8 +68,6 @@ public class PipelineExecutionerTests {
 
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .predictionType(Output.PredictionType.RAW)
-                .inputDataFormat(Input.DataFormat.IMAGE)
                 .httpPort(port)
                 .build();
 
@@ -87,7 +85,7 @@ public class PipelineExecutionerTests {
                 .build();
 
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);
-        pipelineExecutioner.init();
+        pipelineExecutioner.init(Input.DataFormat.IMAGE, Output.PredictionType.RAW);
         assertNotNull("Input names should not be null.", pipelineExecutioner.inputNames());
         assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         assertNotNull(pipelineExecutioner.inputDataTypes);
@@ -117,8 +115,6 @@ public class PipelineExecutionerTests {
                 .build();
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .inputDataFormat(Input.DataFormat.IMAGE)
-                .predictionType(Output.PredictionType.YOLO)
                 .outputDataFormat(Output.DataFormat.JSON)
                 .httpPort(port)
                 .build();
@@ -142,7 +138,7 @@ public class PipelineExecutionerTests {
                 .build();
 
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);
-        pipelineExecutioner.init();
+        pipelineExecutioner.init(Input.DataFormat.IMAGE, Output.PredictionType.YOLO);
         assertNotNull("Input names should not be null.", pipelineExecutioner.inputNames());
         assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         TestCase.assertEquals(TensorDataType.INT64, pipelineExecutioner.inputDataTypes.get("image_tensor"));

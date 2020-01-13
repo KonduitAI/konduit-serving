@@ -87,8 +87,6 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .inputDataFormat(Input.DataFormat.NUMPY)
-                .predictionType(PredictionType.RAW)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
@@ -112,7 +110,7 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
         String responseBody = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/dictionary").then()
+                .post("/raw/json").then()
                 .extract()
                 .body().asString();
         JsonArray outputJsonArray = new JsonArray(responseBody);

@@ -140,7 +140,6 @@ public class KonduitServingMainTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(getAvailablePort())
-                .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
 
         ModelConfig modelConfig = ModelConfig.builder()

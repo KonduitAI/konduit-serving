@@ -222,10 +222,11 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
      */
     @Override
     public Schema outputSchemaForName(String name) {
-        Preconditions.checkNotNull(outputSchemas, "No output schemas specified in configuration!");
-
-        if (!outputSchemas.containsKey(name))
+        // Commenting the line because there are cases where the outputSchemas are null but the configuration is valid.
+        // Preconditions.checkNotNull(outputSchemas, "No output schemas specified in configuration!");
+        if (outputSchemas == null || !outputSchemas.containsKey(name))
             return null;
+
         return SchemaTypeUtils.toSchema(outputSchemas.get(name),
                 outputColumnNames.get(name));
     }
@@ -235,8 +236,9 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
      */
     @Override
     public Schema inputSchemaForName(String name) {
-        Preconditions.checkNotNull(inputSchemas, "No input schemas specified in configuration!");
-        if (!inputSchemas.containsKey(name))
+        // Commenting the line below because there are cases where the inputSchemas are null but the configuration is valid.
+        // Preconditions.checkNotNull(inputSchemas, "No input schemas specified in configuration!");
+        if (inputSchemas == null || !inputSchemas.containsKey(name))
             return null;
 
         return SchemaTypeUtils.toSchema(inputTypesForName(name),

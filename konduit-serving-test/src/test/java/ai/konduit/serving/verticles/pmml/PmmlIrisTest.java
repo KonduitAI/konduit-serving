@@ -95,9 +95,7 @@ public class PmmlIrisTest extends BaseVerticleTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .inputDataFormat(DataFormat.JSON)
                 .outputDataFormat(ai.konduit.serving.config.Output.DataFormat.JSON)
-                .predictionType(ai.konduit.serving.config.Output.PredictionType.RAW)
                 .build();
 
         ai.konduit.serving.pipeline.step.PmmlStep pmmlPipelineStep = ai.konduit.serving.pipeline.step.PmmlStep.builder()

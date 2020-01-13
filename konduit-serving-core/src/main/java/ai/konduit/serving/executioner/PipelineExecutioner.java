@@ -90,9 +90,6 @@ import java.util.zip.ZipOutputStream;
 @Slf4j
 public class PipelineExecutioner {
 
-    Input.DataFormat inputDataFormat;
-    PredictionType predictionType;
-
     @Getter
     protected MultiOutputAdapter multiOutputAdapter;
     protected List<String> inputNames, outputNames;
@@ -115,12 +112,8 @@ public class PipelineExecutioner {
     private static RegressionMultiOutputAdapter regressionMultiOutputAdapter = new RegressionMultiOutputAdapter();
     private static RawMultiOutputAdapter rawMultiOutputAdapter = new RawMultiOutputAdapter();
 
-    public PipelineExecutioner(InferenceConfiguration inferenceConfiguration,
-                               Input.DataFormat inputDataFormat,
-                               PredictionType predictionType) {
+    public PipelineExecutioner(InferenceConfiguration inferenceConfiguration) {
         this.config = inferenceConfiguration;
-        this.inputDataFormat = inputDataFormat;
-        this.predictionType = predictionType;
     }
 
     /**
@@ -227,7 +220,6 @@ public class PipelineExecutioner {
     }
 
     private void validateInputsAndOutputs(Input.DataFormat inputDataformat,
-                                          Output.DataFormat outputDataformat,
                                           PredictionType predictionType) {
         //configure validation for input and output
         if(!config.getSteps().isEmpty()) {
@@ -239,7 +231,7 @@ public class PipelineExecutioner {
                             + startingPipelineStep.getClass().getName() + " expected input types were "
                             + Arrays.toString(startingPipelineStep.validInputTypes())
                             + ". If this list is null or empty, then any type is considered valid.");
-            Preconditions.checkState(finalPipelineStep.isValidOutputType(outputDataformat),
+            Preconditions.checkState(finalPipelineStep.isValidOutputType(config.getServingConfig().getOutputDataFormat()),
                     "Configured output type is invalid for final pipeline step of type "
                             + finalPipelineStep.getClass().getName() + " expected output types were "
                             + Arrays.toString(finalPipelineStep.validInputTypes())
@@ -255,13 +247,13 @@ public class PipelineExecutioner {
     /**
      * Init the pipeline executioner.
      */
-    public void init() {
+    public void init(Input.DataFormat inputDataFormat, PredictionType predictionType) {
         ServingConfig servingConfig = config.getServingConfig();
         if(config.getSteps().isEmpty()) {
             log.warn("No pipeline steps configured.");
         }
 
-        validateInputsAndOutputs(inputDataFormat, servingConfig.getOutputDataFormat(), predictionType);
+        validateInputsAndOutputs(inputDataFormat, predictionType);
 
         this.pipeline = Pipeline.getPipeline(config.getSteps());
 
