@@ -129,7 +129,7 @@
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
         <hdf5.version>1.10.5</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
-
+        <jna.version>5.3.1</jna.version>
         <cuda>10.1</cuda>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
@@ -155,7 +155,7 @@
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna-platform</artifactId>
-                <version>${jna.platform.version}</version>
+                <version>${jna.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>

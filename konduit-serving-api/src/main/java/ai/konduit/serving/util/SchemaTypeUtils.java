@@ -24,10 +24,15 @@ package ai.konduit.serving.util;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.SchemaType;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.ColumnType;
 import org.datavec.api.transform.TransformProcess;
+import org.datavec.api.transform.metadata.BinaryMetaData;
+import org.datavec.api.transform.metadata.ColumnMetaData;
 import org.datavec.api.transform.schema.Schema;
+import org.datavec.api.transform.schema.Schema.Builder;
 import org.datavec.api.writable.DoubleWritable;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
@@ -41,8 +46,154 @@ import java.util.*;
 /**
  * Utils for a mix of data vec {@link Schema} manipulation
  * and configuration for {@link InferenceConfiguration}
+ *
+ * @author Adam Gibson
  */
 public class SchemaTypeUtils {
+
+    /**
+     * Returns true if the passed in {@link Collection}
+     *  or {@link Map }is null or empty
+     * @param collections the collection to check
+     * @return
+     */
+    public static  boolean allIsNullOrEmpty(Object...collections) {
+        if(collections == null)
+            return true;
+
+        boolean ret = isNullOrEmpty(collections[0]);
+        for(int i = 1; i < collections.length; i++) {
+            ret = ret && isNullOrEmpty(collections[i]);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Returns true if the passed in {@link Collection}
+     *  or {@link Map} is null or empty
+     * @param collections the collection to check
+     * @return
+     */
+    public static  boolean anyIsNullOrEmpty(Object...collections) {
+        if(collections == null)
+            return true;
+
+        boolean ret = isNullOrEmpty(collections[0]);
+        for(int i = 1; i < collections.length; i++) {
+            ret = ret || isNullOrEmpty(collections[i]);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Returns true if the passed in {@link Collection} or
+     * {@link Map}
+     *  is null or empty
+     * @param collection the collection to check* @return
+     */
+    public static  boolean isNullOrEmpty(Object collection) {
+        if(collection instanceof Map) {
+            Map map = (Map) collection;
+            return map == null || map.isEmpty();
+        }
+        else if(collection instanceof Collection) {
+            Collection collection1 = (Collection) collection;
+            return collection1 == null || collection1.isEmpty();
+        }
+        else
+            throw new IllegalArgumentException("Passed in type must be a collection or map");
+    }
+
+    /**
+     * Create a {@link Schema} from a {@link JsonObject}
+     *  schema descriptor. The schema descriptor contains a json object of keys
+     *  of type {@link ColumnType} values in the form of:
+     *  name : {@link ColumnType} value
+     *
+     * There are 2 exceptions to this rule.
+     * {@link ColumnType#NDArray} and {@link ColumnType#Categorical}
+     * both are json objects.
+     * {@link ColumnType#NDArray} has the form:
+     * {name : shape: [], serialization type: "json" | "b64"}
+     * {@link ColumnType#Categorical} has the form:
+     * {categories: []}
+     * {@link ColumnType#Time} has the form:
+     * {timeZoneId: timeZoneId}
+     *
+     *
+     * @param schemaDescriptor a {@link JsonObject} with the form
+     *                         described above
+     * @return the equivalent {@link Schema} derived from the given descriptor
+     */
+    public static Schema schemaFromDynamicSchemaDefinition(JsonObject schemaDescriptor) {
+        Schema.Builder schemaBuilder = new Builder();
+        for(String key : schemaDescriptor.fieldNames()) {
+            JsonObject fieldInfo = schemaDescriptor.getJsonObject(key);
+            JsonObject fieldInfoObject = fieldInfo.getJsonObject("fieldInfo");
+            if(fieldInfoObject == null) {
+                throw new IllegalArgumentException("Unable to find object fieldInfo!");
+            }
+
+            if(!fieldInfoObject.containsKey("type")) {
+                throw new IllegalArgumentException("Illegal field info. Missing key type for identifying type of field");
+            }
+            //convert image to bytes and let user pre process accordingly
+            String type = fieldInfoObject.getString("type");
+            if(type.equals("Image")) {
+                type = "Bytes";
+            }
+            switch(ColumnType.valueOf(type)) {
+                case Boolean:
+                    schemaBuilder.addColumnBoolean(key);
+                    break;
+                case Double:
+                    schemaBuilder.addColumnDouble(key);
+                    break;
+                case Float:
+                    schemaBuilder.addColumnFloat(key);
+                    break;
+                case Long:
+                    schemaBuilder.addColumnLong(key);
+                    break;
+                case String:
+                    schemaBuilder.addColumnString(key);
+                    break;
+                case Integer:
+                    schemaBuilder.addColumnInteger(key);
+                    break;
+                case NDArray:
+                    JsonArray shapeArr = fieldInfoObject.getJsonArray("shape");
+                    long[] shape = new long[shapeArr.size()];
+                    for(int i = 0; i < shape.length; i++) {
+                        shape[i] = shapeArr.getLong(i);
+                    }
+                    schemaBuilder.addColumnNDArray(key,shape);
+                    break;
+                case Categorical:
+                    JsonArray jsonArray = fieldInfoObject.getJsonArray("categories");
+                    String[] categories = new String[jsonArray.size()];
+                    for(int i = 0; i < categories.length; i++) {
+                        categories[i] = jsonArray.getString(i);
+                    }
+                    schemaBuilder.addColumnCategorical(key,categories);
+                    break;
+                case Bytes:
+                    ColumnMetaData columnMetaData = new BinaryMetaData(key);
+                    schemaBuilder.addColumn(columnMetaData);
+                    break;
+                case Time:
+                    TimeZone zoneById = TimeZone.getTimeZone(fieldInfoObject.getString("timeZoneId"));
+                    schemaBuilder.addColumnTime(key,zoneById);
+                    break;
+
+            }
+        }
+
+        return schemaBuilder.build();
+    }
+
 
 
     /**
@@ -70,35 +221,6 @@ public class SchemaTypeUtils {
         return schema.getColumnNames();
     }
 
-    /**
-     * Compute input types for the given set of transform processes
-     *
-     * @param transformProcesses the input transform processes
-     * @return the input types for the given transform processes
-     */
-    public static SchemaType[][] inputTypes(TransformProcess[] transformProcesses) {
-        SchemaType[][] types = new SchemaType[transformProcesses.length][];
-        for (int i = 0; i < types.length; i++) {
-            types[i] = SchemaTypeUtils.typesForSchema(transformProcesses[i].getInitialSchema());
-        }
-
-        return types;
-    }
-
-    /**
-     * Compute output types for the given set of transform processes
-     *
-     * @param transformProcesses the input transform processes
-     * @return the input types for the given transform processes
-     */
-    public static SchemaType[][] outputTypes(TransformProcess[] transformProcesses) {
-        SchemaType[][] types = new SchemaType[transformProcesses.length][];
-        for (int i = 0; i < types.length; i++) {
-            types[i] = SchemaTypeUtils.typesForSchema(transformProcesses[i].getFinalSchema());
-        }
-
-        return types;
-    }
 
 
     /**
@@ -192,7 +314,13 @@ public class SchemaTypeUtils {
                     builder.addColumnLong(names.get(i));
                     break;
                 case Bytes:
-                    throw new UnsupportedOperationException();
+                case Image:
+                    BinaryMetaData binaryMetaData = new BinaryMetaData(names.get(i));
+                    builder.addColumn(binaryMetaData);
+                    break;
+                case Time:
+                    builder.addColumnTime(names.get(i),TimeZone.getDefault());
+                    break;
                 default:
                     throw new UnsupportedOperationException("Unknown type " + types[i]);
 
@@ -200,39 +328,6 @@ public class SchemaTypeUtils {
         }
 
         return builder.build();
-    }
-
-    /**
-     * Convert a set of {@link INDArray}
-     * to an equivalent {@link NDArrayWritable}
-     *
-     * @param writables the writables to convert
-     * @return the underlying {@link INDArray}
-     */
-    public static Writable[] fromArrays(INDArray[] writables) {
-        Writable[] ret = new Writable[writables.length];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = new NDArrayWritable(writables[i]);
-        }
-
-        return ret;
-    }
-
-    /**
-     * Convert a set of {@link NDArrayWritable}
-     * to their underlying ndarrays
-     *
-     * @param writables the writables to convert
-     * @return the underlying {@link INDArray}
-     */
-    public static INDArray[] fromWritables(Writable[] writables) {
-        INDArray[] ret = new INDArray[writables.length];
-        for (int i = 0; i < ret.length; i++) {
-            NDArrayWritable ndArrayWritable = (NDArrayWritable) writables[i];
-            ret[i] = ndArrayWritable.get();
-        }
-
-        return ret;
     }
 
     /**
