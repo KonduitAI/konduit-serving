@@ -113,6 +113,7 @@ public class PmmlIrisTest extends BaseVerticleTest {
                         SchemaType.Double,
                         SchemaType.Double,
                 })
+                .outputName("default")
                 .outputColumnName("default", Collections.singletonList("class"))
                 .outputSchema("default", new SchemaType[]{SchemaType.String})
                 .build();
