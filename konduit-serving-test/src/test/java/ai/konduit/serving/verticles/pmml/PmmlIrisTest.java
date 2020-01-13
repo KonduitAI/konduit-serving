@@ -23,12 +23,12 @@
 package ai.konduit.serving.verticles.pmml;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input.DataFormat;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.model.PmmlConfig;
+import ai.konduit.serving.pipeline.step.PmmlStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.AbstractVerticle;
@@ -46,6 +46,7 @@ import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static ai.konduit.serving.executioner.PipelineExecutioner.convertBatchOutput;
@@ -81,9 +82,8 @@ public class PmmlIrisTest extends BaseVerticleTest {
             req.bodyHandler(body -> {
                 System.out.println(body.toJson());
                 System.out.println("Finish body" + body);
-            });
-
-            req.exceptionHandler(exception -> context.fail(exception));
+            })
+            .exceptionHandler(exception -> context.fail(exception));
         };
     }
 
@@ -98,8 +98,9 @@ public class PmmlIrisTest extends BaseVerticleTest {
                 .outputDataFormat(ai.konduit.serving.config.Output.DataFormat.JSON)
                 .build();
 
-        ai.konduit.serving.pipeline.step.PmmlStep pmmlPipelineStep = ai.konduit.serving.pipeline.step.PmmlStep.builder()
+        PmmlStep pmmlPipelineStep = PmmlStep.builder()
                 .modelConfig(pmmlConfig)
+                .inputName("default")
                 .inputColumnName("default", Arrays.asList(
                         "sepal_length",
                         "sepal_width",
@@ -112,7 +113,7 @@ public class PmmlIrisTest extends BaseVerticleTest {
                         SchemaType.Double,
                         SchemaType.Double,
                 })
-                .outputColumnName("default", Arrays.asList("class"))
+                .outputColumnName("default", Collections.singletonList("class"))
                 .outputSchema("default", new SchemaType[]{SchemaType.String})
                 .build();
 

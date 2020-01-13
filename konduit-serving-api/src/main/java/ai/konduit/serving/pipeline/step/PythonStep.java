@@ -121,16 +121,16 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
         try {
             switch (pythonVarType) {
                 case BOOL:
-                    return ai.konduit.serving.config.SchemaType.Boolean;
+                    return SchemaType.Boolean;
                 case STR:
-                    return ai.konduit.serving.config.SchemaType.String;
+                    return SchemaType.String;
                 case INT:
-                    return ai.konduit.serving.config.SchemaType.Integer;
+                    return SchemaType.Integer;
                 case FLOAT:
-                    return ai.konduit.serving.config.SchemaType.Float;
+                    return SchemaType.Float;
                 case NDARRAY:
-                    return ai.konduit.serving.config.SchemaType.NDArray;
                 case LIST:
+                    return SchemaType.NDArray;
                 case FILE:
                 case DICT:
                 default:

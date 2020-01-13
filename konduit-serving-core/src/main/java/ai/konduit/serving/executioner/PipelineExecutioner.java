@@ -580,7 +580,8 @@ public class PipelineExecutioner {
      * among other components)
      */
     public void destroy() {
-        pipeline.destroy();
+        if(pipeline != null)
+            pipeline.destroy();
     }
 
 
