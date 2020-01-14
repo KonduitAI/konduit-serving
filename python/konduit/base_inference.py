@@ -1132,9 +1132,7 @@ class ServingConfig(object):
 
     :param http_port: HTTP port of the konduit.Server
     :param listen_host: host of the konduit.Server, defaults to 'localhost'
-    :param input_data_format: Input data format, see konduit.Input for more information
     :param output_data_format: Output data format, see konduit.Output for more information
-    :param prediction_type: Prediction type, see konduit.Output for more information
     :param uploads_directory: to which directory to store file uploads to, defaults to 'file-uploads/'
     :param log_timings: whether to log timings for this config, defaults to False
     :param metric_types: the types of metrics logged for your ServingConfig can currently only be configured and
