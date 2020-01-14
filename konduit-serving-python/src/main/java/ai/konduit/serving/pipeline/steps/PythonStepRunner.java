@@ -23,30 +23,24 @@
 package ai.konduit.serving.pipeline.steps;
 
 import ai.konduit.serving.executioner.Pipeline;
-import org.datavec.api.transform.schema.Schema;
-import org.datavec.api.transform.schema.Schema.Builder;
-import org.datavec.python.NumpyArray;
-import org.datavec.python.PythonExecutioner;
-import org.datavec.python.PythonTransform;
-import org.datavec.python.PythonTransform.PythonTransformBuilder;
-import org.datavec.python.PythonVariables;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.records.Record;
-import org.datavec.api.transform.TransformProcess;
+import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.Writable;
-import org.datavec.local.transforms.LocalTransformExecutor;
-import org.datavec.python.PythonVariables.Type;
+import org.datavec.python.NumpyArray;
+import org.datavec.python.PythonExecutioner;
+import org.datavec.python.PythonTransform;
+import org.datavec.python.PythonTransform.PythonTransformBuilder;
+import org.datavec.python.PythonVariables;
 import org.nd4j.base.Preconditions;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,18 +144,15 @@ public class PythonStepRunner extends BaseStepRunner {
                     .build();*/
             // this.transformProcesses.put(configEntry.getKey(), transformProcess);
         }
-
-        PythonExecutioner.init();
     }
 
 
     protected Schema schemaForVariables(PythonVariables pythonVariables) {
         Schema.Builder schemaBuilder = new Schema.Builder();
         String[] varNames = pythonVariables.getVariables();
-        for (int i = 0; i < varNames.length; i++) {
-            String name = varNames[i];
+        for (String name : varNames) {
             PythonVariables.Type pyType = pythonVariables.getType(name);
-            switch (pyType){
+            switch (pyType) {
                 case INT:
                     schemaBuilder.addColumnLong(name);
                     break;
@@ -175,8 +166,8 @@ public class PythonStepRunner extends BaseStepRunner {
                     break;
                 case NDARRAY:
                     NumpyArray arr = pythonVariables.getNDArrayValue(name);
-                    if(arr == null)
-                        schemaBuilder.addColumnNDArray(name,new long[]{1,1});
+                    if (arr == null)
+                        schemaBuilder.addColumnNDArray(name, new long[]{1, 1});
                     else
                         schemaBuilder.addColumnNDArray(name, arr.getShape());
                     break;
@@ -193,11 +184,7 @@ public class PythonStepRunner extends BaseStepRunner {
 
 
     @Override
-    public void destroy() {
-        //get rid of everything but the main interpreter and clear all the variables but the default one
-        PythonExecutioner.clearNonMainInterpreters();
-        PythonExecutioner.resetAllInterpreters();
-    }
+    public void destroy() { }
 
     @Override
     public Record[] transform(Record[] input) {
