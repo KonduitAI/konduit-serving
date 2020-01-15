@@ -28,6 +28,7 @@ import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -43,7 +44,6 @@ import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nd4j.jackson.objectmapper.holder.ObjectMapperHolder;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
@@ -57,6 +57,7 @@ import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -126,11 +127,10 @@ public class KerasTestPythonNdArrayInputFormat extends BaseMultiNumpyVerticalTes
         JsonObject jsonObject = new JsonObject();
 
         //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[]{1.0f, 2.0f, 3.0f, 4.0f}, 1, 4);
+        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
+        INDArray inputArray = Nd4j.onesLike(arr);
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-
-        System.out.println("filePath-----------" + filePath);
 
         //Create new file to write binary input data.
         File file = new File(filePath + "/test-input.zip");
@@ -144,11 +144,12 @@ public class KerasTestPythonNdArrayInputFormat extends BaseMultiNumpyVerticalTes
                 .field("default", file)
                 .asString().getBody();
 
-        System.out.print(response);
-
         JsonObject jsonObject1 = new JsonObject(response);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
+        INDArray outputArray = nd.getNdArray();
+        INDArray expected = Nd4j.create(new double[][]{{0.1628401, 0.7828045, 0.05435541}, {0.0, 1.0, 0.0}});
+        assertEquals(expected, outputArray);
 
     }
 
