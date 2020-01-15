@@ -11,24 +11,20 @@ print("Working Directory", work_dir)
 import input_data
 
 import json
-
 # read file
 #with open('tensorflowImgPath.json', 'r') as myfile:
 with open(JsonInput, 'r') as myfile:
     data=myfile.read()
 
-print("data----------->: " + data)
 # parse file
 obj = json.loads(data)
-print(obj)
 print("ImagePath: " + str(obj['ImagePath']))
 ImgPath = obj['ImagePath']
-print(ImgPath)
-#ImgPath ="test_img.png"
+ImgPath1=work_dir+'//'+str(ImgPath[0])
 
 
 # This will print 2, which is the value of bias that we saved
-img = np.invert(Image.open(ImgPath[0]).convert('L')).ravel()
+img = np.invert(Image.open(ImgPath1).convert('L')).ravel()
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)  # y labels are oh-encoded
 
 n_train = mnist.train.num_examples  # 55,000

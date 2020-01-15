@@ -142,7 +142,7 @@ public class KerasTestPythonJsonInputFormat extends BaseMultiNumpyVerticalTest {
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(output);
-        List<Float> out = jsonObject1.getJsonArray("score").getList();
+        List<Float> out = jsonObject1.getJsonArray("default").getList();
         INDArray outputArray = Nd4j.create(out);
         INDArray expected = outputArray.get();
         assertEquals(expected, outputArray);
