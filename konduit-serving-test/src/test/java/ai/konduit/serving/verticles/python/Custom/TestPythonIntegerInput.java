@@ -112,8 +112,8 @@ public class TestPythonIntegerInput extends BaseMultiNumpyVerticalTest {
                 .body().asString();
         JsonArray outputJsonArray = new JsonArray(output);
         JsonObject result = outputJsonArray.getJsonObject(0);
-        assertTrue(result.containsKey("output"));
-        assertEquals(25, result.getInteger("output"), 1e-1);
+        assertTrue(result.containsKey("default"));
+        assertEquals(25, result.getInteger("default"), 1e-1);
 
     }
     @Test(timeout = 60000)
