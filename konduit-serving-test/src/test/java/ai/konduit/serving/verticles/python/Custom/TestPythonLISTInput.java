@@ -3,7 +3,9 @@ package ai.konduit.serving.verticles.python.Custom;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -17,11 +19,14 @@ import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -34,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TestPythonSTRInput extends BaseMultiNumpyVerticalTest {
+public class TestPythonLISTInput extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -73,13 +78,14 @@ public class TestPythonSTRInput extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.STR.name())
-                .pythonOutput("output", PythonVariables.Type.STR.name())
+                .pythonInput("inputVar", PythonVariables.Type.LIST.name())
+                .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
+                //   .inputDataFormat(Input.DataFormat.NUMPY)
                 .httpPort(port)
                 .build();
 
@@ -98,8 +104,18 @@ public class TestPythonSTRInput extends BaseMultiNumpyVerticalTest {
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
-        String strTest = "Test for data types";
-        jsonObject.put("inputVar", strTest.toString());
+
+        //Todo : Test in progress.
+        //List tpStepList = new ArrayList();
+        //tpStepList.add("ABCD");
+        //tpStepList.add("XYZ");
+
+
+        List tpStepList = new ArrayList();
+        tpStepList.add(100);
+        tpStepList.add(200);
+
+        jsonObject.put("inputVar", tpStepList);
 
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "application/json");
@@ -114,8 +130,51 @@ public class TestPythonSTRInput extends BaseMultiNumpyVerticalTest {
         JsonObject jsonObject1 = new JsonObject(body);
         //Check for the output variable
         assertTrue(jsonObject1.containsKey("default"));
-        assertEquals(strTest, jsonObject1.getString("default"));
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
+        INDArray outputArray = nd.getNdArray();
+        //  INDArray expected = inputArray.add(0);
+        // assertEquals(expected, outputArray);
+
+        List<Float> out = jsonObject1.getJsonArray("default").getList();
+        //  INDArray outputArray = Nd4j.create(out);
+        INDArray expected = outputArray.get();
+        assertEquals(expected, outputArray);
 
     }
+
+/*
+    @Test(timeout = 60000)
+    public void testInferenceResult1(TestContext context) throws Exception {
+        this.context = context;
+
+        RequestSpecification requestSpecification = given();
+        requestSpecification.port(port);
+        JsonObject jsonObject = new JsonObject();
+
+        HashMap<String, Integer> input_data_types = new LinkedHashMap<>();
+        input_data_types.put("first", 100);
+        input_data_types.put("second", 200);
+
+        //     Hashmap<Sting ,Int> stingIntHashmap = new HashMap<String, Int>();
+        String strTest = "Test for data types";
+        jsonObject.put("inputVar", input_data_types);
+
+        requestSpecification.body(jsonObject.encode().getBytes());
+        requestSpecification.header("Content-Type", "application/json");
+        String body = requestSpecification.when()
+                .expect().statusCode(200)
+                .body(not(isEmptyOrNullString()))
+                .post("/raw/json").then()
+                .extract()
+                .body().asString();
+
+        //Receive the response as JSON
+        JsonObject jsonObject1 = new JsonObject(body);
+        //Check for the output variable
+        assertTrue(jsonObject1.containsKey("default"));
+        // assertEquals(tpStepList, jsonObject1.("default"));
+
+    }*/
 
 }
