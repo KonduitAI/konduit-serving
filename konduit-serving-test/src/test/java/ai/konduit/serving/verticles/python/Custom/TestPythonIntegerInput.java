@@ -1,3 +1,24 @@
+/*
+ *
+ *  * ******************************************************************************
+ *  *  * Copyright (c) 2015-2019 Skymind Inc.
+ *  *  * Copyright (c) 2019 Konduit AI.
+ *  *  *
+ *  *  * This program and the accompanying materials are made available under the
+ *  *  * terms of the Apache License, Version 2.0 which is available at
+ *  *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *  *
+ *  *  * Unless required by applicable law or agreed to in writing, software
+ *  *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  *  * License for the specific language governing permissions and limitations
+ *  *  * under the License.
+ *  *  *
+ *  *  * SPDX-License-Identifier: Apache-2.0
+ *  *  *****************************************************************************
+ *
+ *
+ */
 package ai.konduit.serving.verticles.python.Custom;
 
 import ai.konduit.serving.InferenceConfiguration;
@@ -68,8 +89,6 @@ public class TestPythonIntegerInput extends BaseMultiNumpyVerticalTest {
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        System.out.println("Python Path--------------"+pythonPath);
-
         String pythonCodePath = new ClassPathResource("scripts/Custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
@@ -83,8 +102,8 @@ public class TestPythonIntegerInput extends BaseMultiNumpyVerticalTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-              //  .inputDataFormat(Input.DataFormat.NUMPY)
-               // .predictionType(Output.PredictionType.RAW)
+                //  .inputDataFormat(Input.DataFormat.NUMPY)
+                // .predictionType(Output.PredictionType.RAW)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
@@ -116,6 +135,7 @@ public class TestPythonIntegerInput extends BaseMultiNumpyVerticalTest {
         assertEquals(25, result.getInteger("default"), 1e-1);
 
     }
+
     @Test(timeout = 60000)
     public void testInferenceInvalidResult(TestContext context) throws Exception {
         this.context = context;

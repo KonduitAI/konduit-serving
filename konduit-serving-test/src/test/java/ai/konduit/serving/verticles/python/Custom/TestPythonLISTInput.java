@@ -1,3 +1,24 @@
+/*
+ *
+ *  * ******************************************************************************
+ *  *  * Copyright (c) 2015-2019 Skymind Inc.
+ *  *  * Copyright (c) 2019 Konduit AI.
+ *  *  *
+ *  *  * This program and the accompanying materials are made available under the
+ *  *  * terms of the Apache License, Version 2.0 which is available at
+ *  *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *  *
+ *  *  * Unless required by applicable law or agreed to in writing, software
+ *  *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  *  * License for the specific language governing permissions and limitations
+ *  *  * under the License.
+ *  *  *
+ *  *  * SPDX-License-Identifier: Apache-2.0
+ *  *  *****************************************************************************
+ *
+ *
+ */
 package ai.konduit.serving.verticles.python.Custom;
 
 import ai.konduit.serving.InferenceConfiguration;
@@ -72,7 +93,6 @@ public class TestPythonLISTInput extends BaseMultiNumpyVerticalTest {
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        System.out.println("Python Path--------------" + pythonPath);
         String pythonCodePath = new ClassPathResource("scripts/Custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
@@ -85,7 +105,6 @@ public class TestPythonLISTInput extends BaseMultiNumpyVerticalTest {
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
-                //   .inputDataFormat(Input.DataFormat.NUMPY)
                 .httpPort(port)
                 .build();
 
@@ -109,8 +128,6 @@ public class TestPythonLISTInput extends BaseMultiNumpyVerticalTest {
         //List tpStepList = new ArrayList();
         //tpStepList.add("ABCD");
         //tpStepList.add("XYZ");
-
-
         List tpStepList = new ArrayList();
         tpStepList.add(100);
         tpStepList.add(200);
@@ -142,39 +159,5 @@ public class TestPythonLISTInput extends BaseMultiNumpyVerticalTest {
         assertEquals(expected, outputArray);
 
     }
-
-/*
-    @Test(timeout = 60000)
-    public void testInferenceResult1(TestContext context) throws Exception {
-        this.context = context;
-
-        RequestSpecification requestSpecification = given();
-        requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
-
-        HashMap<String, Integer> input_data_types = new LinkedHashMap<>();
-        input_data_types.put("first", 100);
-        input_data_types.put("second", 200);
-
-        //     Hashmap<Sting ,Int> stingIntHashmap = new HashMap<String, Int>();
-        String strTest = "Test for data types";
-        jsonObject.put("inputVar", input_data_types);
-
-        requestSpecification.body(jsonObject.encode().getBytes());
-        requestSpecification.header("Content-Type", "application/json");
-        String body = requestSpecification.when()
-                .expect().statusCode(200)
-                .body(not(isEmptyOrNullString()))
-                .post("/raw/json").then()
-                .extract()
-                .body().asString();
-
-        //Receive the response as JSON
-        JsonObject jsonObject1 = new JsonObject(body);
-        //Check for the output variable
-        assertTrue(jsonObject1.containsKey("default"));
-        // assertEquals(tpStepList, jsonObject1.("default"));
-
-    }*/
 
 }
