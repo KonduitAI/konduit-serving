@@ -109,8 +109,6 @@ public class TestPythonLISTInput extends BaseMultiNumpyVerticalTest {
         //List tpStepList = new ArrayList();
         //tpStepList.add("ABCD");
         //tpStepList.add("XYZ");
-
-
         List tpStepList = new ArrayList();
         tpStepList.add(100);
         tpStepList.add(200);
@@ -142,39 +140,5 @@ public class TestPythonLISTInput extends BaseMultiNumpyVerticalTest {
         assertEquals(expected, outputArray);
 
     }
-
-/*
-    @Test(timeout = 60000)
-    public void testInferenceResult1(TestContext context) throws Exception {
-        this.context = context;
-
-        RequestSpecification requestSpecification = given();
-        requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
-
-        HashMap<String, Integer> input_data_types = new LinkedHashMap<>();
-        input_data_types.put("first", 100);
-        input_data_types.put("second", 200);
-
-        //     Hashmap<Sting ,Int> stingIntHashmap = new HashMap<String, Int>();
-        String strTest = "Test for data types";
-        jsonObject.put("inputVar", input_data_types);
-
-        requestSpecification.body(jsonObject.encode().getBytes());
-        requestSpecification.header("Content-Type", "application/json");
-        String body = requestSpecification.when()
-                .expect().statusCode(200)
-                .body(not(isEmptyOrNullString()))
-                .post("/raw/json").then()
-                .extract()
-                .body().asString();
-
-        //Receive the response as JSON
-        JsonObject jsonObject1 = new JsonObject(body);
-        //Check for the output variable
-        assertTrue(jsonObject1.containsKey("default"));
-        // assertEquals(tpStepList, jsonObject1.("default"));
-
-    }*/
 
 }
