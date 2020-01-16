@@ -128,7 +128,6 @@ public class KerasTestPythonNdArrayInputFormat extends BaseMultiNumpyVerticalTes
 
         //Preparing input NDArray
         INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-        INDArray inputArray = Nd4j.onesLike(arr);
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
@@ -148,7 +147,7 @@ public class KerasTestPythonNdArrayInputFormat extends BaseMultiNumpyVerticalTes
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expected = Nd4j.create(new double[][]{{0.1628401, 0.7828045, 0.05435541}, {0.0, 1.0, 0.0}});
+        INDArray expected = Nd4j.create(new float[][]{{0.1628401f, 0.7828045f, 0.05435541f}, {0.0f, 1.0f, 0.0f}});
         assertEquals(expected, outputArray);
 
     }
