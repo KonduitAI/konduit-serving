@@ -129,7 +129,7 @@ public class TensorFlowTestPythonJsonInputFormat extends BaseMultiNumpyVerticalT
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        File json = new ClassPathResource("Json/tensorflowImgPath.json").getFile();
+        File json = new ClassPathResource("scripts/TensorFlow/tensorflowImgPath.json").getFile();
         jsonObject.put("JsonInput", json.getAbsolutePath());
         requestSpecification.body(jsonObject.encode());
 
@@ -145,7 +145,7 @@ public class TensorFlowTestPythonJsonInputFormat extends BaseMultiNumpyVerticalT
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expected = outputArray.get();
+        INDArray expected = outputArray.add(0);
         assertEquals(expected, outputArray);
 
     }

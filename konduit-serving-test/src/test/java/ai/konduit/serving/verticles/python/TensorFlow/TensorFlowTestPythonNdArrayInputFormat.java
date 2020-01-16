@@ -22,13 +22,18 @@
 package ai.konduit.serving.verticles.python.TensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.output.types.NDArrayOutput;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
+import com.mashape.unirest.http.Unirest;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
@@ -36,12 +41,14 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.api.transform.schema.Schema;
+import org.datavec.api.writable.NDArrayWritable;
+import org.datavec.api.writable.Writable;
+import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.serde.binary.BinarySerde;
 
@@ -53,6 +60,7 @@ import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -104,10 +112,11 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                //.inputDataFormat(Input.DataFormat.NUMPY)
+                .inputDataFormat(Input.DataFormat.IMAGE)
                 // .outputDataFormat(Output.DataFormat.NUMPY)
                 .predictionType(Output.PredictionType.RAW)
                 .build();
+
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .step(pythonStepConfig)
@@ -122,21 +131,48 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
+        JsonObject jsonObject = new JsonObject();
 
-        INDArray arr = Nd4j.ones(28, 28);
+        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
+                .scaleImageTransform(20.0f)
+                .resizeImageTransform(28, 28)
+                .build();
+
+        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
+                .imageProcessingInitialLayout("NCHW")
+                .imageProcessingRequiredLayout("NHWC")
+                .inputName("default")
+                .dimensionsConfig("default", new Long[]{28L, 28L, 1L}) // Height, width, channels
+                .imageTransformProcess("default", imageTransformProcess)
+                .build();
+
+        String imagePath = new ClassPathResource("data/5.png").getFile().getAbsolutePath();
+
+        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
+
+        INDArray image = ((NDArrayWritable) output[0][0]).get();
+
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
+        System.out.println("filePath-----------" + filePath);
 
         //Create new file to write binary input data.
         File file = new File(filePath + "/test-input.zip");
-        BinarySerde.writeArrayToDisk(arr, file);
+        System.out.println(file.getAbsolutePath());
+
+        BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
+        requestSpecification.body(jsonObject.encode().getBytes());
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String output = requestSpecification.when()
-                .multiPart("default", file)
-                .expect().statusCode(200)
-                .post("raw/nd4j").then()
-                .extract()
-                .body().asString();
+        String response = Unirest.post("http://localhost:" + port + "/raw/nd4j")
+                .field("default", file)
+                .asString().getBody();
+
+        JsonObject jsonObject1 = new JsonObject(response);
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        System.out.print(ndarraySerde);
+        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
+        INDArray outputArray = nd.getNdArray();
+        assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 
 }
