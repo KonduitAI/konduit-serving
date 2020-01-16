@@ -84,7 +84,7 @@ public class TestPythonSetupRun extends BaseMultiNumpyVerticalTest {
     @Override
     public JsonObject getConfigObject() throws Exception {
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonCode("def setup(): pass\ndef run(input): return {'output': np.array(input + 2)}")
+                .pythonCode("import numpy as np\ndef setup(): pass\ndef run(input): return {'output': np.array(input + 2)}")
                 .pythonInput("input", PythonVariables.Type.NDARRAY.name())
                 .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
                 .setupAndRun(true)
