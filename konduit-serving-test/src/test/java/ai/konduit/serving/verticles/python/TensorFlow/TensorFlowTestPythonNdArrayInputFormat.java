@@ -33,7 +33,6 @@ import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
-import com.mashape.unirest.http.Unirest;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
@@ -60,6 +59,8 @@ import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
@@ -163,9 +164,13 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
         requestSpecification.body(jsonObject.encode().getBytes());
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = Unirest.post("http://localhost:" + port + "/raw/nd4j")
-                .field("default", file)
-                .asString().getBody();
+        String response = requestSpecification.when()
+                .multiPart("default", file)
+                .expect().statusCode(200)
+                .body(not(isEmptyOrNullString()))
+                .post("/raw/nd4j").then()
+                .extract()
+                .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(response);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
