@@ -23,8 +23,8 @@
 package ai.konduit.serving.executioner;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
-import ai.konduit.serving.config.Output.DataFormat;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.input.conversion.ConverterArgs;
@@ -223,23 +223,24 @@ public class PipelineExecutioner {
         }
     }
 
-    private void validateInputsAndOutputs(ServingConfig servingConfig) {
+    private void validateInputsAndOutputs(Input.DataFormat inputDataformat,
+                                          PredictionType predictionType) {
         //configure validation for input and output
         if(!config.getSteps().isEmpty()) {
             PipelineStep finalPipelineStep = config.getSteps().get(config.getSteps().size() - 1);
             PipelineStep startingPipelineStep = config.getSteps().get(0);
 
-            Preconditions.checkState(startingPipelineStep.isValidInputType(servingConfig.getInputDataFormat()),
+            Preconditions.checkState(startingPipelineStep.isValidInputType(inputDataformat),
                     "Configured input type is invalid for initial pipeline step of type "
                             + startingPipelineStep.getClass().getName() + " expected input types were "
                             + Arrays.toString(startingPipelineStep.validInputTypes())
                             + ". If this list is null or empty, then any type is considered valid.");
-            Preconditions.checkState(finalPipelineStep.isValidOutputType(servingConfig.getOutputDataFormat()),
+            Preconditions.checkState(finalPipelineStep.isValidOutputType(config.getServingConfig().getOutputDataFormat()),
                     "Configured output type is invalid for final pipeline step of type "
                             + finalPipelineStep.getClass().getName() + " expected output types were "
                             + Arrays.toString(finalPipelineStep.validInputTypes())
                             + ". If this list is null or empty, then any type is considered valid.");
-            Preconditions.checkState(finalPipelineStep.isValidPredictionType(servingConfig.getPredictionType()),
+            Preconditions.checkState(finalPipelineStep.isValidPredictionType(predictionType),
                     "Invalid prediction type configured for final pipeline step of type "
                             + finalPipelineStep.getClass().getName() + " expected types were "
                             + Arrays.toString(finalPipelineStep.validPredictionTypes())
@@ -250,13 +251,13 @@ public class PipelineExecutioner {
     /**
      * Init the pipeline executioner.
      */
-    public void init() {
+    public void init(Input.DataFormat inputDataFormat, PredictionType predictionType) {
         ServingConfig servingConfig = config.getServingConfig();
         if(config.getSteps().isEmpty()) {
             log.warn("No pipeline steps configured.");
         }
 
-        validateInputsAndOutputs(servingConfig);
+        validateInputsAndOutputs(inputDataFormat, predictionType);
 
         this.pipeline = Pipeline.getPipeline(config.getSteps());
 
@@ -286,25 +287,18 @@ public class PipelineExecutioner {
                 ImageLoadingStep imageLoadingStepConfig = (ImageLoadingStep) pipelineStep;
                 objectDetectionConfig = imageLoadingStepConfig.getObjectDetectionConfig();
             }
-
-
         }
 
         initDataTypes();
 
         try {
             if (servingConfig.getOutputDataFormat() == Output.DataFormat.JSON) {
-                multiOutputAdapter = outputAdapterFor(config().serving().getPredictionType(), objectDetectionConfig);
+                multiOutputAdapter = outputAdapterFor(predictionType, objectDetectionConfig);
             } else {
                 log.info("Skipping initialization of multi input adapter due to binary output.");
             }
         } catch (Exception e) {
             log.error("Error initializing output adapter.", e);
-        }
-
-
-        if (servingConfig.getInputDataFormat() == null) {
-            throw new IllegalStateException("Please define an input data type!");
         }
 
         if (modelConfig != null && modelConfig.getModelConfigType().getModelType() != ModelConfig.ModelType.PMML
@@ -367,7 +361,7 @@ public class PipelineExecutioner {
                 multiOutputAdapter = new RegressionMultiOutputAdapter();
                 break;
             default:
-                throw new IllegalStateException("Illegal type for output type " + config.serving().getPredictionType());
+                throw new IllegalStateException("Illegal type for output type " + predictionType);
         }
 
         return multiOutputAdapter;
@@ -411,7 +405,7 @@ public class PipelineExecutioner {
             timedResponse(ctx, outputDataFormat, batchId, arrays, batchOutputMap);
 
         } else {
-            /**
+            /*
              * Note that this handles binary responses.
              */
             Map<String, BatchOutput> namedBatchOutput = new HashMap<>();
@@ -479,9 +473,9 @@ public class PipelineExecutioner {
                             Schema conversionSchema,
                             TransformProcess transformProcess,
                             Schema outputSchema,
-                            DataFormat outputDataFormat) {
+                            Output.DataFormat outputDataFormat) {
 
-        Record[] pipelineInput = PipelineExecutioner.createInput(input,transformProcess,conversionSchema);
+        Record[] pipelineInput = PipelineExecutioner.createInput(input, transformProcess, conversionSchema);
         Record[] records = pipeline.doPipeline(pipelineInput);
         Writable firstWritable = records[0].getRecord().get(0);
         if (firstWritable.getType() == WritableType.NDArray) {
@@ -586,7 +580,8 @@ public class PipelineExecutioner {
      * among other components)
      */
     public void destroy() {
-        pipeline.destroy();
+        if(pipeline != null)
+            pipeline.destroy();
     }
 
 
@@ -770,8 +765,7 @@ public class PipelineExecutioner {
                     "of %s data types specified", namesValidation, inputOrOutputType));
         }
 
-        ret = new LinkedHashMap<>();
-        ret.putAll(types);
+        ret = new LinkedHashMap<>(types);
         return ret;
     }
 

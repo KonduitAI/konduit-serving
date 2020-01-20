@@ -114,8 +114,6 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
         TransformProcessStep transformStep = new TransformProcessStep(transformProcess, outputSchema);
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .predictionType(Output.PredictionType.CLASSIFICATION)
-                .inputDataFormat(Input.DataFormat.JSON)
                 .httpPort(port)
                 .build();
 
@@ -153,7 +151,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
         given().contentType(ContentType.JSON)
                 .body(wrapper.toString())
                 .port(port)
-                .post("/classification/csv")
+                .post("/classification/json")
                 .then().statusCode(200);
 
 
