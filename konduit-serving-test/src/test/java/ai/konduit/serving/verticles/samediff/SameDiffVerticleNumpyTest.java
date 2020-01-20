@@ -40,6 +40,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.autodiff.samediff.SDVariable;
@@ -80,9 +81,7 @@ public class SameDiffVerticleNumpyTest extends BaseVerticleTest {
         sameDiff.asFlatFile(tmpSameDiffFile);
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .inputDataFormat(Input.DataFormat.NUMPY)
                 .outputDataFormat(Output.DataFormat.NUMPY)
-                .predictionType(Output.PredictionType.RAW)
                 .httpPort(port)
                 .build();
 

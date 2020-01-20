@@ -35,7 +35,6 @@ def test_build_tp(output_format):
     port = random.randint(1000, 65535)
     serving_config = ServingConfig(
         http_port=port,
-        input_data_format="JSON",
         output_data_format=output_format,
         log_timings=True,
     )

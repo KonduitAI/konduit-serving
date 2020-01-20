@@ -128,8 +128,8 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
                     return SchemaType.Integer;
                 case FLOAT:
                     return SchemaType.Float;
-                case LIST:
                 case NDARRAY:
+                case LIST:
                     return SchemaType.NDArray;
                 case FILE:
                 case DICT:

@@ -54,8 +54,7 @@ Let's have a look at it first:
 ```yaml
 serving:
   http_port: 1337
-  input_data_type: NUMPY
-  output_data_type: NUMPY
+  output_data_format: NUMPY
   log_timings: True
   extra_start_args: -Xmx8g
   jar_path: konduit.jar
