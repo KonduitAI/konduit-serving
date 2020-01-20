@@ -94,13 +94,15 @@ public class SchemaTypeUtils {
      * @param collection the collection to check* @return
      */
     public static  boolean isNullOrEmpty(Object collection) {
+        if(collection == null) return true;
+
         if(collection instanceof Map) {
             Map map = (Map) collection;
-            return map == null || map.isEmpty();
+            return map.isEmpty();
         }
         else if(collection instanceof Collection) {
             Collection collection1 = (Collection) collection;
-            return collection1 == null || collection1.isEmpty();
+            return collection1.isEmpty();
         }
         else
             throw new IllegalArgumentException("Passed in type must be a collection or map");
