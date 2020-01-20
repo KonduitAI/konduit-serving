@@ -32,9 +32,7 @@ import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
 import junit.framework.TestCase;
-import org.datavec.python.PythonVariables;
 import org.datavec.python.PythonVariables.Type;
 import org.junit.Test;
 import org.nd4j.linalg.factory.Nd4j;
@@ -53,12 +51,9 @@ public class PipelineExecutionerTests {
 
     @Test
     public void testDoJsonInference() {
-        ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
         int port = 1111;
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .predictionType(Output.PredictionType.RAW)
-                .inputDataFormat(Input.DataFormat.IMAGE)
                 .httpPort(port)
                 .build();
 
@@ -69,7 +64,7 @@ public class PipelineExecutionerTests {
 
         List<String> fieldNames = Arrays.stream(values)
                 .filter(input -> input == SchemaType.Boolean)
-                .map(input -> input.name())
+                .map(Enum::name)
                 .collect(Collectors.toList());
         Map<String,PythonConfig> namesToPythonConfig = new LinkedHashMap<>();
         PythonConfigBuilder pythonConfig = PythonConfig.builder();
@@ -158,11 +153,11 @@ public class PipelineExecutionerTests {
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .steps(Arrays.asList(pythonStep))
+                .steps(Collections.singletonList(pythonStep))
                 .build();
 
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration);
-        pipelineExecutioner.init();
+        pipelineExecutioner.init(Input.DataFormat.IMAGE, Output.PredictionType.RAW);
         // Run the test
         pipelineExecutioner.doJsonInference(wrapper,null);
     }
@@ -190,8 +185,6 @@ public class PipelineExecutionerTests {
 
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .predictionType(Output.PredictionType.RAW)
-                .inputDataFormat(Input.DataFormat.IMAGE)
                 .httpPort(port)
                 .build();
 
@@ -209,7 +202,7 @@ public class PipelineExecutionerTests {
                 .build();
 
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);
-        pipelineExecutioner.init();
+        pipelineExecutioner.init(Input.DataFormat.IMAGE, Output.PredictionType.RAW);
         assertNotNull("Input names should not be null.", pipelineExecutioner.inputNames());
         assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         assertNotNull(pipelineExecutioner.inputDataTypes);
@@ -239,8 +232,6 @@ public class PipelineExecutionerTests {
                 .build();
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .inputDataFormat(Input.DataFormat.IMAGE)
-                .predictionType(Output.PredictionType.YOLO)
                 .outputDataFormat(Output.DataFormat.JSON)
                 .httpPort(port)
                 .build();
@@ -264,7 +255,7 @@ public class PipelineExecutionerTests {
                 .build();
 
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);
-        pipelineExecutioner.init();
+        pipelineExecutioner.init(Input.DataFormat.IMAGE, Output.PredictionType.YOLO);
         assertNotNull("Input names should not be null.", pipelineExecutioner.inputNames());
         assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         TestCase.assertEquals(TensorDataType.INT64, pipelineExecutioner.inputDataTypes.get("image_tensor"));

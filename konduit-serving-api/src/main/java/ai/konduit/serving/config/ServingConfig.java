@@ -45,13 +45,9 @@ public class ServingConfig {
 
     @Builder.Default
     private String listenHost = "localhost";
-    @Builder.Default
-    private Input.DataFormat inputDataFormat = Input.DataFormat.JSON;
-    @Builder.Default
-    private Output.DataFormat outputDataFormat = Output.DataFormat.JSON;
 
     @Builder.Default
-    private Output.PredictionType predictionType = PredictionType.RAW;
+    private Output.DataFormat outputDataFormat = Output.DataFormat.JSON;
 
     @Builder.Default
     private String uploadsDirectory = "file-uploads/";

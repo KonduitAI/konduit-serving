@@ -39,6 +39,7 @@ import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.image.VertxBufferImageInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.nd4j.VertxBufferNd4jInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy.VertxBufferNumpyInputAdapter;
+import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PmmlStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
@@ -84,6 +85,10 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 public class PipelineRouteDefiner {
+
+    protected Input.DataFormat inputDataFormat;
+    protected PredictionType predictionType;
+    protected Output.DataFormat outputDataFormat;
 
     protected PipelineExecutioner pipelineExecutioner;
     protected InferenceConfiguration inferenceConfiguration;
@@ -254,13 +259,18 @@ public class PipelineRouteDefiner {
         /**
          * Get the output of a pipeline for a given prediction type for JSON input data format.
          */
-        // TODO: this json specific route assumes a single input and output called "default".
-        //  That seems very restrictive. Also, using this for a data format other than JSON does not make sense.
-        //  Consider renaming this route to "/:predictionType/JSON" for clarity.
         router.post("/:predictionType/:inputDataFormat")
                 .consumes("application/json")
                 .produces("application/json").handler(ctx -> {
-            PredictionType predictionType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
+            predictionType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
+            inputDataFormat = Input.DataFormat.valueOf(ctx.pathParam("inputDataFormat").toUpperCase());
+
+            Preconditions.checkState(inputDataFormat.equals(Input.DataFormat.JSON),
+                    "content-type: application/json only accepts JSON as " +
+                            "input data format and not " + inputDataFormat.name());
+
+            pipelineExecutioner.init(inputDataFormat, predictionType);
+
             initializeSchemas(inferenceConfiguration, true);
 
             try {
@@ -291,10 +301,23 @@ public class PipelineRouteDefiner {
         /**
          * Multi-part request for pipeline outputs of given predictionType for
          */
-        // TODO: predictionType is unused, why put it into the route?
         router.post("/:predictionType/:inputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed").handler(ctx -> {
+            inputDataFormat = Input.DataFormat.valueOf(ctx.pathParam("inputDataFormat").toUpperCase());
+
+            try {
+                // Sometimes we have predictionType coming in as outputDataFormat if that's the case
+                // then the right place for the pipelineExecutioner to be initialized is at the
+                // "/:outputDataFormat/:inputDataFormat" route
+                outputDataFormat = Output.DataFormat.valueOf(ctx.pathParam("predictionType").toUpperCase());
+                predictionType = PredictionType.RAW;
+            } catch(Exception e) {
+                predictionType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
+            }
+
+            pipelineExecutioner.init(inputDataFormat, predictionType);
+
             Map<String, InputAdapter<io.vertx.core.buffer.Buffer, ?>> adapters = getInputAdapterMap(ctx);
 
             BatchInputParser batchInputParser = BatchInputParser.builder()
@@ -317,7 +340,6 @@ public class PipelineRouteDefiner {
                         start.stop();
                 } catch (Exception e) {
                     log.error("Unable to convert data for batch", e);
-
                 }
 
                 long endNanos = System.nanoTime();
@@ -338,7 +360,6 @@ public class PipelineRouteDefiner {
 
         });
 
-        // TODO: predictionType is unused, why put it into the route?
         router.post("/:predictionType/:inputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed")
@@ -371,7 +392,7 @@ public class PipelineRouteDefiner {
 
                     pipelineExecutioner.doInference(
                             ctx,
-                            inferenceConfiguration.getServingConfig().getPredictionType(),
+                            predictionType,
                             inputs,
                             inputSchema,
                             null,
@@ -447,6 +468,7 @@ public class PipelineRouteDefiner {
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed")
                 .produces("application/octet-stream").handler((RoutingContext ctx) -> {
+
             Record[] inputs = ctx.get(VerticleConstants.CONVERTED_INFERENCE_DATA);
             if (inputs == null) {
                 log.warn("No inputs found. Bad request");
@@ -479,11 +501,8 @@ public class PipelineRouteDefiner {
                     handler.fail(e);
                 }
 
-            }, true, result -> {
-            });
-
+            }, true, result -> {});
         });
-
 
         if (pipelineExecutioner == null) {
             log.debug("Initializing inference executioner after starting verticle");
@@ -491,12 +510,9 @@ public class PipelineRouteDefiner {
             //due to needing to sometime initialize retraining routes
             try {
                 pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration);
-                pipelineExecutioner.init();
-
             } catch (Exception e) {
                 log.error("Failed to initialize. Shutting down.", e);
             }
-
         } else {
             log.debug("Web server and endpoint already initialized.");
         }
@@ -508,7 +524,7 @@ public class PipelineRouteDefiner {
     private void initializeSchemas(InferenceConfiguration inferenceConfiguration, boolean inputRequired) {
         if (inputSchema == null && inputRequired) {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                if (pipelineStep instanceof PmmlStep || pipelineStep instanceof PythonStep || pipelineStep
+                if (pipelineStep instanceof ModelStep || pipelineStep instanceof PythonStep || pipelineStep
                         instanceof TransformProcessStep) {
                     inputSchema = pipelineStep.inputSchemaForName("default");
                 }
@@ -517,7 +533,7 @@ public class PipelineRouteDefiner {
 
         if (outputSchema == null) {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                if (pipelineStep instanceof PmmlStep || pipelineStep instanceof PythonStep || pipelineStep
+                if (pipelineStep instanceof ModelStep || pipelineStep instanceof PythonStep || pipelineStep
                         instanceof TransformProcessStep) {
                     outputSchema = pipelineStep.outputSchemaForName("default");
                 }
