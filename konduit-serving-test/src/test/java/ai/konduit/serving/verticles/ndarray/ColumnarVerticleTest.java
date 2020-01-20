@@ -59,7 +59,7 @@ public class ColumnarVerticleTest extends BaseDl4JVerticalTest {
                 .contentType(ContentType.JSON)
                 .port(port)
                 .when()
-                .post("/classification/csv").andReturn();
+                .post("/classification/json").andReturn();
     }
 
 

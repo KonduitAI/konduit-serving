@@ -24,8 +24,10 @@ package ai.konduit.serving.pipeline;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.util.SchemaTypeUtils;
-import lombok.*;
-import lombok.Builder.Default;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.schema.Schema;
@@ -105,7 +107,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
             this.inputColumnNames.put("default",Arrays.asList("default"));
         }
 
-        if(SchemaTypeUtils.allIsNullOrEmpty(this.outputNames,this.outputSchemas,this.outputColumnNames)) {
+        if(!SchemaTypeUtils.allIsNullOrEmpty(this.outputNames,this.outputSchemas,this.outputColumnNames)) {
             Set<String> outputNamesTest = new HashSet<>(this.outputNames);
             if(SchemaTypeUtils.anyIsNullOrEmpty(outputSchemas,outputColumnNames)) {
                 outputColumnNames = new LinkedHashMap<>();
@@ -304,10 +306,10 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
     @Override
     public Schema outputSchemaForName(String name) {
         initSchemasAndColumnsIfNeeded();
-        Preconditions.checkNotNull(outputSchemas, "No output schemas specified in configuration!");
-
-        if (!outputSchemas.containsKey(name))
+      
+        if (outputSchemas == null || !outputSchemas.containsKey(name))
             return null;
+
         return SchemaTypeUtils.toSchema(outputSchemas.get(name),
                 outputColumnNames.get(name));
     }
@@ -318,7 +320,8 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
     @Override
     public Schema inputSchemaForName(String name) {
         initSchemasAndColumnsIfNeeded();
-        if (!inputSchemas.containsKey(name))
+
+        if (inputSchemas == null || !inputSchemas.containsKey(name))
             return null;
 
         return SchemaTypeUtils.toSchema(inputTypesForName(name),

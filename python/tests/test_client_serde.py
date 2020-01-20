@@ -41,7 +41,6 @@ def test_python_serde():
     port = random.randint(1000, 65535)
     serving_config = ServingConfig(
         http_port=port,
-        input_data_format="NUMPY",
         output_data_format="NUMPY",
         log_timings=True,
     )
