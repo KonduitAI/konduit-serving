@@ -14,7 +14,7 @@ InferenceConfigurationJava = autoclass("ai.konduit.serving.InferenceConfiguratio
 def test_json_compare():
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(
-        http_port=1300, input_data_format="NUMPY", output_data_format="NUMPY"
+        http_port=1300, output_data_format="NUMPY"
     )
 
     tensorflow_config = TensorFlowConfig(
@@ -51,7 +51,6 @@ def test_python_serde():
     port = 1300
     serving_config = ServingConfig(
         http_port=port,
-        input_data_format="NUMPY",
         output_data_format="NUMPY",
         log_timings=True,
     )

@@ -24,8 +24,12 @@ package ai.konduit.serving.pipeline;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.util.SchemaTypeUtils;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.base.Preconditions;
 
@@ -41,14 +45,16 @@ import java.util.*;
  * @author Adam Gibson
  */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(callSuper = false)
+@Slf4j
 public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements PipelineStep<T> {
 
     @Singular
-    protected Map<String, SchemaType[]> inputSchemas, outputSchemas;
+    protected Map<String, SchemaType[]> inputSchemas;
+    @Singular
+    protected Map<String,SchemaType[]> outputSchemas;
 
     @Singular
     protected List<String> inputNames, outputNames;
@@ -56,6 +62,83 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
     @Singular
     protected Map<String, List<String>> inputColumnNames, outputColumnNames;
 
+    public BasePipelineStep(Map<String, SchemaType[]> inputSchemas, Map<String, SchemaType[]> outputSchemas, List<String> inputNames, List<String> outputNames, Map<String, List<String>> inputColumnNames, Map<String, List<String>> outputColumnNames) {
+        this.inputSchemas = inputSchemas;
+        this.outputSchemas = outputSchemas;
+        this.inputNames = inputNames;
+        this.outputNames = outputNames;
+        this.inputColumnNames = inputColumnNames;
+        this.outputColumnNames = outputColumnNames;
+        initSchemasAndColumnsIfNeeded();
+
+
+    }
+
+
+    protected  void initSchemasAndColumnsIfNeeded() {
+        if(!SchemaTypeUtils.allIsNullOrEmpty(inputNames,inputColumnNames,inputSchemas)) {
+            Set<String> namesTest = new HashSet<>(inputNames);
+            if(SchemaTypeUtils.anyIsNullOrEmpty(inputColumnNames,inputSchemas)) {
+                inputColumnNames = new LinkedHashMap<>();
+                inputSchemas = new LinkedHashMap<>();
+                inputNames.forEach(inputName -> {
+                    inputColumnNames.put(inputName, Arrays.asList("default"));
+                    inputSchemas.put(inputName, new SchemaType[]{SchemaType.NDArray});
+                });
+            }
+            Preconditions.checkState(namesTest.equals(inputSchemas.keySet()) && namesTest.equals(inputColumnNames.keySet()),"Input schema types, input column names, and input names specified are not consistent!");
+        }
+        else if(SchemaTypeUtils.anyIsNullOrEmpty(inputColumnNames,inputSchemas)) {
+            inputColumnNames = new LinkedHashMap<>();
+            inputSchemas = new LinkedHashMap<>();
+            log.info("Auto initializing inputs with default column name default and default column type NDArray");
+            inputNames.forEach(inputName -> {
+                inputColumnNames.put(inputName, Arrays.asList("default"));
+                inputSchemas.put(inputName, new SchemaType[]{SchemaType.NDArray});
+            });
+        }
+
+        else { //initialize all default values
+            log.info("No input names or column names or types found. Initializing with default name of default, default column name of default and NDArray type");
+            this.inputNames = new ArrayList<>(Arrays.asList("default"));
+            this.inputSchemas = new LinkedHashMap<>();
+            this.inputSchemas.put("default",new SchemaType[]{SchemaType.NDArray});
+            this.inputColumnNames = new LinkedHashMap<>();
+            this.inputColumnNames.put("default",Arrays.asList("default"));
+        }
+
+        if(!SchemaTypeUtils.allIsNullOrEmpty(this.outputNames,this.outputSchemas,this.outputColumnNames)) {
+            Set<String> outputNamesTest = new HashSet<>(this.outputNames);
+            if(SchemaTypeUtils.anyIsNullOrEmpty(outputSchemas,outputColumnNames)) {
+                outputColumnNames = new LinkedHashMap<>();
+                outputSchemas = new LinkedHashMap<>();
+                outputNames.forEach(inputName -> {
+                    outputColumnNames.put(inputName, Arrays.asList("default"));
+                    outputSchemas.put(inputName, new SchemaType[]{SchemaType.NDArray});
+                });
+            }
+            Preconditions.checkState(this.outputSchemas.keySet().equals(this.outputColumnNames.keySet())
+                            && this.outputSchemas.keySet().equals(outputNamesTest),
+                    "Output schemas and input column name names are not consistent!");
+        }
+        else if(SchemaTypeUtils.anyIsNullOrEmpty(outputSchemas,outputColumnNames)) {
+            outputColumnNames = new LinkedHashMap<>();
+            outputSchemas = new LinkedHashMap<>();
+            log.info("Auto initializing outputs with default column name default and default column type NDArray");
+            outputNames.forEach(inputName -> {
+                outputColumnNames.put(inputName, Arrays.asList("default"));
+                outputSchemas.put(inputName, new SchemaType[]{SchemaType.NDArray});
+            });
+        }
+
+        else { //initialize all default values
+            this.outputNames = new ArrayList<>(Arrays.asList("default"));
+            this.outputSchemas = new LinkedHashMap<>();
+            this.outputSchemas.put("default",new SchemaType[]{SchemaType.NDArray});
+            this.outputColumnNames = new LinkedHashMap<>();
+            this.outputColumnNames.put("default",Arrays.asList("default"));
+        }
+    }
 
     /**
      *  {@inheritDoc}
@@ -222,10 +305,11 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
      */
     @Override
     public Schema outputSchemaForName(String name) {
-        Preconditions.checkNotNull(outputSchemas, "No output schemas specified in configuration!");
-
-        if (!outputSchemas.containsKey(name))
+        initSchemasAndColumnsIfNeeded();
+      
+        if (outputSchemas == null || !outputSchemas.containsKey(name))
             return null;
+
         return SchemaTypeUtils.toSchema(outputSchemas.get(name),
                 outputColumnNames.get(name));
     }
@@ -235,8 +319,9 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
      */
     @Override
     public Schema inputSchemaForName(String name) {
-        Preconditions.checkNotNull(inputSchemas, "No input schemas specified in configuration!");
-        if (!inputSchemas.containsKey(name))
+        initSchemasAndColumnsIfNeeded();
+
+        if (inputSchemas == null || !inputSchemas.containsKey(name))
             return null;
 
         return SchemaTypeUtils.toSchema(inputTypesForName(name),
@@ -248,10 +333,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
      */
     @Override
     public SchemaType[] inputTypesForName(String name) {
-        if (!inputSchemas.containsKey(name)) {
-            return null;
-        }
-
+        initSchemasAndColumnsIfNeeded();
         return inputSchemas.get(name);
     }
 

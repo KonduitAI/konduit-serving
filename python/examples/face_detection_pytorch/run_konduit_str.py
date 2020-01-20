@@ -21,7 +21,7 @@ python_config = PythonConfig(
 # for this example.
 python_pipeline_step = PythonStep().step(python_config)
 serving_config = ServingConfig(
-    http_port=1337, input_data_format="JSON", output_data_format="JSON"
+    http_port=1337, output_data_format="JSON"
 )
 
 # Start a konduit server and wait for it to start

@@ -1,6 +1,5 @@
 serving:
   http_port: 1337
-  input_data_format: IMAGE
   output_data_format: NUMPY
   log_timings: True
 steps:
