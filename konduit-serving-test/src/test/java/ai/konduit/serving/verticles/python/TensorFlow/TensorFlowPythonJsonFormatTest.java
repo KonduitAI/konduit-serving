@@ -17,7 +17,8 @@
  *  *  * SPDX-License-Identifier: Apache-2.0
  *  *  *****************************************************************************
  *
- * */
+ *
+ */
 
 package ai.konduit.serving.verticles.python.TensorFlow;
 
@@ -25,7 +26,6 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
-import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -38,16 +38,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.api.transform.schema.Schema;
-import org.datavec.api.writable.NDArrayWritable;
-import org.datavec.api.writable.Writable;
-import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
-import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
@@ -63,7 +59,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVerticalTest {
+public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     private Schema inputSchema;
 
@@ -96,12 +92,12 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/tensorflow/TensorFlowImageTest.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/tensorflow/Json_TensorFlow_NDarray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(pythonPath)
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("img", PythonVariables.Type.NDARRAY.name())
+                .pythonPath(pythonPath)
+                .pythonInput("JsonInput", PythonVariables.Type.STR.name())
                 .pythonOutput("prediction", PythonVariables.Type.NDARRAY.name())
                 .build();
 
@@ -110,7 +106,6 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .build();
-
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .step(pythonStepConfig)
@@ -122,52 +117,31 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
 
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
+
         this.context = context;
+
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
-                .scaleImageTransform(20.0f)
-                .resizeImageTransform(28, 28)
-                .build();
+        File json = new ClassPathResource("scripts/TensorFlow/tensorflowImgPath.json").getFile();
+        jsonObject.put("JsonInput", json.getAbsolutePath());
+        requestSpecification.body(jsonObject.encode());
 
-        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .imageProcessingInitialLayout("NCHW")
-                .imageProcessingRequiredLayout("NHWC")
-                .inputName("default")
-                .dimensionsConfig("default", new Long[]{28L, 28L, 1L}) // Height, width, channels
-                .imageTransformProcess("default", imageTransformProcess)
-                .build();
-
-        String imagePath = new ClassPathResource("data/5.png").getFile().getAbsolutePath();
-
-        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
-
-        INDArray image = ((NDArrayWritable) output[0][0]).get();
-
-        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-
-        //Create new file to write binary input data.
-        File file = new File(filePath + "/test-input.zip");
-
-        BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
-        requestSpecification.body(jsonObject.encode().getBytes());
-
-        requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
-                .multiPart("default", file)
+        requestSpecification.header("Content-Type", "application/json");
+        String output = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/nd4j").then()
+                .post("/raw/json").then()
                 .extract()
                 .body().asString();
 
-        JsonObject jsonObject1 = new JsonObject(response);
+        JsonObject jsonObject1 = new JsonObject(output);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        assertEquals(7, outputArray.getDouble(0), 1e-1);
-    }
+        INDArray expected = outputArray.add(0);
+        assertEquals(expected, outputArray);
 
+    }
 }

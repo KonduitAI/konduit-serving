@@ -59,7 +59,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TensorFlowTestPythonImageInput extends BaseMultiNumpyVerticalTest {
+public class TensorFlowPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
 
     private Schema inputSchema;
 
