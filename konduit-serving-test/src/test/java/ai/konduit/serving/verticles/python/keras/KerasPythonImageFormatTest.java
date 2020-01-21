@@ -59,7 +59,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class KerasTestPythonImageInput extends BaseMultiNumpyVerticalTest {
+public class KerasPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
 
     private Schema inputSchema;
 
