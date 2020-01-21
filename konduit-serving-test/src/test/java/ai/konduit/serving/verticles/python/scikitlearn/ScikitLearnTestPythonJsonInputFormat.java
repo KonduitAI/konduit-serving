@@ -79,8 +79,6 @@ public class ScikitLearnTestPythonJsonInputFormat extends BaseMultiNumpyVertical
         return req -> {
             //should be json body of classification
             req.bodyHandler(body -> {
-                System.out.println(body.toJson());
-                System.out.println("Finish body" + body);
             });
 
             req.exceptionHandler(exception -> context.fail(exception));
