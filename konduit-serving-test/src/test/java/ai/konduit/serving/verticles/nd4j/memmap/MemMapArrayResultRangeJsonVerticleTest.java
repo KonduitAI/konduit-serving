@@ -37,28 +37,15 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class MemMapArrayResultRangeJsonVerticleTest extends ai.konduit.serving.verticles.nd4j.memmap.BaseMemMapTest {
-
+public class MemMapArrayResultRangeJsonVerticleTest extends BaseMemMapTest {
 
     @Override
     public Handler<HttpServerRequest> getRequest() {
-        Handler<HttpServerRequest> ret = new Handler<HttpServerRequest>() {
-            @Override
-            public void handle(HttpServerRequest req) {
-                //should be json body of classification
-                req.bodyHandler(body -> {
-                    System.out.println("Finish body" + body);
-                });
-
-                req.exceptionHandler(exception -> {
-                    exception.printStackTrace();
-                });
-
-
-            }
+        return req -> {
+            //should be json body of classification
+            req.bodyHandler(body -> System.out.println("Finish body" + body)).
+                    exceptionHandler(Throwable::printStackTrace);
         };
-
-        return ret;
     }
 
     @Test(timeout = 60000)
@@ -90,5 +77,4 @@ public class MemMapArrayResultRangeJsonVerticleTest extends ai.konduit.serving.v
 
         async.await();
     }
-
 }

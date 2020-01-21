@@ -42,23 +42,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @Slf4j
 public class ComputationGraphInferenceExecutioner implements InferenceExecutioner<ModelLoader<ComputationGraph>, INDArray, INDArray, ParallelInferenceConfig, ComputationGraph> {
-
-    private static Field zooField, protoModelField, replicateModelField;
-
-    static {
-        try {
-            zooField = ParallelInference.class.getDeclaredField("zoo");
-            zooField.setAccessible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Getter
-    private ParallelInference parallelInference;
     @Getter
     private ComputationGraph computationGraph;
-    private ReentrantReadWriteLock modelReadWriteLock;
+
     @Getter
     private ModelLoader<ComputationGraph> computationGraphModelLoader;
 
@@ -69,67 +55,24 @@ public class ComputationGraphInferenceExecutioner implements InferenceExecutione
 
     @Override
     public ComputationGraph model() {
-        try {
-            modelReadWriteLock.readLock().lock();
-            return computationGraph;
-        } finally {
-            modelReadWriteLock.readLock().unlock();
-        }
+        return computationGraph;
     }
 
     @Override
     public void initialize(ModelLoader<ComputationGraph> model, ParallelInferenceConfig parallelInferenceConfig) throws Exception {
-        ComputationGraph computationGraph = model.loadModel();
-        this.computationGraph = computationGraph;
+        this.computationGraph = model.loadModel();
         this.computationGraphModelLoader = model;
-
-        ParallelInference inference = new ParallelInference.Builder(computationGraph)
-                .batchLimit(parallelInferenceConfig.getBatchLimit())
-                .queueLimit(parallelInferenceConfig.getQueueLimit())
-                .inferenceMode(parallelInferenceConfig.getInferenceMode())
-                .workers(parallelInferenceConfig.getWorkers())
-                .build();
-
-
-        this.parallelInference = inference;
-
-        Object[] zoo = (Object[]) zooField.get(parallelInference);
-        if (protoModelField == null) {
-            protoModelField = zoo[0].getClass().getDeclaredField("protoModel");
-            protoModelField.setAccessible(true);
-        }
-
-        if (replicateModelField == null) {
-            replicateModelField = zoo[0].getClass().getDeclaredField("replicatedModel");
-            replicateModelField.setAccessible(true);
-        }
-
-        modelReadWriteLock = new ReentrantReadWriteLock();
-
     }
 
     @Override
     public INDArray execute(INDArray input) {
-        if (parallelInference == null) {
-            throw new IllegalStateException("Initialize not called. No ParallelInference found. Please call inferenceExecutioner.initialize(..)");
-        }
-
-        try {
-            modelReadWriteLock.readLock().lock();
-            INDArray output = parallelInference.output(new INDArray[]{input})[0];
-            return output;
-
-        } finally {
-            modelReadWriteLock.readLock().unlock();
+        synchronized (computationGraph) {
+            return computationGraph.output(input)[0];
         }
 
     }
 
     @Override
     public void stop() {
-        if (parallelInference != null) {
-            parallelInference.shutdown();
-        }
     }
-
 }

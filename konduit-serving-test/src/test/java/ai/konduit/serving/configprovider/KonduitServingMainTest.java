@@ -23,7 +23,6 @@
 package ai.konduit.serving.configprovider;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.model.ModelConfig;
@@ -41,7 +40,10 @@ import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
-import org.junit.*;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
@@ -140,7 +142,6 @@ public class KonduitServingMainTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(getAvailablePort())
-                .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
 
         ModelConfig modelConfig = ModelConfig.builder()

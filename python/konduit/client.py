@@ -46,7 +46,7 @@ class Client(object):
         url = "{}:{}".format(host, port)
 
         server_running = validate_server(url)
-        insufficient_data = input_data_format is None and output_data_format is None
+        insufficient_data = output_data_format is None
         if server_running:
             try:
                 response = requests.get("{}/config".format(url))
@@ -61,12 +61,8 @@ class Client(object):
                     output_names = []
                     for step in steps:
                         output_names += step["outputNames"]
-                if input_data_format is None:
-                    input_data_format = config["inputDataFormat"]
                 if output_data_format is None:
                     output_data_format = config["outputDataFormat"]
-                if prediction_type is None:
-                    prediction_type = config["predictionType"]
             except Exception as ex:
                 logging.error(
                     "{}\nUnable to get configuration from the server. Please verify that the server is "
@@ -97,6 +93,9 @@ class Client(object):
             self.convert_to_format = output_data_format
         else:
             self.convert_to_format = input_data_format
+
+        if input_data_format is None:
+            input_data_format = "NUMPY"
 
         if prediction_type is None:
             prediction_type = "RAW"
