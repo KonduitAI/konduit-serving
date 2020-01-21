@@ -83,8 +83,6 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
         return req -> {
             //should be json body of classification
             req.bodyHandler(body -> {
-                System.out.println(body.toJson());
-                System.out.println("Finish body" + body);
             });
 
             req.exceptionHandler(exception -> context.fail(exception));
@@ -149,7 +147,6 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
         INDArray image = ((NDArrayWritable) output[0][0]).get();
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-        System.out.println("filePath-----------" + filePath);
 
         //Create new file to write binary input data.
         File file = new File(filePath + "/test-input.zip");
@@ -169,7 +166,6 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
 
         JsonObject jsonObject1 = new JsonObject(response);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
-        System.out.print(ndarraySerde);
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         assertEquals(7, outputArray.getDouble(0), 1e-1);
