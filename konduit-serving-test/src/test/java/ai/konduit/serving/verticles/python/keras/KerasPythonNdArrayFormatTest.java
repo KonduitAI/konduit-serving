@@ -37,9 +37,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.datavec.api.transform.schema.Schema;
 import org.datavec.python.PythonVariables;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -63,16 +61,9 @@ import static org.junit.Assert.assertEquals;
 @NotThreadSafe
 public class KerasPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTest {
 
-    private Schema inputSchema;
-
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return InferenceVerticle.class;
-    }
-
-    @After
-    public void after(TestContext context) {
-        vertx.close(context.asyncAssertSuccess());
     }
 
     @Override
@@ -144,7 +135,7 @@ public class KerasPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTest {
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(response);
-        String ndarraySerde = jsonObject1.getJsonObject("arr").toString();
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         INDArray expected = Nd4j.create(new float[][]{{0.1628401f, 0.7828045f, 0.05435541f}, {0.0f, 1.0f, 0.0f}});
