@@ -135,8 +135,8 @@ public class TestPythonBoolInput extends BaseMultiNumpyVerticalTest {
 
         JsonArray outputJsonArray = new JsonArray(body);
         JsonObject result = outputJsonArray.getJsonObject(0);
-        assertTrue(result.containsKey("default"));
-        assertEquals(Boolean.FALSE, result.getBoolean("default"));
+        assertTrue(result.containsKey("output"));
+        assertEquals(Boolean.FALSE, result.getBoolean("output"));
 
 
     }

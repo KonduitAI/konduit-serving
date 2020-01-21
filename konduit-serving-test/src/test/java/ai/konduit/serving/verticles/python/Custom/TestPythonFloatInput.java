@@ -129,8 +129,8 @@ public class TestPythonFloatInput extends BaseMultiNumpyVerticalTest {
                 .body().asString();
         JsonArray outputJsonArray = new JsonArray(output);
         JsonObject result = outputJsonArray.getJsonObject(0);
-        assertTrue(result.containsKey("default"));
-        assertEquals(25.03, result.getFloat("default"), 1e-1);
+        assertTrue(result.containsKey("output"));
+        assertEquals(25.03, result.getFloat("output"), 1e-1);
 
     }
 
@@ -154,8 +154,8 @@ public class TestPythonFloatInput extends BaseMultiNumpyVerticalTest {
                 .body().asString();
         JsonArray outputJsonArray = new JsonArray(output);
         JsonObject result = outputJsonArray.getJsonObject(0);
-        assertTrue(result.containsKey("default"));
-        assertEquals(100.0, result.getFloat("default"), 1e-1);
+        assertTrue(result.containsKey("output"));
+        assertEquals(100.0, result.getFloat("output"), 1e-1);
 
     }
 }
