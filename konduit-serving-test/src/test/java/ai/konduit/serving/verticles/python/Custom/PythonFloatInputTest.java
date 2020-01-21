@@ -56,7 +56,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TestPythonBoolInput extends BaseMultiNumpyVerticalTest {
+public class PythonFloatInputTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -89,15 +89,13 @@ public class TestPythonBoolInput extends BaseMultiNumpyVerticalTest {
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        System.out.println("Python Path--------------" + pythonPath);
-
         String pythonCodePath = new ClassPathResource("scripts/Custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.BOOL.name())
-                .pythonOutput("output", PythonVariables.Type.BOOL.name())
+                .pythonInput("inputVar", PythonVariables.Type.FLOAT.name())
+                .pythonOutput("output", PythonVariables.Type.FLOAT.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -117,28 +115,47 @@ public class TestPythonBoolInput extends BaseMultiNumpyVerticalTest {
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
         this.context = context;
-
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
-        Boolean booltest = Boolean.FALSE;
-        jsonObject.put("inputVar", booltest.toString());
-        requestSpecification.body(jsonObject.encode().getBytes());
+        JsonObject inputJson = new JsonObject();
+        inputJson.put("inputVar", 25.03);
+        requestSpecification.body(inputJson.encode().getBytes());
         requestSpecification.header("Content-Type", "application/json");
-
-        String body = requestSpecification.when()
+        String output = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/json").then()
                 .extract()
                 .body().asString();
-
-        JsonArray outputJsonArray = new JsonArray(body);
+        JsonArray outputJsonArray = new JsonArray(output);
         JsonObject result = outputJsonArray.getJsonObject(0);
         assertTrue(result.containsKey("output"));
-        assertEquals(Boolean.FALSE, result.getBoolean("output"));
-
+        assertEquals(25.03, result.getFloat("output"), 1e-1);
 
     }
 
+    @Test(timeout = 60000)
+    public void testIntForFloatInferenceResult(TestContext context) throws Exception {
+        this.context = context;
+        RequestSpecification requestSpecification = given();
+
+        requestSpecification.port(port);
+        JsonObject inputJson = new JsonObject();
+        Integer intValue = 100;
+        inputJson.put("inputVar", 100);
+        requestSpecification.body(inputJson.encode().getBytes());
+
+        requestSpecification.header("Content-Type", "application/json");
+        String output = requestSpecification.when()
+                .expect().statusCode(200)
+                .body(not(isEmptyOrNullString()))
+                .post("/raw/json").then()
+                .extract()
+                .body().asString();
+        JsonArray outputJsonArray = new JsonArray(output);
+        JsonObject result = outputJsonArray.getJsonObject(0);
+        assertTrue(result.containsKey("output"));
+        assertEquals(100.0, result.getFloat("output"), 1e-1);
+
+    }
 }

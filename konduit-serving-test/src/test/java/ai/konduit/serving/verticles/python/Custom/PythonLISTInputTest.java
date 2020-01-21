@@ -60,7 +60,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TestPythonDICTInput extends BaseMultiNumpyVerticalTest {
+public class PythonLISTInputTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -98,8 +98,8 @@ public class TestPythonDICTInput extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.DICT.name())
-                .pythonOutput("output", PythonVariables.Type.DICT.name())
+                .pythonInput("inputVar", PythonVariables.Type.LIST.name())
+                .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -128,8 +128,6 @@ public class TestPythonDICTInput extends BaseMultiNumpyVerticalTest {
         //List tpStepList = new ArrayList();
         //tpStepList.add("ABCD");
         //tpStepList.add("XYZ");
-
-
         List tpStepList = new ArrayList();
         tpStepList.add(100);
         tpStepList.add(200);

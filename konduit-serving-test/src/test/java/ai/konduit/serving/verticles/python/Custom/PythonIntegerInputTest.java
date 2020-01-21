@@ -31,6 +31,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -55,7 +56,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TestPythonSTRInput extends BaseMultiNumpyVerticalTest {
+public class PythonIntegerInputTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -93,8 +94,8 @@ public class TestPythonSTRInput extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.STR.name())
-                .pythonOutput("output", PythonVariables.Type.STR.name())
+                .pythonInput("inputVar", PythonVariables.Type.INT.name())
+                .pythonOutput("output", PythonVariables.Type.INT.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -114,28 +115,47 @@ public class TestPythonSTRInput extends BaseMultiNumpyVerticalTest {
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
         this.context = context;
-
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
-        String strTest = "Test for data types";
-        jsonObject.put("inputVar", strTest.toString());
-
-        requestSpecification.body(jsonObject.encode().getBytes());
+        JsonObject inputJson = new JsonObject();
+        inputJson.put("inputVar", 25);
+        requestSpecification.body(inputJson.encode().getBytes());
         requestSpecification.header("Content-Type", "application/json");
-        String body = requestSpecification.when()
+        String output = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/json").then()
                 .extract()
                 .body().asString();
-
-        //Receive the response as JSON
-        JsonObject jsonObject1 = new JsonObject(body);
-        //Check for the output variable
-        assertTrue(jsonObject1.containsKey("output"));
-        assertEquals(strTest, jsonObject1.getString("output"));
+        JsonArray outputJsonArray = new JsonArray(output);
+        JsonObject result = outputJsonArray.getJsonObject(0);
+        assertTrue(result.containsKey("output"));
+        assertEquals(25, result.getInteger("output"), 1e-1);
 
     }
 
+    @Test(timeout = 60000)
+    public void testInferenceInvalidResult(TestContext context) throws Exception {
+        this.context = context;
+        RequestSpecification requestSpecification = given();
+        requestSpecification.port(port);
+        JsonObject inputJson = new JsonObject();
+
+        Float floatValue = 100.25f;
+        inputJson.put("inputVar", floatValue);
+
+        requestSpecification.body(inputJson.encode().getBytes());
+        requestSpecification.header("Content-Type", "application/json");
+        String output = requestSpecification.when()
+                .expect().statusCode(500)
+                .body(not(isEmptyOrNullString()))
+                .post("/raw/json").then()
+                .extract()
+                .body().asString();
+        JsonArray outputJsonArray = new JsonArray(output);
+        JsonObject result = outputJsonArray.getJsonObject(0);
+        assertTrue(result.containsKey("output"));
+        assertEquals(floatValue, result.getFloat("output"), 1e-1);
+
+    }
 }

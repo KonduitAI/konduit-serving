@@ -59,7 +59,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TestPythonNDArrayInput extends BaseMultiNumpyVerticalTest {
+public class PythonNDArrayInputTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
