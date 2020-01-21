@@ -59,7 +59,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class ScikitLearnTestPythonJsonInputFormat extends BaseMultiNumpyVerticalTest {
+public class ScikitLearnPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     private Schema inputSchema;
 
