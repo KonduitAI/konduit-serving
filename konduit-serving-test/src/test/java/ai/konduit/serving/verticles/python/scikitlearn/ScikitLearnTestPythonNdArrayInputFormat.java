@@ -23,7 +23,6 @@
 package ai.konduit.serving.verticles.python.scikitlearn;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
@@ -111,7 +110,6 @@ public class ScikitLearnTestPythonNdArrayInputFormat extends BaseMultiNumpyVerti
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .predictionType(Output.PredictionType.RAW)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()

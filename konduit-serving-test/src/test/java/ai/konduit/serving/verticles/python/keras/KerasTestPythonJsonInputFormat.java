@@ -107,9 +107,6 @@ public class KerasTestPythonJsonInputFormat extends BaseMultiNumpyVerticalTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                // .inputDataFormat(Input.DataFormat.JSON)
-                //  .outputDataFormat(Output.DataFormat.NUMPY)
-                // .predictionType(Output.PredictionType.RAW)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
@@ -142,7 +139,7 @@ public class KerasTestPythonJsonInputFormat extends BaseMultiNumpyVerticalTest {
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(output);
-        List<Float> out = jsonObject1.getJsonArray("default").getList();
+        List<Float> out = jsonObject1.getJsonArray("score").getList();
         INDArray outputArray = Nd4j.create(out);
         INDArray expected = outputArray.get();
         assertEquals(expected, outputArray);

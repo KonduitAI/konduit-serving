@@ -23,8 +23,6 @@
 package ai.konduit.serving.verticles.python.scikitlearn;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
@@ -110,8 +108,6 @@ public class ScikitLearnTestPythonImageInput extends BaseMultiNumpyVerticalTest 
 
         //ServingConfig set httpport and Input Formats
         ServingConfig servingConfig = ServingConfig.builder().httpPort(port).
-                inputDataFormat(Input.DataFormat.IMAGE).
-                predictionType(Output.PredictionType.RAW).
                 build();
 
         //Model config and set model type as KERAS

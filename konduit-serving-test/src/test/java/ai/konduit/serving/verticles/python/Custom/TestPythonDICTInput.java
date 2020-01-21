@@ -105,7 +105,6 @@ public class TestPythonDICTInput extends BaseMultiNumpyVerticalTest {
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
-                //   .inputDataFormat(Input.DataFormat.NUMPY)
                 .httpPort(port)
                 .build();
 

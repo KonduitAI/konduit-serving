@@ -22,8 +22,6 @@
 package ai.konduit.serving.verticles.python.TensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
@@ -113,9 +111,6 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .inputDataFormat(Input.DataFormat.IMAGE)
-                // .outputDataFormat(Output.DataFormat.NUMPY)
-                .predictionType(Output.PredictionType.RAW)
                 .build();
 
 

@@ -23,7 +23,6 @@
 package ai.konduit.serving.verticles.python.keras;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
@@ -99,7 +98,7 @@ public class KerasTestPythonNdArrayInputFormat extends BaseMultiNumpyVerticalTes
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(pythonPath)
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("default", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("inputData", PythonVariables.Type.NDARRAY.name())
                 .pythonOutput("arr", PythonVariables.Type.NDARRAY.name())
                 .build();
 
@@ -107,7 +106,6 @@ public class KerasTestPythonNdArrayInputFormat extends BaseMultiNumpyVerticalTes
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .predictionType(Output.PredictionType.RAW)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
@@ -146,7 +144,7 @@ public class KerasTestPythonNdArrayInputFormat extends BaseMultiNumpyVerticalTes
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(response);
-        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        String ndarraySerde = jsonObject1.getJsonObject("arr").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         INDArray expected = Nd4j.create(new float[][]{{0.1628401f, 0.7828045f, 0.05435541f}, {0.0f, 1.0f, 0.0f}});

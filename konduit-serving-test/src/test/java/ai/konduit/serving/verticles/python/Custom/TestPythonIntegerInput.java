@@ -102,8 +102,6 @@ public class TestPythonIntegerInput extends BaseMultiNumpyVerticalTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                //  .inputDataFormat(Input.DataFormat.NUMPY)
-                // .predictionType(Output.PredictionType.RAW)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
