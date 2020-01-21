@@ -133,8 +133,8 @@ public class TestPythonSTRInput extends BaseMultiNumpyVerticalTest {
         //Receive the response as JSON
         JsonObject jsonObject1 = new JsonObject(body);
         //Check for the output variable
-        assertTrue(jsonObject1.containsKey("default"));
-        assertEquals(strTest, jsonObject1.getString("default"));
+        assertTrue(jsonObject1.containsKey("output"));
+        assertEquals(strTest, jsonObject1.getString("output"));
 
     }
 
