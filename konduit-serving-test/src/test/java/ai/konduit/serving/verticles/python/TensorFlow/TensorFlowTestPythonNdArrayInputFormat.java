@@ -150,7 +150,6 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
 
         //Create new file to write binary input data.
         File file = new File(filePath + "/test-input.zip");
-        System.out.println(file.getAbsolutePath());
 
         BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
         requestSpecification.body(jsonObject.encode().getBytes());
