@@ -128,9 +128,6 @@ public class ScikitLearnTestPythonJsonInputFormat extends BaseMultiNumpyVertical
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                // .inputDataFormat(Input.DataFormat.JSON)
-                //  .outputDataFormat(Output.DataFormat.NUMPY)
-                // .predictionType(Output.PredictionType.RAW)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
