@@ -8,7 +8,7 @@ work_dir = os.path.abspath(".")
 
 class KerasTest:
     def __init__(self):
-        self.model = load_model(os.path.join(work_dir, "src\\test\\resources\\inference\\keras\\model_ndarray_in_ndarray_out.h5"))
+        self.model = load_model(os.path.join(work_dir, "src/test/resources/inference/keras/model_ndarray_in_ndarray_out.h5"))
 
     def test(self,inputarray):
         arr = self.model.predict(inputarray)

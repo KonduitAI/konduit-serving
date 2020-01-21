@@ -144,13 +144,10 @@ public class KerasTestPythonNdArrayInputFormat extends BaseMultiNumpyVerticalTes
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(response);
-        String ndarraySerde = jsonObject1.getJsonObject("arr").toString();
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         INDArray expected = Nd4j.create(new float[][]{{0.1628401f, 0.7828045f, 0.05435541f}, {0.0f, 1.0f, 0.0f}});
         assertEquals(expected, outputArray);
-
     }
-
-
 }
