@@ -19,12 +19,14 @@
  *
  *
  */
-package ai.konduit.serving.verticles.python.Custom;
+package ai.konduit.serving.verticles.python.custom;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -39,6 +41,8 @@ import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -52,11 +56,10 @@ import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class PythonBoolInputTest extends BaseMultiNumpyVerticalTest {
+public class PythonNDArrayInputTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -89,15 +92,13 @@ public class PythonBoolInputTest extends BaseMultiNumpyVerticalTest {
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        System.out.println("Python Path--------------" + pythonPath);
-
         String pythonCodePath = new ClassPathResource("scripts/Custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.BOOL.name())
-                .pythonOutput("output", PythonVariables.Type.BOOL.name())
+                .pythonInput("inputVar", PythonVariables.Type.NDARRAY.name())
+                .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -121,11 +122,10 @@ public class PythonBoolInputTest extends BaseMultiNumpyVerticalTest {
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
-        Boolean booltest = Boolean.FALSE;
-        jsonObject.put("inputVar", booltest.toString());
+        INDArray inputArray = Nd4j.ones(4, 3, 2, 1);
+        jsonObject.put("inputVar", new JsonArray(inputArray.toString()));
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "application/json");
-
         String body = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
@@ -133,11 +133,12 @@ public class PythonBoolInputTest extends BaseMultiNumpyVerticalTest {
                 .extract()
                 .body().asString();
 
-        JsonArray outputJsonArray = new JsonArray(body);
-        JsonObject result = outputJsonArray.getJsonObject(0);
-        assertTrue(result.containsKey("output"));
-        assertEquals(Boolean.FALSE, result.getBoolean("output"));
-
+        JsonObject jsonObject1 = new JsonObject(body);
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
+        INDArray outputArray = nd.getNdArray();
+        INDArray expected = inputArray.add(0);
+        assertEquals(expected, outputArray);
 
     }
 

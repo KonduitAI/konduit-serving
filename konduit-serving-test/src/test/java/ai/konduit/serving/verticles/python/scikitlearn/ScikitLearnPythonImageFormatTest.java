@@ -38,6 +38,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.apache.commons.io.IOUtils;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +47,9 @@ import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -135,9 +139,12 @@ public class ScikitLearnPythonImageFormatTest extends BaseMultiNumpyVerticalTest
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        //Comparing the first digit of NDArray output
-        // todo: Yet to compare the whole data Ndarray output
-        assertEquals(8, outputArray.getDouble(0), 1e-1);
+        InputStream expectedIS = new FileInputStream("src/test/resources/Json/ScikitlearnImageTest.json");
+        String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
+        JsonObject expectedObj = new JsonObject(encodedText);
+        NDArrayOutput expND = ObjectMapperHolder.getJsonMapper().readValue(expectedObj.toString(), NDArrayOutput.class);
+        INDArray expectedArr = expND.getNdArray();
+        assertEquals(expectedArr, outputArray);
     }
 
 

@@ -20,13 +20,12 @@
  *
  */
 
-package ai.konduit.serving.verticles.python.TensorFlow;
+package ai.konduit.serving.verticles.python.tensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
-import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -52,12 +51,13 @@ import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TensorFlowPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
+public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -83,30 +83,24 @@ public class TensorFlowPythonImageFormatTest extends BaseMultiNumpyVerticalTest 
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/tensorflow/TensorFlowImageTest.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/tensorflow/Json_TensorFlow_NDarray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(pythonPath)
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("img", PythonVariables.Type.NDARRAY.name())
+                .pythonPath(pythonPath)
+                .pythonInput("JsonInput", PythonVariables.Type.STR.name())
                 .pythonOutput("prediction", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
-        //ServingConfig set httpport and Input Formats
-        ServingConfig servingConfig = ServingConfig.builder().httpPort(port).
-                build();
-
-        //Model config and set model type as KERAS
-        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .inputName("img")
-                .dimensionsConfig("default", new Long[]{240L, 320L, 3L}) // Height, width, channels
+        ServingConfig servingConfig = ServingConfig.builder()
+                .httpPort(port)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+                .step(pythonStepConfig)
                 .servingConfig(servingConfig)
-                .steps(Arrays.asList(imageLoadingStep, pythonStepConfig))
                 .build();
 
         return new JsonObject(inferenceConfiguration.toJson());
@@ -116,18 +110,20 @@ public class TensorFlowPythonImageFormatTest extends BaseMultiNumpyVerticalTest 
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
+
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-
         JsonObject jsonObject = new JsonObject();
-        requestSpecification.body(jsonObject.encode());
-        requestSpecification.header("Content-Type", "multipart/form-data");
 
-        File imageFile = new ClassPathResource("data/TensorFlowImageTest.png").getFile();
+        File json = new ClassPathResource("scripts/TensorFlow/tensorflowImgPath.json").getFile();
+        jsonObject.put("JsonInput", json.getAbsolutePath());
+        requestSpecification.body(jsonObject.encode());
+
+        requestSpecification.header("Content-Type", "application/json");
         String output = requestSpecification.when()
-                .multiPart("img", imageFile)
                 .expect().statusCode(200)
-                .post("/raw/image").then()
+                .body(not(isEmptyOrNullString()))
+                .post("/raw/json").then()
                 .extract()
                 .body().asString();
 
@@ -135,9 +131,8 @@ public class TensorFlowPythonImageFormatTest extends BaseMultiNumpyVerticalTest 
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        assertEquals(7, outputArray.getDouble(0), 1e-1);
+        INDArray expected = outputArray.add(0);
+        assertEquals(expected, outputArray);
 
     }
-
-
 }

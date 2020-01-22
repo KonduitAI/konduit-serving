@@ -19,21 +19,18 @@
  *
  *
  */
-package ai.konduit.serving.verticles.python.Custom;
+package ai.konduit.serving.verticles.python.custom;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -41,8 +38,6 @@ import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -56,10 +51,11 @@ import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class PythonNDArrayInputTest extends BaseMultiNumpyVerticalTest {
+public class PythonSTRInputTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -97,8 +93,8 @@ public class PythonNDArrayInputTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("inputVar", PythonVariables.Type.STR.name())
+                .pythonOutput("output", PythonVariables.Type.STR.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -122,8 +118,9 @@ public class PythonNDArrayInputTest extends BaseMultiNumpyVerticalTest {
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
-        INDArray inputArray = Nd4j.ones(4, 3, 2, 1);
-        jsonObject.put("inputVar", new JsonArray(inputArray.toString()));
+        String strTest = "Test for data types";
+        jsonObject.put("inputVar", strTest);
+
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "application/json");
         String body = requestSpecification.when()
@@ -133,12 +130,11 @@ public class PythonNDArrayInputTest extends BaseMultiNumpyVerticalTest {
                 .extract()
                 .body().asString();
 
+        //Receive the response as JSON
         JsonObject jsonObject1 = new JsonObject(body);
-        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
-        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
-        INDArray expected = inputArray.add(0);
-        assertEquals(expected, outputArray);
+        //Check for the output variable
+        assertTrue(jsonObject1.containsKey("output"));
+        assertEquals(strTest, jsonObject1.getString("output"));
 
     }
 
