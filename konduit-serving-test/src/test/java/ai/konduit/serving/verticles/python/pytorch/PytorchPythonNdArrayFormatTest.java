@@ -91,7 +91,6 @@ public class PytorchPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTest {
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(pythonPath)
-                //     .pythonPath(pythonPath)
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("image", PythonVariables.Type.NDARRAY.name())
                 .pythonOutput("num_boxes", PythonVariables.Type.NDARRAY.name())

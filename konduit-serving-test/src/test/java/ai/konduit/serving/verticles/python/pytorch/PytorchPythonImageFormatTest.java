@@ -97,7 +97,7 @@ public class PytorchPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
         ServingConfig servingConfig = ServingConfig.builder().httpPort(port).
                 build();
 
-        //Model config and set model type as KERAS
+        //Model config and set model type as Pytorch
         ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
                 .imageProcessingInitialLayout("NCHW")
                 .imageProcessingRequiredLayout("NHWC")
