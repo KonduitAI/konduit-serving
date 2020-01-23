@@ -35,11 +35,8 @@ net.load(model_path)
 print(">>> Server side shape")
 print(image.shape)
 image = np.squeeze(image)
-#img = np.array(image)
-#print("img",img)
 print("image Shape ----",image.shape)
 boxes, _, _ = predictor.predict(image, candidate_size / 2, threshold)
 
 # "num_boxes" is then picked up again from here and returned to the client
 num_boxes = np.array(len(boxes))
-print("num_boxes ----",num_boxes)
