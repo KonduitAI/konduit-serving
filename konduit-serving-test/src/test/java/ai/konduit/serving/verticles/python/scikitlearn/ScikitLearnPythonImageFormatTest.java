@@ -102,7 +102,7 @@ public class ScikitLearnPythonImageFormatTest extends BaseMultiNumpyVerticalTest
         ServingConfig servingConfig = ServingConfig.builder().httpPort(port).
                 build();
 
-        //Model config and set model type as KERAS
+        //Model config and set model type as ScikitLearn
         ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
                 .inputName("imgPath")
                 .dimensionsConfig("default", new Long[]{240L, 320L, 3L}) // Height, width, channels

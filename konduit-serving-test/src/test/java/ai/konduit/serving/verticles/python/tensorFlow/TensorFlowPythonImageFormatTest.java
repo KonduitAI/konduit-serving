@@ -98,7 +98,7 @@ public class TensorFlowPythonImageFormatTest extends BaseMultiNumpyVerticalTest 
         ServingConfig servingConfig = ServingConfig.builder().httpPort(port).
                 build();
 
-        //Model config and set model type as KERAS
+        //Model config and set model type as TensorFlow
         ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
                 .inputName("img")
                 .dimensionsConfig("default", new Long[]{240L, 320L, 3L}) // Height, width, channels
