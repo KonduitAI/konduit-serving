@@ -115,7 +115,7 @@ public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        File json = new ClassPathResource("scripts/TensorFlow/tensorflowImgPath.json").getFile();
+        File json = new ClassPathResource("scripts/tensorFlow/tensorflowImgPath.json").getFile();
         jsonObject.put("JsonInput", json.getAbsolutePath());
         requestSpecification.body(jsonObject.encode());
 

@@ -93,7 +93,7 @@ public class PythonLISTInputTest extends BaseMultiNumpyVerticalTest {
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/Custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)

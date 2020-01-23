@@ -85,7 +85,7 @@ public class KerasPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/Keras/KerasJsonTest.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/keras/KerasJsonTest.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
