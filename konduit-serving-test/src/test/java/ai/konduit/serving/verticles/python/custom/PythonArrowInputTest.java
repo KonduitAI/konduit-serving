@@ -132,7 +132,7 @@ public class PythonArrowInputTest extends BaseMultiNumpyVerticalTest {
         System.out.println("writables---" + writables);
 
         File tmpFile = new File(temporary.getRoot(), "tmp.arrow");
-        System.out.println("tmpFile---" + tmpFile);
+        System.out.println("tmpFile" + tmpFile);
         FileSplit fileSplit = new FileSplit(tmpFile);
         arrowRecordWriter.initialize(fileSplit, new NumberOfRecordsPartitioner());
         arrowRecordWriter.writeBatch(writables);
@@ -148,6 +148,7 @@ public class PythonArrowInputTest extends BaseMultiNumpyVerticalTest {
         JsonObject jsonObject = new JsonObject();
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "multipart/form-data");
+        // TODO: Need to check the output format
         String output = requestSpecification.when()
                 .multiPart("default", tmpFile)
                 .expect().statusCode(200)
