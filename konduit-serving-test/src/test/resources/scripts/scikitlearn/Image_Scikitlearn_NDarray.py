@@ -20,6 +20,3 @@ filename =work_dir+'//'+'ScikitLearn_model.sav'
 loaded_model = joblib.load(filename)
 result = loaded_model.predict(X_test)
 results = loaded_model.score(X_test, y_test)
-print("result---------->",result)
-#print(results)
-

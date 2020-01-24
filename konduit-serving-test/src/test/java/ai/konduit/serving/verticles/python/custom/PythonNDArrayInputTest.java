@@ -19,7 +19,7 @@
  *
  *
  */
-package ai.konduit.serving.verticles.python.Custom;
+package ai.konduit.serving.verticles.python.custom;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
@@ -59,7 +59,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TestPythonNDArrayInput extends BaseMultiNumpyVerticalTest {
+public class PythonNDArrayInputTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -92,7 +92,7 @@ public class TestPythonNDArrayInput extends BaseMultiNumpyVerticalTest {
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/Custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)

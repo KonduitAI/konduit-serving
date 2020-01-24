@@ -19,7 +19,7 @@
  *
  *
  */
-package ai.konduit.serving.verticles.python.Custom;
+package ai.konduit.serving.verticles.python.custom;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
@@ -31,7 +31,6 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -56,7 +55,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TestPythonBoolInput extends BaseMultiNumpyVerticalTest {
+public class PythonSTRInputTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -89,15 +88,13 @@ public class TestPythonBoolInput extends BaseMultiNumpyVerticalTest {
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        System.out.println("Python Path--------------" + pythonPath);
-
-        String pythonCodePath = new ClassPathResource("scripts/Custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.BOOL.name())
-                .pythonOutput("output", PythonVariables.Type.BOOL.name())
+                .pythonInput("inputVar", PythonVariables.Type.STR.name())
+                .pythonOutput("output", PythonVariables.Type.STR.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -121,11 +118,11 @@ public class TestPythonBoolInput extends BaseMultiNumpyVerticalTest {
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
-        Boolean booltest = Boolean.FALSE;
-        jsonObject.put("inputVar", booltest.toString());
+        String strTest = "Test for data types";
+        jsonObject.put("inputVar", strTest);
+
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "application/json");
-
         String body = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
@@ -133,11 +130,11 @@ public class TestPythonBoolInput extends BaseMultiNumpyVerticalTest {
                 .extract()
                 .body().asString();
 
-        JsonArray outputJsonArray = new JsonArray(body);
-        JsonObject result = outputJsonArray.getJsonObject(0);
-        assertTrue(result.containsKey("output"));
-        assertEquals(Boolean.FALSE, result.getBoolean("output"));
-
+        //Receive the response as JSON
+        JsonObject jsonObject1 = new JsonObject(body);
+        //Check for the output variable
+        assertTrue(jsonObject1.containsKey("output"));
+        assertEquals(strTest, jsonObject1.getString("output"));
 
     }
 

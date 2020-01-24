@@ -17,9 +17,10 @@
  *  *  * SPDX-License-Identifier: Apache-2.0
  *  *  *****************************************************************************
  *
- * */
+ *
+ */
 
-package ai.konduit.serving.verticles.python.TensorFlow;
+package ai.konduit.serving.verticles.python.scikitlearn;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
@@ -37,12 +38,10 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonVariables;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -63,18 +62,11 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVerticalTest {
-
-    private Schema inputSchema;
+public class ScikitLearnPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return InferenceVerticle.class;
-    }
-
-    @After
-    public void after(TestContext context) {
-        vertx.close(context.asyncAssertSuccess());
     }
 
     @Override
@@ -83,8 +75,6 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
         return req -> {
             //should be json body of classification
             req.bodyHandler(body -> {
-                System.out.println(body.toJson());
-                System.out.println("Finish body" + body);
             });
 
             req.exceptionHandler(exception -> context.fail(exception));
@@ -98,13 +88,13 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/tensorflow/TensorFlowImageTest.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/NDArrayScikitNDArrayInf.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(pythonPath)
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("img", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("prediction", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("imgPath", PythonVariables.Type.NDARRAY.name())
+                .pythonOutput("Ypredict", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -112,7 +102,6 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .build();
-
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .step(pythonStepConfig)
@@ -142,18 +131,16 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
                 .imageTransformProcess("default", imageTransformProcess)
                 .build();
 
-        String imagePath = new ClassPathResource("data/5.png").getFile().getAbsolutePath();
+        String imagePath = new ClassPathResource("data/ScikitLearnNDArray.png").getFile().getAbsolutePath();
 
         Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
 
         INDArray image = ((NDArrayWritable) output[0][0]).get();
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-        System.out.println("filePath-----------" + filePath);
 
         //Create new file to write binary input data.
         File file = new File(filePath + "/test-input.zip");
-        System.out.println(file.getAbsolutePath());
 
         BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
         requestSpecification.body(jsonObject.encode().getBytes());
@@ -169,10 +156,11 @@ public class TensorFlowTestPythonNdArrayInputFormat extends BaseMultiNumpyVertic
 
         JsonObject jsonObject1 = new JsonObject(response);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
-        System.out.print(ndarraySerde);
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        assertEquals(7, outputArray.getDouble(0), 1e-1);
+        assertEquals(2, outputArray.getInt(0));
+
     }
+
 
 }

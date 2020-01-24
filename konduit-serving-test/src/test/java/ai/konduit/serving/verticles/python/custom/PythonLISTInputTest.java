@@ -19,14 +19,12 @@
  *
  *
  */
-
-package ai.konduit.serving.verticles.python.TensorFlow;
+package ai.konduit.serving.verticles.python.custom;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
-import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -38,7 +36,6 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.datavec.api.transform.schema.Schema;
 import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
@@ -48,20 +45,22 @@ import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TensorFlowTestPythonImageInput extends BaseMultiNumpyVerticalTest {
-
-    private Schema inputSchema;
+public class PythonLISTInputTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -72,7 +71,6 @@ public class TensorFlowTestPythonImageInput extends BaseMultiNumpyVerticalTest {
     public void after(TestContext context) {
         vertx.close(context.asyncAssertSuccess());
     }
-
 
     @Override
     public Handler<HttpServerRequest> getRequest() {
@@ -95,30 +93,24 @@ public class TensorFlowTestPythonImageInput extends BaseMultiNumpyVerticalTest {
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/tensorflow/TensorFlowImageTest.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(pythonPath)
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("img", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("prediction", PythonVariables.Type.NDARRAY.name())
+                .pythonPath(pythonPath)
+                .pythonInput("inputVar", PythonVariables.Type.LIST.name())
+                .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
-        //ServingConfig set httpport and Input Formats
-        ServingConfig servingConfig = ServingConfig.builder().httpPort(port).
-                build();
-
-        //Model config and set model type as KERAS
-        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .inputName("img")
-                .dimensionsConfig("default", new Long[]{240L, 320L, 3L}) // Height, width, channels
+        ServingConfig servingConfig = ServingConfig.builder()
+                .httpPort(port)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+                .step(pythonStepConfig)
                 .servingConfig(servingConfig)
-                .steps(Arrays.asList(imageLoadingStep, pythonStepConfig))
                 .build();
 
         return new JsonObject(inferenceConfiguration.toJson());
@@ -126,30 +118,46 @@ public class TensorFlowTestPythonImageInput extends BaseMultiNumpyVerticalTest {
 
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
-
         this.context = context;
+
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-
         JsonObject jsonObject = new JsonObject();
-        requestSpecification.body(jsonObject.encode());
-        requestSpecification.header("Content-Type", "multipart/form-data");
 
-        File imageFile = new ClassPathResource("data/TensorFlowImageTest.png").getFile();
-        String output = requestSpecification.when()
-                .multiPart("img", imageFile)
+        //Todo : Test in progress.
+        //List tpStepList = new ArrayList();
+        //tpStepList.add("ABCD");
+        //tpStepList.add("XYZ");
+        List tpStepList = new ArrayList();
+        tpStepList.add(100);
+        tpStepList.add(200);
+
+        jsonObject.put("inputVar", tpStepList);
+
+        requestSpecification.body(jsonObject.encode().getBytes());
+        requestSpecification.header("Content-Type", "application/json");
+        String body = requestSpecification.when()
                 .expect().statusCode(200)
-                .post("/raw/image").then()
+                .body(not(isEmptyOrNullString()))
+                .post("/raw/json").then()
                 .extract()
                 .body().asString();
 
-        JsonObject jsonObject1 = new JsonObject(output);
+        //Receive the response as JSON
+        JsonObject jsonObject1 = new JsonObject(body);
+        //Check for the output variable
+        assertTrue(jsonObject1.containsKey("default"));
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        assertEquals(7, outputArray.getDouble(0), 1e-1);
+        //  INDArray expected = inputArray.add(0);
+        // assertEquals(expected, outputArray);
+
+        List<Float> out = jsonObject1.getJsonArray("default").getList();
+        //  INDArray outputArray = Nd4j.create(out);
+        INDArray expected = outputArray.get();
+        assertEquals(expected, outputArray);
 
     }
-
 
 }

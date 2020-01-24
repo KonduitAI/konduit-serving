@@ -20,7 +20,7 @@
  *
  */
 
-package ai.konduit.serving.verticles.python.scikitlearn;
+package ai.konduit.serving.verticles.python.keras;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
@@ -37,13 +37,13 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.datavec.api.transform.schema.Schema;
 import org.datavec.python.PythonVariables;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
@@ -59,18 +59,11 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class ScikitLearnTestPythonJsonInputFormat extends BaseMultiNumpyVerticalTest {
-
-    private Schema inputSchema;
+public class KerasPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return InferenceVerticle.class;
-    }
-
-    @After
-    public void after(TestContext context) {
-        vertx.close(context.asyncAssertSuccess());
     }
 
     @Override
@@ -79,8 +72,6 @@ public class ScikitLearnTestPythonJsonInputFormat extends BaseMultiNumpyVertical
         return req -> {
             //should be json body of classification
             req.bodyHandler(body -> {
-                System.out.println(body.toJson());
-                System.out.println("Finish body" + body);
             });
 
             req.exceptionHandler(exception -> context.fail(exception));
@@ -93,14 +84,13 @@ public class ScikitLearnTestPythonJsonInputFormat extends BaseMultiNumpyVertical
                 .filter(Objects::nonNull)
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
-
-        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/JsonScikitNDArrayInf.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/keras/KerasNDArrayTest.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("JsonInput", PythonVariables.Type.STR.name())
-                .pythonOutput("Ypredict", PythonVariables.Type.NDARRAY.name())
+                .pythonCodePath(pythonCodePath)
+                .pythonInput("inputData", PythonVariables.Type.NDARRAY.name())
+                .pythonOutput("arr", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -119,31 +109,36 @@ public class ScikitLearnTestPythonJsonInputFormat extends BaseMultiNumpyVertical
 
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
-
         this.context = context;
-
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        File json = new ClassPathResource("Json/IrisY.json").getFile();
-        jsonObject.put("JsonInput", json.getAbsolutePath());
-        requestSpecification.body(jsonObject.encode());
+        //Preparing input NDArray
+        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
 
-        requestSpecification.header("Content-Type", "application/json");
-        String output = requestSpecification.when()
+        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
+
+        //Create new file to write binary input data.
+        File file = new File(filePath + "/test-input.zip");
+
+        BinarySerde.writeArrayToDisk(arr, file);
+        requestSpecification.body(jsonObject.encode().getBytes());
+
+        requestSpecification.header("Content-Type", "multipart/form-data");
+        String response = requestSpecification.when()
+                .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/json").then()
+                .post("/raw/nd4j").then()
                 .extract()
                 .body().asString();
 
-        JsonObject jsonObject1 = new JsonObject(output);
+        JsonObject jsonObject1 = new JsonObject(response);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expected = outputArray.add(0);
+        INDArray expected = Nd4j.create(new float[][]{{0.1628401f, 0.7828045f, 0.05435541f}, {0.0f, 1.0f, 0.0f}});
         assertEquals(expected, outputArray);
-
     }
 }

@@ -19,12 +19,14 @@
  *
  *
  */
-package ai.konduit.serving.verticles.python.Custom;
+
+package ai.konduit.serving.verticles.python.pytorch;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -37,7 +39,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.python.PythonVariables;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -45,31 +46,21 @@ import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TestPythonDICTInput extends BaseMultiNumpyVerticalTest {
+public class PytorchPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return InferenceVerticle.class;
-    }
-
-    @After
-    public void after(TestContext context) {
-        vertx.close(context.asyncAssertSuccess());
     }
 
     @Override
@@ -78,8 +69,6 @@ public class TestPythonDICTInput extends BaseMultiNumpyVerticalTest {
         return req -> {
             //should be json body of classification
             req.bodyHandler(body -> {
-                System.out.println(body.toJson());
-                System.out.println("Finish body" + body);
             });
 
             req.exceptionHandler(exception -> context.fail(exception));
@@ -93,24 +82,32 @@ public class TestPythonDICTInput extends BaseMultiNumpyVerticalTest {
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/Custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/face_detection_pytorch/detect_image.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.DICT.name())
-                .pythonOutput("output", PythonVariables.Type.DICT.name())
+                .pythonInput("image", PythonVariables.Type.NDARRAY.name())
+                .pythonOutput("num_boxes", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(port)
+        //ServingConfig set httpport and Input Formats
+        ServingConfig servingConfig = ServingConfig.builder().httpPort(port).
+                build();
+
+        //Model config and set model type as Pytorch
+        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
+                .imageProcessingInitialLayout("NCHW")
+                .imageProcessingRequiredLayout("NHWC")
+                .inputName("image")
+                .dimensionsConfig("default", new Long[]{478L, 720L, 3L}) // Height, width, channels
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
-                .step(pythonStepConfig)
                 .servingConfig(servingConfig)
+                .steps(Arrays.asList(imageLoadingStep, pythonStepConfig))
                 .build();
 
         return new JsonObject(inferenceConfiguration.toJson());
@@ -118,48 +115,28 @@ public class TestPythonDICTInput extends BaseMultiNumpyVerticalTest {
 
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
-        this.context = context;
 
+        this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
+
         JsonObject jsonObject = new JsonObject();
-
-        //Todo : Test in progress.
-        //List tpStepList = new ArrayList();
-        //tpStepList.add("ABCD");
-        //tpStepList.add("XYZ");
-
-
-        List tpStepList = new ArrayList();
-        tpStepList.add(100);
-        tpStepList.add(200);
-
-        jsonObject.put("inputVar", tpStepList);
-
         requestSpecification.body(jsonObject.encode().getBytes());
-        requestSpecification.header("Content-Type", "application/json");
-        String body = requestSpecification.when()
+        requestSpecification.header("Content-Type", "multipart/form-data");
+
+        File imageFile = new ClassPathResource("data/PytorchNDArrayTest.jpg").getFile();
+
+        String output = requestSpecification.when()
+                .multiPart("image", imageFile)
                 .expect().statusCode(200)
-                .body(not(isEmptyOrNullString()))
-                .post("/raw/json").then()
+                .post("/raw/image").then()
                 .extract()
                 .body().asString();
-
-        //Receive the response as JSON
-        JsonObject jsonObject1 = new JsonObject(body);
-        //Check for the output variable
-        assertTrue(jsonObject1.containsKey("default"));
+        JsonObject jsonObject1 = new JsonObject(output);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        //  INDArray expected = inputArray.add(0);
-        // assertEquals(expected, outputArray);
-
-        List<Float> out = jsonObject1.getJsonArray("default").getList();
-        //  INDArray outputArray = Nd4j.create(out);
-        INDArray expected = outputArray.get();
-        assertEquals(expected, outputArray);
-
+        assertEquals(51, outputArray.getDouble(0), 1e-1);
     }
 
 }

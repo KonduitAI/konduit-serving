@@ -20,57 +20,57 @@
  *
  */
 
-package ai.konduit.serving.verticles.python.TensorFlow;
+package ai.konduit.serving.verticles.python.custom;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.output.types.NDArrayOutput;
+import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ObjectMapperHolder;
+import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.apache.commons.io.FileUtils;
+import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
+import org.datavec.api.split.FileSplit;
+import org.datavec.api.split.partition.NumberOfRecordsPartitioner;
 import org.datavec.api.transform.schema.Schema;
+import org.datavec.api.writable.Writable;
+import org.datavec.arrow.recordreader.ArrowRecordWriter;
+import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.datavec.python.PythonVariables;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class TensorFlowTestPythonJsonInputFormat extends BaseMultiNumpyVerticalTest {
-
-    private Schema inputSchema;
+public class PythonArrowInputTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return InferenceVerticle.class;
-    }
-
-    @After
-    public void after(TestContext context) {
-        vertx.close(context.asyncAssertSuccess());
     }
 
     @Override
@@ -89,18 +89,18 @@ public class TensorFlowTestPythonJsonInputFormat extends BaseMultiNumpyVerticalT
 
     @Override
     public JsonObject getConfigObject() throws Exception {
+
         String pythonPath = Arrays.stream(cachePackages())
                 .filter(Objects::nonNull)
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/tensorflow/Json_TensorFlow_NDarray.py").getFile().getAbsolutePath();
-
+        String pythonCodePath = new ClassPathResource("scripts/custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("JsonInput", PythonVariables.Type.STR.name())
-                .pythonOutput("prediction", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("inputVar", PythonVariables.Type.NDARRAY.name())
+                .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -113,37 +113,52 @@ public class TensorFlowTestPythonJsonInputFormat extends BaseMultiNumpyVerticalT
                 .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
-
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
+
     @Test(timeout = 60000)
-    public void testInferenceResult(TestContext context) throws Exception {
+    public void testInferenceResult(TestContext testContext) throws Exception {
 
         this.context = context;
-
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
+
+        Schema irisInputSchema = TrainUtils.getIrisInputSchema();
+        ArrowRecordWriter arrowRecordWriter = new ArrowRecordWriter(irisInputSchema);
+        CSVRecordReader reader = new CSVRecordReader();
+        reader.initialize(new FileSplit(new ClassPathResource("iris.txt").getFile()));
+        List<List<Writable>> writables = reader.next(150);
+        System.out.println("writables---" + writables);
+
+        File tmpFile = new File(temporary.getRoot(), "tmp.arrow");
+        System.out.println("tmpFile" + tmpFile);
+        FileSplit fileSplit = new FileSplit(tmpFile);
+        arrowRecordWriter.initialize(fileSplit, new NumberOfRecordsPartitioner());
+        arrowRecordWriter.writeBatch(writables);
+
+        byte[] arrowBytes = FileUtils.readFileToByteArray(tmpFile);
+        Buffer buffer = Buffer.buffer(arrowBytes);
+
+        ArrowBinaryInputAdapter arrowBinaryInputAdapter = new ArrowBinaryInputAdapter();
+        ArrowWritableRecordBatch convert = arrowBinaryInputAdapter.convert(buffer, ConverterArgs.builder().schema(irisInputSchema).build(), null);
+
+        //  assertEquals(writables.size(), convert.size());
+
         JsonObject jsonObject = new JsonObject();
-
-        File json = new ClassPathResource("scripts/TensorFlow/tensorflowImgPath.json").getFile();
-        jsonObject.put("JsonInput", json.getAbsolutePath());
-        requestSpecification.body(jsonObject.encode());
-
-        requestSpecification.header("Content-Type", "application/json");
+        requestSpecification.body(jsonObject.encode().getBytes());
+        requestSpecification.header("Content-Type", "multipart/form-data");
+        // TODO: Need to check the output format
         String output = requestSpecification.when()
+                .multiPart("default", tmpFile)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/json").then()
+                .post("raw/arrow").then()
                 .extract()
                 .body().asString();
 
-        JsonObject jsonObject1 = new JsonObject(output);
-        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
-        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
-        INDArray expected = outputArray.add(0);
-        assertEquals(expected, outputArray);
+        System.out.println("output-----------" + output);
+
 
     }
 }

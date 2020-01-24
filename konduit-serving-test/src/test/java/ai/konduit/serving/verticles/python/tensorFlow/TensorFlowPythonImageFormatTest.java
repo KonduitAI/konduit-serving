@@ -20,7 +20,7 @@
  *
  */
 
-package ai.konduit.serving.verticles.python.scikitlearn;
+package ai.konduit.serving.verticles.python.tensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
@@ -38,9 +38,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.datavec.api.transform.schema.Schema;
 import org.datavec.python.PythonVariables;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -59,20 +57,12 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class ScikitLearnTestPythonImageInput extends BaseMultiNumpyVerticalTest {
-
-    private Schema inputSchema;
+public class TensorFlowPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
         return InferenceVerticle.class;
     }
-
-    @After
-    public void after(TestContext context) {
-        vertx.close(context.asyncAssertSuccess());
-    }
-
 
     @Override
     public Handler<HttpServerRequest> getRequest() {
@@ -80,8 +70,6 @@ public class ScikitLearnTestPythonImageInput extends BaseMultiNumpyVerticalTest 
         return req -> {
             //should be json body of classification
             req.bodyHandler(body -> {
-                System.out.println(body.toJson());
-                System.out.println("Finish body" + body);
             });
 
             req.exceptionHandler(exception -> context.fail(exception));
@@ -95,13 +83,13 @@ public class ScikitLearnTestPythonImageInput extends BaseMultiNumpyVerticalTest 
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/Image_Scikitlearn_NDarray.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/tensorflow/TensorFlowImageTest.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(pythonPath)
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("imgPath", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("result", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("img", PythonVariables.Type.NDARRAY.name())
+                .pythonOutput("prediction", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -110,9 +98,9 @@ public class ScikitLearnTestPythonImageInput extends BaseMultiNumpyVerticalTest 
         ServingConfig servingConfig = ServingConfig.builder().httpPort(port).
                 build();
 
-        //Model config and set model type as KERAS
+        //Model config and set model type as TensorFlow
         ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .inputName("imgPath")
+                .inputName("img")
                 .dimensionsConfig("default", new Long[]{240L, 320L, 3L}) // Height, width, channels
                 .build();
 
@@ -135,9 +123,9 @@ public class ScikitLearnTestPythonImageInput extends BaseMultiNumpyVerticalTest 
         requestSpecification.body(jsonObject.encode());
         requestSpecification.header("Content-Type", "multipart/form-data");
 
-        File imageFile = new ClassPathResource("data/ScikitlearnImageTest.png").getFile();
+        File imageFile = new ClassPathResource("data/TensorFlowImageTest.png").getFile();
         String output = requestSpecification.when()
-                .multiPart("imgPath", imageFile)
+                .multiPart("img", imageFile)
                 .expect().statusCode(200)
                 .post("/raw/image").then()
                 .extract()
@@ -147,9 +135,8 @@ public class ScikitLearnTestPythonImageInput extends BaseMultiNumpyVerticalTest 
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        //Comparing the first digit of NDArray output
-        // todo: Yet to compare the whole data Ndarray output
-        assertEquals(8, outputArray.getDouble(0), 1e-1);
+        assertEquals(7, outputArray.getDouble(0), 1e-1);
+
     }
 
 
