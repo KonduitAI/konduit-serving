@@ -150,8 +150,6 @@ public class PythonStepRunner extends BaseStepRunner {
                     .build();*/
             // this.transformProcesses.put(configEntry.getKey(), transformProcess);
         }
-
-        PythonExecutioner.init();
     }
 
 
@@ -193,11 +191,7 @@ public class PythonStepRunner extends BaseStepRunner {
 
 
     @Override
-    public void destroy() {
-        //get rid of everything but the main interpreter and clear all the variables but the default one
-        PythonExecutioner.clearNonMainInterpreters();
-        PythonExecutioner.resetAllInterpreters();
-    }
+    public void destroy() { }
 
     @Override
     public Record[] transform(Record[] input) {

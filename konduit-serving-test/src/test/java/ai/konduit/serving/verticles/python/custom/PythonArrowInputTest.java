@@ -20,13 +20,11 @@
  *
  */
 
-package ai.konduit.serving.verticles.python.custom;
+package ai.konduit.serving.verticles.python.Custom;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -34,27 +32,32 @@ import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.FileUtils;
 import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
 import org.datavec.api.split.FileSplit;
 import org.datavec.api.split.partition.NumberOfRecordsPartitioner;
 import org.datavec.api.transform.schema.Schema;
+import org.datavec.api.writable.NDArrayWritable;
+import org.datavec.api.writable.Text;
 import org.datavec.api.writable.Writable;
+import org.datavec.arrow.ArrowConverter;
+import org.datavec.arrow.recordreader.ArrowRecordReader;
 import org.datavec.arrow.recordreader.ArrowRecordWriter;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.linalg.primitives.Pair;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -76,15 +79,12 @@ public class PythonArrowInputTest extends BaseMultiNumpyVerticalTest {
     @Override
     public Handler<HttpServerRequest> getRequest() {
 
-        return req -> {
-            //should be json body of classification
-            req.bodyHandler(body -> {
-                System.out.println(body.toJson());
-                System.out.println("Finish body" + body);
-            });
-
-            req.exceptionHandler(exception -> context.fail(exception));
-        };
+        return req ->
+                //should be json body of classification
+                req.bodyHandler(body -> {
+                    System.out.println(body.toJson());
+                    System.out.println("Finish body" + body);
+                }).exceptionHandler(exception -> context.fail(exception));
     }
 
     @Override
@@ -116,34 +116,30 @@ public class PythonArrowInputTest extends BaseMultiNumpyVerticalTest {
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext testContext) throws Exception {
 
-        this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
 
-        Schema irisInputSchema = TrainUtils.getIrisInputSchema();
-        ArrowRecordWriter arrowRecordWriter = new ArrowRecordWriter(irisInputSchema);
-        CSVRecordReader reader = new CSVRecordReader();
-        reader.initialize(new FileSplit(new ClassPathResource("iris.txt").getFile()));
-        List<List<Writable>> writables = reader.next(150);
-        System.out.println("writables---" + writables);
+        Schema customSchema = new Schema.Builder()
+                .addColumnNDArray("inputVar", new long[] {10, 10, 10})
+                .build();
+        ArrowRecordWriter arrowRecordWriter = new ArrowRecordWriter(customSchema);
 
         File tmpFile = new File(temporary.getRoot(), "tmp.arrow");
         System.out.println("tmpFile" + tmpFile);
         FileSplit fileSplit = new FileSplit(tmpFile);
         arrowRecordWriter.initialize(fileSplit, new NumberOfRecordsPartitioner());
-        arrowRecordWriter.writeBatch(writables);
+        arrowRecordWriter.writeBatch(
+                Collections.singletonList(
+                        Collections.singletonList(
+                                new NDArrayWritable(Nd4j.ones(10, 10, 10))
+                        )
+                ));
 
-        byte[] arrowBytes = FileUtils.readFileToByteArray(tmpFile);
-        Buffer buffer = Buffer.buffer(arrowBytes);
-
-        ArrowBinaryInputAdapter arrowBinaryInputAdapter = new ArrowBinaryInputAdapter();
-        ArrowWritableRecordBatch convert = arrowBinaryInputAdapter.convert(buffer, ConverterArgs.builder().schema(irisInputSchema).build(), null);
-
-        //  assertEquals(writables.size(), convert.size());
+        Pair<Schema, ArrowWritableRecordBatch> output1 = ArrowConverter.readFromFile(tmpFile);
+        System.out.println(output1.getValue().get(0));
 
         JsonObject jsonObject = new JsonObject();
         requestSpecification.body(jsonObject.encode().getBytes());
@@ -158,7 +154,5 @@ public class PythonArrowInputTest extends BaseMultiNumpyVerticalTest {
                 .body().asString();
 
         System.out.println("output-----------" + output);
-
-
     }
 }
