@@ -16,7 +16,7 @@ data = digits.images.reshape((n_samples, -1))
 X_train, X_test, y_train, y_test = train_test_split(
     data, digits.target, test_size=0.5, shuffle=False)
 
-filename =work_dir+'//'+'ScikitLearn_model.sav'
+filename =work_dir+'//'+'ScikitLearnmodel.sav'
 loaded_model = joblib.load(filename)
 result = loaded_model.predict(X_test)
 results = loaded_model.score(X_test, y_test)
