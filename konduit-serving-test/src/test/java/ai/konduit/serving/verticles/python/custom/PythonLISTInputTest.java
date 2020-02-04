@@ -19,14 +19,12 @@
  *
  *
  */
-package ai.konduit.serving.verticles.python.custom;
+package ai.konduit.serving.verticles.python.Custom;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -40,12 +38,10 @@ import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -55,7 +51,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
@@ -124,40 +120,31 @@ public class PythonLISTInputTest extends BaseMultiNumpyVerticalTest {
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        //Todo : Test in progress.
-        //List tpStepList = new ArrayList();
-        //tpStepList.add("ABCD");
-        //tpStepList.add("XYZ");
-        List tpStepList = new ArrayList();
-        tpStepList.add(100);
-        tpStepList.add(200);
+        List<Double> inputArray = Arrays.asList(100.0, 200.0);
 
-        jsonObject.put("inputVar", tpStepList);
+        jsonObject.put("inputVar", inputArray);
 
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "application/json");
-        String body = requestSpecification.when()
+        String output = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/json").then()
                 .extract()
-                .body().asString();
+                .body()
+                .asString();
 
-        //Receive the response as JSON
-        JsonObject jsonObject1 = new JsonObject(body);
-        //Check for the output variable
-        assertTrue(jsonObject1.containsKey("default"));
-        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
-        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
-        //  INDArray expected = inputArray.add(0);
-        // assertEquals(expected, outputArray);
+        JsonObject outputJson = new JsonObject(output);
 
-        List<Float> out = jsonObject1.getJsonArray("default").getList();
-        //  INDArray outputArray = Nd4j.create(out);
-        INDArray expected = outputArray.get();
-        assertEquals(expected, outputArray);
+        assertTrue(outputJson.containsKey("default"));
+        assertTrue(outputJson.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(outputJson.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
 
+        List outputDataArray = outputJson.getJsonObject("default")
+                .getJsonObject("ndArray")
+                .getJsonArray("data")
+                .getList();
+
+        assertArrayEquals(inputArray.toArray(), outputDataArray.toArray());
     }
-
 }
