@@ -24,6 +24,7 @@ package ai.konduit.serving.verticles.python.tensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -34,6 +35,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -41,11 +43,13 @@ import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -78,16 +82,11 @@ public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
-
-        String pythonCodePath = new ClassPathResource("scripts/tensorflow/Json_TensorFlow_NDarray.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/tensorFlow/Json_TensorFlow_NDarray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(pythonPath)
+                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("JsonInput", PythonVariables.Type.STR.name())
                 .pythonOutput("prediction", PythonVariables.Type.NDARRAY.name())
                 .build();
@@ -106,7 +105,7 @@ public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test(timeout = 60000)
+    @Test
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -127,12 +126,44 @@ public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .extract()
                 .body().asString();
 
+        System.out.println(output);
         JsonObject jsonObject1 = new JsonObject(output);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         INDArray expected = outputArray.add(0);
         assertEquals(expected, outputArray);
+
+    }
+
+    @Test
+    public void testInferenceClassificationResult(TestContext context) throws Exception {
+
+        this.context = context;
+
+        RequestSpecification requestSpecification = given();
+        requestSpecification.port(port);
+        JsonObject jsonObject = new JsonObject();
+
+        File json = new ClassPathResource("scripts/tensorFlow/tensorflowImgPath.json").getFile();
+        jsonObject.put("JsonInput", json.getAbsolutePath());
+        requestSpecification.body(jsonObject.encode());
+
+        requestSpecification.header("Content-Type", "application/json");
+        String output = requestSpecification.when()
+                .expect().statusCode(200)
+                .body(not(isEmptyOrNullString()))
+                .post("/classification/json").then()
+                .extract()
+                .body().asString();
+
+        System.out.println(output);
+
+        JsonObject jsonObject1 = new JsonObject(output);
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = probabilities.getJsonArray(0).getDouble(0);
+        assertEquals(2, outpuValue, 1e-1);
 
     }
 }
