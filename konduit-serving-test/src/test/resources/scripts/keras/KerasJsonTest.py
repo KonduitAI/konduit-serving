@@ -4,6 +4,8 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.models import model_from_json
 import numpy as np
+import keras.backend.tensorflow_backend as tb
+tb._SYMBOLIC_SCOPE.value = True
 
 work_dir = os.path.abspath(".")
 print("Work Directory", work_dir)

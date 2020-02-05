@@ -1,9 +1,10 @@
 import os
-
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.models import load_model
+import keras.backend.tensorflow_backend as tb
+tb._SYMBOLIC_SCOPE.value = True
 work_dir = os.path.abspath(".")
 
 class KerasTest:

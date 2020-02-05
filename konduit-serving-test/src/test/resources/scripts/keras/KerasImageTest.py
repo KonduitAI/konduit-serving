@@ -3,6 +3,8 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import cv2
+import keras.backend.tensorflow_backend as tb
+tb._SYMBOLIC_SCOPE.value = True
 
 # let's keep our keras backend tensorflow quiet
 import os
