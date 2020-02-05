@@ -138,8 +138,5 @@ public class KerasPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         assertEquals(7, outputArray.getDouble(0), 1e-1);
-
     }
-
-
 }
