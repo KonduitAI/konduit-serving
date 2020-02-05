@@ -106,6 +106,7 @@ public class PytorchPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
+    @Test
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
