@@ -24,6 +24,7 @@ package ai.konduit.serving.verticles.python.pytorch;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -45,12 +46,8 @@ import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
@@ -78,16 +75,11 @@ public class PytorchPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
-
         String pythonCodePath = new ClassPathResource("scripts/face_detection_pytorch/jsondetectimage.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(pythonPath)
+                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("JsonInput", PythonVariables.Type.STR.name())
                 .pythonOutput("num_boxes", PythonVariables.Type.NDARRAY.name())
                 .build();
@@ -124,6 +116,36 @@ public class PytorchPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/json").then()
+                .extract()
+                .body().asString();
+
+        JsonObject jsonObject1 = new JsonObject(output);
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
+        INDArray outputArray = nd.getNdArray();
+        INDArray expected = outputArray.add(0);
+        assertEquals(expected, outputArray);
+
+    }
+
+    @Test
+    public void testInferenceClassificationResult(TestContext context) throws Exception {
+
+        this.context = context;
+
+        RequestSpecification requestSpecification = given();
+        requestSpecification.port(port);
+        JsonObject jsonObject = new JsonObject();
+
+        File json = new ClassPathResource("scripts/face_detection_pytorch/pytorchImgPath.json").getFile();
+        jsonObject.put("JsonInput", json.getAbsolutePath());
+        requestSpecification.body(jsonObject.encode());
+
+        requestSpecification.header("Content-Type", "application/json");
+        String output = requestSpecification.when()
+                .expect().statusCode(200)
+                .body(not(isEmptyOrNullString()))
+                .post("/classification/json").then()
                 .extract()
                 .body().asString();
 

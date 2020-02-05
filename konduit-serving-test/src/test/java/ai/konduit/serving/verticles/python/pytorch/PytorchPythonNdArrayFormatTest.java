@@ -24,6 +24,7 @@ package ai.konduit.serving.verticles.python.pytorch;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
@@ -50,12 +51,8 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
@@ -83,14 +80,10 @@ public class PytorchPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
         String pythonCodePath = new ClassPathResource("scripts/face_detection_pytorch/detect_image.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(pythonPath)
+                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("image", PythonVariables.Type.NDARRAY.name())
                 .pythonOutput("num_boxes", PythonVariables.Type.NDARRAY.name())
@@ -150,6 +143,57 @@ public class PytorchPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTest {
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/nd4j").then()
+                .extract()
+                .body().asString();
+
+        JsonObject jsonObject1 = new JsonObject(response);
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
+        INDArray outputArray = nd.getNdArray();
+        assertEquals(51, outputArray.getInt(0));
+    }
+
+
+    @Test
+    public void testInferenceClassificationResult(TestContext context) throws Exception {
+
+        this.context = context;
+        RequestSpecification requestSpecification = given();
+        requestSpecification.port(port);
+        JsonObject jsonObject = new JsonObject();
+
+        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
+                .scaleImageTransform(20.0f)
+                .build();
+
+        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
+                .imageProcessingInitialLayout("NCHW")
+                .imageProcessingRequiredLayout("NHWC")
+                .inputName("default")
+                .dimensionsConfig("default", new Long[]{478L, 720L, 3L}) // Height, width, channels
+                .imageTransformProcess("default", imageTransformProcess)
+                .build();
+
+        String imagePath = new ClassPathResource("data/PytorchNDArrayTest.jpg").getFile().getAbsolutePath();
+
+        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
+
+        INDArray image = ((NDArrayWritable) output[0][0]).get();
+
+        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
+
+        //Create new file to write binary input data.
+        File file = new File(filePath + "/test-input.zip");
+
+        BinarySerde.writeArrayToDisk(image, file);
+        requestSpecification.body(jsonObject.encode().getBytes());
+
+        requestSpecification.header("Content-Type", "multipart/form-data");
+        String response = requestSpecification.when()
+                .multiPart("default", file)
+                .expect().statusCode(200)
+                .body(not(isEmptyOrNullString()))
+                .post("/classification/nd4j").then()
                 .extract()
                 .body().asString();
 

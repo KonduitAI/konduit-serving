@@ -24,6 +24,7 @@ package ai.konduit.serving.verticles.python.pytorch;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
@@ -47,11 +48,8 @@ import org.nd4j.linalg.io.ClassPathResource;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
@@ -77,16 +75,11 @@ public class PytorchPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
-
         String pythonCodePath = new ClassPathResource("scripts/face_detection_pytorch/detect_image.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(pythonPath)
+                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("image", PythonVariables.Type.NDARRAY.name())
                 .pythonOutput("num_boxes", PythonVariables.Type.NDARRAY.name())
                 .build();
@@ -134,6 +127,34 @@ public class PytorchPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
                 .body().asString();
         JsonObject jsonObject1 = new JsonObject(output);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
+        INDArray outputArray = nd.getNdArray();
+        assertEquals(51, outputArray.getDouble(0), 1e-1);
+    }
+
+    @Test
+    public void testInferenceClassificationResult(TestContext context) throws Exception {
+
+        this.context = context;
+        RequestSpecification requestSpecification = given();
+        requestSpecification.port(port);
+
+        JsonObject jsonObject = new JsonObject();
+        requestSpecification.body(jsonObject.encode().getBytes());
+        requestSpecification.header("Content-Type", "multipart/form-data");
+
+        File imageFile = new ClassPathResource("data/PytorchNDArrayTest.jpg").getFile();
+
+        String output = requestSpecification.when()
+                .multiPart("image", imageFile)
+                .expect().statusCode(200)
+                .post("/classification/image").then()
+                .extract()
+                .body().asString();
+        System.out.println(output);
+        JsonObject jsonObject1 = new JsonObject(output);
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        System.out.println(ndarraySerde);
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         assertEquals(51, outputArray.getDouble(0), 1e-1);
