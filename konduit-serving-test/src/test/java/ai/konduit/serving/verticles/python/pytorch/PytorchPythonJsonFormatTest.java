@@ -98,7 +98,6 @@ public class PytorchPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
