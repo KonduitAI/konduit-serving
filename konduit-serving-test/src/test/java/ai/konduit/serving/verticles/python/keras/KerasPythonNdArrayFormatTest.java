@@ -24,6 +24,7 @@ package ai.konduit.serving.verticles.python.keras;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -34,6 +35,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -87,7 +89,7 @@ public class KerasPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTest {
         String pythonCodePath = new ClassPathResource("scripts/keras/KerasNDArrayTest.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(pythonPath)
+                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("inputData", PythonVariables.Type.NDARRAY.name())
                 .pythonOutput("arr", PythonVariables.Type.NDARRAY.name())
@@ -139,6 +141,42 @@ public class KerasPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTest {
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         INDArray expected = Nd4j.create(new float[][]{{0.1628401f, 0.7828045f, 0.05435541f}, {0.0f, 1.0f, 0.0f}});
+        assertEquals(expected, outputArray);
+    }
+
+    @Test(timeout = 60000)
+    public void testInferenceClassificationResult(TestContext context) throws Exception {
+        this.context = context;
+        RequestSpecification requestSpecification = given();
+        requestSpecification.port(port);
+        JsonObject jsonObject = new JsonObject();
+
+        //Preparing input NDArray
+        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
+
+        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
+
+        //Create new file to write binary input data.
+        File file = new File(filePath + "/test-input.zip");
+
+        BinarySerde.writeArrayToDisk(arr, file);
+        requestSpecification.body(jsonObject.encode().getBytes());
+
+        requestSpecification.header("Content-Type", "multipart/form-data");
+        String response = requestSpecification.when()
+                .multiPart("default", file)
+                .expect().statusCode(200)
+                .body(not(isEmptyOrNullString()))
+                .post("/classification/nd4j").then()
+                .extract()
+                .body().asString();
+
+        JsonObject jsonObject1 = new JsonObject(response);
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
+        double[][] nd = ObjectMapperHolder.getJsonMapper().readValue(probabilities.toString(), double[][].class);
+        INDArray outputArray = Nd4j.create(nd);
+        INDArray expected = Nd4j.create(new double[][]{{0.1628401, 0.7828045, 0.05435541}, {0.0, 1.0, 0.0}});
         assertEquals(expected, outputArray);
     }
 }

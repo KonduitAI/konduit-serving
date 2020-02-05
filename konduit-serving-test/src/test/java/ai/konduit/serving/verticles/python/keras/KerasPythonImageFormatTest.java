@@ -24,6 +24,7 @@ package ai.konduit.serving.verticles.python.keras;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
@@ -35,6 +36,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -47,11 +49,8 @@ import org.nd4j.linalg.io.ClassPathResource;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.junit.Assert.assertEquals;
 
 
@@ -80,16 +79,11 @@ public class KerasPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
-
-        String pythonCodePath = new ClassPathResource("scripts/keras/KerasImageTest.py").getFile().getAbsolutePath();
+           String pythonCodePath = new ClassPathResource("scripts/keras/KerasImageTest.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(pythonPath)
+                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("imgPath", PythonVariables.Type.NDARRAY.name())
                 .pythonOutput("imageArray", PythonVariables.Type.NDARRAY.name())
                 .build();
@@ -138,5 +132,34 @@ public class KerasPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         assertEquals(7, outputArray.getDouble(0), 1e-1);
+    }
+
+    @Test(timeout = 60000)
+    public void testInferenceClassificationResult(TestContext context) throws Exception {
+
+        System.out.println("testInferenceClassificationResult Start");
+
+        this.context = context;
+        RequestSpecification requestSpecification = given();
+        requestSpecification.port(port);
+
+        JsonObject jsonObject = new JsonObject();
+        requestSpecification.body(jsonObject.encode().getBytes());
+        requestSpecification.header("Content-Type", "multipart/form-data");
+
+        File imageFile = new ClassPathResource("data/KerasImageTest.png").getFile();
+        String Response = requestSpecification.when()
+                .multiPart("imgPath", imageFile)
+                .expect().statusCode(200)
+                .post("/classification/image").then()
+                .extract()
+                .body().asString();
+
+        JsonObject jsonObject1 = new JsonObject(Response);
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = probabilities.getJsonArray(0).getDouble(0);
+        assertEquals(7, outpuValue, 1e-1);
+
     }
 }

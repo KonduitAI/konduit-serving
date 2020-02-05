@@ -24,6 +24,7 @@ package ai.konduit.serving.verticles.python.keras;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -89,7 +90,7 @@ public class KerasPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(pythonPath)
+                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("JsonInput", PythonVariables.Type.STR.name())
                 .pythonOutput("score", PythonVariables.Type.LIST.name())
                 .build();
@@ -126,6 +127,34 @@ public class KerasPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/json").then()
+                .extract()
+                .body().asString();
+
+        JsonObject jsonObject1 = new JsonObject(output);
+        List<Float> out = jsonObject1.getJsonArray("score").getList();
+        INDArray outputArray = Nd4j.create(out);
+        INDArray expected = outputArray.get();
+        assertEquals(expected, outputArray);
+    }
+
+    @Test(timeout = 60000)
+    public void testInferenceClassificationResult(TestContext context) throws Exception {
+
+        this.context = context;
+
+        RequestSpecification requestSpecification = given();
+        requestSpecification.port(port);
+        JsonObject jsonObject = new JsonObject();
+
+        File json = new ClassPathResource("Json/IrisY.json").getFile();
+        jsonObject.put("JsonInput", json.getAbsolutePath());
+        requestSpecification.body(jsonObject.encode());
+
+        requestSpecification.header("Content-Type", "application/json");
+        String output = requestSpecification.when()
+                .expect().statusCode(200)
+                .body(not(isEmptyOrNullString()))
+                .post("/classification/json").then()
                 .extract()
                 .body().asString();
 
