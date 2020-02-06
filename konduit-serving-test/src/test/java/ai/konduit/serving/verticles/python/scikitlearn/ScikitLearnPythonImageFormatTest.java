@@ -24,6 +24,7 @@ package ai.konduit.serving.verticles.python.scikitlearn;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
@@ -35,6 +36,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -90,7 +92,7 @@ public class ScikitLearnPythonImageFormatTest extends BaseMultiNumpyVerticalTest
         String pythonCodePath = new ClassPathResource("scripts/scikitlearn/Image_Scikitlearn_NDarray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(pythonPath)
+                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("imgPath", PythonVariables.Type.NDARRAY.name())
                 .pythonOutput("result", PythonVariables.Type.NDARRAY.name())
@@ -147,5 +149,29 @@ public class ScikitLearnPythonImageFormatTest extends BaseMultiNumpyVerticalTest
         assertEquals(expectedArr, outputArray);
     }
 
+    @Test(timeout = 60000)
+    public void testInferenceClassificationResult(TestContext context) throws Exception {
+
+        this.context = context;
+        RequestSpecification requestSpecification = given();
+        requestSpecification.port(port);
+
+        JsonObject jsonObject = new JsonObject();
+        requestSpecification.body(jsonObject.encode());
+        requestSpecification.header("Content-Type", "multipart/form-data");
+
+        File imageFile = new ClassPathResource("data/ScikitlearnImageTest.png").getFile();
+        String output = requestSpecification.when()
+                .multiPart("imgPath", imageFile)
+                .expect().statusCode(200)
+                .post("/classification/image").then()
+                .extract()
+                .body().asString();
+        JsonObject jsonObject1 = new JsonObject(output);
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = probabilities.getJsonArray(0).getDouble(0);
+        assertEquals(8, outpuValue, 1e-1);
+    }
 
 }
