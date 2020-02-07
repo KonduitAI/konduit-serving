@@ -36,6 +36,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -202,15 +203,15 @@ public class ScikitLearnPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTe
                 .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/nd4j").then()
+                .post("/classification/nd4j").then()
                 .extract()
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(response);
-        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
-        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
-        assertEquals(2, outputArray.getInt(0));
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = probabilities.getJsonArray(0).getDouble(0);
+        assertEquals(2, outpuValue, 1e-1);
 
     }
 
