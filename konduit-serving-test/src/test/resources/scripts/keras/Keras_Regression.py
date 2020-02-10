@@ -43,7 +43,6 @@ pred_train= model.predict(X_train)
 print(np.sqrt(mean_squared_error(y_train,pred_train)))
 #My_test = np.array(0.00632,18,2.31,0,0.538,6.575,65.2,4.09,1,296,15.3,4.98,24)
 My_test = inputData
-print("My_test----------",My_test)
 pred= model.predict(X_test)
 #print(np.sqrt(mean_squared_error(y_test,pred)))
 
