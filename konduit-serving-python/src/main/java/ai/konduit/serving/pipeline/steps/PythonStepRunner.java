@@ -31,12 +31,10 @@ import org.apache.commons.io.FileUtils;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.Writable;
-import org.datavec.python.NumpyArray;
-import org.datavec.python.PythonExecutioner;
-import org.datavec.python.PythonTransform;
+import org.datavec.python.*;
 import org.datavec.python.PythonTransform.PythonTransformBuilder;
-import org.datavec.python.PythonVariables;
 import org.nd4j.base.Preconditions;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,13 +77,12 @@ import java.util.Map;
 public class PythonStepRunner extends BaseStepRunner {
 
     private Map<String, PythonTransform> pythonTransform;
-    //private Map<String, TransformProcess> transformProcesses;
 
-    public PythonStepRunner(PipelineStep pipelineStep) {
+    public PythonStepRunner(PipelineStep pipelineStep) throws Exception {
         super(pipelineStep);
         PythonStep pythonConfig = (PythonStep) pipelineStep;
         pythonTransform = new HashMap<>();
-        //transformProcesses = new HashMap<>();
+
         boolean setPath = false;
         for (Map.Entry<String, PythonConfig> configEntry : pythonConfig.getPythonConfigs().entrySet()) {
             Preconditions.checkState(pipelineStep.hasInputName(configEntry.getKey()),
@@ -97,7 +94,6 @@ public class PythonStepRunner extends BaseStepRunner {
                 setPath = true;
             }
 
-
             String code = configEntry.getValue().getPythonCode();
             if (code == null) {
                 try {
@@ -107,7 +103,6 @@ public class PythonStepRunner extends BaseStepRunner {
                 }
                 log.info("Resolving code from " + currConfig.getPythonCodePath());
             }
-
 
             Preconditions.checkNotNull(code, "No code to run!");
             Preconditions.checkState(!code.isEmpty(), "Code resolved to an empty string!");
@@ -120,7 +115,6 @@ public class PythonStepRunner extends BaseStepRunner {
                 pythonVariables = PythonVariables.schemaFromMap(currConfig.getPythonInputs());
                 pythonTransformBuilder.inputs(pythonVariables);
                 pythonTransformBuilder.inputSchema(schemaForVariables(pythonVariables));
-
             }
 
             if(currConfig.getPythonOutputs() != null) {
@@ -133,26 +127,19 @@ public class PythonStepRunner extends BaseStepRunner {
                     pythonTransformBuilder.outputs(outputs);
                     pythonTransformBuilder.outputSchema(schemaForVariables(outputs));
                 }
-
-
             }
 
             PythonTransform pythonTransform =  pythonTransformBuilder.build();
             this.pythonTransform.put(configEntry.getKey(), pythonTransform);
-            /*TransformProcess transformProcess = new TransformProcess.Builder(pythonTransform.getInputSchema())
-                    .transform(pythonTransform)
-                    .build();*/
-            // this.transformProcesses.put(configEntry.getKey(), transformProcess);
         }
     }
-
 
     protected Schema schemaForVariables(PythonVariables pythonVariables) {
         Schema.Builder schemaBuilder = new Schema.Builder();
         String[] varNames = pythonVariables.getVariables();
         for (String name : varNames) {
-            PythonVariables.Type pyType = pythonVariables.getType(name);
-            switch (pyType) {
+            PythonType pyType = pythonVariables.getType(name);
+            switch (pyType.getName()) {
                 case INT:
                     schemaBuilder.addColumnLong(name);
                     break;
@@ -165,23 +152,22 @@ public class PythonStepRunner extends BaseStepRunner {
                     schemaBuilder.addColumnString(name);
                     break;
                 case NDARRAY:
-                    NumpyArray arr = pythonVariables.getNDArrayValue(name);
+                    INDArray arr = pythonVariables.getNDArrayValue(name);
                     if (arr == null)
                         schemaBuilder.addColumnNDArray(name, new long[]{1, 1});
                     else
-                        schemaBuilder.addColumnNDArray(name, arr.getShape());
+                        schemaBuilder.addColumnNDArray(name, arr.shape());
                     break;
                 case BOOL:
                     schemaBuilder.addColumnBoolean(name);
                     break;
                 default:
-                    throw new IllegalStateException("Unable to support type " + pyType.name());
+                    throw new IllegalStateException("Unable to support type " + pyType.getName().name());
             }
         }
 
         return schemaBuilder.build();
     }
-
 
     @Override
     public void destroy() { }
@@ -198,15 +184,6 @@ public class PythonStepRunner extends BaseStepRunner {
             } else {
                 ret[i] = input[i];
             }
-
-        /*    if (transformProcesses.containsKey(pipelineStep.inputNameAt(i))) {
-                TransformProcess transformProcess = transformProcesses.get(pipelineStep.inputNameAt(i));
-                Preconditions.checkState(input[i].getRecord() != null && !input[i].getRecord().isEmpty(), "Record should not be empty!");
-                List<List<Writable>> execute = LocalTransformExecutor.execute(Arrays.asList(input[i].getRecord()), transformProcess);
-                ret[i] = new org.datavec.api.records.impl.Record(execute.get(0), null);
-            } else {
-                ret[i] = input[i];
-            }*/
         }
 
         log.debug("Post python transform execution");
@@ -215,6 +192,6 @@ public class PythonStepRunner extends BaseStepRunner {
 
     @Override
     public void processValidWritable(Writable writable, List<Writable> record, int inputIndex, Object... extraArgs) {
-        //no-op here
+        throw new UnsupportedOperationException();
     }
 }
