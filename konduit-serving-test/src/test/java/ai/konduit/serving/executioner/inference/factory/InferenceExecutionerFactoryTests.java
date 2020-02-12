@@ -37,7 +37,6 @@ import org.junit.Test;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.linalg.primitives.Pair;
-import org.nd4j.tensorflow.conversion.TensorDataType;
 
 import java.io.File;
 
@@ -90,7 +89,7 @@ public class InferenceExecutionerFactoryTests {
     @Test
     public void testKerasSequential() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/keras/bidirectional_lstm_tensorflow_1.h5");
-        ModelConfig modelConfig = ModelConfig.builder()
+        ModelConfig modelConfig = KerasConfig.builder()
                 .modelConfigType(ModelConfigType.keras(classPathResource.getFile().getAbsolutePath()))
                 .build();
 
