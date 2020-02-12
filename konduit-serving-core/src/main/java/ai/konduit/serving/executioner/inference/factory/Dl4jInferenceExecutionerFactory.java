@@ -11,6 +11,7 @@ import ai.konduit.serving.model.loader.dl4j.mln.MultiLayerNetworkModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import lombok.extern.slf4j.Slf4j;
 import org.deeplearning4j.nn.graph.ComputationGraph;
+import org.deeplearning4j.util.DL4JModelValidator;
 
 import java.io.File;
 import java.util.Collections;
@@ -21,22 +22,23 @@ public class Dl4jInferenceExecutionerFactory implements InferenceExecutionerFact
 
     @Override
     public InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception {
-        try {
-            ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
+        ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
+        File modelPath = new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath());
+
+        if(DL4JModelValidator.validateMultiLayerNetwork(modelPath).isValid()) {
             ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 
             MultiLayerNetworkInferenceExecutioner inferenceExecutioner = new MultiLayerNetworkInferenceExecutioner();
-            MultiLayerNetworkModelLoader multiLayerNetworkModelLoader = new MultiLayerNetworkModelLoader(new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath()));
+            MultiLayerNetworkModelLoader multiLayerNetworkModelLoader = new MultiLayerNetworkModelLoader(modelPath);
             inferenceExecutioner.initialize(multiLayerNetworkModelLoader, parallelInferenceConfig);
             List<String> inputNames = Collections.singletonList("default");
             List<String> outputNames = Collections.singletonList("default");
             return new InitializedInferenceExecutionerConfig(inferenceExecutioner, inputNames, outputNames);
-        } catch (Exception mlnLoadingException) {
-            log.error("Error loading multi layer network from file. Attempting to load computation graph instead.", mlnLoadingException);
-            ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
+        } else {
+            log.debug("Error loading multi layer network from file. Attempting to load computation graph instead.");
             ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 
-            ComputationGraphModelLoader computationGraphModelLoader = new ComputationGraphModelLoader(new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath()));
+            ComputationGraphModelLoader computationGraphModelLoader = new ComputationGraphModelLoader(modelPath);
             MultiComputationGraphInferenceExecutioner inferenceExecutioner = new MultiComputationGraphInferenceExecutioner();
             inferenceExecutioner.initialize(computationGraphModelLoader, parallelInferenceConfig);
 
