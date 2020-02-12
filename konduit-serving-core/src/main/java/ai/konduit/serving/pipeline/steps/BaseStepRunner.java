@@ -59,7 +59,8 @@ public abstract class BaseStepRunner implements PipelineStepRunner {
     /**
      * no-op
      */
-    public void destroy() {
+    @Override
+    public void close() {
     }
 
     /**

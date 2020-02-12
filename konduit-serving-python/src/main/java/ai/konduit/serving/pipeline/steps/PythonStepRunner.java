@@ -170,7 +170,7 @@ public class PythonStepRunner extends BaseStepRunner {
     }
 
     @Override
-    public void destroy() { }
+    public void close() { }
 
     @Override
     public Record[] transform(Record[] input) {

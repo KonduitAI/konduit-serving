@@ -69,7 +69,7 @@ public class PmmlInferenceExecutionerStepRunner extends BaseStepRunner {
     }
 
     @Override
-    public void destroy() {
+    public void close() {
         pmmlInferenceExecutioner.stop();
     }
 

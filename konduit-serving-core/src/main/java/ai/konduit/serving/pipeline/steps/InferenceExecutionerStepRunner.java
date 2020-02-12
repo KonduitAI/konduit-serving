@@ -108,7 +108,7 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
     }
 
     @Override
-    public void destroy() {
+    public void close() {
         inferenceExecutioner.stop();
     }
 

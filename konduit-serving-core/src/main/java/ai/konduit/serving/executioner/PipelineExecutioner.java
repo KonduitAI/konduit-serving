@@ -67,10 +67,7 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.serde.binary.BinarySerde;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -89,7 +86,7 @@ import java.util.zip.ZipOutputStream;
  * @author Adam Gibson
  */
 @Slf4j
-public class PipelineExecutioner {
+public class PipelineExecutioner implements Closeable {
 
     @Getter
     protected MultiOutputAdapter multiOutputAdapter;
@@ -579,9 +576,9 @@ public class PipelineExecutioner {
      * Destroys the executioner (shuts down {@link ai.konduit.serving.executioner.inference.InferenceExecutioner}
      * among other components)
      */
-    public void destroy() {
+    public void close() {
         if(pipeline != null)
-            pipeline.destroy();
+            pipeline.close();
     }
 
 

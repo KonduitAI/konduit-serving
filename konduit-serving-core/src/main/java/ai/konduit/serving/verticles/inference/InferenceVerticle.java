@@ -74,7 +74,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         super.stop();
 
         if(pipelineRouteDefiner.getPipelineExecutioner() != null)
-            pipelineRouteDefiner.getPipelineExecutioner().destroy();
+            pipelineRouteDefiner.getPipelineExecutioner().close();
         
         log.debug("Stopping konduit server.");
     }

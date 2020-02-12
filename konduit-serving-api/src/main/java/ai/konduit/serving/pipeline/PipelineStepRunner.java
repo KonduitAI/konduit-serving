@@ -28,6 +28,7 @@ import org.datavec.api.records.Record;
 import org.datavec.api.writable.Writable;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
+import java.io.Closeable;
 import java.util.Map;
 
 
@@ -52,7 +53,7 @@ import java.util.Map;
  *
  * @author Adam Gibson
  */
-public interface PipelineStepRunner {
+public interface PipelineStepRunner extends Closeable {
 
     /**
      * Destroy the pipeline runner.
@@ -60,7 +61,7 @@ public interface PipelineStepRunner {
      * This means cleaning up used resources.
      * This method will be called when a pipeline needs to be finalized.
      */
-    void destroy();
+    void close();
 
     /**
      * Returns the expected input types
