@@ -113,22 +113,8 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
     }
 
     @Override
-    public Map<String, SchemaType[]> inputTypes() {
-        Map<String, SchemaType[]> ret = new LinkedHashMap<>();
-        for (int i = 0; i < pipelineStep.getInputNames().size(); i++) {
-            ret.put(pipelineStep.getInputNames().get(i), new SchemaType[]{SchemaType.NDArray});
-        }
-        return ret;
-    }
-
-    @Override
-    public Map<String, SchemaType[]> outputTypes() {
-        Map<String, SchemaType[]> ret = new LinkedHashMap<>();
-        for (int i = 0; i < pipelineStep.getOutputNames().size(); i++) {
-            ret.put(pipelineStep.getOutputNames().get(i), new SchemaType[]{SchemaType.NDArray});
-        }
-
-        return ret;
+    public PipelineStep<?> getPipelineStep() {
+        return pipelineStep;
     }
 
     @Override

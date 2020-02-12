@@ -140,13 +140,8 @@ public abstract class BaseStepRunner implements PipelineStepRunner {
     }
 
     @Override
-    public Map<String, SchemaType[]> inputTypes() {
-        return pipelineStep.getInputSchemas();
-    }
-
-    @Override
-    public Map<String, SchemaType[]> outputTypes() {
-        return pipelineStep.getOutputSchemas();
+    public PipelineStep<?> getPipelineStep() {
+        return pipelineStep;
     }
 
     public abstract void processValidWritable(Writable writable, List<Writable> record, int inputIndex, Object... extraArgs);

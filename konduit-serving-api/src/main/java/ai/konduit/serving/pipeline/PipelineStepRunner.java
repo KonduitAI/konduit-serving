@@ -63,21 +63,23 @@ public interface PipelineStepRunner extends Closeable {
      */
     void close();
 
-    /**
-     * Returns the expected input types
-     * for this step
-     *
-     * @return pipeline step
-     */
-    Map<String, SchemaType[]> inputTypes();
+    PipelineStep<?> getPipelineStep();
 
-    /**
-     * Returns the expected output types
-     * for this step
-     *
-     * @return pipeline step
-     */
-    Map<String, SchemaType[]> outputTypes();
+//    /**
+//     * Returns the expected input types
+//     * for this step
+//     *
+//     * @return pipeline step
+//     */
+//    Map<String, SchemaType[]> inputTypes();
+//
+//    /**
+//     * Returns the expected output types
+//     * for this step
+//     *
+//     * @return pipeline step
+//     */
+//    Map<String, SchemaType[]> outputTypes();
 
     /**
      * Transform a set of {@link Object}

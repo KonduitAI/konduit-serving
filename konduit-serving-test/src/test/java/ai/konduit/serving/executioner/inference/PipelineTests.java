@@ -83,8 +83,8 @@ public class PipelineTests {
         Writable writable = transform[0].getRecord().get(0);
         assertEquals("appendedtwo", writable.toString());
 
-        assertEquals(1, step.inputTypes().size());
-        assertEquals(1, step.outputTypes().size());
+        assertEquals(1, step.getPipelineStep().getInputSchemas().size());
+        assertEquals(1, step.getPipelineStep().getOutputSchemas().size());
 
 
     }

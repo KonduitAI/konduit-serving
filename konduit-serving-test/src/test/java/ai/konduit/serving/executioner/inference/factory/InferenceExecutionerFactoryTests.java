@@ -147,7 +147,7 @@ public class InferenceExecutionerFactoryTests {
         File tmpZip = new File("dl4j_mln_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
-        ModelConfig modelConfig = ModelConfig.builder()
+        ModelConfig modelConfig = DL4JConfig.builder()
                 .modelConfigType(ModelConfigType.multiLayerNetwork(tmpZip.getAbsolutePath()))
                 .build();
 
@@ -177,7 +177,7 @@ public class InferenceExecutionerFactoryTests {
         File tmpZip = new File("dl4j_cg_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
-        ModelConfig modelConfig = ModelConfig.builder()
+        ModelConfig modelConfig = DL4JConfig.builder()
                 .modelConfigType(ModelConfigType.computationGraph(tmpZip.getAbsolutePath()))
                 .build();
 

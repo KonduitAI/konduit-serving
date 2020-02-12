@@ -23,7 +23,6 @@ import lombok.experimental.SuperBuilder;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @SuperBuilder
 public class DL4JConfig extends ModelConfig {
 
