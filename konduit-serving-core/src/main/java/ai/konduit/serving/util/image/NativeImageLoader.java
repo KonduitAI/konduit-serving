@@ -37,6 +37,7 @@ import org.datavec.image.data.ImageWritable;
 import org.datavec.image.loader.AndroidNativeImageLoader;
 import org.datavec.image.loader.BaseImageLoader;
 import org.datavec.image.transform.ImageTransform;
+import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.concurrency.AffinityManager;
 import org.nd4j.linalg.api.memory.pointers.PagedPointer;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -176,13 +177,11 @@ public class NativeImageLoader extends BaseImageLoader {
                     pix2 = pixConvert4To8(pix, 0);
                     break;
                 case 8:
-                    pix2 = pix;
-                    break;
                 case 24:
                     pix2 = pix;
                     break;
                 default:
-                    assert false;
+                    Preconditions.checkState(false, String.format("Unrecognized pixel depth of %d", pix.d()));
             }
             tempPix = pix = pix2;
             int channels = pix.d() / 8;
