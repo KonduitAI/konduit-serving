@@ -104,7 +104,7 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfig(modelConfig)
                 .build();
 
-        MultiLayerNetworkInferenceExecutionerFactory factory = new MultiLayerNetworkInferenceExecutionerFactory();
+        Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
         MultiLayerNetworkInferenceExecutioner computationGraphInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(computationGraphInferenceExecutioner);
@@ -149,7 +149,7 @@ public class InferenceExecutionerFactoryTests {
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
         ModelConfig modelConfig = ModelConfig.builder()
-                .modelConfigType(ModelConfigType.multiLayerNetwork(tmpZip.getAbsolutePath()))
+                .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
                 .build();
 
         ServingConfig servingConfig = ServingConfig.builder()
@@ -162,7 +162,7 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfig(modelConfig)
                 .build();
 
-        MultiLayerNetworkInferenceExecutionerFactory factory = new MultiLayerNetworkInferenceExecutionerFactory();
+        Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
         MultiLayerNetworkInferenceExecutioner computationGraphInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(computationGraphInferenceExecutioner);
@@ -179,7 +179,7 @@ public class InferenceExecutionerFactoryTests {
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
         ModelConfig modelConfig = ModelConfig.builder()
-                .modelConfigType(ModelConfigType.computationGraph(tmpZip.getAbsolutePath()))
+                .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
                 .build();
 
         ServingConfig servingConfig = ServingConfig.builder()
@@ -192,7 +192,7 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfig(modelConfig)
                 .build();
 
-        ComputationGraphInferenceExecutionerFactory factory = new ComputationGraphInferenceExecutionerFactory();
+        Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
         MultiComputationGraphInferenceExecutioner computationGraphInferenceExecutioner = (MultiComputationGraphInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(computationGraphInferenceExecutioner);
