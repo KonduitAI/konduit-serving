@@ -104,12 +104,12 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfig(modelConfig)
                 .build();
 
-        Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();
+        KerasInferenceExecutionerFactory factory = new KerasInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
-        MultiLayerNetworkInferenceExecutioner computationGraphInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
-        assertNotNull(computationGraphInferenceExecutioner);
-        assertNotNull(computationGraphInferenceExecutioner.model());
-        assertNotNull(computationGraphInferenceExecutioner.modelLoader());
+        MultiLayerNetworkInferenceExecutioner multiLayerNetworkInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
+        assertNotNull(multiLayerNetworkInferenceExecutioner);
+        assertNotNull(multiLayerNetworkInferenceExecutioner.model());
+        assertNotNull(multiLayerNetworkInferenceExecutioner.modelLoader());
 
     }
 
