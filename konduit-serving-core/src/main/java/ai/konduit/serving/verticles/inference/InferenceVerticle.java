@@ -36,6 +36,7 @@ import io.vertx.core.Vertx;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * A {@link io.vertx.core.Verticle} that takes multi part file uploads
@@ -113,15 +114,17 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         }
 
         final int portValueFinal = portValue;
+        List<PipelineStep> steps = inferenceConfiguration.getSteps();
+        final int nSteps = steps == null ? 0 : steps.size();
         vertx.createHttpServer()
                 .requestHandler(router)
                 .exceptionHandler(Throwable::printStackTrace)
                 .listen(portValueFinal, inferenceConfiguration.getServingConfig().getListenHost(), listenResult -> {
                     if (listenResult.failed()) {
-                        log.debug("Could not start HTTP server");
+                        log.error("Could not start HTTP server on port {}", portValueFinal);
                         listenResult.cause().printStackTrace();
                     } else {
-                        log.debug("Server started on port " + portValueFinal);
+                        log.info("Server started on port {} with {} pipeline steps", portValueFinal, nSteps);
                     }
                 });
     }
