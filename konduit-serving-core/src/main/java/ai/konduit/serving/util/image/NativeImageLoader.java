@@ -165,7 +165,7 @@ public class NativeImageLoader extends BaseImageLoader {
             tempPix = pix = pix2;
             dtype = CV_8UC4;
         } else if (pix.d() <= 8 || pix.d() == 24) {
-            PIX pix2 = null;
+            PIX pix2 = pix;
             switch (pix.d()) {
                 case 1:
                     pix2 = pixConvert1To8(null, pix, (byte) 0, (byte) 255);
