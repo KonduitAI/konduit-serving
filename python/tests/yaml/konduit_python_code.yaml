@@ -5,8 +5,7 @@ serving:
   extra_start_args: -Xmx8g
   jar_path: konduit.jar
 steps:
-  python_step:
-    type: PYTHON
+  - type: PYTHON
     python_path: .
     python_code: "first+=2; second = first"
     python_inputs:

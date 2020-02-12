@@ -1,8 +1,7 @@
 serving:
   http_port: 1337
 steps:
-  tensorflow_step:
-    type: TENSORFLOW
+  - type: TENSORFLOW
     model_loading_path: bert_mrpc_frozen.pb
     input_names:
       - IteratorGetNext:0

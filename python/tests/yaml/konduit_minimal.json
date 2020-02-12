@@ -2,8 +2,8 @@
   "serving": {
     "http_port": 1337
   },
-  "steps": {
-    "python_step": {
+  "steps": [
+    {
       "type": "PYTHON",
       "python_path": ".",
       "python_code_path": "./simple.py",
@@ -14,7 +14,7 @@
         "second": "NDARRAY"
       }
     }
-  },
+  ],
   "client": {
     "port": 1337
   }

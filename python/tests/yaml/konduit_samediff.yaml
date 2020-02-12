@@ -1,6 +1,5 @@
 serving:
   http_port: 1337
 steps:
-  samediff_step:
-    type: SAMEDIFF
+  - type: SAMEDIFF
     model_loading_path: resources/tensorflow/frozen_model.pb

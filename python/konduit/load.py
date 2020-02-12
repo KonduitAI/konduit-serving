@@ -131,7 +131,8 @@ def server_from_file(file_path, start_server=False, use_yaml=True):
 
     step_data = data.get("steps", None)
     steps = []
-    for step_config in step_data.values():
+    # Supporting both list and dictionary for steps yaml/json configuration
+    for step_config in step_data if isinstance(step_data, list) else step_data.values():
         steps.append(get_step(step_config))
 
     server = Server(
