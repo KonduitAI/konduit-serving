@@ -39,6 +39,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.apache.commons.io.IOUtils;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +48,9 @@ import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -56,6 +60,7 @@ import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -128,13 +133,19 @@ public class ScikitLearnPythonJsonFormatTest extends BaseMultiNumpyVerticalTest 
                 .post("/raw/json").then()
                 .extract()
                 .body().asString();
-
         JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expected = outputArray.add(0);
-        assertEquals(expected, outputArray);
+        InputStream expectedIS = new FileInputStream("src/test/resources/Json/ScikitlearnJsonTest.json");
+        String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
+        JsonObject expectedObj = new JsonObject(encodedText);
+        NDArrayOutput expND = ObjectMapperHolder.getJsonMapper().readValue(expectedObj.getJsonObject("raw").toString(), NDArrayOutput.class);
+        INDArray expectedArr = expND.getNdArray();
+        assertEquals(expectedArr, outputArray);
     }
 
     @Test(timeout = 60000)
@@ -158,10 +169,18 @@ public class ScikitLearnPythonJsonFormatTest extends BaseMultiNumpyVerticalTest 
                 .extract()
                 .body().asString();
         JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
-        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-        double outpuValue = probabilities.getJsonArray(0).getDouble(0);
-        assertEquals(2, outpuValue, 1e-1);
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
+        InputStream expectedIS = new FileInputStream("src/test/resources/Json/ScikitlearnJsonTest.json");
+        String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
+        JsonObject expectedObj = new JsonObject(encodedText);
+        JsonArray expArr = expectedObj.getJsonObject("classification").getJsonArray("probabilities");
+        double expValue = expArr.getJsonArray(0).getDouble(0);
+        assertEquals(expValue, outpuValue, 1e-1);
+        assertEquals(expArr, outputArr);
 
     }
 }
