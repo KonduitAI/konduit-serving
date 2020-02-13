@@ -2909,7 +2909,7 @@ class ImageLoadingStep(PipelineStep):
             )
         return d
 
-class CustomStep(PipelineStep):
+class BertStep(PipelineStep):
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
