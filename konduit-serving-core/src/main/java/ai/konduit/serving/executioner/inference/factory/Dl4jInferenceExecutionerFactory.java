@@ -34,7 +34,7 @@ public class Dl4jInferenceExecutionerFactory implements InferenceExecutionerFact
             List<String> inputNames = Collections.singletonList("default");
             List<String> outputNames = Collections.singletonList("default");
             return new InitializedInferenceExecutionerConfig(inferenceExecutioner, inputNames, outputNames);
-        } else {
+        } else if (DL4JModelValidator.validateComputationGraph(modelPath).isValid()){
             log.debug("Error loading multi layer network from file. Attempting to load computation graph instead.");
             ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 
@@ -51,6 +51,9 @@ public class Dl4jInferenceExecutionerFactory implements InferenceExecutionerFact
                     .inferenceExecutioner(inferenceExecutioner)
                     .inputNames(inputNames).outputNames(outputNames)
                     .build();
+        } else {
+            throw new IllegalStateException(String.format("The given file at path %s is not a valid DL4J model.",
+                    modelPath.getAbsolutePath()));
         }
     }
 }
