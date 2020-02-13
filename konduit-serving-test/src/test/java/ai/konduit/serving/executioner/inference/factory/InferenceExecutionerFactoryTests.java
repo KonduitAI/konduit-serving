@@ -110,7 +110,6 @@ public class InferenceExecutionerFactoryTests {
         assertNotNull(multiLayerNetworkInferenceExecutioner);
         assertNotNull(multiLayerNetworkInferenceExecutioner.model());
         assertNotNull(multiLayerNetworkInferenceExecutioner.modelLoader());
-
     }
 
 
@@ -130,7 +129,6 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfig(tensorFlowConfig)
                 .build();
 
-
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = tensorflowInferenceExecutionerFactory.create(modelPipelineStep);
         InferenceExecutioner inferenceExecutioner = initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(inferenceExecutioner);
@@ -138,7 +136,6 @@ public class InferenceExecutionerFactoryTests {
         SameDiffInferenceExecutioner tensorflowInferenceExecutioner = (SameDiffInferenceExecutioner) inferenceExecutioner;
         assertNotNull(tensorflowInferenceExecutioner.model());
         assertNotNull(tensorflowInferenceExecutioner.modelLoader());
-
     }
 
     @Test
@@ -152,10 +149,6 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
                 .build();
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(1139)
-                .build();
-
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
@@ -164,11 +157,10 @@ public class InferenceExecutionerFactoryTests {
 
         Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
-        MultiLayerNetworkInferenceExecutioner computationGraphInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
-        assertNotNull(computationGraphInferenceExecutioner);
-        assertNotNull(computationGraphInferenceExecutioner.model());
-        assertNotNull(computationGraphInferenceExecutioner.modelLoader());
-
+        MultiLayerNetworkInferenceExecutioner multiLayerNetworkInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
+        assertNotNull(multiLayerNetworkInferenceExecutioner);
+        assertNotNull(multiLayerNetworkInferenceExecutioner.model());
+        assertNotNull(multiLayerNetworkInferenceExecutioner.modelLoader());
     }
 
     @Test
@@ -182,10 +174,6 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
                 .build();
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(1139)
-                .build();
-
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
                 .outputName("output")
@@ -194,12 +182,9 @@ public class InferenceExecutionerFactoryTests {
 
         Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
-        MultiComputationGraphInferenceExecutioner computationGraphInferenceExecutioner = (MultiComputationGraphInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
-        assertNotNull(computationGraphInferenceExecutioner);
-        assertNotNull(computationGraphInferenceExecutioner.model());
-        assertNotNull(computationGraphInferenceExecutioner.modelLoader());
-
-
+        MultiComputationGraphInferenceExecutioner multiComputationGraphInferenceExecutioner = (MultiComputationGraphInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
+        assertNotNull(multiComputationGraphInferenceExecutioner);
+        assertNotNull(multiComputationGraphInferenceExecutioner.model());
+        assertNotNull(multiComputationGraphInferenceExecutioner.modelLoader());
     }
-
 }

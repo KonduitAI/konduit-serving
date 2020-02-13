@@ -5,7 +5,6 @@ import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerC
 import ai.konduit.serving.executioner.inference.MultiComputationGraphInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.MultiLayerNetworkInferenceExecutioner;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.loader.ModelGuesser;
 import ai.konduit.serving.model.loader.dl4j.cg.ComputationGraphModelLoader;
 import ai.konduit.serving.model.loader.dl4j.mln.MultiLayerNetworkModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
