@@ -116,16 +116,14 @@ public class KerasPythonNDArrayRegressionTest extends BaseMultiNumpyVerticalTest
         JsonObject jsonObject = new JsonObject();
 
         //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
+        INDArray arr = Nd4j.create(new float[]{0.00632f, 18f, 2.31f, 0f, 0.538f, 6.575f, 65.2f, 4.09f, 1f, 296f, 15.3f, 4.98f}, 1, 12);
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-
         //Create new file to write binary input data.
         File file = new File(filePath + "/test-input.zip");
 
         BinarySerde.writeArrayToDisk(arr, file);
         requestSpecification.body(jsonObject.encode().getBytes());
-
         requestSpecification.header("Content-Type", "multipart/form-data");
         String response = requestSpecification.when()
                 .multiPart("default", file)
@@ -134,6 +132,7 @@ public class KerasPythonNDArrayRegressionTest extends BaseMultiNumpyVerticalTest
                 .post("/regression/nd4j").then()
                 .extract()
                 .body().asString();
+
         // TODO: Need to check the output format
         JsonObject jsonObject1 = new JsonObject(response);
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");

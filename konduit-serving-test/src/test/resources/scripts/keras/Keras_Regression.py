@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+np.random.seed(1234)
 
 import keras
 from keras.models import Sequential
@@ -41,8 +42,8 @@ model.fit(X_train, y_train, epochs=20)
 
 pred_train= model.predict(X_train)
 print(np.sqrt(mean_squared_error(y_train,pred_train)))
-#My_test = np.array(0.00632,18,2.31,0,0.538,6.575,65.2,4.09,1,296,15.3,4.98,24)
 My_test = inputData
-pred= model.predict(X_test)
-#print(np.sqrt(mean_squared_error(y_test,pred)))
+#My_test = np.array([[0.00632,18,2.31,0,0.538,6.575,65.2,4.09,1,296,15.3,4.98]])
+pred= model.predict(My_test)
+print(pred)
 
