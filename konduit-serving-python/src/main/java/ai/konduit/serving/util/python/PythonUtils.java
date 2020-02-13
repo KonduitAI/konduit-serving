@@ -22,10 +22,13 @@
 
 package ai.konduit.serving.util.python;
 
+import ai.konduit.serving.config.SchemaType;
+import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.ColumnType;
 import org.datavec.api.transform.metadata.BooleanMetaData;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.python.NumpyArray;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -42,31 +45,31 @@ import java.util.Map;
  *
  * @author Adam Gibson
  */
+@Slf4j
 public class PythonUtils {
 
-
-    public static ai.konduit.serving.config.SchemaType pythonToDataVecVarTypes(PythonVariables.Type pythonVarType) {
+    public static ai.konduit.serving.config.SchemaType pythonToDataVecVarTypes(String pythonTypeString) {
         try {
-            switch (pythonVarType) {
+            switch (PythonType.valueOf(pythonTypeString).getName()) {
                 case BOOL:
-                    return ai.konduit.serving.config.SchemaType.Boolean;
+                    return SchemaType.Boolean;
                 case STR:
-                    return ai.konduit.serving.config.SchemaType.String;
+                    return SchemaType.String;
                 case INT:
-                    return ai.konduit.serving.config.SchemaType.Integer;
+                    return SchemaType.Integer;
                 case FLOAT:
-                    return ai.konduit.serving.config.SchemaType.Float;
+                    return SchemaType.Float;
                 case NDARRAY:
-                    return ai.konduit.serving.config.SchemaType.NDArray;
                 case LIST:
-                case FILE:
+                    return SchemaType.NDArray;
                 case DICT:
                 default:
                     throw new IllegalArgumentException(String.format("Can't convert (%s) to (%s) enum",
-                            pythonVarType.name(), ai.konduit.serving.config.SchemaType.class.getName()));
+                            pythonTypeString, ai.konduit.serving.config.SchemaType.class.getName()));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Unable to convert python type: " + pythonTypeString +
+                    " into a valid datavec schema type. Error was: ", e);
         }
 
         return null;
@@ -123,7 +126,7 @@ public class PythonUtils {
     public static Schema fromPythonVariables(PythonVariables input) {
         Schema.Builder schemaBuilder = new Schema.Builder();
         Preconditions.checkState(input.getVariables() != null && input.getVariables().length > 0, "Input must have variables. Found none.");
-        for (Map.Entry<String, PythonVariables.Type> entry : input.getVars().entrySet()) {
+        for (Map.Entry<String, PythonType.TypeName> entry : input.getVars().entrySet()) {
             switch (entry.getValue()) {
                 case INT:
                     schemaBuilder.addColumnInteger(entry.getKey());
@@ -160,22 +163,22 @@ public class PythonUtils {
             ColumnType columnType = input.getType(i);
             switch (columnType) {
                 case NDArray:
-                    ret.add(currColumnName, PythonVariables.Type.NDARRAY);
+                    ret.add(currColumnName, PythonType.NDARRAY);
                     break;
                 case Boolean:
-                    ret.add(currColumnName, PythonVariables.Type.BOOL);
+                    ret.add(currColumnName, PythonType.BOOL);
                     break;
                 case Categorical:
                 case String:
-                    ret.add(currColumnName, PythonVariables.Type.STR);
+                    ret.add(currColumnName, PythonType.STR);
                     break;
                 case Double:
                 case Float:
-                    ret.add(currColumnName, PythonVariables.Type.FLOAT);
+                    ret.add(currColumnName, PythonType.FLOAT);
                     break;
                 case Integer:
                 case Long:
-                    ret.add(currColumnName, PythonVariables.Type.INT);
+                    ret.add(currColumnName, PythonType.INT);
                     break;
                 case Bytes:
                     break;
@@ -215,7 +218,7 @@ public class PythonUtils {
             stride[i] = (Long) strideList.get(i);
         }
         long address = (Long) map.get("address");
-        NumpyArray numpyArray = new NumpyArray(address, shape, stride, true, dtype);
+        NumpyArray numpyArray = new NumpyArray(address, shape, stride, dtype, true);
         return numpyArray;
     }
 
@@ -338,7 +341,7 @@ public class PythonUtils {
 
 
         long address = map.getLong("address");
-        NumpyArray numpyArray = new NumpyArray(address, shape, stride, true, dtype);
+        NumpyArray numpyArray = new NumpyArray(address, shape, stride, dtype, true);
         return numpyArray;
     }
 
