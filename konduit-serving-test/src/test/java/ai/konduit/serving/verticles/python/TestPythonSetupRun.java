@@ -85,7 +85,7 @@ public class TestPythonSetupRun extends BaseMultiNumpyVerticalTest {
                 .pythonCode("import numpy as np\ndef setup(): pass\ndef run(input): return {'output': np.array(input + 2)}")
                 .pythonInput("input", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("output", PythonType.TypeName.NDARRAY.name())
-                //.setupAndRun(true)
+                .setupAndRun(true)
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
