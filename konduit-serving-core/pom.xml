@@ -329,6 +329,11 @@
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-arrow</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-nlp</artifactId>
+            <version>1.0.0-beta6</version>
+        </dependency>
     </dependencies>
 
 
