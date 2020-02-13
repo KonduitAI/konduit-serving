@@ -78,23 +78,4 @@ public class InferenceConfiguration implements Serializable, TextConfig {
         return servingConfig;
     }
 
-    /**
-     * Convert a configuration to a json string
-     *
-     * @return convert this object to a string
-     */
-    public String toJson() {
-        return ObjectMappers.toJson(this);
-    }
-
-    /**
-     * Convert a configuration to a yaml string
-     *
-     * @return the yaml representation of this configuration
-     */
-    public String toYaml() {
-        return ObjectMappers.toYaml(this);
-    }
-
-
 }

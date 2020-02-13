@@ -31,11 +31,11 @@ public class ConfigJsonCoverageTrackingTests {
 
         System.out.println("All subtypes:");
         for(Class<? extends TextConfig> c : subTypes ){
-            System.out.println(c);
             int mod = c.getModifiers();
             if(Modifier.isAbstract(mod) || Modifier.isInterface(mod))
                 continue;
             allClasses.add(c);
+//            System.out.println(c);
         }
     }
 
@@ -98,11 +98,64 @@ public class ConfigJsonCoverageTrackingTests {
         return null;
     }
 
+    @Test
+    public void testInferenceConfiguration(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testServingConfig(){
+        fail("Not yet implemented");
+    }
 
 
     @Test
-    public void test(){
-
+    public void testArrayConcatenationStep(){
+        fail("Not yet implemented");
     }
 
+    @Test
+    public void testJsonExpanderTransformStep(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testTransformProcessStep(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testCustomPipelineStep(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testPmmlStep(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testPythonStep(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testImageLoadingStep(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testModelStep(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testMemMapConfig(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testParallelInferenceConfig(){
+        fail("Not yet implemented");
+    }
 }

@@ -23,6 +23,7 @@ package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.SchemaType;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
