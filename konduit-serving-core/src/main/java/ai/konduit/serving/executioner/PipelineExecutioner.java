@@ -41,7 +41,7 @@ import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.util.ArrowUtils;
-import ai.konduit.serving.util.ObjectMapperHolder;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import io.netty.buffer.Unpooled;
 import io.vertx.core.buffer.Buffer;
@@ -690,7 +690,7 @@ public class PipelineExecutioner implements Closeable {
 
                 try {
                     jsonObject.put(entry.getKey(),
-                            new JsonObject(ObjectMapperHolder.getJsonMapper()
+                            new JsonObject(ObjectMappers.json()
                                     .writeValueAsString(entry.getValue())));
                 } catch (JsonProcessingException e) {
                     log.error("Unable to process json for value " + entry.getValue(), e);

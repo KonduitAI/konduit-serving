@@ -24,12 +24,11 @@ package ai.konduit.serving;
 
 import ai.konduit.serving.config.MemMapConfig;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.config.TextConfig;
 import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.*;
-import org.datavec.api.transform.serde.JsonMappers;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
-import org.nd4j.shade.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -39,7 +38,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class InferenceConfiguration implements Serializable {
+public class InferenceConfiguration implements Serializable, TextConfig {
 
     @Singular
     private List<PipelineStep> steps;
@@ -51,11 +50,9 @@ public class InferenceConfiguration implements Serializable {
      *
      * @param yaml the yaml to create from
      * @return the initialized object from the yaml content
-     * @throws IOException if an error occurs while reading/parsing the yaml
      */
-    public static InferenceConfiguration fromYaml(String yaml) throws IOException {
-        ObjectMapper mapper = JsonMappers.getMapperYaml();
-        return mapper.readValue(yaml, InferenceConfiguration.class);
+    public static InferenceConfiguration fromYaml(String yaml) {
+        return ObjectMappers.fromYaml(yaml, InferenceConfiguration.class);
     }
 
     /**
@@ -64,10 +61,9 @@ public class InferenceConfiguration implements Serializable {
      *
      * @param json the json to create the configuration from
      * @return InferenceConfiguration
-     * @throws IOException I/O exception
      */
-    public static InferenceConfiguration fromJson(String json) throws IOException {
-        return JsonMappers.getMapper().readValue(json, InferenceConfiguration.class);
+    public static InferenceConfiguration fromJson(String json) {
+        return ObjectMappers.fromJson(json, InferenceConfiguration.class);
     }
 
     /**
@@ -86,23 +82,18 @@ public class InferenceConfiguration implements Serializable {
      * Convert a configuration to a json string
      *
      * @return convert this object to a string
-     * @throws JsonProcessingException JSON processing exception
      */
-    public String toJson() throws JsonProcessingException {
-        ObjectMapper objectMapper = JsonMappers.getMapper();
-        return objectMapper.writeValueAsString(this);
+    public String toJson() {
+        return ObjectMappers.toJson(this);
     }
 
     /**
      * Convert a configuration to a yaml string
      *
      * @return the yaml representation of this configuration
-     * @throws JsonProcessingException if jackson throws an exception
-     *                                 serializing this configuration
      */
-    public String toYaml() throws JsonProcessingException {
-        ObjectMapper mapper = JsonMappers.getMapperYaml();
-        return mapper.writeValueAsString(this);
+    public String toYaml() {
+        return ObjectMappers.toYaml(this);
     }
 
 

@@ -83,25 +83,21 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     public void init(Vertx vertx, Context context) {
         this.context = context;
         this.vertx = vertx;
-        try {
-            inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
-            pipelineRouteDefiner = new PipelineRouteDefiner();
+        inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
+        pipelineRouteDefiner = new PipelineRouteDefiner();
+        this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
+        //define the memory map endpoints if the user specifies the memory map configuration
+        if (inferenceConfiguration.getMemMapConfig() != null) {
+            this.router = new MemMapRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+        } else {
             this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
-            //define the memory map endpoints if the user specifies the memory map configuration
-            if (inferenceConfiguration.getMemMapConfig() != null) {
-                this.router = new MemMapRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
-            } else {
-                this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
 
-                // Checking if the configuration runners can be created without problems or not
-                for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
-                    pipelineStep.createRunner();
-            }
-
-            setupWebServer();
-        } catch (IOException e) {
-            log.error("Unable to parse InferenceConfiguration", e);
+            // Checking if the configuration runners can be created without problems or not
+            for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
+                pipelineStep.createRunner();
         }
+
+        setupWebServer();
     }
 
     protected void setupWebServer() {

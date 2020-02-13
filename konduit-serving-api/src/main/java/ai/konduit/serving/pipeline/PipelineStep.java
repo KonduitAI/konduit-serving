@@ -8,6 +8,7 @@ import java.util.Map;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
+import ai.konduit.serving.config.TextConfig;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 import ai.konduit.serving.pipeline.step.*;
@@ -36,7 +37,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = ArrayConcatenationStep.class, name = "ArrayConcatenationStep"),
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
-public interface PipelineStep<T extends PipelineStep> extends Serializable {
+public interface PipelineStep<T extends PipelineStep> extends Serializable, TextConfig {
 
 
     /**

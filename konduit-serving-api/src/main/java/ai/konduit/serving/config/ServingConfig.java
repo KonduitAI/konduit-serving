@@ -39,7 +39,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ServingConfig {
+public class ServingConfig implements TextConfig {
 
     private int httpPort;
 
@@ -66,4 +66,13 @@ public class ServingConfig {
             MetricType.NATIVE
     );
 
+    @Override
+    public String toJson() {
+        return null;
+    }
+
+    @Override
+    public String toYaml() {
+        return null;
+    }
 }
