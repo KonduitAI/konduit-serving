@@ -16,6 +16,7 @@
 
 package ai.konduit.serving.model;
 
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,4 +27,11 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class DL4JConfig extends ModelConfig {
 
+    public static DL4JConfig fromJson(String json){
+        return ObjectMappers.fromJson(json, DL4JConfig.class);
+    }
+
+    public static DL4JConfig fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, DL4JConfig.class);
+    }
 }

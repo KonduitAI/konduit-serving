@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.model;
 
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -54,5 +55,13 @@ public class PmmlConfig extends ModelConfig {
 
     public String evaluatorFactoryName() {
         return evaluatorFactoryName == null ? DEFAULT_EVALUATOR_FACTORY : evaluatorFactoryName;
+    }
+
+    public static PmmlConfig fromJson(String json){
+        return ObjectMappers.fromJson(json, PmmlConfig.class);
+    }
+
+    public static PmmlConfig fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, PmmlConfig.class);
     }
 }

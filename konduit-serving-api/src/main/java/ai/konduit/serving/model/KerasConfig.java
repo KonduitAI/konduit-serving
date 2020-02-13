@@ -16,6 +16,7 @@
 
 package ai.konduit.serving.model;
 
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,4 +26,12 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class KerasConfig extends ModelConfig {
+
+    public static KerasConfig fromJson(String json){
+        return ObjectMappers.fromJson(json, KerasConfig.class);
+    }
+
+    public static KerasConfig fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, KerasConfig.class);
+    }
 }

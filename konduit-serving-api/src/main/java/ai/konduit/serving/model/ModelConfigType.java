@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.model;
 
+import ai.konduit.serving.config.TextConfig;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,7 +43,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ModelConfigType implements Serializable {
+public class ModelConfigType implements Serializable, TextConfig {
 
     @JsonProperty
     private ModelConfig.ModelType modelType;

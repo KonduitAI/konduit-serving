@@ -23,6 +23,7 @@
 package ai.konduit.serving.model;
 
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.TextConfig;
 import ai.konduit.serving.output.types.ClassifierOutput;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -79,7 +80,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 @SuperBuilder
-public abstract class ModelConfig implements Serializable {
+public abstract class ModelConfig implements Serializable, TextConfig {
 
     @JsonProperty
     private TensorDataTypesConfig tensorDataTypesConfig;

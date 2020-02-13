@@ -1,5 +1,9 @@
 package ai.konduit.serving.config;
 
+import ai.konduit.serving.model.DL4JConfig;
+import ai.konduit.serving.model.ModelConfigType;
+import ai.konduit.serving.model.TensorDataType;
+import ai.konduit.serving.model.TensorDataTypesConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -9,8 +13,7 @@ import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -42,18 +45,31 @@ public class ConfigJsonCoverageTrackingTests {
     @AfterClass
     public static void afterClass(){
         if(!seen.containsAll(allClasses)){
-            int count = 0;
+            List<String> notTested = new ArrayList<>();
             for(Class<?> c : allClasses){
                 if(!seen.contains(c)) {
-                    log.warn("Class was not tested for JSON/YAML SerDe: " + c);
-                    count++;
+                    notTested.add(c.getName());
                 }
             }
-            fail(count + " of " + allClasses.size() + " classes implementing TextConfig were not tested for JSON/YAML serialization and deserialization");
+
+            Collections.sort(notTested);
+            for(String s : notTested){
+                log.warn("Class was not tested for JSON/YAML serialization/deserialization: {}", s);
+            }
+
+            fail(notTested.size() + " of " + allClasses.size() + " classes implementing TextConfig were not tested for JSON/YAML serialization and deserialization");
         }
     }
 
-    public void testConfigSerDe(TextConfig c) throws Exception {
+    public static void testConfigSerDe(TextConfig c) {
+        try{
+            testConfigSerDeHelper(c);
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected static void testConfigSerDeHelper(TextConfig c) throws Exception {
         seen.add(c.getClass());     //Record class for coverage tracking
 
         String json = c.toJson();
@@ -84,7 +100,7 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     private static Method findStaticSingleStringArgMethodWithName(Class<?> c, String methodName){
-        Class<?> current = c.getClass();
+        Class<?> current = c;
         while(current != Object.class){
             Method[] methods = current.getDeclaredMethods();
             for(Method m : methods){
@@ -107,7 +123,6 @@ public class ConfigJsonCoverageTrackingTests {
     public void testServingConfig(){
         fail("Not yet implemented");
     }
-
 
     @Test
     public void testArrayConcatenationStep(){
@@ -156,6 +171,39 @@ public class ConfigJsonCoverageTrackingTests {
 
     @Test
     public void testParallelInferenceConfig(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testDL4JConfig(){
+        DL4JConfig d = DL4JConfig.builder()
+                .modelConfigType(ModelConfigType.multiLayerNetwork("/Some/Path/Here"))
+                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
+                        .inputDataType("in", TensorDataType.FLOAT)
+                        .outputDataType("out", TensorDataType.FLOAT)
+                        .build())
+                .build();
+
+        testConfigSerDe(d);
+    }
+
+    @Test
+    public void testKerasConfig(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testPmmlConfig(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testSameDiffConfig(){
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void testTensorFlowConfig(){
         fail("Not yet implemented");
     }
 }
