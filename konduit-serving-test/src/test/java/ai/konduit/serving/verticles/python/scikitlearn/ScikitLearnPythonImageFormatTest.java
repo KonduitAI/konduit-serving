@@ -59,6 +59,7 @@ import java.util.stream.Collectors;
 import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 @RunWith(VertxUnitRunner.class)
@@ -138,13 +139,16 @@ public class ScikitLearnPythonImageFormatTest extends BaseMultiNumpyVerticalTest
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         InputStream expectedIS = new FileInputStream("src/test/resources/Json/ScikitlearnImageTest.json");
         String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
         JsonObject expectedObj = new JsonObject(encodedText);
-        NDArrayOutput expND = ObjectMapperHolder.getJsonMapper().readValue(expectedObj.toString(), NDArrayOutput.class);
+        NDArrayOutput expND = ObjectMapperHolder.getJsonMapper().readValue(expectedObj.getJsonObject("raw").toString(), NDArrayOutput.class);
         INDArray expectedArr = expND.getNdArray();
         assertEquals(expectedArr, outputArray);
     }
@@ -168,10 +172,18 @@ public class ScikitLearnPythonImageFormatTest extends BaseMultiNumpyVerticalTest
                 .extract()
                 .body().asString();
         JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
-        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-        double outpuValue = probabilities.getJsonArray(0).getDouble(0);
-        assertEquals(8, outpuValue, 1e-1);
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
+        InputStream expectedIS = new FileInputStream("src/test/resources/Json/ScikitlearnImageTest.json");
+        String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
+        JsonObject expectedObj = new JsonObject(encodedText);
+        JsonArray expArr = expectedObj.getJsonObject("classification").getJsonArray("probabilities");
+        double expValue = expArr.getJsonArray(0).getDouble(0);
+        assertEquals(expValue, outpuValue, 1e-1);
+        assertEquals(expArr, outputArr);
     }
 
 }

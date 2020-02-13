@@ -40,6 +40,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.apache.commons.io.IOUtils;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
@@ -52,6 +53,9 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -61,6 +65,7 @@ import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -155,12 +160,20 @@ public class ScikitLearnPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTe
                 .post("/raw/nd4j").then()
                 .extract()
                 .body().asString();
-
         JsonObject jsonObject1 = new JsonObject(response);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        assertEquals(2, outputArray.getInt(0));
+        InputStream expectedIS = new FileInputStream("src/test/resources/Json/ScikitlearnNdArrayTest.json");
+        String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
+        JsonObject expectedObj = new JsonObject(encodedText);
+        NDArrayOutput expND = ObjectMapperHolder.getJsonMapper().readValue(expectedObj.getJsonObject("raw").toString(), NDArrayOutput.class);
+        INDArray expectedArr = expND.getNdArray();
+        assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
+        assertEquals(expectedArr, outputArray);
 
     }
 
@@ -206,12 +219,17 @@ public class ScikitLearnPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTe
                 .post("/classification/nd4j").then()
                 .extract()
                 .body().asString();
-
         JsonObject jsonObject1 = new JsonObject(response);
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
-        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-        double outpuValue = probabilities.getJsonArray(0).getDouble(0);
-        assertEquals(2, outpuValue, 1e-1);
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
+        InputStream expectedIS = new FileInputStream("src/test/resources/Json/ScikitlearnNdArrayTest.json");
+        String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
+        JsonObject expectedObj = new JsonObject(encodedText);
+        JsonArray expArr = expectedObj.getJsonObject("classification").getJsonArray("probabilities");
+        double expValue = expArr.getJsonArray(0).getDouble(0);
+        assertEquals(expValue, outpuValue, 1e-1);
+        assertEquals(expArr, outputArr);
 
     }
 
