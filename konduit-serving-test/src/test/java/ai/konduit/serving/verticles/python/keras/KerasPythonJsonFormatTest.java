@@ -36,6 +36,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.apache.commons.io.IOUtils;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +46,9 @@ import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -55,6 +59,7 @@ import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -131,10 +136,14 @@ public class KerasPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("score"));
         List<Float> out = jsonObject1.getJsonArray("score").getList();
         INDArray outputArray = Nd4j.create(out);
-        INDArray expected = outputArray.get();
-        assertEquals(expected, outputArray);
+        InputStream expectedIS = new FileInputStream("src/test/resources/Json/keras/KerasJsonTest.json");
+        String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
+        List<Float> expectedObj = new JsonObject(encodedText).getJsonObject("raw").getJsonArray("score").getList();
+        INDArray expectedArr = Nd4j.create(expectedObj);
+        assertEquals(expectedArr, outputArray);
     }
 
     @Test(timeout = 60000)
@@ -159,9 +168,13 @@ public class KerasPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("score"));
         List<Float> out = jsonObject1.getJsonArray("score").getList();
         INDArray outputArray = Nd4j.create(out);
-        INDArray expected = outputArray.get();
-        assertEquals(expected, outputArray);
+        InputStream expectedIS = new FileInputStream("src/test/resources/Json/keras/KerasJsonTest.json");
+        String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
+        List<Float> expectedObj = new JsonObject(encodedText).getJsonObject("classification").getJsonArray("score").getList();
+        INDArray expectedArr = Nd4j.create(expectedObj);
+        assertEquals(expectedArr, outputArray);
     }
 }

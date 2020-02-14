@@ -1,0 +1,15 @@
+{
+  "raw" : {
+    "ndArray" : {
+      "dataType" : "DOUBLE",
+      "shape" : [ 1 ],
+      "data" : [ 51.0 ]
+    }
+  },
+  "classification" : {
+    "ndArray" : {
+      "dataType" : "DOUBLE",
+      "shape" : [ 1 ],
+      "data" : [ 51.0 ]
+    }
+}

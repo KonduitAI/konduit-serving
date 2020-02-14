@@ -28,6 +28,7 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.util.ExpectedAssertTest;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -56,6 +57,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -145,12 +147,18 @@ public class TensorFlowPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTes
                 .post("/raw/nd4j").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
         JsonObject jsonObject1 = new JsonObject(response);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        assertEquals(7, outputArray.getDouble(0), 1e-1);
+        double outputValue = outputArray.getDouble(0);
+        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/tensorflow/TensorflowNdArrayTest.json","raw");
+        double expValue = expectedArr.getDouble(0);
+        assertEquals(expValue, outputValue, 1e-1);
+        assertEquals(expectedArr, outputArray);
     }
 
     @Test
@@ -192,12 +200,16 @@ public class TensorFlowPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTes
                 .post("/classification/nd4j").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
         JsonObject jsonObject1 = new JsonObject(response);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
-        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-        double outpuValue = probabilities.getJsonArray(0).getDouble(0);
-        assertEquals(7, outpuValue, 1e-1);
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
+        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/tensorflow/TensorflowNdArrayTest.json");
+        double expValue = expArr.getJsonArray(0).getDouble(0);
+        assertEquals(expValue, outpuValue, 1e-1);
+        assertEquals(expArr, outputArr);
     }
 
 }

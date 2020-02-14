@@ -28,6 +28,7 @@ import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.util.ExpectedAssertTest;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -43,21 +44,16 @@ import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -126,13 +122,15 @@ public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .extract()
                 .body().asString();
 
-        System.out.println(output);
         JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expected = outputArray.add(0);
-        assertEquals(expected, outputArray);
+        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json", "raw");
+        assertEquals(expectedArr, outputArray);
 
     }
 
@@ -157,13 +155,16 @@ public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .extract()
                 .body().asString();
 
-        System.out.println(output);
-
         JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
-        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-        double outpuValue = probabilities.getJsonArray(0).getDouble(0);
-        assertEquals(2, outpuValue, 1e-1);
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
+        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json");
+        double expValue = expArr.getJsonArray(0).getDouble(0);
+        assertEquals(expValue, outpuValue, 1e-1);
+        assertEquals(expArr, outputArr);
 
     }
 }

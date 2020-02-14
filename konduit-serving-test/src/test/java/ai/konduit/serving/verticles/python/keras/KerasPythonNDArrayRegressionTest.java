@@ -133,7 +133,6 @@ public class KerasPythonNDArrayRegressionTest extends BaseMultiNumpyVerticalTest
                 .extract()
                 .body().asString();
 
-        // TODO: Need to check the output format
         JsonObject jsonObject1 = new JsonObject(response);
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray values = ndarraySerde.getJsonArray("values");

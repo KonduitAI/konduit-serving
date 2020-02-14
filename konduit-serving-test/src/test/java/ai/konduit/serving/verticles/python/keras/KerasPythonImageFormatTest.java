@@ -29,6 +29,7 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.util.ExpectedAssertTest;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -52,6 +53,7 @@ import java.util.Arrays;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 @RunWith(VertxUnitRunner.class)
@@ -128,10 +130,15 @@ public class KerasPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        assertEquals(7, outputArray.getDouble(0), 1e-1);
+        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasImageTest.json", "raw");
+        assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
+        assertEquals(expectedArr, outputArray);
     }
 
     @Test(timeout = 60000)
@@ -148,18 +155,23 @@ public class KerasPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
         requestSpecification.header("Content-Type", "multipart/form-data");
 
         File imageFile = new ClassPathResource("data/KerasImageTest.png").getFile();
-        String Response = requestSpecification.when()
+        String response = requestSpecification.when()
                 .multiPart("imgPath", imageFile)
                 .expect().statusCode(200)
                 .post("/classification/image").then()
                 .extract()
                 .body().asString();
 
-        JsonObject jsonObject1 = new JsonObject(Response);
+        JsonObject jsonObject1 = new JsonObject(response);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
-        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-        double outpuValue = probabilities.getJsonArray(0).getDouble(0);
-        assertEquals(7, outpuValue, 1e-1);
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
+        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/keras/KerasImageTest.json");
+        double expValue = expArr.getJsonArray(0).getDouble(0);
+        assertEquals(expValue, outpuValue, 1e-1);
+        assertEquals(expArr, outputArr);
 
     }
 }

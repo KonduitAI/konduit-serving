@@ -1,0 +1,16 @@
+{
+  "raw" : {
+    "ndArray" : {
+      "dataType" : "LONG",
+      "shape" : [ 1 ],
+      "data" : [ 51 ]
+    }
+  },
+  "classification" : {
+    "ndArray" : {
+      "dataType" : "LONG",
+      "shape" : [ 1 ],
+      "data" : [ 51 ]
+    }
+  }
+}
