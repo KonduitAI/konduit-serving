@@ -29,17 +29,15 @@ import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
-import org.datavec.python.PythonType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.schema.Schema;
+import org.datavec.python.PythonType;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.datavec.python.PythonType.*;
 
 
 /**
