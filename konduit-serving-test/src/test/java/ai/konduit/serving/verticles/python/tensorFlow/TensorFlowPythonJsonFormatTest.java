@@ -24,11 +24,9 @@ package ai.konduit.serving.verticles.python.tensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ExpectedAssertTest;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -36,7 +34,6 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -48,12 +45,15 @@ import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
+import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -78,11 +78,16 @@ public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonCodePath = new ClassPathResource("scripts/tensorFlow/Json_TensorFlow_NDarray.py").getFile().getAbsolutePath();
+        String pythonPath = Arrays.stream(cachePackages())
+                .filter(Objects::nonNull)
+                .map(File::getAbsolutePath)
+                .collect(Collectors.joining(File.pathSeparator));
+
+        String pythonCodePath = new ClassPathResource("scripts/tensorflow/Json_TensorFlow_NDarray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(pythonPath)
                 .pythonInput("JsonInput", PythonVariables.Type.STR.name())
                 .pythonOutput("prediction", PythonVariables.Type.NDARRAY.name())
                 .build();
@@ -101,7 +106,7 @@ public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -123,48 +128,11 @@ public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(output);
-        assertTrue(jsonObject1.containsKey("default"));
-        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
-        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json", "raw");
-        assertEquals(expectedArr, outputArray);
-
-    }
-
-    @Test
-    public void testInferenceClassificationResult(TestContext context) throws Exception {
-
-        this.context = context;
-
-        RequestSpecification requestSpecification = given();
-        requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
-
-        File json = new ClassPathResource("scripts/tensorFlow/tensorflowImgPath.json").getFile();
-        jsonObject.put("JsonInput", json.getAbsolutePath());
-        requestSpecification.body(jsonObject.encode());
-
-        requestSpecification.header("Content-Type", "application/json");
-        String output = requestSpecification.when()
-                .expect().statusCode(200)
-                .body(not(isEmptyOrNullString()))
-                .post("/classification/json").then()
-                .extract()
-                .body().asString();
-
-        JsonObject jsonObject1 = new JsonObject(output);
-        assertTrue(jsonObject1.containsKey("default"));
-        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
-        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
-        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
-        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
-        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json");
-        double expValue = expArr.getJsonArray(0).getDouble(0);
-        assertEquals(expValue, outpuValue, 1e-1);
-        assertEquals(expArr, outputArr);
+        INDArray expected = outputArray.add(0);
+        assertEquals(expected, outputArray);
 
     }
 }
