@@ -59,18 +59,11 @@ public class BertStepRunner extends BaseStepRunner
 
         this.bertStep = (BertStep) pipelineStep;
 
-        //delete once confirmed
-        String inputName = (String) this.bertStep.getInputNames().get(0);
-        String outputName = (String) this.bertStep.getOutputNames().get(0);
+        //String inputName = (String) this.bertStep.getInputNames().get(0);
+        //String outputName = (String) this.bertStep.getOutputNames().get(0);
 
         String modelPath = (String) this.bertStep.getModelPath();
         String vocabPath = (String) this.bertStep.getVocabPath();
-
-        //delete once confirmed
-        System.out.println( "BertStepRunner [InputName]: " + inputName );
-        System.out.println( "BertStepRunner [outputName]: " + outputName );
-        System.out.println( "BertStepRunner [modelpath]: " + modelPath );
-        System.out.println( "BertStepRunner [vocabPath]: " + vocabPath );
 
         Map<String, SchemaType[]> inputSchema = this.bertStep.getInputSchemas();
 
