@@ -46,7 +46,7 @@ Yr = np.array([[0,0,1],[0,0,1]], dtype = float)
 #X = dataset[:,0:4]
 #Y = dataset[:,1]
 # load json and create model
-json_file = open('src\\test\\resources\\Json\\KerasJsonmodel.json', 'r')
+json_file = open('src\\test\\resources\\Json\\keras\\KerasJsonmodel.json', 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 loaded_model = model_from_json(loaded_model_json)
