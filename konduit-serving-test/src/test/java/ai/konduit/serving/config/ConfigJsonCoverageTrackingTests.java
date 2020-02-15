@@ -1,10 +1,13 @@
 package ai.konduit.serving.config;
 
-import ai.konduit.serving.model.DL4JConfig;
-import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.model.TensorDataType;
-import ai.konduit.serving.model.TensorDataTypesConfig;
+import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.metrics.MetricType;
+import ai.konduit.serving.model.*;
+import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
+import ai.konduit.serving.pipeline.step.*;
 import lombok.extern.slf4j.Slf4j;
+import org.datavec.api.transform.TransformProcess;
+import org.datavec.api.transform.schema.Schema;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -116,52 +119,83 @@ public class ConfigJsonCoverageTrackingTests {
 
     @Test
     public void testInferenceConfiguration(){
-        fail("Not yet implemented");
+        InferenceConfiguration conf = InferenceConfiguration.builder()
+                .step(PythonStep.builder()
+                        .pythonConfig("x", PythonConfig.builder().pythonCode("import numpy as np\nreturn np.ones(1)").build())
+                        .inputNames(Arrays.asList("x"))
+                        .outputNames(Arrays.asList("z"))
+                        .build())
+                .step(ModelStep.builder().modelConfig(DL4JConfig.builder().build()).build())
+                .servingConfig(ServingConfig.builder().httpPort(12345).logTimings(true).build())
+                .build();
+
+        testConfigSerDe(conf);
     }
 
     @Test
     public void testServingConfig(){
-        fail("Not yet implemented");
+        testConfigSerDe(ServingConfig.builder().httpPort(12345).logTimings(true)
+                .metricTypes(Arrays.asList(MetricType.JVM_GC, MetricType.CLASS_LOADER, MetricType.JVM_MEMORY, MetricType.JVM_THREAD))
+                .outputDataFormat(Output.DataFormat.JSON).build());
     }
 
     @Test
     public void testArrayConcatenationStep(){
-        fail("Not yet implemented");
+        testConfigSerDe(ArrayConcatenationStep.builder().concatDimension(1,2).build());
     }
 
     @Test
     public void testJsonExpanderTransformStep(){
-        fail("Not yet implemented");
+        testConfigSerDe(JsonExpanderTransformStep.builder()
+                .inputNames(Arrays.asList("x", "y"))
+                .outputNames(Arrays.asList("z","a"))
+                .inputSchema("x", new SchemaType[]{SchemaType.NDArray, SchemaType.Boolean})
+                .outputSchema("z", new SchemaType[]{SchemaType.Image, SchemaType.Categorical})
+        .build());
     }
 
     @Test
     public void testTransformProcessStep(){
-        fail("Not yet implemented");
+        testConfigSerDe(TransformProcessStep.builder()
+                .transformProcess("x", new TransformProcess.Builder(new Schema.Builder().addColumnString("col").build())
+                        .stringToCategorical("col", Arrays.asList("a","b","c"))
+                        .categoricalToOneHot("col")
+                        .build())
+            .build());
     }
 
     @Test
     public void testCustomPipelineStep(){
-        fail("Not yet implemented");
+        testConfigSerDe(CustomPipelineStep.builder().customUdfClazz("my.clazz.name.Here").build());
     }
 
     @Test
     public void testPmmlStep(){
-        fail("Not yet implemented");
+        testConfigSerDe(PmmlStep.builder().inputName("x").outputNames(Arrays.asList("y","z")).build());
     }
 
     @Test
     public void testPythonStep(){
-        fail("Not yet implemented");
+        testConfigSerDe(PythonStep.builder()
+                .pythonConfig("x", PythonConfig.builder().pythonCode("import numpy as np\nreturn np.ones(1)").build())
+                .inputNames(Collections.singletonList("x"))
+                .outputNames(Collections.singletonList("z"))
+                .build());
     }
 
     @Test
     public void testImageLoadingStep(){
-        fail("Not yet implemented");
+        testConfigSerDe(ImageLoadingStep.builder()
+                .inputNames(Collections.singletonList("image_tensor"))
+                .outputNames(Collections.singletonList("detection_classes"))
+                .objectDetectionConfig(ObjectDetectionConfig.builder().numLabels(80).build())
+                .build());
     }
 
     @Test
     public void testModelStep(){
-        fail("Not yet implemented");
+        testConfigSerDe(ModelStep.builder().modelConfig(DL4JConfig.builder()
+                .modelConfigType(ModelConfigType.computationGraph("/my/path/here")).build()).build());
     }
 
     @Test

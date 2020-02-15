@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.pipeline.step;
 
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -34,5 +35,13 @@ public class PmmlStep extends ModelStep {
     @Override
     public String pipelineStepClazz() {
         return "ai.konduit.serving.pipeline.PmmlInferenceExecutionerStepRunner";
+    }
+
+    public static PmmlStep fromJson(String json){
+        return ObjectMappers.fromJson(json, PmmlStep.class);
+    }
+
+    public static PmmlStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, PmmlStep.class);
     }
 }

@@ -27,6 +27,7 @@ import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.datavec.api.transform.TransformProcess;
@@ -139,5 +140,13 @@ public class TransformProcessStep extends BasePipelineStep<TransformProcessStep>
     @Override
     public String pipelineStepClazz() {
         return "ai.konduit.serving.pipeline.steps.TransformProcessStepRunner";
+    }
+
+    public static TransformProcessStep fromJson(String json){
+        return ObjectMappers.fromJson(json, TransformProcessStep.class);
+    }
+
+    public static TransformProcessStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, TransformProcessStep.class);
     }
 }

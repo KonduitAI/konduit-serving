@@ -26,10 +26,8 @@ import ai.konduit.serving.config.Input.DataFormat;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Singular;
+import ai.konduit.serving.util.ObjectMappers;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.datavec.image.transform.ImageTransformProcess;
 
@@ -38,7 +36,7 @@ import java.util.Map;
 
 @Data
 @SuperBuilder
-@NoArgsConstructor
+//@NoArgsConstructor
 @AllArgsConstructor
 public class ImageLoadingStep extends BasePipelineStep<ImageLoadingStep> implements Serializable {
 
@@ -50,12 +48,18 @@ public class ImageLoadingStep extends BasePipelineStep<ImageLoadingStep> impleme
     @Singular
     private Map<String, Long[]> dimensionsConfigs;
 
-    private String imageProcessingRequiredLayout = "NCHW", imageProcessingInitialLayout = "NCHW";
+    @Builder.Default private String imageProcessingRequiredLayout = "NCHW";
+    @Builder.Default private String imageProcessingInitialLayout = "NCHW";
 
     @Singular
     private Map<String, ImageTransformProcess> imageTransformProcesses;
 
     private ObjectDetectionConfig objectDetectionConfig;
+
+    public ImageLoadingStep(){
+        this.imageProcessingInitialLayout = "NCHW";
+        this.imageProcessingRequiredLayout = "NCHW";
+    }
 
     public boolean initialImageLayoutMatchesFinal() {
         if (getImageProcessingInitialLayout() != null && getImageProcessingRequiredLayout() != null)
@@ -83,5 +87,13 @@ public class ImageLoadingStep extends BasePipelineStep<ImageLoadingStep> impleme
     @Override
     public String pipelineStepClazz() {
         return "ai.konduit.serving.pipeline.steps.ImageTransformProcessStepRunner";
+    }
+
+    public static ImageLoadingStep fromJson(String json){
+        return ObjectMappers.fromJson(json, ImageLoadingStep.class);
+    }
+
+    public static ImageLoadingStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, ImageLoadingStep.class);
     }
 }

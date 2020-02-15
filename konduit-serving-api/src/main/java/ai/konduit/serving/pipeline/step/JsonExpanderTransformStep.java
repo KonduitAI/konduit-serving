@@ -25,6 +25,7 @@ package ai.konduit.serving.pipeline.step;
 import ai.konduit.serving.config.Input.DataFormat;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -58,5 +59,13 @@ public class JsonExpanderTransformStep extends BasePipelineStep<JsonExpanderTran
     @Override
     public String pipelineStepClazz() {
         return "ai.konduit.serving.pipeline.steps.JsonExpanderTransformStepRunner";
+    }
+
+    public static JsonExpanderTransformStep fromJson(String json){
+        return ObjectMappers.fromJson(json, JsonExpanderTransformStep.class);
+    }
+
+    public static JsonExpanderTransformStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, JsonExpanderTransformStep.class);
     }
 }

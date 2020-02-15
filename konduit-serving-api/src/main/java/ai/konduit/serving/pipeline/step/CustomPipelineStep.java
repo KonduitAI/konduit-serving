@@ -25,11 +25,14 @@ package ai.konduit.serving.pipeline.step;
 import ai.konduit.serving.config.Input.DataFormat;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Data
 @SuperBuilder
+@NoArgsConstructor
 public class CustomPipelineStep extends BasePipelineStep<CustomPipelineStep> {
 
     private String customUdfClazz;
@@ -47,5 +50,13 @@ public class CustomPipelineStep extends BasePipelineStep<CustomPipelineStep> {
     @Override
     public String pipelineStepClazz() {
         return "ai.konduit.serving.pipeline.steps.CustomStepRunner";
+    }
+
+    public static CustomPipelineStep fromJson(String json){
+        return ObjectMappers.fromJson(json, CustomPipelineStep.class);
+    }
+
+    public static CustomPipelineStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, CustomPipelineStep.class);
     }
 }
