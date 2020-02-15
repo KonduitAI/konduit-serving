@@ -8,6 +8,7 @@ import ai.konduit.serving.pipeline.step.*;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
+import org.deeplearning4j.parallelism.inference.InferenceMode;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -200,12 +201,13 @@ public class ConfigJsonCoverageTrackingTests {
 
     @Test
     public void testMemMapConfig(){
-        fail("Not yet implemented");
+        testConfigSerDe(MemMapConfig.builder().arrayPath("/my/array/path").initialMemmapSize(100000).unkVectorPath("/my/array/unknown").build());
     }
 
     @Test
     public void testParallelInferenceConfig(){
-        fail("Not yet implemented");
+        testConfigSerDe(ParallelInferenceConfig.defaultConfig());
+        testConfigSerDe(ParallelInferenceConfig.builder().batchLimit(5).workers(3).queueLimit(2).inferenceMode(InferenceMode.SEQUENTIAL).build());
     }
 
     @Test
@@ -223,21 +225,24 @@ public class ConfigJsonCoverageTrackingTests {
 
     @Test
     public void testKerasConfig(){
-        fail("Not yet implemented");
+        testConfigSerDe(KerasConfig.builder().modelConfigType(ModelConfigType.keras("/path/to/model.kdf5"))
+                .tensorDataTypesConfig(TensorDataTypesConfig.builder().inputDataType("x",TensorDataType.DOUBLE).build())
+                .build());
     }
 
     @Test
     public void testPmmlConfig(){
-        fail("Not yet implemented");
+        testConfigSerDe(PmmlConfig.defaultConfig());
+        testConfigSerDe(PmmlConfig.builder().evaluatorFactoryName("my.factory.class").build());
     }
 
     @Test
     public void testSameDiffConfig(){
-        fail("Not yet implemented");
+        testConfigSerDe(SameDiffConfig.builder().modelConfigType(ModelConfigType.sameDiff("/my/model/path.fb")).build());
     }
 
     @Test
     public void testTensorFlowConfig(){
-        fail("Not yet implemented");
+        testConfigSerDe(TensorFlowConfig.builder().build());
     }
 }
