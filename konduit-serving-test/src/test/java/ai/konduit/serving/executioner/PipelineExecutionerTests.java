@@ -33,7 +33,7 @@ import ai.konduit.serving.pipeline.step.PythonStep;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import junit.framework.TestCase;
-import org.datavec.python.PythonVariables.Type;
+import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
@@ -79,7 +79,7 @@ public class PipelineExecutionerTests {
             jsonSchema.put(value.name(), topLevel);
             switch (value) {
                 case NDArray:
-                    pythonConfig.pythonInput(value.name(), Type.NDARRAY.name());
+                    pythonConfig.pythonInput(value.name(), PythonType.TypeName.NDARRAY.name());
                     fieldInfo.put("shape",new JsonArray().add(1).add(1));
                     schemaValues.put(value.name(), Nd4j.toNpyByteArray(Nd4j.scalar(1.0)));
                     break;
@@ -89,42 +89,42 @@ public class PipelineExecutionerTests {
                     schemaValues.put(value.name(), true);
                     break;*/
                 case Float:
-                    pythonConfig.pythonInput(value.name(),Type.FLOAT.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.FLOAT.name());
                     schemaValues.put(value.name(), 1.0f);
                     break;
                 case Double:
-                    pythonConfig.pythonInput(value.name(),Type.FLOAT.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.FLOAT.name());
                     schemaValues.put(value.name(), 1.0);
                     break;
                 case Image:
                     schemaValues.put(value.name(), new byte[]{0, 1});
-                    pythonConfig.pythonInput(value.name(),Type.STR.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
                     break;
                 case Integer:
-                    pythonConfig.pythonInput(value.name(),Type.INT.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.INT.name());
                     schemaValues.put(value.name(), 1);
                     break;
                 case String:
-                    pythonConfig.pythonInput(value.name(),Type.STR.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
                     schemaValues.put(value.name(), "1.0");
                     break;
                 case Time:
                     fieldInfo.put("timeZoneId", TimeZone.getDefault().getID());
                     Instant now = Instant.now();
                     schemaValues.put(value.name(), now);
-                    pythonConfig.pythonInput(value.name(),Type.STR.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
                     break;
                 case Categorical:
-                    pythonConfig.pythonInput(value.name(),Type.STR.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
                     fieldInfo.put("categories",new JsonArray().add("cat"));
                     schemaValues.put(value.name(), "cat");
                     break;
                 case Bytes:
-                    pythonConfig.pythonInput(value.name(),Type.STR.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
                     schemaValues.put(value.name(), new byte[]{1, 0});
                     break;
                 case Long:
-                    pythonConfig.pythonInput(value.name(),Type.INT.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.INT.name());
                     schemaValues.put(value.name(), 1L);
                     break;
 
