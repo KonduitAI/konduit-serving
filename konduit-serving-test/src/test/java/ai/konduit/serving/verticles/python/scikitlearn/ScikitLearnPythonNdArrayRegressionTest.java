@@ -89,7 +89,7 @@ public class ScikitLearnPythonNdArrayRegressionTest extends BaseMultiNumpyVertic
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("inputData", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("predictions", PythonVariables.Type.NDARRAY.name())
+                .pythonOutput("pred", PythonVariables.Type.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -131,9 +131,6 @@ public class ScikitLearnPythonNdArrayRegressionTest extends BaseMultiNumpyVertic
                 .post("/regression/nd4j").then()
                 .extract()
                 .body().asString();
-
-        System.out.println("response" + response);
-
     }
 
 }
