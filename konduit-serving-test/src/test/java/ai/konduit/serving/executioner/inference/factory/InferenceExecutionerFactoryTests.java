@@ -28,6 +28,8 @@ import ai.konduit.serving.model.*;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 import ai.konduit.serving.train.TrainUtils;
 import org.deeplearning4j.nn.graph.ComputationGraph;
@@ -43,6 +45,9 @@ import java.io.File;
 import static org.junit.Assert.*;
 
 public class InferenceExecutionerFactoryTests {
+
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Test
     public void testTensorflow() throws Exception {
@@ -144,7 +149,8 @@ public class InferenceExecutionerFactoryTests {
     public void testMultiLayerNetwork() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> trainedNetwork = TrainUtils.getTrainedNetwork();
         MultiLayerNetwork save = trainedNetwork.getLeft();
-        File tmpZip = new File("dl4j_mln_model.zip");
+        File dir = testDir.newFolder();
+        File tmpZip = new File(dir, "dl4j_mln_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
         ModelConfig modelConfig = DL4JConfig.builder()
@@ -174,7 +180,8 @@ public class InferenceExecutionerFactoryTests {
     public void testComputationGraph() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> trainedNetwork = TrainUtils.getTrainedNetwork();
         ComputationGraph save = trainedNetwork.getLeft().toComputationGraph();
-        File tmpZip = new File("dl4j_cg_model.zip");
+        File dir = testDir.newFolder();
+        File tmpZip = new File(dir, "dl4j_cg_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
         ModelConfig modelConfig = DL4JConfig.builder()
