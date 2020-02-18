@@ -90,6 +90,7 @@ public class ModelConfig implements Serializable {
     public enum ModelType {
         COMPUTATION_GRAPH,
         MULTI_LAYER_NETWORK,
+	ONNX,
         PMML,
         TENSORFLOW,
         KERAS,

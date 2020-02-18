@@ -75,7 +75,7 @@
                     <value>arm</value>
                 </property>
             </activation>
-            <dependencies>
+	    <dependencies>
                 <dependency>
                     <groupId>org.nd4j</groupId>
                     <artifactId>nd4j-native-platform</artifactId>
@@ -240,6 +240,10 @@
                     <artifactId>mkl-dnn-platform</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>onnxruntime</artifactId>
         </dependency>
         <dependency>
             <groupId>org.nd4j</groupId>
