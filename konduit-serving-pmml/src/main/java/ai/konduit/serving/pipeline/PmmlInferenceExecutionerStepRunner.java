@@ -26,7 +26,7 @@ import ai.konduit.serving.executioner.inference.PmmlInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.factory.PmmlInferenceExecutionerFactory;
 import ai.konduit.serving.pipeline.step.PmmlStep;
 import ai.konduit.serving.pipeline.steps.BaseStepRunner;
-import ai.konduit.serving.util.ObjectMapperHolder;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.util.WritableValueRetriever;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
@@ -98,12 +98,7 @@ public class PmmlInferenceExecutionerStepRunner extends BaseStepRunner {
 
         List<Map<FieldName, Object>> execute = pmmlInferenceExecutioner.execute(pmmlInput);
         Record[] ret = new Record[1];
-        String json = null;
-        try {
-            json = ObjectMapperHolder.getJsonMapper().writeValueAsString(execute);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Unable to write json fore records " + execute);
-        }
+        String json = ObjectMappers.toJson(execute);
 
         ret[0] = new org.datavec.api.records.impl.Record(Collections.singletonList(new Text(json)), null);
 
