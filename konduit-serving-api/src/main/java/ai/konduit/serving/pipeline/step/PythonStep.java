@@ -29,7 +29,7 @@ import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
-import org.datavec.python.PythonVariables;
+import org.datavec.python.PythonType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +38,8 @@ import org.datavec.api.transform.schema.Schema;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.datavec.python.PythonType.*;
 
 
 /**
@@ -113,32 +115,32 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
 
     private static SchemaType[] pythonToDataVecVarTypes(String[] pythonVarTypes) {
         return Arrays.stream(pythonVarTypes)
-                .map(type -> pythonToDataVecVarTypes(PythonVariables.Type.valueOf(type)))
+                .map(PythonStep::pythonToDataVecVarTypes)
                 .toArray(SchemaType[]::new);
     }
 
-    private static SchemaType pythonToDataVecVarTypes(PythonVariables.Type pythonVarType) {
+    private static SchemaType pythonToDataVecVarTypes(String pythonTypeString) {
         try {
-            switch (pythonVarType) {
+            switch (PythonType.valueOf(pythonTypeString).getName()) {
                 case BOOL:
-                    return ai.konduit.serving.config.SchemaType.Boolean;
+                    return SchemaType.Boolean;
                 case STR:
-                    return ai.konduit.serving.config.SchemaType.String;
+                    return SchemaType.String;
                 case INT:
-                    return ai.konduit.serving.config.SchemaType.Integer;
+                    return SchemaType.Integer;
                 case FLOAT:
-                    return ai.konduit.serving.config.SchemaType.Float;
+                    return SchemaType.Float;
                 case NDARRAY:
-                    return ai.konduit.serving.config.SchemaType.NDArray;
                 case LIST:
-                case FILE:
+                    return SchemaType.NDArray;
                 case DICT:
                 default:
                     throw new IllegalArgumentException(String.format("Can't convert (%s) to (%s) enum",
-                            pythonVarType.name(), ai.konduit.serving.config.SchemaType.class.getName()));
+                            pythonTypeString, ai.konduit.serving.config.SchemaType.class.getName()));
             }
         } catch (Exception e) {
-            log.error("Unable to convert type " + pythonVarType + ". Error was",e);
+            log.error("Unable to convert python type: " + pythonTypeString +
+                    " into a valid datavec schema type. Error was: ", e);
         }
 
         return null;

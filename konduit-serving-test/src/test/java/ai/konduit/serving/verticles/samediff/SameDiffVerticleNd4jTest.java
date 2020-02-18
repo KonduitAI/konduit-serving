@@ -42,6 +42,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.common.template.test;
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.autodiff.samediff.SDVariable;
@@ -86,9 +87,7 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
         SameDiff values = SameDiff.fromFlatFile(tmpSameDiffFile);
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .inputDataFormat(Input.DataFormat.NUMPY)
                 .outputDataFormat(Output.DataFormat.ND4J)
-                .predictionType(PredictionType.RAW)
                 .httpPort(port)
                 .build();
 

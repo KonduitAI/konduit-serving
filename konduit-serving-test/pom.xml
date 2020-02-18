@@ -154,34 +154,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <id>clean-numpy-javacpp-cache</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <executable>java</executable>
-                    <arguments>
-                        <argument>-classpath</argument>
-                        <classpath>
-                            <dependency>com.beust:jcommander</dependency>
-                            <dependency>commons-io:commons-io</dependency>
-                        </classpath>
-                        <argument>ai.konduit.serving.miscutils.CleanNumpyJavaCppCache</argument>
-                        <argument>--numpyJavacppVersion=${numpy.javacpp.version}</argument>
-                        <argument>--javacppPlatform=${javacpp.platform}</argument>
-                    </arguments>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 </project>

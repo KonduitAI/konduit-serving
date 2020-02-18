@@ -102,8 +102,6 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .inputDataFormat(Input.DataFormat.JSON)
-                .predictionType(Output.PredictionType.CLASSIFICATION)
                 .build();
 
         PipelineStep modelPipelineStep = new ModelStep(modelConfig)

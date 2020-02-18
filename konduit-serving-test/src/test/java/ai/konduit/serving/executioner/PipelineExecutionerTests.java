@@ -32,10 +32,8 @@ import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
 import junit.framework.TestCase;
-import org.datavec.python.PythonVariables;
-import org.datavec.python.PythonVariables.Type;
+import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
@@ -53,12 +51,9 @@ public class PipelineExecutionerTests {
 
     @Test
     public void testDoJsonInference() {
-        ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
         int port = 1111;
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .predictionType(Output.PredictionType.RAW)
-                .inputDataFormat(Input.DataFormat.IMAGE)
                 .httpPort(port)
                 .build();
 
@@ -69,7 +64,7 @@ public class PipelineExecutionerTests {
 
         List<String> fieldNames = Arrays.stream(values)
                 .filter(input -> input == SchemaType.Boolean)
-                .map(input -> input.name())
+                .map(Enum::name)
                 .collect(Collectors.toList());
         Map<String,PythonConfig> namesToPythonConfig = new LinkedHashMap<>();
         PythonConfigBuilder pythonConfig = PythonConfig.builder();
@@ -84,7 +79,7 @@ public class PipelineExecutionerTests {
             jsonSchema.put(value.name(), topLevel);
             switch (value) {
                 case NDArray:
-                    pythonConfig.pythonInput(value.name(), Type.NDARRAY.name());
+                    pythonConfig.pythonInput(value.name(), PythonType.TypeName.NDARRAY.name());
                     fieldInfo.put("shape",new JsonArray().add(1).add(1));
                     schemaValues.put(value.name(), Nd4j.toNpyByteArray(Nd4j.scalar(1.0)));
                     break;
@@ -94,42 +89,42 @@ public class PipelineExecutionerTests {
                     schemaValues.put(value.name(), true);
                     break;*/
                 case Float:
-                    pythonConfig.pythonInput(value.name(),Type.FLOAT.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.FLOAT.name());
                     schemaValues.put(value.name(), 1.0f);
                     break;
                 case Double:
-                    pythonConfig.pythonInput(value.name(),Type.FLOAT.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.FLOAT.name());
                     schemaValues.put(value.name(), 1.0);
                     break;
                 case Image:
                     schemaValues.put(value.name(), new byte[]{0, 1});
-                    pythonConfig.pythonInput(value.name(),Type.STR.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
                     break;
                 case Integer:
-                    pythonConfig.pythonInput(value.name(),Type.INT.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.INT.name());
                     schemaValues.put(value.name(), 1);
                     break;
                 case String:
-                    pythonConfig.pythonInput(value.name(),Type.STR.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
                     schemaValues.put(value.name(), "1.0");
                     break;
                 case Time:
                     fieldInfo.put("timeZoneId", TimeZone.getDefault().getID());
                     Instant now = Instant.now();
                     schemaValues.put(value.name(), now);
-                    pythonConfig.pythonInput(value.name(),Type.STR.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
                     break;
                 case Categorical:
-                    pythonConfig.pythonInput(value.name(),Type.STR.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
                     fieldInfo.put("categories",new JsonArray().add("cat"));
                     schemaValues.put(value.name(), "cat");
                     break;
                 case Bytes:
-                    pythonConfig.pythonInput(value.name(),Type.STR.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
                     schemaValues.put(value.name(), new byte[]{1, 0});
                     break;
                 case Long:
-                    pythonConfig.pythonInput(value.name(),Type.INT.name());
+                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.INT.name());
                     schemaValues.put(value.name(), 1L);
                     break;
 
@@ -158,11 +153,11 @@ public class PipelineExecutionerTests {
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
-                .steps(Arrays.asList(pythonStep))
+                .steps(Collections.singletonList(pythonStep))
                 .build();
 
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration);
-        pipelineExecutioner.init();
+        pipelineExecutioner.init(Input.DataFormat.IMAGE, Output.PredictionType.RAW);
         // Run the test
         pipelineExecutioner.doJsonInference(wrapper,null);
     }
@@ -190,8 +185,6 @@ public class PipelineExecutionerTests {
 
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .predictionType(Output.PredictionType.RAW)
-                .inputDataFormat(Input.DataFormat.IMAGE)
                 .httpPort(port)
                 .build();
 
@@ -209,7 +202,7 @@ public class PipelineExecutionerTests {
                 .build();
 
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);
-        pipelineExecutioner.init();
+        pipelineExecutioner.init(Input.DataFormat.IMAGE, Output.PredictionType.RAW);
         assertNotNull("Input names should not be null.", pipelineExecutioner.inputNames());
         assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         assertNotNull(pipelineExecutioner.inputDataTypes);
@@ -239,8 +232,6 @@ public class PipelineExecutionerTests {
                 .build();
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .inputDataFormat(Input.DataFormat.IMAGE)
-                .predictionType(Output.PredictionType.YOLO)
                 .outputDataFormat(Output.DataFormat.JSON)
                 .httpPort(port)
                 .build();
@@ -264,7 +255,7 @@ public class PipelineExecutionerTests {
                 .build();
 
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);
-        pipelineExecutioner.init();
+        pipelineExecutioner.init(Input.DataFormat.IMAGE, Output.PredictionType.YOLO);
         assertNotNull("Input names should not be null.", pipelineExecutioner.inputNames());
         assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         TestCase.assertEquals(TensorDataType.INT64, pipelineExecutioner.inputDataTypes.get("image_tensor"));

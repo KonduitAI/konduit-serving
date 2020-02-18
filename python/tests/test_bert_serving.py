@@ -26,7 +26,6 @@ def test_server_start():
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(
         http_port=port,
-        input_data_format="NUMPY",
         output_data_format="NUMPY",
         log_timings=True,
     )
@@ -59,7 +58,7 @@ def test_server_start():
         inference_config=inference, extra_start_args="-Xmx8g", jar_path="konduit.jar"
     )
     server.start()
-    client = Client(input_data_format="NUMPY", prediction_type="NUMPY", port=port)
+    client = Client(input_data_format="NUMPY", prediction_type="RAW", port=port)
 
     data_input = {
         "IteratorGetNext:0": np.load("../data/input-0.npy"),

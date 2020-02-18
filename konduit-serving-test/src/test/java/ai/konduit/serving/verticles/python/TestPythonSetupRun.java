@@ -23,14 +23,11 @@
 package ai.konduit.serving.verticles.python;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMapperHolder;
-import org.datavec.python.PythonVariables;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -40,6 +37,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,9 +82,9 @@ public class TestPythonSetupRun extends BaseMultiNumpyVerticalTest {
     @Override
     public JsonObject getConfigObject() throws Exception {
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonCode("def setup(): pass\ndef run(input): return {'output': np.array(input + 2)}")
-                .pythonInput("input", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
+                .pythonCode("import numpy as np\ndef setup(): pass\ndef run(input): return {'output': np.array(input + 2)}")
+                .pythonInput("input", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("output", PythonType.TypeName.NDARRAY.name())
                 .setupAndRun(true)
                 .build();
 
@@ -94,8 +92,6 @@ public class TestPythonSetupRun extends BaseMultiNumpyVerticalTest {
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .inputDataFormat(Input.DataFormat.NUMPY)
-                .predictionType(Output.PredictionType.RAW)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
@@ -119,7 +115,7 @@ public class TestPythonSetupRun extends BaseMultiNumpyVerticalTest {
         String body = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/dictionary").then()
+                .post("/raw/json").then()
                 .extract()
                 .body().asString();
         JsonObject jsonObject1 = new JsonObject(body);

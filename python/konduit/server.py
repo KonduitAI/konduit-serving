@@ -93,7 +93,10 @@ class Server(object):
         else:
             self.extra_jar_args = extra_jar_args
 
-    def get_client(self, output_data_format=None):
+    def get_client(self,
+                   input_data_format=None,
+                   prediction_type=None,
+                   output_data_format=None):
         """Get a Konduit Client instance from this Server instance.
         :param output_data_format: optional, same as in Client signature
         :return: konduit.Client
@@ -110,8 +113,12 @@ class Server(object):
         host = serving_config._get_listen_host()
         if not host.startswith("http://"):
             host = "http://" + host
-        input_data_format = serving_config._get_input_data_format()
-        prediction_type = serving_config._get_prediction_type()
+
+        if not input_data_format:
+            input_data_format = "NUMPY"
+
+        if not prediction_type:
+            prediction_type = "RAW"
 
         if not output_data_format:
             output_data_format = serving_config._get_output_data_format()
