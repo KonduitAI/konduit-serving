@@ -32,7 +32,7 @@ import org.bytedeco.onnxruntime.Env;
 import org.bytedeco.onnxruntime.Session;
 import org.bytedeco.onnxruntime.SessionOptions;
 import static org.bytedeco.onnxruntime.global.onnxruntime.ORT_LOGGING_LEVEL_WARNING;
-import static org.bytedeco.onnxruntime.global.onnxruntime.ORT_ENABLE_BASIC;
+import static org.bytedeco.onnxruntime.global.onnxruntime.ORT_ENABLE_EXTENDED;
 import static org.bytedeco.onnxruntime.global.onnxruntime.OrtSessionOptionsAppendExecutionProvider_Dnnl;
 
 import java.io.File;
@@ -58,7 +58,7 @@ public class OnnxModelLoader implements ModelLoader<Session> {
         SessionOptions session_options = new SessionOptions();
 	session_options.SetIntraOpNumThreads(1);
 
-	session_options.SetGraphOptimizationLevel(ORT_ENABLE_BASIC);
+	session_options.SetGraphOptimizationLevel(ORT_ENABLE_EXTENDED);
         OrtSessionOptionsAppendExecutionProvider_Dnnl(session_options.asOrtSessionOptions(), 1);
 
 	Session session = new Session(env, model_path, session_options); 

@@ -83,19 +83,6 @@ import java.util.concurrent.atomic.AtomicLong;
 @Slf4j
 public class ONNXThreadPool {
 
-    static final OrtApi g_ort = OrtGetApiBase().GetApi().call(ORT_API_VERSION);
-
-    //*****************************************************************************
-    // helper function to check for status
-    static void CheckStatus(OrtStatus status) {
-        if (status != null && !status.isNull()) {
-          String msg = g_ort.GetErrorMessage().call(status).getString();
-          System.err.println(msg);
-          g_ort.ReleaseStatus().call(status);
-          System.exit(1);
-        }
-    }
-
     public final static int DEFAULT_NUM_WORKERS = Nd4j.getAffinityManager().getNumberOfDevices();
     public final static int DEFAULT_BATCH_LIMIT = 32;
     public final static InferenceMode DEFAULT_INFERENCE_MODE = InferenceMode.BATCHED;
@@ -393,24 +380,12 @@ public class ONNXThreadPool {
 		long inputSize = 0;
                 for (int i = 0; i < num_input_nodes; i++) {
 		    BytePointer input_name = replicatedModel.GetInputName(i, allocator.asOrtAllocator());
-                    //System.out.println("Input " + i + " : name=" + input_name.getString());
                     input_node_names.put(i, input_name);
 
                     TypeInfo typeInfo = replicatedModel.GetInputTypeInfo(i);
+                    TensorTypeAndShapeInfo tensor_info = typeInfo.GetTensorTypeAndShapeInfo();
+                    int type = tensor_info.GetElementType();
 
-                    OrtTypeInfo ort_type_info = typeInfo.asOrtTypeInfo();
-
-                    //Using C API here because GetTensorTypeAndShapeInfo() isn't there
-                    PointerPointer<OrtTensorTypeAndShapeInfo> tensor_infos = new PointerPointer<OrtTensorTypeAndShapeInfo>(1);
-                    CheckStatus(g_ort.CastTypeInfoToTensorInfo().call(ort_type_info, tensor_infos));
-                    OrtTensorTypeAndShapeInfo ort_tensor_info = tensor_infos.get(OrtTensorTypeAndShapeInfo.class);
-                    IntPointer type = new IntPointer(1);
-                    CheckStatus(g_ort.GetTensorElementType().call(ort_tensor_info, type));
-                    //System.out.println("Input " + i + " : type=" + type.get());
-
-                    TensorTypeAndShapeInfo tensor_info = new TensorTypeAndShapeInfo(ort_tensor_info);
-
-	            //Back to C++ API 
 		    input_node_dims[i] = tensor_info.GetShape();
 
 	            int acc = 1;
@@ -419,8 +394,6 @@ public class ONNXThreadPool {
 
 		    inputSizes[i] = acc;
 		    inputSize += acc;
-
-		    g_ort.ReleaseTypeInfo().call(ort_type_info);
 		}
 
                 while (shouldWork.get()) {
@@ -438,38 +411,33 @@ public class ONNXThreadPool {
 			        INDArray inputArray = Nd4j.concat(0, inputArrays.toArray(new INDArray[inputArrays.size()]));
                              
 			        Value[] inputTensors = new Value[num_input_nodes.intValue()];
-				//PointerPointer inputTensors = new PointerPointer(num_input_nodes);
+
                                 for (int i = 0; i < num_input_nodes; i++) {
-		                  BytePointer input_name = (BytePointer)input_node_names.get(i); //replicatedModel.GetInputName(i, allocator.asOrtAllocator());
+		                  BytePointer input_name = (BytePointer)input_node_names.get(i);
 		
-				  FloatPointer input_tensor_values = (FloatPointer)inBatch.get(input_name).data().pointer();
+				  FloatPointer input_tensor_values = (FloatPointer)inBatch.get(input_name.getString()).data().pointer();
 
 				//TODO: Handle other data types here, currently only Float inputs supported
 				//FloatPointer input_tensor_values = (FloatPointer)inputArray.data().pointer();
 
 				  MemoryInfo memory_info = MemoryInfo.CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
 
-				  OrtMemoryInfo ort_memory_info = memory_info.asOrtMemoryInfo();
-
 				//hardcoded to Float
-				  Value inputTensor = Value.CreateTensor(ort_memory_info, input_tensor_values, inputSizes[i] * Float.SIZE / 8, input_node_dims[i], 4, ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT);
-
+				  Value inputTensor = Value.CreateTensor(memory_info.asOrtMemoryInfo(), input_tensor_values, inputSizes[i] * Float.SIZE / 8, input_node_dims[i], 4, ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT);
 				  inputTensors[i] = inputTensor;
-		                  g_ort.ReleaseMemoryInfo().call(ort_memory_info);
 
 				}
 				PointerPointer inputTensorsPP = new PointerPointer(inputTensors);
 				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, new Value(inputTensorsPP), num_input_nodes, output_node_names, num_output_nodes);
-                                //TODO: Get all outputs here
-				Map<String, INDArray> output = new HashMap<String, INDArray>()
-					{
-						{
-							FloatPointer fpOut = outputVector.get(0).GetTensorMutableDataFloat();
-							Indexer indexer = FloatIndexer.create(fpOut);
-                                                        DataBuffer buffer = Nd4j.createBuffer(fpOut, DataType.FLOAT, fpOut.capacity(), indexer);
-							put("0", Nd4j.create(buffer));
-						}
-					};
+
+				Map<String, INDArray> output = new HashMap<String, INDArray>();
+
+                                for (int i = 0; i < num_output_nodes; i++) {
+					FloatPointer fpOut = outputVector.get(i).GetTensorMutableDataFloat();
+					Indexer indexer = FloatIndexer.create(fpOut);
+					DataBuffer buffer = Nd4j.createBuffer(fpOut, DataType.FLOAT, fpOut.capacity(), indexer);
+					output.put(((BytePointer)output_node_names.get(i)).getString(), Nd4j.create(buffer));
+				}
                                 out.add((Map<String, INDArray>) output);
                             }
 
