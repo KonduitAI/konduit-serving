@@ -27,6 +27,7 @@ import ai.konduit.serving.pipeline.step.ModelStep;
 import lombok.extern.slf4j.Slf4j;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.util.DL4JModelValidator;
+import org.nd4j.validation.ValidationResult;
 
 import java.io.File;
 import java.util.Collections;
@@ -40,7 +41,10 @@ public class Dl4jInferenceExecutionerFactory implements InferenceExecutionerFact
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
         File modelPath = new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath());
 
-        if(DL4JModelValidator.validateMultiLayerNetwork(modelPath).isValid()) {
+        ValidationResult mlnValidationResult = DL4JModelValidator.validateMultiLayerNetwork(modelPath);
+        ValidationResult cgValidationResult;
+
+        if (mlnValidationResult.isValid()) {
             ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 
             MultiLayerNetworkInferenceExecutioner inferenceExecutioner = new MultiLayerNetworkInferenceExecutioner();
@@ -49,26 +53,35 @@ public class Dl4jInferenceExecutionerFactory implements InferenceExecutionerFact
             List<String> inputNames = Collections.singletonList("default");
             List<String> outputNames = Collections.singletonList("default");
             return new InitializedInferenceExecutionerConfig(inferenceExecutioner, inputNames, outputNames);
-        } else if (DL4JModelValidator.validateComputationGraph(modelPath).isValid()){
-            log.debug("Error loading multi layer network from file. Attempting to load computation graph instead.");
-            ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
-
-            ComputationGraphModelLoader computationGraphModelLoader = new ComputationGraphModelLoader(modelPath);
-            MultiComputationGraphInferenceExecutioner inferenceExecutioner = new MultiComputationGraphInferenceExecutioner();
-            inferenceExecutioner.initialize(computationGraphModelLoader, parallelInferenceConfig);
-
-            ComputationGraph computationGraph2 = computationGraphModelLoader.loadModel();
-            List<String> inputNames = computationGraph2.getConfiguration().getNetworkInputs();
-            List<String> outputNames = computationGraph2.getConfiguration().getNetworkOutputs();
-            log.info("Loaded computation graph with input names " + inputNames + " and output names " + outputNames);
-
-            return InitializedInferenceExecutionerConfig.builder()
-                    .inferenceExecutioner(inferenceExecutioner)
-                    .inputNames(inputNames).outputNames(outputNames)
-                    .build();
         } else {
-            throw new IllegalStateException(String.format("The given file at path %s is not a valid DL4J model.",
-                    modelPath.getAbsolutePath()));
+            log.info("Error loading MultiLayerNetwork from file: {}. Attempting to load as ComputationGraph instead...",
+                    modelPath.getAbsoluteFile());
+            cgValidationResult = DL4JModelValidator.validateComputationGraph(modelPath);
+
+            if (cgValidationResult.isValid()) {
+                ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
+
+                ComputationGraphModelLoader computationGraphModelLoader = new ComputationGraphModelLoader(modelPath);
+                MultiComputationGraphInferenceExecutioner inferenceExecutioner = new MultiComputationGraphInferenceExecutioner();
+                inferenceExecutioner.initialize(computationGraphModelLoader, parallelInferenceConfig);
+
+                ComputationGraph computationGraph2 = computationGraphModelLoader.loadModel();
+                List<String> inputNames = computationGraph2.getConfiguration().getNetworkInputs();
+                List<String> outputNames = computationGraph2.getConfiguration().getNetworkOutputs();
+                log.info("Loaded computation graph with input names {} and output names {}", inputNames, outputNames);
+
+                return InitializedInferenceExecutionerConfig.builder()
+                        .inferenceExecutioner(inferenceExecutioner)
+                        .inputNames(inputNames).outputNames(outputNames)
+                        .build();
+            } else {
+                String finalErrorMessage = String.format("The given file at path %s is not a valid DL4J model.\n" +
+                                " --- Errors while loading file as a MultiLayerNetwork ---\n%s\n" +
+                                " --- Errors while loading file as a ComputationGraph ---\n%s",
+                        modelPath.getAbsolutePath(), mlnValidationResult.toString(), cgValidationResult.toString());
+
+                throw new IllegalStateException(finalErrorMessage);
+            }
         }
     }
 }
