@@ -26,8 +26,6 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.output.types.NDArrayOutput;
-import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMapperHolder;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -36,26 +34,29 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.datavec.api.writable.NDArrayWritable;
-import org.datavec.api.writable.Writable;
-import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
+import static junit.framework.TestCase.assertEquals;
+import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -80,7 +81,13 @@ public class PytorchPythonNdArrayRegressionTest extends BaseMultiNumpyVerticalTe
 
     @Override
     public JsonObject getConfigObject() throws Exception {
+        String pythonPath = Arrays.stream(cachePackages())
+                .filter(Objects::nonNull)
+                .map(File::getAbsolutePath)
+                .collect(Collectors.joining(File.pathSeparator));
+
         String pythonCodePath = new ClassPathResource("scripts/pytorch/RegressionTorch.py").getFile().getAbsolutePath();
+
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
@@ -102,40 +109,23 @@ public class PytorchPythonNdArrayRegressionTest extends BaseMultiNumpyVerticalTe
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
-
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
-                .scaleImageTransform(20.0f)
-                .build();
-
-        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .imageProcessingInitialLayout("NCHW")
-                .imageProcessingRequiredLayout("NHWC")
-                .inputName("X_test")
-                .dimensionsConfig("default", new Long[]{478L, 720L, 3L}) // Height, width, channels
-                .imageTransformProcess("default", imageTransformProcess)
-                .build();
-
-        String imagePath = new ClassPathResource("data/PytorchNDArrayTest.jpg").getFile().getAbsolutePath();
-
-        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
-
-        INDArray image = ((NDArrayWritable) output[0][0]).get();
+        //Preparing input NDArray
+        INDArray arr = Nd4j.create(new double[]{1462.00000,20.0000000,81.0000000,14267.0000,6.00000000,6.00000000,1958.00000,1958.00000,108.000000,923.000000,0.00000000,406.000000,1329.00000,1329.00000,0.00000000,0.00000000 ,1329.00000,0.00000000,0.00000000,1.00000000, 1.00000000,3.00000000,1.00000000,6.00000000, 0.00000000,1958.00000,1.00000000,312.000000, 393.000000,36.0000000,0.00000000,0.00000000, 0.00000000,0.00000000,12500.0000,6.00000000, 2010.00000,0.00000000,0.00000000,0.00000000, 1.00000000,0.00000000,0.00000000,1.00000000, 0.00000000,0.00000000,1.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,1.00000000,1.00000000,68493.1507, 1.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,1.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 1.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,1.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 1.00000000,0.00000000,0.00000000,68493.1507, 68493.1507,1369.86301,1.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,1.00000000,5479.45205,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,1.00000000,0.00000000, 0.00000000,68493.1507,1.00000000,68493.1507, 68493.1507,68493.1507,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 68493.1507,0.00000000,0.00000000,1369.86301, 0.00000000,0.00000000,1.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,68493.1507,0.00000000,0.00000000, 0.00000000,0.00000000,1.00000000,0.00000000, 0.00000000,1.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,1.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 1.00000000,0.00000000,1.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,1.00000000,0.00000000, 0.00000000,0.00000000,1.00000000,0.00000000, 0.00000000,0.00000000,1.00000000,1.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,1.00000000,68493.1507, 1.00000000,0.00000000,0.00000000,1369.86301, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,1.00000000,0.00000000,1.00000000, 0.00000000,0.00000000,0.00000000,68493.1507, 1.00000000,0.00000000,0.00000000,1.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,1.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,1.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,1.00000000,2054.79452,0.00000000, 0.00000000,0.00000000,1.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,1.00000000, 0.00000000,0.00000000,1.00000000,0.00000000, 1369.86301,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,1.00000000,0.00000000, 0.00000000,68493.1507,0.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,0.00000000, 0.00000000,0.00000000,1.00000000,0.00000000, 0.00000000,0.00000000,0.00000000,1.00000000, 0.00000000
+        }, 1, 289);
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-
         //Create new file to write binary input data.
         File file = new File(filePath + "/test-input.zip");
 
-        BinarySerde.writeArrayToDisk(image, file);
+        BinarySerde.writeArrayToDisk(arr, file);
         requestSpecification.body(jsonObject.encode().getBytes());
-
         requestSpecification.header("Content-Type", "multipart/form-data");
         String response = requestSpecification.when()
                 .multiPart("default", file)
@@ -145,13 +135,13 @@ public class PytorchPythonNdArrayRegressionTest extends BaseMultiNumpyVerticalTe
                 .extract()
                 .body().asString();
 
-        System.out.println("response----" + response);
-
         JsonObject jsonObject1 = new JsonObject(response);
-        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
-        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
-        assertEquals(51, outputArray.getInt(0));
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray values = ndarraySerde.getJsonArray("values");
+        double[][] nd = ObjectMapperHolder.getJsonMapper().readValue(values.toString(), double[][].class);
+        INDArray outputArray = Nd4j.create(nd);
+        double outpuValue = values.getJsonArray(0).getDouble(0);
+        assertEquals(outputArray.getDouble(0), outpuValue);
     }
 
 }
