@@ -39,6 +39,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,8 +83,8 @@ public class PytorchPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
-                .pythonInput("JsonInput", PythonVariables.Type.STR.name())
-                .pythonOutput("num_boxes", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("JsonInput", PythonType.TypeName.STR.name())
+                .pythonOutput("num_boxes", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

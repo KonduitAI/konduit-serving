@@ -34,6 +34,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
@@ -93,8 +94,8 @@ public class PythonSTRInputOperationTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.STR.name())
-                .pythonOutput("output", PythonVariables.Type.STR.name())
+                .pythonInput("inputVar", PythonType.TypeName.STR.name())
+                .pythonOutput("output", PythonType.TypeName.STR.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

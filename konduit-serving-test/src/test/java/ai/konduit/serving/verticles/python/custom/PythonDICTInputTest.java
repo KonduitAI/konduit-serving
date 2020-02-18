@@ -36,6 +36,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
@@ -98,8 +99,8 @@ public class PythonDICTInputTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.DICT.name())
-                .pythonOutput("output", PythonVariables.Type.DICT.name())
+                .pythonInput("inputVar", PythonType.TypeName.DICT.name())
+                .pythonOutput("output", PythonType.TypeName.DICT.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

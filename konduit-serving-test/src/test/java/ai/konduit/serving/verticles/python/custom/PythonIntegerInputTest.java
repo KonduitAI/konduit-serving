@@ -35,6 +35,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
@@ -94,8 +95,8 @@ public class PythonIntegerInputTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.INT.name())
-                .pythonOutput("output", PythonVariables.Type.INT.name())
+                .pythonInput("inputVar", PythonType.TypeName.INT.name())
+                .pythonOutput("output", PythonType.TypeName.INT.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

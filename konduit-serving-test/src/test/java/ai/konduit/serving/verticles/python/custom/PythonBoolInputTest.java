@@ -35,6 +35,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
@@ -96,8 +97,8 @@ public class PythonBoolInputTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.BOOL.name())
-                .pythonOutput("output", PythonVariables.Type.BOOL.name())
+                .pythonInput("inputVar", PythonType.TypeName.BOOL.name())
+                .pythonOutput("output", PythonType.TypeName.BOOL.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

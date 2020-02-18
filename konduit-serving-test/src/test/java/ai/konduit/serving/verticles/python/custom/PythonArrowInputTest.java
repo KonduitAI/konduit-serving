@@ -42,6 +42,7 @@ import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.arrow.ArrowConverter;
 import org.datavec.arrow.recordreader.ArrowRecordWriter;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -93,8 +94,8 @@ public class PythonArrowInputTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("inputVar", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("output", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
