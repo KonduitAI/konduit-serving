@@ -23,6 +23,7 @@
 package ai.konduit.serving.model;
 
 import ai.konduit.serving.config.TextConfig;
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -75,5 +76,12 @@ public class ModelConfigType implements Serializable, TextConfig {
         return new ModelConfigType(ModelConfig.ModelType.PMML, path);
     }
 
+    public static ModelConfigType fromJson(String json){
+        return ObjectMappers.fromJson(json, ModelConfigType.class);
+    }
+
+    public static ModelConfigType fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, ModelConfigType.class);
+    }
 }
 

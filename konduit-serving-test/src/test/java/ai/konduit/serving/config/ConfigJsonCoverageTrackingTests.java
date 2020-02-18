@@ -126,9 +126,11 @@ public class ConfigJsonCoverageTrackingTests {
                         .inputNames(Arrays.asList("x"))
                         .outputNames(Arrays.asList("z"))
                         .build())
-                .step(ModelStep.builder().modelConfig(DL4JConfig.builder().build()).build())
+                .step(ModelStep.builder().modelConfig(DL4JConfig.builder().modelConfigType(ModelConfigType.computationGraph("/my/model/path.bin")).build()).build())
                 .servingConfig(ServingConfig.builder().httpPort(12345).logTimings(true).build())
                 .build();
+
+//        System.out.println(conf.toYaml());
 
         testConfigSerDe(conf);
     }
@@ -244,5 +246,11 @@ public class ConfigJsonCoverageTrackingTests {
     @Test
     public void testTensorFlowConfig(){
         testConfigSerDe(TensorFlowConfig.builder().build());
+    }
+
+    @Test
+    public void testModelConfigType(){
+        testConfigSerDe(ModelConfigType.keras("/path/to/keras.hdf5"));
+        testConfigSerDe(ModelConfigType.tensorFlow("/path/to/tensorflow.pb"));
     }
 }
