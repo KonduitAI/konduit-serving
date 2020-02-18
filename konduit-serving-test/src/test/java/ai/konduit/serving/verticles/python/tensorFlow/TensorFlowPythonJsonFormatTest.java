@@ -40,6 +40,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,8 +84,8 @@ public class TensorFlowPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
-                .pythonInput("JsonInput", PythonVariables.Type.STR.name())
-                .pythonOutput("prediction", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("JsonInput", PythonType.TypeName.STR.name())
+                .pythonOutput("prediction", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

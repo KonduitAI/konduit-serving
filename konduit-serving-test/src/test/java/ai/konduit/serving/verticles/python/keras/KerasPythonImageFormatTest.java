@@ -41,6 +41,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,8 +87,8 @@ public class KerasPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
-                .pythonInput("imgPath", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("imageArray", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("imgPath", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("imageArray", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

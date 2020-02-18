@@ -40,6 +40,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,8 +83,8 @@ public class PytorchPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
-                .pythonInput("image", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("num_boxes", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("image", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("num_boxes", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

@@ -38,6 +38,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -91,8 +92,8 @@ public class PytorchPythonNdArrayRegressionTest extends BaseMultiNumpyVerticalTe
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("X_test", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("X_test", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("output", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

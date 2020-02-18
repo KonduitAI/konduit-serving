@@ -38,6 +38,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,8 +91,8 @@ public class KerasPythonNDArrayRegressionTest extends BaseMultiNumpyVerticalTest
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("inputData", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("pred", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("inputData", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("pred", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

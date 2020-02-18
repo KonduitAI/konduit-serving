@@ -37,6 +37,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.IOUtils;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -96,8 +97,8 @@ public class KerasPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
-                .pythonInput("JsonInput", PythonVariables.Type.STR.name())
-                .pythonOutput("score", PythonVariables.Type.LIST.name())
+                .pythonInput("JsonInput", PythonType.TypeName.STR.name())
+                .pythonOutput("score", PythonType.TypeName.LIST.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

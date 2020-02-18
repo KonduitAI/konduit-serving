@@ -41,6 +41,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,8 +93,8 @@ public class ScikitLearnPythonImageFormatTest extends BaseMultiNumpyVerticalTest
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("imgPath", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("result", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("imgPath", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("result", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

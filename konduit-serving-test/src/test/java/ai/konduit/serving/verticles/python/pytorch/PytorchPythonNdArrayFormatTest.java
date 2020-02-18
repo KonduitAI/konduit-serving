@@ -43,6 +43,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,8 +88,8 @@ public class PytorchPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("image", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("num_boxes", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("image", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("num_boxes", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

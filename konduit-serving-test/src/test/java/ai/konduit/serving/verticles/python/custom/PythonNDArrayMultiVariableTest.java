@@ -37,6 +37,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
@@ -97,10 +98,10 @@ public class PythonNDArrayMultiVariableTest extends BaseMultiNumpyVerticalTest {
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("array1", PythonVariables.Type.NDARRAY.name())
-                .pythonInput("array2", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("add_array", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("sub_array", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("array1", PythonType.TypeName.NDARRAY.name())
+                .pythonInput("array2", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("add_array", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("sub_array", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

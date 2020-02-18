@@ -42,6 +42,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,8 +86,8 @@ public class TensorFlowPythonNdArrayFormatTest extends BaseMultiNumpyVerticalTes
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
-                .pythonInput("img", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("prediction", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("img", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("prediction", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

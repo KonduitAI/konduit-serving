@@ -37,6 +37,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.After;
 import org.junit.Test;
@@ -97,8 +98,8 @@ public class PythonNDArrayInputOperationTest extends BaseMultiNumpyVerticalTest 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(pythonPath)
-                .pythonInput("inputVar", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("output", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("inputVar", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("output", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);

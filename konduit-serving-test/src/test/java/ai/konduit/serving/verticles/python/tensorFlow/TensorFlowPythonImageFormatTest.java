@@ -40,6 +40,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,8 +83,8 @@ public class TensorFlowPythonImageFormatTest extends BaseMultiNumpyVerticalTest 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
-                .pythonInput("img", PythonVariables.Type.NDARRAY.name())
-                .pythonOutput("prediction", PythonVariables.Type.NDARRAY.name())
+                .pythonInput("img", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("prediction", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
