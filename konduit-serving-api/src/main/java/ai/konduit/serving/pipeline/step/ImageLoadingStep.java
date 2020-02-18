@@ -35,15 +35,15 @@ import java.io.Serializable;
 import java.util.Map;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @SuperBuilder
-//@NoArgsConstructor
 @AllArgsConstructor
 public class ImageLoadingStep extends BasePipelineStep<ImageLoadingStep> implements Serializable {
 
     private int originalImageHeight;
     private int originalImageWidth;
 
-    private boolean updateOrderingBeforeTransform = false;
+    private boolean updateOrderingBeforeTransform;
 
     @Singular
     private Map<String, Long[]> dimensionsConfigs;

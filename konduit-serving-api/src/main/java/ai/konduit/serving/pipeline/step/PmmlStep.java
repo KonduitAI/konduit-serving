@@ -24,12 +24,14 @@ package ai.konduit.serving.pipeline.step;
 
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class PmmlStep extends ModelStep {
 
     @Override

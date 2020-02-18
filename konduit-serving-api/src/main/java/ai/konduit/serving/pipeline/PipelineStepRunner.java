@@ -22,14 +22,12 @@
 
 package ai.konduit.serving.pipeline;
 
-import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.step.CustomPipelineStep;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.Writable;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.Closeable;
-import java.util.Map;
 
 
 /**
@@ -64,22 +62,6 @@ public interface PipelineStepRunner extends Closeable {
     void close();
 
     PipelineStep<?> getPipelineStep();
-
-//    /**
-//     * Returns the expected input types
-//     * for this step
-//     *
-//     * @return pipeline step
-//     */
-//    Map<String, SchemaType[]> inputTypes();
-//
-//    /**
-//     * Returns the expected output types
-//     * for this step
-//     *
-//     * @return pipeline step
-//     */
-//    Map<String, SchemaType[]> outputTypes();
 
     /**
      * Transform a set of {@link Object}

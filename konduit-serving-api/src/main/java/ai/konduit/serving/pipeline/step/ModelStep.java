@@ -35,11 +35,13 @@ import ai.konduit.serving.pipeline.config.NormalizationConfig;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
 import org.datavec.api.transform.schema.Schema;
 
 @SuperBuilder
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ModelStep extends BasePipelineStep<ModelStep> {
 
     private ModelConfig modelConfig;

@@ -30,6 +30,7 @@ import lombok.experimental.SuperBuilder;
  * Extension of {@link ModelConfig} for DL4J SameDiff models.
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder

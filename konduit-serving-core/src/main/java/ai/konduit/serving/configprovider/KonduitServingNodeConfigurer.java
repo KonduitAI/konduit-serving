@@ -169,10 +169,12 @@ public class KonduitServingNodeConfigurer {
             description = "Whether an instance is clustered or not")
     private boolean isClustered = false;
 
+    @Builder.Default
     @Parameter(names = {"--help", "-h"}, arity = 0, help = true,
             description = "See the help menu")
     private boolean help = false;
 
+    @Builder.Default
     private MeterRegistry registry = BackendRegistries.getDefaultNow();
     private ConfigStoreOptions configStoreOptions;
     private DeploymentOptions deploymentOptions;

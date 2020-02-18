@@ -27,6 +27,7 @@ import ai.konduit.serving.config.Output;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -38,6 +39,7 @@ import lombok.experimental.SuperBuilder;
  */
 @SuperBuilder
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 public class JsonExpanderTransformStep extends BasePipelineStep<JsonExpanderTransformStep> {
 

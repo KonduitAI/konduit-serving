@@ -28,6 +28,7 @@ import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
@@ -37,6 +38,7 @@ import java.util.Map;
 @Data
 @SuperBuilder
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class ArrayConcatenationStep extends BasePipelineStep<ArrayConcatenationStep> {
 
     @Singular

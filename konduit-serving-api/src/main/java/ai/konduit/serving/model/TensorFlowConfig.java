@@ -25,6 +25,7 @@ package ai.konduit.serving.model;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -32,6 +33,7 @@ import lombok.experimental.SuperBuilder;
  * TensorFlow extension of {@link ModelConfig}.
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder

@@ -62,7 +62,7 @@ public class ObjectMappers {
      *
      * @return YAML object mapper
      */
-    public static ObjectMapper yaml(){
+    public static ObjectMapper yaml() {
         return yamlMapper;
     }
 
@@ -80,34 +80,60 @@ public class ObjectMappers {
     }
 
 
-    public static String toYaml(Object o){
-        try{
+    /**
+     * Convert the specified object to a YAML String, throwing an unchecked exception (RuntimeException) if conversion fails
+     *
+     * @param o Object
+     * @return Object as YAML
+     */
+    public static String toYaml(@NonNull Object o) {
+        try {
             return yaml().writeValueAsString(o);
-        } catch (JsonProcessingException e){
+        } catch (JsonProcessingException e) {
             throw new RuntimeException("Error converting object of class " + o.getClass().getName() + " to YAML", e);
         }
     }
 
-    public static String toJson(Object o){
-        try{
+    /**
+     * Convert the specified object to a JSON String, throwing an unchecked exception (RuntimeException) if conversion fails
+     *
+     * @param o Object
+     * @return Object as JSON
+     */
+    public static String toJson(@NonNull Object o) {
+        try {
             return json().writeValueAsString(o);
-        } catch (JsonProcessingException e){
+        } catch (JsonProcessingException e) {
             throw new RuntimeException("Error converting object of class " + o.getClass().getName() + " to JSON", e);
         }
     }
 
-    public static <T> T fromYaml(@NonNull String yaml, @NonNull Class<T> c){
+    /**
+     * Convert the specified YAML String to an object of the specified class, throwing an unchecked exception (RuntimeException) if conversion fails
+     *
+     * @param yaml YAML string
+     * @param c    Class for the object
+     * @return Object from YAML
+     */
+    public static <T> T fromYaml(@NonNull String yaml, @NonNull Class<T> c) {
         try {
             return yaml().readValue(yaml, c);
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new RuntimeException("Error deserializing YAML string to class " + c.getName(), e);
         }
     }
 
-    public static <T> T fromJson(@NonNull String json, @NonNull Class<T> c){
+    /**
+     * Convert the specified YAML String to an object of the specified class, throwing an unchecked exception (RuntimeException) if conversion fails
+     *
+     * @param json JSON string
+     * @param c    Class for the object
+     * @return Object from JSON
+     */
+    public static <T> T fromJson(@NonNull String json, @NonNull Class<T> c) {
         try {
             return json().readValue(json, c);
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new RuntimeException("Error deserializing JSON string to class " + c.getName(), e);
         }
     }
