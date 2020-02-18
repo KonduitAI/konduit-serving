@@ -1,0 +1,15 @@
+{
+  "raw" : {
+    "ndArray" : {
+      "dataType" : "LONG",
+      "shape" : [ 1 ],
+      "data" : [ 7 ]
+    }
+  },
+  "classification" : {
+    "decisions" : [ 0 ],
+    "probabilities" : [ [ 7.0 ] ],
+    "labels" : [ "default" ],
+    "batchId" : "acd8e6a3-2393-4190-90b3-81a11c68db78"
+  }
+}

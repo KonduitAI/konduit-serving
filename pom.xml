@@ -133,7 +133,7 @@
         <cuda>10.1</cuda>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
-
+        <javacpp.platform>windows-x86_64</javacpp.platform>
         <commons-lang3.version>3.6</commons-lang3.version>
         <snakeyaml.version>1.20</snakeyaml.version>
 

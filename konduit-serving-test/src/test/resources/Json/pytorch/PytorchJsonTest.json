@@ -1,0 +1,16 @@
+{
+  "raw" : {
+    "ndArray" : {
+      "dataType" : "INT",
+      "shape" : [ 2 ],
+      "data" : [ 2, 2 ]
+    }
+  },
+  "classification" : {
+    "ndArray" : {
+      "dataType" : "INT",
+      "shape" : [ 2 ],
+      "data" : [ 2, 2 ]
+    }
+  }
+}

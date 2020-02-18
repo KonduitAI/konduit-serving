@@ -149,7 +149,9 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
     @Override
     public PredictionType[] validPredictionTypes() {
         return new PredictionType[] {
-                PredictionType.RAW
+                PredictionType.RAW,
+                PredictionType.CLASSIFICATION,
+                PredictionType.REGRESSION
         };
     }
 
@@ -159,7 +161,8 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
                 DataFormat.ARROW,
                 DataFormat.NUMPY,
                 DataFormat.JSON,
-                DataFormat.IMAGE
+                DataFormat.IMAGE,
+                DataFormat.ND4J
         };
     }
 
