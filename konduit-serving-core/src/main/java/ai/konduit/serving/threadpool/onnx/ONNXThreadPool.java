@@ -32,31 +32,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.deeplearning4j.parallelism.inference.InferenceMode;
 import org.deeplearning4j.parallelism.inference.observers.BasicInferenceObserver;
 
-import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.LongPointer;
-import org.bytedeco.javacpp.PointerPointer;
+import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.indexer.Indexer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
-import org.bytedeco.onnxruntime.Session;
-import org.bytedeco.onnxruntime.MemoryInfo;
-import org.bytedeco.onnxruntime.OrtMemoryInfo;
-import org.bytedeco.onnxruntime.RunOptions;
-import org.bytedeco.onnxruntime.Value;
-import org.bytedeco.onnxruntime.TypeInfo;
-import org.bytedeco.onnxruntime.OrtTypeInfo;
-import org.bytedeco.onnxruntime.OrtApi;
-import org.bytedeco.onnxruntime.OrtStatus;
-import org.bytedeco.onnxruntime.TensorTypeAndShapeInfo;
-import org.bytedeco.onnxruntime.OrtTensorTypeAndShapeInfo;
-import org.bytedeco.onnxruntime.ValueVector;
-import org.bytedeco.onnxruntime.AllocatorWithDefaultOptions;
-import static org.bytedeco.onnxruntime.global.onnxruntime.OrtArenaAllocator;
-import static org.bytedeco.onnxruntime.global.onnxruntime.OrtMemTypeDefault;
-import static org.bytedeco.onnxruntime.global.onnxruntime.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT;
-import static org.bytedeco.onnxruntime.global.onnxruntime.ORT_API_VERSION;
-import static org.bytedeco.onnxruntime.global.onnxruntime.OrtGetApiBase;
+import org.bytedeco.onnxruntime.*;
+import static org.bytedeco.onnxruntime.global.onnxruntime.*;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -377,7 +357,8 @@ public class ONNXThreadPool {
                     output_node_names.put(i, output_name);
 		}
 		long[] inputSizes = new long[num_input_nodes.intValue()];
-		long inputSize = 0;
+		int[] inputTypes = new int[num_input_nodes.intValue()];
+
                 for (int i = 0; i < num_input_nodes; i++) {
 		    BytePointer input_name = replicatedModel.GetInputName(i, allocator.asOrtAllocator());
                     input_node_names.put(i, input_name);
@@ -385,6 +366,7 @@ public class ONNXThreadPool {
                     TypeInfo typeInfo = replicatedModel.GetInputTypeInfo(i);
                     TensorTypeAndShapeInfo tensor_info = typeInfo.GetTensorTypeAndShapeInfo();
                     int type = tensor_info.GetElementType();
+		    inputTypes[i] = type;
 
 		    input_node_dims[i] = tensor_info.GetShape();
 
@@ -393,7 +375,6 @@ public class ONNXThreadPool {
 	                acc *= input_node_dims[i].get(j);
 
 		    inputSizes[i] = acc;
-		    inputSize += acc;
 		}
 
                 while (shouldWork.get()) {
@@ -414,19 +395,13 @@ public class ONNXThreadPool {
 
                                 for (int i = 0; i < num_input_nodes; i++) {
 		                  BytePointer input_name = (BytePointer)input_node_names.get(i);
-		
-				  FloatPointer input_tensor_values = (FloatPointer)inBatch.get(input_name.getString()).data().pointer();
+			          Pointer inputTensorValuesPtr = inBatch.get(input_name.getString()).data().pointer();
 
-				//TODO: Handle other data types here, currently only Float inputs supported
-				//FloatPointer input_tensor_values = (FloatPointer)inputArray.data().pointer();
-
-				  MemoryInfo memory_info = MemoryInfo.CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-
-				//hardcoded to Float
-				  Value inputTensor = Value.CreateTensor(memory_info.asOrtMemoryInfo(), input_tensor_values, inputSizes[i] * Float.SIZE / 8, input_node_dims[i], 4, ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT);
+				  Value inputTensor = getTensor(inputTensorValuesPtr, inputTypes[i], inputSizes[i], input_node_dims[i]);
 				  inputTensors[i] = inputTensor;
 
 				}
+				//TODO: Pass ValueVector here when possible
 				PointerPointer inputTensorsPP = new PointerPointer(inputTensors);
 				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, new Value(inputTensorsPP), num_input_nodes, output_node_names, num_output_nodes);
 
@@ -469,7 +444,59 @@ public class ONNXThreadPool {
                 // block until main loop is finished
             }
         }
+
+	private Value getTensor(Pointer inputTensorValuesPtr, int type, long size, LongPointer dims){
+	    //TODO: Don't trust that the NDArray data type matches the ONNX data type here
+            MemoryInfo memory_info = MemoryInfo.CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+	    Pointer input_tensor_values = null;
+            switch (type) {
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT:
+		    input_tensor_values = (FloatPointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8:
+		    input_tensor_values = (BytePointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8:
+		    input_tensor_values = (BytePointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16:
+		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16:
+		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32:
+		    input_tensor_values = (IntPointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64:
+		    input_tensor_values = (LongPointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
+		    input_tensor_values = (BytePointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL:
+		    input_tensor_values = (BoolPointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16:
+		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE:
+		    input_tensor_values = (DoublePointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32:
+		    input_tensor_values = (IntPointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
+		    input_tensor_values = (LongPointer)inputTensorValuesPtr;
+		    break;
+                case ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16:
+		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
+		    break;
+		default:
+		    throw new RuntimeException("Unsupported data type encountered");
+	    }
+	    Value inputTensor = Value.CreateTensor(memory_info.asOrtMemoryInfo(), input_tensor_values, size, dims, dims.capacity(), type);
+            return inputTensor;
+	}
     }
-
-
 }
