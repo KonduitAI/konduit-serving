@@ -36,7 +36,7 @@ model = Regressor()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 #checkpoint = torch.load('RegressionModel.pt')
-checkpoint = torch.load(os.path.join(work_dir,'inference\\pytorch\\RegressionModel.pt'))
+checkpoint = torch.load(os.path.join(work_dir, 'inference', 'pytorch', 'RegressionModel.pt'))
 model.load_state_dict(checkpoint['model_state_dict'])
 optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 epoch = checkpoint['epoch']
@@ -44,8 +44,7 @@ loss = checkpoint['loss']
 
 model.eval()
 
-data_train = pd.read_csv('train.csv')
-#data_train = pd.read_csv(os.path.join(work_dir,'train.csv'))
+data_train = pd.read_csv(os.path.join(work_dir, 'scripts', 'pytorch', 'train.csv'))
 data = pd.get_dummies(data_train, dummy_na=True, drop_first=True)
 data.drop('Id', axis=1, inplace=True)
 data.isnull().values.any()
@@ -106,12 +105,14 @@ ps.shape
 #inference code
 #the X_test dimenstion is 1x288 columns
 #X_test will be input from Java
-print("X_test----"X_test)
+print("X_test:\n" + str(X_test))
 X_test = X_val
 with torch.no_grad():
     model.eval()
-    output = model(X_val)
+    outputTensor = model(X_val)
     print('outputis')
 
-print(output.shape)
-print(output[0])
+print(outputTensor.shape)
+print(outputTensor[0])
+
+output = outputTensor.numpy()
