@@ -1,19 +1,19 @@
 package ai.konduit.serving.pipeline;
 
-import  java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
+import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.config.TextConfig;
+import ai.konduit.serving.pipeline.step.*;
+import org.datavec.api.transform.schema.Schema;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
-import ai.konduit.serving.pipeline.step.*;
-import ai.konduit.serving.config.SchemaType;
-import org.datavec.api.transform.schema.Schema;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;

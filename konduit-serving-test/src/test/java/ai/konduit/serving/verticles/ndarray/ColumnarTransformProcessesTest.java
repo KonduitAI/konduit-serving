@@ -24,8 +24,6 @@ package ai.konduit.serving.verticles.ndarray;
 
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.DL4JConfig;
 import ai.konduit.serving.model.ModelConfig;

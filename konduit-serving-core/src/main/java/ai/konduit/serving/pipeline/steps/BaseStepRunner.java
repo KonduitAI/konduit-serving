@@ -22,8 +22,6 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.PipelineStepRunner;
 import org.datavec.api.records.Record;
@@ -33,7 +31,6 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**

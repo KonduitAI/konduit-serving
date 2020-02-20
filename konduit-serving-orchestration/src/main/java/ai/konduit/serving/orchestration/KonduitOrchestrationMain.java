@@ -38,9 +38,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.nd4j.base.Preconditions;
-import org.nd4j.shade.jackson.core.JsonProcessingException;
-
-import java.io.IOException;
 
 /**
  * Multi node/clustered setup using

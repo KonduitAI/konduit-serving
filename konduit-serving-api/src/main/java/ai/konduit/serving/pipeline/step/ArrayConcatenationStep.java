@@ -24,7 +24,6 @@ package ai.konduit.serving.pipeline.step;
 
 import ai.konduit.serving.config.Input.DataFormat;
 import ai.konduit.serving.config.Output;
-import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.Data;

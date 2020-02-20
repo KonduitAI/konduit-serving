@@ -22,7 +22,6 @@
 
 package ai.konduit.serving.config;
 
-import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;

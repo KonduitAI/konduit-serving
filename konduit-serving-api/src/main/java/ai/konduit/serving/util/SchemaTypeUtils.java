@@ -28,7 +28,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.ColumnType;
-import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.metadata.BinaryMetaData;
 import org.datavec.api.transform.metadata.ColumnMetaData;
 import org.datavec.api.transform.schema.Schema;

@@ -22,8 +22,6 @@
 
 package ai.konduit.serving.model.loader.tensorflow;
 
-import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
-import org.nd4j.tensorflow.conversion.TensorDataType;
 import ai.konduit.serving.model.TensorFlowConfig;
 import ai.konduit.serving.model.loader.ModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
@@ -33,6 +31,8 @@ import lombok.Getter;
 import lombok.Singular;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.base.Preconditions;
+import org.nd4j.tensorflow.conversion.TensorDataType;
+import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 
 import java.io.File;
 import java.util.HashMap;

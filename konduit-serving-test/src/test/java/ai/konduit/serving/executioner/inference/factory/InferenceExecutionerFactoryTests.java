@@ -28,17 +28,17 @@ import ai.konduit.serving.model.*;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
-import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 import ai.konduit.serving.train.TrainUtils;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.linalg.primitives.Pair;
+import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 
 import java.io.File;
 

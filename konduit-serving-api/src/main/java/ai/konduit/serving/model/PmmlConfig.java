@@ -23,7 +23,10 @@
 package ai.konduit.serving.model;
 
 import ai.konduit.serving.util.ObjectMappers;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
 
 

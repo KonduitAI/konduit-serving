@@ -28,9 +28,7 @@ import ai.konduit.serving.config.TextConfig;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.*;
-import org.nd4j.shade.jackson.core.JsonProcessingException;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
