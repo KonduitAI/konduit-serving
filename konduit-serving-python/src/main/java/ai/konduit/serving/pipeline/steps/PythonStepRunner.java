@@ -32,7 +32,10 @@ import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.Writable;
 import org.datavec.python.PythonExecutioner;
+import org.datavec.python.PythonTransform;
 import org.datavec.python.PythonTransform.PythonTransformBuilder;
+import org.datavec.python.PythonType;
+import org.datavec.python.PythonVariables;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
