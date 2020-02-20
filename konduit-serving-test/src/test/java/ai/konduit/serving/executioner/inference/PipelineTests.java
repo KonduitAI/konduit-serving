@@ -42,6 +42,7 @@ import org.nd4j.linalg.factory.Nd4j;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -62,10 +63,10 @@ public class PipelineTests {
 
         TransformProcessStep config = TransformProcessStep.builder()
                 .inputName("default")
-                .inputSchema("default", new SchemaType[]{SchemaType.String})
-                .outputSchema("default", new SchemaType[]{SchemaType.String})
+                .inputSchema("default", Collections.singletonList(SchemaType.String))
+                .outputSchema("default", Collections.singletonList(SchemaType.String))
 
-                .inputColumnName("default", Arrays.asList(new String[]{"first"}))
+                .inputColumnName("default", Collections.singletonList("first"))
                 .transformProcess("default", transformProcess)
                 .build();
 
@@ -101,7 +102,7 @@ public class PipelineTests {
 
         TransformProcessStep config = TransformProcessStep.builder()
                 .inputName("default")
-                .inputColumnName("default", Arrays.asList(new String[]{"first"}))
+                .inputColumnName("default", Collections.singletonList("first"))
                 .transformProcess("default", transformProcess)
                 .build();
 

@@ -167,8 +167,8 @@ public class ConfigJsonCoverageTrackingTests {
         testConfigSerDe(JsonExpanderTransformStep.builder()
                 .inputNames(Arrays.asList("x", "y"))
                 .outputNames(Arrays.asList("z","a"))
-                .inputSchema("x", new SchemaType[]{SchemaType.NDArray, SchemaType.Boolean})
-                .outputSchema("z", new SchemaType[]{SchemaType.Image, SchemaType.Categorical})
+                .inputSchema("x", Arrays.asList(SchemaType.NDArray, SchemaType.Boolean))
+                .outputSchema("z", Arrays.asList(SchemaType.Image, SchemaType.Categorical))
         .build());
     }
 

@@ -101,8 +101,8 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
 
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)
-                .inputNames(Arrays.asList(new String[]{"x", "y"}))
-                .outputNames(Arrays.asList(new String[]{"output"}))
+                .inputNames(Arrays.asList("x", "y"))
+                .outputNames(Arrays.asList("output"))
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()

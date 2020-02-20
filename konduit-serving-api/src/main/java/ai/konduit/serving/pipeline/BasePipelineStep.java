@@ -23,7 +23,6 @@ package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,6 +30,7 @@ import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.base.Preconditions;
 
@@ -53,9 +53,9 @@ import java.util.*;
 public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements PipelineStep<T> {
 
     @Singular
-    protected Map<String, SchemaType[]> inputSchemas;
+    protected Map<String, List<SchemaType>> inputSchemas;
     @Singular
-    protected Map<String,SchemaType[]> outputSchemas;
+    protected Map<String,List<SchemaType>> outputSchemas;
 
     @Singular
     protected List<String> inputNames, outputNames;
@@ -63,7 +63,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
     @Singular
     protected Map<String, List<String>> inputColumnNames, outputColumnNames;
 
-    public BasePipelineStep(Map<String, SchemaType[]> inputSchemas, Map<String, SchemaType[]> outputSchemas, List<String> inputNames, List<String> outputNames, Map<String, List<String>> inputColumnNames, Map<String, List<String>> outputColumnNames) {
+    public BasePipelineStep(Map<String, List<SchemaType>> inputSchemas, Map<String, List<SchemaType>> outputSchemas, List<String> inputNames, List<String> outputNames, Map<String, List<String>> inputColumnNames, Map<String, List<String>> outputColumnNames) {
         this.inputSchemas = inputSchemas;
         this.outputSchemas = outputSchemas;
         this.inputNames = inputNames;
@@ -71,20 +71,18 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
         this.inputColumnNames = inputColumnNames;
         this.outputColumnNames = outputColumnNames;
         initSchemasAndColumnsIfNeeded();
-
-
     }
 
 
     protected  void initSchemasAndColumnsIfNeeded() {
-        if(!SchemaTypeUtils.allIsNullOrEmpty(inputNames,inputColumnNames,inputSchemas)) {
+        if(!(SchemaTypeUtils.allIsNullOrEmpty(inputNames) && SchemaTypeUtils.allIsNullOrEmpty(inputColumnNames) && SchemaTypeUtils.allIsNullOrEmpty(inputSchemas))) {
             Set<String> namesTest = new HashSet<>(inputNames);
             if(SchemaTypeUtils.anyIsNullOrEmpty(inputColumnNames,inputSchemas)) {
                 inputColumnNames = new LinkedHashMap<>();
                 inputSchemas = new LinkedHashMap<>();
                 inputNames.forEach(inputName -> {
                     inputColumnNames.put(inputName, Arrays.asList("default"));
-                    inputSchemas.put(inputName, new SchemaType[]{SchemaType.NDArray});
+                    inputSchemas.put(inputName, Collections.singletonList(SchemaType.NDArray));
                 });
             }
             Preconditions.checkState(namesTest.equals(inputSchemas.keySet()) && namesTest.equals(inputColumnNames.keySet()),"Input schema types, input column names, and input names specified are not consistent!");
@@ -95,7 +93,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
             log.info("Auto initializing inputs with default column name default and default column type NDArray");
             inputNames.forEach(inputName -> {
                 inputColumnNames.put(inputName, Arrays.asList("default"));
-                inputSchemas.put(inputName, new SchemaType[]{SchemaType.NDArray});
+                inputSchemas.put(inputName, Collections.singletonList(SchemaType.NDArray));
             });
         }
 
@@ -103,39 +101,37 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
             log.info("No input names or column names or types found. Initializing with default name of default, default column name of default and NDArray type");
             this.inputNames = new ArrayList<>(Arrays.asList("default"));
             this.inputSchemas = new LinkedHashMap<>();
-            this.inputSchemas.put("default",new SchemaType[]{SchemaType.NDArray});
+            this.inputSchemas.put("default",Collections.singletonList(SchemaType.NDArray));
             this.inputColumnNames = new LinkedHashMap<>();
             this.inputColumnNames.put("default",Arrays.asList("default"));
         }
 
-        if(!SchemaTypeUtils.allIsNullOrEmpty(this.outputNames,this.outputSchemas,this.outputColumnNames)) {
+
+        if(!(SchemaTypeUtils.allIsNullOrEmpty(this.outputNames) && SchemaTypeUtils.allIsNullOrEmpty(this.outputSchemas) && SchemaTypeUtils.allIsNullOrEmpty(this.outputColumnNames))) {
             Set<String> outputNamesTest = new HashSet<>(this.outputNames);
             if(SchemaTypeUtils.anyIsNullOrEmpty(outputSchemas,outputColumnNames)) {
                 outputColumnNames = new LinkedHashMap<>();
                 outputSchemas = new LinkedHashMap<>();
                 outputNames.forEach(inputName -> {
                     outputColumnNames.put(inputName, Arrays.asList("default"));
-                    outputSchemas.put(inputName, new SchemaType[]{SchemaType.NDArray});
+                    outputSchemas.put(inputName, Collections.singletonList(SchemaType.NDArray));
                 });
             }
             Preconditions.checkState(this.outputSchemas.keySet().equals(this.outputColumnNames.keySet())
                             && this.outputSchemas.keySet().equals(outputNamesTest),
                     "Output schemas and input column name names are not consistent!");
-        }
-        else if(SchemaTypeUtils.anyIsNullOrEmpty(outputSchemas,outputColumnNames)) {
+        } else if(SchemaTypeUtils.anyIsNullOrEmpty(outputSchemas,outputColumnNames)) {
             outputColumnNames = new LinkedHashMap<>();
             outputSchemas = new LinkedHashMap<>();
             log.info("Auto initializing outputs with default column name default and default column type NDArray");
             outputNames.forEach(inputName -> {
                 outputColumnNames.put(inputName, Arrays.asList("default"));
-                outputSchemas.put(inputName, new SchemaType[]{SchemaType.NDArray});
+                outputSchemas.put(inputName, Collections.singletonList(SchemaType.NDArray));
             });
-        }
-
-        else { //initialize all default values
+        } else { //initialize all default values
             this.outputNames = new ArrayList<>(Arrays.asList("default"));
             this.outputSchemas = new LinkedHashMap<>();
-            this.outputSchemas.put("default",new SchemaType[]{SchemaType.NDArray});
+            this.outputSchemas.put("default",Collections.singletonList(SchemaType.NDArray));
             this.outputColumnNames = new LinkedHashMap<>();
             this.outputColumnNames.put("default",Arrays.asList("default"));
         }
@@ -156,7 +152,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
      * @return
      */
     @Override
-    public T setInput(String[] columnNames, SchemaType[] types) throws Exception {
+    public T setInput(String[] columnNames, List<SchemaType> types) throws Exception {
         return setInput("default", columnNames, types);
     }
 
@@ -174,7 +170,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
      * @return
      */
     @Override
-    public T setInput(String inputName, String[] columnNames, SchemaType[] types)
+    public T setInput(String inputName, String[] columnNames, List<SchemaType> types)
             throws Exception {
 
         List<String> names = getInputNames();
@@ -215,7 +211,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
             List<String> columnNames = SchemaTypeUtils.columnNames(inputSchema);
             setInputColumns(inputName, columnNames);
 
-            SchemaType[] types = SchemaTypeUtils.typesForSchema(inputSchema);
+            List<SchemaType> types = SchemaTypeUtils.typesForSchema(inputSchema);
             setInputTypes(inputName, types);
 
             return (T) this;
@@ -230,7 +226,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
      * @return
      */
     @Override
-    public T setOutput(String[] columnNames, SchemaType[] types)
+    public T setOutput(String[] columnNames, List<SchemaType> types)
             throws Exception {
         return this.setOutput("default", columnNames, types);
     }
@@ -249,7 +245,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
      * @return
      */
     @Override
-    public T setOutput(String outputName, String[] columnNames, SchemaType[] types)
+    public T setOutput(String outputName, String[] columnNames, List<SchemaType> types)
             throws Exception {
 
         List<String> names = getOutputNames();
@@ -291,7 +287,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
             List<String> columnNames = SchemaTypeUtils.columnNames(outputSchema);
             setOutputColumns(outputName, columnNames);
 
-            SchemaType[] types = SchemaTypeUtils.typesForSchema(outputSchema);
+            List<SchemaType> types = SchemaTypeUtils.typesForSchema(outputSchema);
             setOutputTypes(outputName, types);
 
             return (T) this;
@@ -333,7 +329,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
      *  {@inheritDoc}
      */
     @Override
-    public SchemaType[] inputTypesForName(String name) {
+    public List<SchemaType> inputTypesForName(String name) {
         initSchemasAndColumnsIfNeeded();
         return inputSchemas.get(name);
     }
@@ -422,8 +418,8 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
         this.setOutputColumnNames(outputCols);
     }
 
-    protected void setInputTypes(String inputName, SchemaType[] types) {
-        Map<String, SchemaType[]> schemas = this.getInputSchemas();
+    protected void setInputTypes(String inputName, List<SchemaType> types) {
+        Map<String, List<SchemaType>> schemas = this.getInputSchemas();
         if (schemas == null) {
             schemas = new HashMap<>();
         }
@@ -431,8 +427,8 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
         this.setInputSchemas(schemas);
     }
 
-    protected void setOutputTypes(String outputName, SchemaType[] types) {
-        Map<String, SchemaType[]> schemas = this.getOutputSchemas();
+    protected void setOutputTypes(String outputName, List<SchemaType> types) {
+        Map<String, List<SchemaType>> schemas = this.getOutputSchemas();
         if (schemas == null) {
             schemas = new HashMap<>();
         }

@@ -113,11 +113,6 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
     }
 
     @Override
-    public PipelineStep<?> getPipelineStep() {
-        return pipelineStep;
-    }
-
-    @Override
     public Record[] transform(Record[] input) {
         //not a singular ndarray record type
         //try to convert to matrix if all numeric,

@@ -52,21 +52,36 @@ import java.util.*;
 public class SchemaTypeUtils {
 
     /**
-     * Returns true if the passed in {@link Collection}
-     *  or {@link Map }is null or empty
-     * @param collections the collection to check
+     * Returns true if the passed in array is null or empty
+     * @param array the array to check
      * @return
      */
-    public static  boolean allIsNullOrEmpty(Object...collections) {
-        if(collections == null)
+    public static  boolean allIsNullOrEmpty(Object... array) {
+        if(array == null || array.length == 0)
             return true;
 
-        boolean ret = isNullOrEmpty(collections[0]);
-        for(int i = 1; i < collections.length; i++) {
-            ret = ret && isNullOrEmpty(collections[i]);
+        for(Object o : array){
+            if(o != null)
+                return false;
         }
 
-        return ret;
+        return true;
+    }
+
+    /**
+     * Returns true if the passed in List is null or empty
+     * @param list the list to check
+     */
+    public static boolean allIsNullOrEmpty(List<?> list) {
+        if(list == null || list.isEmpty())
+            return true;
+
+        for(Object o : list){
+            if(o != null)
+                return false;
+        }
+
+        return true;
     }
 
     /**
@@ -233,10 +248,10 @@ public class SchemaTypeUtils {
      * @return the schema types based on the ordering
      * of the columns in the schema
      */
-    public static SchemaType[] typesForSchema(Schema schema) {
-        SchemaType[] ret = new SchemaType[schema.numColumns()];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = schemaTypeForColumnType(schema.getType(i));
+    public static List<SchemaType> typesForSchema(Schema schema) {
+        List<SchemaType> ret = new ArrayList<>(schema.numColumns());
+        for (int i = 0; i < schema.numColumns(); i++) {
+            ret.add(schemaTypeForColumnType(schema.getType(i)));
         }
 
         return ret;
@@ -271,17 +286,19 @@ public class SchemaTypeUtils {
     }
 
     /**
-     * Create a {@link Schema}
-     * from the given {@link SchemaType}
-     * and the names.
-     * Note that exceptions are thrown
-     * when the types are null, names are null,
-     * or the 2 arguments are not the same length
+     * See {@link #toSchema(SchemaType[], List)}
+     */
+    public static Schema toSchema(List<SchemaType> types, List<String> names) {
+        return toSchema(types.toArray(new SchemaType[0]), names);
+    }
+
+    /**
+     * Create a {@link Schema} from the given {@link SchemaType} and the names.
+     * Note that exceptions are thrown when the types are null, names are null, or the 2 arguments are not the same length
      *
      * @param types the type
      * @param names the names of each column
-     * @return the equivalent {@link Schema} given the types
-     * and names
+     * @return the equivalent {@link Schema} given the types and names
      */
     public static Schema toSchema(SchemaType[] types, List<String> names) {
         Preconditions.checkNotNull(types, "Please specify types");

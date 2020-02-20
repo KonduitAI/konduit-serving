@@ -47,7 +47,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @param dataFormat the {@link ai.konduit.serving.config.Input.DataFormat} to test
      * @return true if the input format is valid or false otherwise
      */
-    default  boolean isValidInputType(Input.DataFormat dataFormat) {
+    default boolean isValidInputType(Input.DataFormat dataFormat) {
         if(validInputTypes() == null || validInputTypes().length < 1) {
             return true;
         }
@@ -66,7 +66,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @param dataFormat the {@link ai.konduit.serving.config.Output.DataFormat} to test
      * @return true if the output format is valid or false otherwise
      */
-    default  boolean isValidOutputType(Output.DataFormat dataFormat) {
+    default boolean isValidOutputType(Output.DataFormat dataFormat) {
         if(validOutputTypes() == null || validOutputTypes().length < 1) {
             return true;
         }
@@ -132,13 +132,13 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * Getter for the input schema
      * @return
      */
-    Map<String,SchemaType[]> getInputSchemas();
+    Map<String,List<SchemaType>> getInputSchemas();
 
     /**
      * Getter for the input schema
      * @return
      */
-    Map<String,SchemaType[]> getOutputSchemas();
+    Map<String,List<SchemaType>> getOutputSchemas();
 
     /**
      * Getter for the output names for this
@@ -166,7 +166,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
-    T setInput(String inputName, String[] columnNames, SchemaType[] types)
+    T setInput(String inputName, String[] columnNames, List<SchemaType> types)
             throws Exception;
 
     /**
@@ -191,7 +191,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
-    T setOutput(String outputName, String[] columnNames, SchemaType[] types)
+    T setOutput(String outputName, String[] columnNames, List<SchemaType> types)
             throws Exception;
 
     /**
@@ -213,7 +213,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
-    default T setInput(String[] columnNames, SchemaType[] types) throws Exception {
+    default T setInput(String[] columnNames, List<SchemaType> types) throws Exception {
         return setInput("default", columnNames, types);
     }
 
@@ -227,7 +227,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
-    default T setOutput(String[] columnNames, SchemaType[] types) throws Exception {
+    default T setOutput(String[] columnNames, List<SchemaType> types) throws Exception {
         return setOutput("default", columnNames, types);
     }
 
@@ -288,7 +288,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      *
      * @return the schema types ordered by column name ordering
      */
-    SchemaType[] inputTypesForName(String name);
+    List<SchemaType> inputTypesForName(String name);
 
     /**
      * Returns true if this pipeline step
