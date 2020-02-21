@@ -230,6 +230,10 @@
                         <groupId>io.netty</groupId>
                         <artifactId>netty-common</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>com.google.flatbuffers</groupId>
+                        <artifactId>flatbuffers-java</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -244,6 +248,10 @@
                     <exclusion>
                         <groupId>io.netty</groupId>
                         <artifactId>netty-common</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.flatbuffers</groupId>
+                        <artifactId>flatbuffers-java</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
