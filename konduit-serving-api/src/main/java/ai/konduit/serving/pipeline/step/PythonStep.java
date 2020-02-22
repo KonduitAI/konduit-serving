@@ -146,14 +146,14 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
 
     @Override
     public PredictionType[] validPredictionTypes() {
-        return new PredictionType[] {
+        return new PredictionType[]{
                 PredictionType.RAW
         };
     }
 
     @Override
     public DataFormat[] validInputTypes() {
-        return new DataFormat[] {
+        return new DataFormat[]{
                 DataFormat.ARROW,
                 DataFormat.NUMPY,
                 DataFormat.JSON,
@@ -163,7 +163,7 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
 
     @Override
     public Output.DataFormat[] validOutputTypes() {
-        return new Output.DataFormat[] {
+        return new Output.DataFormat[]{
                 Output.DataFormat.ARROW,
                 Output.DataFormat.ND4J,
                 Output.DataFormat.NUMPY,
@@ -315,11 +315,11 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
         return "ai.konduit.serving.pipeline.steps.PythonStepRunner";
     }
 
-    public static PythonStep fromJson(String json){
+    public static PythonStep fromJson(String json) {
         return ObjectMappers.fromJson(json, PythonStep.class);
     }
 
-    public static PythonStep fromYaml(String yaml){
+    public static PythonStep fromYaml(String yaml) {
         return ObjectMappers.fromYaml(yaml, PythonStep.class);
     }
 }

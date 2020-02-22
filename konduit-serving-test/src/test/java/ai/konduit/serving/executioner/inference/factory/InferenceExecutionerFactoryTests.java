@@ -108,13 +108,12 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfig(modelConfig)
                 .build();
 
-        MultiLayerNetworkInferenceExecutionerFactory factory = new MultiLayerNetworkInferenceExecutionerFactory();
+        KerasInferenceExecutionerFactory factory = new KerasInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
-        MultiLayerNetworkInferenceExecutioner computationGraphInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
-        assertNotNull(computationGraphInferenceExecutioner);
-        assertNotNull(computationGraphInferenceExecutioner.model());
-        assertNotNull(computationGraphInferenceExecutioner.modelLoader());
-
+        MultiLayerNetworkInferenceExecutioner multiLayerNetworkInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
+        assertNotNull(multiLayerNetworkInferenceExecutioner);
+        assertNotNull(multiLayerNetworkInferenceExecutioner.model());
+        assertNotNull(multiLayerNetworkInferenceExecutioner.modelLoader());
     }
 
 
@@ -134,7 +133,6 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfig(tensorFlowConfig)
                 .build();
 
-
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = tensorflowInferenceExecutionerFactory.create(modelPipelineStep);
         InferenceExecutioner inferenceExecutioner = initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(inferenceExecutioner);
@@ -142,7 +140,6 @@ public class InferenceExecutionerFactoryTests {
         SameDiffInferenceExecutioner tensorflowInferenceExecutioner = (SameDiffInferenceExecutioner) inferenceExecutioner;
         assertNotNull(tensorflowInferenceExecutioner.model());
         assertNotNull(tensorflowInferenceExecutioner.modelLoader());
-
     }
 
     @Test
@@ -154,11 +151,7 @@ public class InferenceExecutionerFactoryTests {
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
         ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.multiLayerNetwork(tmpZip.getAbsolutePath()))
-                .build();
-
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(1139)
+                .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
                 .build();
 
         ModelStep modelPipelineStep = ModelStep.builder()
@@ -167,13 +160,12 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfig(modelConfig)
                 .build();
 
-        MultiLayerNetworkInferenceExecutionerFactory factory = new MultiLayerNetworkInferenceExecutionerFactory();
+        Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
-        MultiLayerNetworkInferenceExecutioner computationGraphInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
-        assertNotNull(computationGraphInferenceExecutioner);
-        assertNotNull(computationGraphInferenceExecutioner.model());
-        assertNotNull(computationGraphInferenceExecutioner.modelLoader());
-
+        MultiLayerNetworkInferenceExecutioner multiLayerNetworkInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
+        assertNotNull(multiLayerNetworkInferenceExecutioner);
+        assertNotNull(multiLayerNetworkInferenceExecutioner.model());
+        assertNotNull(multiLayerNetworkInferenceExecutioner.modelLoader());
     }
 
     @Test
@@ -184,12 +176,9 @@ public class InferenceExecutionerFactoryTests {
         File tmpZip = new File(dir, "dl4j_cg_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.computationGraph(tmpZip.getAbsolutePath()))
-                .build();
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(1139)
+        ModelConfig modelConfig = DL4JConfig.builder()
+                .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
                 .build();
 
         ModelStep modelPipelineStep = ModelStep.builder()
@@ -198,14 +187,11 @@ public class InferenceExecutionerFactoryTests {
                 .modelConfig(modelConfig)
                 .build();
 
-        ComputationGraphInferenceExecutionerFactory factory = new ComputationGraphInferenceExecutionerFactory();
+        Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
-        MultiComputationGraphInferenceExecutioner computationGraphInferenceExecutioner = (MultiComputationGraphInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
-        assertNotNull(computationGraphInferenceExecutioner);
-        assertNotNull(computationGraphInferenceExecutioner.model());
-        assertNotNull(computationGraphInferenceExecutioner.modelLoader());
-
-
+        MultiComputationGraphInferenceExecutioner multiComputationGraphInferenceExecutioner = (MultiComputationGraphInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
+        assertNotNull(multiComputationGraphInferenceExecutioner);
+        assertNotNull(multiComputationGraphInferenceExecutioner.model());
+        assertNotNull(multiComputationGraphInferenceExecutioner.modelLoader());
     }
-
 }

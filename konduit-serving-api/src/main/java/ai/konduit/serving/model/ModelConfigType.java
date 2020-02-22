@@ -52,12 +52,8 @@ public class ModelConfigType implements Serializable, TextConfig {
     private String modelLoadingPath;
 
 
-    public static ModelConfigType computationGraph(String path) {
-        return new ModelConfigType(ModelConfig.ModelType.COMPUTATION_GRAPH, path);
-    }
-
-    public static ModelConfigType multiLayerNetwork(String path) {
-        return new ModelConfigType(ModelConfig.ModelType.MULTI_LAYER_NETWORK, path);
+    public static ModelConfigType dl4j(String path) {
+        return new ModelConfigType(ModelConfig.ModelType.DL4J, path);
     }
 
     public static ModelConfigType keras(String path) {

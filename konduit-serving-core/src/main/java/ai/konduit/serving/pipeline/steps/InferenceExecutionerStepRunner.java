@@ -73,11 +73,8 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
                 case TENSORFLOW:
                     inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.TensorflowInferenceExecutionerFactory").newInstance();
                     break;
-                case COMPUTATION_GRAPH:
-                    inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.ComputationGraphInferenceExecutionerFactory").newInstance();
-                    break;
-                case MULTI_LAYER_NETWORK:
-                    inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.MultiLayerNetworkInferenceExecutionerFactory").newInstance();
+                case DL4J:
+                    inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.Dl4jInferenceExecutionerFactory").newInstance();
                     break;
                 case PMML:
                     inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.PmmlInferenceExecutionerFactory").newInstance();

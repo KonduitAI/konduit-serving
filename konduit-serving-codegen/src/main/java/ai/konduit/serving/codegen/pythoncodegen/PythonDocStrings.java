@@ -59,7 +59,7 @@ public class PythonDocStrings {
                         "    includes the model loading path and the model type. It's used in\n" +
                         "    konduit.ModelConfig.\n" +
                         "\n" +
-                        "    :param model_type: Can be any of 'COMPUTATION_GRAPH', 'MULTI_LAYER_NETWORK',\n" +
+                        "    :param model_type: Can be any of 'DL4J',\n" +
                         "        'PMML', 'TENSORFLOW', 'KERAS', and 'SAMEDIFF'.\n" +
                         "    :param model_loading_path: path to the model file\n" +
                         "    \"\"\""

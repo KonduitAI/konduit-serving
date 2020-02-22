@@ -148,7 +148,7 @@ public class KonduitServingMainTest {
         ModelConfig modelConfig = DL4JConfig.builder()
                 .modelConfigType(
                         ModelConfigType.builder().modelLoadingPath(modelSave.getAbsolutePath())
-                                .modelType(ModelConfig.ModelType.MULTI_LAYER_NETWORK)
+                                .modelType(ModelConfig.ModelType.DL4J)
                                 .build()
                 ).build();
 

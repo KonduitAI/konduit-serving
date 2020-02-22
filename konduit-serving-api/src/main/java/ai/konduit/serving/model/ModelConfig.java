@@ -90,8 +90,7 @@ public abstract class ModelConfig implements Serializable, TextConfig {
 
 
     public enum ModelType {
-        COMPUTATION_GRAPH,
-        MULTI_LAYER_NETWORK,
+        DL4J,
         PMML,
         TENSORFLOW,
         KERAS,

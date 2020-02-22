@@ -15,8 +15,7 @@ KONDUIT_PID_STORAGE = os.path.join(KONDUIT_DIR, "pid.json")
 MODEL_TYPES = [
     "TENSORFLOW",
     "KERAS",
-    "COMPUTATION_GRAPH",
-    "MULTI_LAYER_NETWORK",
+    "DL4J",
     "PMML",
     "SAMEDIFF",
 ]
@@ -224,7 +223,7 @@ def get_model_step(step_config, step_type):
     """Get a ModelStep from a configuration object
 
     :param step_config: python dictionary with properties to create a PipelineStep
-    :param step_type: type of the step (TENSORFLOW, KERAS, COMPUTATION_GRAPH, MULTI_LAYER_NETWORK, PMML or SAMEDIFF)
+    :param step_type: type of the step (TENSORFLOW, KERAS, DL4J, PMML or SAMEDIFF)
     :return: konduit.inference.ModelStep instance.
     """
     model_config_type = ModelConfigType(
