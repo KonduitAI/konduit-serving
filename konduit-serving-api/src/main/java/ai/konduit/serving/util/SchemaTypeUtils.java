@@ -383,19 +383,13 @@ public class SchemaTypeUtils {
      * @return the extracted {@link INDArray}
      */
     public static INDArray[] toArrays(Record[] records) {
-        INDArray[] ret = new INDArray[records[0].getRecord().size()];
+        INDArray[] ret = new INDArray[records.length];
+
         int initialLength = ret.length;
         //each ndarray
         for (int i = 0; i < initialLength; i++) {
-            List<INDArray> accum = new ArrayList<>();
-            //for each record
-            for (Record record : records) {
-                NDArrayWritable writable = (NDArrayWritable) record.getRecord().get(i);
-                accum.add(writable.get());
-
-            }
-
-            ret[i] = Nd4j.concat(0, accum.toArray(new INDArray[0]));
+            NDArrayWritable ndArrayWritable = (NDArrayWritable) records[i].getRecord().get(0);
+            ret[i] = ndArrayWritable.get();
 
         }
 
