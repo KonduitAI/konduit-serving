@@ -60,7 +60,7 @@ public class OnnxModelLoader implements ModelLoader<Session> {
 	session_options.SetGraphOptimizationLevel(ORT_ENABLE_EXTENDED);
         OrtSessionOptionsAppendExecutionProvider_Dnnl(session_options.asOrtSessionOptions(), 1);
 
-	Session session = new Session(env, model_path, session_options); 
+	Session session = new Session(env, new BytePointer(model_path), session_options);
         return session;
     }
 }

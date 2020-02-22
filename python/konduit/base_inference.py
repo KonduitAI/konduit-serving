@@ -355,7 +355,7 @@ class ModelConfigType(object):
     """
 
     _modelType_enum = enum.Enum(
-        "_modelType_enum", "DL4J PMML TENSORFLOW KERAS SAMEDIFF", module=__name__
+        "_modelType_enum", "DL4J ONNX PMML TENSORFLOW KERAS SAMEDIFF", module=__name__
     )
     _types_map = {
         "modelType": {"type": str, "subtype": None},
@@ -1155,10 +1155,10 @@ class ServingConfig(object):
     def __init__(
         self,
         http_port=None,
-        listen_host="localhost",
+        listen_host=None,
         output_data_format="NUMPY",
         uploads_directory="file-uploads/",
-        log_timings=False,
+        log_timings=None,
         metric_types=None,
     ):
         self.__http_port = http_port
@@ -1295,10 +1295,10 @@ class PipelineStep(object):
     _types_map = {
         "inputColumnNames": {"type": dict, "subtype": None},
         "outputColumnNames": {"type": dict, "subtype": None},
-        "inputSchemas": {"type": dict, "subtype": None},
         "outputSchemas": {"type": dict, "subtype": None},
         "outputNames": {"type": list, "subtype": str},
         "inputNames": {"type": list, "subtype": str},
+        "inputSchemas": {"type": dict, "subtype": None},
     }
     _formats_map = {
         "outputNames": "table",
@@ -1309,17 +1309,17 @@ class PipelineStep(object):
         self,
         input_column_names=None,
         output_column_names=None,
-        input_schemas=None,
         output_schemas=None,
         output_names=None,
         input_names=None,
+        input_schemas=None,
     ):
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
-        self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__output_names = output_names
         self.__input_names = input_names
+        self.__input_schemas = input_schemas
 
     def _get_input_column_names(self):
         return self.__input_column_names
@@ -1348,20 +1348,6 @@ class PipelineStep(object):
         self.__output_column_names = value
 
     output_column_names = property(_get_output_column_names, _set_output_column_names)
-
-    def _get_input_schemas(self):
-        return self.__input_schemas
-
-    def _set_input_schemas(self, value):
-        if (
-            not isinstance(value, dict)
-            and not isinstance(value, DictWrapper)
-            and not isinstance(value, DictWrapper)
-        ):
-            raise TypeError("inputSchemas must be type")
-        self.__input_schemas = value
-
-    input_schemas = property(_get_input_schemas, _set_input_schemas)
 
     def _get_output_schemas(self):
         return self.__output_schemas
@@ -1401,6 +1387,20 @@ class PipelineStep(object):
 
     input_names = property(_get_input_names, _set_input_names)
 
+    def _get_input_schemas(self):
+        return self.__input_schemas
+
+    def _set_input_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputSchemas must be type")
+        self.__input_schemas = value
+
+    input_schemas = property(_get_input_schemas, _set_input_schemas)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_column_names is not None:
@@ -1414,12 +1414,6 @@ class PipelineStep(object):
                 self.__output_column_names.as_dict()
                 if hasattr(self.__output_column_names, "as_dict")
                 else self.__output_column_names
-            )
-        if self.__input_schemas is not None:
-            d["inputSchemas"] = (
-                self.__input_schemas.as_dict()
-                if hasattr(self.__input_schemas, "as_dict")
-                else self.__input_schemas
             )
         if self.__output_schemas is not None:
             d["outputSchemas"] = (
@@ -1435,6 +1429,12 @@ class PipelineStep(object):
             d["inputNames"] = [
                 p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
             ]
+        if self.__input_schemas is not None:
+            d["inputSchemas"] = (
+                self.__input_schemas.as_dict()
+                if hasattr(self.__input_schemas, "as_dict")
+                else self.__input_schemas
+            )
         return d
 
 
