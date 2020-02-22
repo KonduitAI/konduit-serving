@@ -29,15 +29,15 @@ import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.python.PythonType;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -72,8 +72,8 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
      * @param outputTypes       output schema types
      * @throws Exception key error
      */
-    public PythonStep(PythonConfig pythonConfig, String[] inputColumnNames, SchemaType[] inputTypes,
-                      String[] outputColumnNames, SchemaType[] outputTypes) throws Exception {
+    public PythonStep(PythonConfig pythonConfig, String[] inputColumnNames, List<SchemaType> inputTypes,
+                      String[] outputColumnNames, List<SchemaType> outputTypes) throws Exception {
         String defaultName = "default";
         this.setInput(defaultName, inputColumnNames, inputTypes);
         this.setOutput(defaultName, outputColumnNames, outputTypes);
@@ -89,9 +89,9 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
      * @param inputTypes       input schema types
      * @throws Exception key error
      */
-    public PythonStep(PythonConfig pythonConfig, String[] inputColumnNames, SchemaType[] inputTypes)
+    public PythonStep(PythonConfig pythonConfig, String[] inputColumnNames, List<SchemaType> inputTypes)
             throws Exception {
-        this(pythonConfig, inputColumnNames, inputTypes, new String[]{}, new SchemaType[]{});
+        this(pythonConfig, inputColumnNames, inputTypes, new String[]{}, Collections.emptyList());
     }
 
     /**
@@ -111,10 +111,10 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
         this.pythonConfig(defaultName, pythonConfig);
     }
 
-    private static SchemaType[] pythonToDataVecVarTypes(String[] pythonVarTypes) {
+    private static List<SchemaType> pythonToDataVecVarTypes(String[] pythonVarTypes) {
         return Arrays.stream(pythonVarTypes)
                 .map(PythonStep::pythonToDataVecVarTypes)
-                .toArray(SchemaType[]::new);
+                .collect(Collectors.toList());
     }
 
     private static SchemaType pythonToDataVecVarTypes(String pythonTypeString) {
@@ -146,14 +146,14 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
 
     @Override
     public PredictionType[] validPredictionTypes() {
-        return new PredictionType[] {
+        return new PredictionType[]{
                 PredictionType.RAW
         };
     }
 
     @Override
     public DataFormat[] validInputTypes() {
-        return new DataFormat[] {
+        return new DataFormat[]{
                 DataFormat.ARROW,
                 DataFormat.NUMPY,
                 DataFormat.JSON,
@@ -163,7 +163,7 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
 
     @Override
     public Output.DataFormat[] validOutputTypes() {
-        return new Output.DataFormat[] {
+        return new Output.DataFormat[]{
                 Output.DataFormat.ARROW,
                 Output.DataFormat.ND4J,
                 Output.DataFormat.NUMPY,
@@ -231,7 +231,7 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
      * @throws Exception key error
      */
     public PythonStep step(String stepName, PythonConfig pythonConfig, String[] inputColumnNames,
-                           SchemaType[] inputTypes, String[] outputColumnNames, SchemaType[] outputTypes)
+                           List<SchemaType> inputTypes, String[] outputColumnNames, List<SchemaType> outputTypes)
             throws Exception {
         this.setInput(stepName, inputColumnNames, inputTypes);
         this.setOutput(stepName, outputColumnNames, outputTypes);
@@ -250,10 +250,10 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
      * @throws Exception key error
      */
     public PythonStep step(String stepName, PythonConfig pythonConfig, String[] inputColumnNames,
-                           SchemaType[] inputTypes)
+                           List<SchemaType> inputTypes)
             throws Exception {
         this.setInput(stepName, inputColumnNames, inputTypes);
-        this.setOutput(stepName, new String[]{}, new SchemaType[]{});
+        this.setOutput(stepName, new String[]{}, Collections.emptyList());
         this.pythonConfig(stepName, pythonConfig);
 
         return this;
@@ -313,5 +313,13 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
     @Override
     public String pipelineStepClazz() {
         return "ai.konduit.serving.pipeline.steps.PythonStepRunner";
+    }
+
+    public static PythonStep fromJson(String json) {
+        return ObjectMappers.fromJson(json, PythonStep.class);
+    }
+
+    public static PythonStep fromYaml(String yaml) {
+        return ObjectMappers.fromYaml(yaml, PythonStep.class);
     }
 }

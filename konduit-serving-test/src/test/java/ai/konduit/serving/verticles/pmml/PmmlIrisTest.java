@@ -105,17 +105,15 @@ public class PmmlIrisTest extends BaseVerticleTest {
                         "sepal_length",
                         "sepal_width",
                         "petal_length",
-                        "petal_width"
-                ))
-                .inputSchema("default", new SchemaType[]{
+                        "petal_width"))
+                .inputSchema("default", Arrays.asList(
                         SchemaType.Double,
                         SchemaType.Double,
                         SchemaType.Double,
-                        SchemaType.Double,
-                })
+                        SchemaType.Double))
                 .outputName("default")
                 .outputColumnName("default", Collections.singletonList("class"))
-                .outputSchema("default", new SchemaType[]{SchemaType.String})
+                .outputSchema("default", Collections.singletonList(SchemaType.String))
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()

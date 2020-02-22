@@ -22,8 +22,10 @@
 
 package ai.konduit.serving.model;
 
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -31,15 +33,21 @@ import lombok.experimental.SuperBuilder;
  * TensorFlow extension of {@link ModelConfig}.
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-
 public class TensorFlowConfig extends ModelConfig {
 
     public final static String TENSORFLOW_EXECUTION_CONFIG_KEY = "tensorFlowConfig";
     private String configProtoPath;
     private org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig savedModelConfig;
 
+    public static TensorFlowConfig fromJson(String json){
+        return ObjectMappers.fromJson(json, TensorFlowConfig.class);
+    }
 
+    public static TensorFlowConfig fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, TensorFlowConfig.class);
+    }
 }

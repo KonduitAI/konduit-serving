@@ -28,22 +28,26 @@ import ai.konduit.serving.model.*;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
-import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 import ai.konduit.serving.train.TrainUtils;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.linalg.primitives.Pair;
-import org.nd4j.tensorflow.conversion.TensorDataType;
+import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 
 import java.io.File;
 
 import static org.junit.Assert.*;
 
 public class InferenceExecutionerFactoryTests {
+
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Test
     public void testTensorflow() throws Exception {
@@ -90,7 +94,7 @@ public class InferenceExecutionerFactoryTests {
     @Test
     public void testKerasSequential() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/keras/bidirectional_lstm_tensorflow_1.h5");
-        ModelConfig modelConfig = ModelConfig.builder()
+        ModelConfig modelConfig = KerasConfig.builder()
                 .modelConfigType(ModelConfigType.keras(classPathResource.getFile().getAbsolutePath()))
                 .build();
 
@@ -142,10 +146,11 @@ public class InferenceExecutionerFactoryTests {
     public void testMultiLayerNetwork() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> trainedNetwork = TrainUtils.getTrainedNetwork();
         MultiLayerNetwork save = trainedNetwork.getLeft();
-        File tmpZip = new File("dl4j_mln_model.zip");
+        File dir = testDir.newFolder();
+        File tmpZip = new File(dir, "dl4j_mln_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
-        ModelConfig modelConfig = ModelConfig.builder()
+        ModelConfig modelConfig = DL4JConfig.builder()
                 .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
                 .build();
 
@@ -167,10 +172,12 @@ public class InferenceExecutionerFactoryTests {
     public void testComputationGraph() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> trainedNetwork = TrainUtils.getTrainedNetwork();
         ComputationGraph save = trainedNetwork.getLeft().toComputationGraph();
-        File tmpZip = new File("dl4j_cg_model.zip");
+        File dir = testDir.newFolder();
+        File tmpZip = new File(dir, "dl4j_cg_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
-        ModelConfig modelConfig = ModelConfig.builder()
+
+        ModelConfig modelConfig = DL4JConfig.builder()
                 .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
                 .build();
 

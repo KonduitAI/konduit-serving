@@ -30,9 +30,6 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.parallelism.ParallelInference;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import java.lang.reflect.Field;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 /**
  * An {@link InferenceExecutioner}
  * for use with the {@link ParallelInference}

@@ -443,7 +443,7 @@ public class NativeImageLoader extends BaseImageLoader {
                 ret.data().offset() * Nd4j.sizeOfDataType(ret.data().dataType()));
 
         if (pointer instanceof FloatPointer) {
-            FloatIndexer retidx = FloatIndexer.create((FloatPointer) pagedPointer.asFloatPointer(),
+            FloatIndexer retidx = FloatIndexer.create(pagedPointer.asFloatPointer(),
                     new long[]{channels, rows, cols}, new long[]{stride[0], stride[1], stride[2]}, direct);
             if (idx instanceof UByteIndexer) {
                 UByteIndexer ubyteidx = (UByteIndexer) idx;
@@ -488,7 +488,7 @@ public class NativeImageLoader extends BaseImageLoader {
             }
             retidx.release();
         } else if (pointer instanceof DoublePointer) {
-            DoubleIndexer retidx = DoubleIndexer.create((DoublePointer) pagedPointer.asDoublePointer(),
+            DoubleIndexer retidx = DoubleIndexer.create(pagedPointer.asDoublePointer(),
                     new long[]{channels, rows, cols}, new long[]{stride[0], stride[1], stride[2]}, direct);
             if (idx instanceof UByteIndexer) {
                 UByteIndexer ubyteidx = (UByteIndexer) idx;

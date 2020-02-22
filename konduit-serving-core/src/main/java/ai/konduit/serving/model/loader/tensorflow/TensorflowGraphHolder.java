@@ -21,10 +21,7 @@
  */
 
 package ai.konduit.serving.model.loader.tensorflow;
-import org.nd4j.tensorflow.conversion.TensorDataType;
-import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
-import org.nd4j.tensorflow.conversion.TensorflowConversion;
-import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,6 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.tensorflow.TF_Graph;
 import org.bytedeco.tensorflow.TF_Status;
 import org.nd4j.base.Preconditions;
+import org.nd4j.tensorflow.conversion.TensorDataType;
+import org.nd4j.tensorflow.conversion.TensorflowConversion;
+import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
+import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 import org.tensorflow.framework.ConfigProto;
 import org.tensorflow.framework.GraphDef;
 
