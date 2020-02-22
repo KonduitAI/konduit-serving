@@ -132,9 +132,10 @@ public class KonduitServlet extends HttpServlet {
 
     }
 
+
     @Override
-    public void close() {
-        super.close();
+    public void destroy() {
+        super.destroy();
         if (httpClient != null) {
             httpClient.close();
         }
