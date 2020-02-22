@@ -60,7 +60,7 @@ public class KonduitServingMainTest {
     public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
 
     @Rule
-    public Timeout rule = Timeout.seconds(60);
+    public Timeout rule = Timeout.seconds(120);
 
     @ClassRule
     public static TemporaryFolder folder = new TemporaryFolder();
