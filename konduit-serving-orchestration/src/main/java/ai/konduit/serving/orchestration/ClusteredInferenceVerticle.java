@@ -72,29 +72,25 @@ public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
     public void init(Vertx vertx, Context context) {
         this.context = context;
         this.vertx = vertx;
-        try {
-            inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
-            //inference endpoints (pipeline execution, loading,..)
-            this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
-            //get the cluster manager to get node information
-            VertxImpl impl = (VertxImpl) vertx;
-            clusterManager = impl.getClusterManager();
-            this.router.get("/numnodes").handler(ctx -> {
-                List<String> nodes = clusterManager.getNodes();
-                ctx.response().putHeader("Content-Type", "application/json");
-                ctx.response().end(new JsonObject().put("numnodes", nodes.size()).toBuffer());
-            });
+        inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
+        //inference endpoints (pipeline execution, loading,..)
+        this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+        //get the cluster manager to get node information
+        VertxImpl impl = (VertxImpl) vertx;
+        clusterManager = impl.getClusterManager();
+        this.router.get("/numnodes").handler(ctx -> {
+            List<String> nodes = clusterManager.getNodes();
+            ctx.response().putHeader("Content-Type", "application/json");
+            ctx.response().end(new JsonObject().put("numnodes", nodes.size()).toBuffer());
+        });
 
-            this.router.get("/nodes").handler(ctx -> {
-                List<String> nodes = clusterManager.getNodes();
-                ctx.response().putHeader("Content-Type", "application/json");
-                ctx.response().end(new JsonObject().put("nodes", new JsonArray(nodes)).toBuffer());
-            });
+        this.router.get("/nodes").handler(ctx -> {
+            List<String> nodes = clusterManager.getNodes();
+            ctx.response().putHeader("Content-Type", "application/json");
+            ctx.response().end(new JsonObject().put("nodes", new JsonArray(nodes)).toBuffer());
+        });
 
-            setupWebServer();
-        } catch (java.io.IOException e) {
-            log.error("Unable to parse InferenceConfiguration", e);
-        }
+        setupWebServer();
     }
 
 

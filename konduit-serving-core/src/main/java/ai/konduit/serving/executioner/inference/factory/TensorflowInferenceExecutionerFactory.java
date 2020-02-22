@@ -28,9 +28,9 @@ import ai.konduit.serving.model.TensorFlowConfig;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
-import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.base.Preconditions;
+import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 
 import java.util.List;
 

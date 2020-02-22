@@ -25,8 +25,6 @@ package ai.konduit.serving.threadpool.tensorflow;
 
 import ai.konduit.serving.model.loader.ModelLoader;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
-import org.nd4j.tensorflow.conversion.TensorflowConversion;
-import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 import ai.konduit.serving.threadpool.tensorflow.observables.BasicTensorflowInferenceObservable;
 import ai.konduit.serving.threadpool.tensorflow.observables.BatchedTensorflowInferenceObservable;
 import ai.konduit.serving.threadpool.tensorflow.observables.TensorflowObservable;
@@ -37,6 +35,8 @@ import org.deeplearning4j.parallelism.inference.InferenceMode;
 import org.deeplearning4j.parallelism.inference.observers.BasicInferenceObserver;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.tensorflow.conversion.TensorflowConversion;
+import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 
 import java.util.LinkedHashMap;
 import java.util.List;

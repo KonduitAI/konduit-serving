@@ -136,6 +136,7 @@
 
         <commons-lang3.version>3.6</commons-lang3.version>
         <snakeyaml.version>1.20</snakeyaml.version>
+        <reflections.version>0.9.10</reflections.version>
 
         <oshi.version>3.13.4</oshi.version>
     </properties>

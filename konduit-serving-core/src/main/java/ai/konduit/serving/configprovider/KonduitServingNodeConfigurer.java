@@ -28,7 +28,6 @@ import com.beust.jcommander.Parameter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.DeploymentOptions;
@@ -39,8 +38,14 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import io.vertx.micrometer.MicrometerMetricsOptions;
+import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
+import lombok.*;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.bytedeco.systems.global.linux;
+import org.bytedeco.systems.global.macosx;
+import org.bytedeco.systems.global.windows;
 
 import java.io.File;
 import java.io.IOException;
@@ -170,10 +175,12 @@ public class KonduitServingNodeConfigurer {
             description = "Whether an instance is clustered or not")
     private boolean isClustered = false;
 
+    @Builder.Default
     @Parameter(names = {"--help", "-h"}, arity = 0, help = true,
             description = "See the help menu")
     private boolean help = false;
 
+    @Builder.Default
     private MeterRegistry registry = BackendRegistries.getDefaultNow();
     private ConfigStoreOptions configStoreOptions;
     private DeploymentOptions deploymentOptions;
@@ -317,16 +324,12 @@ public class KonduitServingNodeConfigurer {
         }
 
 
-        try {
-            deploymentOptions = new DeploymentOptions()
-                    .setWorker(workerNode)
-                    .setHa(ha).setInstances(numInstances)
-                    .setConfig(new JsonObject(inferenceConfiguration.toJson()))
-                    .setExtraClasspath(Arrays.asList(System.getProperty("java.class.path").split(":")))
-                    .setWorkerPoolSize(workerPoolSize);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        deploymentOptions = new DeploymentOptions()
+                .setWorker(workerNode)
+                .setHa(ha).setInstances(numInstances)
+                .setConfig(new JsonObject(inferenceConfiguration.toJson()))
+                .setExtraClasspath(Arrays.asList(System.getProperty("java.class.path").split(":")))
+                .setWorkerPoolSize(workerPoolSize);
     }
 
     private int getPid() throws UnsatisfiedLinkError {

@@ -22,6 +22,8 @@
 
 package ai.konduit.serving.model;
 
+import ai.konduit.serving.config.TextConfig;
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,7 +44,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ModelConfigType implements Serializable {
+public class ModelConfigType implements Serializable, TextConfig {
 
     @JsonProperty
     private ModelConfig.ModelType modelType;
@@ -50,12 +52,8 @@ public class ModelConfigType implements Serializable {
     private String modelLoadingPath;
 
 
-    public static ModelConfigType computationGraph(String path) {
-        return new ModelConfigType(ModelConfig.ModelType.COMPUTATION_GRAPH, path);
-    }
-
-    public static ModelConfigType multiLayerNetwork(String path) {
-        return new ModelConfigType(ModelConfig.ModelType.MULTI_LAYER_NETWORK, path);
+    public static ModelConfigType dl4j(String path) {
+        return new ModelConfigType(ModelConfig.ModelType.DL4J, path);
     }
 
     public static ModelConfigType keras(String path) {
@@ -74,5 +72,12 @@ public class ModelConfigType implements Serializable {
         return new ModelConfigType(ModelConfig.ModelType.PMML, path);
     }
 
+    public static ModelConfigType fromJson(String json){
+        return ObjectMappers.fromJson(json, ModelConfigType.class);
+    }
+
+    public static ModelConfigType fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, ModelConfigType.class);
+    }
 }
 

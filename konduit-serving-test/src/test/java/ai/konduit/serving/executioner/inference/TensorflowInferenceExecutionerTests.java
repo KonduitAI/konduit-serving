@@ -23,7 +23,6 @@
 package ai.konduit.serving.executioner.inference;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
-import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import org.deeplearning4j.parallelism.inference.InferenceMode;
 import org.junit.Rule;
@@ -32,6 +31,7 @@ import org.junit.rules.TemporaryFolder;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;

@@ -22,8 +22,8 @@
 
 package ai.konduit.serving.config;
 
-import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.metrics.MetricType;
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,7 +39,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ServingConfig {
+public class ServingConfig implements TextConfig {
 
     private int httpPort;
 
@@ -66,4 +66,11 @@ public class ServingConfig {
             MetricType.NATIVE
     );
 
+    public static ServingConfig fromJson(String json){
+        return ObjectMappers.fromJson(json, ServingConfig.class);
+    }
+
+    public static ServingConfig fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, ServingConfig.class);
+    }
 }

@@ -23,6 +23,7 @@
 
 package ai.konduit.serving.config;
 
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -45,7 +46,7 @@ import java.io.Serializable;
  * valid slices. Our unknown vector is simply [0, 0, 0] in this example. Now, if we query for
  * the indices {-2, 1} we'd get [[0, 0, 0], [4, 5, 6]].
  */
-public class MemMapConfig implements Serializable {
+public class MemMapConfig implements Serializable, TextConfig {
 
     public final static String ARRAY_URL = "arrayPath";
     public final static String INITIAL_MEM_MAP_SIZE = "initialMemmapSize";
@@ -58,5 +59,11 @@ public class MemMapConfig implements Serializable {
     @Builder.Default
     private String workSpaceName = WORKSPACE_NAME;
 
+    public static MemMapConfig fromJson(String json){
+        return ObjectMappers.fromJson(json, MemMapConfig.class);
+    }
 
+    public static MemMapConfig fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, MemMapConfig.class);
+    }
 }

@@ -23,9 +23,9 @@
 package ai.konduit.serving.pipeline.config;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -37,9 +37,10 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
+@Builder
 public class NormalizationConfig implements Serializable {
 
+    @Builder.Default
     private Map<String, String> config = new HashMap<>();
 
     public void put(String key, String value) {

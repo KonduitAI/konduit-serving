@@ -22,7 +22,6 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import org.datavec.api.records.Record;

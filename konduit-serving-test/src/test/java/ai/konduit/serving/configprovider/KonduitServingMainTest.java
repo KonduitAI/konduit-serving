@@ -25,6 +25,7 @@ package ai.konduit.serving.configprovider;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.input.conversion.BatchInputParser;
+import ai.konduit.serving.model.DL4JConfig;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
@@ -144,10 +145,10 @@ public class KonduitServingMainTest {
                 .httpPort(getAvailablePort())
                 .build();
 
-        ModelConfig modelConfig = ModelConfig.builder()
+        ModelConfig modelConfig = DL4JConfig.builder()
                 .modelConfigType(
                         ModelConfigType.builder().modelLoadingPath(modelSave.getAbsolutePath())
-                                .modelType(ModelConfig.ModelType.MULTI_LAYER_NETWORK)
+                                .modelType(ModelConfig.ModelType.DL4J)
                                 .build()
                 ).build();
 

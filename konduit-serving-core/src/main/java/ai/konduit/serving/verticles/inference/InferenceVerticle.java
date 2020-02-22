@@ -35,7 +35,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
+import java.util.List;
 
 /**
  * A {@link io.vertx.core.Verticle} that takes multi part file uploads
@@ -73,7 +73,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         super.stop();
 
         if(pipelineRouteDefiner.getPipelineExecutioner() != null)
-            pipelineRouteDefiner.getPipelineExecutioner().destroy();
+            pipelineRouteDefiner.getPipelineExecutioner().close();
         
         log.debug("Stopping konduit server.");
     }
@@ -82,25 +82,21 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     public void init(Vertx vertx, Context context) {
         this.context = context;
         this.vertx = vertx;
-        try {
-            inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
-            pipelineRouteDefiner = new PipelineRouteDefiner();
+        inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
+        pipelineRouteDefiner = new PipelineRouteDefiner();
+        this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
+        //define the memory map endpoints if the user specifies the memory map configuration
+        if (inferenceConfiguration.getMemMapConfig() != null) {
+            this.router = new MemMapRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+        } else {
             this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
-            //define the memory map endpoints if the user specifies the memory map configuration
-            if (inferenceConfiguration.getMemMapConfig() != null) {
-                this.router = new MemMapRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
-            } else {
-                this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
 
-                // Checking if the configuration runners can be created without problems or not
-                for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
-                    pipelineStep.createRunner();
-            }
-
-            setupWebServer();
-        } catch (IOException e) {
-            log.error("Unable to parse InferenceConfiguration", e);
+            // Checking if the configuration runners can be created without problems or not
+            for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
+                pipelineStep.createRunner();
         }
+
+        setupWebServer();
     }
 
     protected void setupWebServer() {
@@ -113,15 +109,17 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         }
 
         final int portValueFinal = portValue;
+        List<PipelineStep> steps = inferenceConfiguration.getSteps();
+        final int nSteps = steps == null ? 0 : steps.size();
         vertx.createHttpServer()
                 .requestHandler(router)
                 .exceptionHandler(Throwable::printStackTrace)
                 .listen(portValueFinal, inferenceConfiguration.getServingConfig().getListenHost(), listenResult -> {
                     if (listenResult.failed()) {
-                        log.debug("Could not start HTTP server");
+                        log.error("Could not start HTTP server on port {}", portValueFinal);
                         listenResult.cause().printStackTrace();
                     } else {
-                        log.debug("Server started on port " + portValueFinal);
+                        log.info("Server started on port {} with {} pipeline steps", portValueFinal, nSteps);
                     }
                 });
     }
