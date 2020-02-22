@@ -108,8 +108,8 @@
         <jackson.version>2.10.0</jackson.version>
         <tensorflow.version>1.15.0</tensorflow.version>
 
-        <javacpp.version>1.5.2</javacpp.version>
-        <javacpp-presets.version>1.5.2</javacpp-presets.version>
+        <javacpp.version>1.5.3-SNAPSHOT</javacpp.version>
+        <javacpp-presets.version>1.5.3-SNAPSHOT</javacpp-presets.version>
         <javacv.version>1.5.2</javacv.version>
         <opencv.version>4.1.2</opencv.version>
         <cpython.version>3.7.5</cpython.version>
