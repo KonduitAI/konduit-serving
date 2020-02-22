@@ -22,23 +22,30 @@
 
 package ai.konduit.serving.model;
 
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
 
 
-@Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
 /**
  * Configuration for models in PMML format.
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
+@AllArgsConstructor
 public class PmmlConfig extends ModelConfig {
 
     public final static String DEFAULT_EVALUATOR_FACTORY = "org.jpmml.evaluator.ModelEvaluatorFactory";
+    @Builder.Default
     private String evaluatorFactoryName = DEFAULT_EVALUATOR_FACTORY;
+
+    public PmmlConfig(){
+        this.evaluatorFactoryName = DEFAULT_EVALUATOR_FACTORY;
+    }
 
     /**
      * Default PMML config
@@ -54,5 +61,13 @@ public class PmmlConfig extends ModelConfig {
 
     public String evaluatorFactoryName() {
         return evaluatorFactoryName == null ? DEFAULT_EVALUATOR_FACTORY : evaluatorFactoryName;
+    }
+
+    public static PmmlConfig fromJson(String json){
+        return ObjectMappers.fromJson(json, PmmlConfig.class);
+    }
+
+    public static PmmlConfig fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, PmmlConfig.class);
     }
 }

@@ -22,11 +22,9 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.executioner.inference.InferenceExecutioner;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.factory.InferenceExecutionerFactory;
-import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.util.SchemaTypeUtils;
@@ -40,9 +38,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * An {@link InferenceExecutioner}
@@ -108,27 +104,8 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
     }
 
     @Override
-    public void destroy() {
+    public void close() {
         inferenceExecutioner.stop();
-    }
-
-    @Override
-    public Map<String, SchemaType[]> inputTypes() {
-        Map<String, SchemaType[]> ret = new LinkedHashMap<>();
-        for (int i = 0; i < pipelineStep.getInputNames().size(); i++) {
-            ret.put(pipelineStep.getInputNames().get(i), new SchemaType[]{SchemaType.NDArray});
-        }
-        return ret;
-    }
-
-    @Override
-    public Map<String, SchemaType[]> outputTypes() {
-        Map<String, SchemaType[]> ret = new LinkedHashMap<>();
-        for (int i = 0; i < pipelineStep.getOutputNames().size(); i++) {
-            ret.put(pipelineStep.getOutputNames().get(i), new SchemaType[]{SchemaType.NDArray});
-        }
-
-        return ret;
     }
 
     @Override

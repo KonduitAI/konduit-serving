@@ -51,11 +51,9 @@ import java.util.*;
 public class YOLOOutputAdapter implements MultiOutputAdapter<INDArray[]> {
 
     private double threshold;
-    @Builder.Default
-    private int[] inputShape = {3, 608, 608};
+    private int[] inputShape;
     private Labels labels;
-    @Builder.Default
-    private INDArray boundingBoxPriors = Nd4j.create(YOLO2.DEFAULT_PRIOR_BOXES);
+    private INDArray boundingBoxPriors;
     private int gridWidth;
     private int gridHeight;
     private int numLabels;

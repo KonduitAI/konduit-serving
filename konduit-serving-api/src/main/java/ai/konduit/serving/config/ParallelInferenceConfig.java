@@ -23,6 +23,7 @@
 package ai.konduit.serving.config;
 
 
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,7 +42,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ParallelInferenceConfig implements Serializable {
+public class ParallelInferenceConfig implements Serializable, TextConfig {
 
     private static final int NUM_WORKERS = 1;
 
@@ -74,4 +75,11 @@ public class ParallelInferenceConfig implements Serializable {
 
     }
 
+    public static ParallelInferenceConfig fromJson(String json){
+        return ObjectMappers.fromJson(json, ParallelInferenceConfig.class);
+    }
+
+    public static ParallelInferenceConfig fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, ParallelInferenceConfig.class);
+    }
 }

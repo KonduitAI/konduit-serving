@@ -26,18 +26,18 @@ import ai.konduit.serving.config.Input.DataFormat;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ParallelInferenceConfig;
-import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
-import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.config.NormalizationConfig;
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
-import org.datavec.api.transform.schema.Schema;
 
 @SuperBuilder
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ModelStep extends BasePipelineStep<ModelStep> {
 
     private ModelConfig modelConfig;
@@ -84,5 +84,13 @@ public class ModelStep extends BasePipelineStep<ModelStep> {
     @Override
     public String pipelineStepClazz() {
         return "ai.konduit.serving.pipeline.steps.InferenceExecutionerStepRunner";
+    }
+
+    public static ModelStep fromJson(String json){
+        return ObjectMappers.fromJson(json, ModelStep.class);
+    }
+
+    public static ModelStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, ModelStep.class);
     }
 }

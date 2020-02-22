@@ -24,9 +24,10 @@ package ai.konduit.serving.pipeline.step;
 
 import ai.konduit.serving.config.Input.DataFormat;
 import ai.konduit.serving.config.Output;
-import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
@@ -36,6 +37,7 @@ import java.util.Map;
 @Data
 @SuperBuilder
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class ArrayConcatenationStep extends BasePipelineStep<ArrayConcatenationStep> {
 
     @Singular
@@ -62,5 +64,13 @@ public class ArrayConcatenationStep extends BasePipelineStep<ArrayConcatenationS
     @Override
     public String pipelineStepClazz() {
         return "ai.konduit.serving.pipeline.steps.ArrayConcatenationStepRunner";
+    }
+
+    public static ArrayConcatenationStep fromJson(String json){
+        return ObjectMappers.fromJson(json, ArrayConcatenationStep.class);
+    }
+
+    public static ArrayConcatenationStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, ArrayConcatenationStep.class);
     }
 }

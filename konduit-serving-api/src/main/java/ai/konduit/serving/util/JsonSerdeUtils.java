@@ -23,7 +23,6 @@ import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.*;
-import org.datavec.image.data.ImageWritable;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
