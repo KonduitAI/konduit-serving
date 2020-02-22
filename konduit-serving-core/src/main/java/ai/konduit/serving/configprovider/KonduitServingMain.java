@@ -95,13 +95,9 @@ public class KonduitServingMain {
     }
 
     public void runMain(KonduitServingNodeConfigurer konduitServingNodeConfigurer) {
-          //no need to configure, inerence verticle exists
+        //no need to configure, inference verticle exists
         if (konduitServingNodeConfigurer.getInferenceConfiguration() != null) {
-            try {
-                konduitServingNodeConfigurer.configureWithJson(new JsonObject(konduitServingNodeConfigurer.getInferenceConfiguration().toJson()));
-            } catch (JsonProcessingException e) {
-                log.error("Unable to load json object for configuration",e);
-            }
+            konduitServingNodeConfigurer.configureWithJson(new JsonObject(konduitServingNodeConfigurer.getInferenceConfiguration().toJson()));
 
             Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
             deployVerticle(konduitServingNodeConfigurer, vertx);
