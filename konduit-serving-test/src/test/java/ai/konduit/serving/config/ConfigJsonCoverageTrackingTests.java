@@ -141,7 +141,7 @@ public class ConfigJsonCoverageTrackingTests {
                         .inputNames(Arrays.asList("x"))
                         .outputNames(Arrays.asList("z"))
                         .build())
-                .step(ModelStep.builder().modelConfig(DL4JConfig.builder().modelConfigType(ModelConfigType.computationGraph("/my/model/path.bin")).build()).build())
+                .step(ModelStep.builder().modelConfig(DL4JConfig.builder().modelConfigType(ModelConfigType.dl4j("/my/model/path.bin")).build()).build())
                 .servingConfig(ServingConfig.builder().httpPort(12345).logTimings(true).build())
                 .build();
 
@@ -213,7 +213,7 @@ public class ConfigJsonCoverageTrackingTests {
     @Test
     public void testModelStep(){
         testConfigSerDe(ModelStep.builder().modelConfig(DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.computationGraph("/my/path/here")).build()).build());
+                .modelConfigType(ModelConfigType.dl4j("/my/path/here")).build()).build());
     }
 
     @Test
@@ -230,7 +230,7 @@ public class ConfigJsonCoverageTrackingTests {
     @Test
     public void testDL4JConfig(){
         DL4JConfig d = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.multiLayerNetwork("/Some/Path/Here"))
+                .modelConfigType(ModelConfigType.dl4j("/Some/Path/Here"))
                 .tensorDataTypesConfig(TensorDataTypesConfig.builder()
                         .inputDataType("in", TensorDataType.FLOAT)
                         .outputDataType("out", TensorDataType.FLOAT)
