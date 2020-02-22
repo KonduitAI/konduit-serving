@@ -109,8 +109,8 @@
         <tensorflow.version>1.15.0</tensorflow.version>
 
         <javacpp.version>1.5.3-SNAPSHOT</javacpp.version>
-        <javacpp-presets.version>1.5.3-SNAPSHOT</javacpp-presets.version>
-        <javacv.version>1.5.2</javacv.version>
+        <javacpp-presets.version>1.5.3</javacpp-presets.version>
+        <javacv.version>1.5.3</javacv.version>
         <opencv.version>4.1.2</opencv.version>
         <cpython.version>3.7.5</cpython.version>
         <mkl.version>2019.5</mkl.version>
@@ -121,13 +121,13 @@
         </tensorflow.javacpp.version>
         <mkl-dnn.version>0.21.2</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
-        <numpy.version>1.17.3</numpy.version>
+        <numpy.version>1.18.1</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
-        <openblas.version>0.3.7</openblas.version>
+        <openblas.version>0.3.8</openblas.version>
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>
         <leptonica.version>1.78.0</leptonica.version>
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
-        <hdf5.version>1.10.5</hdf5.version>
+        <hdf5.version>1.10.6</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
         <jna.version>5.3.1</jna.version>
         <cuda>10.1</cuda>
