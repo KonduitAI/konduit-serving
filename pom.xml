@@ -103,10 +103,10 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <jpmml.version>1.4.1</jpmml.version>
-        <vertx-stack.version>3.8.3</vertx-stack.version>
+        <vertx-stack.version>3.8.5</vertx-stack.version>
         <lombok.version>1.18.2</lombok.version>
         <jackson.version>2.10.0</jackson.version>
-        <tensorflow.version>1.15.0</tensorflow.version>
+        <tensorflow.version>1.15.2</tensorflow.version>
 
         <javacpp.version>1.5.3-SNAPSHOT</javacpp.version>
         <javacpp-presets.version>1.5.3</javacpp-presets.version>
@@ -130,7 +130,7 @@
         <hdf5.version>1.10.6</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
         <jna.version>5.3.1</jna.version>
-        <cuda>10.1</cuda>
+        <cuda>10.2</cuda>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
 
@@ -191,6 +191,11 @@
             <dependency>
                 <groupId>org.nd4j</groupId>
                 <artifactId>nd4j-arrow</artifactId>
+                <version>${nd4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.nd4j</groupId>
+                <artifactId>nd4j-api</artifactId>
                 <version>${nd4j.version}</version>
             </dependency>
             <dependency>
@@ -388,11 +393,6 @@
                 <version>${datavec.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.deeplearning4j</groupId>
-                <artifactId>dl4j-perf</artifactId>
-                <version>${dl4j.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.nd4j</groupId>
                 <artifactId>nd4j-jackson</artifactId>
                 <version>${dl4j.version}</version>
@@ -537,6 +537,11 @@
             </dependency>
 
             <!-- vertx and arrow netty clash -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-util</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-common</artifactId>
