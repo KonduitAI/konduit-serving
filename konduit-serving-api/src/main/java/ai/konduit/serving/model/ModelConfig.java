@@ -23,6 +23,7 @@
 package ai.konduit.serving.model;
 
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.config.TextConfig;
 import ai.konduit.serving.output.types.ClassifierOutput;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -74,11 +75,12 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = SameDiffConfig.class, name = "SameDiffConfig"),
         @JsonSubTypes.Type(value = TensorFlowConfig.class, name = "TensorFlowConfig"),
         @JsonSubTypes.Type(value = PythonConfig.class, name = "PythonConfig"),
+        @JsonSubTypes.Type(value = DL4JConfig.class, name= "DL4JConfig")
 
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 @SuperBuilder
-public class ModelConfig implements Serializable {
+public abstract class ModelConfig implements Serializable, TextConfig {
 
     @JsonProperty
     private TensorDataTypesConfig tensorDataTypesConfig;
@@ -88,8 +90,7 @@ public class ModelConfig implements Serializable {
 
 
     public enum ModelType {
-        COMPUTATION_GRAPH,
-        MULTI_LAYER_NETWORK,
+	DL4J,
 	ONNX,
         PMML,
         TENSORFLOW,

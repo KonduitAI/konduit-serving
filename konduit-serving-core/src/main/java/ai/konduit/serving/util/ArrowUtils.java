@@ -141,13 +141,13 @@ public class ArrowUtils {
             INDArray arr = Nd4j.create(rows, cols);
 
             for (i = 0; i < cols; ++i) {
-                INDArray put = convertArrowVector((FieldVector) columnVectors.get(i), schema.getType(i));
+                INDArray put = convertArrowVector(columnVectors.get(i), schema.getType(i));
                 switch (arr.data().dataType()) {
                     case FLOAT:
-                        arr.putColumn(i, Nd4j.create(put.data().asFloat()).reshape((long) rows, 1L));
+                        arr.putColumn(i, Nd4j.create(put.data().asFloat()).reshape(rows, 1L));
                         break;
                     case DOUBLE:
-                        arr.putColumn(i, Nd4j.create(put.data().asDouble()).reshape((long) rows, 1L));
+                        arr.putColumn(i, Nd4j.create(put.data().asDouble()).reshape(rows, 1L));
                 }
             }
 
@@ -176,7 +176,7 @@ public class ArrowUtils {
                 buffer = Nd4j.createBuffer(direct, DataType.LONG, cols);
         }
 
-        return Nd4j.create(buffer, new int[]{cols, 1});
+        return Nd4j.create(buffer, cols, 1);
     }
 
 
@@ -188,15 +188,15 @@ public class ArrowUtils {
             switch (type) {
                 case Integer:
                     int[] fromDataInt = from.isView() ? from.dup().data().asInt() : from.data().asInt();
-                    ret.add(vectorFor(bufferAllocator, (String) name.get(0), fromDataInt));
+                    ret.add(vectorFor(bufferAllocator, name.get(0), fromDataInt));
                     break;
                 case Float:
                     float[] fromDataFloat = from.isView() ? from.dup().data().asFloat() : from.data().asFloat();
-                    ret.add(vectorFor(bufferAllocator, (String) name.get(0), fromDataFloat));
+                    ret.add(vectorFor(bufferAllocator, name.get(0), fromDataFloat));
                     break;
                 case Double:
                     double[] fromData = from.isView() ? from.dup().data().asDouble() : from.data().asDouble();
-                    ret.add(vectorFor(bufferAllocator, (String) name.get(0), fromData));
+                    ret.add(vectorFor(bufferAllocator, name.get(0), fromData));
                     break;
                 default:
                     throw new IllegalArgumentException("Illegal type " + type);
@@ -205,19 +205,19 @@ public class ArrowUtils {
             cols = from.size(1);
 
             for (int i = 0; (long) i < cols; ++i) {
-                INDArray column = from.getColumn((long) i);
+                INDArray column = from.getColumn(i);
                 switch (type) {
                     case Integer:
                         int[] fromDataInt = column.isView() ? column.dup().data().asInt() : from.data().asInt();
-                        ret.add(vectorFor(bufferAllocator, (String) name.get(i), fromDataInt));
+                        ret.add(vectorFor(bufferAllocator, name.get(i), fromDataInt));
                         break;
                     case Float:
                         float[] fromDataFloat = column.isView() ? column.dup().data().asFloat() : from.data().asFloat();
-                        ret.add(vectorFor(bufferAllocator, (String) name.get(i), fromDataFloat));
+                        ret.add(vectorFor(bufferAllocator, name.get(i), fromDataFloat));
                         break;
                     case Double:
                         double[] fromData = column.isView() ? column.dup().data().asDouble() : from.data().asDouble();
-                        ret.add(vectorFor(bufferAllocator, (String) name.get(i), fromData));
+                        ret.add(vectorFor(bufferAllocator, name.get(i), fromData));
                         break;
                     default:
                         throw new IllegalArgumentException("Illegal type " + type);
@@ -327,7 +327,7 @@ public class ArrowUtils {
         Schema.Builder schemaBuilder = new Schema.Builder();
 
         for (int i = 0; i < schema.getFields().size(); ++i) {
-            schemaBuilder.addColumn(metaDataFromField((Field) schema.getFields().get(i)));
+            schemaBuilder.addColumn(metaDataFromField(schema.getFields().get(i)));
         }
 
         return schemaBuilder.build();
@@ -392,12 +392,12 @@ public class ArrowUtils {
         Dictionary[] dictionaries = new Dictionary[vectors.size()];
 
         for (int i = 0; i < vectors.size(); ++i) {
-            DictionaryEncoding dictionary = ((Field) fields.get(i)).getDictionary();
+            DictionaryEncoding dictionary = fields.get(i).getDictionary();
             if (dictionary == null) {
-                dictionary = new DictionaryEncoding((long) i, true, (ArrowType.Int) null);
+                dictionary = new DictionaryEncoding(i, true, null);
             }
 
-            dictionaries[i] = new Dictionary((FieldVector) vectors.get(i), dictionary);
+            dictionaries[i] = new Dictionary(vectors.get(i), dictionary);
         }
 
         return new DictionaryProvider.MapDictionaryProvider(dictionaries);
@@ -409,12 +409,12 @@ public class ArrowUtils {
         List<FieldVector> ret = createFieldVectors(bufferAllocator, schema, numRows);
 
         for (int j = 0; j < schema.numColumns(); ++j) {
-            FieldVector fieldVector = (FieldVector) ret.get(j);
+            FieldVector fieldVector = ret.get(j);
             int row = 0;
 
             for (Iterator var8 = dataVecRecord.iterator(); var8.hasNext(); ++row) {
                 List<Writable> record = (List) var8.next();
-                Writable writable = (Writable) record.get(j);
+                Writable writable = record.get(j);
                 setValue(schema.getType(j), fieldVector, writable, row);
             }
         }
@@ -444,14 +444,14 @@ public class ArrowUtils {
         }
 
         for (i = 0; i < dataVecRecord.size(); ++i) {
-            List<List<T>> record = (List) dataVecRecord.get(i);
+            List<List<T>> record = dataVecRecord.get(i);
 
             for (int j = 0; j < record.size(); ++j) {
-                List<T> curr = (List) record.get(j);
+                List<T> curr = record.get(j);
 
                 for (int k = 0; k < curr.size(); ++k) {
-                    Integer idx = (Integer) currIndex.get(k);
-                    FieldVector fieldVector = (FieldVector) ret.get(k);
+                    Integer idx = currIndex.get(k);
+                    FieldVector fieldVector = ret.get(k);
                     T writable = curr.get(k);
                     setValue(schema.getType(k), fieldVector, writable, idx);
                     currIndex.put(k, idx + 1);
@@ -475,7 +475,7 @@ public class ArrowUtils {
         List<FieldVector> ret = createFieldVectors(bufferAllocator, schema, numRows);
 
         for (int j = 0; j < schema.numColumns(); ++j) {
-            FieldVector fieldVector = (FieldVector) ret.get(j);
+            FieldVector fieldVector = ret.get(j);
 
             for (int row = 0; row < numRows; ++row) {
                 String writable = (String) ((List) dataVecRecord.get(row)).get(j);
@@ -785,12 +785,12 @@ public class ArrowUtils {
         ArrowType arrowType = field.getFieldType().getType();
         if (arrowType instanceof ArrowType.Int) {
             ArrowType.Int intType = (ArrowType.Int) arrowType;
-            return (ColumnMetaData) (intType.getBitWidth() == 32 ? new IntegerMetaData(field.getName()) : new LongMetaData(field.getName()));
+            return intType.getBitWidth() == 32 ? new IntegerMetaData(field.getName()) : new LongMetaData(field.getName());
         } else if (arrowType instanceof ArrowType.Bool) {
             return new BooleanMetaData(field.getName());
         } else if (arrowType instanceof ArrowType.FloatingPoint) {
             ArrowType.FloatingPoint floatingPointType = (ArrowType.FloatingPoint) arrowType;
-            return (ColumnMetaData) (floatingPointType.getPrecision() == FloatingPointPrecision.DOUBLE ? new DoubleMetaData(field.getName()) : new FloatMetaData(field.getName()));
+            return floatingPointType.getPrecision() == FloatingPointPrecision.DOUBLE ? new DoubleMetaData(field.getName()) : new FloatMetaData(field.getName());
         } else if (arrowType instanceof ArrowType.Binary) {
             return new BinaryMetaData(field.getName());
         } else if (arrowType instanceof ArrowType.Utf8) {
@@ -877,13 +877,13 @@ public class ArrowUtils {
                     return timeStampMilliVector.get(row);
                 } else if (fieldVector instanceof TimeMilliVector) {
                     TimeMilliVector timeMilliVector = (TimeMilliVector) fieldVector;
-                    return (long) timeMilliVector.get(row);
+                    return timeMilliVector.get(row);
                 } else if (fieldVector instanceof TimeStampMicroVector) {
                     TimeStampMicroVector timeStampMicroVector = (TimeStampMicroVector) fieldVector;
                     return timeStampMicroVector.get(row);
                 } else if (fieldVector instanceof TimeSecVector) {
                     TimeSecVector timeSecVector = (TimeSecVector) fieldVector;
-                    return (long) timeSecVector.get(row);
+                    return timeSecVector.get(row);
                 } else if (fieldVector instanceof TimeStampMilliVector) {
                     timeStampMilliVector = (TimeStampMilliVector) fieldVector;
                     return timeStampMilliVector.get(row);
