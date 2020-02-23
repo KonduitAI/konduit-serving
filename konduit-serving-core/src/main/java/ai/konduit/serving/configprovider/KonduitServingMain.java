@@ -31,8 +31,6 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import org.nd4j.base.Preconditions;
-import org.nd4j.shade.jackson.core.JsonProcessingException;
 
 import java.util.Arrays;
 
