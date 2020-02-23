@@ -23,12 +23,7 @@
 package ai.konduit.serving.codegen.pythoncodegen;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input;
-import ai.konduit.serving.config.MemMapConfig;
-import ai.konduit.serving.config.ParallelInferenceConfig;
-import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.config.Output;
-import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.config.*;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
@@ -91,7 +86,7 @@ public class CodeGen {
         String sep = File.separator;
 
         String codeGenBasePath = System.getProperty("user.dir");
-        String projectBasePath = codeGenBasePath.replace(sep + "model-server-codegen", "");
+        String projectBasePath = codeGenBasePath.replace(sep + "konduit-serving-codegen", "");
 
         File newModule = new File(
                 projectBasePath + sep + "python" + sep + "konduit" + sep + "base_inference.py");
@@ -106,7 +101,7 @@ public class CodeGen {
             ObjectNode objectNode = (ObjectNode) jsonNode;
             objectNode.putObject("definitions");
             objectNode.put("title",clazz.getSimpleName());
-            File classJson = new File("schema-%s.json", clazz.getSimpleName());
+            File classJson = new File(String.format("schema-%s.json", clazz.getSimpleName()));
             if(classJson.exists()) {
                 boolean deleted = classJson.delete();
                 System.out.println(deleted);

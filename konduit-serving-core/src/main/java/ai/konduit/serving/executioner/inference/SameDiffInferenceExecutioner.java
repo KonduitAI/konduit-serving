@@ -28,10 +28,20 @@ import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
 import ai.konduit.serving.threadpool.samediff.SameDiffThreadPool;
 import ai.konduit.serving.threadpool.tensorflow.TensorFlowThreadPool;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.nd4j.autodiff.execution.NativeGraphExecutioner;
+import org.nd4j.autodiff.execution.conf.ExecutionMode;
+import org.nd4j.autodiff.execution.conf.ExecutorConfiguration;
+import org.nd4j.autodiff.execution.conf.OutputMode;
 import org.nd4j.autodiff.samediff.SameDiff;
+import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.ops.executioner.OpExecutioner;
 import org.nd4j.linalg.factory.Nd4j;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 
 /**
@@ -40,14 +50,21 @@ import org.nd4j.linalg.factory.Nd4j;
  *
  * @author Adam Gibson
  */
+@Slf4j
 public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelLoader<SameDiff>, INDArray[], INDArray[],
         ParallelInferenceConfig, SameDiff> {
 
     @Getter
-    private SameDiffThreadPool sameDiffThreadPool;
-    @Getter
     private ModelLoader<SameDiff> modelLoader;
+    private NativeGraphExecutioner nativeGraphExecutioner;
+    private static ExecutorConfiguration configuration = ExecutorConfiguration.builder()
+            .executionMode(ExecutionMode.SEQUENTIAL)
+            .profilingMode(OpExecutioner.ProfilingMode.DISABLED)
+            .gatherTimings(true)
+            .outputMode(OutputMode.IMPLICIT)
+            .build();
 
+    private SameDiff model;
 
     @Override
     public ModelLoader<SameDiff> modelLoader() {
@@ -65,37 +82,31 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
 
     @Override
     public void initialize(ModelLoader<SameDiff> model, ParallelInferenceConfig config) {
-        SameDiffModelLoader sameDiffModelLoader = (SameDiffModelLoader) model;
-        sameDiffThreadPool = new SameDiffThreadPool
-                .Builder(model).workers(config.getWorkers())
-                .inferenceMode(config.getInferenceMode())
-                .queueLimit(config.getQueueLimit())
-                .batchLimit(config.getBatchLimit())
-                .inputNames(sameDiffModelLoader.getInputNames())
-                .outputNames(sameDiffModelLoader.getOutputNames())
-                .build();
+        nativeGraphExecutioner = new NativeGraphExecutioner();
         this.modelLoader = model;
-
+        this.model = model();
+        log.info("Number of inputs is" + this.model.inputs().size());
     }
 
     @Override
     public INDArray[] execute(INDArray[] input) {
-        INDArray[] ret = sameDiffThreadPool.output(input);
-        for (int i = 0; i < ret.length; i++) {
-            if (ret[i].dataType() != Nd4j.dataType()) {
-                ret[i] = Nd4j.dataType() == DataType.DOUBLE
-                        ? ret[i].castTo(DataType.DOUBLE)
-                        : ret[i].castTo(DataType.FLOAT);
-            }
-        }
+        Preconditions.checkNotNull(input,"Inputs must not be null!");
+        Preconditions.checkState(input.length == this.model.inputs().size(),String.format("Number of inputs %d did not equal number of model inputs %d!",input.length,model.inputs().size()));
+        synchronized (this.model) {
+            Map<String, INDArray> inputs = new LinkedHashMap(input.length);
 
-        return ret;
+            for (int i = 0; i < this.model.inputs().size(); i++) {
+                inputs.put(this.model.inputs().get(i), input[i]);
+                this.model.associateArrayWithVariable(input[i], this.model.inputs().get(i));
+            }
+
+
+            INDArray[] ret = nativeGraphExecutioner.executeGraph(model, configuration);
+            return ret;
+        }
     }
 
     @Override
     public void stop() {
-        if (sameDiffThreadPool != null) {
-            sameDiffThreadPool.shutdown();
-        }
     }
 }

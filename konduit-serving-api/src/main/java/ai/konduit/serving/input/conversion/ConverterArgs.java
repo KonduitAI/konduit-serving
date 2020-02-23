@@ -62,7 +62,9 @@ public class ConverterArgs implements Serializable {
     private List<Double> doubles = new ArrayList<>();
     @Builder.Default
     private List<String> strings = new ArrayList<>();
-
-    private String imageProcessingRequiredLayout, imageProcessingInitialLayout = "NCHW";
+    @Builder.Default
+    private String imageProcessingRequiredLayout = "NCHW";
+    @Builder.Default
+    private String imageProcessingInitialLayout = "NCHW";
 
 }
