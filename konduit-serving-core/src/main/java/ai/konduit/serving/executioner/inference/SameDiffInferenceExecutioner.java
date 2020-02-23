@@ -28,11 +28,13 @@ import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
 import ai.konduit.serving.threadpool.samediff.SameDiffThreadPool;
 import ai.konduit.serving.threadpool.tensorflow.TensorFlowThreadPool;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.nd4j.autodiff.execution.NativeGraphExecutioner;
 import org.nd4j.autodiff.execution.conf.ExecutionMode;
 import org.nd4j.autodiff.execution.conf.ExecutorConfiguration;
 import org.nd4j.autodiff.execution.conf.OutputMode;
 import org.nd4j.autodiff.samediff.SameDiff;
+import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.api.ops.executioner.OpExecutioner;
@@ -48,6 +50,7 @@ import java.util.Map;
  *
  * @author Adam Gibson
  */
+@Slf4j
 public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelLoader<SameDiff>, INDArray[], INDArray[],
         ParallelInferenceConfig, SameDiff> {
 
@@ -79,18 +82,20 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
 
     @Override
     public void initialize(ModelLoader<SameDiff> model, ParallelInferenceConfig config) {
-        SameDiffModelLoader sameDiffModelLoader = (SameDiffModelLoader) model;
         nativeGraphExecutioner = new NativeGraphExecutioner();
         this.modelLoader = model;
         this.model = model();
+        log.info("Number of inputs is" + this.model.inputs().size());
     }
 
     @Override
     public INDArray[] execute(INDArray[] input) {
+        Preconditions.checkNotNull(input,"Inputs must not be null!");
+        Preconditions.checkState(input.length == this.model.inputs().size(),String.format("Number of inputs %d did not equal number of model inputs %d!",input.length,model.inputs().size()));
         synchronized (this.model) {
             Map<String, INDArray> inputs = new LinkedHashMap(input.length);
 
-            for (int i = 0; i < this.model.inputs().size(); ++i) {
+            for (int i = 0; i < this.model.inputs().size(); i++) {
                 inputs.put(this.model.inputs().get(i), input[i]);
                 this.model.associateArrayWithVariable(input[i], this.model.inputs().get(i));
             }

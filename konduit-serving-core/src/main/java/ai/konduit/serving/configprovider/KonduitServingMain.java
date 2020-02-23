@@ -103,24 +103,26 @@ public class KonduitServingMain {
             deployVerticle(konduitServingNodeConfigurer, vertx);
         } else {
             Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
-            ConfigRetriever configRetriever = ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getConfigRetrieverOptions());
-            if (konduitServingNodeConfigurer.getInferenceConfiguration() != null) {
-                configRetriever.getConfig(result -> {
-                    if (result.failed()) {
-                        log.error("Unable to retrieve configuration " + result.cause());
+            final ConfigRetriever configRetriever = konduitServingNodeConfigurer.getConfigRetrieverOptions() != null ?
+                    ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getConfigRetrieverOptions()) :
+                    ConfigRetriever.create(vertx);
+            configRetriever.getConfig(result -> {
+                if (result.failed()) {
+                    log.error("Unable to retrieve configuration " + result.cause());
 
-                        if (onFailure != null) {
-                            onFailure.run();
-                        }
-                    } else {
-                        configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
-
-                        JsonObject json = result.result();
-                        konduitServingNodeConfigurer.configureWithJson(json);
-                        deployVerticle(konduitServingNodeConfigurer, vertx);
+                    if (onFailure != null) {
+                        onFailure.run();
                     }
-                });
-            }
+                } else {
+                    configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
+
+                    JsonObject json = result.result();
+                    konduitServingNodeConfigurer.configureWithJson(json);
+                    deployVerticle(konduitServingNodeConfigurer, vertx);
+                }
+            });
+
+
 
         }
 

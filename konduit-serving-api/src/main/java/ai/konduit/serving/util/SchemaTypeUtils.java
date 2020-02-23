@@ -401,7 +401,7 @@ public class SchemaTypeUtils {
     public static INDArray[] toArrays(Record[] records) {
         INDArray[] ret = new INDArray[records.length];
 
-        int initialLength = ret.length;
+        int initialLength = records.length;
         //each ndarray
         for (int i = 0; i < initialLength; i++) {
             NDArrayWritable ndArrayWritable = (NDArrayWritable) records[i].getRecord().get(0);
