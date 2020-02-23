@@ -113,13 +113,13 @@
         <javacv.version>1.5.3</javacv.version>
         <opencv.version>4.2.0</opencv.version>
         <cpython.version>3.8.0</cpython.version>
-        <mkl.version>2019.5</mkl.version>
+        <mkl.version>2020.0</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
         <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}
         </tensorflow.javacpp.version>
-        <mkl-dnn.version>0.21.2</mkl-dnn.version>
+        <mkl-dnn.version>0.21.3</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
         <numpy.version>1.18.1</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
