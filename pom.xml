@@ -111,7 +111,7 @@
         <javacpp.version>1.5.3-SNAPSHOT</javacpp.version>
         <javacpp-presets.version>1.5.3</javacpp-presets.version>
         <javacv.version>1.5.3</javacv.version>
-        <opencv.version>4.1.2</opencv.version>
+        <opencv.version>4.2.0</opencv.version>
         <cpython.version>3.8.0</cpython.version>
         <mkl.version>2019.5</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
