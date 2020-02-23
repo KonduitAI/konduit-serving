@@ -22,15 +22,17 @@
 package ai.konduit.serving.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-
+import ai.konduit.serving.util.ObjectMappers;
 
 @Data
 @SuperBuilder
-@NoArgsConstructor
-//@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+//@NoArgsConstructor
+@AllArgsConstructor
 /**
  * Configuration for models in ONNX format.
  */
@@ -46,4 +48,13 @@ public class OnnxConfig extends ModelConfig {
                 .build();
 
     }
+
+    public static OnnxConfig fromJson(String json){
+        return ObjectMappers.fromJson(json, OnnxConfig.class);
+    }
+
+    public static OnnxConfig fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, OnnxConfig.class);
+    }
+
 }

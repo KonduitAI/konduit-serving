@@ -21,17 +21,29 @@
 
 package ai.konduit.serving.pipeline.step;
 
+import ai.konduit.serving.util.ObjectMappers;
+
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class OnnxStep extends ModelStep {
 
     @Override
     public String pipelineStepClazz() {
         return "ai.konduit.serving.pipeline.OnnxInferenceExecutionerStepRunner";
+    }
+
+    public static OnnxStep fromJson(String json){
+        return ObjectMappers.fromJson(json, OnnxStep.class);
+    }
+
+    public static OnnxStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, OnnxStep.class);
     }
 }
