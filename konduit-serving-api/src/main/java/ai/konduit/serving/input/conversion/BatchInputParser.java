@@ -79,20 +79,14 @@ public class BatchInputParser {
             throw new IllegalArgumentException("Illegal part info resolved. Part info keys were " + partInfo.keySet() + " while input parts were " + inputParts);
         }
 
-        int batchSize = partInfo.get(inputParts.get(0)).size();
-
         //batch size
-        Record[] inputBatches = new Record[batchSize];
+        Record[] inputBatches = new Record[inputParts.size()];
         for (int j = 0; j < inputBatches.length; j++) {
             inputBatches[j] =
                     new org.datavec.api.records.impl.Record(
                             new ArrayList<>(inputParts.size()),
                             null);
-
-            //pre populate the record to prevent out of index when setting
-            for (int k = 0; k < inputParts.size(); k++) {
-                inputBatches[j].getRecord().add(null);
-            }
+            inputBatches[j].getRecord().add(null);
         }
 
         Map<Integer, List<List<Writable>>> missingIndices = new LinkedHashMap<>();
@@ -112,7 +106,7 @@ public class BatchInputParser {
                 //set the name
                 if (convert instanceof Writable) {
                     Writable writable = (Writable) convert;
-                    inputBatches[j].getRecord().set(i, writable);
+                    inputBatches[i].getRecord().set(j, writable);
                 } else {
                     ArrowWritableRecordBatch arrow = (ArrowWritableRecordBatch) convert;
                     missingIndices.put(j, arrow);

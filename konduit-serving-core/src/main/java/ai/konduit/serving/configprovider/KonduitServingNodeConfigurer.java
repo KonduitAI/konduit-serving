@@ -56,6 +56,11 @@ import java.util.UUID;
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
 import static java.lang.System.setProperty;
 
+import lombok.*;
+import org.apache.commons.lang3.SystemUtils;
+import org.bytedeco.systems.global.*;
+import org.nd4j.shade.jackson.core.JsonProcessingException;
+
 /**
  * Core node configurer based on both command line and builder arguments.
  * This contains the core initialization logic for initializing any peers
@@ -278,17 +283,10 @@ public class KonduitServingNodeConfigurer {
      * @param config the configuration to use for setup
      */
     public void configureWithJson(JsonObject config) {
-        deploymentOptions = new DeploymentOptions()
-                .setWorker(workerNode)
-                .setHa(ha).setInstances(numInstances)
-                .setConfig(config)
-                .setExtraClasspath(Arrays.asList(System.getProperty("java.class.path").split(":")))
-                .setWorkerPoolSize(workerPoolSize);
-
         if (configHost != null)
             config.put("host", configHost);
 
-        if (configPath != null) {
+        if (configPath != null && inferenceConfiguration == null) {
             File tmpFile = new File(configPath);
             try {
                 inferenceConfiguration = InferenceConfiguration.fromJson(
@@ -324,6 +322,14 @@ public class KonduitServingNodeConfigurer {
 
             config.put("path", configPath);
         }
+
+
+        deploymentOptions = new DeploymentOptions()
+                .setWorker(workerNode)
+                .setHa(ha).setInstances(numInstances)
+                .setConfig(new JsonObject(inferenceConfiguration.toJson()))
+                .setExtraClasspath(Arrays.asList(System.getProperty("java.class.path").split(":")))
+                .setWorkerPoolSize(workerPoolSize);
     }
 
     private int getPid() throws UnsatisfiedLinkError {
