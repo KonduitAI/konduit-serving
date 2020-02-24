@@ -86,7 +86,7 @@ public class DataUtilities {
                     new java.io.File(outputPath + entry.getName()).mkdirs();
                 } else {
                     int count;
-                    byte data[] = new byte[bufferSize];
+                    byte[] data = new byte[bufferSize];
                     java.io.FileOutputStream fos = new java.io.FileOutputStream(outputPath + entry.getName());
                     java.io.BufferedOutputStream dest = new java.io.BufferedOutputStream(fos, bufferSize);
                     while ((count = tais.read(data, 0, bufferSize)) != -1) {

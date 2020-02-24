@@ -3,14 +3,14 @@ package ai.konduit.serving.orchestration;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.configprovider.KonduitServingNodeConfigurer;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
 import com.jayway.restassured.response.Response;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 import java.io.File;
@@ -20,6 +20,9 @@ import static com.jayway.restassured.RestAssured.given;
 
 @RunWith(VertxUnitRunner.class)
 public class KonduitOrchestrationMainTest {
+
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Test
     public void testClusterRun(TestContext testContext) throws Exception {
@@ -36,7 +39,7 @@ public class KonduitOrchestrationMainTest {
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .build();
-        File tmpFile = new File("file.json");
+        File tmpFile = new File(testDir.newFolder(), "file.json");
         FileUtils.writeStringToFile(tmpFile, inferenceConfiguration.toJson(), Charset.defaultCharset());
         tmpFile.deleteOnExit();
         /*

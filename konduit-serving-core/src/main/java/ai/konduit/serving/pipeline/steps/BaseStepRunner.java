@@ -22,8 +22,6 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.config.SchemaType;
-import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.PipelineStepRunner;
 import org.datavec.api.records.Record;
@@ -33,7 +31,6 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -59,7 +56,8 @@ public abstract class BaseStepRunner implements PipelineStepRunner {
     /**
      * no-op
      */
-    public void destroy() {
+    @Override
+    public void close() {
     }
 
     /**
@@ -139,13 +137,8 @@ public abstract class BaseStepRunner implements PipelineStepRunner {
     }
 
     @Override
-    public Map<String, SchemaType[]> inputTypes() {
-        return pipelineStep.getInputSchemas();
-    }
-
-    @Override
-    public Map<String, SchemaType[]> outputTypes() {
-        return pipelineStep.getOutputSchemas();
+    public PipelineStep<?> getPipelineStep() {
+        return pipelineStep;
     }
 
     public abstract void processValidWritable(Writable writable, List<Writable> record, int inputIndex, Object... extraArgs);

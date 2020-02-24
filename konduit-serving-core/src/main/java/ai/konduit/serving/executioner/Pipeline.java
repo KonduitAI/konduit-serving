@@ -68,9 +68,9 @@ public class Pipeline {
         return builder.build();
     }
 
-    public void destroy() {
+    public void close() {
         for (PipelineStepRunner pipelineStepRunner : steps) {
-            pipelineStepRunner.destroy();
+            pipelineStepRunner.close();
         }
     }
 

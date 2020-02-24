@@ -103,39 +103,40 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <jpmml.version>1.4.1</jpmml.version>
-        <vertx-stack.version>3.8.3</vertx-stack.version>
+        <vertx-stack.version>3.8.5</vertx-stack.version>
         <lombok.version>1.18.2</lombok.version>
         <jackson.version>2.10.0</jackson.version>
-        <tensorflow.version>1.15.0</tensorflow.version>
+        <tensorflow.version>1.15.2</tensorflow.version>
 
-        <javacpp.version>1.5.2</javacpp.version>
-        <javacpp-presets.version>1.5.2</javacpp-presets.version>
-        <javacv.version>1.5.2</javacv.version>
-        <opencv.version>4.1.2</opencv.version>
-        <cpython.version>3.7.5</cpython.version>
-        <mkl.version>2019.5</mkl.version>
+        <javacpp.version>1.5.3-SNAPSHOT</javacpp.version>
+        <javacpp-presets.version>1.5.3</javacpp-presets.version>
+        <javacv.version>1.5.3</javacv.version>
+        <opencv.version>4.2.0</opencv.version>
+        <cpython.version>3.7.6</cpython.version>
+        <mkl.version>2020.0</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
         <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}
         </tensorflow.javacpp.version>
-        <mkl-dnn.version>0.21.2</mkl-dnn.version>
+        <mkl-dnn.version>0.21.3</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
-        <numpy.version>1.17.3</numpy.version>
+        <numpy.version>1.18.1</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
-        <openblas.version>0.3.7</openblas.version>
+        <openblas.version>0.3.8</openblas.version>
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>
-        <leptonica.version>1.78.0</leptonica.version>
+        <leptonica.version>1.79.0</leptonica.version>
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
-        <hdf5.version>1.10.5</hdf5.version>
+        <hdf5.version>1.10.6</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
         <jna.version>5.3.1</jna.version>
-        <cuda>10.1</cuda>
+        <cuda>10.2</cuda>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
         <javacpp.platform>windows-x86_64</javacpp.platform>
         <commons-lang3.version>3.6</commons-lang3.version>
         <snakeyaml.version>1.20</snakeyaml.version>
+        <reflections.version>0.9.10</reflections.version>
 
         <oshi.version>3.13.4</oshi.version>
     </properties>
@@ -193,6 +194,11 @@
                 <version>${nd4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.nd4j</groupId>
+                <artifactId>nd4j-api</artifactId>
+                <version>${nd4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.datavec</groupId>
                 <artifactId>datavec-python</artifactId>
                 <version>${datavec.version}</version>
@@ -230,6 +236,10 @@
                         <groupId>io.netty</groupId>
                         <artifactId>netty-common</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>com.google.flatbuffers</groupId>
+                        <artifactId>flatbuffers-java</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -244,6 +254,10 @@
                     <exclusion>
                         <groupId>io.netty</groupId>
                         <artifactId>netty-common</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.flatbuffers</groupId>
+                        <artifactId>flatbuffers-java</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -377,11 +391,6 @@
                 <groupId>org.datavec</groupId>
                 <artifactId>datavec-spark-inference-model</artifactId>
                 <version>${datavec.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.deeplearning4j</groupId>
-                <artifactId>dl4j-perf</artifactId>
-                <version>${dl4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.nd4j</groupId>
@@ -528,6 +537,11 @@
             </dependency>
 
             <!-- vertx and arrow netty clash -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-util</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-common</artifactId>
@@ -726,7 +740,7 @@
             </modules>
         </profile>
         <profile>
-            <id>gpu</id> 
+            <id>gpu</id>
             <activation>
                 <property>
                     <name>chip</name>

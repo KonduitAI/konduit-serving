@@ -37,6 +37,6 @@ public class TransformProcessStepTest {
 
         assertSame(tpps2.getTransformProcesses().get("default"), tp);
 
-        assertArrayEquals(tpps2.getInputSchemas().get("default"), SchemaTypeUtils.typesForSchema(inputSchema));
+        assertEquals(tpps2.getInputSchemas().get("default"), SchemaTypeUtils.typesForSchema(inputSchema));
     }
 }

@@ -22,10 +22,7 @@
 
 package ai.konduit.serving.threadpool.tensorflow.observables;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.util.ArrayList;
@@ -37,6 +34,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class BatchedTensorflowInferenceObservable extends Observable implements TensorflowObservable {
 
     private final Object locker = new Object();
