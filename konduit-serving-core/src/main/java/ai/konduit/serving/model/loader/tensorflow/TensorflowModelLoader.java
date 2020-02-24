@@ -22,8 +22,6 @@
 
 package ai.konduit.serving.model.loader.tensorflow;
 
-import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
-import org.nd4j.tensorflow.conversion.TensorDataType;
 import ai.konduit.serving.model.TensorFlowConfig;
 import ai.konduit.serving.model.loader.ModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
@@ -33,8 +31,11 @@ import lombok.Getter;
 import lombok.Singular;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.base.Preconditions;
+import org.nd4j.tensorflow.conversion.TensorDataType;
+import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -114,8 +115,8 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
                     .savedModelConfig(savedModelConfig)
                     .inputNames(inputNames)
                     .outputNames(outputNames)
-                    .castingInputTypes(config.getTensorDataTypesConfig() == null ? null : config.getTensorDataTypesConfig().getInputDataTypes())
-                    .castingOutputTypes(config.getTensorDataTypesConfig() == null ? null : config.getTensorDataTypesConfig().getOutputDataTypes())
+                    .castingInputTypes(config.getTensorDataTypesConfig() == null ? null : convertDTypes(config.getTensorDataTypesConfig().getInputDataTypes()))
+                    .castingOutputTypes(config.getTensorDataTypesConfig() == null ? null : convertDTypes(config.getTensorDataTypesConfig().getOutputDataTypes()))
                     .savedModelConfig(savedModelConfig)
                     .configFile(sessionConfigPath != null ? new File(sessionConfigPath) : null)
                     .protoFile(modelConfigPath != null ? new File(modelConfigPath) : null)
@@ -126,6 +127,16 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    public static Map<String,org.nd4j.tensorflow.conversion.TensorDataType> convertDTypes(Map<String, ai.konduit.serving.model.TensorDataType> in){
+        if(in == null)
+            return null;
+        Map<String,org.nd4j.tensorflow.conversion.TensorDataType> out = new HashMap<>();
+        for(Map.Entry<String, ai.konduit.serving.model.TensorDataType> e : in.entrySet()){
+            out.put(e.getKey(), e.getValue().toTFType());
+        }
+        return out;
     }
 
     @Override

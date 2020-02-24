@@ -82,10 +82,7 @@ public class KerasDl4jHandler implements Handler<RoutingContext> {
                 }
             });
 
-
-            event.response().exceptionHandler(exception -> {
-                exception.printStackTrace();
-            });
+            event.response().exceptionHandler(Throwable::printStackTrace);
 
         } catch (Exception e) {
             event.response().setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -117,7 +114,6 @@ public class KerasDl4jHandler implements Handler<RoutingContext> {
 
         return tmpFile;
     }
-
 
     public enum ModelType {
         SEQUENTIAL, FUNCTIONAL

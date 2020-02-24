@@ -23,15 +23,14 @@
 package ai.konduit.serving.verticles.ndarray;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.model.DL4JConfig;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.output.types.ClassifierOutput;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.util.ObjectMapperHolder;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.AbstractVerticle;
@@ -61,7 +60,7 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
         return req -> {
             req.bodyHandler(body -> {
                 try {
-                    ClassifierOutput classifierOutput = ObjectMapperHolder.getJsonMapper().readValue(body.toString(),
+                    ClassifierOutput classifierOutput = ObjectMappers.json().readValue(body.toString(),
                             ClassifierOutput.class);
                     assertEquals(1, classifierOutput.getDecisions()[0]);
                 } catch (IOException e) {
@@ -96,8 +95,8 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
 
         Nd4j.getRandom().setSeed(42);
 
-        ModelConfig modelConfig = ModelConfig.builder()
-                .modelConfigType(ModelConfigType.multiLayerNetwork(modelSave.getAbsolutePath()))
+        ModelConfig modelConfig = DL4JConfig.builder()
+                .modelConfigType(ModelConfigType.dl4j(modelSave.getAbsolutePath()))
                 .build();
 
         ServingConfig servingConfig = ServingConfig.builder()

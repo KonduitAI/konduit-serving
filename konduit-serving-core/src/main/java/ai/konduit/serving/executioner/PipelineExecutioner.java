@@ -29,8 +29,7 @@ import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.util.JsonSerdeUtils;
-import org.nd4j.tensorflow.conversion.TensorDataType;
+import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.model.TensorDataTypesConfig;
 import ai.konduit.serving.output.adapter.*;
 import ai.konduit.serving.output.types.BatchOutput;
@@ -41,7 +40,8 @@ import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.util.ArrowUtils;
-import ai.konduit.serving.util.ObjectMapperHolder;
+import ai.konduit.serving.util.JsonSerdeUtils;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import io.netty.buffer.Unpooled;
 import io.vertx.core.buffer.Buffer;
@@ -67,10 +67,7 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.serde.binary.BinarySerde;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -89,7 +86,7 @@ import java.util.zip.ZipOutputStream;
  * @author Adam Gibson
  */
 @Slf4j
-public class PipelineExecutioner {
+public class PipelineExecutioner implements Closeable {
 
     @Getter
     protected MultiOutputAdapter multiOutputAdapter;
@@ -579,9 +576,9 @@ public class PipelineExecutioner {
      * Destroys the executioner (shuts down {@link ai.konduit.serving.executioner.inference.InferenceExecutioner}
      * among other components)
      */
-    public void destroy() {
+    public void close() {
         if(pipeline != null)
-            pipeline.destroy();
+            pipeline.close();
     }
 
 
@@ -693,7 +690,7 @@ public class PipelineExecutioner {
 
                 try {
                     jsonObject.put(entry.getKey(),
-                            new JsonObject(ObjectMapperHolder.getJsonMapper()
+                            new JsonObject(ObjectMappers.json()
                                     .writeValueAsString(entry.getValue())));
                 } catch (JsonProcessingException e) {
                     log.error("Unable to process json for value " + entry.getValue(), e);

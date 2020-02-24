@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.nd4j.autodiff.samediff.SDVariable;
 import org.nd4j.autodiff.samediff.SameDiff;
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -49,16 +50,16 @@ public class SameDiffInferenceExecutionerTests {
     public void testSameDiff() throws Exception {
         SameDiffInferenceExecutioner sameDiffInferenceExecutioner = new SameDiffInferenceExecutioner();
         SameDiff sameDiff = SameDiff.create();
-        SDVariable input1 = sameDiff.var("input1", 2, 2);
-        SDVariable input2 = sameDiff.var("input2", 2, 2);
+        SDVariable input1 = sameDiff.placeHolder("input1", DataType.FLOAT,2, 2);
+        SDVariable input2 = sameDiff.placeHolder("input2", DataType.FLOAT,2, 2);
         SDVariable result = input1.add("output", input2);
         INDArray input1Arr = Nd4j.linspace(1, 4, 4).reshape(2, 2);
         INDArray input2Arr = Nd4j.linspace(1, 4, 4).reshape(2, 2);
-        sameDiff.associateArrayWithVariable(input1Arr, input1.getVarName());
-        sameDiff.associateArrayWithVariable(input2Arr, input2.getVarName());
+        sameDiff.associateArrayWithVariable(input1Arr, input1.name());
+        sameDiff.associateArrayWithVariable(input2Arr, input2.name());
         Map<String, INDArray> indArrays = new LinkedHashMap<>();
-        indArrays.put(input1.getVarName(), input1Arr);
-        indArrays.put(input2.getVarName(), input2Arr);
+        indArrays.put(input1.name(), input1Arr);
+        indArrays.put(input2.name(), input2Arr);
         Map<String, INDArray> outputs = sameDiff.outputAll(indArrays);
         assertEquals(3, outputs.size());
 

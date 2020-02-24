@@ -27,7 +27,6 @@ import ai.konduit.serving.pipeline.PmmlInferenceExecutionerStepRunner;
 import ai.konduit.serving.pipeline.step.*;
 import ai.konduit.serving.pipeline.steps.*;
 import ai.konduit.serving.util.SchemaTypeUtils;
-import org.bytedeco.tensorflow.Mod;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.MathOp;
 import org.datavec.api.transform.TransformProcess;
@@ -41,7 +40,7 @@ import org.nd4j.linalg.factory.Nd4j;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -62,10 +61,10 @@ public class PipelineTests {
 
         TransformProcessStep config = TransformProcessStep.builder()
                 .inputName("default")
-                .inputSchema("default", new SchemaType[]{SchemaType.String})
-                .outputSchema("default", new SchemaType[]{SchemaType.String})
+                .inputSchema("default", Collections.singletonList(SchemaType.String))
+                .outputSchema("default", Collections.singletonList(SchemaType.String))
 
-                .inputColumnName("default", Arrays.asList(new String[]{"first"}))
+                .inputColumnName("default", Collections.singletonList("first"))
                 .transformProcess("default", transformProcess)
                 .build();
 
@@ -83,8 +82,8 @@ public class PipelineTests {
         Writable writable = transform[0].getRecord().get(0);
         assertEquals("appendedtwo", writable.toString());
 
-        assertEquals(1, step.inputTypes().size());
-        assertEquals(1, step.outputTypes().size());
+        assertEquals(1, step.getPipelineStep().getInputSchemas().size());
+        assertEquals(1, step.getPipelineStep().getOutputSchemas().size());
 
 
     }
@@ -101,7 +100,7 @@ public class PipelineTests {
 
         TransformProcessStep config = TransformProcessStep.builder()
                 .inputName("default")
-                .inputColumnName("default", Arrays.asList(new String[]{"first"}))
+                .inputColumnName("default", Collections.singletonList("first"))
                 .transformProcess("default", transformProcess)
                 .build();
 

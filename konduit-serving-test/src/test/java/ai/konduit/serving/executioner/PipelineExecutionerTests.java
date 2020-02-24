@@ -34,10 +34,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import junit.framework.TestCase;
 import org.datavec.python.PythonType;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
-import org.nd4j.tensorflow.conversion.TensorDataType;
 
 import java.time.Instant;
 import java.util.*;
@@ -50,6 +50,7 @@ public class PipelineExecutionerTests {
 
 
     @Test
+    @Ignore
     public void testDoJsonInference() {
         int port = 1111;
 

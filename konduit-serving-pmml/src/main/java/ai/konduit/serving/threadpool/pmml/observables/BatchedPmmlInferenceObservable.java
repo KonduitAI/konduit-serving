@@ -22,10 +22,7 @@
 
 package ai.konduit.serving.threadpool.pmml.observables;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 import org.dmg.pmml.FieldName;
 
 import java.util.*;
@@ -35,6 +32,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class BatchedPmmlInferenceObservable extends Observable implements PmmlObservable {
 
     private final Object locker = new Object();
