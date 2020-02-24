@@ -62,10 +62,8 @@ public class BertStepRunner extends BaseStepRunner
         //String inputName = (String) this.bertStep.getInputNames().get(0);
         //String outputName = (String) this.bertStep.getOutputNames().get(0);
 
-        String modelPath = (String) this.bertStep.getModelPath();
-        String vocabPath = (String) this.bertStep.getVocabPath();
-
-        Map<String, SchemaType[]> inputSchema = this.bertStep.getInputSchemas();
+        String modelPath = this.bertStep.getModelPath();
+        String vocabPath = this.bertStep.getVocabPath();
 
         //load tokenizer
         try {
@@ -95,8 +93,8 @@ public class BertStepRunner extends BaseStepRunner
 
     public BertIterator getToken(String input)
     {
-        List<String> inputList = Arrays.asList(input);
-        List<String> labelList = Arrays.asList("default");
+        List<String> inputList = Collections.singletonList(input);
+        List<String> labelList = Collections.singletonList("default");
 
         LabeledSentenceProvider provider = new CollectionLabeledSentenceProvider(inputList, labelList, new Random(123));
 
@@ -144,9 +142,7 @@ public class BertStepRunner extends BaseStepRunner
 
         }
 
-        Record[] records =  recordList.toArray(new Record[recordList.size()]);
-
-        return records;
+        return recordList.toArray(new Record[recordList.size()]);
     }
 
 }

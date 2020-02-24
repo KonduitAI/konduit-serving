@@ -268,4 +268,9 @@ public class ConfigJsonCoverageTrackingTests {
         testConfigSerDe(ModelConfigType.keras("/path/to/keras.hdf5"));
         testConfigSerDe(ModelConfigType.tensorFlow("/path/to/tensorflow.pb"));
     }
+
+    @Test
+    public void testBertConfig() {
+        testConfigSerDe(BertStep.builder().modelPath("/path/to/bert.zip").vocabPath("/path/to/vocab.txt").build());
+    }
 }

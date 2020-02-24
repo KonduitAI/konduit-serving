@@ -25,6 +25,7 @@ package ai.konduit.serving.pipeline.step;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.pipeline.BasePipelineStep;
+import ai.konduit.serving.util.ObjectMappers;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -55,5 +56,13 @@ public class BertStep extends BasePipelineStep<BertStep> implements Serializable
     @Override
     public String pipelineStepClazz() {
         return "ai.konduit.serving.pipeline.steps.BertStepRunner";
+    }
+
+    public static BertStep fromJson(String json){
+        return ObjectMappers.fromJson(json, BertStep.class);
+    }
+
+    public static BertStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, BertStep.class);
     }
 }
