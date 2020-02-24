@@ -113,6 +113,11 @@ public class KonduitOrchestrationMain {
                                             log.info("Received cluster reply with ", replyHandler.result().toString());
                                     }
                                 });
+
+                                log.info("Deployed verticle {}", konduitServingNodeConfigurer.getVerticleClassName());
+                                if(onSuccess != null) {
+                                    onSuccess.run();
+                                }
                             } catch (Exception e) {
                                 log.error("Unable to parse json from configuration", e);
                                 if(onFailure != null) {
@@ -120,10 +125,6 @@ public class KonduitOrchestrationMain {
                                 }
                             }
 
-                            log.info("Deployed verticle {}", konduitServingNodeConfigurer.getVerticleClassName());
-                            if(onSuccess != null) {
-                                onSuccess.run();
-                            }
                         }
                     });
 
