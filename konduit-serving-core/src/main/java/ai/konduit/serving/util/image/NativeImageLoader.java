@@ -164,7 +164,7 @@ public class NativeImageLoader extends BaseImageLoader {
             tempPix = pix = pix2;
             dtype = CV_8UC4;
         } else if (pix.d() <= 8 || pix.d() == 24) {
-            PIX pix2 = null;
+            PIX pix2 = pix;
             switch (pix.d()) {
                 case 1:
                     pix2 = pixConvert1To8(null, pix, (byte) 0, (byte) 255);
@@ -176,13 +176,11 @@ public class NativeImageLoader extends BaseImageLoader {
                     pix2 = pixConvert4To8(pix, 0);
                     break;
                 case 8:
-                    pix2 = pix;
-                    break;
                 case 24:
                     pix2 = pix;
                     break;
                 default:
-                    assert false;
+                    throw new IllegalStateException("Unrecognized pixel depth of " + pix.d());
             }
             tempPix = pix = pix2;
             int channels = pix.d() / 8;
@@ -445,7 +443,7 @@ public class NativeImageLoader extends BaseImageLoader {
                 ret.data().offset() * Nd4j.sizeOfDataType(ret.data().dataType()));
 
         if (pointer instanceof FloatPointer) {
-            FloatIndexer retidx = FloatIndexer.create((FloatPointer) pagedPointer.asFloatPointer(),
+            FloatIndexer retidx = FloatIndexer.create(pagedPointer.asFloatPointer(),
                     new long[]{channels, rows, cols}, new long[]{stride[0], stride[1], stride[2]}, direct);
             if (idx instanceof UByteIndexer) {
                 UByteIndexer ubyteidx = (UByteIndexer) idx;
@@ -490,7 +488,7 @@ public class NativeImageLoader extends BaseImageLoader {
             }
             retidx.release();
         } else if (pointer instanceof DoublePointer) {
-            DoubleIndexer retidx = DoubleIndexer.create((DoublePointer) pagedPointer.asDoublePointer(),
+            DoubleIndexer retidx = DoubleIndexer.create(pagedPointer.asDoublePointer(),
                     new long[]{channels, rows, cols}, new long[]{stride[0], stride[1], stride[2]}, direct);
             if (idx instanceof UByteIndexer) {
                 UByteIndexer ubyteidx = (UByteIndexer) idx;

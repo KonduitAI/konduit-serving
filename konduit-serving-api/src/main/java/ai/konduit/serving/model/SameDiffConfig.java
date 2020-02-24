@@ -22,13 +22,18 @@
 
 package ai.konduit.serving.model;
 
-import lombok.*;
+import ai.konduit.serving.util.ObjectMappers;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
  * Extension of {@link ModelConfig} for DL4J SameDiff models.
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
@@ -37,5 +42,12 @@ public class SameDiffConfig extends ModelConfig {
     public final static String SAME_DIFF_EXECUTION_CONFIG_KEY = "sameDiffConfig";
     private TensorDataTypesConfig tensorDataTypesConfig;
 
+    public static SameDiffConfig fromJson(String json){
+        return ObjectMappers.fromJson(json, SameDiffConfig.class);
+    }
+
+    public static SameDiffConfig fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, SameDiffConfig.class);
+    }
 
 }

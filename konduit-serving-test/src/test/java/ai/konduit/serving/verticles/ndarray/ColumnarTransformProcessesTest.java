@@ -24,9 +24,8 @@ package ai.konduit.serving.verticles.ndarray;
 
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.model.DL4JConfig;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.PipelineStep;
@@ -117,8 +116,8 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .httpPort(port)
                 .build();
 
-        ModelConfig modelConfig = ModelConfig.builder()
-                .modelConfigType(ModelConfigType.multiLayerNetwork(modelSave.getAbsolutePath()))
+        ModelConfig modelConfig = DL4JConfig.builder()
+                .modelConfigType(ModelConfigType.dl4j(modelSave.getAbsolutePath()))
                 .build();
 
         PipelineStep modelStepConfig = new ModelStep(modelConfig)

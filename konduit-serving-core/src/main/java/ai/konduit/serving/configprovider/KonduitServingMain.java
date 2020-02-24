@@ -58,7 +58,8 @@ public class KonduitServingMain {
         LoggerFactory.getLogger(LoggerFactory.class); // Required for Logback to work in Vertx
     }
 
-    public KonduitServingMain() { }
+    public KonduitServingMain() {
+    }
 
     public static void main(String... args) {
         try {
@@ -92,37 +93,56 @@ public class KonduitServingMain {
     }
 
     public void runMain(KonduitServingNodeConfigurer konduitServingNodeConfigurer) {
-        Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
-        ConfigRetriever configRetriever = ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getConfigRetrieverOptions());
-        configRetriever.getConfig(result -> {
-            if (result.failed()) {
-                log.error("Unable to retrieve configuration " + result.cause());
+        //no need to configure, inference verticle exists
+        if (konduitServingNodeConfigurer.getInferenceConfiguration() != null) {
+            konduitServingNodeConfigurer.configureWithJson(new JsonObject(konduitServingNodeConfigurer.getInferenceConfiguration().toJson()));
 
-                if(onFailure != null) {
+            Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
+            deployVerticle(konduitServingNodeConfigurer, vertx);
+        } else {
+            Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
+            final ConfigRetriever configRetriever = konduitServingNodeConfigurer.getConfigRetrieverOptions() != null ?
+                    ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getConfigRetrieverOptions()) :
+                    ConfigRetriever.create(vertx);
+            configRetriever.getConfig(result -> {
+                if (result.failed()) {
+                    log.error("Unable to retrieve configuration " + result.cause());
+
+                    if (onFailure != null) {
+                        onFailure.run();
+                    }
+                } else {
+                    configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
+
+                    JsonObject json = result.result();
+                    konduitServingNodeConfigurer.configureWithJson(json);
+                    deployVerticle(konduitServingNodeConfigurer, vertx);
+                }
+            });
+
+
+
+        }
+
+    }
+
+
+    private void deployVerticle(KonduitServingNodeConfigurer konduitServingNodeConfigurer, Vertx vertx) {
+        vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
+            if (handler.failed()) {
+                log.error(String.format("Unable to deploy verticle %s", konduitServingNodeConfigurer.getVerticleClassName()), handler.cause());
+                if (onFailure != null) {
                     onFailure.run();
                 }
+
+                vertx.close();
             } else {
-                configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
-
-                JsonObject json = result.result();
-                konduitServingNodeConfigurer.configureWithJson(json);
-              
-                vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
-                    if (handler.failed()) {
-                        log.error(String.format("Unable to deploy verticle %s", konduitServingNodeConfigurer.getVerticleClassName()), handler.cause());
-                        if(onFailure != null) {
-                            onFailure.run();
-                        }
-
-                        vertx.close();
-                    } else {
-                        log.info(String.format("Deployed verticle %s", konduitServingNodeConfigurer.getVerticleClassName()));
-                        if(onSuccess != null) {
-                            onSuccess.run();
-                        }
-                    }
-                });
+                log.info(String.format("Deployed verticle %s", konduitServingNodeConfigurer.getVerticleClassName()));
+                if (onSuccess != null) {
+                    onSuccess.run();
+                }
             }
         });
+
     }
 }

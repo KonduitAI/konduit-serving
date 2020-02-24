@@ -7,9 +7,8 @@ import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static ai.konduit.serving.train.TrainUtils.getIrisOutputSchema;
+import static org.junit.Assert.*;
 
 public class TransformProcessStepTest {
 
@@ -28,17 +27,16 @@ public class TransformProcessStepTest {
                 .step("foo", tp, outputSchema)
                 .step("bar", tp, outputSchema);
 
-        assert tpps.getInputNames().contains("foo");
-        assert tpps.getInputNames().contains("bar");
+        assertTrue(tpps.getInputNames().contains("foo"));
+        assertTrue(tpps.getInputNames().contains("bar"));
 
-        assert tpps.getOutputNames().contains("foo");
-        assert tpps.getOutputNames().contains("bar");
+        assertTrue(tpps.getOutputNames().contains("foo"));
+        assertTrue(tpps.getOutputNames().contains("bar"));
 
         TransformProcessStep tpps2 = new TransformProcessStep(tp, outputSchema);
 
-        assert tpps2.getTransformProcesses().get("default") == tp;
+        assertSame(tpps2.getTransformProcesses().get("default"), tp);
 
-        assert Arrays.equals(tpps2.getInputSchemas().get("default"), SchemaTypeUtils.typesForSchema(inputSchema));
-
+        assertEquals(tpps2.getInputSchemas().get("default"), SchemaTypeUtils.typesForSchema(inputSchema));
     }
 }

@@ -167,4 +167,59 @@ public enum TensorDataType {
         }
     }
 
+    public org.nd4j.tensorflow.conversion.TensorDataType toTFType(){
+        switch (this){
+            case INVALID:
+                return org.nd4j.tensorflow.conversion.TensorDataType.INVALID;
+            case FLOAT:
+                return org.nd4j.tensorflow.conversion.TensorDataType.FLOAT;
+            case DOUBLE:
+                return org.nd4j.tensorflow.conversion.TensorDataType.DOUBLE;
+            case INT32:
+                return org.nd4j.tensorflow.conversion.TensorDataType.INT32;
+            case UINT8:
+                return org.nd4j.tensorflow.conversion.TensorDataType.UINT8;
+            case INT16:
+                return org.nd4j.tensorflow.conversion.TensorDataType.INT16;
+            case INT8:
+                return org.nd4j.tensorflow.conversion.TensorDataType.INT8;
+            case STRING:
+                return org.nd4j.tensorflow.conversion.TensorDataType.STRING;
+            case COMPLEX64:
+                return org.nd4j.tensorflow.conversion.TensorDataType.COMPLEX64;
+            case INT64:
+                return org.nd4j.tensorflow.conversion.TensorDataType.INT64;
+            case BOOL:
+                return org.nd4j.tensorflow.conversion.TensorDataType.BOOL;
+            case QINT8:
+                return org.nd4j.tensorflow.conversion.TensorDataType.QINT8;
+            case QUINT8:
+                return org.nd4j.tensorflow.conversion.TensorDataType.QUINT8;
+            case QINT32:
+                return org.nd4j.tensorflow.conversion.TensorDataType.QINT32;
+            case BFLOAT16:
+                return org.nd4j.tensorflow.conversion.TensorDataType.BFLOAT16;
+            case QINT16:
+                return org.nd4j.tensorflow.conversion.TensorDataType.QINT16;
+            case QUINT16:
+                return org.nd4j.tensorflow.conversion.TensorDataType.QUINT16;
+            case UINT16:
+                return org.nd4j.tensorflow.conversion.TensorDataType.UINT16;
+            case COMPLEX128:
+                return org.nd4j.tensorflow.conversion.TensorDataType.COMPLEX128;
+            case HALF:
+                return org.nd4j.tensorflow.conversion.TensorDataType.HALF;
+            case RESOURCE:
+                return org.nd4j.tensorflow.conversion.TensorDataType.RESOURCE;
+            case VARIANT:
+                return org.nd4j.tensorflow.conversion.TensorDataType.VARIANT;
+            case UINT32:
+                return org.nd4j.tensorflow.conversion.TensorDataType.UINT32;
+            case UINT64:
+                return org.nd4j.tensorflow.conversion.TensorDataType.UINT64;
+            default:
+                throw new IllegalStateException("Unknown tensor data type: " + this);
+        }
+    }
+
 }

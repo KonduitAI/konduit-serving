@@ -349,15 +349,13 @@ class ModelConfigType(object):
     includes the model loading path and the model type. It's used in
     konduit.ModelConfig.
 
-    :param model_type: Can be any of 'COMPUTATION_GRAPH', 'MULTI_LAYER_NETWORK',
+    :param model_type: Can be any of 'DL4J',
         'PMML', 'TENSORFLOW', 'KERAS', and 'SAMEDIFF'.
     :param model_loading_path: path to the model file
     """
 
     _modelType_enum = enum.Enum(
-        "_modelType_enum",
-        "COMPUTATION_GRAPH MULTI_LAYER_NETWORK PMML TENSORFLOW KERAS SAMEDIFF",
-        module=__name__,
+        "_modelType_enum", "DL4J PMML TENSORFLOW KERAS SAMEDIFF", module=__name__
     )
     _types_map = {
         "modelType": {"type": str, "subtype": None},
