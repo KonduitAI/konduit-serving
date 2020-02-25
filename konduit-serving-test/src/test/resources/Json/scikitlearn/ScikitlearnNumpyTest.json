@@ -1,0 +1,16 @@
+{
+  "raw" : {
+    "batchId" : "53d43213-cfdf-4fb3-bdb7-6e271c7c1b90",
+    "ndArray" : {
+      "dataType" : "INT",
+      "shape" : [ 2 ],
+      "data" : [ 2, 2 ]
+    }
+  },
+  "classification" : {
+    "decisions" : [ 0 ],
+    "probabilities" : [ [ 2.0, 2.0] ],
+    "labels" : [ "default" ],
+    "batchId" : "66e338d0-fc6e-44a7-b4b3-5fd1690498b9"
+  }
+}
