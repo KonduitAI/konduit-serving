@@ -29,7 +29,7 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ExpectedAssertTest;
-import ai.konduit.serving.util.ObjectMapperHolder;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -139,7 +139,7 @@ public class KerasPythonNumpyFormatTest extends BaseMultiNumpyVerticalTest {
         assertTrue(jsonObject.getJsonObject("default").containsKey("ndArray"));
         assertTrue(jsonObject.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
         String ndarraySerde = jsonObject.getJsonObject("default").toString();
-        NDArrayOutput nd = ObjectMapperHolder.getJsonMapper().readValue(ndarraySerde, NDArrayOutput.class);
+        NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json", "raw");
         assertEquals(expectedArr, outputArray);
@@ -175,10 +175,10 @@ public class KerasPythonNumpyFormatTest extends BaseMultiNumpyVerticalTest {
         assertTrue(jsonObjectClassification.getJsonObject("default").containsKey("probabilities"));
         JsonObject ndarraySerde = jsonObjectClassification.getJsonObject("default");
         JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-        float[][] nd = ObjectMapperHolder.getJsonMapper().readValue(probabilities.toString(), float[][].class);
+        float[][] nd = ObjectMappers.json().readValue(probabilities.toString(), float[][].class);
         INDArray outputArray = Nd4j.create(nd);
         JsonArray expProb = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/keras/KerasNdArrayTest.json");
-        float[][] expNd = ObjectMapperHolder.getJsonMapper().readValue(expProb.toString(), float[][].class);
+        float[][] expNd = ObjectMappers.json().readValue(expProb.toString(), float[][].class);
         INDArray expectedArray = Nd4j.create(expNd);
         assertEquals(expectedArray, outputArray);
     }

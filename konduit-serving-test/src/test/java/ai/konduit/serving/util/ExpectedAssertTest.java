@@ -4,6 +4,7 @@ import ai.konduit.serving.output.types.NDArrayOutput;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
+import org.nd4j.jackson.objectmapper.holder.ObjectMapperHolder;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.FileInputStream;
