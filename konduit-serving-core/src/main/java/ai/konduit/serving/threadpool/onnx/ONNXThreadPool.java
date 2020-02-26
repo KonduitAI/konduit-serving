@@ -141,15 +141,19 @@ public class ONNXThreadPool {
      * @param input Input to the network
      * @return Output from the network
      */
-    public List<Map<String, INDArray>> output(List<Map<String, INDArray>> input) {
+    public Map<String, INDArray> output(Map<String, INDArray> input) {
         // basically, depending on model type we either throw stuff to specific model, or wait for batch
 
         BasicInferenceObserver observer = new BasicInferenceObserver();
         OnnxObservable observable;
 
 
-        if (inferenceMode == InferenceMode.SEQUENTIAL) {
-            observable = new BasicOnnxInferenceObservable(input);
+	//Batch of 1
+	List<Map<String, INDArray>> inputs = new ArrayList<Map<String, INDArray>>(1);
+	inputs.add(input);
+
+	if (inferenceMode == InferenceMode.SEQUENTIAL) {
+            observable = new BasicOnnxInferenceObservable(inputs);
             observable.addObserver(observer);
             try {
                 observables.put(observable);
@@ -158,7 +162,7 @@ public class ONNXThreadPool {
                 throw new RuntimeException(e);
             }
         } else {
-            observable = provider.setInput(observer, input);
+            observable = provider.setInput(observer, inputs);
         }
 
         try {
@@ -171,8 +175,7 @@ public class ONNXThreadPool {
             throw new RuntimeException(e);
         }
 
-
-        return observable.getOutput();
+        return observable.getOutput().get(0);
     }
 
 
@@ -346,8 +349,8 @@ public class ONNXThreadPool {
 
 		Long num_input_nodes = replicatedModel.GetInputCount();
 		Long num_output_nodes = replicatedModel.GetOutputCount();
-                PointerPointer input_node_names = new PointerPointer(num_input_nodes);
-                PointerPointer output_node_names = new PointerPointer(num_output_nodes);
+                PointerPointer<BytePointer> input_node_names = new PointerPointer(num_input_nodes);
+                PointerPointer<BytePointer> output_node_names = new PointerPointer(num_output_nodes);
 
 		LongPointer[] input_node_dims = new LongPointer[num_input_nodes.intValue()];
 
@@ -360,7 +363,8 @@ public class ONNXThreadPool {
 
                 for (int i = 0; i < num_input_nodes; i++) {
 		    BytePointer input_name = replicatedModel.GetInputName(i, allocator.asOrtAllocator());
-                    input_node_names.put(i, input_name);
+
+		    input_node_names.put(i, input_name);
 
                     TypeInfo typeInfo = replicatedModel.GetInputTypeInfo(i);
                     TensorTypeAndShapeInfo tensor_info = typeInfo.GetTensorTypeAndShapeInfo();
@@ -389,27 +393,30 @@ public class ONNXThreadPool {
                             for (Map<String, INDArray> inBatch : batches) {	
 			        Collection<INDArray> inputArrays = inBatch.values();	    
 			        INDArray inputArray = Nd4j.concat(0, inputArrays.toArray(new INDArray[inputArrays.size()]));
-                             
+
+			        System.out.println("First input: " + inputArray.getFloat(0));
 			        Value[] inputTensors = new Value[num_input_nodes.intValue()];
 
                                 for (int i = 0; i < num_input_nodes; i++) {
-		                  BytePointer input_name = (BytePointer)input_node_names.get(i);
+		                  BytePointer input_name = input_node_names.get(BytePointer.class, i);
 
 				  Value inputTensor = getTensor(inBatch.get(input_name.getString()), inputTypes[i], inputSizes[i], input_node_dims[i]);
+				  System.out.println("Input element count: " + inputTensor.GetTensorTypeAndShapeInfo().GetElementCount());
 				  inputTensors[i] = inputTensor;
 
 				}
 				//TODO: Pass ValueVector here when possible
 				PointerPointer inputTensorsPP = new PointerPointer(inputTensors);
-				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, new Value(inputTensorsPP), num_input_nodes, output_node_names, num_output_nodes);
+				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputTensors[0], num_input_nodes, output_node_names, num_output_nodes);
 
 				Map<String, INDArray> output = new HashMap<String, INDArray>();
 
                                 for (int i = 0; i < num_output_nodes; i++) {
 					Value outValue = outputVector.get(i);
-
 					DataBuffer buffer = getDataBuffer(outValue);
-					output.put(((BytePointer)output_node_names.get(i)).getString(), Nd4j.create(buffer));
+					INDArray outArray = Nd4j.create(buffer);
+					System.out.println("Output element count " + outValue.GetTensorTypeAndShapeInfo().GetElementCount());
+					output.put((output_node_names.get(BytePointer.class, i)).getString(), outArray);
 				}
                                 out.add((Map<String, INDArray>) output);
                             }
@@ -446,69 +453,84 @@ public class ONNXThreadPool {
 	private Value getTensor(INDArray ndArray, int type, long size, LongPointer dims){
             Pointer inputTensorValuesPtr = ndArray.data().pointer();
 
+	    long sizeInBytes = size;
             MemoryInfo memory_info = MemoryInfo.CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
 	    Pointer input_tensor_values = null;
             switch (type) {
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT:
                     if(!ndArray.dataType().equals(DataType.FLOAT)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (FloatPointer)inputTensorValuesPtr;
+		    sizeInBytes = size * 4;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8:
-                if(!ndArray.dataType().equals(DataType.UINT8)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		input_tensor_values = (BytePointer)inputTensorValuesPtr;
+                    if(!ndArray.dataType().equals(DataType.UINT8)) throw new RuntimeException("INDArray data type does not match ONNX data type");
+		    input_tensor_values = (BytePointer)inputTensorValuesPtr;
+		    sizeInBytes = size;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8:
                     if(!ndArray.dataType().equals(DataType.INT8)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (BytePointer)inputTensorValuesPtr;
+		    sizeInBytes = size;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16:
                     if(!ndArray.dataType().equals(DataType.UINT16)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
+		    sizeInBytes = size * 2;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16:
                     if(!ndArray.dataType().equals(DataType.INT16)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
+		    sizeInBytes = size * 2;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32:
                     if(!ndArray.dataType().equals(DataType.INT32)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (IntPointer)inputTensorValuesPtr;
+		    sizeInBytes = size * 4;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64:
                     if(!ndArray.dataType().equals(DataType.INT64)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (LongPointer)inputTensorValuesPtr;
+		    sizeInBytes = size * 8;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
                     if(!ndArray.dataType().equals(DataType.INT8)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (BytePointer)inputTensorValuesPtr;
+		    sizeInBytes = size;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL:
                     if(!ndArray.dataType().equals(DataType.BOOL)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (BoolPointer)inputTensorValuesPtr; //Casting Boolean to Bool here, sizes could different on some platforms
+		    sizeInBytes = size;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16:
                     if(!ndArray.dataType().equals(DataType.HALF)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
+		    sizeInBytes = size * 2;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE:
                     if(!ndArray.dataType().equals(DataType.DOUBLE)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (DoublePointer)inputTensorValuesPtr;
+		    sizeInBytes = size * 8;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32:
                     if(!ndArray.dataType().equals(DataType.UINT32)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (IntPointer)inputTensorValuesPtr;
+		    sizeInBytes = size * 4;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
                     if(!ndArray.dataType().equals(DataType.UINT64)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (LongPointer)inputTensorValuesPtr;
+		    sizeInBytes = size * 8;
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16:
                     if(!ndArray.dataType().equals(DataType.BFLOAT16)) throw new RuntimeException("INDArray data type does not match ONNX data type");
 		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
+		    sizeInBytes = size * 2;
 		    break;
 		default:
 		    throw new RuntimeException("Unsupported data type encountered");
 	    }
-	    Value inputTensor = Value.CreateTensor(memory_info.asOrtMemoryInfo(), input_tensor_values, size, dims, dims.capacity(), type);
+	    Value inputTensor = Value.CreateTensor(memory_info.asOrtMemoryInfo(), input_tensor_values, sizeInBytes, dims, dims.capacity(), type);
             return inputTensor;
 	}
 
@@ -516,11 +538,19 @@ public class ONNXThreadPool {
 
 	    DataBuffer buffer = null;
 	    int type = tens.GetTensorTypeAndShapeInfo().GetElementType();
+	    long size = tens.GetTensorTypeAndShapeInfo().GetElementCount();
             switch (type) {
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT:
-		    FloatPointer pFloat = tens.GetTensorMutableDataFloat();
-		    Indexer floatIndexer = FloatIndexer.create(pFloat);
-		    buffer = Nd4j.createBuffer(pFloat, DataType.FLOAT, pFloat.capacity(), floatIndexer);
+		    FloatPointer origPFloat = tens.GetTensorMutableDataFloat();
+
+		    //TODO: avoid using a second float pointer here
+		    FloatPointer pFloat = new FloatPointer(size);
+                    for(int i = 0; i < size; i++){
+
+                      pFloat.put(i, origPFloat.get(i));
+                    }
+		    FloatIndexer floatIndexer = FloatIndexer.create(pFloat);
+		    buffer = Nd4j.createBuffer(pFloat, DataType.FLOAT, size, floatIndexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8:
 		    BytePointer pUint8 = tens.GetTensorMutableDataUByte();

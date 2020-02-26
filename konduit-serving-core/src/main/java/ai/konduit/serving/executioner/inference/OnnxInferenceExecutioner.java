@@ -28,11 +28,14 @@ import ai.konduit.serving.threadpool.onnx.ONNXThreadPool;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
-
+import org.bytedeco.onnxruntime.AllocatorWithDefaultOptions;
 import org.bytedeco.onnxruntime.Session;
 
 import java.util.List;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -43,7 +46,7 @@ import java.util.Map;
  */
 @Slf4j
 public class OnnxInferenceExecutioner implements
-        InferenceExecutioner<ModelLoader<Session>, List<Map<String, INDArray>>, List<Map<String, INDArray>>,
+        InferenceExecutioner<ModelLoader<Session>, INDArray[], INDArray[],
                 ParallelInferenceConfig, Session> {
 
     @Getter
@@ -51,11 +54,14 @@ public class OnnxInferenceExecutioner implements
     @Getter
     private ModelLoader<Session> modelLoader;
 
+    private AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions();
 
     @Override
     public ModelLoader<Session> modelLoader() {
         return modelLoader;
     }
+
+    private Session model;
 
     @Override
     public Session model() {
@@ -70,24 +76,30 @@ public class OnnxInferenceExecutioner implements
 
     @Override
     public void initialize(ModelLoader<Session> model, ParallelInferenceConfig config) {
-        this.inference = new ONNXThreadPool.Builder(model)
+        this.modelLoader = model;
+        this.model = model();
+        this.inference = new ONNXThreadPool.Builder(model, this.model)
                 .batchLimit(config.getBatchLimit())
                 .queueLimit(config.getQueueLimit())
                 .inferenceMode(config.getInferenceMode())
                 .workers(config.getWorkers())
                 .build();
-        this.modelLoader = model;
-
-
     }
 
     @Override
-    public List<Map<String, INDArray>> execute(List<Map<String, INDArray>> input) {
-        if (inference == null) {
-            throw new IllegalStateException("Initialize not called. No ParallelInference found. Please call " +
-                    "inferenceExecutioner.initialize(..)");
+    public INDArray[] execute(INDArray[] input) {
+	Preconditions.checkNotNull(input,"Inputs must not be null!");
+        Preconditions.checkState(input.length == this.model.GetInputCount(),String.format("Number of inputs %d did not equal number of model inputs %d!",input.length,model.GetInputCount()));
+        synchronized (this.model) {
+	    Map<String, INDArray> inputs = new LinkedHashMap(input.length);
+
+            for (int i = 0; i < this.model.GetInputCount(); i++) {
+                inputs.put(this.model.GetInputName(i, allocator.asOrtAllocator()).getString(), input[i]);
+            }
+
+            Map<String, INDArray> ret = inference.output(inputs);
+            return ret.values().toArray(new INDArray[0]);
         }
-        return inference.output(input);
     }
 
     @Override
