@@ -1,11 +1,8 @@
 package ai.konduit.serving.util;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 
-@Slf4j
 public class PortUtils {
 
     /**
