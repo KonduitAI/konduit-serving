@@ -183,13 +183,12 @@ def clean_java_files(ext=""):
 
 
 @pytest.mark.unit
-@pytest.mark.skip
 def test_docs():
     """This is the main unit test for testing documentation code snippets
     contained in markdown files."""
     files = get_files("../docs")
     for file_path in files:
-        python_blocks = markdown_blocks(file_path, "python")
+        python_blocks = markdown_blocks(file_path, "python./")
         exec_python_code(python_blocks)
 
         java_blocks = markdown_blocks(file_path, "java")
