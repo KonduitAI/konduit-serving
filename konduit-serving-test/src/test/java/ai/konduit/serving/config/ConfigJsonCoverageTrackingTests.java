@@ -188,6 +188,11 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @Test
+    public void testOnnxStep(){
+        testConfigSerDe(OnnxStep.builder().inputName("x").outputNames(Arrays.asList("y","z")).build());
+    }
+
+    @Test
     public void testPmmlStep(){
         testConfigSerDe(PmmlStep.builder().inputName("x").outputNames(Arrays.asList("y","z")).build());
     }
@@ -225,6 +230,19 @@ public class ConfigJsonCoverageTrackingTests {
     public void testParallelInferenceConfig(){
         testConfigSerDe(ParallelInferenceConfig.defaultConfig());
         testConfigSerDe(ParallelInferenceConfig.builder().batchLimit(5).workers(3).queueLimit(2).inferenceMode(InferenceMode.SEQUENTIAL).build());
+    }
+
+    @Test
+    public void testOnnxConfig(){
+        OnnxConfig d = OnnxConfig.builder()
+                .modelConfigType(ModelConfigType.onnx("/Some/Path/Here"))
+                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
+                        .inputDataType("in", TensorDataType.FLOAT)
+                        .outputDataType("out", TensorDataType.FLOAT)
+                        .build())
+                .build();
+
+        testConfigSerDe(d);
     }
 
     @Test

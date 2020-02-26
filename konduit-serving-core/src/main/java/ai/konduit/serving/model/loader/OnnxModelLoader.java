@@ -37,6 +37,7 @@ import static org.bytedeco.onnxruntime.global.onnxruntime.OrtSessionOptionsAppen
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
@@ -52,7 +53,7 @@ public class OnnxModelLoader implements ModelLoader<Session> {
 
     @Override
     public Session loadModel() throws Exception {
-	Env env = new Env(ORT_LOGGING_LEVEL_WARNING, new BytePointer("konduit-serving-onnx-session"));
+	Env env = new Env(ORT_LOGGING_LEVEL_WARNING, new BytePointer("konduit-serving-onnx-session" + (new Date()).getTime()));
 
         SessionOptions session_options = new SessionOptions();
 	session_options.SetIntraOpNumThreads(1);
