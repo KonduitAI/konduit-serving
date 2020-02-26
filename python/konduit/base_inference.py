@@ -2907,7 +2907,7 @@ class ImageLoadingStep(PipelineStep):
             )
         return d
 
-class BertStep(PipelineStep):
+class WordPieceTokenizerStep(PipelineStep):
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},

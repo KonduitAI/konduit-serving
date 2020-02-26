@@ -35,7 +35,7 @@ import java.io.Serializable;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-public class BertStep extends BasePipelineStep<BertStep> implements Serializable
+public class WordPieceTokenizerStep extends BasePipelineStep<WordPieceTokenizerStep> implements Serializable
 {
     protected String modelPath, vocabPath;
 
@@ -55,14 +55,14 @@ public class BertStep extends BasePipelineStep<BertStep> implements Serializable
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.steps.BertStepRunner";
+        return "ai.konduit.serving.pipeline.steps.WordPieceTokenizerStepRunner";
     }
 
-    public static BertStep fromJson(String json){
-        return ObjectMappers.fromJson(json, BertStep.class);
+    public static WordPieceTokenizerStep fromJson(String json){
+        return ObjectMappers.fromJson(json, WordPieceTokenizerStep.class);
     }
 
-    public static BertStep fromYaml(String yaml){
-        return ObjectMappers.fromYaml(yaml, BertStep.class);
+    public static WordPieceTokenizerStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, WordPieceTokenizerStep.class);
     }
 }

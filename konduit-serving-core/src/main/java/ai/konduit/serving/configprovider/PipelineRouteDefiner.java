@@ -515,7 +515,7 @@ public class PipelineRouteDefiner {
         if (inputSchema == null && inputRequired) {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
                 if (pipelineStep instanceof ModelStep || pipelineStep instanceof PythonStep || pipelineStep
-                        instanceof TransformProcessStep || pipelineStep instanceof BertStep) {
+                        instanceof TransformProcessStep || pipelineStep instanceof WordPieceTokenizerStep) {
                     inputSchema = pipelineStep.inputSchemaForName("default");
                 }
             }

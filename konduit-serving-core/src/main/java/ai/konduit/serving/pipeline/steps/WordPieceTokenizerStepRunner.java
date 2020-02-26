@@ -24,7 +24,7 @@ package ai.konduit.serving.pipeline.steps;
 
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.PipelineStep;
-import ai.konduit.serving.pipeline.step.BertStep;
+import ai.konduit.serving.pipeline.step.WordPieceTokenizerStep;
 import ai.konduit.serving.util.WritableValueRetriever;
 import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
@@ -44,20 +44,20 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class BertStepRunner extends BaseStepRunner
+public class WordPieceTokenizerStepRunner extends BaseStepRunner
 {
     private BertWordPieceTokenizerFactory tokenizer;
-    private BertStep bertStep;
+    private WordPieceTokenizerStep bertStep;
 
     private ComputationGraph bertModel;
 
     private final int MAX_LEN = 256;
 
-    public BertStepRunner(PipelineStep pipelineStep)
+    public WordPieceTokenizerStepRunner(PipelineStep pipelineStep)
     {
         super(pipelineStep);
 
-        this.bertStep = (BertStep) pipelineStep;
+        this.bertStep = (WordPieceTokenizerStep) pipelineStep;
 
         //String inputName = (String) this.bertStep.getInputNames().get(0);
         //String outputName = (String) this.bertStep.getOutputNames().get(0);
