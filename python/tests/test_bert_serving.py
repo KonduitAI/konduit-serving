@@ -19,13 +19,10 @@ import pytest
 
 @pytest.mark.integration
 def test_server_start():
-
     input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
     output_names = ["loss/Softmax"]
-    port = random.randint(1000, 65535)
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(
-        http_port=port,
         output_data_format="NUMPY",
         log_timings=True,
     )
@@ -57,8 +54,7 @@ def test_server_start():
     server = Server(
         inference_config=inference, extra_start_args="-Xmx8g", jar_path="konduit.jar"
     )
-    server.start()
-    client = Client(input_data_format="NUMPY", prediction_type="RAW", port=port)
+    _, port, started = server.start()
 
     data_input = {
         "IteratorGetNext:0": np.load("../data/input-0.npy"),
@@ -66,7 +62,10 @@ def test_server_start():
         "IteratorGetNext:4": np.load("../data/input-4.npy"),
     }
 
+    assert started  # will be true if the server was started
     assert is_port_in_use(port)
+
+    client = Client(input_data_format="NUMPY", prediction_type="RAW", port=port)
 
     try:
         predicted = client.predict(data_input)
@@ -75,3 +74,6 @@ def test_server_start():
     except Exception as e:
         print(e)
         server.stop()
+
+
+test_server_start()
