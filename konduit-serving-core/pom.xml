@@ -159,6 +159,16 @@
         </dependency>
         <dependency>
             <groupId>org.bytedeco</groupId>
+            <artifactId>onnxruntime</artifactId>
+            <version>${onnxruntime.javacpp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>onnxruntime-platform</artifactId>
+            <version>${onnxruntime.javacpp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
             <artifactId>opencv-platform</artifactId>
         </dependency>
         <dependency>
@@ -200,10 +210,6 @@
                     <artifactId>mkl-dnn-platform</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>onnxruntime</artifactId>
         </dependency>
         <dependency>
             <groupId>org.nd4j</groupId>

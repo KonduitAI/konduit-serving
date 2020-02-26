@@ -119,7 +119,9 @@
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
         <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}
         </tensorflow.javacpp.version>
-        <mkl-dnn.version>0.21.3</mkl-dnn.version>
+        <dnnl.version>1.2.0</dnnl.version>
+        <dnnl.javacpp.version>${dnnl.version}-${javacpp.version}</dnnl.javacpp.version>
+	<mkl-dnn.version>0.21.3</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
         <numpy.version>1.18.1</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
@@ -176,11 +178,6 @@
                 <version>${slf4j.version}</version>
             </dependency>
 	    <dependency>
-                <groupId>org.bytedeco</groupId>
-                <artifactId>onnxruntime</artifactId>
-                <version>${onnxruntime.javacpp.version}</version>
-            </dependency>
-           <dependency>
                 <groupId>org.bytedeco</groupId>
                 <artifactId>openblas</artifactId>
                 <version>${openblas.javacpp.version}</version>
@@ -278,6 +275,16 @@
                 <artifactId>mkl-platform</artifactId>
                 <version>${mkl.javacpp.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>dnnl-platform</artifactId>
+                <version>${dnnl.javacpp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>dnnl</artifactId>
+                <version>${dnnl.javacpp.version}</version>
+	    </dependency>
             <dependency>
                 <groupId>org.bytedeco</groupId>
                 <artifactId>mkl-dnn-platform</artifactId>
@@ -608,7 +615,10 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
+		<artifactId>maven-surefire-plugin</artifactId>
+		    <configuration>
+			    <forkCount>0</forkCount>
+		    </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
