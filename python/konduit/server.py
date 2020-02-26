@@ -1,18 +1,16 @@
 import json
 import logging
 import os
+import re
 import signal
 import subprocess
-import re
 
-import time
 import requests
-
+from konduit import KONDUIT_DIR
 from konduit.base_inference import PipelineStep
+from konduit.client import Client
 from konduit.inference import InferenceConfiguration
 from konduit.json_utils import config_to_dict_with_type
-from konduit.client import Client
-from konduit import KONDUIT_DIR
 
 
 def stop_server_by_pid(pid):
@@ -56,6 +54,7 @@ class Server(object):
         :param config_path: path to write the config object to (as json)
         :param jar_path: path to the konduit uberjar
         """
+        self.port = -1
         if jar_path is None:
             jar_path = os.getenv(
                 "KONDUIT_JAR_PATH", os.path.join(KONDUIT_DIR, "konduit.jar")
@@ -108,7 +107,7 @@ class Server(object):
             input_names += step._get_input_names()
             output_names += step._get_output_names()
 
-        port = serving_config._get_http_port()
+        port = self.port
         host = serving_config._get_listen_host()
         if not host.startswith("http://"):
             host = "http://" + host
@@ -179,6 +178,7 @@ class Server(object):
                     m = re.search('port (.+?) with', str(output))
                     if m:
                         port = int(m.group(1))
+                        self.port = port
                         break
 
         if port != -1:

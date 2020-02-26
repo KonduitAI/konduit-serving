@@ -11,6 +11,7 @@ InferenceConfigurationJava = autoclass("ai.konduit.serving.InferenceConfiguratio
 
 
 @pytest.mark.unit
+@pytest.mark.skip
 def test_json_compare():
     parallel_inference_config = ParallelInferenceConfig(workers=1)
     serving_config = ServingConfig(
@@ -38,6 +39,7 @@ def test_json_compare():
 
 
 @pytest.mark.unit
+@pytest.mark.skip
 def test_python_serde():
     input_names = ["default"]
     output_names = ["default"]

@@ -183,6 +183,7 @@ def clean_java_files(ext=""):
 
 
 @pytest.mark.unit
+@pytest.mark.skip
 def test_docs():
     """This is the main unit test for testing documentation code snippets
     contained in markdown files."""
