@@ -78,7 +78,7 @@ public class OnnxInferenceExecutioner implements
     public void initialize(ModelLoader<Session> model, ParallelInferenceConfig config) {
         this.modelLoader = model;
         this.model = model();
-        this.inference = new ONNXThreadPool.Builder(model, this.model)
+        this.inference = new ONNXThreadPool.Builder(model)
                 .batchLimit(config.getBatchLimit())
                 .queueLimit(config.getQueueLimit())
                 .inferenceMode(config.getInferenceMode())
