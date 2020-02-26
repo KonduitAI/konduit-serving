@@ -1,42 +1,21 @@
-/*
- *
- *  * ******************************************************************************
- *  *  * Copyright (c) 2015-2019 Skymind Inc.
- *  *  * Copyright (c) 2019 Konduit AI.
- *  *  *
- *  *  * This program and the accompanying materials are made available under the
- *  *  * terms of the Apache License, Version 2.0 which is available at
- *  *  * https://www.apache.org/licenses/LICENSE-2.0.
- *  *  *
- *  *  * Unless required by applicable law or agreed to in writing, software
- *  *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- *  *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- *  *  * License for the specific language governing permissions and limitations
- *  *  * under the License.
- *  *  *
- *  *  * SPDX-License-Identifier: Apache-2.0
- *  *  *****************************************************************************
- *
- *
- */
-
-package ai.konduit.serving.configprovider;
+package ai.konduit.serving.util;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.input.conversion.BatchInputParser;
+import ai.konduit.serving.configprovider.KonduitServingMain;
+import ai.konduit.serving.configprovider.KonduitServingMainArgs;
 import ai.konduit.serving.model.DL4JConfig;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.train.TrainUtils;
-import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -52,13 +31,18 @@ import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import ai.konduit.serving.util.PortUtils;
 
+import static com.jayway.restassured.RestAssured.given;
+
+@Slf4j
 @RunWith(VertxUnitRunner.class)
-public class KonduitServingMainTest {
+public class PortConflictsResolutionTest {
 
     public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
+    private static int firstSelectedPort;
 
     @Rule
     public Timeout rule = Timeout.seconds(240);
@@ -68,7 +52,10 @@ public class KonduitServingMainTest {
 
     @BeforeClass
     public static void beforeClass(TestContext testContext) throws Exception {
-        JsonObject config = getConfig();
+        firstSelectedPort = PortUtils.getAvailablePort(); // Getting an available port so that the first server starts without issues
+        log.info("First selected port is {}", firstSelectedPort);
+        JsonObject config = getConfig(firstSelectedPort);
+
         File jsonConfigPath = folder.newFile("config.json");
         FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
 
@@ -76,8 +63,13 @@ public class KonduitServingMainTest {
     }
 
     @Test
-    public void testOnSuccessHook(TestContext testContext) {
-        Async async = testContext.async();
+    public void testPortConflictResolution(TestContext testContext) {
+        Async async1 = testContext.async();
+        Async async2 = testContext.async();
+
+        AtomicInteger server1Port = new AtomicInteger(0);
+        AtomicInteger server2Port = new AtomicInteger(0);
+
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
                 .multiThreaded(false)
@@ -85,32 +77,45 @@ public class KonduitServingMainTest {
                 .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
                 .build();
 
-        KonduitServingMain.builder()
-                .onSuccess(port -> async.complete())
-                .onFailure(() -> testContext.fail("onFailure called instead of onSuccess hook"))
-                .build()
-                .runMain(args.toArgs());
-    }
-
-    @Test
-    public void testOnFailureHook(TestContext testContext) {
-        Async async = testContext.async();
-
-        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                .configStoreType("file").ha(false)
-                .multiThreaded(false)
-                .verticleClassName(BatchInputParser.class.getName()) // Invalid verticle class name
-                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
+        KonduitServingMain konduitServingMain = KonduitServingMain.builder()
+                .onSuccess(port -> {
+                    if(server1Port.get() < 1) {
+                        server1Port.set(port);
+                        async1.complete();
+                    } else {
+                        server2Port.set(port);
+                        async2.complete();
+                    }
+                })
+                .onFailure(() -> testContext.fail("unable to start server."))
                 .build();
 
-        KonduitServingMain.builder()
-                .onSuccess(port -> testContext.fail("onSuccess called instead of onFailure hook"))
-                .onFailure(async::complete)
-                .build()
-                .runMain(args.toArgs());
+        konduitServingMain.runMain(args.toArgs());
+        async1.await();
+
+        konduitServingMain.runMain(args.toArgs()); // Trying to start the same server on the same port
+        async2.await();
+
+        // The first server should be started on the given port
+        testContext.assertEquals(server1Port.get(), firstSelectedPort);
+        // Due to a conflict, the second server should start on a different port number than the first one
+        testContext.assertNotEquals(server2Port.get(), firstSelectedPort);
+        // The two running ports should also be different
+        testContext.assertNotEquals(server1Port.get(), server2Port.get());
+
+        // Health checking server 1
+        given().port(server1Port.get())
+                .get("/healthcheck")
+                .then()
+                .statusCode(204);
+        // Health checking server 2
+        given().port(server2Port.get())
+                .get("/healthcheck")
+                .then()
+                .statusCode(204);
     }
 
-    public static JsonObject getConfig() throws Exception {
+    public static JsonObject getConfig(int port) throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
         File modelSave = folder.newFile("model.zip");
         ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
@@ -129,7 +134,7 @@ public class KonduitServingMainTest {
         Schema outputSchema = outputSchemaBuilder.build();
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(PortUtils.getAvailablePort())
+                .httpPort(port)
                 .build();
 
         ModelConfig modelConfig = DL4JConfig.builder()
