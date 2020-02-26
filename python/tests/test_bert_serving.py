@@ -1,6 +1,5 @@
-import random
-
 import numpy as np
+import pytest
 from konduit import (
     ParallelInferenceConfig,
     ServingConfig,
@@ -11,10 +10,6 @@ from konduit import TensorDataTypesConfig, ModelStep, InferenceConfiguration
 from konduit.client import Client
 from konduit.server import Server
 from konduit.utils import is_port_in_use
-
-import numpy as np
-import random
-import pytest
 
 
 @pytest.mark.integration

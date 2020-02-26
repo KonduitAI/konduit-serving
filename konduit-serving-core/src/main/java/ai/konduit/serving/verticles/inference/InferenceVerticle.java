@@ -39,7 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.BindException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A {@link io.vertx.core.Verticle} that takes multi part file uploads

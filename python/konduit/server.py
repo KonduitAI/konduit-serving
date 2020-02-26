@@ -34,8 +34,7 @@ class Server(object):
         extra_jar_args=None,
         config_path="config.json",
         jar_path=None,
-        pid_file_path="konduit-serving.pid",
-        start_timeout=120,
+        pid_file_path="konduit-serving.pid"
     ):
         """Konduit Server
 
@@ -75,7 +74,6 @@ class Server(object):
         self.config_path = config_path
         self.jar_path = jar_path
         self.pid_file_path = pid_file_path
-        self.start_timeout = start_timeout
         self.process = None
         if extra_start_args is None:
             extra_start_args = []
@@ -165,11 +163,10 @@ class Server(object):
 
         # Check if the server is up or not.
         request_timeout = 5
-        tries = int(self.start_timeout / request_timeout + 1)
 
         started = False
 
-        print("Starting server", end="")
+        print("Starting server")
 
         port = -1
         while True:
@@ -177,20 +174,17 @@ class Server(object):
             if output == b'' and process.poll() is not None:
                 break
             else:
-                print(output)
+                print(output.decode("utf-8"), end="")
                 if b'Server started on port' in output:
-                    m = re.search('port (.+?) with', output)
+                    m = re.search('port (.+?) with', str(output))
                     if m:
                         port = int(m.group(1))
                         break
-            print(".", end="")
 
-        if port > -1:
+        if port != -1:
             try:
                 r = requests.get(
-                    "http://localhost:{}/healthcheck".format(
-                        self.config.serving_config.http_port
-                    ),
+                    "http://localhost:{}/healthcheck".format(port),
                     timeout=request_timeout,
                 )
                 if r.status_code == 204:
