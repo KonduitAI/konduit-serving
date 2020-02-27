@@ -16,9 +16,12 @@
 
 package ai.konduit.serving.util;
 
+import lombok.NoArgsConstructor;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 
+@NoArgsConstructor
 public class PortUtils {
 
     /**
