@@ -70,7 +70,7 @@ public class WordPieceTokenizerStepRunner extends BaseStepRunner
 
         } catch (IOException e)
         {
-            throw new IllegalStateException("Vocabulary file missing");
+            throw new IllegalStateException("Failed to create BertWordPieceTokenizerFactory", e);
         }
 
         //load Bert trained model
@@ -80,7 +80,7 @@ public class WordPieceTokenizerStepRunner extends BaseStepRunner
 
         } catch (IOException e)
         {
-            throw new IllegalStateException("Model file failed loading");
+            throw new IllegalStateException("Failed to load ComputationGraph model at path " + modelPath, e);
         }
     }
 
