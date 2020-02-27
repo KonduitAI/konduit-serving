@@ -61,7 +61,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     private InferenceConfiguration inferenceConfiguration;
     private PipelineRouteDefiner pipelineRouteDefiner;
     private Throwable throwable;
-    private CountDownLatch countDownLatch = new CountDownLatch(1);
+    private CountDownLatch countDownLatch;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -106,6 +106,8 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     }
 
     protected void setupWebServer() throws Throwable {
+        countDownLatch = new CountDownLatch(1);
+
         String portEnvValue = System.getenv(VerticleConstants.KONDUIT_SERVING_PORT);
         if (portEnvValue != null) {
             try {
@@ -126,7 +128,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         List<PipelineStep> steps = inferenceConfiguration.getSteps();
         final int nSteps = steps == null ? 0 : steps.size();
 
-        startVertxServer(port, nSteps);
+        new Thread(() -> startVertxServer(port, nSteps)).start(); // Starting a new thread here because the CountDownLatch freezes the listen callback for Vertx#createHttpServer
 
         countDownLatch.await();
 
@@ -134,18 +136,18 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     }
 
     private void startVertxServer(int port, int nSteps) {
-        new Thread(() -> vertx.createHttpServer()
-                .requestHandler(router)
-                .exceptionHandler(Throwable::printStackTrace)
-                .listen(port, inferenceConfiguration.getServingConfig().getListenHost(), result -> {
-                    if (result.failed()) {
-                        throwable = result.cause();
-                    } else {
-                        this.port = result.result().actualPort();
-                        log.info("Server started on port {} with {} pipeline steps", this.port, nSteps);
+        vertx.createHttpServer()
+            .requestHandler(router)
+            .exceptionHandler(Throwable::printStackTrace)
+            .listen(port, inferenceConfiguration.getServingConfig().getListenHost(), result -> {
+                if (result.failed()) {
+                    throwable = result.cause();
+                } else {
+                    this.port = result.result().actualPort();
+                    log.info("Server started on port {} with {} pipeline steps", this.port, nSteps);
 
-                    }
-                    countDownLatch.countDown();
-                })).start();
+                }
+                countDownLatch.countDown();
+            });
     }
 }
