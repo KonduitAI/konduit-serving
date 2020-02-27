@@ -1,8 +1,7 @@
 /*
  *
  *  * ******************************************************************************
- *  *  * Copyright (c) 2015-2019 Skymind Inc.
- *  *  * Copyright (c) 2019 Konduit AI.
+ *  *  * Copyright (c) 2020 Konduit AI.
  *  *  *
  *  *  * This program and the accompanying materials are made available under the
  *  *  * terms of the Apache License, Version 2.0 which is available at
@@ -22,7 +21,6 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.WordPieceTokenizerStep;
 import ai.konduit.serving.util.WritableValueRetriever;
