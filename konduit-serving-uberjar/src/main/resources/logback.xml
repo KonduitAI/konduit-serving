@@ -21,11 +21,16 @@
   -->
 
 <configuration scan="true" scanPeriod="30 seconds">
-    <appender name="FILE" class="ch.qos.logback.core.ConsoleAppender">
-        <file>${KONDUIT_SERVING_LOG_DIR:-/var/log/konduit-serving}/${service.type}-${service.id}.log</file>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
-            </pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${KONDUIT_SERVING_LOG_DIR:-${user.dir}}/main.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -44,6 +49,7 @@
     <logger name="org.bytedeco" level="DEBUG"/>
 
     <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </root>
 

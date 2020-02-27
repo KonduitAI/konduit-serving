@@ -48,7 +48,6 @@ import static java.lang.System.setProperty;
 @AllArgsConstructor
 @Builder
 public class KonduitServingMain {
-
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
     private Runnable onSuccess;
     private Runnable onFailure;

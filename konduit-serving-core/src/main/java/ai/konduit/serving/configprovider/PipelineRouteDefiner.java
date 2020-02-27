@@ -26,6 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
+import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
@@ -42,6 +43,11 @@ import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.FileAppender;
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.LongTaskTimer.Sample;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -61,11 +67,16 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.base.Preconditions;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -212,6 +223,40 @@ public class PipelineRouteDefiner {
         });
 
         /**
+         * Sets up and endpoint to see server logs if
+         * {@link ServingConfig#isCreateLoggingEndpoints()} is true.
+         * Returns the last 100 lines of the log file.
+         */
+        if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
+            router.get("/logs")
+                    .produces("application/text").handler(ctx -> {
+                try { ctx.response().end(getLogs(100)); }
+                catch(Exception e) { ctx.fail(500, e); }
+            });
+
+        /**
+         * Sets up and endpoint to see server logs if {@link ServingConfig#isCreateLoggingEndpoints()}
+         * is true. Returns the number of last few lines determines by the path param
+         * {@code numberOfLinesToRead}. If an invalid integer is given as the
+         * path param all of the log file will be read and returned.
+         */
+            router.get("/logs/:numberOfLinesToRead")
+                    .produces("application/text").handler(ctx -> {
+                String numberOfLinesString = ctx.pathParam("numberOfLinesToRead");
+
+                try {
+                    ctx.response().end(getLogs(Integer.parseInt(numberOfLinesString)));
+                } catch (Exception e) {
+                    if(e instanceof NumberFormatException) {
+                        ctx.response().end(getLogs(-1));
+                    } else {
+                        ctx.fail(500, e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Get prometheus metrics from this endpoint.
          */
         router.get("/metrics").handler(io.vertx.micrometer.PrometheusScrapingHandler.create())
@@ -220,7 +265,6 @@ public class PipelineRouteDefiner {
                         log.error("Failed to scrape metrics", failureHandler.failure());
                     }
                 });
-
 
         Preconditions.checkNotNull(inferenceConfiguration.getServingConfig(), "Please define a serving configuration.");
         router.post().handler(BodyHandler.create()
@@ -238,8 +282,6 @@ public class PipelineRouteDefiner {
                         }
                     }
                 });
-
-
 
         router.post("/dynamicschema")
                 .consumes("application/json")
@@ -564,5 +606,60 @@ public class PipelineRouteDefiner {
         }
     }
 
+    /**
+     * Finds the log file and sends the output as a String
+     * @param numLastLineToRead Number of lines to read from the last few lines.
+     *                          if it's less than 1 then all of the log file data is read.
+     * @return
+     */
+    private String getLogs(int numLastLineToRead) {
+        File logsFile;
+        FileAppender<?> fileAppender = null;
+        LoggerContext context = (LoggerContext ) LoggerFactory.getILoggerFactory();
+        for (Logger logger : context.getLoggerList())
+        {
+            for (Iterator<Appender<ILoggingEvent>> index = logger.iteratorForAppenders();
+                 index.hasNext();)
+            {
+                Object enumElement = index.next();
+                if (enumElement instanceof FileAppender) {
+                    fileAppender=(FileAppender<?>)enumElement;
+                }
+            }
+        }
 
+        if (fileAppender != null) {
+            logsFile = new File(fileAppender.getFile());
+        }
+        else {
+            logsFile = null;
+        }
+
+        List<String> result = new ArrayList<>();
+
+        if(logsFile == null || !logsFile.exists()) return "";
+
+        if(numLastLineToRead > 0) {
+            try (ReversedLinesFileReader reader = new ReversedLinesFileReader(logsFile, StandardCharsets.UTF_8)) {
+
+                String line;
+                while ((line = reader.readLine()) != null && result.size() < numLastLineToRead) {
+                    result.add(line);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                return FileUtils.readFileToString(logsFile, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                log.error("Error reading file: ", e);
+                return "";
+            }
+        }
+
+        Collections.reverse(result);
+        return String.join(System.lineSeparator(), result);
+    }
 }
