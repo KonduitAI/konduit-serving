@@ -60,7 +60,7 @@ import static org.hamcrest.Matchers.not;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class PytorchPythonNdArrayRegressionTest extends BaseMultiNumpyVerticalTest {
+public class PytorchPythonNd4jJsonRegressionTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {

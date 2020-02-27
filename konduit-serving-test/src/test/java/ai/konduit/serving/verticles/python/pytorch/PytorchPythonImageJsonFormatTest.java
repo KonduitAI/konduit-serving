@@ -23,13 +23,14 @@
 package ai.konduit.serving.verticles.python.pytorch;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ExpectedAssertTest;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -39,25 +40,23 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
-import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class PytorchPythonImageND4JFormatTest extends BaseMultiNumpyVerticalTest {
+public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -90,10 +89,8 @@ public class PytorchPythonImageND4JFormatTest extends BaseMultiNumpyVerticalTest
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
         //ServingConfig set httpport and Input Formats
-        ServingConfig servingConfig = ServingConfig.builder()
-                .outputDataFormat(Output.DataFormat.ND4J)
-                .httpPort(port).
-                        build();
+        ServingConfig servingConfig = ServingConfig.builder().httpPort(port).
+                build();
 
         //Model config and set model type as Pytorch
         ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
@@ -130,14 +127,15 @@ public class PytorchPythonImageND4JFormatTest extends BaseMultiNumpyVerticalTest
                 .post("/raw/image").then()
                 .extract()
                 .body().asString();
-
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
-        FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
-        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
+        JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
+        INDArray outputArray = nd.getNdArray();
         INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
-        assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
+        assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0),1e-1);
         assertEquals(expectedArr, outputArray);
     }
 
@@ -160,12 +158,15 @@ public class PytorchPythonImageND4JFormatTest extends BaseMultiNumpyVerticalTest
                 .post("/classification/image").then()
                 .extract()
                 .body().asString();
-
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
-        FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
-        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
+        JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        System.out.println(ndarraySerde);
+        NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
+        INDArray outputArray = nd.getNdArray();
+        //assertEquals(51, outputArray.getDouble(0), 1e-1);
         INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "classification");
         assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
         assertEquals(expectedArr, outputArray);
