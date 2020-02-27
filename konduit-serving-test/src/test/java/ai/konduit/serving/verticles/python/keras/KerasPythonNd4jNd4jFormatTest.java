@@ -27,9 +27,9 @@ import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ExpectedAssertTest;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -45,6 +45,7 @@ import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.serde.binary.BinarySerde;
 
@@ -52,15 +53,18 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
+import static org.bytedeco.cpython.presets.python.cachePackages;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class KerasPythonImageND4JFormatTest extends BaseMultiNumpyVerticalTest {
+public class KerasPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -73,8 +77,6 @@ public class KerasPythonImageND4JFormatTest extends BaseMultiNumpyVerticalTest {
         return req -> {
             //should be json body of classification
             req.bodyHandler(body -> {
-                System.out.println(body.toJson());
-                System.out.println("Finish body" + body);
             });
 
             req.exceptionHandler(exception -> context.fail(exception));
@@ -83,32 +85,30 @@ public class KerasPythonImageND4JFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonCodePath = new ClassPathResource("scripts/keras/KerasImageTest.py").getFile().getAbsolutePath();
+        String pythonPath = Arrays.stream(cachePackages())
+                .filter(Objects::nonNull)
+                .map(File::getAbsolutePath)
+                .collect(Collectors.joining(File.pathSeparator));
+        String pythonCodePath = new ClassPathResource("scripts/keras/KerasNDArrayTest.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
-                .pythonInput("imgPath", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("imageArray", PythonType.TypeName.NDARRAY.name())
+                .pythonCodePath(pythonCodePath)
+                .pythonInput("inputData", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("arr", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
-        //ServingConfig set httpport and Input Formats
         ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.ND4J)
-                .httpPort(port).
-                        build();
-
-        //Model config and set model type as KERAS
-        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .inputName("imgPath")
-                .dimensionsConfig("default", new Long[]{240L, 320L, 3L}) // Height, width, channels
+                .httpPort(port)
                 .build();
 
+
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+                .step(pythonStepConfig)
                 .servingConfig(servingConfig)
-                .steps(Arrays.asList(imageLoadingStep, pythonStepConfig))
                 .build();
         System.out.println(inferenceConfiguration.toJson());
         return new JsonObject(inferenceConfiguration.toJson());
@@ -116,65 +116,76 @@ public class KerasPythonImageND4JFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
-
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-
         JsonObject jsonObject = new JsonObject();
-        requestSpecification.body(jsonObject.encode().getBytes());
-        requestSpecification.header("Content-Type", "multipart/form-data");
 
-        File imageFile = new ClassPathResource("data/KerasImageTest.png").getFile();
-        String output = requestSpecification.when()
-                .multiPart("imgPath", imageFile)
+        //Preparing input NDArray
+        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
+        System.out.println(arr);
+
+        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
+
+        //Create new file to write binary input data.
+        File file = new File(filePath + "/test-input.zip");
+
+        BinarySerde.writeArrayToDisk(arr, file);
+        requestSpecification.body(jsonObject.encode().getBytes());
+
+        requestSpecification.header("Content-Type", "multipart/form-data");
+        String response = requestSpecification.when()
+                .multiPart("default", file)
                 .expect().statusCode(200)
-                .post("/raw/image").then()
+                .body(not(isEmptyOrNullString()))
+                .post("/raw/nd4j").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
 
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
-        FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
+        FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasImageTest.json", "raw");
-        assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
+        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json", "raw");
         assertEquals(expectedArr, outputArray);
     }
 
     @Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
-
-        System.out.println("testInferenceClassificationResult Start");
-
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-
         JsonObject jsonObject = new JsonObject();
-        requestSpecification.body(jsonObject.encode().getBytes());
-        requestSpecification.header("Content-Type", "multipart/form-data");
 
-        File imageFile = new ClassPathResource("data/KerasImageTest.png").getFile();
+        //Preparing input NDArray
+        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
+
+        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
+
+        //Create new file to write binary input data.
+        File file = new File(filePath + "/test-input.zip");
+
+        BinarySerde.writeArrayToDisk(arr, file);
+        requestSpecification.body(jsonObject.encode().getBytes());
+
+        requestSpecification.header("Content-Type", "multipart/form-data");
         String response = requestSpecification.when()
-                .multiPart("imgPath", imageFile)
+                .multiPart("default", file)
                 .expect().statusCode(200)
-                .post("/classification/image").then()
+                .body(not(isEmptyOrNullString()))
+                .post("/classification/nd4j").then()
                 .extract()
                 .body().asString();
 
-        JsonObject jsonObject1 = new JsonObject(response);
-        assertTrue(jsonObject1.containsKey("default"));
-        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
-        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
-        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
-        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
-        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/keras/KerasImageTest.json");
-        double expValue = expArr.getJsonArray(0).getDouble(0);
-        assertEquals(expValue, outpuValue, 1e-1);
-        assertEquals(expArr, outputArr);
-
+        File outputImagePath = new File(
+                "src/main/resources/data/test-nd4j-output.zip");
+        FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
+        System.out.println(BinarySerde.readFromDisk(outputImagePath));
+        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
+        JsonArray expProb = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/keras/KerasNdArrayTest.json");
+        float[][] expNd = ObjectMappers.json().readValue(expProb.toString(), float[][].class);
+        INDArray expectedArray = Nd4j.create(expNd);
+        assertEquals(expectedArray, outputArray);
     }
 }

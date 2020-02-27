@@ -23,10 +23,10 @@
 package ai.konduit.serving.verticles.python.keras;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ExpectedAssertTest;
 import ai.konduit.serving.util.ObjectMappers;
@@ -40,8 +40,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.FileUtils;
-import org.bytedeco.systems.macosx.so_np_extensions;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +50,6 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -62,10 +59,11 @@ import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class KerasPythonND4JNUMPYFormatTest extends BaseMultiNumpyVerticalTest {
+public class KerasPythonNd4JsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -102,7 +100,6 @@ public class KerasPythonND4JNUMPYFormatTest extends BaseMultiNumpyVerticalTest {
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .outputDataFormat(Output.DataFormat.NUMPY)
                 .httpPort(port)
                 .build();
 
@@ -110,7 +107,7 @@ public class KerasPythonND4JNUMPYFormatTest extends BaseMultiNumpyVerticalTest {
                 .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
-        System.out.println(inferenceConfiguration.toJson());
+
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
@@ -123,7 +120,6 @@ public class KerasPythonND4JNUMPYFormatTest extends BaseMultiNumpyVerticalTest {
 
         //Preparing input NDArray
         INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-        System.out.println(arr);
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
@@ -142,32 +138,18 @@ public class KerasPythonND4JNUMPYFormatTest extends BaseMultiNumpyVerticalTest {
                 .extract()
                 .body().asString();
 
-        //TO test create and read from numpy.
-/*
-        //Preparing input NDArray
-        INDArray arr1 = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-
-        byte[] xNpy = Nd4j.toNpyByteArray(arr1);
-
-        File xFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(xFile, xNpy);
-*/
-
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.npy");
-        FileUtils.writeStringToFile(outputImagePath, response,Charset.defaultCharset());
-        System.out.print(response);
-        INDArray outputArray1=  Nd4j.createFromNpyFile(outputImagePath);
-        //INDArray outputArray1=  Nd4j.readNpy(outputImagePath);
-       // INDArray outputArray1=  Nd4j.readNumpy(outputImagePath.getAbsolutePath());
-
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
-        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
+        JsonObject jsonObject1 = new JsonObject(response);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
+        INDArray outputArray = nd.getNdArray();
         INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json", "raw");
         assertEquals(expectedArr, outputArray);
     }
 
-    //@Test(timeout = 60000)
+    @Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -194,11 +176,13 @@ public class KerasPythonND4JNUMPYFormatTest extends BaseMultiNumpyVerticalTest {
                 .extract()
                 .body().asString();
 
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
-        FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
-        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
+        JsonObject jsonObject1 = new JsonObject(response);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
+        float[][] nd = ObjectMappers.json().readValue(probabilities.toString(), float[][].class);
+        INDArray outputArray = Nd4j.create(nd);
         JsonArray expProb = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/keras/KerasNdArrayTest.json");
         float[][] expNd = ObjectMappers.json().readValue(expProb.toString(), float[][].class);
         INDArray expectedArray = Nd4j.create(expNd);

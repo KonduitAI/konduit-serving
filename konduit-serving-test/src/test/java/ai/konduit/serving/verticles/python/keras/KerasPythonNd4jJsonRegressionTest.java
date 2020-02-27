@@ -26,9 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ExpectedAssertTest;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -40,13 +38,13 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
@@ -55,15 +53,14 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
+import static groovy.util.GroovyTestCase.assertEquals;
 import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class KerasPythonNumpyFormatTest extends BaseMultiNumpyVerticalTest {
+public class KerasPythonNd4jJsonRegressionTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -88,13 +85,13 @@ public class KerasPythonNumpyFormatTest extends BaseMultiNumpyVerticalTest {
                 .filter(Objects::nonNull)
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
-        String pythonCodePath = new ClassPathResource("scripts/keras/NumpyKerasNumpy.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/keras/Keras_Regression.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("inputValue", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("output_np", PythonType.TypeName.NDARRAY.name())
+                .pythonInput("inputData", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("pred", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -116,71 +113,34 @@ public class KerasPythonNumpyFormatTest extends BaseMultiNumpyVerticalTest {
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-
-        //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-
-        byte[] xNpy = Nd4j.toNpyByteArray(arr);
-
-        File xFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(xFile, xNpy);
-
-        requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
-                .multiPart("default", xFile)
-                .expect().statusCode(200)
-                .body(not(isEmptyOrNullString()))
-                .post("/raw/numpy").then()
-                .extract()
-                .body().asString();
-
-        JsonObject jsonObject = new JsonObject(response);
-        assertTrue(jsonObject.containsKey("default"));
-        assertTrue(jsonObject.getJsonObject("default").containsKey("ndArray"));
-        assertTrue(jsonObject.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
-        String ndarraySerde = jsonObject.getJsonObject("default").toString();
-        NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json", "raw");
-        assertEquals(expectedArr, outputArray);
-    }
-
-
-    @Test(timeout = 60000)
-    public void testInferenceClassificationResult(TestContext context) throws Exception {
-        this.context = context;
-        RequestSpecification requestSpecification = given();
-        requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
         //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
+        INDArray arr = Nd4j.create(new float[]{0.00632f, 18f, 2.31f, 0f, 0.538f, 6.575f, 65.2f, 4.09f, 1f, 296f, 15.3f, 4.98f}, 1, 12);
 
-        byte[] xNpy = Nd4j.toNpyByteArray(arr);
+        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
+        //Create new file to write binary input data.
+        File file = new File(filePath + "/test-input.zip");
 
-        File xFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(xFile, xNpy);
-
+        BinarySerde.writeArrayToDisk(arr, file);
+        requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "multipart/form-data");
         String response = requestSpecification.when()
-                .multiPart("default", xFile)
+                .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/classification/numpy").then()
+                .post("/regression/nd4j").then()
                 .extract()
                 .body().asString();
 
-        JsonObject jsonObjectClassification = new JsonObject(response);
-        assertTrue(jsonObjectClassification.containsKey("default"));
-        assertTrue(jsonObjectClassification.getJsonObject("default").containsKey("probabilities"));
-        JsonObject ndarraySerde = jsonObjectClassification.getJsonObject("default");
-        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-        float[][] nd = ObjectMappers.json().readValue(probabilities.toString(), float[][].class);
+        JsonObject jsonObject1 = new JsonObject(response);
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray values = ndarraySerde.getJsonArray("values");
+        double[][] nd = ObjectMappers.json().readValue(values.toString(), double[][].class);
         INDArray outputArray = Nd4j.create(nd);
-        JsonArray expProb = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/keras/KerasNdArrayTest.json");
-        float[][] expNd = ObjectMappers.json().readValue(expProb.toString(), float[][].class);
-        INDArray expectedArray = Nd4j.create(expNd);
-        assertEquals(expectedArray, outputArray);
-    }
+        double outpuValue = values.getJsonArray(0).getDouble(0);
+        assertEquals(outputArray.getDouble(0), outpuValue);
 
+
+    }
 }

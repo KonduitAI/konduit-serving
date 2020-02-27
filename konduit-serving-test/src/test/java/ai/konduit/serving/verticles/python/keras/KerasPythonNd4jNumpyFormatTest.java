@@ -41,6 +41,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
+import org.bytedeco.systems.macosx.so_np_extensions;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,7 +65,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class KerasPythonNdArrayND4JFormatTest extends BaseMultiNumpyVerticalTest {
+public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -101,7 +102,7 @@ public class KerasPythonNdArrayND4JFormatTest extends BaseMultiNumpyVerticalTest
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .outputDataFormat(Output.DataFormat.ND4J)
+                .outputDataFormat(Output.DataFormat.NUMPY)
                 .httpPort(port)
                 .build();
 
@@ -141,16 +142,32 @@ public class KerasPythonNdArrayND4JFormatTest extends BaseMultiNumpyVerticalTest
                 .extract()
                 .body().asString();
 
+        //TO test create and read from numpy.
+/*
+        //Preparing input NDArray
+        INDArray arr1 = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
+
+        byte[] xNpy = Nd4j.toNpyByteArray(arr1);
+
+        File xFile = temporary.newFile();
+        FileUtils.writeByteArrayToFile(xFile, xNpy);
+*/
+
         File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
-        FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
+                "src/main/resources/data/test-nd4j-output.npy");
+        FileUtils.writeStringToFile(outputImagePath, response,Charset.defaultCharset());
+        System.out.print(response);
+        INDArray outputArray1=  Nd4j.createFromNpyFile(outputImagePath);
+        //INDArray outputArray1=  Nd4j.readNpy(outputImagePath);
+       // INDArray outputArray1=  Nd4j.readNumpy(outputImagePath.getAbsolutePath());
+
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json", "raw");
         assertEquals(expectedArr, outputArray);
     }
 
-    @Test(timeout = 60000)
+    //@Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();

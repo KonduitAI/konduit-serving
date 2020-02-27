@@ -60,7 +60,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class KerasPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
+public class KerasPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
