@@ -131,7 +131,7 @@ public class LogsEndpointTest {
         KonduitServingMain.builder()
                 .onSuccess(() -> {
                     given().port(testContext.get(SELECTED_PORT_KEY))
-                            .get("/logs/10")
+                            .get(String.format("/logs/%s", numberOfLinesToReadFromLogs))
                             .then()
                             .assertThat()
                             .statusCode(200)
