@@ -109,7 +109,7 @@
         <tensorflow.version>1.15.2</tensorflow.version>
 
         <javacpp.version>1.5.3-SNAPSHOT</javacpp.version>
-        <javacpp-presets.version>1.5.3</javacpp-presets.version>
+        <javacpp-presets.version>1.5.3-SNAPSHOT</javacpp-presets.version>
         <javacv.version>1.5.3</javacv.version>
         <opencv.version>4.2.0</opencv.version>
         <cpython.version>3.7.6</cpython.version>
@@ -119,13 +119,13 @@
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
         <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}
         </tensorflow.javacpp.version>
-        <dnnl.version>1.2.0</dnnl.version>
-        <dnnl.javacpp.version>${dnnl.version}-${javacpp.version}</dnnl.javacpp.version>
+ 
+
 	<mkl-dnn.version>0.21.3</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
         <numpy.version>1.18.1</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
-        <onnxruntime.version>1.1.1</onnxruntime.version>
+        <onnxruntime.version>1.1.2</onnxruntime.version>
         <onnxruntime.javacpp.version>${onnxruntime.version}-${javacpp.version}</onnxruntime.javacpp.version>
 	<openblas.version>0.3.8</openblas.version>
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>
@@ -275,16 +275,6 @@
                 <artifactId>mkl-platform</artifactId>
                 <version>${mkl.javacpp.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.bytedeco</groupId>
-                <artifactId>dnnl-platform</artifactId>
-                <version>${dnnl.javacpp.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.bytedeco</groupId>
-                <artifactId>dnnl</artifactId>
-                <version>${dnnl.javacpp.version}</version>
-	    </dependency>
             <dependency>
                 <groupId>org.bytedeco</groupId>
                 <artifactId>mkl-dnn-platform</artifactId>

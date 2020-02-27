@@ -76,10 +76,22 @@ public class ONNXThreadPool {
     private BlockingQueue<OnnxObservable> observables;
     private InferenceWorker[] zoo;
     private ObservablesProvider provider;
-
+    static final OrtApi g_ort = OrtGetApiBase().GetApi().call(ORT_API_VERSION);
 
     protected ONNXThreadPool() {
         //
+    }
+
+    protected static void CheckStatus(OrtStatus status) {
+
+        if (status != null && !status.isNull()) {
+            String msg = g_ort.GetErrorMessage().call(status).getString();
+
+	    log.error("Error occurred doing inference", msg);
+
+            g_ort.ReleaseStatus().call(status);
+	    throw new RuntimeException(msg);
+          }
     }
 
     protected void init() {
@@ -320,7 +332,7 @@ public class ONNXThreadPool {
         private BlockingQueue<OnnxObservable> inputQueue;
         private AtomicBoolean shouldWork = new AtomicBoolean(true);
         private AtomicBoolean isStopped = new AtomicBoolean(false);
-        private Session replicatedModel;
+//        private Session replicatedModel;
         private AtomicLong counter = new AtomicLong(0);
         private boolean rootDevice;
 
@@ -341,9 +353,9 @@ public class ONNXThreadPool {
 
         @Override
         public void run() {
-            try {
+ try (PointerScope scope = new PointerScope()) {
                 // model should be replicated & initialized here
-                this.replicatedModel = onnxModelLoader.loadModel();
+                Session replicatedModel = onnxModelLoader.loadModel();
 
                 AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions();	
 
@@ -367,11 +379,22 @@ public class ONNXThreadPool {
 		    input_node_names.put(i, input_name);
 
                     TypeInfo typeInfo = replicatedModel.GetInputTypeInfo(i);
-                    TensorTypeAndShapeInfo tensor_info = typeInfo.GetTensorTypeAndShapeInfo();
-                    int type = tensor_info.GetElementType();
-		    inputTypes[i] = type;
 
-		    input_node_dims[i] = tensor_info.GetShape();
+                    //Using C API here because GetTensorTypeAndShapeInfo() causes double deallocation
+                    OrtTypeInfo ort_type_info = typeInfo.asOrtTypeInfo();
+
+                    PointerPointer<OrtTensorTypeAndShapeInfo> tensor_infos = new PointerPointer<OrtTensorTypeAndShapeInfo>(1);
+                    CheckStatus(g_ort.CastTypeInfoToTensorInfo().call(ort_type_info, tensor_infos));
+		    OrtTensorTypeAndShapeInfo ort_tensor_info = tensor_infos.get(OrtTensorTypeAndShapeInfo.class);
+	 	    //TensorTypeAndShapeInfo tensor_info = new TensorTypeAndShapeInfo(ort_tensor_info);
+
+		    inputTypes[i] = typeInfo.GetONNXType();
+                    SizeTPointer num_dims = new SizeTPointer(1);
+		    CheckStatus(g_ort.GetDimensionsCount().call(ort_tensor_info, num_dims));
+		    input_node_dims[i] = new LongPointer(num_dims.get());
+		    CheckStatus(g_ort.GetDimensions().call(ort_tensor_info, input_node_dims[i], num_dims.get()));
+
+		    //input_node_dims[i] = tensor_info.GetShape();
 
 	            int acc = 1;
 		    for (long j = 0; j < input_node_dims[i].capacity(); j++)
@@ -394,14 +417,14 @@ public class ONNXThreadPool {
 			        Collection<INDArray> inputArrays = inBatch.values();	    
 			        INDArray inputArray = Nd4j.concat(0, inputArrays.toArray(new INDArray[inputArrays.size()]));
 
-			        System.out.println("First input: " + inputArray.getFloat(0));
+//			        System.out.println("First input: " + inputArray.getFloat(0));
 			        Value[] inputTensors = new Value[num_input_nodes.intValue()];
 
                                 for (int i = 0; i < num_input_nodes; i++) {
 		                  BytePointer input_name = input_node_names.get(BytePointer.class, i);
 
 				  Value inputTensor = getTensor(inBatch.get(input_name.getString()), inputTypes[i], inputSizes[i], input_node_dims[i]);
-				  System.out.println("Input element count: " + inputTensor.GetTensorTypeAndShapeInfo().GetElementCount());
+//				  System.out.println("Input element count: " + inputTensor.GetTensorTypeAndShapeInfo().GetElementCount());
 				  inputTensors[i] = inputTensor;
 
 				}
@@ -415,7 +438,7 @@ public class ONNXThreadPool {
 					Value outValue = outputVector.get(i);
 					DataBuffer buffer = getDataBuffer(outValue);
 					INDArray outArray = Nd4j.create(buffer);
-					System.out.println("Output element count " + outValue.GetTensorTypeAndShapeInfo().GetElementCount());
+//					System.out.println("Output element count " + outValue.GetTensorTypeAndShapeInfo().GetElementCount());
 					output.put((output_node_names.get(BytePointer.class, i)).getString(), outArray);
 				}
                                 out.add((Map<String, INDArray>) output);

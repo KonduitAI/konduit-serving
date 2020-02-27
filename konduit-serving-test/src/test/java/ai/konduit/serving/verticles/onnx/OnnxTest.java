@@ -115,7 +115,7 @@ public class OnnxTest extends BaseVerticleTest {
 
 
     @Test
-    public void runFaceDetection(TestContext testContext) throws Exception {
+    public void runSqueezenet(TestContext testContext) throws Exception {
 
         //NativeImageLoader nativeImageLoader = new NativeImageLoader(240, 320);
         //Image image = nativeImageLoader.asImageMatrix(new ClassPathResource("data/1.jpg").getFile());
@@ -156,7 +156,7 @@ public class OnnxTest extends BaseVerticleTest {
         assert Math.abs(bodyResult.getFloat(0) - 0.000045) < 1e-6;	
 	
 	System.out.println("After " + bodyResult);
-	assertArrayEquals(new long[]{1,1000,1,1}, bodyResult.shape());
+	assertArrayEquals(new long[]{1,1000}, bodyResult.shape());
         //TODO: Fix double free issue here
     }
 
