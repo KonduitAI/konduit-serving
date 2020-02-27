@@ -41,11 +41,15 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.datavec.api.writable.NDArrayWritable;
+import org.datavec.api.writable.Writable;
+import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
@@ -55,13 +59,14 @@ import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class ScikitLearnPythonImageFormatTest extends BaseMultiNumpyVerticalTest {
+public class ScikitLearnPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -87,30 +92,24 @@ public class ScikitLearnPythonImageFormatTest extends BaseMultiNumpyVerticalTest
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/Image_Scikitlearn_NDarray.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/NDArrayScikitNDArrayInf.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("imgPath", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("result", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("Ypredict", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
-        //ServingConfig set httpport and Input Formats
-        ServingConfig servingConfig = ServingConfig.builder().httpPort(port).
-                build();
-
-        //Model config and set model type as ScikitLearn
-        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .inputName("imgPath")
-                .dimensionsConfig("default", new Long[]{240L, 320L, 3L}) // Height, width, channels
+        ServingConfig servingConfig = ServingConfig.builder()
+                .httpPort(port)
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+                .step(pythonStepConfig)
                 .servingConfig(servingConfig)
-                .steps(Arrays.asList(imageLoadingStep, pythonStepConfig))
                 .build();
 
         return new JsonObject(inferenceConfiguration.toJson());
@@ -118,62 +117,111 @@ public class ScikitLearnPythonImageFormatTest extends BaseMultiNumpyVerticalTest
 
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
-
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-
         JsonObject jsonObject = new JsonObject();
-        requestSpecification.body(jsonObject.encode());
-        requestSpecification.header("Content-Type", "multipart/form-data");
 
-        File imageFile = new ClassPathResource("data/ScikitlearnImageTest.png").getFile();
-        String output = requestSpecification.when()
-                .multiPart("imgPath", imageFile)
+        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
+                .scaleImageTransform(20.0f)
+                .resizeImageTransform(28, 28)
+                .build();
+
+        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
+                .imageProcessingInitialLayout("NCHW")
+                .imageProcessingRequiredLayout("NHWC")
+                .inputName("default")
+                .dimensionsConfig("default", new Long[]{28L, 28L, 1L}) // Height, width, channels
+                .imageTransformProcess("default", imageTransformProcess)
+                .build();
+
+        String imagePath = new ClassPathResource("data/ScikitLearnNDArray.png").getFile().getAbsolutePath();
+
+        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
+
+        INDArray image = ((NDArrayWritable) output[0][0]).get();
+
+        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
+
+        //Create new file to write binary input data.
+        File file = new File(filePath + "/test-input.zip");
+
+        BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
+        requestSpecification.body(jsonObject.encode().getBytes());
+
+        requestSpecification.header("Content-Type", "multipart/form-data");
+        String response = requestSpecification.when()
+                .multiPart("default", file)
                 .expect().statusCode(200)
-                .post("/raw/image").then()
+                .body(not(isEmptyOrNullString()))
+                .post("/raw/nd4j").then()
                 .extract()
                 .body().asString();
-
-        JsonObject jsonObject1 = new JsonObject(output);
+        JsonObject jsonObject1 = new JsonObject(response);
         assertTrue(jsonObject1.containsKey("default"));
         assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
         assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json","raw");
+        assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         assertEquals(expectedArr, outputArray);
+
     }
 
     @Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
-
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-
         JsonObject jsonObject = new JsonObject();
-        requestSpecification.body(jsonObject.encode());
-        requestSpecification.header("Content-Type", "multipart/form-data");
 
-        File imageFile = new ClassPathResource("data/ScikitlearnImageTest.png").getFile();
-        String output = requestSpecification.when()
-                .multiPart("imgPath", imageFile)
+        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
+                .scaleImageTransform(20.0f)
+                .resizeImageTransform(28, 28)
+                .build();
+
+        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
+                .imageProcessingInitialLayout("NCHW")
+                .imageProcessingRequiredLayout("NHWC")
+                .inputName("default")
+                .dimensionsConfig("default", new Long[]{28L, 28L, 1L}) // Height, width, channels
+                .imageTransformProcess("default", imageTransformProcess)
+                .build();
+
+        String imagePath = new ClassPathResource("data/ScikitLearnNDArray.png").getFile().getAbsolutePath();
+
+        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
+
+        INDArray image = ((NDArrayWritable) output[0][0]).get();
+
+        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
+
+        //Create new file to write binary input data.
+        File file = new File(filePath + "/test-input.zip");
+
+        BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
+        requestSpecification.body(jsonObject.encode().getBytes());
+
+        requestSpecification.header("Content-Type", "multipart/form-data");
+        String response = requestSpecification.when()
+                .multiPart("default", file)
                 .expect().statusCode(200)
-                .post("/classification/image").then()
+                .body(not(isEmptyOrNullString()))
+                .post("/classification/nd4j").then()
                 .extract()
                 .body().asString();
-        JsonObject jsonObject1 = new JsonObject(output);
-        assertTrue(jsonObject1.containsKey("default"));
-        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
+        JsonObject jsonObject1 = new JsonObject(response);
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
         double outpuValue = outputArr.getJsonArray(0).getDouble(0);
-        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json");
+        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json");
         double expValue = expArr.getJsonArray(0).getDouble(0);
         assertEquals(expValue, outpuValue, 1e-1);
         assertEquals(expArr, outputArr);
+
     }
+
 
 }

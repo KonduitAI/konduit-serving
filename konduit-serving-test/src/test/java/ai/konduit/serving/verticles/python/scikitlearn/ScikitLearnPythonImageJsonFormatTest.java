@@ -27,6 +27,7 @@ import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ExpectedAssertTest;
 import ai.konduit.serving.util.ObjectMappers;
@@ -54,14 +55,13 @@ import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class ScikitLearnPythonJsonFormatTest extends BaseMultiNumpyVerticalTest {
+public class ScikitLearnPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -87,24 +87,30 @@ public class ScikitLearnPythonJsonFormatTest extends BaseMultiNumpyVerticalTest 
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/JsonScikitNDArrayInf.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/Image_Scikitlearn_NDarray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
-                .pythonInput("JsonInput", PythonType.TypeName.STR.name())
-                .pythonOutput("Ypredict", PythonType.TypeName.NDARRAY.name())
+                .pythonCodePath(pythonCodePath)
+                .pythonInput("imgPath", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("result", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(port)
+        //ServingConfig set httpport and Input Formats
+        ServingConfig servingConfig = ServingConfig.builder().httpPort(port).
+                build();
+
+        //Model config and set model type as ScikitLearn
+        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
+                .inputName("imgPath")
+                .dimensionsConfig("default", new Long[]{240L, 320L, 3L}) // Height, width, channels
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
-                .step(pythonStepConfig)
                 .servingConfig(servingConfig)
+                .steps(Arrays.asList(imageLoadingStep, pythonStepConfig))
                 .build();
 
         return new JsonObject(inferenceConfiguration.toJson());
@@ -114,22 +120,21 @@ public class ScikitLearnPythonJsonFormatTest extends BaseMultiNumpyVerticalTest 
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
-
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
+
         JsonObject jsonObject = new JsonObject();
-
-        File json = new ClassPathResource("Json/IrisY.json").getFile();
-        jsonObject.put("JsonInput", json.getAbsolutePath());
         requestSpecification.body(jsonObject.encode());
+        requestSpecification.header("Content-Type", "multipart/form-data");
 
-        requestSpecification.header("Content-Type", "application/json");
+        File imageFile = new ClassPathResource("data/ScikitlearnImageTest.png").getFile();
         String output = requestSpecification.when()
+                .multiPart("imgPath", imageFile)
                 .expect().statusCode(200)
-                .body(not(isEmptyOrNullString()))
-                .post("/raw/json").then()
+                .post("/raw/image").then()
                 .extract()
                 .body().asString();
+
         JsonObject jsonObject1 = new JsonObject(output);
         assertTrue(jsonObject1.containsKey("default"));
         assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
@@ -137,7 +142,7 @@ public class ScikitLearnPythonJsonFormatTest extends BaseMultiNumpyVerticalTest 
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnJsonTest.json","raw");
+        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json", "raw");
         assertEquals(expectedArr, outputArray);
     }
 
@@ -145,20 +150,18 @@ public class ScikitLearnPythonJsonFormatTest extends BaseMultiNumpyVerticalTest 
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         this.context = context;
-
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
+
         JsonObject jsonObject = new JsonObject();
-
-        File json = new ClassPathResource("Json/IrisY.json").getFile();
-        jsonObject.put("JsonInput", json.getAbsolutePath());
         requestSpecification.body(jsonObject.encode());
+        requestSpecification.header("Content-Type", "multipart/form-data");
 
-        requestSpecification.header("Content-Type", "application/json");
+        File imageFile = new ClassPathResource("data/ScikitlearnImageTest.png").getFile();
         String output = requestSpecification.when()
+                .multiPart("imgPath", imageFile)
                 .expect().statusCode(200)
-                .body(not(isEmptyOrNullString()))
-                .post("/classification/json").then()
+                .post("/classification/image").then()
                 .extract()
                 .body().asString();
         JsonObject jsonObject1 = new JsonObject(output);
@@ -167,10 +170,10 @@ public class ScikitLearnPythonJsonFormatTest extends BaseMultiNumpyVerticalTest 
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
         double outpuValue = outputArr.getJsonArray(0).getDouble(0);
-        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnJsonTest.json");
+        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json");
         double expValue = expArr.getJsonArray(0).getDouble(0);
         assertEquals(expValue, outpuValue, 1e-1);
         assertEquals(expArr, outputArr);
-
     }
+
 }

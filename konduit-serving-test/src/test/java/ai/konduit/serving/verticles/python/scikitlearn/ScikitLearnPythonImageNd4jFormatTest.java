@@ -23,13 +23,13 @@
 package ai.konduit.serving.verticles.python.scikitlearn;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.output.types.NDArrayOutput;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ExpectedAssertTest;
-import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -45,25 +45,25 @@ import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.bytedeco.cpython.presets.python.cachePackages;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class ScikitLearnPythonNumpyFormatTest extends BaseMultiNumpyVerticalTest {
+public class ScikitLearnPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -88,24 +88,33 @@ public class ScikitLearnPythonNumpyFormatTest extends BaseMultiNumpyVerticalTest
                 .filter(Objects::nonNull)
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
-        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/NumpyScikitLearnNumpy.py").getFile().getAbsolutePath();
+
+        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/Image_Scikitlearn_NDarray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("inputValue", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("outputValue", PythonType.TypeName.NDARRAY.name())
+                .pythonInput("imgPath", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("result", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
+                .outputDataFormat(Output.DataFormat.ND4J)
                 .httpPort(port)
                 .build();
 
+
+        //Model config and set model type as ScikitLearn
+        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
+                .inputName("imgPath")
+                .dimensionsConfig("default", new Long[]{240L, 320L, 3L}) // Height, width, channels
+                .build();
+
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
-                .step(pythonStepConfig)
                 .servingConfig(servingConfig)
+                .steps(Arrays.asList(imageLoadingStep, pythonStepConfig))
                 .build();
 
         return new JsonObject(inferenceConfiguration.toJson());
@@ -113,73 +122,60 @@ public class ScikitLearnPythonNumpyFormatTest extends BaseMultiNumpyVerticalTest
 
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
+
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
 
-        //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-
-        byte[] xNpy = Nd4j.toNpyByteArray(arr);
-
-        File xFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(xFile, xNpy);
-
+        JsonObject jsonObject = new JsonObject();
+        requestSpecification.body(jsonObject.encode());
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
-                .multiPart("default", xFile)
+
+        File imageFile = new ClassPathResource("data/ScikitlearnImageTest.png").getFile();
+        String output = requestSpecification.when()
+                .multiPart("imgPath", imageFile)
                 .expect().statusCode(200)
-                .body(not(isEmptyOrNullString()))
-                .post("/raw/numpy").then()
+                .post("/raw/image").then()
                 .extract()
                 .body().asString();
 
-        JsonObject jsonObject = new JsonObject(response);
-        assertTrue(jsonObject.containsKey("default"));
-        assertTrue(jsonObject.getJsonObject("default").containsKey("ndArray"));
-        assertTrue(jsonObject.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
-        String ndarraySerde = jsonObject.getJsonObject("default").toString();
-        NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNumpyTest.json", "raw");
+        File outputImagePath = new File(
+                "src/main/resources/data/test-nd4j-output.zip");
+        FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
+        System.out.println(BinarySerde.readFromDisk(outputImagePath));
+        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
+        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json", "raw");
         assertEquals(expectedArr, outputArray);
     }
 
     @Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
+
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
+
         JsonObject jsonObject = new JsonObject();
-
-        //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-
-        byte[] xNpy = Nd4j.toNpyByteArray(arr);
-
-        File xFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(xFile, xNpy);
-
+        requestSpecification.body(jsonObject.encode());
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
-                .multiPart("default", xFile)
+
+        File imageFile = new ClassPathResource("data/ScikitlearnImageTest.png").getFile();
+        String output = requestSpecification.when()
+                .multiPart("imgPath", imageFile)
                 .expect().statusCode(200)
-                .body(not(isEmptyOrNullString()))
-                .post("/classification/numpy").then()
+                .post("/classification/image").then()
                 .extract()
                 .body().asString();
-
-        JsonObject jsonObjectClassification = new JsonObject(response);
-        assertTrue(jsonObjectClassification.containsKey("default"));
-        assertTrue(jsonObjectClassification.getJsonObject("default").containsKey("probabilities"));
-        JsonObject ndarraySerde = jsonObjectClassification.getJsonObject("default");
-        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-        float[][] nd = ObjectMappers.json().readValue(probabilities.toString(), float[][].class);
-        INDArray outputArray = Nd4j.create(nd);
-        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnNumpyTest.json");
-        float[][] expNd = ObjectMappers.json().readValue(expArr.toString(), float[][].class);
-        INDArray expectedArray = Nd4j.create(expNd);
-        assertEquals(expectedArray, outputArray);
+        JsonObject jsonObject1 = new JsonObject(output);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
+        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json");
+        double expValue = expArr.getJsonArray(0).getDouble(0);
+        assertEquals(expValue, outpuValue, 1e-1);
+        assertEquals(expArr, outputArr);
     }
 
 }
