@@ -44,22 +44,24 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
-import org.omg.CORBA.Environment;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.charset.Charset;
-import java.util.UUID;
+import java.nio.file.Paths;
 
 import static com.jayway.restassured.RestAssured.given;
 
 @RunWith(VertxUnitRunner.class)
 public class LogsEndpointTest {
+
+    private String baseLogDir = null;
 
     public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
     public static String SELECTED_PORT_KEY = "availablePortKey";
@@ -69,6 +71,9 @@ public class LogsEndpointTest {
 
     @ClassRule
     public static TemporaryFolder folder = new TemporaryFolder();
+
+    @Rule
+    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
     @BeforeClass
     public static void beforeClass(TestContext testContext) throws Exception {
@@ -94,10 +99,10 @@ public class LogsEndpointTest {
         }
     }
 
-
     @Test
     public void checkLogs(TestContext testContext) {
-        Async async = testContext.async();
+        Async async = testContext.async(2);
+
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
                 .multiThreaded(false)
@@ -128,8 +133,12 @@ public class LogsEndpointTest {
             }
         };
 
-        KonduitServingMain.builder()
+        baseLogDir = System.getProperty("user.dir");
+
+        KonduitServingMain konduitServingMain = KonduitServingMain.builder()
                 .onSuccess(() -> {
+                    testContext.assertTrue(Paths.get(baseLogDir, "main.log").toFile().exists());
+
                     given().port(testContext.get(SELECTED_PORT_KEY))
                             .get(String.format("/logs/%s", numberOfLinesToReadFromLogs))
                             .then()
@@ -143,8 +152,17 @@ public class LogsEndpointTest {
                     async.complete();
                 })
                 .onFailure(() -> testContext.fail("onFailure called instead of onSuccess hook"))
-                .build()
-                .runMain(args.toArgs());
+                .build();
+
+        // Checking without setting environment variables
+        konduitServingMain.runMain(args.toArgs());
+
+        // Now checking with environment variables
+        environmentVariables.set("KONDUIT_SERVING_LOG_DIR", folder.getRoot().getAbsolutePath());
+        testContext.assertEquals(System.getenv("KONDUIT_SERVING_LOG_DIR"), folder.getRoot().getAbsolutePath());
+
+        baseLogDir = System.getenv("KONDUIT_SERVING_LOG_DIR");
+        konduitServingMain.runMain(args.toArgs());
     }
 
     public static JsonObject getConfig(TestContext testContext) throws Exception {
