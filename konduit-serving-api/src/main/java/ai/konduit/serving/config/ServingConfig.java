@@ -41,7 +41,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ServingConfig implements TextConfig {
 
-    private int httpPort;
+    @Builder.Default
+    private int httpPort = 0;
 
     @Builder.Default
     private String listenHost = "localhost";

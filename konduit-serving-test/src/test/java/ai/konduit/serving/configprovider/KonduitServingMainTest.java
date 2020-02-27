@@ -87,7 +87,7 @@ public class KonduitServingMainTest {
 
         KonduitServingMain.builder()
                 .onSuccess(port -> async.complete())
-                .onFailure(() -> testContext.fail("onFailure called instead of onSuccess hook"))
+                .onFailure(throwable -> testContext.fail("onFailure called instead of onSuccess hook"))
                 .build()
                 .runMain(args.toArgs());
     }
@@ -105,7 +105,7 @@ public class KonduitServingMainTest {
 
         KonduitServingMain.builder()
                 .onSuccess(port -> testContext.fail("onSuccess called instead of onFailure hook"))
-                .onFailure(async::complete)
+                .onFailure(throwable -> async.complete())
                 .build()
                 .runMain(args.toArgs());
     }

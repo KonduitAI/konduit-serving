@@ -106,21 +106,21 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     }
 
     protected void setupWebServer() throws Throwable {
-        String portEnvValue = System.getenv(VerticleConstants.PORT_FROM_ENV);
+        String portEnvValue = System.getenv(VerticleConstants.KONDUIT_SERVING_PORT);
         if (portEnvValue != null) {
             try {
                 port = Integer.parseInt(portEnvValue);
             } catch (NumberFormatException e) {
-                log.error("Environment variable value isn't a valid port number",  e);
+                log.error("Environment variable \"{}={}\" isn't a valid port number.", VerticleConstants.KONDUIT_SERVING_PORT, portEnvValue, e);
 
-                port = inferenceConfiguration.getServingConfig().getHttpPort();
+                throw e;
             }
         } else {
             port = inferenceConfiguration.getServingConfig().getHttpPort();
         }
 
         if (port < 0 || port > 0xFFFF) {
-            port = 0; // a port of 0 will automatically be resolved into an available port.
+            throw new Exception(String.format("Valid port range is between 0-65535. The given port was %s", port));
         }
 
         List<PipelineStep> steps = inferenceConfiguration.getSteps();
@@ -139,23 +139,13 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                 .exceptionHandler(Throwable::printStackTrace)
                 .listen(port, inferenceConfiguration.getServingConfig().getListenHost(), result -> {
                     if (result.failed()) {
-                        Throwable cause = result.cause();
-
-                        if(cause instanceof BindException && cause.getMessage().equalsIgnoreCase("Address already in use")) {
-                            log.info("Port: {} is already in use. Trying another port...", port);
-                            startVertxServer(0, nSteps);
-                        } else {
-                            log.error("Could not start HTTP server on port {}", port);
-                            this.throwable = result.cause();
-
-                            countDownLatch.countDown();
-                        }
+                        throwable = result.cause();
                     } else {
                         this.port = result.result().actualPort();
                         log.info("Server started on port {} with {} pipeline steps", this.port, nSteps);
 
-                        countDownLatch.countDown();
                     }
+                    countDownLatch.countDown();
                 })).start();
     }
 }

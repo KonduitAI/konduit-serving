@@ -56,8 +56,8 @@ import static java.lang.System.setProperty;
 public class KonduitServingMain {
 
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
-    private KonduitServingMainRunnable onSuccess;
-    private Runnable onFailure;
+    private KonduitServingMainOnSuccessRunnable onSuccess;
+    private KonduitServingMainOnFailureRunnable onFailure;
 
     static {
         setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
@@ -115,7 +115,7 @@ public class KonduitServingMain {
                     log.error("Unable to retrieve configuration " + result.cause());
 
                     if (onFailure != null) {
-                        onFailure.run();
+                        onFailure.run(result.cause());
                     }
                 } else {
                     configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
@@ -134,7 +134,7 @@ public class KonduitServingMain {
                 log.error(String.format("Unable to deploy verticle %s", konduitServingNodeConfigurer.getVerticleClassName()), handler.cause());
 
                 if (onFailure != null) {
-                    onFailure.run();
+                    onFailure.run(handler.cause());
                 }
 
                 vertx.close();
@@ -156,7 +156,12 @@ public class KonduitServingMain {
     }
 
     @FunctionalInterface
-    public interface KonduitServingMainRunnable {
+    public interface KonduitServingMainOnSuccessRunnable {
         void run(int verticleSelectedPort);
+    }
+
+    @FunctionalInterface
+    public interface KonduitServingMainOnFailureRunnable {
+        void run(Throwable cause);
     }
 }

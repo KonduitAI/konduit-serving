@@ -58,7 +58,6 @@ public abstract class BaseRoutableVerticle extends AbstractVerticle implements R
      * Start an http server the port with the value configured
      * as the httpPort key found in {@link #config()}
      */
-    @SneakyThrows
     protected void setupWebServer() throws Throwable {
         RouterImpl router = (RouterImpl) router();
         int port;
