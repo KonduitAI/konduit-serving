@@ -126,7 +126,6 @@ public class PytorchPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalTest
                 .post("/raw/numpy").then()
                 .extract()
                 .body().asString();
-        System.out.println("response---" + response);
 
         JsonObject jsonObject = new JsonObject(response);
         assertTrue(jsonObject.containsKey("default"));
@@ -164,8 +163,6 @@ public class PytorchPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalTest
                 .post("/classification/numpy").then()
                 .extract()
                 .body().asString();
-
-        System.out.println("Classification---" + response);
 
         JsonObject jsonObjectClassification = new JsonObject(response);
         assertTrue(jsonObjectClassification.containsKey("default"));
