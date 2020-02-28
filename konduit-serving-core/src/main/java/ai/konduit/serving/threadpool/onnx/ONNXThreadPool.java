@@ -379,22 +379,10 @@ public class ONNXThreadPool {
 		    input_node_names.put(i, input_name);
 
                     TypeInfo typeInfo = replicatedModel.GetInputTypeInfo(i);
-
-                    //Using C API here because GetTensorTypeAndShapeInfo() causes double deallocation
-                    OrtTypeInfo ort_type_info = typeInfo.asOrtTypeInfo();
-
-                    PointerPointer<OrtTensorTypeAndShapeInfo> tensor_infos = new PointerPointer<OrtTensorTypeAndShapeInfo>(1);
-                    CheckStatus(g_ort.CastTypeInfoToTensorInfo().call(ort_type_info, tensor_infos));
-		    OrtTensorTypeAndShapeInfo ort_tensor_info = tensor_infos.get(OrtTensorTypeAndShapeInfo.class);
-	 	    //TensorTypeAndShapeInfo tensor_info = new TensorTypeAndShapeInfo(ort_tensor_info);
-
 		    inputTypes[i] = typeInfo.GetONNXType();
-                    SizeTPointer num_dims = new SizeTPointer(1);
-		    CheckStatus(g_ort.GetDimensionsCount().call(ort_tensor_info, num_dims));
-		    input_node_dims[i] = new LongPointer(num_dims.get());
-		    CheckStatus(g_ort.GetDimensions().call(ort_tensor_info, input_node_dims[i], num_dims.get()));
 
-		    //input_node_dims[i] = tensor_info.GetShape();
+		    TensorTypeAndShapeInfo tensor_info = typeInfo.GetTensorTypeAndShapeInfo();
+		    input_node_dims[i] = tensor_info.GetShape();
 
 	            int acc = 1;
 		    for (long j = 0; j < input_node_dims[i].capacity(); j++)
