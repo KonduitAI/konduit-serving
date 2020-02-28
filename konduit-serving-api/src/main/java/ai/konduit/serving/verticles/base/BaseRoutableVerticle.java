@@ -25,9 +25,13 @@ package ai.konduit.serving.verticles.base;
 import ai.konduit.serving.verticles.Routable;
 import ai.konduit.serving.verticles.VerticleConstants;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.impl.RouterImpl;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -37,11 +41,14 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author Adam Gibson
  */
+@EqualsAndHashCode(callSuper = true)
 @Slf4j
+@Data
 public abstract class BaseRoutableVerticle extends AbstractVerticle implements Routable {
 
     private final static int DEFAULT_HTTP_PORT = 8081;
     protected Router router;
+    protected int port;
 
     public BaseRoutableVerticle() {
         super();
@@ -51,7 +58,7 @@ public abstract class BaseRoutableVerticle extends AbstractVerticle implements R
      * Start an http server the port with the value configured
      * as the httpPort key found in {@link #config()}
      */
-    protected void setupWebServer() {
+    protected void setupWebServer() throws Throwable {
         RouterImpl router = (RouterImpl) router();
         int port;
         if (context != null && config().containsKey(VerticleConstants.HTTP_PORT_KEY)) {

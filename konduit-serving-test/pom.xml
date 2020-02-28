@@ -131,6 +131,8 @@
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
         </dependency>
+
+
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
@@ -151,6 +153,7 @@
             <groupId>com.github.stefanbirkner</groupId>
             <artifactId>system-rules</artifactId>
             <version>1.19.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
