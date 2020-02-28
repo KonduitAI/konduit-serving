@@ -27,7 +27,6 @@ import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.Timeout;
