@@ -10,8 +10,6 @@ import pytest
 
 @pytest.mark.integration
 def test_python_script_prediction():
-    port = 1337
-    serving_config = ServingConfig(http_port=port)
     work_dir = os.path.abspath(".")
 
     python_config = PythonConfig(
@@ -22,16 +20,19 @@ def test_python_script_prediction():
     )
 
     step = PythonStep().step(python_config)
-    server = Server(steps=step, serving_config=serving_config)
-    server.start()
+    server = Server(steps=step, serving_config=ServingConfig())
+    _, port, started = server.start()
+
+    assert started
+    assert is_port_in_use(port)
 
     client = Client(port=port)
 
-    if is_port_in_use(port):
+    try:
         input_array = np.load("../data/input-0.npy")
         predicted = client.predict(input_array)
         print(predicted)
         server.stop()
-    else:
+    except Exception as e:
+        print(e)
         server.stop()
-        raise Exception("Server not running on specified port")
