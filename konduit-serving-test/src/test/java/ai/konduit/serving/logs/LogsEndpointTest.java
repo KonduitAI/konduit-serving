@@ -25,6 +25,7 @@ import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.train.TrainUtils;
+import ai.konduit.serving.util.PortUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.json.JsonObject;
@@ -51,8 +52,6 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 
@@ -77,26 +76,13 @@ public class LogsEndpointTest {
 
     @BeforeClass
     public static void beforeClass(TestContext testContext) throws Exception {
-        testContext.put(SELECTED_PORT_KEY, getAvailablePort());
+        testContext.put(SELECTED_PORT_KEY, PortUtils.getAvailablePort());
 
         File jsonConfigPath = folder.newFile("config.json");
         testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
 
         JsonObject config = getConfig(testContext);
         FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
-    }
-
-    /**
-     * @return single available port number
-     */
-    public static int getAvailablePort() {
-        try {
-            try (ServerSocket socket = new ServerSocket(0)) {
-                return socket.getLocalPort();
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot find available port: " + e.getMessage(), e);
-        }
     }
 
     @Test
@@ -136,10 +122,10 @@ public class LogsEndpointTest {
         baseLogDir = System.getProperty("user.dir");
 
         KonduitServingMain konduitServingMain = KonduitServingMain.builder()
-                .onSuccess(() -> {
+                .onSuccess(port -> {
                     testContext.assertTrue(Paths.get(baseLogDir, "main.log").toFile().exists());
 
-                    given().port(testContext.get(SELECTED_PORT_KEY))
+                    given().port(port)
                             .get(String.format("/logs/%s", numberOfLinesToReadFromLogs))
                             .then()
                             .assertThat()
@@ -151,7 +137,7 @@ public class LogsEndpointTest {
 
                     async.complete();
                 })
-                .onFailure(() -> testContext.fail("onFailure called instead of onSuccess hook"))
+                .onFailure(testContext::fail)
                 .build();
 
         // Checking without setting environment variables
