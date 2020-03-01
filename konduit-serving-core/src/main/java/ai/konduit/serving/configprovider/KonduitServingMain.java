@@ -24,6 +24,11 @@ package ai.konduit.serving.configprovider;
 
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
 import com.beust.jcommander.JCommander;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Verticle;
@@ -36,7 +41,10 @@ import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.nd4j.shade.guava.base.Strings;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
@@ -128,6 +136,10 @@ public class KonduitServingMain {
     }
 
     private void deployVerticle(KonduitServingNodeConfigurer konduitServingNodeConfigurer, Vertx vertx) {
+        if(konduitServingNodeConfigurer.getInferenceConfiguration().getServingConfig().isCreateLoggingEndpoints()) {
+            setFileAppenderIfNeeded();
+        }
+
         vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
             if (handler.failed()) {
                 log.error(String.format("Unable to deploy verticle %s", konduitServingNodeConfigurer.getVerticleClassName()), handler.cause());
@@ -152,6 +164,42 @@ public class KonduitServingMain {
                 }
             }
         });
+    }
+
+    public void setFileAppenderIfNeeded() {
+        File previousLogsFile = PipelineRouteDefiner.getLogsFile();
+
+        String konduitServingLogDirFromEnv = System.getenv("KONDUIT_SERVING_LOG_DIR");
+        File newLogsFile = Paths.get(Strings.isNullOrEmpty(konduitServingLogDirFromEnv) ?
+                System.getProperty("user.dir") : konduitServingLogDirFromEnv, "main.log").toFile();
+
+        if(!newLogsFile.equals(previousLogsFile)) {
+            ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)
+                    org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+
+            LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
+
+            rootLogger.setLevel(Level.ALL);
+
+            if(previousLogsFile != null) {
+                rootLogger.detachAppender("FILE");
+            }
+
+            FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+            fileAppender.setName("FILE");
+            fileAppender.setFile(newLogsFile.getAbsolutePath());
+            fileAppender.setContext(context);
+
+            PatternLayoutEncoder patternLayoutEncoder = new PatternLayoutEncoder();
+            patternLayoutEncoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
+            patternLayoutEncoder.setContext(context);
+            patternLayoutEncoder.start();
+
+            fileAppender.setEncoder(patternLayoutEncoder);
+            fileAppender.start();
+
+            rootLogger.addAppender(fileAppender);
+        }
     }
 
     @FunctionalInterface

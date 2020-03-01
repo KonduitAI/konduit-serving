@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -230,20 +230,19 @@ public class PipelineRouteDefiner {
          */
         if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
             router.get("/logs")
-                    .produces("application/text").handler(ctx -> {
-                try { ctx.response().end(getLogs(100)); }
-                catch(Exception e) { ctx.fail(500, e); }
+                    .produces("text/plain").handler(ctx -> {
+                ctx.reroute("/logs/100");
             });
 
         /**
          * Sets up and endpoint to see server logs if {@link ServingConfig#isCreateLoggingEndpoints()}
          * is true. Returns the number of last few lines determines by the path param
-         * {@code numberOfLinesToRead}. If an invalid integer is given as the
+         * {@code numberOfLastLinesToRead}. If an invalid integer is given as the
          * path param all of the log file will be read and returned.
          */
-            router.get("/logs/:numberOfLinesToRead")
-                    .produces("application/text").handler(ctx -> {
-                String numberOfLinesString = ctx.pathParam("numberOfLinesToRead");
+            router.get("/logs/:numberOfLastLinesToRead")
+                    .produces("text/plain").handler(ctx -> {
+                String numberOfLinesString = ctx.pathParam("numberOfLastLinesToRead");
 
                 try {
                     ctx.response().end(getLogs(Integer.parseInt(numberOfLinesString)));
@@ -609,55 +608,71 @@ public class PipelineRouteDefiner {
 
     /**
      * Finds the log file and sends the output as a String
-     * @param numLastLineToRead Number of lines to read from the last few lines.
-     *                          if it's less than 1 then all of the log file data is read.
-     * @return
+     * @param numOfLastLinesToRead Number of lines to read from the last few lines.
+     *                          if it's less than 1 then it will return all the log file data.
+     * @return current jvm process logs for konduit-serving.
      */
-    private String getLogs(int numLastLineToRead) {
-        File logsFile;
+    private String getLogs(int numOfLastLinesToRead) {
+        File logsFile = getLogsFile();
+
+        if(logsFile == null || !logsFile.exists()) return "";
+
+        List<String> result = new ArrayList<>();
+
+        if(numOfLastLinesToRead > 0) {
+            return readLastLines(logsFile, numOfLastLinesToRead);
+        } else {
+            try {
+                return FileUtils.readFileToString(logsFile, Charset.defaultCharset());
+            } catch (IOException e) {
+                log.error("Error reading file: ", e);
+                return "";
+            }
+        }
+    }
+
+    /**
+     * Gets the file where the logs are.
+     * @return the logs file.
+     */
+    public static File getLogsFile() {
         FileAppender<?> fileAppender = null;
-        LoggerContext context = (LoggerContext ) LoggerFactory.getILoggerFactory();
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+
         for (Logger logger : context.getLoggerList())
         {
-            for (Iterator<Appender<ILoggingEvent>> index = logger.iteratorForAppenders();
-                 index.hasNext();)
+            for (Iterator<Appender<ILoggingEvent>> index = logger.iteratorForAppenders(); index.hasNext();)
             {
-                Object enumElement = index.next();
-                if (enumElement instanceof FileAppender) {
-                    fileAppender=(FileAppender<?>)enumElement;
+                Object appender = index.next();
+                if (appender instanceof FileAppender) {
+                    fileAppender = (FileAppender<?>) appender;
                 }
             }
         }
 
         if (fileAppender != null) {
-            logsFile = new File(fileAppender.getFile());
+            return new File(fileAppender.getFile());
+        } else {
+            return null;
         }
-        else {
-            logsFile = null;
-        }
+    }
 
+    /**
+     * Reads the last n lines from a file
+     * @param numOfLastLinesToRead the number of last lines to read
+     * @return read lines
+     */
+    public String readLastLines(File file, int numOfLastLinesToRead) {
         List<String> result = new ArrayList<>();
 
-        if(logsFile == null || !logsFile.exists()) return "";
-
-        if(numLastLineToRead > 0) {
-            try (ReversedLinesFileReader reader = new ReversedLinesFileReader(logsFile, StandardCharsets.UTF_8)) {
-
-                String line;
-                while ((line = reader.readLine()) != null && result.size() < numLastLineToRead) {
-                    result.add(line);
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
+        try (ReversedLinesFileReader reader = new ReversedLinesFileReader(file, Charset.defaultCharset())) {
+            String line;
+            while ((line = reader.readLine()) != null && result.size() < numOfLastLinesToRead) {
+                result.add(line);
             }
-        } else {
-            try {
-                return FileUtils.readFileToString(logsFile, StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                log.error("Error reading file: ", e);
-                return "";
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
         }
 
         Collections.reverse(result);

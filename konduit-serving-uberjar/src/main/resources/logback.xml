@@ -27,13 +27,6 @@
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>${KONDUIT_SERVING_LOG_DIR:-${user.dir}}/main.log</file>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
-
     <logger name="org.apache.catalina.core" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.deeplearning4j" level="INFO"/>
@@ -50,7 +43,6 @@
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
     </root>
 
 </configuration>

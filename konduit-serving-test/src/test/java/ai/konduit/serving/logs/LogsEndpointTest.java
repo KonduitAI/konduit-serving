@@ -25,7 +25,6 @@ import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.train.TrainUtils;
-import ai.konduit.serving.util.PortUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.json.JsonObject;
@@ -52,6 +51,7 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 
@@ -61,6 +61,7 @@ import static com.jayway.restassured.RestAssured.given;
 public class LogsEndpointTest {
 
     private String baseLogDir = null;
+    private Async async = null;
 
     public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
     public static String SELECTED_PORT_KEY = "availablePortKey";
@@ -76,8 +77,6 @@ public class LogsEndpointTest {
 
     @BeforeClass
     public static void beforeClass(TestContext testContext) throws Exception {
-        testContext.put(SELECTED_PORT_KEY, PortUtils.getAvailablePort());
-
         File jsonConfigPath = folder.newFile("config.json");
         testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
 
@@ -86,8 +85,8 @@ public class LogsEndpointTest {
     }
 
     @Test
-    public void checkLogs(TestContext testContext) {
-        Async async = testContext.async(2);
+    public void checkLogs(TestContext testContext) throws InterruptedException {
+        async = testContext.async();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
@@ -121,6 +120,13 @@ public class LogsEndpointTest {
 
         baseLogDir = System.getProperty("user.dir");
 
+        // Delete previous logs if needed
+        try {
+            FileUtils.forceDelete(Paths.get(baseLogDir, "main.log").toFile());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         KonduitServingMain konduitServingMain = KonduitServingMain.builder()
                 .onSuccess(port -> {
                     testContext.assertTrue(Paths.get(baseLogDir, "main.log").toFile().exists());
@@ -140,15 +146,21 @@ public class LogsEndpointTest {
                 .onFailure(testContext::fail)
                 .build();
 
-        // Checking without setting environment variables
+
+        // Checking before setting environment variables
         konduitServingMain.runMain(args.toArgs());
+        async.await();
+        async = testContext.async();
 
         // Now checking with environment variables
         environmentVariables.set("KONDUIT_SERVING_LOG_DIR", folder.getRoot().getAbsolutePath());
         testContext.assertEquals(System.getenv("KONDUIT_SERVING_LOG_DIR"), folder.getRoot().getAbsolutePath());
 
         baseLogDir = System.getenv("KONDUIT_SERVING_LOG_DIR");
+
+        // Checking after setting environment variables
         konduitServingMain.runMain(args.toArgs());
+        async.await();
     }
 
     public static JsonObject getConfig(TestContext testContext) throws Exception {
@@ -170,7 +182,6 @@ public class LogsEndpointTest {
         Schema outputSchema = outputSchemaBuilder.build();
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(testContext.get(SELECTED_PORT_KEY))
                 .createLoggingEndpoints(true)
                 .build();
 
