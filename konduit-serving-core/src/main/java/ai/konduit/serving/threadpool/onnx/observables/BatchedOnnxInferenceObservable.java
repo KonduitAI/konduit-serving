@@ -98,7 +98,6 @@ public class BatchedOnnxInferenceObservable extends Observable implements OnnxOb
     @Override
     public void setOutputBatches(List<Map<String, INDArray>> output) {
         //this method should split batched output INDArray[] into multiple separate INDArrays
-        int countNumInputBatches = 0;   //Counter for total number of input batches processed
         this.output = output;
         this.setChanged();
         notifyObservers();

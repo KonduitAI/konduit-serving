@@ -31,7 +31,7 @@ import java.util.Observer;
 public interface OnnxObservable {
 
     /**
-     * Get input batches - and their associated input mask arrays, if any<br>
+     * Get input batches
      * Note that usually the returned list will be of size 1 - however, in the batched case, not all inputs
      * can actually be batched (variable size inputs to fully convolutional net, for example). In these "can't batch"
      * cases, multiple input batches will be returned, to be processed

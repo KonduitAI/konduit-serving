@@ -113,7 +113,6 @@ public class OnnxTest extends BaseVerticleTest {
 	return new JsonObject(inferenceConfiguration.toJson());
     }
 
-
     @Test
     public void runSqueezenet(TestContext testContext) throws Exception {
 
@@ -133,7 +132,6 @@ public class OnnxTest extends BaseVerticleTest {
         //INDArray contents = image.getImage();
 	System.out.println("Original input" + contents.getFloat(0));
 	
-	//TODO: Handle image as uint8 / int
 	byte[] npyContents = Nd4j.toNpyByteArray(contents);
 
         //File inputFile = temporary.newFile();
@@ -157,7 +155,6 @@ public class OnnxTest extends BaseVerticleTest {
 	
 	System.out.println("After " + bodyResult);
 	assertArrayEquals(new long[]{1,1000}, bodyResult.shape());
-        //TODO: Fix double free issue here
     }
 
     @After
