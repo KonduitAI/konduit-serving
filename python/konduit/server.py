@@ -1,17 +1,16 @@
 import json
 import logging
 import os
+import re
 import signal
 import subprocess
 
 import requests
-import time
-
+from konduit import KONDUIT_DIR
 from konduit.base_inference import PipelineStep
+from konduit.client import Client
 from konduit.inference import InferenceConfiguration
 from konduit.json_utils import config_to_dict_with_type
-from konduit.client import Client
-from konduit import KONDUIT_DIR
 
 
 def stop_server_by_pid(pid):
@@ -33,8 +32,7 @@ class Server(object):
         extra_jar_args=None,
         config_path="config.json",
         jar_path=None,
-        pid_file_path="konduit-serving.pid",
-        start_timeout=120,
+        pid_file_path="konduit-serving.pid"
     ):
         """Konduit Server
 
@@ -56,6 +54,7 @@ class Server(object):
         :param config_path: path to write the config object to (as json)
         :param jar_path: path to the konduit uberjar
         """
+        self.port = -1
         if jar_path is None:
             jar_path = os.getenv(
                 "KONDUIT_JAR_PATH", os.path.join(KONDUIT_DIR, "konduit.jar")
@@ -74,7 +73,6 @@ class Server(object):
         self.config_path = config_path
         self.jar_path = jar_path
         self.pid_file_path = pid_file_path
-        self.start_timeout = start_timeout
         self.process = None
         if extra_start_args is None:
             extra_start_args = []
@@ -109,7 +107,7 @@ class Server(object):
             input_names += step._get_input_names()
             output_names += step._get_output_names()
 
-        port = serving_config._get_http_port()
+        port = self.port
         host = serving_config._get_listen_host()
         if not host.startswith("http://"):
             host = "http://" + host
@@ -159,68 +157,50 @@ class Server(object):
             json.dump(json_config, f)
 
         args = self._process_extra_args(abs_path)
-        process = subprocess.Popen(args=args)
+        process = subprocess.Popen(args=args, stdout=subprocess.PIPE)
         self.process = process
 
         # Check if the server is up or not.
         request_timeout = 5
-        tries = int(self.start_timeout / request_timeout + 1)
 
         started = False
 
-        print("Starting server", end="")
+        print("Starting server")
 
-        for i in range(tries):
-            start_time = time.time()
+        port = -1
+        while True:
+            output = process.stdout.readline()
+            if output == b'' and process.poll() is not None:
+                break
+            else:
+                print(output.decode("utf-8"), end="")
+                if b'Server started on port' in output:
+                    m = re.search('port (.+?) with', str(output))
+                    if m:
+                        port = int(m.group(1))
+                        self.port = port
+                        break
 
-            # This url returns status 204 with no content when the server is up.
+        if port != -1:
             try:
-                """
-                This would look like the following on success:
-                ------
-                Starting server...
-                
-                Server has started successfully.
-                ------ 
-                
-                and like this on failure
-                ------
-                Starting server...
-                
-                The server wasn't able to start.
-                ------ 
-                """
-                print(".", end="")
-                logging.debug(
-                    "Checking server integrity. Tries: {} of {}".format(i + 1, tries)
-                )
-
                 r = requests.get(
-                    "http://localhost:{}/healthcheck".format(
-                        self.config.serving_config.http_port
-                    ),
+                    "http://localhost:{}/healthcheck".format(port),
                     timeout=request_timeout,
                 )
                 if r.status_code == 204:
                     started = True
-                    break
             except Exception as ex:
-                logging.debug("{}\nChecking server integrity again...".format(str(ex)))
+                logging.debug("Server health checks failed...\n{}".format(str(ex)))
 
-            time_taken = time.time() - start_time
-
-            if time_taken < request_timeout:
-                time.sleep(
-                    request_timeout - time_taken
-                )  # Making sure the loop takes exactly "request_timeout" seconds
+        process = process.poll()
 
         if started:
-            print("\n\nServer has started successfully.")
+            print("\n\nServer has started successfully on port {}".format(port))
         else:
             print("\n\nThe server wasn't able to start.")
             self.stop()
 
-        return process
+        return process, port, started
 
     def stop(self):
         """Stop the server"""

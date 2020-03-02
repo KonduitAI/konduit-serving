@@ -98,7 +98,7 @@ public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
         Preconditions.checkNotNull(inferenceConfiguration, "Inference configuration undefined!");
         int portValue = inferenceConfiguration.getServingConfig().getHttpPort();
         if (portValue == 0) {
-            String portEnvValue = System.getenv(ai.konduit.serving.verticles.VerticleConstants.PORT_FROM_ENV);
+            String portEnvValue = System.getenv(ai.konduit.serving.verticles.VerticleConstants.KONDUIT_SERVING_PORT);
             if (portEnvValue != null) {
                 portValue = Integer.parseInt(portEnvValue);
             }

@@ -2,5 +2,5 @@ serving:
   http_port: 1337
 steps:
   dl4j_cg_step:
-    type: COMPUTATION_GRAPH
+    type: DL4J
     model_loading_path: resources/dl4j/dl4j_cg_model.zip
