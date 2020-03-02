@@ -71,7 +71,7 @@ public class LogsEndpointTest {
     }
 
     @Test
-    public void checkLogs(TestContext testContext) throws InterruptedException {
+    public void testLogs(TestContext testContext) throws InterruptedException {
         mAsync = testContext.async();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
@@ -83,14 +83,12 @@ public class LogsEndpointTest {
 
         int numberOfLinesToReadFromLogs = 2;
 
-        mBaseLogDir = System.getProperty("user.dir");
-
         // Delete previous logs if they exist
         try {
-            FileUtils.forceDelete(Paths.get(mBaseLogDir, "main.log").toFile());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            FileUtils.forceDelete(Paths.get(System.getProperty("user.dir"), "main.log").toFile());
+        } catch (IOException ignore) {}
+
+        mBaseLogDir = System.getProperty("user.dir");
 
         KonduitServingMain konduitServingMain = KonduitServingMain.builder()
                 .onSuccess(port -> {
@@ -119,9 +117,8 @@ public class LogsEndpointTest {
 
         // Now checking with environment variables
         environmentVariables.set("KONDUIT_SERVING_LOG_DIR", folder.getRoot().getAbsolutePath());
-        testContext.assertEquals(System.getenv("KONDUIT_SERVING_LOG_DIR"), folder.getRoot().getAbsolutePath());
-
         mBaseLogDir = System.getenv("KONDUIT_SERVING_LOG_DIR");
+        testContext.assertEquals(mBaseLogDir, folder.getRoot().getAbsolutePath());
 
         // Checking after setting environment variables
         konduitServingMain.runMain(args.toArgs());
@@ -142,9 +139,7 @@ public class LogsEndpointTest {
         // Delete previous logs if they exist
         try {
             FileUtils.forceDelete(Paths.get(System.getProperty("user.dir"), "main.log").toFile());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException ignore) {}
 
         KonduitServingMain.builder()
                 .onSuccess(port -> {
