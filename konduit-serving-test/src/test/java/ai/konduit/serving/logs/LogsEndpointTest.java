@@ -95,7 +95,7 @@ public class LogsEndpointTest {
                 .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
                 .build();
 
-        int numberOfLinesToReadFromLogs = 10;
+        int numberOfLinesToReadFromLogs = 2;
 
         Matcher<String> linesCalculatingMatcher = new BaseMatcher<String>() {
 

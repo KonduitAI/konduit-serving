@@ -41,13 +41,9 @@ import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
+import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.FileAppender;
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.LongTaskTimer.Sample;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -68,16 +64,11 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.base.Preconditions;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -130,8 +121,8 @@ public class PipelineRouteDefiner {
      * <p>
      * Health checks are automatically added at /healthcheck endpoints
      *
-     * @param vertx                  the input vertx instance for setting up
-     *                               the returned {@link Router} instance and endpoints
+     * @param vertx                  the input vertx instance for setting up the returned {@link Router}
+     *                               instance and endpoints
      * @param inferenceConfiguration the configuration to use for the {@link PipelineExecutioner}
      * @return the router with the endpoints defined
      * @see <a href="https://vertx.io/docs/vertx-health-check/java/">Vertx health checks</a>
@@ -237,18 +228,18 @@ public class PipelineRouteDefiner {
         /**
          * Sets up and endpoint to see server logs if {@link ServingConfig#isCreateLoggingEndpoints()}
          * is true. Returns the number of last few lines determines by the path param
-         * {@code numberOfLastLinesToRead}. If an invalid integer is given as the
-         * path param all of the log file will be read and returned.
+         * {@code numberOfLastLinesToRead}. If the path param is an invalid integer,
+         * then the whole log file data will be read and returned.
          */
             router.get("/logs/:numberOfLastLinesToRead")
                     .produces("text/plain").handler(ctx -> {
                 String numberOfLinesString = ctx.pathParam("numberOfLastLinesToRead");
 
                 try {
-                    ctx.response().end(getLogs(Integer.parseInt(numberOfLinesString)));
+                    ctx.response().end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
                 } catch (Exception e) {
                     if(e instanceof NumberFormatException) {
-                        ctx.response().end(getLogs(-1));
+                        ctx.response().end(LogUtils.getLogs(-1));
                     } else {
                         ctx.fail(500, e);
                     }
@@ -604,78 +595,5 @@ public class PipelineRouteDefiner {
             default:
                 throw new IllegalStateException("Illegal adapter type!");
         }
-    }
-
-    /**
-     * Finds the log file and sends the output as a String
-     * @param numOfLastLinesToRead Number of lines to read from the last few lines.
-     *                          if it's less than 1 then it will return all the log file data.
-     * @return current jvm process logs for konduit-serving.
-     */
-    private String getLogs(int numOfLastLinesToRead) {
-        File logsFile = getLogsFile();
-
-        if(logsFile == null || !logsFile.exists()) return "";
-
-        List<String> result = new ArrayList<>();
-
-        if(numOfLastLinesToRead > 0) {
-            return readLastLines(logsFile, numOfLastLinesToRead);
-        } else {
-            try {
-                return FileUtils.readFileToString(logsFile, Charset.defaultCharset());
-            } catch (IOException e) {
-                log.error("Error reading file: ", e);
-                return "";
-            }
-        }
-    }
-
-    /**
-     * Gets the file where the logs are.
-     * @return the logs file.
-     */
-    public static File getLogsFile() {
-        FileAppender<?> fileAppender = null;
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-
-        for (Logger logger : context.getLoggerList())
-        {
-            for (Iterator<Appender<ILoggingEvent>> index = logger.iteratorForAppenders(); index.hasNext();)
-            {
-                Object appender = index.next();
-                if (appender instanceof FileAppender) {
-                    fileAppender = (FileAppender<?>) appender;
-                }
-            }
-        }
-
-        if (fileAppender != null) {
-            return new File(fileAppender.getFile());
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Reads the last n lines from a file
-     * @param numOfLastLinesToRead the number of last lines to read
-     * @return read lines
-     */
-    public String readLastLines(File file, int numOfLastLinesToRead) {
-        List<String> result = new ArrayList<>();
-
-        try (ReversedLinesFileReader reader = new ReversedLinesFileReader(file, Charset.defaultCharset())) {
-            String line;
-            while ((line = reader.readLine()) != null && result.size() < numOfLastLinesToRead) {
-                result.add(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "";
-        }
-
-        Collections.reverse(result);
-        return String.join(System.lineSeparator(), result);
     }
 }
