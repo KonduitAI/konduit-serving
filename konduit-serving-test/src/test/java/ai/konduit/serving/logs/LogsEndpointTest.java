@@ -16,29 +16,18 @@
 
 package ai.konduit.serving.logs;
 
-import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.configprovider.KonduitServingMain;
 import ai.konduit.serving.configprovider.KonduitServingMainArgs;
-import ai.konduit.serving.model.DL4JConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.train.TrainUtils;
-import ai.konduit.serving.util.SchemaTypeUtils;
+import ai.konduit.serving.train.TestUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
+import com.jayway.restassured.response.Response;
+import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
-import org.datavec.api.transform.schema.Schema;
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.deeplearning4j.util.ModelSerializer;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -47,8 +36,6 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
-import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,11 +47,10 @@ import static com.jayway.restassured.RestAssured.given;
 @RunWith(VertxUnitRunner.class)
 public class LogsEndpointTest {
 
-    private String baseLogDir = null;
-    private Async async = null;
+    private String mBaseLogDir = null;
+    private Async mAsync = null;
 
     public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
-    public static String SELECTED_PORT_KEY = "availablePortKey";
 
     @Rule
     public Timeout rule = Timeout.seconds(240);
@@ -80,13 +66,13 @@ public class LogsEndpointTest {
         File jsonConfigPath = folder.newFile("config.json");
         testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
 
-        JsonObject config = getConfig(testContext);
+        JsonObject config = TestUtils.getConfig(folder);
         FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
     }
 
     @Test
     public void checkLogs(TestContext testContext) throws InterruptedException {
-        async = testContext.async();
+        mAsync = testContext.async();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
@@ -97,39 +83,18 @@ public class LogsEndpointTest {
 
         int numberOfLinesToReadFromLogs = 2;
 
-        Matcher<String> linesCalculatingMatcher = new BaseMatcher<String>() {
+        mBaseLogDir = System.getProperty("user.dir");
 
-            @Override
-            public boolean matches(Object logs) {
-                return ((String) logs).split(System.lineSeparator()).length == numberOfLinesToReadFromLogs;
-            }
-
-            @Override
-            public void describeTo(Description description) { }
-
-            @Override
-            public void describeMismatch(Object logs, Description description) {
-                description.appendText("Expected number of lines were ")
-                        .appendValue(numberOfLinesToReadFromLogs)
-                        .appendText("was ")
-                        .appendValue(((String) logs).split(System.lineSeparator()).length)
-                        .appendText("logs were ")
-                        .appendValue(logs);
-            }
-        };
-
-        baseLogDir = System.getProperty("user.dir");
-
-        // Delete previous logs if needed
+        // Delete previous logs if they exist
         try {
-            FileUtils.forceDelete(Paths.get(baseLogDir, "main.log").toFile());
+            FileUtils.forceDelete(Paths.get(mBaseLogDir, "main.log").toFile());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         KonduitServingMain konduitServingMain = KonduitServingMain.builder()
                 .onSuccess(port -> {
-                    testContext.assertTrue(Paths.get(baseLogDir, "main.log").toFile().exists());
+                    testContext.assertTrue(Paths.get(mBaseLogDir, "main.log").toFile().exists());
 
                     given().port(port)
                             .get(String.format("/logs/%s", numberOfLinesToReadFromLogs))
@@ -139,9 +104,9 @@ public class LogsEndpointTest {
                             .and()
                             .assertThat()
                             .body(Matchers.not(Matchers.isEmptyOrNullString()),
-                                    linesCalculatingMatcher); // This would mean that the log file has been found and it was read successfully
+                                    new TestUtils.LinesCalculatingMatcher(numberOfLinesToReadFromLogs)); // This would mean that the log file has been found and it was read successfully
 
-                    async.complete();
+                    mAsync.complete();
                 })
                 .onFailure(testContext::fail)
                 .build();
@@ -149,63 +114,75 @@ public class LogsEndpointTest {
 
         // Checking before setting environment variables
         konduitServingMain.runMain(args.toArgs());
-        async.await();
-        async = testContext.async();
+        mAsync.await();
+        mAsync = testContext.async();
 
         // Now checking with environment variables
         environmentVariables.set("KONDUIT_SERVING_LOG_DIR", folder.getRoot().getAbsolutePath());
         testContext.assertEquals(System.getenv("KONDUIT_SERVING_LOG_DIR"), folder.getRoot().getAbsolutePath());
 
-        baseLogDir = System.getenv("KONDUIT_SERVING_LOG_DIR");
+        mBaseLogDir = System.getenv("KONDUIT_SERVING_LOG_DIR");
 
         // Checking after setting environment variables
         konduitServingMain.runMain(args.toArgs());
-        async.await();
+        mAsync.await();
     }
 
-    public static JsonObject getConfig(TestContext testContext) throws Exception {
-        Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
-        File modelSave = folder.newFile("model.zip");
-        ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
+    @Test
+    public void testLogsWithStdOutAndStdErr(TestContext testContext) {
+        Async async = testContext.async();
 
-        Schema.Builder schemaBuilder = new Schema.Builder();
-        schemaBuilder.addColumnDouble("petal_length")
-                .addColumnDouble("petal_width")
-                .addColumnDouble("sepal_width")
-                .addColumnDouble("sepal_height");
-        Schema inputSchema = schemaBuilder.build();
-
-        Schema.Builder outputSchemaBuilder = new Schema.Builder();
-        outputSchemaBuilder.addColumnDouble("setosa");
-        outputSchemaBuilder.addColumnDouble("versicolor");
-        outputSchemaBuilder.addColumnDouble("virginica");
-        Schema outputSchema = outputSchemaBuilder.build();
-
-        ServingConfig servingConfig = ServingConfig.builder()
-                .createLoggingEndpoints(true)
+        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
+                .configStoreType("file").ha(false)
+                .multiThreaded(false)
+                .verticleClassName(InferenceVerticle.class.getName())
+                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
                 .build();
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder().modelLoadingPath(modelSave.getAbsolutePath())
-                                .modelType(ModelConfig.ModelType.DL4J)
-                                .build()
-                ).build();
+        // Delete previous logs if they exist
+        try {
+            FileUtils.forceDelete(Paths.get(System.getProperty("user.dir"), "main.log").toFile());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        ModelStep modelPipelineStep = ModelStep.builder()
-                .inputName("default")
-                .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
-                .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
-                .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
-                .modelConfig(modelConfig)
-                .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
-                .build();
+        KonduitServingMain.builder()
+                .onSuccess(port -> {
+                    testContext.assertTrue(Paths.get(System.getProperty("user.dir"), "main.log").toFile().exists());
 
-        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
-                .servingConfig(servingConfig)
-                .step(modelPipelineStep)
-                .build();
+                    RequestSpecification requestSpecification = given().port(port);
 
-        return new JsonObject(inferenceConfiguration.toJson());
+                    Response response = requestSpecification.get("/logs/all");
+
+                    response.then().assertThat()
+                            .statusCode(200)
+                            .and()
+                            .assertThat()
+                            .body(Matchers.not(Matchers.isEmptyOrNullString()));
+
+                    int responseLines = response.body().print().split(System.lineSeparator()).length;
+
+                    int timesPrinted = 10;
+
+                    for (int i = 0; i < timesPrinted; i++) {
+                        System.out.println("Stdout check: " + i);
+                        System.err.println("Stderr check: " + i);
+                    }
+
+                    Response responseWithStdOutAndStdErr = requestSpecification.get("/logs/all");
+                    responseWithStdOutAndStdErr.
+                            then()
+                            .assertThat()
+                            .statusCode(200)
+                            .and()
+                            .body(Matchers.not(Matchers.isEmptyOrNullString()),
+                                    new TestUtils.ContainsNumberOfInstancesMatcher(timesPrinted, "Stdout check"),
+                                    new TestUtils.ContainsNumberOfInstancesMatcher(timesPrinted, "Stderr check"));
+
+                    async.complete();
+                })
+                .onFailure(testContext::fail)
+                .build()
+                .runMain(args.toArgs());
     }
 }

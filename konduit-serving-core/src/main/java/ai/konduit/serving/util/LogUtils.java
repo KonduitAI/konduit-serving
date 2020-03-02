@@ -54,6 +54,7 @@ public class LogUtils {
 
     /**
      * Reads the last n lines from a file
+     * @param file file where the data to be read is.
      * @param numOfLastLinesToRead the number of last lines to read
      * @return read lines
      */
@@ -114,8 +115,8 @@ public class LogUtils {
 
     /**
      * Finds the log file and sends the output as a String
-     * @param numOfLastLinesToRead Number of lines to read from the last few lines.
-     *                          if it's less than 1 then it will return all the log file data.
+     * @param numOfLastLinesToRead Number of lines to read from the last few lines. If it's less than 1 then it will
+     *                             return all the log file data.
      * @return current jvm process logs for konduit-serving.
      */
     public static String getLogs(int numOfLastLinesToRead) {

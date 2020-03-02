@@ -25,11 +25,6 @@ package ai.konduit.serving.configprovider;
 import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.FileAppender;
 import com.beust.jcommander.JCommander;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Verticle;
@@ -42,10 +37,8 @@ import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.nd4j.shade.guava.base.Strings;
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
-import java.io.File;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
@@ -68,6 +61,8 @@ public class KonduitServingMain {
     private KonduitServingMainOnFailureRunnable onFailure;
 
     static {
+        SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
+
         setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
         LoggerFactory.getLogger(LoggerFactory.class); // Required for Logback to work in Vertx
     }

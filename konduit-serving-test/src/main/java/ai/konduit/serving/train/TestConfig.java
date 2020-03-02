@@ -31,5 +31,4 @@ public class TestConfig implements java.io.Serializable {
     private org.deeplearning4j.nn.graph.ComputationGraph computationGraph;
     private org.nd4j.linalg.dataset.api.preprocessor.DataNormalization dataNormalization;
 
-
 }
