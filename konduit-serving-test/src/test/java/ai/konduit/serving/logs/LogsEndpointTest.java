@@ -53,7 +53,7 @@ public class LogsEndpointTest {
     public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
 
     @Rule
-    public Timeout rule = Timeout.seconds(240);
+    public Timeout rule = Timeout.seconds(50000);
 
     @ClassRule
     public static TemporaryFolder folder = new TemporaryFolder();
@@ -148,6 +148,13 @@ public class LogsEndpointTest {
 
         KonduitServingMain.builder()
                 .onSuccess(port -> {
+
+                    try {
+                        Thread.sleep(5000000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                     testContext.assertTrue(Paths.get(System.getProperty("user.dir"), "main.log").toFile().exists());
 
                     RequestSpecification requestSpecification = given().port(port);
@@ -170,9 +177,7 @@ public class LogsEndpointTest {
                     }
 
                     Response responseWithStdOutAndStdErr = requestSpecification.get("/logs/all");
-                    responseWithStdOutAndStdErr.
-                            then()
-                            .assertThat()
+                    responseWithStdOutAndStdErr.then().assertThat()
                             .statusCode(200)
                             .and()
                             .body(Matchers.not(Matchers.isEmptyOrNullString()),

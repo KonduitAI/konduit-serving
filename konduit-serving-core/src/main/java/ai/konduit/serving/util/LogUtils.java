@@ -83,8 +83,7 @@ public class LogUtils {
         File previousLogsFile = getLogsFile();
 
         String konduitServingLogDirFromEnv = System.getenv("KONDUIT_SERVING_LOG_DIR");
-        File newLogsFile = Paths.get(Strings.isNullOrEmpty(konduitServingLogDirFromEnv) ?
-                System.getProperty("user.dir") : konduitServingLogDirFromEnv, "main.log").toFile();
+        File newLogsFile = Paths.get(getLogsDir(), "main.log").toFile();
 
         if(!newLogsFile.equals(previousLogsFile)) {
             ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)
@@ -134,5 +133,14 @@ public class LogUtils {
                 return "";
             }
         }
+    }
+
+    /**
+     * Returns the directory where all are log files are
+     * @return log files directory
+     */
+    public static String getLogsDir() {
+        String konduitServingLogDirFromEnv = System.getenv("KONDUIT_SERVING_LOG_DIR");
+        return Strings.isNullOrEmpty(konduitServingLogDirFromEnv) ? System.getProperty("user.dir") : konduitServingLogDirFromEnv;
     }
 }
