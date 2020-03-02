@@ -188,7 +188,7 @@ def test_docs():
     contained in markdown files."""
     files = get_files("../docs")
     for file_path in files:
-        python_blocks = markdown_blocks(file_path, "python")
+        python_blocks = markdown_blocks(file_path, "python./")
         exec_python_code(python_blocks)
 
         java_blocks = markdown_blocks(file_path, "java")

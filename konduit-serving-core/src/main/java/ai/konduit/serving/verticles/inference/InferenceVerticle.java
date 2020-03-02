@@ -33,9 +33,12 @@ import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.BindException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * A {@link io.vertx.core.Verticle} that takes multi part file uploads
@@ -57,6 +60,8 @@ public class InferenceVerticle extends BaseRoutableVerticle {
 
     private InferenceConfiguration inferenceConfiguration;
     private PipelineRouteDefiner pipelineRouteDefiner;
+    private Throwable throwable;
+    private CountDownLatch countDownLatch;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -78,10 +83,11 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         log.debug("Stopping konduit server.");
     }
 
+    @SneakyThrows
     @Override
     public void init(Vertx vertx, Context context) {
-        this.context = context;
-        this.vertx = vertx;
+        super.init(vertx, context);
+
         inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
         pipelineRouteDefiner = new PipelineRouteDefiner();
         this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
@@ -99,28 +105,49 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         setupWebServer();
     }
 
-    protected void setupWebServer() {
-        int portValue = inferenceConfiguration.getServingConfig().getHttpPort();
-        if (portValue == 0) {
-            String portEnvValue = System.getenv(VerticleConstants.PORT_FROM_ENV);
-            if (portEnvValue != null) {
-                portValue = Integer.parseInt(portEnvValue);
+    protected void setupWebServer() throws Throwable {
+        countDownLatch = new CountDownLatch(1);
+
+        String portEnvValue = System.getenv(VerticleConstants.KONDUIT_SERVING_PORT);
+        if (portEnvValue != null) {
+            try {
+                port = Integer.parseInt(portEnvValue);
+            } catch (NumberFormatException e) {
+                log.error("Environment variable \"{}={}\" isn't a valid port number.", VerticleConstants.KONDUIT_SERVING_PORT, portEnvValue, e);
+
+                throw e;
             }
+        } else {
+            port = inferenceConfiguration.getServingConfig().getHttpPort();
         }
 
-        final int portValueFinal = portValue;
+        if (port < 0 || port > 0xFFFF) {
+            throw new Exception(String.format("Valid port range is between 0-65535. The given port was %s", port));
+        }
+
         List<PipelineStep> steps = inferenceConfiguration.getSteps();
         final int nSteps = steps == null ? 0 : steps.size();
+
+        new Thread(() -> startVertxServer(port, nSteps)).start(); // Starting a new thread here because the CountDownLatch freezes the listen callback for Vertx#createHttpServer
+
+        countDownLatch.await();
+
+        if(throwable != null) throw throwable;
+    }
+
+    private void startVertxServer(int port, int nSteps) {
         vertx.createHttpServer()
-                .requestHandler(router)
-                .exceptionHandler(Throwable::printStackTrace)
-                .listen(portValueFinal, inferenceConfiguration.getServingConfig().getListenHost(), listenResult -> {
-                    if (listenResult.failed()) {
-                        log.error("Could not start HTTP server on port {}", portValueFinal);
-                        listenResult.cause().printStackTrace();
-                    } else {
-                        log.info("Server started on port {} with {} pipeline steps", portValueFinal, nSteps);
-                    }
-                });
+            .requestHandler(router)
+            .exceptionHandler(Throwable::printStackTrace)
+            .listen(port, inferenceConfiguration.getServingConfig().getListenHost(), result -> {
+                if (result.failed()) {
+                    throwable = result.cause();
+                } else {
+                    this.port = result.result().actualPort();
+                    log.info("Server started on port {} with {} pipeline steps", this.port, nSteps);
+
+                }
+                countDownLatch.countDown();
+            });
     }
 }

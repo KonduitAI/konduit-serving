@@ -30,6 +30,7 @@ import ai.konduit.serving.input.converter.tensorflow.TensorflowSameDiffHandler;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -62,6 +63,7 @@ public class ConverterVerticle extends BaseRoutableVerticle {
     protected String filePath;
     protected String unzipPath;
 
+    @SneakyThrows
     @Override
     public void start() {
 
