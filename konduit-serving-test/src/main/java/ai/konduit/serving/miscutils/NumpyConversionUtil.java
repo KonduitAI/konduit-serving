@@ -1,4 +1,4 @@
-package ai.konduit.serving.util;
+package ai.konduit.serving.miscutils;
 
 import org.apache.commons.io.FileUtils;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -15,8 +15,8 @@ public class NumpyConversionUtil {
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.npy");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        outputArray = BinarySerde.readFromDisk(outputImagePath);
-        //outputArray = Nd4j.createFromNpyFile(outputImagePath);
+        //outputArray = BinarySerde.readFromDisk(outputImagePath);
+        outputArray = Nd4j.createFromNpyFile(outputImagePath);
 
         return outputArray;
     }
