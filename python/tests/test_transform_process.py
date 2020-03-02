@@ -1,14 +1,13 @@
+import json
+
+import pydatavec
+import pytest
 from konduit import *
 from konduit.json_utils import config_to_dict_with_type
 from konduit.server import Server
-from konduit.client import Client
 from konduit.utils import is_port_in_use
 
-import random
-import json
-import pydatavec
 from .utils import load_java_tp, inference_from_json
-import pytest
 
 
 @pytest.mark.integration
@@ -32,9 +31,7 @@ def test_build_tp(output_format):
         .transform_process(as_python_json)
     )
 
-    port = random.randint(1000, 65535)
     serving_config = ServingConfig(
-        http_port=port,
         output_data_format=output_format,
         log_timings=True,
     )
@@ -50,10 +47,12 @@ def test_build_tp(output_format):
         extra_start_args="-Xmx8g",
         jar_path="konduit.jar",
     )
-    server.start()
-    client = server.get_client()
+    _, port, started = server.start()
 
+    assert started
     assert is_port_in_use(port)
+
+    client = server.get_client()
 
     try:
         predicted = client.predict({"first": "value"})
