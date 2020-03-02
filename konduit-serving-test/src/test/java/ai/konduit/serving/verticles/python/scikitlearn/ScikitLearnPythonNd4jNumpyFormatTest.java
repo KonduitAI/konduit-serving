@@ -20,13 +20,14 @@
  *
  */
 
-package ai.konduit.serving.verticles.python.keras;
+package ai.konduit.serving.verticles.python.scikitlearn;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ExpectedAssertTest;
 import ai.konduit.serving.util.ObjectMappers;
@@ -40,6 +41,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.apache.commons.io.FileUtils;
+import org.datavec.api.writable.NDArrayWritable;
+import org.datavec.api.writable.Writable;
+import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +55,7 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -63,7 +69,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
+public class ScikitLearnPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -88,13 +94,14 @@ public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
                 .filter(Objects::nonNull)
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
-        String pythonCodePath = new ClassPathResource("scripts/keras/KerasNDArrayTest.py").getFile().getAbsolutePath();
+
+        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/NDArrayScikitNDArrayInf.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("inputData", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("arr", PythonType.TypeName.NDARRAY.name())
+                .pythonInput("imgPath", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("Ypredict", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -108,7 +115,7 @@ public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
                 .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
-        System.out.println(inferenceConfiguration.toJson());
+
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
@@ -119,16 +126,31 @@ public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-        System.out.println(arr);
+        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
+                .scaleImageTransform(20.0f)
+                .resizeImageTransform(28, 28)
+                .build();
+
+        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
+                .imageProcessingInitialLayout("NCHW")
+                .imageProcessingRequiredLayout("NHWC")
+                .inputName("default")
+                .dimensionsConfig("default", new Long[]{28L, 28L, 1L}) // Height, width, channels
+                .imageTransformProcess("default", imageTransformProcess)
+                .build();
+
+        String imagePath = new ClassPathResource("data/ScikitLearnNDArray.png").getFile().getAbsolutePath();
+
+        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
+
+        INDArray image = ((NDArrayWritable) output[0][0]).get();
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
         //Create new file to write binary input data.
         File file = new File(filePath + "/test-input.zip");
 
-        BinarySerde.writeArrayToDisk(arr, file);
+        BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
         requestSpecification.body(jsonObject.encode().getBytes());
 
         requestSpecification.header("Content-Type", "multipart/form-data");
@@ -140,37 +162,50 @@ public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
                 .extract()
                 .body().asString();
 
-        //TO test create and read from numpy.
-/*
-        //Preparing input NDArray
-        INDArray arr1 = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-
-        byte[] xNpy = Nd4j.toNpyByteArray(arr1);
-
-        File xFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(xFile, xNpy);
-*/
-        INDArray outputArray= convertToNd4J(response);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json", "raw");
+        /*File outputImagePath = new File(
+                "src/main/resources/data/test-nd4j-output.zip");
+        FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
+        System.out.println(BinarySerde.readFromDisk(outputImagePath));
+        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);*/
+        INDArray outputArray=  convertToNd4J(response);
+        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json", "raw");
+        assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         assertEquals(expectedArr, outputArray);
+
     }
 
-    //@Test(timeout = 60000)
+    @Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
+        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
+                .scaleImageTransform(20.0f)
+                .resizeImageTransform(28, 28)
+                .build();
+
+        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
+                .imageProcessingInitialLayout("NCHW")
+                .imageProcessingRequiredLayout("NHWC")
+                .inputName("default")
+                .dimensionsConfig("default", new Long[]{28L, 28L, 1L}) // Height, width, channels
+                .imageTransformProcess("default", imageTransformProcess)
+                .build();
+
+        String imagePath = new ClassPathResource("data/ScikitLearnNDArray.png").getFile().getAbsolutePath();
+
+        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
+
+        INDArray image = ((NDArrayWritable) output[0][0]).get();
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
         //Create new file to write binary input data.
         File file = new File(filePath + "/test-input.zip");
 
-        BinarySerde.writeArrayToDisk(arr, file);
+        BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
         requestSpecification.body(jsonObject.encode().getBytes());
 
         requestSpecification.header("Content-Type", "multipart/form-data");
@@ -181,16 +216,19 @@ public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
                 .post("/classification/nd4j").then()
                 .extract()
                 .body().asString();
-
-        /*File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
-        FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
-        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);*/
+        /*JsonObject jsonObject1 = new JsonObject(response);
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");*/
         INDArray outputArray=  convertToNd4J(response);
-        JsonArray expProb = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/keras/KerasNdArrayTest.json");
-        float[][] expNd = ObjectMappers.json().readValue(expProb.toString(), float[][].class);
+        double outpuValue = outputArray.getDouble(0);
+        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json");
+        double[][] expNd = ObjectMappers.json().readValue(expArr.toString(), double[][].class);
         INDArray expectedArray = Nd4j.create(expNd);
+        double expValue = expectedArray.getDouble(0);
+        assertEquals(expValue, outpuValue, 1e-1);
         assertEquals(expectedArray, outputArray);
+
     }
+
+
 }
