@@ -552,81 +552,74 @@ public class ONNXThreadPool {
 	    long size = tens.GetTensorTypeAndShapeInfo().GetElementCount();
             switch (type) {
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT:
-		    FloatPointer origPFloat = tens.GetTensorMutableDataFloat();
-
-		    //TODO: avoid using a second float pointer here
-		    FloatPointer pFloat = new FloatPointer(size);
-                    for(int i = 0; i < size; i++){
-
-                      pFloat.put(i, origPFloat.get(i));
-                    }
+		    FloatPointer pFloat = tens.GetTensorMutableDataFloat().capacity(size);
 		    FloatIndexer floatIndexer = FloatIndexer.create(pFloat);
 		    buffer = Nd4j.createBuffer(pFloat, DataType.FLOAT, size, floatIndexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8:
-		    BytePointer pUint8 = tens.GetTensorMutableDataUByte();
+		    BytePointer pUint8 = tens.GetTensorMutableDataUByte().capacity(size);
 		    Indexer uint8Indexer = ByteIndexer.create(pUint8);
-		    buffer = Nd4j.createBuffer(pUint8, DataType.UINT8, pUint8.capacity(), uint8Indexer);
+		    buffer = Nd4j.createBuffer(pUint8, DataType.UINT8, size, uint8Indexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8:
-		    BytePointer pInt8 = tens.GetTensorMutableDataByte();
+		    BytePointer pInt8 = tens.GetTensorMutableDataByte().capacity(size);
 		    Indexer int8Indexer = ByteIndexer.create(pInt8);
-		    buffer = Nd4j.createBuffer(pInt8, DataType.UINT8, pInt8.capacity(), int8Indexer);
+		    buffer = Nd4j.createBuffer(pInt8, DataType.UINT8, size, int8Indexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16:
-		    ShortPointer pUint16 = tens.GetTensorMutableDataUShort();
+		    ShortPointer pUint16 = tens.GetTensorMutableDataUShort().capacity(size);
 		    Indexer uint16Indexer = ShortIndexer.create(pUint16);
-		    buffer = Nd4j.createBuffer(pUint16, DataType.UINT16, pUint16.capacity(), uint16Indexer);
+		    buffer = Nd4j.createBuffer(pUint16, DataType.UINT16, size, uint16Indexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16:
-		    ShortPointer pInt16 = tens.GetTensorMutableDataShort();
+		    ShortPointer pInt16 = tens.GetTensorMutableDataShort().capacity(size);
 		    Indexer int16Indexer = ShortIndexer.create(pInt16);
-		    buffer = Nd4j.createBuffer(pInt16, DataType.INT16, pInt16.capacity(), int16Indexer);
+		    buffer = Nd4j.createBuffer(pInt16, DataType.INT16, size, int16Indexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32:
-		    IntPointer pInt32 = tens.GetTensorMutableDataInt();
+		    IntPointer pInt32 = tens.GetTensorMutableDataInt().capacity(size);
 		    Indexer int32Indexer = IntIndexer.create(pInt32);
-		    buffer = Nd4j.createBuffer(pInt32, DataType.INT32, pInt32.capacity(), int32Indexer);
+		    buffer = Nd4j.createBuffer(pInt32, DataType.INT32, size, int32Indexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64:
-		    LongPointer pInt64 = tens.GetTensorMutableDataLong();
+		    LongPointer pInt64 = tens.GetTensorMutableDataLong().capacity(size);
 		    Indexer int64Indexer = LongIndexer.create(pInt64);
-		    buffer = Nd4j.createBuffer(pInt64, DataType.INT64, pInt64.capacity(), int64Indexer);
+		    buffer = Nd4j.createBuffer(pInt64, DataType.INT64, size, int64Indexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
-		    BytePointer pString = tens.GetTensorMutableDataByte();
+		    BytePointer pString = tens.GetTensorMutableDataByte().capacity(size);
 		    Indexer stringIndexer = ByteIndexer.create(pString);
-		    buffer = Nd4j.createBuffer(pString, DataType.INT8, pString.capacity(), stringIndexer);
+		    buffer = Nd4j.createBuffer(pString, DataType.INT8, size, stringIndexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL:
-		    BoolPointer pBool = tens.GetTensorMutableDataBool();
+		    BoolPointer pBool = tens.GetTensorMutableDataBool().capacity(size);
 		    Indexer boolIndexer = BooleanIndexer.create(new BooleanPointer(pBool)); //Converting from JavaCPP Bool to Boolean here - C++ bool type size is not defined, could cause problems on some platforms
-		    buffer = Nd4j.createBuffer(pBool, DataType.BOOL, pBool.capacity(), boolIndexer);
+		    buffer = Nd4j.createBuffer(pBool, DataType.BOOL, size, boolIndexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16:
-		    ShortPointer pFloat16 = tens.GetTensorMutableDataShort();
+		    ShortPointer pFloat16 = tens.GetTensorMutableDataShort().capacity(size);
 		    Indexer float16Indexer = ShortIndexer.create(pFloat16);
-		    buffer = Nd4j.createBuffer(pFloat16, DataType.FLOAT16, pFloat16.capacity(), float16Indexer);
+		    buffer = Nd4j.createBuffer(pFloat16, DataType.FLOAT16, size, float16Indexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE:
-		    DoublePointer pDouble = tens.GetTensorMutableDataDouble();
+		    DoublePointer pDouble = tens.GetTensorMutableDataDouble().capacity(size);
 		    Indexer doubleIndexer = DoubleIndexer.create(pDouble);
-		    buffer = Nd4j.createBuffer(pDouble, DataType.DOUBLE, pDouble.capacity(), doubleIndexer);
+		    buffer = Nd4j.createBuffer(pDouble, DataType.DOUBLE, size, doubleIndexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32:
-		    IntPointer pUint32 = tens.GetTensorMutableDataUInt();
+		    IntPointer pUint32 = tens.GetTensorMutableDataUInt().capacity(size);
 		    Indexer uint32Indexer = IntIndexer.create(pUint32);
-		    buffer = Nd4j.createBuffer(pUint32, DataType.UINT32, pUint32.capacity(), uint32Indexer);
+		    buffer = Nd4j.createBuffer(pUint32, DataType.UINT32, size, uint32Indexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
-		    LongPointer pUint64 = tens.GetTensorMutableDataULong();
+		    LongPointer pUint64 = tens.GetTensorMutableDataULong().capacity(size);
 		    Indexer uint64Indexer = LongIndexer.create(pUint64);
-		    buffer = Nd4j.createBuffer(pUint64, DataType.UINT64, pUint64.capacity(), uint64Indexer);
+		    buffer = Nd4j.createBuffer(pUint64, DataType.UINT64, size, uint64Indexer);
 		    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16:
-		    ShortPointer pBfloat16 = tens.GetTensorMutableDataShort();
+		    ShortPointer pBfloat16 = tens.GetTensorMutableDataShort().capacity(size);
 		    Indexer bfloat16Indexer = ShortIndexer.create(pBfloat16);
-		    buffer = Nd4j.createBuffer(pBfloat16, DataType.BFLOAT16, pBfloat16.capacity(), bfloat16Indexer);
+		    buffer = Nd4j.createBuffer(pBfloat16, DataType.BFLOAT16, size, bfloat16Indexer);
 		    break;
 		default:
 		    throw new RuntimeException("Unsupported data type encountered");
