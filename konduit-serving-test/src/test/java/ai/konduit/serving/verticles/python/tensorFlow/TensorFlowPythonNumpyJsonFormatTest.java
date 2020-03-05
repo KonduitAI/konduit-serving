@@ -144,7 +144,7 @@ public class TensorFlowPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalT
                 .post("/raw/numpy").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
+
         JsonObject jsonObject1 = new JsonObject(response);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
@@ -189,7 +189,7 @@ public class TensorFlowPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalT
                 .post("/classification/numpy").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
+
         JsonObject jsonObject1 = new JsonObject(response);
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
