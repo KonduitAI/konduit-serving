@@ -132,8 +132,6 @@ public class TensorflowPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVerti
                 .extract()
                 .body().asString();
 
-        System.out.println("response----" + response);
-
         //TODO:assertion yet to implement.
 
 
