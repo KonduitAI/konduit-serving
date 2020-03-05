@@ -18,9 +18,30 @@
         <nd4j.cuda.version>${nd4j.version}-${cuda.version}</nd4j.cuda.version>
         <javacpp.date>7.6</javacpp.date>
         <cuda.javacpp.version>${cuda.version}-${javacpp.date}-${javacpp.version}</cuda.javacpp.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>intel</id>
+            <activation>
+                <os>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <dependencies>
+
+
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>tensorflow-platform-gpu</artifactId>
+                    <version>${tensorflow.javacpp.version}</version>
+                </dependency>
+
+
+            </dependencies>
+        </profile>
+    </profiles>
+
 
     <dependencyManagement>
         <dependencies>
@@ -39,24 +60,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>cuda-platform</artifactId>
-            <version>${cuda.javacpp.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>tensorflow-platform-gpu</artifactId>
-            <version>${tensorflow.javacpp.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-cuda-${cuda.version}-platform</artifactId>
             <version>${nd4j.version}</version>
@@ -71,6 +74,20 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>cuda-platform</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
