@@ -26,12 +26,12 @@ import ai.konduit.serving.verticles.Routable;
 import ai.konduit.serving.verticles.VerticleConstants;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.impl.RouterImpl;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -46,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 public abstract class BaseRoutableVerticle extends AbstractVerticle implements Routable {
 
-    private final static int DEFAULT_HTTP_PORT = 8081;
+    private final static int DEFAULT_HTTP_PORT = 0; // 0 will find an available port when running HttpServer#listen
     protected Router router;
     protected int port;
 
@@ -54,13 +54,18 @@ public abstract class BaseRoutableVerticle extends AbstractVerticle implements R
         super();
     }
 
+    @Override
+    public void init(Vertx vertx, Context context) {
+        super.init(vertx, context);
+    }
+
     /**
      * Start an http server the port with the value configured
      * as the httpPort key found in {@link #config()}
      */
-    protected void setupWebServer() throws Throwable {
+    protected void setupWebServer(Promise<Void> startPromise) {
         RouterImpl router = (RouterImpl) router();
-        int port;
+
         if (context != null && config().containsKey(VerticleConstants.HTTP_PORT_KEY)) {
             String portKey = config().getValue(VerticleConstants.HTTP_PORT_KEY).toString();
             port = Integer.parseInt(portKey);
@@ -69,23 +74,38 @@ public abstract class BaseRoutableVerticle extends AbstractVerticle implements R
             log.warn("No port defined in configuration! Using default port = " + port);
         }
 
-        vertx.createHttpServer().requestHandler(router::accept).exceptionHandler(Throwable::printStackTrace)
+        vertx.createHttpServer()
+                .requestHandler(router)
+                .exceptionHandler(Throwable::printStackTrace)
                 .listen(port, listenResult -> {
                     if (listenResult.failed()) {
                         log.error("Could not start HTTP server", listenResult.cause());
-                        listenResult.cause().printStackTrace();
+                        startPromise.fail(listenResult.cause());
                     } else {
-                        log.debug("Server started on port " + port);
+                        log.info("Server started on port {}", port);
+                        startPromise.complete();
                     }
                 });
     }
 
+    @Override
+    public void start(Promise<Void> startPromise) {
+        setupWebServer(startPromise);
+    }
 
     @Override
-    public void stop() throws Exception {
-        super.stop();
+    public void stop(Promise<Void> stopPromise) {
         if (vertx != null) {
-            vertx.close(handler -> log.debug("Shut down server."));
+            vertx.close(handler -> {
+                if(handler.succeeded()) {
+                    log.debug("Shut down server.");
+                    stopPromise.complete();
+                } else {
+                    stopPromise.fail(handler.cause());
+                }
+            });
+        } else {
+            stopPromise.complete();
         }
     }
 

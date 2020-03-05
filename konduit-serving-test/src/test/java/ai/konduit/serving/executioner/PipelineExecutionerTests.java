@@ -30,6 +30,7 @@ import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.util.PortUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import junit.framework.TestCase;
@@ -52,7 +53,7 @@ public class PipelineExecutionerTests {
     @Test
     @Ignore
     public void testDoJsonInference() {
-        int port = 1111;
+        int port = PortUtils.getAvailablePort();
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
@@ -166,7 +167,7 @@ public class PipelineExecutionerTests {
     @Test
     public void testInitPipeline() throws Exception {
         ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
-        int port = 1111;
+        int port = PortUtils.getAvailablePort();
         System.out.println("Started on port " + port);
         String path = new ClassPathResource("inference/tensorflow/mnist/lenet_frozen.pb").getFile().getAbsolutePath();
 
@@ -214,7 +215,7 @@ public class PipelineExecutionerTests {
     @Test
     public void testInitPipelineYolo() throws Exception {
         ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
-        int port = 1111;
+        int port = PortUtils.getAvailablePort();
         System.out.println("Started on port " + port);
         String path = new ClassPathResource("inference/tensorflow/mnist/lenet_frozen.pb").getFile().getAbsolutePath();
 
