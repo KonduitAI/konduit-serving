@@ -25,7 +25,6 @@ package ai.konduit.serving.verticles.base;
 import ai.konduit.serving.verticles.Routable;
 import ai.konduit.serving.verticles.VerticleConstants;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Context;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
@@ -52,11 +51,6 @@ public abstract class BaseRoutableVerticle extends AbstractVerticle implements R
 
     public BaseRoutableVerticle() {
         super();
-    }
-
-    @Override
-    public void init(Vertx vertx, Context context) {
-        super.init(vertx, context);
     }
 
     /**
