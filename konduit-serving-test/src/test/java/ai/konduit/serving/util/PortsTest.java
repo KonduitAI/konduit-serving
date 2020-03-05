@@ -128,7 +128,7 @@ public class PortsTest {
 
         konduitServingMain.setOnFailure(throwable -> {
                     if(throwable instanceof BindException &&
-                        throwable.getMessage().equalsIgnoreCase("Address already in use")) {
+                        throwable.getMessage().contains("Address already in use")) {
                         async.countDown();
                     } else {
                         testContext.fail(throwable);
