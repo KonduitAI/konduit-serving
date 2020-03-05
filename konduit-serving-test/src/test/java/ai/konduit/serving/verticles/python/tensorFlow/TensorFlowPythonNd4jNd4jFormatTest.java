@@ -34,7 +34,6 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -45,6 +44,7 @@ import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.serde.binary.BinarySerde;
@@ -129,7 +129,7 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
 
         Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
 
-        INDArray image = ((NDArrayWritable) output[0][0]).get();
+        INDArray image = (((NDArrayWritable) output[0][0]).get()).castTo(DataType.UINT8);
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
@@ -157,7 +157,7 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
         assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 
-   // @Test
+    //@Test
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -179,7 +179,7 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
 
         String imagePath = new ClassPathResource("data/5.png").getFile().getAbsolutePath();
         Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
-        INDArray image = ((NDArrayWritable) output[0][0]).get();
+        INDArray image = (((NDArrayWritable) output[0][0]).get()).castTo(DataType.UINT8);
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
         //Create new file to write binary input data.
@@ -197,11 +197,12 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
                 .extract()
                 .body().asString();
         System.out.println(output);
-        JsonObject jsonObject1 = new JsonObject(response);
-        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
-        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-        double outpuValue = probabilities.getJsonArray(0).getDouble(0);
-        assertEquals(7, outpuValue, 1e-1);
+        File outputImagePath = new File(
+                "src/main/resources/data/test-nd4j-output.zip");
+        FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
+        System.out.println(BinarySerde.readFromDisk(outputImagePath));
+        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
+        assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 
 }
