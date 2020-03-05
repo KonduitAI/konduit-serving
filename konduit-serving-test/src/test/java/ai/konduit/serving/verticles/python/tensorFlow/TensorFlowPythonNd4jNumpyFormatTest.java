@@ -144,14 +144,13 @@ public class TensorFlowPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalT
                 .post("/raw/nd4j").then()
                 .extract()
                 .body().asString();
-        System.out.println(response);
 
         //TODO:assertion yet to implement.
         /*INDArray outputArray=  convertToNd4J(response);
         assertEquals(7, outputArray.getDouble(0), 1e-1);*/
     }
 
-   // @Test
+    @Test
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -190,7 +189,6 @@ public class TensorFlowPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalT
                 .post("/classification/nd4j").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
 
         //TODO:assertion yet to implement.
         /*INDArray outputArray=  convertToNd4J(response);
