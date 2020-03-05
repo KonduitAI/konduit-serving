@@ -44,7 +44,6 @@ import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.serde.binary.BinarySerde;
@@ -129,7 +128,7 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
 
         Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
 
-        INDArray image = (((NDArrayWritable) output[0][0]).get()).castTo(DataType.UINT8);
+        INDArray image = ((NDArrayWritable) output[0][0]).get();
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
@@ -147,7 +146,6 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
                 .post("/raw/nd4j").then()
                 .extract()
                 .body().asString();
-        System.out.println(response);
 
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
@@ -157,7 +155,7 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
         assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 
-    //@Test
+    @Test
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -179,7 +177,7 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
 
         String imagePath = new ClassPathResource("data/5.png").getFile().getAbsolutePath();
         Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
-        INDArray image = (((NDArrayWritable) output[0][0]).get()).castTo(DataType.UINT8);
+        INDArray image = ((NDArrayWritable) output[0][0]).get();
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
         //Create new file to write binary input data.
@@ -196,7 +194,6 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
                 .post("/classification/nd4j").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
