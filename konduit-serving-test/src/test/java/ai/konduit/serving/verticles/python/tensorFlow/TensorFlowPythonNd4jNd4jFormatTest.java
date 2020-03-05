@@ -147,7 +147,6 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
                 .post("/raw/nd4j").then()
                 .extract()
                 .body().asString();
-        System.out.println(response);
 
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
@@ -157,7 +156,7 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
         assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 
-   // @Test
+    @Test
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
