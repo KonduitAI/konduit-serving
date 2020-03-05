@@ -102,7 +102,7 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    //@Test
     public void testInferenceResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -142,7 +142,6 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
                 .extract()
                 .body().asString();
         //TODO:assertion yet to implement.
-        System.out.print(response);
         /*INDArray outputArray=  convertToNd4J(response);
         assertEquals(7, outputArray.getDouble(0), 1e-1);*/
     }
@@ -185,7 +184,6 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
                 .extract()
                 .body().asString();
         //TODO:assertion yet to implement.
-        System.out.print(response);
     /*    INDArray outputArray=  convertToNd4J(response);
         double outpuValue = outputArray.getDouble(0);
         assertEquals(7, outpuValue, 1e-1);*/
