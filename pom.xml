@@ -77,7 +77,7 @@
 
     <properties>
         <spin.version>custom</spin.version>
-        <jna.platform.version>5.3.1</jna.platform.version>
+        <jna.platform.version>5.3.2</jna.platform.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
         <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>

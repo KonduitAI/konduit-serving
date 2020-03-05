@@ -1,12 +1,9 @@
-from konduit import *
 import pytest
-import random
+from konduit import *
 
 
 @pytest.mark.integration
 def test_client_from_server():
-    port = random.randint(1000, 65535)
-    serving_config = ServingConfig(http_port=port)
 
     python_config = PythonConfig(
         python_code="first += 2",
@@ -15,7 +12,7 @@ def test_client_from_server():
     )
 
     step = PythonStep().step(python_config)
-    server = Server(steps=step, serving_config=serving_config)
+    server = Server(steps=step, serving_config=ServingConfig())
     server.start()
 
     try:
