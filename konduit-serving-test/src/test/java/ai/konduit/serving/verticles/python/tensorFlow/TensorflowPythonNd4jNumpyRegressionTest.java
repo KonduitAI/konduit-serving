@@ -38,6 +38,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.python.PythonType;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -58,6 +59,7 @@ import static org.hamcrest.Matchers.not;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
+@Ignore
 public class TensorflowPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVerticalTest {
 
     @Override
@@ -79,10 +81,7 @@ public class TensorflowPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVerti
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
+
         String pythonCodePath = new ClassPathResource("scripts/tensorFlow/TensorflowRegression.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()

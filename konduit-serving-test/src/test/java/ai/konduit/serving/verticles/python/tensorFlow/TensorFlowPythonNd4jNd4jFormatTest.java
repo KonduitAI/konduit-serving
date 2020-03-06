@@ -42,6 +42,7 @@ import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonType;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -156,6 +157,7 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
     }
 
     @Test
+    @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();

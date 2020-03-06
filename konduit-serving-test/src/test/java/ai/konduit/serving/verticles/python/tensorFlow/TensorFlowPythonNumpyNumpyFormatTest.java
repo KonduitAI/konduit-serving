@@ -42,6 +42,7 @@ import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonType;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.buffer.DataType;
@@ -148,7 +149,8 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
         assertEquals(7, outputArray.getDouble(0), 1e-1);*/
     }
 
-   // @Test
+    @Test
+    @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();

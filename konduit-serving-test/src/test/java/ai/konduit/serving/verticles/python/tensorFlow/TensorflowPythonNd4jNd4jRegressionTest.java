@@ -40,6 +40,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -50,17 +51,14 @@ import org.nd4j.serde.binary.BinarySerde;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
+@Ignore
 public class TensorflowPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVerticalTest {
 
     @Override
@@ -82,10 +80,7 @@ public class TensorflowPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVertic
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
+
         String pythonCodePath = new ClassPathResource("scripts/tensorFlow/TensorflowRegression.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
