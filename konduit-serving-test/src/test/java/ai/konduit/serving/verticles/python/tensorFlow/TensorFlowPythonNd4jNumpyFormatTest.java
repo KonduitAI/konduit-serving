@@ -58,7 +58,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-@Ignore
+
 public class TensorFlowPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
@@ -152,6 +152,7 @@ public class TensorFlowPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalT
     }
 
     @Test
+    @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
