@@ -43,6 +43,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -65,6 +66,7 @@ import static org.hamcrest.Matchers.not;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
+@Ignore
 public class ScikitLearnPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVerticalTest {
 
     @Override
