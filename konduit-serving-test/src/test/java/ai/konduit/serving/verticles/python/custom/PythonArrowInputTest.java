@@ -43,7 +43,7 @@ import org.datavec.arrow.ArrowConverter;
 import org.datavec.arrow.recordreader.ArrowRecordWriter;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.datavec.python.PythonType;
-import org.datavec.python.PythonVariables;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.factory.Nd4j;
@@ -64,6 +64,7 @@ import static org.hamcrest.Matchers.isEmptyOrNullString;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
+@Ignore
 public class PythonArrowInputTest extends BaseMultiNumpyVerticalTest {
 
     @Override
