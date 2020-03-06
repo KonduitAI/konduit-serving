@@ -102,7 +102,7 @@ public class PortsTest {
     }
 
     @Test
-    public void testConflictedPort(TestContext testContext) throws IOException {
+    public void testConflictedPort(TestContext testContext) throws Exception {
         Async async = testContext.async(2);
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()

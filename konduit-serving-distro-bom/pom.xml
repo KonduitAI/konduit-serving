@@ -24,6 +24,8 @@
                 </dependency>
             </dependencies>
         </profile>
+
+
         <profile>
             <id>pmml</id>
             <dependencies>
@@ -34,6 +36,19 @@
                 </dependency>
             </dependencies>
         </profile>
+
+        <profile>
+            <id>tensorflow</id>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.konduit.serving</groupId>
+                    <artifactId>konduit-serving-tfjava</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+
         <profile>
             <id>cpu</id>
             <activation>

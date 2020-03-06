@@ -116,6 +116,7 @@ public class BuildScriptGen {
                 "linux-x86_64",
                 "macosx-x86_64",
                 "linux-armhf",
+                "linux-arm64",
                 "windows-x86_64-gpu"
         );
 
