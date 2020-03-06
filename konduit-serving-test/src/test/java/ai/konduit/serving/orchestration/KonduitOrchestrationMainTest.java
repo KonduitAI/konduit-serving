@@ -53,23 +53,24 @@ public class KonduitOrchestrationMainTest {
                 .configPath(tmpFile.getAbsolutePath())
                 .build();
         KonduitOrchestrationMain.builder()
-                .onSuccess(() -> {
-                    try {
-                        Response response = given().port(port)
-                                .get("/nodes")
-                                .then()
-                                .statusCode(200).and()
-                                .contentType("application/json")
-                                .extract().response();
-                        System.out.println(response.body().prettyPrint());
+                .eventHandler(handler -> {
+                    if(handler.succeeded()) {
+                        try {
+                            Response response = given().port(port)
+                                    .get("/nodes")
+                                    .then()
+                                    .statusCode(200).and()
+                                    .contentType("application/json")
+                                    .extract().response();
+                            System.out.println(response.body().prettyPrint());
 
-                        async.complete();
-                    } catch (Exception e) {
-                        testContext.fail("Orchestration main server failed to start." + e);
+                            async.complete();
+                        } catch (Exception e) {
+                            testContext.fail("Orchestration main server failed to start." + e);
+                        }
+                    } else {
+                        testContext.fail("Orchestration main server failed to start.");
                     }
-                })
-                .onFailure(() -> {
-                    testContext.fail("Orchestration main server failed to start.");
                 })
                 .build()
                 .runMain(configurer);

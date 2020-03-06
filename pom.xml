@@ -139,10 +139,16 @@
         <reflections.version>0.9.10</reflections.version>
 
         <oshi.version>3.13.4</oshi.version>
+        <guava.version>20.0</guava.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core</artifactId>
