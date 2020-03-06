@@ -41,6 +41,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -111,6 +112,7 @@ public class KerasPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVerticalTes
     }
 
     @Test(timeout = 60000)
+    @Ignore
     public void testInferenceResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
