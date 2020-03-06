@@ -51,13 +51,13 @@ public class ConfigJsonCoverageTrackingTests {
         Reflections reflections = new Reflections("ai.konduit");
         Set<Class<? extends TextConfig>> subTypes = reflections.getSubTypesOf(TextConfig.class);
 
-        System.out.println("All subtypes:");
+        System.out.println(String.format("All subtypes of %s:", TextConfig.class.getCanonicalName()));
         for(Class<? extends TextConfig> c : subTypes ){
             int mod = c.getModifiers();
             if(Modifier.isAbstract(mod) || Modifier.isInterface(mod))
                 continue;
             allClasses.add(c);
-//            System.out.println(c);
+            System.out.println(c);
         }
     }
 

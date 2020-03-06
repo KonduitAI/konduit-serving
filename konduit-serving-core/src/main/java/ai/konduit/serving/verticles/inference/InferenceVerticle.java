@@ -31,14 +31,13 @@ import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
 import io.vertx.core.Context;
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import lombok.SneakyThrows;
+import io.vertx.core.impl.ContextInternal;
+import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.BindException;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * A {@link io.vertx.core.Verticle} that takes multi part file uploads
@@ -60,18 +59,6 @@ public class InferenceVerticle extends BaseRoutableVerticle {
 
     private InferenceConfiguration inferenceConfiguration;
     private PipelineRouteDefiner pipelineRouteDefiner;
-    private Throwable throwable;
-    private CountDownLatch countDownLatch;
-
-    @Override
-    public void start(Future<Void> startFuture) throws Exception {
-        super.start(startFuture);
-    }
-
-    @Override
-    public void start() throws Exception {
-        super.start();
-    }
 
     @Override
     public void stop() throws Exception {
@@ -83,7 +70,6 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         log.debug("Stopping konduit server.");
     }
 
-    @SneakyThrows
     @Override
     public void init(Vertx vertx, Context context) {
         super.init(vertx, context);
@@ -101,53 +87,50 @@ public class InferenceVerticle extends BaseRoutableVerticle {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
                 pipelineStep.createRunner();
         }
-
-        setupWebServer();
     }
 
-    protected void setupWebServer() throws Throwable {
-        countDownLatch = new CountDownLatch(1);
-
+    @Override
+    protected void setupWebServer(Promise<Void> startPromise) {
         String portEnvValue = System.getenv(VerticleConstants.KONDUIT_SERVING_PORT);
         if (portEnvValue != null) {
             try {
                 port = Integer.parseInt(portEnvValue);
-            } catch (NumberFormatException e) {
-                log.error("Environment variable \"{}={}\" isn't a valid port number.", VerticleConstants.KONDUIT_SERVING_PORT, portEnvValue, e);
-
-                throw e;
+            } catch (NumberFormatException exception) {
+                log.error("Environment variable \"{}={}\" isn't a valid port number.", VerticleConstants.KONDUIT_SERVING_PORT, portEnvValue);
+                startPromise.fail(exception);
+                return;
             }
         } else {
             port = inferenceConfiguration.getServingConfig().getHttpPort();
         }
 
         if (port < 0 || port > 0xFFFF) {
-            throw new Exception(String.format("Valid port range is between 0-65535. The given port was %s", port));
+            startPromise.fail(new Exception(String.format("Valid port range is 0 <= port <= 65535. The given port was %s", port)));
+            return;
         }
 
         List<PipelineStep> steps = inferenceConfiguration.getSteps();
         final int nSteps = steps == null ? 0 : steps.size();
-
-        new Thread(() -> startVertxServer(port, nSteps)).start(); // Starting a new thread here because the CountDownLatch freezes the listen callback for Vertx#createHttpServer
-
-        countDownLatch.await();
-
-        if(throwable != null) throw throwable;
-    }
-
-    private void startVertxServer(int port, int nSteps) {
         vertx.createHttpServer()
-            .requestHandler(router)
-            .exceptionHandler(Throwable::printStackTrace)
-            .listen(port, inferenceConfiguration.getServingConfig().getListenHost(), result -> {
-                if (result.failed()) {
-                    throwable = result.cause();
-                } else {
-                    this.port = result.result().actualPort();
-                    log.info("Server started on port {} with {} pipeline steps", this.port, nSteps);
+                .requestHandler(router)
+                .exceptionHandler(Throwable::printStackTrace)
+                .listen(port, inferenceConfiguration.getServingConfig().getListenHost(), handler -> {
+                    if (handler.failed()) {
+                        log.error("Could not start HTTP server");
+                        startPromise.fail(handler.cause());
+                    } else {
+                        port = handler.result().actualPort();
+                        inferenceConfiguration.getServingConfig().setHttpPort(port);
 
-                }
-                countDownLatch.countDown();
-            });
+                        try {
+                            ((ContextInternal) context).getDeployment().deploymentOptions().setConfig(new JsonObject(inferenceConfiguration.toJson()));
+
+                            log.info("Inference server started on port {} with {} pipeline steps", port, nSteps);
+                            startPromise.complete();
+                        } catch (Exception exception) {
+                            startPromise.fail(exception);
+                        }
+                    }
+                });
     }
 }

@@ -26,9 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.configprovider.KonduitServingNodeConfigurer;
 import com.beust.jcommander.JCommander;
 import io.vertx.config.ConfigRetriever;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
+import io.vertx.core.*;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
@@ -51,12 +49,11 @@ import org.nd4j.base.Preconditions;
 @NoArgsConstructor
 @Builder
 public class KonduitOrchestrationMain {
-    private Runnable onSuccess, onFailure;
-
     public final static String NODE_COMMUNICATION_TOPIC = "NodeCommunication";
     private static Logger log = LoggerFactory.getLogger(KonduitOrchestrationMain.class.getName());
     private EventBus eventBus;
     private KonduitServingNodeConfigurer configurer;
+    private Handler<AsyncResult<Void>> eventHandler;
 
     public static void main(String... args) {
         try {
@@ -94,8 +91,8 @@ public class KonduitOrchestrationMain {
                     vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
                         if (handler.failed()) {
                             log.error("Unable to deploy verticle {}", konduitServingNodeConfigurer.getVerticleClassName(), handler.cause());
-                            if(onFailure != null) {
-                                onFailure.run();
+                            if(eventHandler != null) {
+                                eventHandler.handle(Future.failedFuture(handler.cause()));
                             }
                         } else {
                             configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
@@ -115,14 +112,14 @@ public class KonduitOrchestrationMain {
                                 });
                             } catch (Exception e) {
                                 log.error("Unable to parse json from configuration", e);
-                                if(onFailure != null) {
-                                    onFailure.run();
+                                if(eventHandler != null) {
+                                    eventHandler.handle(Future.failedFuture(handler.cause()));
                                 }
                             }
 
                             log.info("Deployed verticle {}", konduitServingNodeConfigurer.getVerticleClassName());
-                            if(onSuccess != null) {
-                                onSuccess.run();
+                            if(eventHandler != null) {
+                                eventHandler.handle(Future.succeededFuture());
                             }
                         }
                     });
