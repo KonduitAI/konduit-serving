@@ -42,6 +42,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -63,6 +64,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
+@Ignore
 public class ScikitLearnPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
@@ -149,6 +151,7 @@ public class ScikitLearnPythonImageNd4jFormatTest extends BaseMultiNumpyVertical
     }
 
     @Test(timeout = 60000)
+    @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         this.context = context;
