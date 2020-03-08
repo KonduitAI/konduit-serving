@@ -67,7 +67,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class OnnxTest extends BaseVerticleTest {
+public class OnnxMultipleOutputsTest extends BaseVerticleTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -81,8 +81,7 @@ public class OnnxTest extends BaseVerticleTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-
-	String modelPath = new ClassPathResource("/inference/onnx/squeezenet.onnx").getFile().getAbsolutePath();
+	String modelPath = new ClassPathResource("/inference/onnx/facedetector.onnx").getFile().getAbsolutePath();
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.NUMPY)
@@ -99,8 +98,8 @@ public class OnnxTest extends BaseVerticleTest {
 
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)
-                .inputNames(Arrays.asList("data_0"))
-                .outputNames(Arrays.asList("softmaxout_1"))
+                .inputNames(Arrays.asList("input"))
+                .outputNames(Arrays.asList("scores", "boxes"))
                 .build();
 
 
@@ -113,42 +112,85 @@ public class OnnxTest extends BaseVerticleTest {
 	return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    //TODO: more tests, benchmark
+    byte[] toPrimitives(Byte[] oBytes)
+{
+    byte[] bytes = new byte[oBytes.length];
+
+    for(int i = 0; i < oBytes.length; i++) {
+        bytes[i] = oBytes[i];
+    }
+
+    return bytes;
+}
+
     @Test
-    public void runSqueezenet(TestContext testContext) throws Exception {
-
-        //NativeImageLoader nativeImageLoader = new NativeImageLoader(240, 320);
-        //Image image = nativeImageLoader.asImageMatrix(new ClassPathResource("data/1.jpg").getFile());
-
-	long inputTensorSize = 224 * 224 * 3;
-
- 	FloatPointer inputTensorValues = new FloatPointer(inputTensorSize);
-        FloatIndexer idx = FloatIndexer.create(inputTensorValues);
-        for (long i = 0; i < inputTensorSize; i++)
-          idx.put(i, (float)i / (inputTensorSize + 1));
-  
-	DataBuffer buffer = Nd4j.createBuffer(inputTensorValues, DataType.FLOAT, inputTensorSize, idx);
-
-        INDArray contents = Nd4j.create(buffer);
-        //INDArray contents = image.getImage();
-	System.out.println("Original input" + contents.getFloat(0));
+    public void runFaceDetector(TestContext testContext) throws Exception {
+        NativeImageLoader nativeImageLoader = new NativeImageLoader(240, 320);
+        Image image = nativeImageLoader.asImageMatrix(new ClassPathResource("data/1.jpg").getFile());
+       
+        INDArray contents = image.getImage();
 	
 	byte[] npyContents = Nd4j.toNpyByteArray(contents);
-       
-        File inputFile = temporary.newFile();
+
+	File inputFile = temporary.newFile();
         FileUtils.writeByteArrayToFile(inputFile, npyContents);
 
        	Response response = given().port(port)
-                .multiPart("data_0", inputFile)
-		.post("nd4j/numpy")
+                .multiPart("input", inputFile)
+		.body(npyContents)
+                .post("nd4j/numpy")
                 .andReturn();
 
         assertEquals("Response failed", 200, response.getStatusCode());
-        
-        INDArray bodyResult = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        assert Math.abs(bodyResult.getFloat(0) - 0.000045) < 1e-6;	
+    
+	File outputFile = temporary.newFile();
+        FileUtils.writeByteArrayToFile(outputFile, response.asByteArray());
+	java.util.zip.ZipFile zipFile = new java.util.zip.ZipFile(outputFile);
 
-	assertArrayEquals(new long[]{1,1000}, bodyResult.shape());
+    java.util.zip.ZipInputStream zs = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(response.asByteArray()));	
+
+   
+    java.util.zip.ZipEntry entry = zs.getNextEntry();
+	
+    assertEquals(entry.getName(), "scores");    
+    System.out.println(entry.getName());
+
+
+    java.io.InputStream entryStream = zipFile.getInputStream(entry);
+    System.out.println(entryStream);
+    byte[] bytes = com.google.common.io.ByteStreams.toByteArray(entryStream);
+    //java.io.InputStream entryStream = java.util.zip.ZipFile.getInputStream(entry);
+
+    
+    java.util.zip.ZipEntry entry2 = zs.getNextEntry();
+	
+    assertEquals(entry2.getName(), "boxes");    
+    System.out.println(entry2.getName());
+   
+    java.io.InputStream entryStream2 = zipFile.getInputStream(entry2);
+    System.out.println(entryStream2);
+    byte[] bytes2 = com.google.common.io.ByteStreams.toByteArray(entryStream2);
+ 
+//        Byte[][] bytes = response.extract().as(Byte[][].class);
+
+	//Byte[] bytes = (Byte[])response.path("scores");
+
+//    byte[] bytes = response.getBody().asByteArray();
+        INDArray bodyResult = Nd4j.createNpyFromByteArray(bytes);
+
+	System.out.println("1nd out 1st entry" + bodyResult.getFloat(0));
+	assert Math.abs(bodyResult.getFloat(0) - 0.002913665) < 1e-6;	
+	
+	assertArrayEquals(new long[]{1, 17680}, bodyResult.shape());
+
+        INDArray bodyResult2 = Nd4j.createNpyFromByteArray(bytes2);
+
+	System.out.println("2nd out 1st entry" + bodyResult2.getFloat(0));
+	assert Math.abs(bodyResult2.getFloat(0) - 0.9539676) < 1e-6;	
+	
+	assertArrayEquals(new long[]{1, 8840}, bodyResult2.shape());
+
+	//TODO: Fix bug that flips outputs
     }
 
     @After
