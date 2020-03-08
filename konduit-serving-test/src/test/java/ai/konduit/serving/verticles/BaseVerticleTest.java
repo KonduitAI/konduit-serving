@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.verticles;
 
+import ai.konduit.serving.util.PortUtils;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
@@ -37,8 +38,6 @@ import org.nd4j.linalg.api.memory.enums.DebugMode;
 import org.nd4j.linalg.factory.Nd4j;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.io.IOException;
-import java.net.ServerSocket;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -59,8 +58,8 @@ public abstract class BaseVerticleTest {
 
     @Before
     public void before(TestContext context) throws Exception {
-        port = getRandomPort();
-        pubsubPort = getRandomPort();
+        port = PortUtils.getAvailablePort();
+        pubsubPort = PortUtils.getAvailablePort();
         System.setProperty("vertx.options.maxEventLoopExecuteTime", "240000");
         VertxOptions vertxOptions = new VertxOptions();
         vertxOptions.setMaxEventLoopExecuteTime(240000);
@@ -116,13 +115,6 @@ public abstract class BaseVerticleTest {
         return ai.konduit.serving.verticles.inference.InferenceVerticle.class;
     }
 
-    public int getRandomPort() throws IOException {
-        ServerSocket pubSubSocket = new ServerSocket(0);
-        int ret = pubSubSocket.getLocalPort();
-        pubSubSocket.close();
-        return ret;
-    }
-
     public abstract Handler<HttpServerRequest> getRequest();
 
     public abstract JsonObject getConfigObject() throws Exception;
@@ -132,5 +124,4 @@ public abstract class BaseVerticleTest {
     public boolean isPubSub() {
         return false;
     }
-
 }
