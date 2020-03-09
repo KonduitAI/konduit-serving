@@ -28,9 +28,10 @@ import ai.konduit.serving.input.converter.pmml.SkLearnPmmlHandler;
 import ai.konduit.serving.input.converter.pmml.XgboostPmmlHandler;
 import ai.konduit.serving.input.converter.tensorflow.TensorflowSameDiffHandler;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
+import io.vertx.core.Context;
+import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -63,9 +64,9 @@ public class ConverterVerticle extends BaseRoutableVerticle {
     protected String filePath;
     protected String unzipPath;
 
-    @SneakyThrows
     @Override
-    public void start() {
+    public void init(Vertx vertx, Context context) {
+        super.init(vertx, context);
 
         router = Router.router(vertx);
         filePath = config().getString(UPLOAD_KEY) == null ? DEFAULT_UPLOAD_PATH : config().getString(UPLOAD_KEY);
@@ -104,8 +105,5 @@ public class ConverterVerticle extends BaseRoutableVerticle {
                 .failureHandler(failure -> {
                     log.error("Failed to convert ", failure.failure());
                 });
-
-        setupWebServer();
     }
-
 }

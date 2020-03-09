@@ -31,7 +31,6 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import org.datavec.api.records.Record;
 import org.nd4j.linalg.api.buffer.DataType;
 
@@ -46,7 +45,6 @@ public class BatchInputArrowParserVerticle extends BaseRoutableVerticle {
     private String inputName = "input1";
     private Record[] batch;
 
-    @SneakyThrows
     @Override
     public void init(Vertx vertx, Context context) {
         super.init(vertx, context);
@@ -59,7 +57,7 @@ public class BatchInputArrowParserVerticle extends BaseRoutableVerticle {
                 .inputParts(Collections.singletonList(inputName))
                 .converters(Collections.singletonMap(inputName, new ArrowBinaryInputAdapter()))
                 .converterArgs(Collections.singletonMap(inputName, ConverterArgs.builder()
-                        .strings(Collections.singletonList(DataType.LONG.name())).build())).build();
+                        .strings(Collections.singletonList(DataType.INT64.name())).build())).build();
         BatchInputArrowParserVerticle.this.inputParser = batchInputParser;
 
 
@@ -73,8 +71,5 @@ public class BatchInputArrowParserVerticle extends BaseRoutableVerticle {
 
             itemHandler.response().end();
         });
-
-        setupWebServer();
     }
-
 }

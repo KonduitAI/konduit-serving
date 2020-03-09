@@ -85,18 +85,23 @@ public class PortsTest {
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(port -> {
-                    testContext.assertTrue(port > 0 && port <= 0xFFFF);
+                .eventHandler(handler -> {
+                    if(handler.succeeded()) {
+                        int port = handler.result().getServingConfig().getHttpPort();
 
-                    // Health checking
-                    given().port(port)
-                            .get("/healthcheck")
-                            .then()
-                            .statusCode(204);
+                        testContext.assertTrue(port > 0 && port <= 0xFFFF);
 
-                    async.complete();
+                        // Health checking
+                        given().port(port)
+                                .get("/healthcheck")
+                                .then()
+                                .statusCode(204);
+
+                        async.complete();
+                    } else {
+                        testContext.fail(handler.cause());
+                    }
                 })
-                .onFailure(testContext::fail)
                 .build()
                 .runMain(args.toArgs());
     }
@@ -113,26 +118,29 @@ public class PortsTest {
                 .build();
 
         KonduitServingMain konduitServingMain = KonduitServingMain.builder().build();
-        konduitServingMain.setOnSuccess(port -> {
-                    testContext.assertTrue(port > 0 && port <= 0xFFFF);
+        konduitServingMain.setEventHandler(handler -> {
+            if (handler.succeeded()) {
+                int port = handler.result().getServingConfig().getHttpPort();
 
-                    // Health checking
-                    given().port(port)
-                            .get("/healthcheck")
-                            .then()
-                            .statusCode(204);
+                testContext.assertTrue(port > 0 && port <= 0xFFFF);
 
-                    konduitServingMain.runMain(args.toArgs());
+                // Health checking
+                given().port(port)
+                        .get("/healthcheck")
+                        .then()
+                        .statusCode(204);
+
+                konduitServingMain.runMain(args.toArgs());
+                async.countDown();
+            } else {
+                Throwable throwable = handler.cause();
+                if(throwable instanceof BindException &&
+                        throwable.getMessage().contains("Address already in use")) {
                     async.countDown();
-                });
-
-        konduitServingMain.setOnFailure(throwable -> {
-                    if(throwable instanceof BindException &&
-                        throwable.getMessage().equalsIgnoreCase("Address already in use")) {
-                        async.countDown();
-                    } else {
-                        testContext.fail(throwable);
-                    }
+                } else {
+                    testContext.fail(throwable);
+                }
+            }
         });
 
         konduitServingMain.runMain(args.toArgs());
@@ -150,22 +158,27 @@ public class PortsTest {
                 .configStoreType("file").ha(false)
                 .multiThreaded(false)
                 .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(getConfig(testContext, -1))  // this port number will be ignored in this case
+                .configPath(getConfig(testContext, -1))  // this port number will be ignored in this case because the port value will be taken from the environment VerticleConstants#KONDUIT_SERVING_PORT
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(port -> {
-                    testContext.assertEquals(port, selectedPort);
+                .eventHandler(handler -> {
+                    if(handler.succeeded()) {
+                        int port = handler.result().getServingConfig().getHttpPort();
 
-                    // Health checking
-                    given().port(selectedPort)
-                            .get("/healthcheck")
-                            .then()
-                            .statusCode(204);
+                        testContext.assertEquals(port, selectedPort);
 
-                    async.complete();
+                        // Health checking
+                        given().port(selectedPort)
+                                .get("/healthcheck")
+                                .then()
+                                .statusCode(204);
+
+                        async.complete();
+                    } else {
+                        testContext.fail(handler.cause());
+                    }
                 })
-                .onFailure(testContext::fail)
                 .build()
                 .runMain(args.toArgs());
     }
@@ -186,18 +199,23 @@ public class PortsTest {
                     .configStoreType("file").ha(false)
                     .multiThreaded(false)
                     .verticleClassName(InferenceVerticle.class.getName())
-                    .configPath(getConfig(testContext, -1)) // this port number will be ignored in this case
+                    .configPath(getConfig(testContext, -1)) // this port number will be ignored in this case because the port value will be taken from the environment VerticleConstants#KONDUIT_SERVING_PORT
                     .build();
 
             KonduitServingMain.builder()
-                    .onSuccess(port -> testContext.fail(String.format("onSuccess hook was called with port value: %s", invalidPorts[finalI])))
-                    .onFailure(throwable -> {
-                        String throwableMessage = throwable.getMessage();
-                        if(throwableMessage.contains(String.format("Valid port range is between 0-65535. The given port was %s", invalidPorts[finalI])) ||
-                            throwableMessage.contains(String.format("For input string: \"%s\"", invalidPorts[finalI]))) {
-                            asyncs[finalI].complete();
+                    .eventHandler(handler -> {
+                        if(handler.succeeded()) {
+                            testContext.fail(String.format("Success event called with port value: %s", invalidPorts[finalI]));
                         } else {
-                            testContext.fail(throwable);
+                            Throwable throwable = handler.cause();
+
+                            String throwableMessage = throwable.getMessage();
+                            if(throwableMessage.contains(String.format("Valid port range is 0 <= port <= 65535. The given port was %s", invalidPorts[finalI])) ||
+                                    throwableMessage.contains(String.format("For input string: \"%s\"", invalidPorts[finalI]))) {
+                                asyncs[finalI].complete();
+                            } else {
+                                testContext.fail(throwable);
+                            }
                         }
                     })
                     .build()
@@ -221,18 +239,23 @@ public class PortsTest {
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(port -> {
-                    testContext.assertEquals(port, selectedPort);
+                .eventHandler(handler -> {
+                    if(handler.succeeded()) {
+                        int port = handler.result().getServingConfig().getHttpPort();
 
-                    // Health checking
-                    given().port(selectedPort)
-                            .get("/healthcheck")
-                            .then()
-                            .statusCode(204);
+                        testContext.assertEquals(port, selectedPort);
 
-                    async.complete();
+                        // Health checking
+                        given().port(selectedPort)
+                                .get("/healthcheck")
+                                .then()
+                                .statusCode(204);
+
+                        async.complete();
+                    } else {
+                        testContext.fail(handler.cause());
+                    }
                 })
-                .onFailure(testContext::fail)
                 .build()
                 .runMain(args.toArgs());
     }
