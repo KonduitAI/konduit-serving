@@ -71,16 +71,10 @@ import org.datavec.api.transform.schema.Schema;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.io.ClassPathResource;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Handles setting up a router for doing pipeline based inference.
@@ -235,7 +229,7 @@ public class PipelineRouteDefiner {
                 try {
                     ctx.response()
                             .putHeader(HttpHeaders.CONTENT_TYPE, "text/html")
-                            .end(FileUtils.readFileToString(new ClassPathResource("web/logs_page.html").getFile(), Charset.defaultCharset()));
+                            .end(FileUtils.readFileToString(new ClassPathResource("web/logs_page.html").getFile(), StandardCharsets.UTF_8));
                 } catch (Exception e) {
                     ctx.fail(500, e);
                 }
@@ -251,43 +245,19 @@ public class PipelineRouteDefiner {
                     .handler(ctx -> {
                 String numberOfLinesString = ctx.pathParam("numberOfLastLinesToRead");
 
+                ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
                 try {
-                    ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/plain").end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
-                } catch (Exception e) {
-                    if(e instanceof NumberFormatException) {
-                        if("download".equalsIgnoreCase(numberOfLinesString)) {
-                            ctx.response().sendFile(LogUtils.getLogsFile().getAbsolutePath()).end();
-                        } else if("downloadAsZip".equalsIgnoreCase(numberOfLinesString)) {
-                            try {
-                                File zipFile = Paths.get(LogUtils.getLogsDir(), "logs.zip").toFile();
-                                zipFile.createNewFile();
-                                FileOutputStream fos = new FileOutputStream(zipFile);
-                                ZipOutputStream zipOut = new ZipOutputStream(fos);
-
-                                FileInputStream fis = new FileInputStream(LogUtils.getLogsFile());
-                                ZipEntry zipEntry = new ZipEntry("main.log");
-                                zipOut.putNextEntry(zipEntry);
-
-                                byte[] bytes = new byte[1024];
-                                int length;
-                                while((length = fis.read(bytes)) >= 0) {
-                                    zipOut.write(bytes, 0, length);
-                                }
-
-                                fis.close();
-                                zipOut.close();
-                                fos.close();
-
-                                ctx.response().sendFile(zipFile.getAbsolutePath()).end();
-                            } catch (Exception exception) {
-                                ctx.fail(500, exception);
-                            }
-                        } else {
-                            ctx.response().end(LogUtils.getLogs(-1));
-                        }
+                    if (numberOfLinesString.matches("-?\\d+")) {
+                        ctx.response().end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
+                    } else if("download".equalsIgnoreCase(numberOfLinesString)) {
+                        ctx.response().sendFile(LogUtils.getLogsFile().getAbsolutePath()).end();
+                    } else if("downloadAsZip".equalsIgnoreCase(numberOfLinesString)) {
+                        ctx.response().sendFile(LogUtils.getZippedLogs().getAbsolutePath()).end();
                     } else {
-                        ctx.fail(500, e);
+                        ctx.response().end(LogUtils.getLogs(-1));
                     }
+                } catch (Exception e) {
+                    ctx.fail(500, e);
                 }
             });
         }

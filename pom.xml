@@ -139,6 +139,8 @@
         <reflections.version>0.9.10</reflections.version>
 
         <oshi.version>3.13.4</oshi.version>
+
+        <sysout-over-slf4j.version>1.0.2</sysout-over-slf4j.version>
     </properties>
 
     <dependencyManagement>

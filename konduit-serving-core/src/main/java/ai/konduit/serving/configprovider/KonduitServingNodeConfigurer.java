@@ -49,17 +49,12 @@ import org.bytedeco.systems.global.windows;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.UUID;
 
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
 import static java.lang.System.setProperty;
-
-import lombok.*;
-import org.apache.commons.lang3.SystemUtils;
-import org.bytedeco.systems.global.*;
-import org.nd4j.shade.jackson.core.JsonProcessingException;
 
 /**
  * Core node configurer based on both command line and builder arguments.
@@ -218,7 +213,7 @@ public class KonduitServingNodeConfigurer {
             }
 
             log.info("Writing pid file to " + pidFile + " with pid " + pid);
-            FileUtils.writeStringToFile(write, String.valueOf(pid), Charset.defaultCharset());
+            FileUtils.writeStringToFile(write, String.valueOf(pid), StandardCharsets.UTF_8);
             write.deleteOnExit();
         } catch (Exception e) {
             log.warn("Unable to write pid file.", e);
@@ -290,8 +285,8 @@ public class KonduitServingNodeConfigurer {
             File tmpFile = new File(configPath);
             try {
                 inferenceConfiguration = InferenceConfiguration.fromJson(
-                        FileUtils.readFileToString(tmpFile,
-                                Charset.defaultCharset()));
+                        FileUtils.readFileToString(tmpFile, StandardCharsets.UTF_8)
+                );
             } catch (IOException e) {
                 log.error("Unable to read inference configuration with path " + configPath, e);
                 return;
@@ -307,11 +302,10 @@ public class KonduitServingNodeConfigurer {
 
                 try {
                     inferenceConfiguration = InferenceConfiguration.fromYaml(
-                            FileUtils.readFileToString(tmpFile,
-                                    Charset.defaultCharset()));
+                            FileUtils.readFileToString(tmpFile, StandardCharsets.UTF_8)
+                    );
                     FileUtils.writeStringToFile(tmpConfigJson,
-                            inferenceConfiguration.toJson()
-                            , Charset.defaultCharset());
+                            inferenceConfiguration.toJson(), StandardCharsets.UTF_8);
                     configPath = tmpConfigJson.getAbsolutePath();
                     log.info("Rewrote input config yaml to path " + tmpConfigJson.getAbsolutePath());
 

@@ -22,14 +22,18 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.archivers.ArchiveOutputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.nd4j.shade.guava.base.Strings;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,17 +62,17 @@ public class LogUtils {
      * @param numOfLastLinesToRead the number of last lines to read
      * @return read lines
      */
-    public static String readLastLines(File file, int numOfLastLinesToRead) {
+    public static String readLastLines(File file, int numOfLastLinesToRead) throws IOException {
         List<String> result = new ArrayList<>();
 
-        try (ReversedLinesFileReader reader = new ReversedLinesFileReader(file, Charset.defaultCharset())) {
+        try (ReversedLinesFileReader reader = new ReversedLinesFileReader(file, StandardCharsets.UTF_8)) {
             String line;
             while ((line = reader.readLine()) != null && result.size() < numOfLastLinesToRead) {
                 result.add(line);
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            return "";
+            log.error("Error while reading log file", e);
+            throw e;
         }
 
         Collections.reverse(result);
@@ -82,7 +86,6 @@ public class LogUtils {
     public static void setFileAppenderIfNeeded() {
         File previousLogsFile = getLogsFile();
 
-        String konduitServingLogDirFromEnv = System.getenv("KONDUIT_SERVING_LOG_DIR");
         File newLogsFile = Paths.get(getLogsDir(), "main.log").toFile();
 
         if(!newLogsFile.equals(previousLogsFile)) {
@@ -118,7 +121,7 @@ public class LogUtils {
      *                             return all the log file data.
      * @return current jvm process logs for konduit-serving.
      */
-    public static String getLogs(int numOfLastLinesToRead) {
+    public static String getLogs(int numOfLastLinesToRead) throws IOException {
         File logsFile = getLogsFile();
 
         if(logsFile == null || !logsFile.exists()) return "";
@@ -127,10 +130,10 @@ public class LogUtils {
             return readLastLines(logsFile, numOfLastLinesToRead);
         } else {
             try {
-                return FileUtils.readFileToString(logsFile, Charset.defaultCharset());
+                return FileUtils.readFileToString(logsFile, StandardCharsets.UTF_8);
             } catch (IOException e) {
-                log.error("Error reading file: ", e);
-                return "";
+                log.error("Error reading logs file: ", e);
+                throw e;
             }
         }
     }
@@ -142,5 +145,30 @@ public class LogUtils {
     public static String getLogsDir() {
         String konduitServingLogDirFromEnv = System.getenv("KONDUIT_SERVING_LOG_DIR");
         return Strings.isNullOrEmpty(konduitServingLogDirFromEnv) ? System.getProperty("user.dir") : konduitServingLogDirFromEnv;
+    }
+
+    public static File getZippedLogs() throws IOException, ArchiveException {
+        File zippedFile = Paths.get(LogUtils.getLogsDir(), "logs.zip").toFile();
+
+        try (BufferedOutputStream archiveStream = new BufferedOutputStream(new FileOutputStream(zippedFile))) {
+            try (ArchiveOutputStream archive = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream)) {
+                File logsFile = getLogsFile();
+
+                if(logsFile != null) {
+                    ZipArchiveEntry entry = new ZipArchiveEntry(logsFile.getName());
+                    archive.putArchiveEntry(entry);
+
+                    try (BufferedInputStream input = new BufferedInputStream(new FileInputStream(logsFile))) {
+                        IOUtils.copy(input, archive);
+                        archive.closeArchiveEntry();
+                        archive.finish();
+                    }
+                } else {
+                    throw new FileNotFoundException("No logs file found!");
+                }
+            }
+        }
+
+        return zippedFile;
     }
 }

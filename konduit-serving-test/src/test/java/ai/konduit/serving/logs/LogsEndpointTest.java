@@ -39,7 +39,7 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
 import static com.jayway.restassured.RestAssured.given;
@@ -67,11 +67,11 @@ public class LogsEndpointTest {
         testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
 
         JsonObject config = TestUtils.getConfig(folder);
-        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
+        FileUtils.write(jsonConfigPath, config.encodePrettily(), StandardCharsets.UTF_8);
     }
 
     @Test
-    public void testLogs(TestContext testContext) throws InterruptedException {
+    public void testLogs(TestContext testContext) {
         mAsync = testContext.async();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
@@ -154,8 +154,6 @@ public class LogsEndpointTest {
                             .and()
                             .assertThat()
                             .body(Matchers.not(Matchers.isEmptyOrNullString()));
-
-                    int responseLines = response.body().print().split(System.lineSeparator()).length;
 
                     int timesPrinted = 10;
 
