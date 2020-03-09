@@ -48,10 +48,9 @@ import java.io.File;
 import java.util.List;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.junit.Assert.*;
 
-@RunWith(VertxUnitRunner.class)
 @NotThreadSafe
+@RunWith(VertxUnitRunner.class)
 public class BatchInputParserMultiRecordTest extends BaseVerticleTest {
 
     @Override
@@ -91,9 +90,10 @@ public class BatchInputParserMultiRecordTest extends BaseVerticleTest {
                 .multiPart("input1", tmpFile)
                 .when().post("/")
                 .then().statusCode(200);
-        assertNotNull("Inputs were null. This means parsing failed.", verticleRef.getBatch());
-        assertTrue(verticleRef.getBatch().length >= 1);
-        assertNotNull(verticleRef.getBatch());
-        assertEquals(150, verticleRef.getBatch().length);
+
+        testContext.assertNotNull(verticleRef.getBatch(), "Inputs were null. This means parsing failed.");
+        testContext.assertTrue(verticleRef.getBatch().length >= 1);
+        testContext.assertNotNull(verticleRef.getBatch());
+        testContext.assertEquals(150, verticleRef.getBatch().length);
     }
 }

@@ -75,7 +75,7 @@ public class KonduitServingMainTest {
     }
 
     @Test
-    public void testOnSuccessHook(TestContext testContext) {
+    public void testSuccess(TestContext testContext) {
         Async async = testContext.async();
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
@@ -85,14 +85,19 @@ public class KonduitServingMainTest {
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(port -> async.complete())
-                .onFailure(throwable -> testContext.fail("onFailure called instead of onSuccess hook"))
+                .eventHandler(handler -> {
+                    if (handler.succeeded()) {
+                        async.complete();
+                    } else {
+                        testContext.fail("Failure event called instead of a success event");
+                    }
+                })
                 .build()
                 .runMain(args.toArgs());
     }
 
     @Test
-    public void testOnFailureHook(TestContext testContext) {
+    public void testFailure(TestContext testContext) {
         Async async = testContext.async();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
@@ -103,8 +108,14 @@ public class KonduitServingMainTest {
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(port -> testContext.fail("onSuccess called instead of onFailure hook"))
-                .onFailure(throwable -> async.complete())
+                .eventHandler(handler -> {
+                    if(handler.succeeded()) {
+                        testContext.fail("Success event called instead of a failure event");
+                    } else {
+                        testContext.assertTrue(handler.cause() instanceof ClassCastException);
+                        async.complete();
+                    }
+                })
                 .build()
                 .runMain(args.toArgs());
     }
