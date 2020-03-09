@@ -91,22 +91,25 @@ public class LogsEndpointTest {
         mBaseLogDir = System.getProperty("user.dir");
 
         KonduitServingMain konduitServingMain = KonduitServingMain.builder()
-                .onSuccess(port -> {
-                    testContext.assertTrue(Paths.get(mBaseLogDir, "main.log").toFile().exists());
+                .eventHandler(handler -> {
+                    if(handler.succeeded()) {
+                        testContext.assertTrue(Paths.get(mBaseLogDir, "main.log").toFile().exists());
 
-                    given().port(port)
-                            .get(String.format("/logs/%s", numberOfLinesToReadFromLogs))
-                            .then()
-                            .assertThat()
-                            .statusCode(200)
-                            .and()
-                            .assertThat()
-                            .body(Matchers.not(Matchers.isEmptyOrNullString()),
-                                    new TestUtils.LinesCalculatingMatcher(numberOfLinesToReadFromLogs)); // This would mean that the log file has been found and it was read successfully
+                        given().port(handler.result().getServingConfig().getHttpPort())
+                                .get(String.format("/logs/%s", numberOfLinesToReadFromLogs))
+                                .then()
+                                .assertThat()
+                                .statusCode(200)
+                                .and()
+                                .assertThat()
+                                .body(Matchers.not(Matchers.isEmptyOrNullString()),
+                                        new TestUtils.LinesCalculatingMatcher(numberOfLinesToReadFromLogs)); // This would mean that the log file has been found and it was read successfully
 
-                    mAsync.complete();
+                        mAsync.complete();
+                    } else {
+                        testContext.fail(handler.cause());
+                    }
                 })
-                .onFailure(testContext::fail)
                 .build();
 
 
@@ -142,37 +145,40 @@ public class LogsEndpointTest {
         } catch (IOException ignore) {}
 
         KonduitServingMain.builder()
-                .onSuccess(port -> {
-                    testContext.assertTrue(Paths.get(System.getProperty("user.dir"), "main.log").toFile().exists());
+                .eventHandler(handler -> {
+                    if(handler.succeeded()) {
+                        testContext.assertTrue(Paths.get(System.getProperty("user.dir"), "main.log").toFile().exists());
 
-                    RequestSpecification requestSpecification = given().port(port);
+                        RequestSpecification requestSpecification = given().port(handler.result().getServingConfig().getHttpPort());
 
-                    Response response = requestSpecification.get("/logs/all");
+                        Response response = requestSpecification.get("/logs/all");
 
-                    response.then().assertThat()
-                            .statusCode(200)
-                            .and()
-                            .assertThat()
-                            .body(Matchers.not(Matchers.isEmptyOrNullString()));
+                        response.then().assertThat()
+                                .statusCode(200)
+                                .and()
+                                .assertThat()
+                                .body(Matchers.not(Matchers.isEmptyOrNullString()));
 
-                    int timesPrinted = 10;
+                        int timesPrinted = 10;
 
-                    for (int i = 0; i < timesPrinted; i++) {
-                        System.out.println("Stdout check: " + i);
-                        System.err.println("Stderr check: " + i);
+                        for (int i = 0; i < timesPrinted; i++) {
+                            System.out.println("Stdout check: " + i);
+                            System.err.println("Stderr check: " + i);
+                        }
+
+                        Response responseWithStdOutAndStdErr = requestSpecification.get("/logs/all");
+                        responseWithStdOutAndStdErr.then().assertThat()
+                                .statusCode(200)
+                                .and()
+                                .body(Matchers.not(Matchers.isEmptyOrNullString()),
+                                        new TestUtils.ContainsNumberOfInstancesMatcher(timesPrinted, "Stdout check"),
+                                        new TestUtils.ContainsNumberOfInstancesMatcher(timesPrinted, "Stderr check"));
+
+                        async.complete();
+                    } else {
+                        testContext.fail(handler.cause());
                     }
-
-                    Response responseWithStdOutAndStdErr = requestSpecification.get("/logs/all");
-                    responseWithStdOutAndStdErr.then().assertThat()
-                            .statusCode(200)
-                            .and()
-                            .body(Matchers.not(Matchers.isEmptyOrNullString()),
-                                    new TestUtils.ContainsNumberOfInstancesMatcher(timesPrinted, "Stdout check"),
-                                    new TestUtils.ContainsNumberOfInstancesMatcher(timesPrinted, "Stderr check"));
-
-                    async.complete();
                 })
-                .onFailure(testContext::fail)
                 .build()
                 .runMain(args.toArgs());
     }
