@@ -182,7 +182,7 @@ public class KonduitServingNodeConfigurer {
     private ConfigRetrieverOptions configRetrieverOptions;
     private VertxOptions vertxOptions;
     private InferenceConfiguration inferenceConfiguration;
-
+    private boolean createPidFile = true;
     /**
      * Initializes the {@link VertxOptions} for deployment and use in a
      * {@link Vertx} instance.
@@ -202,21 +202,23 @@ public class KonduitServingNodeConfigurer {
                     "write or read. Please specify a proper vertx working directory");
         }
 
-        try {
-            long pid = getPid();
-            File write = new File(pidFile);
-            if (!write.getParentFile().exists()) {
-                log.info("Creating parent directory for pid file");
-                if (!write.getParentFile().mkdirs()) {
-                    log.warn("Unable to create pid file directory.");
+        if(createPidFile) {
+            try {
+                long pid = getPid();
+                File write = new File(pidFile);
+                if (!write.getParentFile().exists()) {
+                    log.info("Creating parent directory for pid file");
+                    if (!write.getParentFile().mkdirs()) {
+                        log.warn("Unable to create pid file directory.");
+                    }
                 }
-            }
 
-            log.info("Writing pid file to " + pidFile + " with pid " + pid);
-            FileUtils.writeStringToFile(write, String.valueOf(pid), StandardCharsets.UTF_8);
-            write.deleteOnExit();
-        } catch (Exception e) {
-            log.warn("Unable to write pid file.", e);
+                log.info("Writing pid file to " + pidFile + " with pid " + pid);
+                FileUtils.writeStringToFile(write, String.valueOf(pid), StandardCharsets.UTF_8);
+                write.deleteOnExit();
+            } catch (Exception e) {
+                log.warn("Unable to write pid file.", e);
+            }
         }
 
         setProperty("vertx.cwd", vertxWorkingDirectory);

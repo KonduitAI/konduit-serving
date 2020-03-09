@@ -131,7 +131,13 @@ public class KonduitServingMain {
 
     private void deployVerticle(KonduitServingNodeConfigurer konduitServingNodeConfigurer, Vertx vertx) {
         if(konduitServingNodeConfigurer.getInferenceConfiguration().getServingConfig().isCreateLoggingEndpoints()) {
-            LogUtils.setFileAppenderIfNeeded();
+            try {
+                LogUtils.setFileAppenderIfNeeded();
+            } catch (Exception e) {
+                log.error(e);
+                eventHandler.handle(Future.failedFuture(e));
+                return;
+            }
         }
 
         vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {

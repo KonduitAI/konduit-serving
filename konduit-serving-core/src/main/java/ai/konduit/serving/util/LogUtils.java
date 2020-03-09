@@ -22,7 +22,6 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -83,7 +82,7 @@ public class LogUtils {
      * Sets the file appender with the name of "FILE" if needed. If it's already been setup,
      * it would be ignored.
      */
-    public static void setFileAppenderIfNeeded() {
+    public static void setFileAppenderIfNeeded() throws Exception {
         File previousLogsFile = getLogsFile();
 
         File newLogsFile = Paths.get(getLogsDir(), "main.log").toFile();
@@ -139,15 +138,31 @@ public class LogUtils {
     }
 
     /**
-     * Returns the directory where all are log files are
+     * Returns the directory where all log files are
      * @return log files directory
      */
-    public static String getLogsDir() {
+    public static String getLogsDir() throws Exception {
         String konduitServingLogDirFromEnv = System.getenv("KONDUIT_SERVING_LOG_DIR");
-        return Strings.isNullOrEmpty(konduitServingLogDirFromEnv) ? System.getProperty("user.dir") : konduitServingLogDirFromEnv;
+        String selectedDirectory;
+        if(!Strings.isNullOrEmpty(konduitServingLogDirFromEnv)) {
+            File directory = new File(konduitServingLogDirFromEnv);
+            if(!(directory.exists() && directory.isDirectory())) {
+                throw new Exception(String.format("The path specified by the environment variable KONDUIT_SERVING_LOG_DIR=%s doesn't exist or is an invalid directory.", konduitServingLogDirFromEnv));
+            } else {
+                selectedDirectory = konduitServingLogDirFromEnv;
+            }
+        } else {
+            selectedDirectory = System.getProperty("user.dir");
+            File directory = new File(selectedDirectory);
+            if(!(directory.exists() && directory.isDirectory())) {
+                throw new Exception(String.format("The path specified by the system property user.dir=%s doesn't exist or is an invalid directory.", selectedDirectory));
+            }
+        }
+
+        return selectedDirectory;
     }
 
-    public static File getZippedLogs() throws IOException, ArchiveException {
+    public static File getZippedLogs() throws Exception {
         File zippedFile = Paths.get(LogUtils.getLogsDir(), "logs.zip").toFile();
 
         try (BufferedOutputStream archiveStream = new BufferedOutputStream(new FileOutputStream(zippedFile))) {
