@@ -22,12 +22,11 @@
 
 package ai.konduit.serving.configprovider;
 
-import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
-import ai.konduit.serving.verticles.inference.InferenceVerticle;
+import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.util.ObjectMappers;
 import com.beust.jcommander.JCommander;
 import io.vertx.config.ConfigRetriever;
-import io.vertx.core.Verticle;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -56,8 +55,7 @@ import static java.lang.System.setProperty;
 public class KonduitServingMain {
 
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
-    private KonduitServingMainOnSuccessRunnable onSuccess;
-    private KonduitServingMainOnFailureRunnable onFailure;
+    private Handler<AsyncResult<InferenceConfiguration>> eventHandler;
 
     static {
         setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
@@ -110,17 +108,17 @@ public class KonduitServingMain {
             final ConfigRetriever configRetriever = konduitServingNodeConfigurer.getConfigRetrieverOptions() != null ?
                     ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getConfigRetrieverOptions()) :
                     ConfigRetriever.create(vertx);
-            configRetriever.getConfig(result -> {
-                if (result.failed()) {
-                    log.error("Unable to retrieve configuration " + result.cause());
+            configRetriever.getConfig(handler -> {
+                if (handler.failed()) {
+                    log.error("Unable to retrieve configuration " + handler.cause());
 
-                    if (onFailure != null) {
-                        onFailure.run(result.cause());
+                    if (eventHandler != null) {
+                        eventHandler.handle(Future.failedFuture(handler.cause()));
                     }
                 } else {
                     configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
 
-                    JsonObject json = result.result();
+                    JsonObject json = handler.result();
                     konduitServingNodeConfigurer.configureWithJson(json);
                     deployVerticle(konduitServingNodeConfigurer, vertx);
                 }
@@ -133,35 +131,26 @@ public class KonduitServingMain {
             if (handler.failed()) {
                 log.error(String.format("Unable to deploy verticle %s", konduitServingNodeConfigurer.getVerticleClassName()), handler.cause());
 
-                if (onFailure != null) {
-                    onFailure.run(handler.cause());
+                if (eventHandler != null) {
+                    eventHandler.handle(Future.failedFuture(handler.cause()));
                 }
 
                 vertx.close();
             } else {
                 log.info(String.format("Deployed verticle %s", konduitServingNodeConfigurer.getVerticleClassName()));
-                if (onSuccess != null) {
+                if (eventHandler != null) {
                     VertxImpl vertxImpl = (VertxImpl) vertx;
-                    Verticle verticle = vertxImpl.getDeployment(handler.result())
-                            .getVerticles().iterator().next();
+                    DeploymentOptions deploymentOptions = vertxImpl.getDeployment(handler.result()).deploymentOptions();
 
-                    if(verticle instanceof BaseRoutableVerticle) {
-                        onSuccess.run(((InferenceVerticle) verticle).getPort());
-                    } else {
-                        onSuccess.run(-1);
+                    try {
+                        InferenceConfiguration inferenceConfiguration = ObjectMappers.fromJson(deploymentOptions.getConfig().encode(), InferenceConfiguration.class);
+                        eventHandler.handle(Future.succeededFuture(inferenceConfiguration));
+                    } catch (Exception exception){
+                        log.error("Unable to parse config json into an InferenceConfiguration object", exception);
+                        eventHandler.handle(Future.succeededFuture());
                     }
                 }
             }
         });
-    }
-
-    @FunctionalInterface
-    public interface KonduitServingMainOnSuccessRunnable {
-        void run(int verticleSelectedPort);
-    }
-
-    @FunctionalInterface
-    public interface KonduitServingMainOnFailureRunnable {
-        void run(Throwable cause);
     }
 }

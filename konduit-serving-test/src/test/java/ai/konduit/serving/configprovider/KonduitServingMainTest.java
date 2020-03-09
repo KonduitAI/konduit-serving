@@ -30,6 +30,7 @@ import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.train.TrainUtils;
+import ai.konduit.serving.util.PortUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.json.JsonObject;
@@ -53,8 +54,6 @@ import org.nd4j.linalg.primitives.Pair;
 import java.io.File;
 import java.nio.charset.Charset;
 
-import ai.konduit.serving.util.PortUtils;
-
 @RunWith(VertxUnitRunner.class)
 public class KonduitServingMainTest {
 
@@ -76,7 +75,7 @@ public class KonduitServingMainTest {
     }
 
     @Test
-    public void testOnSuccessHook(TestContext testContext) {
+    public void testSuccess(TestContext testContext) {
         Async async = testContext.async();
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
@@ -86,14 +85,19 @@ public class KonduitServingMainTest {
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(port -> async.complete())
-                .onFailure(throwable -> testContext.fail("onFailure called instead of onSuccess hook"))
+                .eventHandler(handler -> {
+                    if (handler.succeeded()) {
+                        async.complete();
+                    } else {
+                        testContext.fail("Failure event called instead of a success event");
+                    }
+                })
                 .build()
                 .runMain(args.toArgs());
     }
 
     @Test
-    public void testOnFailureHook(TestContext testContext) {
+    public void testFailure(TestContext testContext) {
         Async async = testContext.async();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
@@ -104,8 +108,14 @@ public class KonduitServingMainTest {
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(port -> testContext.fail("onSuccess called instead of onFailure hook"))
-                .onFailure(throwable -> async.complete())
+                .eventHandler(handler -> {
+                    if(handler.succeeded()) {
+                        testContext.fail("Success event called instead of a failure event");
+                    } else {
+                        testContext.assertTrue(handler.cause() instanceof ClassCastException);
+                        async.complete();
+                    }
+                })
                 .build()
                 .runMain(args.toArgs());
     }
