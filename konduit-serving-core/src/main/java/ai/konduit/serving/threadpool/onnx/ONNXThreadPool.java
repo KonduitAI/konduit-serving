@@ -45,7 +45,7 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Observer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -405,14 +405,13 @@ public class ONNXThreadPool {
 			        Collection<INDArray> inputArrays = inBatch.values();	    
 			        INDArray inputArray = Nd4j.concat(0, inputArrays.toArray(new INDArray[inputArrays.size()]));
 
-//			        System.out.println("First input: " + inputArray.getFloat(0));
 			        Value[] inputTensors = new Value[num_input_nodes.intValue()];
 
                                 for (int i = 0; i < num_input_nodes; i++) {
 		                  BytePointer input_name = input_node_names.get(BytePointer.class, i);
 
 				  Value inputTensor = getTensor(inBatch.get(input_name.getString()), inputTypes[i], inputSizes[i], input_node_dims[i]);
-//				  System.out.println("Input element count: " + inputTensor.GetTensorTypeAndShapeInfo().GetElementCount());
+
 				  inputTensors[i] = inputTensor;
 
 				}
@@ -420,13 +419,13 @@ public class ONNXThreadPool {
 				PointerPointer inputTensorsPP = new PointerPointer(inputTensors);
 				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputTensors[0], num_input_nodes, output_node_names, num_output_nodes);
 
-				Map<String, INDArray> output = new HashMap<String, INDArray>();
+				Map<String, INDArray> output = new LinkedHashMap<String, INDArray>();
 
                                 for (int i = 0; i < num_output_nodes; i++) {
 					Value outValue = outputVector.get(i);
 					DataBuffer buffer = getDataBuffer(outValue);
 					INDArray outArray = Nd4j.create(buffer);
-//					System.out.println("Output element count " + outValue.GetTensorTypeAndShapeInfo().GetElementCount());
+
 					output.put((output_node_names.get(BytePointer.class, i)).getString(), outArray);
 				}
                                 out.add((Map<String, INDArray>) output);

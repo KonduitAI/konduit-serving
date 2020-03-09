@@ -153,44 +153,26 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
     java.util.zip.ZipEntry entry = zs.getNextEntry();
 	
     assertEquals(entry.getName(), "scores");    
-    System.out.println(entry.getName());
-
 
     java.io.InputStream entryStream = zipFile.getInputStream(entry);
-    System.out.println(entryStream);
-    byte[] bytes = com.google.common.io.ByteStreams.toByteArray(entryStream);
-    //java.io.InputStream entryStream = java.util.zip.ZipFile.getInputStream(entry);
 
+    byte[] bytes = com.google.common.io.ByteStreams.toByteArray(entryStream);
     
     java.util.zip.ZipEntry entry2 = zs.getNextEntry();
 	
     assertEquals(entry2.getName(), "boxes");    
-    System.out.println(entry2.getName());
    
     java.io.InputStream entryStream2 = zipFile.getInputStream(entry2);
     System.out.println(entryStream2);
     byte[] bytes2 = com.google.common.io.ByteStreams.toByteArray(entryStream2);
- 
-//        Byte[][] bytes = response.extract().as(Byte[][].class);
 
-	//Byte[] bytes = (Byte[])response.path("scores");
+    INDArray bodyResult = Nd4j.createNpyFromByteArray(bytes);
+    assert Math.abs(bodyResult.getFloat(0) - 0.9539676) < 1e-6;
+    assertArrayEquals(new long[]{1, 8840}, bodyResult.shape());
 
-//    byte[] bytes = response.getBody().asByteArray();
-        INDArray bodyResult = Nd4j.createNpyFromByteArray(bytes);
-
-	System.out.println("1nd out 1st entry" + bodyResult.getFloat(0));
-	assert Math.abs(bodyResult.getFloat(0) - 0.002913665) < 1e-6;	
-	
-	assertArrayEquals(new long[]{1, 17680}, bodyResult.shape());
-
-        INDArray bodyResult2 = Nd4j.createNpyFromByteArray(bytes2);
-
-	System.out.println("2nd out 1st entry" + bodyResult2.getFloat(0));
-	assert Math.abs(bodyResult2.getFloat(0) - 0.9539676) < 1e-6;	
-	
-	assertArrayEquals(new long[]{1, 8840}, bodyResult2.shape());
-
-	//TODO: Fix bug that flips outputs
+    INDArray bodyResult2 = Nd4j.createNpyFromByteArray(bytes2);
+    assert Math.abs(bodyResult2.getFloat(0) - 0.002913665) < 1e-6;
+    assertArrayEquals(new long[]{1, 17680}, bodyResult2.shape());
     }
 
     @After
