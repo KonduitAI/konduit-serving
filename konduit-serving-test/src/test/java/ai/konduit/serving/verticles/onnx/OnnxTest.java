@@ -113,7 +113,7 @@ public class OnnxTest extends BaseVerticleTest {
 	return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    //TODO: more tests, benchmark
+    //TODO: benchmark
     @Test
     public void runSqueezenet(TestContext testContext) throws Exception {
 

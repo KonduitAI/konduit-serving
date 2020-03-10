@@ -415,7 +415,7 @@ public class ONNXThreadPool {
 				  inputTensors[i] = inputTensor;
 
 				}
-				//TODO: Pass ValueVector here when possible, test w/ multiple inputs, also outputs
+				//TODO: Pass ValueVector here when possible, test w/ multiple inputs
 				PointerPointer inputTensorsPP = new PointerPointer(inputTensors);
 				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputTensors[0], num_input_nodes, output_node_names, num_output_nodes);
 
