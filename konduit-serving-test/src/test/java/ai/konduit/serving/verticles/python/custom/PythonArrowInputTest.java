@@ -24,6 +24,7 @@ package ai.konduit.serving.verticles.python.custom;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -52,13 +53,9 @@ import org.nd4j.linalg.primitives.Pair;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 
@@ -86,15 +83,10 @@ public class PythonArrowInputTest extends BaseMultiNumpyVerticalTest {
     @Override
     public JsonObject getConfigObject() throws Exception {
 
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
-
         String pythonCodePath = new ClassPathResource("scripts/custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(pythonPath)
+                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("inputVar", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("output", PythonType.TypeName.NDARRAY.name())
                 .build();

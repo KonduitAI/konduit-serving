@@ -23,6 +23,7 @@ package ai.konduit.serving.verticles.python.custom;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -87,16 +88,12 @@ public class PythonNDArrayMultiVariableTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
 
         String pythonCodePath = new ClassPathResource("scripts/custom/add_array_test.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(pythonPath)
+                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("array1", PythonType.TypeName.NDARRAY.name())
                 .pythonInput("array2", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("add_array", PythonType.TypeName.NDARRAY.name())
