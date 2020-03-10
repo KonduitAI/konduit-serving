@@ -54,21 +54,22 @@ Let's have a look at it first:
 ```yaml
 serving:
   http_port: 1337
-  output_data_format: NUMPY
-  log_timings: True
-  extra_start_args: -Xmx8g
-  jar_path: konduit.jar
 steps:
-  python_step:
-    type: PYTHON
-    python_path: .
-    python_code_path: ./simple.py
-    python_inputs:
-      first: NDARRAY
-    python_outputs:
-      second: NDARRAY
-client:
-    port: 1337
+  tensorflow_step:
+    type: TENSORFLOW
+    model_loading_path: bert_mrpc_frozen.pb
+    input_names:
+      - IteratorGetNext:0
+      - IteratorGetNext:1
+      - IteratorGetNext:4
+    output_names:
+      - loss/Softmax
+    parallel_inference_config:
+      workers: 1
+    input_data_types:
+      IteratorGetNext:0: INT32
+      IteratorGetNext:1: INT32
+      IteratorGetNext:4: INT32
 ```
 
 This Konduit experiment describes how your model will be run, what inputs it takes and
@@ -77,18 +78,17 @@ what types of output it will generate. In essence, this configuration will run t
 just run:
 
 ```shell script
-konduit serve --config yaml/konduit.yaml
+konduit serve --config yaml/konduit_tensorflow.yaml
 ```
 
 and to get predictions from it you can use:
 
 ```shell script
-konduit predict-numpy --config yaml/konduit.yaml --numpy_data ../data/input-0.npy 
-
+konduit predict-numpy --port 1337 --numpy_data ../data/input-0.npy,../data/input-1.npy,../data/input-4.npy --input_names IteratorGetNext:0,IteratorGetNext:1,IteratorGetNext:4
 ```
 
-Finally, to shut down the Konduit server again after you're donw with it, simply use
+Finally, to shut down the Konduit server again after you're done with it, simply use
 
 ```shell script
-konduit stop-server --config yaml/konduit.yaml
+konduit stop-server --pid 117468
 ``` 

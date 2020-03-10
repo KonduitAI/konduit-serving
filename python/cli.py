@@ -60,7 +60,7 @@ def build_jar(operating_sys, spin):
                 operating_sys,
                 "--source",
                 KONDUIT_DIR,
-                "--spin", 
+                "--spin",
                 spin
             ]
         )
@@ -73,8 +73,8 @@ def build_jar(operating_sys, spin):
     "--os",
     required=True,
     help="Your operating system. Choose from  `windows-x86_64`,"
-    "`linux-x86_64`,`linux-x86_64-gpu`,"
-    + "`macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`",
+         "`linux-x86_64`,`linux-x86_64-gpu`,"
+         + "`macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`",
 )
 @click.option(
     "--https",
@@ -85,9 +85,9 @@ def build_jar(operating_sys, spin):
     "--spin",
     default="all",
     show_default=True,
-    help="Whether to bundle Python ('python'), PMML ('pmml'), both ('all') " + 
-		 "or neither ('minimal'). Python bundling is not encouraged with ARM, " + 
-		 "and PMML bundling is not encouraged if agpl license is an issue.",
+    help="Whether to bundle Python ('python'), PMML ('pmml'), both ('all') " +
+         "or neither ('minimal'). Python bundling is not encouraged with ARM, " +
+         "and PMML bundling is not encouraged if agpl license is an issue.",
 )
 def init(os, https, spin):
     """Initialize the konduit CLI. You can also use this to build a new konduit-serving JAR."""
@@ -100,17 +100,16 @@ def init(os, https, spin):
     "--os",
     required=True,
     help="Your operating system. Choose from  `windows-x86_64`,`linux-x86_64`,"
-    "`linux-x86_64-gpu`," + "`macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`",
+         "`linux-x86_64-gpu`," + "`macosx-x86_64`, `linux-armhf` and `windows-x86_64-gpu`",
 )
 @click.option(
     "--spin",
     default="all",
     show_default=True,
-    help="Whether to bundle Python ('python'), PMML ('pmml'), both ('all') " + 
-		 "or neither ('minimal'). Python bundling is not encouraged with ARM, " + 
-		 "and PMML bundling is not encouraged if agpl license is an issue.",
+    help="Whether to bundle Python ('python'), PMML ('pmml'), both ('all') " +
+         "or neither ('minimal'). Python bundling is not encouraged with ARM, " +
+         "and PMML bundling is not encouraged if agpl license is an issue.",
 )
-
 def build(os, spin):
     """Build the underlying konduit.jar (again)."""
     build_jar(os, spin)
@@ -139,9 +138,14 @@ def serve(config, start_server):
 
 @click.command()
 @click.option(
-    "--config",
+    "--host",
+    default="localhost",
+    help="The name/ip address of the host that the server is running at. Defaults to localhost.",
+)
+@click.option(
+    "--port",
     required=True,
-    help="Relative or absolute path to your konduit serving config file.",
+    help="Port at which the server is listening to.",
 )
 @click.option(
     "--numpy_data",
@@ -153,15 +157,15 @@ def serve(config, start_server):
     default="default",
     help="Comma-separated list of the input names to your pipeline",
 )
-def predict_numpy(config, numpy_data, input_names):
+def predict_numpy(host, port, numpy_data, input_names):
     """Get predictions for your pipeline from numpy data and input names"""
-    from konduit.load import client_from_file
+    from konduit.client import Client
 
     numpy_files = numpy_data.split(",")
     input_names = input_names.split(",")
     assert len(numpy_files) == len(input_names)
 
-    client = client_from_file(file_path=config)
+    client = Client(host="http://" + host, port=port)
 
     input_dict = {}
     for i in range(len(numpy_files)):
@@ -171,18 +175,17 @@ def predict_numpy(config, numpy_data, input_names):
 
 @click.command()
 @click.option(
-    "--config",
+    "--pid",
+    type=int,
     required=True,
-    help="Relative or absolute path to your konduit serving config file.",
+    help="PID of the running server process.",
 )
-def stop_server(config):
+def stop_server(pid):
     """Stop the Konduit server associated with a given config file."""
     from konduit.server import stop_server_by_pid
-    from konduit.load import pop_pid
 
-    pid = pop_pid(config)
     stop_server_by_pid(pid)
-    logging.info(">>> Stopped running Konduit server with PID " + str(pid))
+    logging.info(">>> Stopped running Konduit server at PID " + str(pid))
 
 
 @click.group()
