@@ -73,9 +73,8 @@ steps:
 ```
 
 This Konduit experiment describes how your model will be run, what inputs it takes and
-what types of output it will generate. In essence, this configuration will run the script
-`simple.py` on input data that you can specify. To serve this Konduit pipeline you can
-just run:
+what types of output it will generate. In essence, this configuration will serve a tensorflow BERT model. 
+To serve this Konduit pipeline you can just run:
 
 ```shell script
 konduit serve --config yaml/konduit_tensorflow.yaml
