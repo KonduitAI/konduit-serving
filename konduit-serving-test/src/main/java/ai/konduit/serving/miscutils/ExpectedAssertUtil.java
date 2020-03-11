@@ -1,4 +1,4 @@
-package ai.konduit.serving.util;
+package ai.konduit.serving.miscutils;
 
 import ai.konduit.serving.output.types.NDArrayOutput;
 import io.vertx.core.json.JsonArray;
@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public class ExpectedAssertTest {
+public class ExpectedAssertUtil {
     public static JsonArray ProbabilitiesAssert(String fileName) throws IOException {
         InputStream expectedIS = new FileInputStream(fileName);
         String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
