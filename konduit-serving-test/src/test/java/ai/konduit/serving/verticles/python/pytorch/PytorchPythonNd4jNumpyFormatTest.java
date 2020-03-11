@@ -42,6 +42,7 @@ import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonType;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -54,7 +55,6 @@ import java.io.File;
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -154,6 +154,7 @@ public class PytorchPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest
 
 
     @Test
+    @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         this.context = context;

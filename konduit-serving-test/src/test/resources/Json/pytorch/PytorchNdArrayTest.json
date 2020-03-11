@@ -1,9 +1,9 @@
 {
   "raw" : {
     "ndArray" : {
-      "dataType" : "LONG",
-      "shape" : [ 1 ],
-      "data" : [ 51 ]
+      "dataType" : "INT",
+      "shape" : [  ],
+      "data" : [ 51]
     }
   },
   "classification" : {
