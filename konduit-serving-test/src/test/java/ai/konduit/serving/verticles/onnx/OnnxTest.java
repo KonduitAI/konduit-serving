@@ -116,9 +116,6 @@ public class OnnxTest extends BaseVerticleTest {
     @Test
     public void runSqueezenet(TestContext testContext) throws Exception {
 
-        //NativeImageLoader nativeImageLoader = new NativeImageLoader(240, 320);
-        //Image image = nativeImageLoader.asImageMatrix(new ClassPathResource("data/1.jpg").getFile());
-
 	long inputTensorSize = 224 * 224 * 3;
 
  	FloatPointer inputTensorValues = new FloatPointer(inputTensorSize);
@@ -129,8 +126,6 @@ public class OnnxTest extends BaseVerticleTest {
 	DataBuffer buffer = Nd4j.createBuffer(inputTensorValues, DataType.FLOAT, inputTensorSize, idx);
 
         INDArray contents = Nd4j.create(buffer);
-        //INDArray contents = image.getImage();
-	System.out.println("Original input" + contents.getFloat(0));
 	
 	byte[] npyContents = Nd4j.toNpyByteArray(contents);
        
