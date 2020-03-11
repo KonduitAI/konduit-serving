@@ -1,0 +1,17 @@
+{
+  "raw" : {
+    "ndArray" : {
+      "dataType" : "DOUBLE",
+      "shape" : [ 2 ],
+      "data" : [ 0.8806918263435364, 0.6666666865348816 ]
+    }
+  },
+  "classification" : {
+    "ndArray" : {
+      "decisions" : [ 0 ],
+      "probabilities" : [ [ 0.8806918263435364, 0.6666666865348816 ] ],
+      "labels" : [ "default" ],
+      "batchId" : ""
+    }
+  }
+}
