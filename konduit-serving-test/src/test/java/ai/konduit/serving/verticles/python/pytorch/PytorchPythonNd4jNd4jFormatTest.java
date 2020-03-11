@@ -29,7 +29,7 @@ import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ExpectedAssertTest;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -154,7 +154,7 @@ public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest 
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         assertEquals(expectedArr, outputArray);
     }
@@ -208,7 +208,7 @@ public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest 
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "classification");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "classification");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         assertEquals(expectedArr, outputArray);
     }

@@ -29,7 +29,7 @@ import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ExpectedAssertTest;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -140,7 +140,7 @@ public class KerasPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest {
         FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasImageTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasImageTest.json", "raw");
         assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
         assertEquals(expectedArr, outputArray);
     }
@@ -173,7 +173,7 @@ public class KerasPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest {
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
         double outpuValue = outputArr.getJsonArray(0).getDouble(0);
-        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/keras/KerasImageTest.json");
+        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/keras/KerasImageTest.json");
         double expValue = expArr.getJsonArray(0).getDouble(0);
         assertEquals(expValue, outpuValue, 1e-1);
         assertEquals(expArr, outputArr);

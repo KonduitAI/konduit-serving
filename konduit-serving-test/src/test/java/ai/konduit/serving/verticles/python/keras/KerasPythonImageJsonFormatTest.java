@@ -29,7 +29,7 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ExpectedAssertTest;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -42,10 +42,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.python.PythonType;
-import org.datavec.python.PythonVariables;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nd4j.jackson.objectmapper.holder.ObjectMapperHolder;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
 
@@ -138,7 +136,7 @@ public class KerasPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest {
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasImageTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasImageTest.json", "raw");
         assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
         assertEquals(expectedArr, outputArray);
     }
@@ -170,7 +168,7 @@ public class KerasPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest {
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
         double outpuValue = outputArr.getJsonArray(0).getDouble(0);
-        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/keras/KerasImageTest.json");
+        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/keras/KerasImageTest.json");
         double expValue = expArr.getJsonArray(0).getDouble(0);
         assertEquals(expValue, outpuValue, 1e-1);
         assertEquals(expArr, outputArr);

@@ -29,7 +29,7 @@ import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ExpectedAssertTest;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -196,7 +196,7 @@ public class PytorchPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTes
                 .body().asString();
 
         INDArray outputArray = convertToNd4J(response);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "classification");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "classification");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         assertEquals(expectedArr, outputArray);
     }

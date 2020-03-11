@@ -29,7 +29,7 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ExpectedAssertTest;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -134,7 +134,7 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
         assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0),1e-1);
         assertEquals(expectedArr, outputArray);
     }
@@ -167,7 +167,7 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         //assertEquals(51, outputArray.getDouble(0), 1e-1);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "classification");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "classification");
         assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
         assertEquals(expectedArr, outputArray);
     }

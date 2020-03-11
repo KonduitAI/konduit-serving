@@ -29,7 +29,7 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ExpectedAssertTest;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -164,7 +164,7 @@ public class ScikitLearnPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalT
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json","raw");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json","raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         assertEquals(expectedArr, outputArray);
 
@@ -216,7 +216,7 @@ public class ScikitLearnPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalT
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
         double outpuValue = outputArr.getJsonArray(0).getDouble(0);
-        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json");
+        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json");
         double expValue = expArr.getJsonArray(0).getDouble(0);
         assertEquals(expValue, outpuValue, 1e-1);
         assertEquals(expArr, outputArr);

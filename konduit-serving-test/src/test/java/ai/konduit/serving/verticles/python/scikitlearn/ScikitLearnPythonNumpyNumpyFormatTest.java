@@ -29,7 +29,7 @@ import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ExpectedAssertTest;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -212,7 +212,7 @@ public class ScikitLearnPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertica
         JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");*/
         INDArray outputArray=  convertToNd4J(response);
         double outpuValue = outputArray.getDouble(0);
-        JsonArray expArr = ExpectedAssertTest.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json");
+        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json");
         double[][] expNd = ObjectMappers.json().readValue(expArr.toString(), double[][].class);
         INDArray expectedArray = Nd4j.create(expNd);
         double expValue = expectedArray.getDouble(0);

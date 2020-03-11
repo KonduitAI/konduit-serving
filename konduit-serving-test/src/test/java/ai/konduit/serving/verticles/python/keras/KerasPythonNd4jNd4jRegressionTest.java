@@ -28,7 +28,7 @@ import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ExpectedAssertTest;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -143,7 +143,7 @@ public class KerasPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVerticalTes
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json", "raw");
         Assert.assertEquals(expectedArr, outputArray);
 
     }

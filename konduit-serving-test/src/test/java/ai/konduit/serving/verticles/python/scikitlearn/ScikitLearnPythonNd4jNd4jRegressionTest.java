@@ -25,18 +25,16 @@ package ai.konduit.serving.verticles.python.scikitlearn;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.util.ExpectedAssertTest;
-import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -59,7 +57,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static junit.framework.TestCase.assertEquals;
 import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
@@ -148,7 +145,7 @@ public class ScikitLearnPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVerti
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json", "raw");
         Assert.assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         Assert.assertEquals(expectedArr, outputArray);
 
