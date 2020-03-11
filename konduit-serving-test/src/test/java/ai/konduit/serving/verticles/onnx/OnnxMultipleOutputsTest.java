@@ -163,7 +163,6 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
     assertEquals(entry2.getName(), "boxes");    
    
     java.io.InputStream entryStream2 = zipFile.getInputStream(entry2);
-    System.out.println(entryStream2);
     byte[] bytes2 = com.google.common.io.ByteStreams.toByteArray(entryStream2);
 
     INDArray bodyResult = Nd4j.createNpyFromByteArray(bytes);
