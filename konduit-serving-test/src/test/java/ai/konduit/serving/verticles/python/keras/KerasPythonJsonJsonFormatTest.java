@@ -24,39 +24,32 @@ package ai.konduit.serving.verticles.python.keras;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.IOUtils;
 import org.datavec.python.PythonType;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
@@ -87,10 +80,6 @@ public class KerasPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
 
         String pythonCodePath = new ClassPathResource("scripts/keras/KerasJsonTest.py").getFile().getAbsolutePath();
 
@@ -98,7 +87,6 @@ public class KerasPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("JsonInput", PythonType.TypeName.STR.name())
-                //.pythonOutput("score", PythonType.TypeName.LIST.name())
                 .pythonOutput("output_array", PythonType.TypeName.NDARRAY.name())
                 .build();
 
@@ -138,18 +126,17 @@ public class KerasPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(output);
-        assertTrue(jsonObject1.containsKey("score"));
-        List<Float> out = jsonObject1.getJsonArray("score").getList();
-        INDArray outputArray = Nd4j.create(out);
-        InputStream expectedIS = new FileInputStream("src/test/resources/Json/keras/KerasJsonTest.json");
-        String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
-        List<Float> expectedObj = new JsonObject(encodedText).getJsonObject("raw").getJsonArray("output_array").getList();
-        INDArray expectedArr = Nd4j.create(expectedObj);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
+        NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
+        INDArray outputArray = nd.getNdArray();
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasJsonTest.json", "raw");
         assertEquals(expectedArr, outputArray);
     }
 
     @Test(timeout = 60000)
-    @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -171,13 +158,14 @@ public class KerasPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest {
                 .body().asString();
 
         JsonObject jsonObject1 = new JsonObject(output);
-        assertTrue(jsonObject1.containsKey("output_array"));
-        List<Float> out = jsonObject1.getJsonArray("output_array").getList();
-        INDArray outputArray = Nd4j.create(out);
-        InputStream expectedIS = new FileInputStream("src/test/resources/Json/keras/KerasJsonTest.json");
-        String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
-        List<Float> expectedObj = new JsonObject(encodedText).getJsonObject("classification").getJsonArray("output_array").getList();
-        INDArray expectedArr = Nd4j.create(expectedObj);
-        assertEquals(expectedArr, outputArray);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
+        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/keras/KerasJsonTest.json");
+        double expValue = expArr.getJsonArray(0).getDouble(0);
+        assertEquals(expValue, outpuValue, 1e-1);
+        assertEquals(expArr, outputArr);
     }
 }
