@@ -30,6 +30,7 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
+import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -134,23 +135,26 @@ public class KerasPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest {
         requestSpecification.body(jsonObject.encode());
 
         requestSpecification.header("Content-Type", "application/json");
-        String output = requestSpecification.when()
+        Response output = requestSpecification.when()
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/json").then()
-                .extract()
-                .body().asString();
+                .post("/raw/json")
+                .andReturn();
 
+        System.out.println(output);
+
+       // INDArray arr=output.asByteArray();
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
-        FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
+      //INDArray outputArray = Nd4j.createN((output.getBody().asByteArray()));
+        FileUtils.writeStringToFile(outputImagePath, output.toString(), Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         InputStream expectedIS = new FileInputStream("src/test/resources/Json/keras/KerasJsonTest.json");
         String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
-        List<Float> expectedObj = new JsonObject(encodedText).getJsonObject("raw").getJsonArray("output_array").getList();
+        List<Float> expectedObj = new JsonObject(encodedText).getJsonObject("raw").getJsonArray("score").getList();
         INDArray expectedArr = Nd4j.create(expectedObj);
-        assertEquals(expectedArr, outputArray);
+        assertEquals(expectedArr,outputArray);
     }
 
     @Test(timeout = 60000)
