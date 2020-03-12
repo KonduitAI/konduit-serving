@@ -1,5 +1,3 @@
-package ai.konduit.serving.verticles.python.scikitlearn;
-
 /*
  *
  *  * ******************************************************************************
@@ -22,15 +20,15 @@ package ai.konduit.serving.verticles.python.scikitlearn;
  *
  */
 
+package ai.konduit.serving.verticles.python.scikitlearn;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -42,9 +40,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
-import org.datavec.api.writable.NDArrayWritable;
-import org.datavec.api.writable.Writable;
-import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonType;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -94,12 +89,12 @@ public class ScikitLearnPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalT
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
 
-        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/NDArrayScikitNDArrayInf.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/JsonScikitNDArrayInf.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("imgPath", PythonType.TypeName.NDARRAY.name())
+                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonInput("JsonInput", PythonType.TypeName.STR.name())
                 .pythonOutput("Ypredict", PythonType.TypeName.NDARRAY.name())
                 .build();
 
@@ -120,44 +115,22 @@ public class ScikitLearnPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalT
 
     @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
+
         this.context = context;
+
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
-                .scaleImageTransform(20.0f)
-                .resizeImageTransform(28, 28)
-                .build();
+        File json = new ClassPathResource("Json/IrisY.json").getFile();
+        jsonObject.put("JsonInput", json.getAbsolutePath());
+        requestSpecification.body(jsonObject.encode());
 
-        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .imageProcessingInitialLayout("NCHW")
-                .imageProcessingRequiredLayout("NHWC")
-                .inputName("default")
-                .dimensionsConfig("default", new Long[]{28L, 28L, 1L}) // Height, width, channels
-                .imageTransformProcess("default", imageTransformProcess)
-                .build();
-
-        String imagePath = new ClassPathResource("data/ScikitLearnNDArray.png").getFile().getAbsolutePath();
-
-        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
-
-        INDArray image = ((NDArrayWritable) output[0][0]).get();
-
-        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-
-        //Create new file to write binary input data.
-        File file = new File(filePath + "/test-input.zip");
-
-        BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
-        requestSpecification.body(jsonObject.encode().getBytes());
-
-        requestSpecification.header("Content-Type", "multipart/form-data");
+        requestSpecification.header("Content-Type", "application/json");
         String response = requestSpecification.when()
-                .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/nd4j").then()
+                .post("/raw/json").then()
                 .extract()
                 .body().asString();
 
@@ -166,7 +139,7 @@ public class ScikitLearnPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalT
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnJsonTest.json", "raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         assertEquals(expectedArr, outputArray);
 
@@ -180,46 +153,22 @@ public class ScikitLearnPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalT
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
-                .scaleImageTransform(20.0f)
-                .resizeImageTransform(28, 28)
-                .build();
+        File json = new ClassPathResource("Json/IrisY.json").getFile();
+        jsonObject.put("JsonInput", json.getAbsolutePath());
+        requestSpecification.body(jsonObject.encode());
 
-        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .imageProcessingInitialLayout("NCHW")
-                .imageProcessingRequiredLayout("NHWC")
-                .inputName("default")
-                .dimensionsConfig("default", new Long[]{28L, 28L, 1L}) // Height, width, channels
-                .imageTransformProcess("default", imageTransformProcess)
-                .build();
-
-        String imagePath = new ClassPathResource("data/ScikitLearnNDArray.png").getFile().getAbsolutePath();
-
-        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
-
-        INDArray image = ((NDArrayWritable) output[0][0]).get();
-
-        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-
-        //Create new file to write binary input data.
-        File file = new File(filePath + "/test-input.zip");
-
-        BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
-        requestSpecification.body(jsonObject.encode().getBytes());
-
-        requestSpecification.header("Content-Type", "multipart/form-data");
+        requestSpecification.header("Content-Type", "application/json");
         String response = requestSpecification.when()
-                .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/classification/nd4j").then()
+                .post("/classification/json").then()
                 .extract()
                 .body().asString();
         JsonObject jsonObject1 = new JsonObject(response);
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
         double outpuValue = outputArr.getJsonArray(0).getDouble(0);
-        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json");
+        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnJsonTest.json");
         double expValue = expArr.getJsonArray(0).getDouble(0);
         assertEquals(expValue, outpuValue, 1e-1);
         assertEquals(expArr, outputArr);
