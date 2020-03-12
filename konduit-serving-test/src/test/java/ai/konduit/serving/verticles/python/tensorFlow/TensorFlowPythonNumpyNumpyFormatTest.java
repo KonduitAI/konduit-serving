@@ -30,6 +30,7 @@ import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
+import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -45,7 +46,6 @@ import org.datavec.python.PythonType;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
@@ -56,6 +56,7 @@ import java.io.File;
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -80,13 +81,13 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonCodePath = new ClassPathResource("scripts/tensorflow/TensorFlowImageTest.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/tensorflow/NumpyTensorflowNumpy.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("img", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("prediction", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("prediction_np", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -104,7 +105,7 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -124,7 +125,7 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
                 .imageTransformProcess("default", imageTransformProcess)
                 .build();
 
-        String imagePath = new ClassPathResource("data/5.png").getFile().getAbsolutePath();
+        String imagePath = new ClassPathResource("data/tensorflow/test_img.png").getFile().getAbsolutePath();
 
         Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
 
@@ -136,26 +137,24 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
         FileUtils.writeByteArrayToFile(tensFile, sciNpy);
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
+        Response response = requestSpecification.when()
                 .multiPart("default", tensFile)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/numpy").then()
-                .extract()
-                .body().asString();
-        //TODO:assertion yet to implement.
-        System.out.print(response);
-        /*INDArray outputArray=  convertToNd4J(response);
-        assertEquals(7, outputArray.getDouble(0), 1e-1);*/
+                .post("/raw/numpy").andReturn();
+
+        //TODO: Assertion for Numpy to be verified
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
+        System.out.println("NumpyArrayOutput"+outputArray);
+        assertEquals(2, outputArray.getDouble(0), 1e-1);
     }
 
-    @Test
+    @Test(timeout = 60000)
     @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
 
         ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
                 .scaleImageTransform(20.0f)
@@ -170,10 +169,9 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
                 .imageTransformProcess("default", imageTransformProcess)
                 .build();
 
-        String imagePath = new ClassPathResource("data/5.png").getFile().getAbsolutePath();
+        String imagePath = new ClassPathResource("data/tensorflow/test_img.png").getFile().getAbsolutePath();
         Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
         INDArray image = ((NDArrayWritable) output[0][0]).get();
-        image.castTo(DataType.INT8);
 
         byte[] sciNpy = Nd4j.toNpyByteArray(image);
 
@@ -181,18 +179,17 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
         FileUtils.writeByteArrayToFile(tensFile, sciNpy);
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
+        Response response = requestSpecification.when()
                 .multiPart("default", tensFile)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/classification/numpy").then()
-                .extract()
-                .body().asString();
-        //TODO:assertion yet to implement.
-        System.out.print(response);
-    /*    INDArray outputArray=  convertToNd4J(response);
-        double outpuValue = outputArray.getDouble(0);
-        assertEquals(7, outpuValue, 1e-1);*/
+                .post("/classification/numpy")
+                .andReturn();
+
+        //TODO: Assertion for Numpy to be verified
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
+        System.out.println("NumpyArrayOutput"+outputArray);
+        assertEquals(2, outputArray.getDouble(0), 1e-1);
     }
 
 }
