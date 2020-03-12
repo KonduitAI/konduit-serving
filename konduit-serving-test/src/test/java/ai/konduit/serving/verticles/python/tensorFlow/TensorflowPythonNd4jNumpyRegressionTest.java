@@ -30,6 +30,7 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
+import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -48,14 +49,11 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -123,15 +121,17 @@ public class TensorflowPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVerti
         BinarySerde.writeArrayToDisk(arr, file);
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
+        Response response = requestSpecification.when()
                 .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/regression/nd4j").then()
-                .extract()
-                .body().asString();
-
-        //TODO:assertion yet to implement.
+                .post("/regression/nd4j")
+                .andReturn();
+        System.out.println(response);
+        //TODO: Assertion for Numpy to be verified
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
+        System.out.println("NumpyArrayOutput"+outputArray);
+        assertEquals(113680.33, outputArray.getDouble(0), 1e-1);
 
 
     }

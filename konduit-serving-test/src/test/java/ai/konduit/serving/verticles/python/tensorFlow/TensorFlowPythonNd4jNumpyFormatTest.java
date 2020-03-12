@@ -30,6 +30,7 @@ import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
+import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -45,6 +46,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.serde.binary.BinarySerde;
 
@@ -139,16 +141,16 @@ public class TensorFlowPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalT
         requestSpecification.body(jsonObject.encode().getBytes());
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
+        Response response = requestSpecification.when()
                 .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/nd4j").then()
-                .extract()
-                .body().asString();
-        //TODO:assertion yet to implement.
-        /*INDArray outputArray=  convertToNd4J(response);
-        assertEquals(7, outputArray.getDouble(0), 1e-1);*/
+                .post("/raw/nd4j").andReturn();
+
+        //TODO: Assertion for Numpy to be verified
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
+        System.out.println("NumpyArrayOutput"+outputArray);
+        assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 
     @Test
@@ -184,17 +186,17 @@ public class TensorFlowPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalT
         requestSpecification.body(jsonObject.encode().getBytes());
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
+        Response response = requestSpecification.when()
                 .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/classification/nd4j").then()
-                .extract()
-                .body().asString();
+                .post("/classification/nd4j")
+                .andReturn();
 
-        //TODO:assertion yet to implement.
-        /*INDArray outputArray=  convertToNd4J(response);
-        assertEquals(7,  outputArray.getDouble(0), 1e-1);*/
+        //TODO: Assertion for Numpy to be verified
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
+        System.out.println("NumpyArrayOutput"+outputArray);
+        assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 
 }
