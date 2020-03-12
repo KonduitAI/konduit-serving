@@ -75,23 +75,26 @@ public class ONNXThreadPool {
     private BlockingQueue<OnnxObservable> observables;
     private InferenceWorker[] zoo;
     private ObservablesProvider provider;
-    static final OrtApi g_ort = OrtGetApiBase().GetApi().call(ORT_API_VERSION);
+//    static final OrtApi g_ort = OrtGetApiBase().GetApi().call(ORT_API_VERSION);
 
     protected ONNXThreadPool() {
-        //
+         //
+
     }
 
+    /*
     protected static void CheckStatus(OrtStatus status) {
 
         if (status != null && !status.isNull()) {
             String msg = g_ort.GetErrorMessage().call(status).getString();
 
-	    log.error("Error occurred doing inference", msg);
+           log.error("Error occurred doing inference", msg);
 
             g_ort.ReleaseStatus().call(status);
-	    throw new RuntimeException(msg);
+           throw new RuntimeException(msg);
           }
-    }
+    } 
+*/
 
     protected void init() {
         observables = new LinkedBlockingQueue<>(queueLimit);
@@ -331,7 +334,7 @@ public class ONNXThreadPool {
         private BlockingQueue<OnnxObservable> inputQueue;
         private AtomicBoolean shouldWork = new AtomicBoolean(true);
         private AtomicBoolean isStopped = new AtomicBoolean(false);
-//        private Session replicatedModel;
+        private Session replicatedModel;
         private AtomicLong counter = new AtomicLong(0);
         private boolean rootDevice;
 
@@ -352,9 +355,10 @@ public class ONNXThreadPool {
 
         @Override
         public void run() {
- try (PointerScope scope = new PointerScope()) {
+	 try (PointerScope scope = new PointerScope()) {
+
                 // model should be replicated & initialized here
-                Session replicatedModel = onnxModelLoader.loadModel();
+	        replicatedModel = onnxModelLoader.loadModel();
 
                 AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions();	
 
@@ -403,7 +407,6 @@ public class ONNXThreadPool {
                             for (Map<String, INDArray> inBatch : batches) {	
 			        Collection<INDArray> inputArrays = inBatch.values();	    
 			        INDArray inputArray = Nd4j.concat(0, inputArrays.toArray(new INDArray[inputArrays.size()]));
-
 			        Value[] inputTensors = new Value[num_input_nodes.intValue()];
 
                                 for (int i = 0; i < num_input_nodes; i++) {
@@ -415,20 +418,40 @@ public class ONNXThreadPool {
 
 				}
 				//TODO: Pass ValueVector here when possible, test w/ multiple inputs
-				PointerPointer inputTensorsPP = new PointerPointer(inputTensors);
-				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputTensors[0], num_input_nodes, output_node_names, num_output_nodes);
+				//PointerPointer inputTensorsPP = new PointerPointer(inputTensors);
 
+				//Value outValue = new Value(null);
+				//Value outValue = new Value(new OrtValue(null));
+				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputTensors[0], num_input_nodes, output_node_names, num_output_nodes);
+                                //PointerPointer<OrtValue> output_tensors = new PointerPointer<OrtValue>(1).put(0, null);
+				//PointerPointer<OrtValue> input_tensors = new PointerPointer<OrtValue>(1).put(0, inputTensors[0].asOrtValue());
+				//CheckStatus(g_ort.Run().call(replicatedModel.asOrtSession(), null, input_node_names, input_tensors, num_input_nodes, output_node_names, num_output_nodes, output_tensors));
+
+				inputTensors[0].close();
 				Map<String, INDArray> output = new LinkedHashMap<String, INDArray>();
 
                                 for (int i = 0; i < num_output_nodes; i++) {
+		//			Value outValue = outputVector.get(i);
+
+					IntPointer is_tensor = new IntPointer(1);
+
+					//OrtValue output_tensor = output_tensors.get(OrtValue.class);
+                                        //CheckStatus(g_ort.IsTensor().call(output_tensor, is_tensor));
+					//assert is_tensor.get() != 0;
 					Value outValue = outputVector.get(i);
+					//Value outValue = new Value(output_tensor);
 					DataBuffer buffer = getDataBuffer(outValue);
+					outValue.close();
+
+//					OrtRelease(output_tensor);
+
 					INDArray outArray = Nd4j.create(buffer);
 
 					output.put((output_node_names.get(BytePointer.class, i)).getString(), outArray);
 				}
                                 out.add((Map<String, INDArray>) output);
-                            }
+				//outputVector.close();
+			    }
 
                             request.setOutputBatches(out);
                         } catch (Exception e) {
@@ -442,6 +465,7 @@ public class ONNXThreadPool {
                         // just do nothing, i guess and hope for next round?
                     }
                 }
+		replicatedModel.close();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 // do nothing
@@ -453,6 +477,7 @@ public class ONNXThreadPool {
         }
 
         protected void shutdown() {
+
             shouldWork.set(false);
             while (!isStopped.get()) {
                 // block until main loop is finished
@@ -540,12 +565,15 @@ public class ONNXThreadPool {
 		    throw new RuntimeException("Unsupported data type encountered");
 	    }
 	    Value inputTensor = Value.CreateTensor(memory_info.asOrtMemoryInfo(), input_tensor_values, sizeInBytes, dims, dims.capacity(), type);
+	    memory_info.close();
+	    input_tensor_values.close();
+	    inputTensorValuesPtr.close();
             return inputTensor;
 	}
 
 	private DataBuffer getDataBuffer(Value tens){
-
-	    DataBuffer buffer = null;
+		try (PointerScope scope = new PointerScope()) {
+	DataBuffer buffer = null;
 	    int type = tens.GetTensorTypeAndShapeInfo().GetElementType();
 	    long size = tens.GetTensorTypeAndShapeInfo().GetElementCount();
             switch (type) {
@@ -622,7 +650,9 @@ public class ONNXThreadPool {
 		default:
 		    throw new RuntimeException("Unsupported data type encountered");
 	    }
-            return buffer;
+	    return buffer;
+
+		}
 	}
     }
 }

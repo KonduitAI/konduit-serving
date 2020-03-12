@@ -29,10 +29,6 @@ import ai.konduit.serving.model.OnnxConfig;
 import ai.konduit.serving.model.loader.onnx.OnnxModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
 
-import org.bytedeco.onnxruntime.Env;
-import org.bytedeco.onnxruntime.Session;
-import org.bytedeco.onnxruntime.SessionOptions;
-
 import java.io.File;
 
 public class OnnxInferenceExecutionerFactory implements InferenceExecutionerFactory {

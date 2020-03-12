@@ -32,6 +32,8 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.bytedeco.onnxruntime.AllocatorWithDefaultOptions;
 import org.bytedeco.onnxruntime.Session;
 
+import org.bytedeco.javacpp.PointerScope;
+
 import java.util.List;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -52,8 +54,6 @@ public class OnnxInferenceExecutioner implements
     private ONNXThreadPool inference;
     @Getter
     private ModelLoader<Session> modelLoader;
-
-    private AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions();
 
     @Override
     public ModelLoader<Session> modelLoader() {
@@ -90,6 +90,9 @@ public class OnnxInferenceExecutioner implements
 	Preconditions.checkNotNull(input,"Inputs must not be null!");
         Preconditions.checkState(input.length == this.model.GetInputCount(),String.format("Number of inputs %d did not equal number of model inputs %d!",input.length,model.GetInputCount()));
         synchronized (this.model) {
+	  try (PointerScope scope = new PointerScope()) {
+            AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions();
+
 	    Map<String, INDArray> inputs = new LinkedHashMap(input.length);
 
             for (int i = 0; i < this.model.GetInputCount(); i++) {
@@ -98,7 +101,8 @@ public class OnnxInferenceExecutioner implements
 
             Map<String, INDArray> ret = inference.output(inputs);
             return ret.values().toArray(new INDArray[0]);
-        }
+          }
+	}
     }
 
     @Override
