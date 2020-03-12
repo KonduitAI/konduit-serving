@@ -31,6 +31,7 @@ import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
+import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -50,6 +51,7 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Objects;
@@ -127,21 +129,18 @@ public class KerasPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalTest {
         FileUtils.writeByteArrayToFile(xFile, xNpy);
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
+        Response response = requestSpecification.when()
                 .multiPart("default", xFile)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/numpy").then()
-                .extract()
-                .body().asString();
+                .post("/raw/numpy")
+                .andReturn();
 
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
-        FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
-        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasNumpyTest.json", "raw");
-        assertEquals(expectedArr, outputArray);
+        INDArray outputArray = BinarySerde.toArray(ByteBuffer.wrap(response.getBody().asByteArray()));
+        System.out.println("NumpyArrayOutput"+outputArray);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasNumpyTest.json","raw");
+        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
+        assertEquals(expectedArr,outputArray);
     }
 
 

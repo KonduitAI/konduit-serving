@@ -25,6 +25,7 @@ package ai.konduit.serving.verticles.python.keras;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -53,6 +54,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -141,19 +143,10 @@ public class KerasPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest {
                 .post("/raw/json")
                 .andReturn();
 
-        System.out.println(output);
-
-       // INDArray arr=output.asByteArray();
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
-      //INDArray outputArray = Nd4j.createN((output.getBody().asByteArray()));
-        FileUtils.writeStringToFile(outputImagePath, output.toString(), Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
-        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        InputStream expectedIS = new FileInputStream("src/test/resources/Json/keras/KerasJsonTest.json");
-        String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);
-        List<Float> expectedObj = new JsonObject(encodedText).getJsonObject("raw").getJsonArray("score").getList();
-        INDArray expectedArr = Nd4j.create(expectedObj);
+        INDArray outputArray = BinarySerde.toArray(ByteBuffer.wrap(output.getBody().asByteArray()));
+        System.out.println("NumpyArrayOutput"+outputArray);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasJsonNumpyTest.json","raw");
+        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr,outputArray);
     }
 
