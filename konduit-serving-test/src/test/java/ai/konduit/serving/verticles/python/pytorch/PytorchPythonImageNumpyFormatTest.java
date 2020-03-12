@@ -57,7 +57,6 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-@Ignore
 public class PytorchPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
@@ -141,6 +140,7 @@ public class PytorchPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTes
     }
 
     @Test
+    @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         this.context = context;
