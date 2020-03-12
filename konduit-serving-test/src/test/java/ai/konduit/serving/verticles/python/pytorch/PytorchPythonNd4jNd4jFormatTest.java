@@ -48,6 +48,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.serde.binary.BinarySerde;
 
@@ -83,13 +84,13 @@ public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest 
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonCodePath = new ClassPathResource("scripts/face_detection_pytorch/detect_image.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/pytorch/NdArray_Pytorch_NdArray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("image", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("num_boxes", PythonType.TypeName.NDARRAY.name())
+                .pythonInput("inputValue", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("pred", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -115,30 +116,16 @@ public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest 
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
-                .scaleImageTransform(20.0f)
-                .build();
-
-        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .imageProcessingInitialLayout("NCHW")
-                .imageProcessingRequiredLayout("NHWC")
-                .inputName("default")
-                .dimensionsConfig("default", new Long[]{478L, 720L, 3L}) // Height, width, channels
-                .imageTransformProcess("default", imageTransformProcess)
-                .build();
-
-        String imagePath = new ClassPathResource("data/PytorchNDArrayTest.jpg").getFile().getAbsolutePath();
-
-        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
-
-        INDArray image = ((NDArrayWritable) output[0][0]).get();
+        //Preparing input NDArray
+        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
+        System.out.println(arr);
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
         //Create new file to write binary input data.
         File file = new File(filePath + "/test-input.zip");
 
-        BinarySerde.writeArrayToDisk(image, file);
+        BinarySerde.writeArrayToDisk(arr, file);
         requestSpecification.body(jsonObject.encode().getBytes());
 
         requestSpecification.header("Content-Type", "multipart/form-data");
@@ -150,13 +137,14 @@ public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest 
                 .extract()
                 .body().asString();
 
+        System.out.println("response----" + response);
+
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "raw");
-        assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         assertEquals(expectedArr, outputArray);
     }
 

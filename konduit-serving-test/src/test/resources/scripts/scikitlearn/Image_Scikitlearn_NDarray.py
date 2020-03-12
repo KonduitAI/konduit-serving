@@ -19,4 +19,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 filename =work_dir+'//'+'ScikitLearnmodel.sav'
 loaded_model = joblib.load(filename)
 result = loaded_model.predict(X_test)
+#resultOutput=result[0:5]
+#print("resultOutput----",result[0:4])
 results = loaded_model.score(X_test, y_test)
