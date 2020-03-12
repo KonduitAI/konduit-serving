@@ -75,26 +75,11 @@ public class ONNXThreadPool {
     private BlockingQueue<OnnxObservable> observables;
     private InferenceWorker[] zoo;
     private ObservablesProvider provider;
-//    static final OrtApi g_ort = OrtGetApiBase().GetApi().call(ORT_API_VERSION);
 
     protected ONNXThreadPool() {
          //
 
     }
-
-    /*
-    protected static void CheckStatus(OrtStatus status) {
-
-        if (status != null && !status.isNull()) {
-            String msg = g_ort.GetErrorMessage().call(status).getString();
-
-           log.error("Error occurred doing inference", msg);
-
-            g_ort.ReleaseStatus().call(status);
-           throw new RuntimeException(msg);
-          }
-    } 
-*/
 
     protected void init() {
         observables = new LinkedBlockingQueue<>(queueLimit);
@@ -358,6 +343,7 @@ public class ONNXThreadPool {
 	 try (PointerScope scope = new PointerScope()) {
 
                 // model should be replicated & initialized here
+		if (replicatedModel == null)
 	        replicatedModel = onnxModelLoader.loadModel();
 
                 AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions();	
@@ -407,6 +393,10 @@ public class ONNXThreadPool {
                             for (Map<String, INDArray> inBatch : batches) {	
 			        Collection<INDArray> inputArrays = inBatch.values();	    
 			        INDArray inputArray = Nd4j.concat(0, inputArrays.toArray(new INDArray[inputArrays.size()]));
+
+
+//				try (PointerScope scope = new PointerScope()) {
+
 			        Value[] inputTensors = new Value[num_input_nodes.intValue()];
 
                                 for (int i = 0; i < num_input_nodes; i++) {
@@ -420,39 +410,25 @@ public class ONNXThreadPool {
 				//TODO: Pass ValueVector here when possible, test w/ multiple inputs
 				//PointerPointer inputTensorsPP = new PointerPointer(inputTensors);
 
-				//Value outValue = new Value(null);
-				//Value outValue = new Value(new OrtValue(null));
 				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputTensors[0], num_input_nodes, output_node_names, num_output_nodes);
-                                //PointerPointer<OrtValue> output_tensors = new PointerPointer<OrtValue>(1).put(0, null);
-				//PointerPointer<OrtValue> input_tensors = new PointerPointer<OrtValue>(1).put(0, inputTensors[0].asOrtValue());
-				//CheckStatus(g_ort.Run().call(replicatedModel.asOrtSession(), null, input_node_names, input_tensors, num_input_nodes, output_node_names, num_output_nodes, output_tensors));
 
 				inputTensors[0].close();
 				Map<String, INDArray> output = new LinkedHashMap<String, INDArray>();
 
                                 for (int i = 0; i < num_output_nodes; i++) {
-		//			Value outValue = outputVector.get(i);
-
-					IntPointer is_tensor = new IntPointer(1);
-
-					//OrtValue output_tensor = output_tensors.get(OrtValue.class);
-                                        //CheckStatus(g_ort.IsTensor().call(output_tensor, is_tensor));
-					//assert is_tensor.get() != 0;
 					Value outValue = outputVector.get(i);
-					//Value outValue = new Value(output_tensor);
+
 					DataBuffer buffer = getDataBuffer(outValue);
 					outValue.close();
-
-//					OrtRelease(output_tensor);
 
 					INDArray outArray = Nd4j.create(buffer);
 
 					output.put((output_node_names.get(BytePointer.class, i)).getString(), outArray);
 				}
                                 out.add((Map<String, INDArray>) output);
-				//outputVector.close();
+				//outputVector.close(); 
+//				}
 			    }
-
                             request.setOutputBatches(out);
                         } catch (Exception e) {
                             log.error("Error occurred doing inference", e);
@@ -460,6 +436,7 @@ public class ONNXThreadPool {
 
                         }
 
+			replicatedModel = null;
 
                     } else {
                         // just do nothing, i guess and hope for next round?
