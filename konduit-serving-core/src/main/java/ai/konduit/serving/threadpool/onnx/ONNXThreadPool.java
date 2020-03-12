@@ -340,7 +340,7 @@ public class ONNXThreadPool {
 
         @Override
         public void run() {
-	 try (PointerScope scope = new PointerScope()) {
+	 try { // (PointerScope scope = new PointerScope()) {
 
                 // model should be replicated & initialized here
 		if (replicatedModel == null)
@@ -395,7 +395,7 @@ public class ONNXThreadPool {
 			        INDArray inputArray = Nd4j.concat(0, inputArrays.toArray(new INDArray[inputArrays.size()]));
 
 
-//				try (PointerScope scope = new PointerScope()) {
+				try (PointerScope scope = new PointerScope()) {
 
 			        Value[] inputTensors = new Value[num_input_nodes.intValue()];
 
@@ -427,7 +427,7 @@ public class ONNXThreadPool {
 				}
                                 out.add((Map<String, INDArray>) output);
 				//outputVector.close(); 
-//				}
+				}
 			    }
                             request.setOutputBatches(out);
                         } catch (Exception e) {
