@@ -12,5 +12,12 @@
       "shape" : [ 1 ],
       "data" : [ 51 ]
     }
+  },
+  "raw_v1" : {
+    "ndArray" : {
+      "dataType" : "INT",
+      "shape" : [ 1 ],
+      "data" : [ 2 ]
+    }
   }
 }
