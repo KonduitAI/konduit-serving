@@ -89,18 +89,4 @@ USER konduit
 
 WORKDIR ${HOME}
 
-ENV PATH=/opt/cmake/bin:/opt/protobuf/bin:${PATH} \
-    JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap ${JAVA_OPTS}"
-
-RUN   mkdir ${HOME}/build && cd ${HOME}/build && git clone https://github.com/bytedeco/javacpp-presets -b cuda100  \
-      && cd javacpp-presets/cuda && mvn -B -V -U -e clean install -DskipTests \
-      -Dmaven.test.skip=true -Djavacpp.platform=linux-arm64 \
-      -Djavacpp.platform.library.path=/usr/local/cuda \
-      -Djavacpp.includePath=/usr/include:/usr/local/cuda/include
-
-
-RUN   cd ${HOME}/build && git clone https://github.com/KonduitAI/deeplearning4j
-ENV   MVN_OPTS -1g
-RUN   cd ${HOME}/build/deeplearning4j/ && mvn -pl '!org.nd4j:nd4j-native,!org.nd4j:nd4j-native-platform,!org.deeplearning4j:jumpy,!org.deeplearning4j:arbiter,!org.deeplearning4j:arbiter-core,!org.deeplearning4j:arbiter-server,!org.deeplearning4j:arbiter-deeplearning4j,!org.deeplearning4j:arbiter-ui,!org.deeplearning4j:rl4j,!org.deeplearning4j:rl4j-api,!org.deeplearning4j:rl4j-core,!org.deeplearning4j:rl4j-doom,!org.deeplearning4j:rl4j-malmo,!org.deeplearning4j:rl4j-ale,!org.deeplearning4j:scalnet_2.11,!org.deeplearning4j:rl4j-gym,!org.deeplearning4j:pydl4j,!org.deeplearning4j:pydatavec' -Djavacpp.platform=linux-arm64 -Dlibnd4j.chip=gpu -Pcuda  clean install -Dmaven.test.skip=true
-
-RUN   cd ${HOME}/build && git clone --single-branch --branch ag_armtfrefactor https://github.com/KonduitAI/konduit-serving && cd konduit-serving && mvn -Djavacpp.platform=linux-arm64 -Dchip=cpu -Dcuda=10.0 clean install -Dmaven.test.skip=true
+RUN   mkdir ${HOME}/build && cd ${HOME}/build && git clone  --single-branch --branch ag_armtfrefactor https://github.com/KonduitAI/konduit-serving && cd konduit-serving && mvn -Djavacpp.platform=linux-arm64 -Dchip=gpu -Pjetson-nano clean install -Dmaven.test.skip=true
