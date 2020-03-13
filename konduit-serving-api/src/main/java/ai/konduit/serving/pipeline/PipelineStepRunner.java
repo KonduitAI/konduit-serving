@@ -22,11 +22,20 @@
 
 package ai.konduit.serving.pipeline;
 
+import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.pipeline.step.CustomPipelineStep;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.Writable;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import java.io.Closeable;
 
 
@@ -51,6 +60,9 @@ import java.io.Closeable;
  *
  * @author Adam Gibson
  */
+@Path("/")
+@Consumes("application/json")
+@Produces("application/json")
 public interface PipelineStepRunner extends Closeable {
 
     /**
@@ -88,5 +100,15 @@ public interface PipelineStepRunner extends Closeable {
      * @param input the input array
      * @return the output from the transform
      */
+    @POST
+    @Path("/transform")
+    @Operation(summary = "Find pet by ID",
+            tags = {"pets"},
+            description = "Returns a pet when 0 < ID <= 10.  ID > 10 or nonintegers will simulate API error conditions",
+            responses = {
+                    @ApiResponse(description = "The pet", content = @Content(
+                            schema = @Schema(implementation = InferenceConfiguration.class)
+                    ))
+            })
     Record[] transform(Record[] input);
 }

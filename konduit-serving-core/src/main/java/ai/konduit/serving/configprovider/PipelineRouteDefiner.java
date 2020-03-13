@@ -113,7 +113,7 @@ public class PipelineRouteDefiner {
      * relative to what was configured in the {@link InferenceConfiguration}
      * Everything implementing the {@link MeterBinder}
      * interface can be configured here.
-     * Of note are a few specific ones for machine learning including:
+     * Of note are a few specific ones for machine learning, including:
      * {@link NativeMetrics}
      * which covers off heap memory allocation among other things.
      * <p>
@@ -140,7 +140,8 @@ public class PipelineRouteDefiner {
                     .register(registry);
         }
 
-        if (inferenceConfiguration.getServingConfig().getMetricTypes() != null && registry != null) {
+        if (inferenceConfiguration.getServingConfig().isIncludeMetrics() &&
+                inferenceConfiguration.getServingConfig().getMetricTypes() != null && registry != null) {
             //don't add more than one type
             for (MetricType metricType : new HashSet<>(inferenceConfiguration.getServingConfig().getMetricTypes())) {
                 switch (metricType) {
@@ -543,7 +544,6 @@ public class PipelineRouteDefiner {
         }
         return adapters;
     }
-
 
     /**
      * Get an {@link InputAdapter} for an input data format

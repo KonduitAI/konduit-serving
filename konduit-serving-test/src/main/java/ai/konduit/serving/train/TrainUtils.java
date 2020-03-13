@@ -23,8 +23,9 @@
 package ai.konduit.serving.train;
 
 import ai.konduit.serving.normalizer.CustomImagePreProcessingScaler;
+import lombok.extern.slf4j.Slf4j;
 
-@lombok.extern.slf4j.Slf4j
+@Slf4j
 public class TrainUtils {
 
     private static final String basePath = System.getProperty("java.io.tmpdir") + "/mnist";
@@ -54,8 +55,7 @@ public class TrainUtils {
         inputSchemaBuilder.addColumnInteger("Hours");
         inputSchemaBuilder.addColumnDouble("Adjusted");
 
-        org.datavec.api.transform.schema.Schema schema = inputSchemaBuilder.build();
-        return schema;
+        return inputSchemaBuilder.build();
 
     }
 
@@ -65,19 +65,17 @@ public class TrainUtils {
         outputSchemaBuilder.addColumnDouble("setosa");
         outputSchemaBuilder.addColumnDouble("versicolor");
         outputSchemaBuilder.addColumnDouble("virginica");
-        org.datavec.api.transform.schema.Schema outputSchema = outputSchemaBuilder.build();
-        return outputSchema;
+        return outputSchemaBuilder.build();
     }
 
     public static org.datavec.api.transform.schema.Schema getPmmlIrisInputSchema() {
         String[] columnNames = {"Petal.Length", "Petal.Width"};
         org.datavec.api.transform.schema.Schema.Builder schemaBuilder = new org.datavec.api.transform.schema.Schema.Builder();
-        for (int i = 0; i < columnNames.length; i++) {
-            schemaBuilder.addColumnDouble(columnNames[i]);
+        for (String columnName : columnNames) {
+            schemaBuilder.addColumnDouble(columnName);
         }
 
-        org.datavec.api.transform.schema.Schema schema = schemaBuilder.build();
-        return schema;
+        return schemaBuilder.build();
     }
 
     public static org.datavec.api.transform.TransformProcess getTransformProcessForIrisInput() {
@@ -87,8 +85,7 @@ public class TrainUtils {
             transformProcessBuilder.convertToDouble(schema.getName(i));
         }
 
-        org.datavec.api.transform.TransformProcess transformProcess = transformProcessBuilder.build();
-        return transformProcess;
+        return transformProcessBuilder.build();
     }
 
     public static org.datavec.api.transform.schema.Schema getIrisOutputSchema() {
@@ -97,8 +94,7 @@ public class TrainUtils {
         outputSchemaBuilder.addColumnDouble("versicolor");
         outputSchemaBuilder.addColumnDouble("virginica");
 
-        org.datavec.api.transform.schema.Schema outputSchema = outputSchemaBuilder.build();
-        return outputSchema;
+        return outputSchemaBuilder.build();
     }
 
     public static org.datavec.api.transform.schema.Schema getIrisInputSchema() {
@@ -108,8 +104,7 @@ public class TrainUtils {
                 .addColumnString("sepal_width")
                 .addColumnString("sepal_height");
 
-        org.datavec.api.transform.schema.Schema schema = schemaBuilder.build();
-        return schema;
+        return schemaBuilder.build();
     }
 
     public static synchronized org.nd4j.linalg.primitives.Pair<org.deeplearning4j.nn.multilayer.MultiLayerNetwork, org.nd4j.linalg.dataset.api.preprocessor.DataNormalization> getTrainedNetwork() throws Exception {

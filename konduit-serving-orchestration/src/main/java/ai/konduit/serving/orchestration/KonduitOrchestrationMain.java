@@ -117,7 +117,7 @@ public class KonduitOrchestrationMain {
                                 }
                             }
 
-                            log.info("Deployed verticle {}", konduitServingNodeConfigurer.getVerticleClassName());
+                            log.info("Deployed verticle {0}", konduitServingNodeConfigurer.getVerticleClassName());
                             if(eventHandler != null) {
                                 eventHandler.handle(Future.succeededFuture());
                             }

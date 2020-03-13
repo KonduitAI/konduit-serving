@@ -38,7 +38,6 @@ import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
 
-
 public class MultiComputationGraphInferenceInitTests {
 
     @ClassRule
@@ -51,7 +50,6 @@ public class MultiComputationGraphInferenceInitTests {
 
         ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
 
-
         File arrayFolder = folder.newFolder();
         File testLabels = new File(arrayFolder, "test-labels.npy");
         File testInput = new File(arrayFolder, "test-input.npy");
@@ -63,10 +61,7 @@ public class MultiComputationGraphInferenceInitTests {
         Pair<MultiLayerNetwork, DataNormalization> trainedNetwork = TrainUtils.getTrainedNetwork();
         trainedNetwork.getSecond().transform(dataSet.getFeatures());
 
-
         InMemoryComputationGraphModelLoader memoryMultiLayernetworkModelLoader = new InMemoryComputationGraphModelLoader(trainedNetwork.getFirst().toComputationGraph());
         multiLayerNetworkInferenceExecutioner.initialize(memoryMultiLayernetworkModelLoader, parallelInferenceConfig);
-
     }
-
 }
