@@ -25,13 +25,13 @@ package ai.konduit.serving.verticles.python.pytorch;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
+import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -40,9 +40,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
-import org.datavec.api.writable.NDArrayWritable;
-import org.datavec.api.writable.Writable;
-import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonType;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -54,7 +51,6 @@ import org.nd4j.linalg.io.ClassPathResource;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 
-import static ai.konduit.serving.miscutils.NumpyConversionUtil.convertToNd4J;
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
@@ -83,13 +79,13 @@ public class PytorchPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTes
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonCodePath = new ClassPathResource("scripts/face_detection_pytorch/detect_image.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/pytorch/NumpyPytorchNumpy.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("image", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("num_boxes", PythonType.TypeName.NDARRAY.name())
+                .pythonInput("inputValue", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("pred", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -113,46 +109,29 @@ public class PytorchPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTes
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
 
-        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
-                .scaleImageTransform(20.0f)
-                .build();
+        //Preparing input NDArray
+        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
 
-        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .imageProcessingInitialLayout("NCHW")
-                .imageProcessingRequiredLayout("NHWC")
-                .inputName("default")
-                .dimensionsConfig("default", new Long[]{478L, 720L, 3L}) // Height, width, channels
-                .imageTransformProcess("default", imageTransformProcess)
-                .build();
+        byte[] xNpy = Nd4j.toNpyByteArray(arr);
 
-        String imagePath = new ClassPathResource("data/PytorchNDArrayTest.jpg").getFile().getAbsolutePath();
-
-        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
-
-        INDArray image = ((NDArrayWritable) output[0][0]).get();
-
-        byte[] sciNpy = Nd4j.toNpyByteArray(image);
-
-        File pyFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(pyFile, sciNpy);
+        File xFile = temporary.newFile();
+        FileUtils.writeByteArrayToFile(xFile, xNpy);
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
-                .multiPart("default", pyFile)
+        Response response = requestSpecification.when()
+                .multiPart("default", xFile)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/numpy").then()
-                .extract()
-                .body().asString();
+                .post("/raw/numpy")
+                .andReturn();
 
-        //TODO:assertion yet to implement.
-        System.out.print(response);
-      /*  INDArray outputArray = convertToNd4J(response);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "raw");
-        assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
-        assertEquals(expectedArr, outputArray);*/
+        //TODO: Assertion for Numpy to be verified
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
+        System.out.println("NumpyArrayOutput"+outputArray);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNumpyTest.json","raw");
+        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
+        assertEquals(expectedArr, outputArray);
     }
 
 
@@ -165,41 +144,27 @@ public class PytorchPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTes
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
-                .scaleImageTransform(20.0f)
-                .build();
+        //Preparing input NDArray
+        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
 
-        ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .imageProcessingInitialLayout("NCHW")
-                .imageProcessingRequiredLayout("NHWC")
-                .inputName("default")
-                .dimensionsConfig("default", new Long[]{478L, 720L, 3L}) // Height, width, channels
-                .imageTransformProcess("default", imageTransformProcess)
-                .build();
+        byte[] xNpy = Nd4j.toNpyByteArray(arr);
 
-        String imagePath = new ClassPathResource("data/PytorchNDArrayTest.jpg").getFile().getAbsolutePath();
-
-        Writable[][] output = imageLoadingStep.createRunner().transform(imagePath);
-
-        INDArray image = ((NDArrayWritable) output[0][0]).get();
-
-        byte[] sciNpy = Nd4j.toNpyByteArray(image);
-
-        File pyFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(pyFile, sciNpy);
+        File xFile = temporary.newFile();
+        FileUtils.writeByteArrayToFile(xFile, xNpy);
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
-                .multiPart("default", pyFile)
+        Response response = requestSpecification.when()
+                .multiPart("default", xFile)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/classification/numpy").then()
-                .extract()
-                .body().asString();
+                .post("/classification/numpy")
+                .andReturn();
 
-        INDArray outputArray = convertToNd4J(response);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "classification");
-        assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
+        //TODO: Assertion for Numpy to be verified
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
+        System.out.println("NumpyArrayOutput"+outputArray);
+        INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchNumpyTest.json");
+        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
     }
 

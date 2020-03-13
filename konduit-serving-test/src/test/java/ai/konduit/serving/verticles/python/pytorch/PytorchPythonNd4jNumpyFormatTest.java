@@ -25,12 +25,14 @@ package ai.konduit.serving.verticles.python.pytorch;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
+import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -46,6 +48,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.serde.binary.BinarySerde;
 
@@ -55,6 +58,7 @@ import java.io.File;
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -138,18 +142,19 @@ public class PytorchPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest
         requestSpecification.body(jsonObject.encode().getBytes());
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
+        Response response = requestSpecification.when()
                 .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/nd4j").then()
-                .extract()
-                .body().asString();
+                .post("/raw/nd4j")
+                .andReturn();
 
-    //TODO:assertion yet to implement.
-        /*INDArray outputArray= convertToNd4J(response);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json", "raw");
-        assertEquals(expectedArr, outputArray);*/
+        //TODO: Assertion for Numpy to be verified
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
+        System.out.println("NumpyArrayOutput"+outputArray);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json","raw_numpy");
+        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
+        assertEquals(expectedArr, outputArray);
     }
 
 
@@ -189,18 +194,19 @@ public class PytorchPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest
         requestSpecification.body(jsonObject.encode().getBytes());
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
+        Response response = requestSpecification.when()
                 .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/classification/nd4j").then()
-                .extract()
-                .body().asString();
+                .post("/classification/nd4j")
+                .andReturn();
 
-        //TODO:assertion yet to implement.
-        /*INDArray outputArray= convertToNd4J(response);
-        INDArray expectedArr = ExpectedAssertTest.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json", "raw");
-        assertEquals(expectedArr, outputArray);*/
+        //TODO: Assertion for Numpy to be verified
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
+        System.out.println("NumpyArrayOutput"+outputArray);
+        INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json");
+        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
+        assertEquals(expectedArr, outputArray);
     }
 
 }

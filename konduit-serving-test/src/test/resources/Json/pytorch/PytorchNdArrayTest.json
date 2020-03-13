@@ -3,14 +3,21 @@
     "ndArray" : {
       "dataType" : "INT",
       "shape" : [  ],
-      "data" : [ 51]
+      "data" : [ 2 ]
+    }
+  },
+  "raw_numpy" : {
+    "ndArray" : {
+      "dataType" : "INT",
+      "shape" : [  ],
+      "data" : [ 51 ]
     }
   },
   "classification" : {
     "ndArray" : {
       "dataType" : "LONG",
       "shape" : [ 1 ],
-      "data" : [ 51 ]
+      "data" : [ 2 ]
     }
   }
 }

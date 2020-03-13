@@ -140,6 +140,10 @@ public class PytorchPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
         assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
         assertEquals(expectedArr, outputArray);
+
+
+
+
     }
 
     @Test

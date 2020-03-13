@@ -90,7 +90,7 @@ public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest 
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("inputValue", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("pred", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("output_value", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -145,7 +145,7 @@ public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest 
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "raw");
-        assertEquals(expectedArr, outputArray);
+        assertEquals(2, outputArray.getInt(0));
     }
 
 
