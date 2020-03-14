@@ -20,46 +20,71 @@
         <cuda.javacpp.version>${cuda.version}-${javacpp.date}-${javacpp.version}</cuda.javacpp.version>
     </properties>
 
-    <dependencies>
 
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>cuda-platform</artifactId>
-            <version>${cuda.javacpp.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>cuda</artifactId>
-            <version>${cuda.javacpp.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-cuda-${cuda.version}-platform</artifactId>
-            <version>${nd4j.version}</version>
-            <exclusions>
-                <exclusion>
+    <profiles>
+        <profile>
+            <id>arm</id>
+            <activation>
+                <property>
+                    <name>os.detected.arch</name>
+                    <value>aarch_64</value>
+                </property>
+            </activation>
+        </profile>
+        <profile>
+            <id>intel</id>
+            <activation>
+                <property>
+                    <name>os.detected.arch</name>
+                    <value>x86_64</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
                     <groupId>org.bytedeco</groupId>
                     <artifactId>cuda-platform</artifactId>
-                </exclusion>
-                <exclusion>
+                    <version>${cuda.javacpp.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>org.bytedeco</groupId>
                     <artifactId>cuda</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+                    <version>${cuda.javacpp.version}</version>
+                </dependency>
 
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>cuda-platform</artifactId>
-        </dependency>
+                <dependency>
+                    <groupId>org.nd4j</groupId>
+                    <artifactId>nd4j-cuda-${cuda.version}-platform</artifactId>
+                    <version>${nd4j.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>org.bytedeco</groupId>
+                            <artifactId>cuda-platform</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.bytedeco</groupId>
+                            <artifactId>cuda</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>cuda-platform</artifactId>
+                </dependency>
 
 
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>tensorflow-platform-gpu</artifactId>
-            <version>${tensorflow.javacpp.version}</version>
-        </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>tensorflow-platform-gpu</artifactId>
+                    <version>${tensorflow.javacpp.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
+    <dependencies>
+
+
 
 
         <dependency>
