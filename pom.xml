@@ -687,6 +687,13 @@
 
     <profiles>
         <profile>
+            <id>jetson-nano</id>
+            <modules>
+                <module>konduit-serving-gpu-nano</module>
+            </modules>
+        </profile>
+
+        <profile>
             <id>test</id>
             <modules>
                 <module>konduit-serving-test</module>
