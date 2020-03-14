@@ -67,6 +67,18 @@
         </profile>
 
         <profile>
+            <id>jetson-nano</id>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.konduit.serving</groupId>
+                    <artifactId>konduit-serving-gpu-nano</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+
+        <profile>
             <id>gpu</id>
             <activation>
                 <property>
