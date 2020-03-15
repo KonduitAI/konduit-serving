@@ -66,13 +66,7 @@
                         </exclusion>
                     </exclusions>
                 </dependency>
-
-                <dependency>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>cuda-platform</artifactId>
-                </dependency>
-
-
+                
                 <dependency>
                     <groupId>org.bytedeco</groupId>
                     <artifactId>tensorflow-platform-gpu</artifactId>
@@ -83,15 +77,10 @@
     </profiles>
 
     <dependencies>
-
-
-
-
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
     </dependencies>
 </project>
