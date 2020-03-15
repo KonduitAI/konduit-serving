@@ -80,12 +80,6 @@
 
         <profile>
             <id>gpu</id>
-            <activation>
-                <property>
-                    <name>chip</name>
-                    <value>gpu</value>
-                </property>
-            </activation>
             <dependencies>
                 <dependency>
                     <groupId>ai.konduit.serving</groupId>
