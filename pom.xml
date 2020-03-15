@@ -790,12 +790,6 @@
         </profile>
         <profile>
             <id>gpu</id>
-            <activation>
-                <property>
-                    <name>chip</name>
-                    <value>gpu</value>
-                </property>
-            </activation>
             <modules>
                 <module>konduit-serving-gpu</module>
             </modules>
