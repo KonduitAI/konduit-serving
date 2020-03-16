@@ -52,9 +52,11 @@ import org.nd4j.serde.binary.BinarySerde;
 import org.datavec.image.data.Image;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.apache.commons.io.FileUtils;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -80,7 +82,13 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-	String modelPath = new ClassPathResource("/inference/onnx/facedetector.onnx").getFile().getAbsolutePath();
+
+	File model = new File("konduit-serving-test/src/test/resources/inference/onnx/facedetector.onnx");
+
+	if(!model.exists()){
+	    FileUtils.copyURLToFile(new URL("https://raw.githubusercontent.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB/master/models/onnx/version-RFB-320.onnx"), model);
+	}
+	String modelPath = new File("src/test/resources/inference/onnx/facedetector.onnx").getAbsolutePath();
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.NUMPY)
@@ -124,8 +132,12 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
 
     @Test
     public void runFaceDetector(TestContext testContext) throws Exception {
-        NativeImageLoader nativeImageLoader = new NativeImageLoader(240, 320);
-        Image image = nativeImageLoader.asImageMatrix(new ClassPathResource("data/1.jpg").getFile());
+	File imageFile = new File("konduit-serving-test/src/test/resources/data/1.jpg");
+        if(!imageFile.exists()){
+	    FileUtils.copyURLToFile(new URL("https://github.com/KonduitAI/konduit-serving-examples/raw/master/data/facedetector/1.jpg"), imageFile);
+        }
+	NativeImageLoader nativeImageLoader = new NativeImageLoader(240, 320);
+        Image image = nativeImageLoader.asImageMatrix(new File("konduit-serving-test/src/test/resources/data/1.jpg"));
        
         INDArray contents = image.getImage();
 	

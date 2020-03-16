@@ -52,9 +52,11 @@ import org.nd4j.serde.binary.BinarySerde;
 import org.datavec.image.data.Image;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.apache.commons.io.FileUtils;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -81,8 +83,13 @@ public class OnnxTest extends BaseVerticleTest {
     @Override
     public JsonObject getConfigObject() throws Exception {
 
-	String modelPath = new ClassPathResource("/inference/onnx/squeezenet.onnx").getFile().getAbsolutePath();
+	File model = new File("konduit-serving-test/src/test/resources/inference/onnx/squeezenet.onnx");
+        if(!model.exists()){
+	    FileUtils.copyURLToFile(new URL("https://s3.amazonaws.com/onnx-model-zoo/squeezenet/squeezenet1.1/squeezenet1.1.onnx"), model);
+				    //"https://github.com/microsoft/Windows-Machine-Learning/raw/1.2.1.1/SharedContent/models/SqueezeNet.onnx"), model);
+	}
 
+	String modelPath = new File("src/test/resources/inference/onnx/squeezenet.onnx").getAbsolutePath();
         ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.NUMPY)
                 .httpPort(port)
@@ -136,11 +143,12 @@ public class OnnxTest extends BaseVerticleTest {
                 .multiPart("data_0", inputFile)
 		.post("nd4j/numpy")
                 .andReturn();
-
+        //TODO: report memory leak in DNNL execution provider to ORT
         assertEquals("Response failed", 200, response.getStatusCode());
-        
+
         INDArray bodyResult = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        assert Math.abs(bodyResult.getFloat(0) - 0.000045) < 1e-6;	
+
+	assert Math.abs(bodyResult.getFloat(0) - 1.9901825) < 1e-6;
 
 	assertArrayEquals(new long[]{1,1000}, bodyResult.shape());
     }
