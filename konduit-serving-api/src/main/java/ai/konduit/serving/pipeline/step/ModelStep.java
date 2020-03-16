@@ -65,8 +65,7 @@ public class ModelStep extends BasePipelineStep<ModelStep> {
                 DataFormat.NUMPY,
                 DataFormat.ND4J,
                 DataFormat.JSON,
-                DataFormat.IMAGE,
-//                DataFormat.IMAGE
+                DataFormat.IMAGE
         };
 
     }
