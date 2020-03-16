@@ -412,21 +412,17 @@ public class ONNXThreadPool {
 
 				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputTensors[0], num_input_nodes, output_node_names, num_output_nodes);
 
-				inputTensors[0].close();
 				Map<String, INDArray> output = new LinkedHashMap<String, INDArray>();
 
                                 for (int i = 0; i < num_output_nodes; i++) {
 					Value outValue = outputVector.get(i);
 
 					DataBuffer buffer = getDataBuffer(outValue);
-					outValue.close();
-
 					INDArray outArray = Nd4j.create(buffer);
-
 					output.put((output_node_names.get(BytePointer.class, i)).getString(), outArray);
+
 				}
                                 out.add((Map<String, INDArray>) output);
-				//outputVector.close(); 
 				}
 			    }
                             request.setOutputBatches(out);
@@ -442,7 +438,6 @@ public class ONNXThreadPool {
                         // just do nothing, i guess and hope for next round?
                     }
                 }
-		replicatedModel.close();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 // do nothing
@@ -542,9 +537,6 @@ public class ONNXThreadPool {
 		    throw new RuntimeException("Unsupported data type encountered");
 	    }
 	    Value inputTensor = Value.CreateTensor(memory_info.asOrtMemoryInfo(), input_tensor_values, sizeInBytes, dims, dims.capacity(), type);
-	    memory_info.close();
-	    input_tensor_values.close();
-	    inputTensorValuesPtr.close();
             return inputTensor;
 	}
 

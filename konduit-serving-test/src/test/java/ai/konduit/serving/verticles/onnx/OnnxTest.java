@@ -139,6 +139,7 @@ public class OnnxTest extends BaseVerticleTest {
         File inputFile = temporary.newFile();
         FileUtils.writeByteArrayToFile(inputFile, npyContents);
 
+	for(int i = 0; i < 5; i++){
        	Response response = given().port(port)
                 .multiPart("data_0", inputFile)
 		.post("nd4j/numpy")
@@ -148,9 +149,10 @@ public class OnnxTest extends BaseVerticleTest {
 
         INDArray bodyResult = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
 
-	assert Math.abs(bodyResult.getFloat(0) - 1.9901825) < 1e-6;
+	assert Math.abs(bodyResult.getFloat(0) - 1.9901832) < 1e-6;
 
 	assertArrayEquals(new long[]{1,1000}, bodyResult.shape());
+	}
     }
 
     @After
