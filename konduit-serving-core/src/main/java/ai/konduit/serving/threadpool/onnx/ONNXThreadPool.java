@@ -340,18 +340,18 @@ public class ONNXThreadPool {
 
         @Override
         public void run() {
-	 try { // (PointerScope scope = new PointerScope()) {
+	 try(PointerScope scope = new PointerScope()) {
 
                 // model should be replicated & initialized here
 		if (replicatedModel == null)
 	        replicatedModel = onnxModelLoader.loadModel();
 
-                AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions();	
+                try(AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions()){
 
 		Long num_input_nodes = replicatedModel.GetInputCount();
 		Long num_output_nodes = replicatedModel.GetOutputCount();
-                PointerPointer<BytePointer> input_node_names = new PointerPointer(num_input_nodes);
-                PointerPointer<BytePointer> output_node_names = new PointerPointer(num_output_nodes);
+                try(PointerPointer<BytePointer> input_node_names = new PointerPointer(num_input_nodes)){
+                try(PointerPointer<BytePointer> output_node_names = new PointerPointer(num_output_nodes)){
 
 		LongPointer[] input_node_dims = new LongPointer[num_input_nodes.intValue()];
 
@@ -394,9 +394,6 @@ public class ONNXThreadPool {
 			        Collection<INDArray> inputArrays = inBatch.values();	    
 			        INDArray inputArray = Nd4j.concat(0, inputArrays.toArray(new INDArray[inputArrays.size()]));
 
-
-				try (PointerScope scope = new PointerScope()) {
-
 			        Value[] inputTensors = new Value[num_input_nodes.intValue()];
 
                                 for (int i = 0; i < num_input_nodes; i++) {
@@ -423,7 +420,6 @@ public class ONNXThreadPool {
 
 				}
                                 out.add((Map<String, INDArray>) output);
-				}
 			    }
                             request.setOutputBatches(out);
                         } catch (Exception e) {
@@ -438,6 +434,9 @@ public class ONNXThreadPool {
                         // just do nothing, i guess and hope for next round?
                     }
                 }
+		}
+		}
+		}
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 // do nothing

@@ -55,13 +55,16 @@ public class OnnxModelLoader implements ModelLoader<Session> {
     public Session loadModel() throws Exception {
 	Env env = new Env(ORT_LOGGING_LEVEL_WARNING, new BytePointer("konduit-serving-onnx-session" + (new Date()).getTime()));
 
-        SessionOptions session_options = new SessionOptions();
+        try(SessionOptions session_options = new SessionOptions()){
 	session_options.SetIntraOpNumThreads(1);
 
 	session_options.SetGraphOptimizationLevel(ORT_ENABLE_EXTENDED);
 //        OrtSessionOptionsAppendExecutionProvider_Dnnl(session_options.asOrtSessionOptions(), 1);
 
+	try(BytePointer bp = new BytePointer(model_path)){
 	Session session = new Session(env, new BytePointer(model_path), session_options);
         return session;
+	}
+    }
     }
 }
