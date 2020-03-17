@@ -62,7 +62,7 @@ public class OnnxModelLoader implements ModelLoader<Session> {
 //        OrtSessionOptionsAppendExecutionProvider_Dnnl(session_options.asOrtSessionOptions(), 1);
 
 	try(BytePointer bp = new BytePointer(model_path)){
-	Session session = new Session(env, new BytePointer(model_path), session_options);
+	Session session = new Session(env, bp, session_options);
         return session;
 	}
     }
