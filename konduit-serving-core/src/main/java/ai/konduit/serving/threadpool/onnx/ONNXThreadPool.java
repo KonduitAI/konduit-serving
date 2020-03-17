@@ -405,9 +405,16 @@ public class ONNXThreadPool {
 
 				}
 				//TODO: Pass ValueVector here when possible, test w/ multiple inputs
-				//PointerPointer inputTensorsPP = new PointerPointer(inputTensors);
 
-				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputTensors[0], num_input_nodes, output_node_names, num_output_nodes);
+				Value inputVal = new Value(num_input_nodes);
+
+				for(int i = 0; i < num_input_nodes; i++){
+					inputVal.position(i);
+					inputVal.put(inputTensors[i]);
+				}
+
+				inputVal.position(0);
+				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputVal, num_input_nodes, output_node_names, num_output_nodes);
 
 				Map<String, INDArray> output = new LinkedHashMap<String, INDArray>();
 
