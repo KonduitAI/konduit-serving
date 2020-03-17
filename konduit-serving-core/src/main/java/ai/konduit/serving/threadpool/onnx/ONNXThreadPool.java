@@ -409,8 +409,7 @@ public class ONNXThreadPool {
 				Value inputVal = new Value(num_input_nodes);
 
 				for(int i = 0; i < num_input_nodes; i++){
-					inputVal.position(i);
-					inputVal.put(inputTensors[i]);
+					inputVal.position(i).put(inputTensors[i]);
 				}
 
 				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputVal.position(0), num_input_nodes, output_node_names, num_output_nodes);
