@@ -413,8 +413,7 @@ public class ONNXThreadPool {
 					inputVal.put(inputTensors[i]);
 				}
 
-				inputVal.position(0);
-				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputVal, num_input_nodes, output_node_names, num_output_nodes);
+				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputVal.position(0), num_input_nodes, output_node_names, num_output_nodes);
 
 				Map<String, INDArray> output = new LinkedHashMap<String, INDArray>();
 
