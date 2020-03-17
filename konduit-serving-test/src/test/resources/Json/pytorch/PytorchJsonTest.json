@@ -3,7 +3,7 @@
     "ndArray" : {
       "dataType" : "INT",
       "shape" : [  ],
-      "data" : [ 35]
+      "data" : [ 35 ]
     }
   },
   "classification" : {
@@ -12,5 +12,18 @@
       "shape" : [  ],
       "data" : [ 35 ]
     }
+  },
+  "raw_v1" : {
+    "ndArray" : {
+      "dataType" : "INT",
+      "shape" : [  ],
+      "data" : [ 2 ]
+    }
+  },
+  "classification_v1" : {
+    "batchId" : "b7d9a07f-7a69-4658-98ef-967061aeff73",
+    "decisions" : [ 1 ],
+    "labels" : [ "default" ],
+    "probabilities" : [ 2.0 ]
   }
 }

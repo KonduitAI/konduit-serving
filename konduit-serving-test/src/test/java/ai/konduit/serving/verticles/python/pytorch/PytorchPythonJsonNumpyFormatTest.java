@@ -78,13 +78,13 @@ public class PytorchPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonCodePath = new ClassPathResource("scripts/face_detection_pytorch/jsondetectimage.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/pytorch/Json_Pytorch_NdArray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("JsonInput", PythonType.TypeName.STR.name())
-                .pythonOutput("num_boxes", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("output_value", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -111,7 +111,7 @@ public class PytorchPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        File json = new ClassPathResource("scripts/face_detection_pytorch/pytorchImgPath.json").getFile();
+        File json = new ClassPathResource("Json/IrisY.json").getFile();
         jsonObject.put("JsonInput", json.getAbsolutePath());
         requestSpecification.body(jsonObject.encode());
 
@@ -122,12 +122,9 @@ public class PytorchPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest
                 .post("/raw/json")
                 .andReturn();
 
-        //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
-        assertEquals(expectedArr, outputArray);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json", "raw_v1");
+        assertEquals(expectedArr.getInt(), outputArray.getInt());
     }
 
     @Test
@@ -140,7 +137,7 @@ public class PytorchPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        File json = new ClassPathResource("scripts/face_detection_pytorch/pytorchImgPath.json").getFile();
+        File json = new ClassPathResource("Json/IrisY.json").getFile();
         jsonObject.put("JsonInput", json.getAbsolutePath());
         requestSpecification.body(jsonObject.encode());
 
@@ -151,11 +148,8 @@ public class PytorchPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest
                 .post("/classification/json")
                 .andReturn();
 
-        //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
 
     }

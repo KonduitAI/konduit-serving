@@ -25,10 +25,10 @@ package ai.konduit.serving.verticles.python.pytorch;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -79,13 +79,13 @@ public class PytorchPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest 
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonCodePath = new ClassPathResource("scripts/face_detection_pytorch/jsondetectimage.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/pytorch/Json_Pytorch_NdArray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("JsonInput", PythonType.TypeName.STR.name())
-                .pythonOutput("num_boxes", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("output_value", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -112,7 +112,7 @@ public class PytorchPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest 
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        File json = new ClassPathResource("scripts/face_detection_pytorch/pytorchImgPath.json").getFile();
+        File json = new ClassPathResource("Json/IrisY.json").getFile();
         jsonObject.put("JsonInput", json.getAbsolutePath());
         requestSpecification.body(jsonObject.encode());
 
@@ -129,8 +129,8 @@ public class PytorchPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest 
         FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json", "raw");
-        assertEquals(expectedArr, outputArray);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json", "raw_v1");
+        assertEquals(expectedArr.getInt(), outputArray.getInt());
 
     }
 
@@ -144,7 +144,7 @@ public class PytorchPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest 
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        File json = new ClassPathResource("scripts/face_detection_pytorch/pytorchImgPath.json").getFile();
+        File json = new ClassPathResource("Json/IrisY.json").getFile();
         jsonObject.put("JsonInput", json.getAbsolutePath());
         requestSpecification.body(jsonObject.encode());
 

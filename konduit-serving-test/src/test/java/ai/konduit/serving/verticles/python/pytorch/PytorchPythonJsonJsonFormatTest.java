@@ -24,11 +24,11 @@ package ai.konduit.serving.verticles.python.pytorch;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -36,6 +36,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -78,13 +79,13 @@ public class PytorchPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest 
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonCodePath = new ClassPathResource("scripts/face_detection_pytorch/jsondetectimage.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/pytorch/Json_Pytorch_NdArray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("JsonInput", PythonType.TypeName.STR.name())
-                .pythonOutput("num_boxes", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("output_value", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -110,7 +111,7 @@ public class PytorchPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest 
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        File json = new ClassPathResource("scripts/face_detection_pytorch/pytorchImgPath.json").getFile();
+        File json = new ClassPathResource("Json/IrisY.json").getFile();
         jsonObject.put("JsonInput", json.getAbsolutePath());
         requestSpecification.body(jsonObject.encode());
 
@@ -129,8 +130,8 @@ public class PytorchPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest 
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json","raw");
-        assertEquals(expectedArr, outputArray);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json", "raw_v1");
+        assertEquals(expectedArr.getInt(), outputArray.getInt());
 
     }
 
@@ -144,7 +145,7 @@ public class PytorchPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest 
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        File json = new ClassPathResource("scripts/face_detection_pytorch/pytorchImgPath.json").getFile();
+        File json = new ClassPathResource("Json/IrisY.json").getFile();
         jsonObject.put("JsonInput", json.getAbsolutePath());
         requestSpecification.body(jsonObject.encode());
 
@@ -158,13 +159,14 @@ public class PytorchPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest 
 
         JsonObject jsonObject1 = new JsonObject(output);
         assertTrue(jsonObject1.containsKey("default"));
-        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
-        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
-        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
-        NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json","classification");
-        assertEquals(expectedArr, outputArray);
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
+        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
+        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json");
+        double expValue = expArr.getJsonArray(0).getDouble(0);
+        assertEquals(expValue, outpuValue, 1e-1);
+        assertEquals(expArr, outputArr);
 
     }
 }
