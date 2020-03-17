@@ -29,6 +29,7 @@ import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.response.Response;
@@ -36,6 +37,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -88,7 +90,7 @@ public class PytorchPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalTest
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("inputValue", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("pred", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("output_np", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -133,13 +135,12 @@ public class PytorchPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalTest
         System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNumpyTest.json", "raw");
         System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
-        assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         assertEquals(expectedArr, outputArray);
     }
 
 
-     @Test
-     @Ignore
+    @Test
+    @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -160,7 +161,8 @@ public class PytorchPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalTest
                 .multiPart("default", xFile)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/classification/numpy").then()
+                .post("/classification/numpy")
+                .then()
                 .extract()
                 .body().asString();
 
@@ -169,9 +171,10 @@ public class PytorchPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalTest
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNumpyTest.json", "classification");
-        assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
-        assertEquals(expectedArr, outputArray);
+        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchNumpyTest.json");
+        float[][] expNd = ObjectMappers.json().readValue(expArr.toString(), float[][].class);
+        INDArray expectedArray = Nd4j.create(expNd);
+        assertEquals(expectedArray, outputArray);
     }
 
 }

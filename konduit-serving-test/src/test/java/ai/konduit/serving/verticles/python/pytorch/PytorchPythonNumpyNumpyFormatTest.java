@@ -85,7 +85,7 @@ public class PytorchPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTes
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("inputValue", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("pred", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("output_np", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -126,7 +126,6 @@ public class PytorchPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTes
                 .post("/raw/numpy")
                 .andReturn();
 
-        //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
         System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNumpyTest.json","raw");
@@ -160,11 +159,8 @@ public class PytorchPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTes
                 .post("/classification/numpy")
                 .andReturn();
 
-        //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchNumpyTest.json");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
     }
 
