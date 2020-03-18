@@ -86,7 +86,6 @@ public class OnnxTest extends BaseVerticleTest {
 	File model = new File("konduit-serving-test/src/test/resources/inference/onnx/squeezenet.onnx");
         if(!model.exists()){
 	    FileUtils.copyURLToFile(new URL("https://s3.amazonaws.com/onnx-model-zoo/squeezenet/squeezenet1.1/squeezenet1.1.onnx"), model);
-				    //"https://github.com/microsoft/Windows-Machine-Learning/raw/1.2.1.1/SharedContent/models/SqueezeNet.onnx"), model);
 	}
 
 	String modelPath = new File("src/test/resources/inference/onnx/squeezenet.onnx").getAbsolutePath();
