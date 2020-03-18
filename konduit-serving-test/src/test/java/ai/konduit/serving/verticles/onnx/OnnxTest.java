@@ -105,7 +105,7 @@ public class OnnxTest extends BaseVerticleTest {
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)
                 .inputNames(Arrays.asList("data_0"))
-                .outputNames(Arrays.asList("softmaxout_1"))
+                .outputNames(Arrays.asList("squeezenet0_flatten0_reshape0"))
                 .build();
 
 
@@ -114,7 +114,6 @@ public class OnnxTest extends BaseVerticleTest {
                 .step(modelPipelineConfig)
                 .build();
 
-//        return new JsonObject();
 	return new JsonObject(inferenceConfiguration.toJson());
     }
 
