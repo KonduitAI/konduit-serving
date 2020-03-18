@@ -123,7 +123,7 @@ public class PytorchPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest
                 .andReturn();
 
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json", "raw_v1");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json", "raw");
         assertEquals(expectedArr.getInt(), outputArray.getInt());
     }
 

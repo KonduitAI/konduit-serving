@@ -2,29 +2,14 @@
   "raw" : {
     "ndArray" : {
       "dataType" : "INT",
-      "shape" : [  ],
+      "shape" : [ 1 ],
       "data" : [ 2 ]
-    }
-  },
-  "raw_numpy" : {
-    "ndArray" : {
-      "dataType" : "INT",
-      "shape" : [  ],
-      "data" : [ 51 ]
     }
   },
   "classification" : {
-    "ndArray" : {
-      "dataType" : "LONG",
-      "shape" : [ 1 ],
-      "data" : [ 2 ]
-    }
-  },
-  "raw_v1" : {
-    "ndArray" : {
-      "dataType" : "INT",
-      "shape" : [ 1 ],
-      "data" : [ 2 ]
-    }
+    "batchId" : "b7d9a07f-7a69-4658-98ef-967061aeff73",
+    "decisions" : [ 1 ],
+    "labels" : [ "default" ],
+    "probabilities" : [ [ 2.0 ] ]
   }
 }

@@ -130,13 +130,12 @@ public class PytorchPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest 
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json", "raw_v1");
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json", "raw");
         assertEquals(expectedArr.getInt(), outputArray.getInt());
 
     }
 
     @Test
-    @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -162,11 +161,7 @@ public class PytorchPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest 
         assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
-        double outpuValue = outputArr.getJsonArray(0).getDouble(0);
         JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json");
-        double expValue = expArr.getJsonArray(0).getDouble(0);
-        assertEquals(expValue, outpuValue, 1e-1);
         assertEquals(expArr, outputArr);
-
     }
 }

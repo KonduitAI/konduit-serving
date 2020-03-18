@@ -36,6 +36,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -145,12 +146,12 @@ public class PytorchPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTest 
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "raw_v1");
-        assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "raw");
+        assertEquals(expectedArr.getInt(0), outputArray.getInt(0), 1e-1);
     }
 
     @Test(timeout = 60000)
-    @Ignore
+    //@Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -177,15 +178,13 @@ public class PytorchPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTest 
                 .post("/classification/nd4j").then()
                 .extract()
                 .body().asString();
+
         JsonObject jsonObject1 = new JsonObject(response);
         assertTrue(jsonObject1.containsKey("default"));
-        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
-        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
-        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
-        NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "classification");
-        assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
+        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json");
+        assertEquals(expArr, outputArr);
     }
-
 }

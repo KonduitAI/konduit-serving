@@ -98,5 +98,5 @@ output_pred1 = model(my_test)
 output_pred1 = output_pred1.detach().numpy()
 
 #print ("The accuracy is", accuracy_score(labels_test, np.argmax(pred, axis=1)))
-output_value=np.argmax(output_pred1)
+output_value=np.array([np.argmax(output_pred1)])
 print("output_value",output_value)
