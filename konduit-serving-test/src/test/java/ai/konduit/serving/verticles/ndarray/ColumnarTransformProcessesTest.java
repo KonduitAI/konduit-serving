@@ -32,6 +32,7 @@ import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.train.TrainUtils;
+import ai.konduit.serving.util.PortUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.http.ContentType;
 import io.vertx.core.DeploymentOptions;
@@ -54,7 +55,6 @@ import org.nd4j.linalg.primitives.Pair;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.net.ServerSocket;
 
 import static ai.konduit.serving.train.TrainUtils.getIrisOutputSchema;
 import static ai.konduit.serving.train.TrainUtils.getTrainedNetwork;
@@ -71,9 +71,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
 
     @Before
     public void before(TestContext context) throws Exception {
-        ServerSocket socket = new ServerSocket(0);
-        port = socket.getLocalPort();
-        socket.close();
+        port = PortUtils.getAvailablePort();
 
         DeploymentOptions options = new DeploymentOptions()
                 .setWorker(true)

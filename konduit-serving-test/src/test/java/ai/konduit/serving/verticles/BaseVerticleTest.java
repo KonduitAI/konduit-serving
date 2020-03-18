@@ -62,7 +62,10 @@ public abstract class BaseVerticleTest {
         pubsubPort = PortUtils.getAvailablePort();
         System.setProperty("vertx.options.maxEventLoopExecuteTime", "240000");
         VertxOptions vertxOptions = new VertxOptions();
-        vertxOptions.setMaxEventLoopExecuteTime(240000);
+        vertxOptions.setMaxEventLoopExecuteTime(240);
+        vertxOptions.setMaxEventLoopExecuteTimeUnit(SECONDS);
+        vertxOptions.setBlockedThreadCheckInterval(10);
+        vertxOptions.setBlockedThreadCheckIntervalUnit(SECONDS);
         vertx = Vertx.vertx(vertxOptions);
         Nd4j.getWorkspaceManager().setDebugMode(DebugMode.SPILL_EVERYTHING);
         setupVertx(vertx);
@@ -76,8 +79,6 @@ public abstract class BaseVerticleTest {
         Nd4j.getRandom().setSeed(42);
 
         DeploymentOptions options = new DeploymentOptions()
-                .setWorker(true).setInstances(1)
-                .setWorkerPoolSize(1)
                 .setConfig(getConfigObject());
 
         vertx.registerVerticleFactory(new VerticleFactory() {

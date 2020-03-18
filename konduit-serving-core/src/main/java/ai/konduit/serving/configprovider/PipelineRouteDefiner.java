@@ -467,7 +467,7 @@ public class PipelineRouteDefiner {
             if (inputs == null) {
                 log.warn("No inputs found. Bad request");
                 ctx.response().setStatusCode(400);
-                ctx.response().end("No  inputs found. Bad request.");
+                ctx.response().end("No inputs found. Bad request.");
                 return;
             }
 
