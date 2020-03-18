@@ -31,6 +31,7 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
+import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -38,7 +39,6 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -50,16 +50,19 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
+import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class PytorchPythonNd4jNd4jFormatTest_v1 extends BaseMultiNumpyVerticalTest {
+public class PytorchPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -80,6 +83,10 @@ public class PytorchPythonNd4jNd4jFormatTest_v1 extends BaseMultiNumpyVerticalTe
 
     @Override
     public JsonObject getConfigObject() throws Exception {
+        String pythonPath = Arrays.stream(cachePackages())
+                .filter(Objects::nonNull)
+                .map(File::getAbsolutePath)
+                .collect(Collectors.joining(File.pathSeparator));
         String pythonCodePath = new ClassPathResource("scripts/pytorch/NdArray_Pytorch_NdArray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
@@ -92,7 +99,7 @@ public class PytorchPythonNd4jNd4jFormatTest_v1 extends BaseMultiNumpyVerticalTe
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .outputDataFormat(Output.DataFormat.ND4J)
+                .outputDataFormat(Output.DataFormat.NUMPY)
                 .httpPort(port)
                 .build();
 
@@ -104,16 +111,15 @@ public class PytorchPythonNd4jNd4jFormatTest_v1 extends BaseMultiNumpyVerticalTe
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
-
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
         //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[]{100, 55, 555, 1000});
+        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
@@ -124,35 +130,28 @@ public class PytorchPythonNd4jNd4jFormatTest_v1 extends BaseMultiNumpyVerticalTe
         requestSpecification.body(jsonObject.encode().getBytes());
 
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
+        Response response = requestSpecification.when()
                 .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/raw/nd4j").then()
-                .extract()
-                .body().asString();
+                .post("/raw/nd4j")
+                .andReturn();
 
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
-        FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "raw_v1");
         assertEquals(expectedArr.getInt(), outputArray.getInt());
-
     }
 
-
-    @Test
+    @Test(timeout = 60000)
     @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
-
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
         //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[]{100, 55, 555, 1000});
+        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
@@ -162,23 +161,18 @@ public class PytorchPythonNd4jNd4jFormatTest_v1 extends BaseMultiNumpyVerticalTe
         BinarySerde.writeArrayToDisk(arr, file);
         requestSpecification.body(jsonObject.encode().getBytes());
 
-
         requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
+        Response response = requestSpecification.when()
                 .multiPart("default", file)
                 .expect().statusCode(200)
                 .body(not(isEmptyOrNullString()))
-                .post("/classification/nd4j").then()
-                .extract()
-                .body().asString();
+                .post("/classification/nd4j")
+                .andReturn();
 
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
-        FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
+        //TODO: Assertion for Numpy to be verified
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "classification");
-        assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
-        assertEquals(expectedArr, outputArray);
+        assertEquals(expectedArr.getInt(), outputArray.getInt());
     }
 
 }

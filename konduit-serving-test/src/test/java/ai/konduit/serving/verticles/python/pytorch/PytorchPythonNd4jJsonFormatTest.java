@@ -63,7 +63,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class PytorchPythonNd4jJsonFormatTest_v1 extends BaseMultiNumpyVerticalTest {
+public class PytorchPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
