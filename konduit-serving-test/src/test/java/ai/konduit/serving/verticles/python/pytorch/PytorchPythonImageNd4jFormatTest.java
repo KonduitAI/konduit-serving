@@ -30,12 +30,14 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -45,6 +47,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.serde.binary.BinarySerde;
 
@@ -79,13 +82,13 @@ public class PytorchPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonCodePath = new ClassPathResource("scripts/face_detection_pytorch/detect_image.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/pytorch/Image_Pytorch_Ndarray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
-                .pythonInput("image", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("num_boxes", PythonType.TypeName.NDARRAY.name())
+                .pythonInput("image_input", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("predicted_Ouput", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -93,15 +96,15 @@ public class PytorchPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest
         //ServingConfig set httpport and Input Formats
         ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.ND4J)
-                .httpPort(port).
-                        build();
+                .httpPort(port)
+                .build();
 
         //Model config and set model type as Pytorch
         ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
                 .imageProcessingInitialLayout("NCHW")
                 .imageProcessingRequiredLayout("NHWC")
-                .inputName("image")
-                .dimensionsConfig("default", new Long[]{478L, 720L, 3L}) // Height, width, channels
+                .inputName("image_input")
+                .dimensionsConfig("default", new Long[]{240L, 320L, 3L}) // Height, width, channels
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
@@ -123,10 +126,10 @@ public class PytorchPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "multipart/form-data");
 
-        File imageFile = new ClassPathResource("data/PytorchNDArrayTest.jpg").getFile();
+        File imageFile = new ClassPathResource("data/pytorch/PytorchImageTest.png").getFile();
 
         String output = requestSpecification.when()
-                .multiPart("image", imageFile)
+                .multiPart("image_input", imageFile)
                 .expect().statusCode(200)
                 .post("/raw/image").then()
                 .extract()
@@ -138,12 +141,7 @@ public class PytorchPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
-        assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
-        assertEquals(expectedArr, outputArray);
-
-
-
-
+        assertEquals(expectedArr.getInt(0), outputArray.getInt(0), 1e-1);
     }
 
     @Test
@@ -158,10 +156,10 @@ public class PytorchPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "multipart/form-data");
 
-        File imageFile = new ClassPathResource("data/PytorchNDArrayTest.jpg").getFile();
+        File imageFile = new ClassPathResource("data/pytorch/PytorchImageTest.png").getFile();
 
         String output = requestSpecification.when()
-                .multiPart("image", imageFile)
+                .multiPart("image_input", imageFile)
                 .expect().statusCode(200)
                 .post("/classification/image").then()
                 .extract()
@@ -172,9 +170,10 @@ public class PytorchPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest
         FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "classification");
-        assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
-        assertEquals(expectedArr, outputArray);
+        JsonArray expProb = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchImageTest.json");
+        float[][] expNd = ObjectMappers.json().readValue(expProb.toString(), float[][].class);
+        INDArray expectedArray = Nd4j.create(expNd);
+        assertEquals(expectedArray, outputArray);
     }
 
 }

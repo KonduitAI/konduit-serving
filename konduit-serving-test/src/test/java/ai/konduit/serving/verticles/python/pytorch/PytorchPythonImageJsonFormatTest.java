@@ -37,6 +37,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -55,6 +56,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest {
@@ -70,6 +72,8 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
         return req -> {
             //should be json body of classification
             req.bodyHandler(body -> {
+                System.out.println(body.toJson());
+                System.out.println("Finish body" + body);
             });
 
             req.exceptionHandler(exception -> context.fail(exception));
@@ -78,13 +82,13 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonCodePath = new ClassPathResource("scripts/face_detection_pytorch/detect_image.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/pytorch/Image_Pytorch_Ndarray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
-                .pythonInput("image", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("num_boxes", PythonType.TypeName.NDARRAY.name())
+                .pythonInput("image_input", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("predicted_Ouput", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -95,10 +99,8 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
 
         //Model config and set model type as Pytorch
         ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
-                .imageProcessingInitialLayout("NCHW")
-                .imageProcessingRequiredLayout("NHWC")
-                .inputName("image")
-                .dimensionsConfig("default", new Long[]{478L, 720L, 3L}) // Height, width, channels
+                .inputName("image_input")
+                .dimensionsConfig("default", new Long[]{240L, 320L, 3L}) // Height, width, channels
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
@@ -120,14 +122,14 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "multipart/form-data");
 
-        File imageFile = new ClassPathResource("data/PytorchNDArrayTest.jpg").getFile();
-
+        File imageFile = new ClassPathResource("data/pytorch/PytorchImageTest.png").getFile();
         String output = requestSpecification.when()
-                .multiPart("image", imageFile)
+                .multiPart("image_input", imageFile)
                 .expect().statusCode(200)
                 .post("/raw/image").then()
                 .extract()
                 .body().asString();
+
         JsonObject jsonObject1 = new JsonObject(output);
         assertTrue(jsonObject1.containsKey("default"));
         assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
@@ -136,13 +138,13 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
-        assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0),1e-1);
-        assertEquals(expectedArr, outputArray);
+        assertEquals(expectedArr.getInt(0), outputArray.getInt(0),1e-1);
     }
 
     @Test
-    @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
+
+        System.out.println("testInferenceClassificationResult Start");
 
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -152,26 +154,22 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "multipart/form-data");
 
-        File imageFile = new ClassPathResource("data/PytorchNDArrayTest.jpg").getFile();
+        File imageFile = new ClassPathResource("data/pytorch/PytorchImageTest.png").getFile();
 
         String output = requestSpecification.when()
-                .multiPart("image", imageFile)
+                .multiPart("image_input", imageFile)
                 .expect().statusCode(200)
                 .post("/classification/image").then()
                 .extract()
                 .body().asString();
         JsonObject jsonObject1 = new JsonObject(output);
         assertTrue(jsonObject1.containsKey("default"));
-        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
-        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
-        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
-        System.out.println(ndarraySerde);
-        NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
-        //assertEquals(51, outputArray.getDouble(0), 1e-1);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "classification");
-        assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
-        assertEquals(expectedArr, outputArray);
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
+        JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+        JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
+        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchImageTest.json");
+        assertEquals(expArr, outputArr);
+
     }
 
 }
