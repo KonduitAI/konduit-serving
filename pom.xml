@@ -883,6 +883,7 @@
             </build>
         </profile>
 
+
         <!-- For Android: -Dplatform=android-arm -->
         <profile>
             <id>javacpp-platform-default</id>
@@ -1018,6 +1019,7 @@
                 <os.arch>arm</os.arch>
             </properties>
         </profile>
+
         <profile>
             <id>securitycheck</id>
             <build>
