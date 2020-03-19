@@ -882,7 +882,6 @@
                 </pluginManagement>
             </build>
         </profile>
-<<<<<<< HEAD
 
         <!-- For Android: -Dplatform=android-arm -->
         <profile>
@@ -1018,7 +1017,7 @@
             <properties>
                 <os.arch>arm</os.arch>
             </properties>
-=======
+        </profile>
         <profile>
             <id>securitycheck</id>
             <build>
@@ -1073,7 +1072,6 @@
                     </plugin>
                 </plugins>
             </build>
->>>>>>> c73ceecba0e4c396bcd2e19fe8460ecdba5f3f65
         </profile>
     </profiles>
 </project>
