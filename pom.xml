@@ -129,10 +129,11 @@
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>
         <leptonica.version>1.79.0</leptonica.version>
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
-        <hdf5.version>1.10.6</hdf5.version>
+        <hdf5.version>1.12.0</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
         <jna.version>5.3.1</jna.version>
-        <cuda>10.2</cuda>
+        <cuda.version>10.2</cuda.version>
+        <cuda.javacpp.version>${cuda.version}-${javacpp.version}</cuda.javacpp.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
 
@@ -583,10 +584,35 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
+
     </distributionManagement>
 
+
     <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.1</version>
+            </extension>
+        </extensions>
+
         <plugins>
+
+            <plugin>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.1</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>detect</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -679,6 +705,10 @@
 
     <repositories>
         <repository>
+            <id>konduit-packages</id>
+            <url>https://packages.konduit.ai/repository/maven-public/</url>
+        </repository>
+        <repository>
             <id>snapshots-repo</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <releases>
@@ -692,6 +722,13 @@
     </repositories>
 
     <profiles>
+        <profile>
+            <id>jetson-nano</id>
+            <modules>
+                <module>konduit-serving-gpu-nano</module>
+            </modules>
+        </profile>
+
         <profile>
             <id>test</id>
             <modules>
@@ -714,6 +751,12 @@
             <id>rpm</id>
             <modules>
                 <module>konduit-serving-rpm</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>tensorflow</id>
+            <modules>
+                <module>konduit-serving-tfjava</module>
             </modules>
         </profile>
         <profile>
@@ -760,12 +803,6 @@
         </profile>
         <profile>
             <id>gpu</id>
-            <activation>
-                <property>
-                    <name>chip</name>
-                    <value>gpu</value>
-                </property>
-            </activation>
             <modules>
                 <module>konduit-serving-gpu</module>
             </modules>
@@ -845,6 +882,144 @@
                 </pluginManagement>
             </build>
         </profile>
+
+
+        <!-- For Android: -Dplatform=android-arm -->
+        <profile>
+            <id>javacpp-platform-default</id>
+            <activation>
+                <property>
+                    <name>!javacpp.platform</name>
+                </property>
+            </activation>
+            <properties>
+                <javacpp.platform>${os.name}-${os.arch}</javacpp.platform>
+            </properties>
+        </profile>
+
+        <!-- Profiles to set the default javacpp.platform property: If someone knows a better way to do this, please do let me know! -->
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <name>linux</name>
+                </os>
+            </activation>
+            <properties>
+                <os.name>linux</os.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>macosx</id>
+            <activation>
+                <os>
+                    <name>mac os x</name>
+                </os>
+            </activation>
+            <properties>
+                <os.name>macosx</os.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <os.name>windows</os.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>i386</id>
+            <activation>
+                <os>
+                    <arch>i386</arch>
+                </os>
+            </activation>
+            <properties>
+                <os.arch>x86_64</os.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>i486</id>
+            <activation>
+                <os>
+                    <arch>i486</arch>
+                </os>
+            </activation>
+            <properties>
+                <os.arch>x86_64</os.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>i586</id>
+            <activation>
+                <os>
+                    <arch>i586</arch>
+                </os>
+            </activation>
+            <properties>
+                <os.arch>x86_64</os.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>i686</id>
+            <activation>
+                <os>
+                    <arch>i686</arch>
+                </os>
+            </activation>
+            <properties>
+                <os.arch>x86_64</os.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>x86</id>
+            <activation>
+                <os>
+                    <arch>x86</arch>
+                </os>
+            </activation>
+            <properties>
+                <os.arch>x86_64</os.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>amd64</id>
+            <activation>
+                <os>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <os.arch>x86_64</os.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>x86-64</id>
+            <activation>
+                <os>
+                    <arch>x86-64</arch>
+                </os>
+            </activation>
+            <properties>
+                <os.arch>x86_64</os.arch>
+            </properties>
+        </profile>
+        <profile>
+            <id>arm</id>
+            <activation>
+                <os>
+                    <arch>arm</arch>
+                </os>
+            </activation>
+            <properties>
+                <os.arch>arm</os.arch>
+            </properties>
+        </profile>
+
         <profile>
             <id>securitycheck</id>
             <build>
