@@ -26,16 +26,11 @@ import ai.konduit.serving.model.loader.ModelLoader;
 import ai.konduit.serving.threadpool.onnx.ONNXThreadPool;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
-import org.nd4j.base.Preconditions;
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.bytedeco.onnxruntime.AllocatorWithDefaultOptions;
 import org.bytedeco.onnxruntime.Session;
+import org.nd4j.base.Preconditions;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
-import org.bytedeco.javacpp.PointerScope;
-
-import java.util.List;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

@@ -28,28 +28,23 @@ import ai.konduit.serving.threadpool.onnx.observables.BatchedOnnxInferenceObserv
 import ai.konduit.serving.threadpool.onnx.observables.OnnxObservable;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.deeplearning4j.parallelism.inference.InferenceMode;
-import org.deeplearning4j.parallelism.inference.observers.BasicInferenceObserver;
-
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.indexer.*;
 import org.bytedeco.onnxruntime.*;
-import static org.bytedeco.onnxruntime.global.onnxruntime.*;
-import org.nd4j.linalg.api.buffer.DataType;
-import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.api.ndarray.INDArray;
+import org.deeplearning4j.parallelism.inference.InferenceMode;
+import org.deeplearning4j.parallelism.inference.observers.BasicInferenceObserver;
 import org.nd4j.linalg.api.buffer.DataBuffer;
+import org.nd4j.linalg.api.buffer.DataType;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.Observer;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static org.bytedeco.onnxruntime.global.onnxruntime.*;
 
 /**
  * This class is simple wrapper for
@@ -77,7 +72,7 @@ public class ONNXThreadPool {
     private ObservablesProvider provider;
 
     protected ONNXThreadPool() {
-         //
+        //
 
     }
 
@@ -147,11 +142,11 @@ public class ONNXThreadPool {
         OnnxObservable observable;
 
 
-	//Batch of 1
-	List<Map<String, INDArray>> inputs = new ArrayList<Map<String, INDArray>>(1);
-	inputs.add(input);
+        //Batch of 1
+        List<Map<String, INDArray>> inputs = new ArrayList<Map<String, INDArray>>(1);
+        inputs.add(input);
 
-	if (inferenceMode == InferenceMode.SEQUENTIAL) {
+        if (inferenceMode == InferenceMode.SEQUENTIAL) {
             observable = new BasicOnnxInferenceObservable(inputs);
             observable.addObserver(observer);
             try {
@@ -340,108 +335,108 @@ public class ONNXThreadPool {
 
         @Override
         public void run() {
-	 try(PointerScope scope = new PointerScope()) {
+            try (PointerScope scope = new PointerScope()) {
 
                 // model should be replicated & initialized here
-		if (replicatedModel == null)
-	        replicatedModel = onnxModelLoader.loadModel();
+                if (replicatedModel == null)
+                    replicatedModel = onnxModelLoader.loadModel();
 
-                try(AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions()){
+                try (AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions()) {
 
-		Long num_input_nodes = replicatedModel.GetInputCount();
-		Long num_output_nodes = replicatedModel.GetOutputCount();
-                try(PointerPointer<BytePointer> input_node_names = new PointerPointer(num_input_nodes)){
-                try(PointerPointer<BytePointer> output_node_names = new PointerPointer(num_output_nodes)){
+                    Long num_input_nodes = replicatedModel.GetInputCount();
+                    Long num_output_nodes = replicatedModel.GetOutputCount();
+                    try (PointerPointer<BytePointer> input_node_names = new PointerPointer(num_input_nodes)) {
+                        try (PointerPointer<BytePointer> output_node_names = new PointerPointer(num_output_nodes)) {
 
-		LongPointer[] input_node_dims = new LongPointer[num_input_nodes.intValue()];
+                            LongPointer[] input_node_dims = new LongPointer[num_input_nodes.intValue()];
 
-		for (int i = 0; i < num_output_nodes; i++) {
-	            BytePointer output_name = replicatedModel.GetOutputName(i, allocator.asOrtAllocator());
-                    output_node_names.put(i, output_name);
-		}
-		long[] inputSizes = new long[num_input_nodes.intValue()];
-		int[] inputTypes = new int[num_input_nodes.intValue()];
+                            for (int i = 0; i < num_output_nodes; i++) {
+                                BytePointer output_name = replicatedModel.GetOutputName(i, allocator.asOrtAllocator());
+                                output_node_names.put(i, output_name);
+                            }
+                            long[] inputSizes = new long[num_input_nodes.intValue()];
+                            int[] inputTypes = new int[num_input_nodes.intValue()];
 
-                for (int i = 0; i < num_input_nodes; i++) {
-		    BytePointer input_name = replicatedModel.GetInputName(i, allocator.asOrtAllocator());
+                            for (int i = 0; i < num_input_nodes; i++) {
+                                BytePointer input_name = replicatedModel.GetInputName(i, allocator.asOrtAllocator());
 
-		    input_node_names.put(i, input_name);
+                                input_node_names.put(i, input_name);
 
-                    TypeInfo typeInfo = replicatedModel.GetInputTypeInfo(i);
-		    inputTypes[i] = typeInfo.GetONNXType();
+                                TypeInfo typeInfo = replicatedModel.GetInputTypeInfo(i);
+                                inputTypes[i] = typeInfo.GetONNXType();
 
-		    TensorTypeAndShapeInfo tensor_info = typeInfo.GetTensorTypeAndShapeInfo();
-		    input_node_dims[i] = tensor_info.GetShape();
+                                TensorTypeAndShapeInfo tensor_info = typeInfo.GetTensorTypeAndShapeInfo();
+                                input_node_dims[i] = tensor_info.GetShape();
 
-	            int acc = 1;
-		    for (long j = 0; j < input_node_dims[i].capacity(); j++)
-	                acc *= input_node_dims[i].get(j);
+                                int acc = 1;
+                                for (long j = 0; j < input_node_dims[i].capacity(); j++)
+                                    acc *= input_node_dims[i].get(j);
 
-		    inputSizes[i] = acc;
-		}
+                                inputSizes[i] = acc;
+                            }
 
-                while (shouldWork.get()) {
-                    OnnxObservable request = inputQueue.take();
+                            while (shouldWork.get()) {
+                                OnnxObservable request = inputQueue.take();
 
-                    if (request != null) {
-                        counter.incrementAndGet();
+                                if (request != null) {
+                                    counter.incrementAndGet();
 
-                        List<Map<String, INDArray>> batches = request.getInputBatches();
-                        List<Map<String, INDArray>> out = new ArrayList<>(batches.size());
+                                    List<Map<String, INDArray>> batches = request.getInputBatches();
+                                    List<Map<String, INDArray>> out = new ArrayList<>(batches.size());
 
-                        try {
-                            for (Map<String, INDArray> inBatch : batches) {	
-			        Collection<INDArray> inputArrays = inBatch.values();	    
-			        INDArray inputArray = Nd4j.concat(0, inputArrays.toArray(new INDArray[inputArrays.size()]));
+                                    try {
+                                        for (Map<String, INDArray> inBatch : batches) {
+                                            Collection<INDArray> inputArrays = inBatch.values();
+                                            INDArray inputArray = Nd4j.concat(0, inputArrays.toArray(new INDArray[inputArrays.size()]));
 
-			        Value[] inputTensors = new Value[num_input_nodes.intValue()];
+                                            Value[] inputTensors = new Value[num_input_nodes.intValue()];
 
-                                for (int i = 0; i < num_input_nodes; i++) {
-		                  BytePointer input_name = input_node_names.get(BytePointer.class, i);
+                                            for (int i = 0; i < num_input_nodes; i++) {
+                                                BytePointer input_name = input_node_names.get(BytePointer.class, i);
 
-				  Value inputTensor = getTensor(inBatch.get(input_name.getString()), inputTypes[i], inputSizes[i], input_node_dims[i]);
+                                                Value inputTensor = getTensor(inBatch.get(input_name.getString()), inputTypes[i], inputSizes[i], input_node_dims[i]);
 
-				  inputTensors[i] = inputTensor;
+                                                inputTensors[i] = inputTensor;
 
-				}
-				//TODO: Pass ValueVector here when possible, test w/ multiple inputs
+                                            }
+                                            //TODO: Pass ValueVector here when possible, test w/ multiple inputs
 
-				Value inputVal = new Value(num_input_nodes);
+                                            Value inputVal = new Value(num_input_nodes);
 
-				for(int i = 0; i < num_input_nodes; i++){
-					inputVal.position(i).put(inputTensors[i]);
-				}
+                                            for (int i = 0; i < num_input_nodes; i++) {
+                                                inputVal.position(i).put(inputTensors[i]);
+                                            }
 
-				ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputVal.position(0), num_input_nodes, output_node_names, num_output_nodes);
+                                            ValueVector outputVector = replicatedModel.Run(new RunOptions(), input_node_names, inputVal.position(0), num_input_nodes, output_node_names, num_output_nodes);
 
-				Map<String, INDArray> output = new LinkedHashMap<String, INDArray>();
+                                            Map<String, INDArray> output = new LinkedHashMap<String, INDArray>();
 
-                                for (int i = 0; i < num_output_nodes; i++) {
-					Value outValue = outputVector.get(i);
+                                            for (int i = 0; i < num_output_nodes; i++) {
+                                                Value outValue = outputVector.get(i);
 
-					DataBuffer buffer = getDataBuffer(outValue);
-					INDArray outArray = Nd4j.create(buffer);
-					output.put((output_node_names.get(BytePointer.class, i)).getString(), outArray);
+                                                DataBuffer buffer = getDataBuffer(outValue);
+                                                INDArray outArray = Nd4j.create(buffer);
+                                                output.put((output_node_names.get(BytePointer.class, i)).getString(), outArray);
 
-				}
-                                out.add((Map<String, INDArray>) output);
-			    }
-                            request.setOutputBatches(out);
-                        } catch (Exception e) {
-                            log.error("Error occurred doing inference", e);
-                            request.setOutputException(e);
+                                            }
+                                            out.add((Map<String, INDArray>) output);
+                                        }
+                                        request.setOutputBatches(out);
+                                    } catch (Exception e) {
+                                        log.error("Error occurred doing inference", e);
+                                        request.setOutputException(e);
 
+                                    }
+
+                                    replicatedModel = null;
+
+                                } else {
+                                    // just do nothing, i guess and hope for next round?
+                                }
+                            }
                         }
-
-			replicatedModel = null;
-
-                    } else {
-                        // just do nothing, i guess and hope for next round?
                     }
                 }
-		}
-		}
-		}
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 // do nothing
@@ -460,172 +455,186 @@ public class ONNXThreadPool {
             }
         }
 
-	private Value getTensor(INDArray ndArray, int type, long size, LongPointer dims){
+        private Value getTensor(INDArray ndArray, int type, long size, LongPointer dims) {
             Pointer inputTensorValuesPtr = ndArray.data().pointer();
 
-	    long sizeInBytes = size;
+            long sizeInBytes = size;
             MemoryInfo memory_info = MemoryInfo.CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-	    Pointer input_tensor_values = null;
+            Pointer input_tensor_values = null;
             switch (type) {
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT:
-                    if(!ndArray.dataType().equals(DataType.FLOAT)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (FloatPointer)inputTensorValuesPtr;
-		    sizeInBytes = size * 4;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.FLOAT))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (FloatPointer) inputTensorValuesPtr;
+                    sizeInBytes = size * 4;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8:
-                    if(!ndArray.dataType().equals(DataType.UINT8)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (BytePointer)inputTensorValuesPtr;
-		    sizeInBytes = size;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.UINT8))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (BytePointer) inputTensorValuesPtr;
+                    sizeInBytes = size;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8:
-                    if(!ndArray.dataType().equals(DataType.INT8)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (BytePointer)inputTensorValuesPtr;
-		    sizeInBytes = size;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.INT8))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (BytePointer) inputTensorValuesPtr;
+                    sizeInBytes = size;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16:
-                    if(!ndArray.dataType().equals(DataType.UINT16)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
-		    sizeInBytes = size * 2;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.UINT16))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (ShortPointer) inputTensorValuesPtr;
+                    sizeInBytes = size * 2;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16:
-                    if(!ndArray.dataType().equals(DataType.INT16)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
-		    sizeInBytes = size * 2;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.INT16))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (ShortPointer) inputTensorValuesPtr;
+                    sizeInBytes = size * 2;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32:
-                    if(!ndArray.dataType().equals(DataType.INT32)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (IntPointer)inputTensorValuesPtr;
-		    sizeInBytes = size * 4;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.INT32))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (IntPointer) inputTensorValuesPtr;
+                    sizeInBytes = size * 4;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64:
-                    if(!ndArray.dataType().equals(DataType.INT64)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (LongPointer)inputTensorValuesPtr;
-		    sizeInBytes = size * 8;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.INT64))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (LongPointer) inputTensorValuesPtr;
+                    sizeInBytes = size * 8;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
-                    if(!ndArray.dataType().equals(DataType.INT8)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (BytePointer)inputTensorValuesPtr;
-		    sizeInBytes = size;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.INT8))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (BytePointer) inputTensorValuesPtr;
+                    sizeInBytes = size;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL:
-                    if(!ndArray.dataType().equals(DataType.BOOL)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (BoolPointer)inputTensorValuesPtr; //Casting Boolean to Bool here, sizes could different on some platforms
-		    sizeInBytes = size;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.BOOL))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (BoolPointer) inputTensorValuesPtr; //Casting Boolean to Bool here, sizes could different on some platforms
+                    sizeInBytes = size;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16:
-                    if(!ndArray.dataType().equals(DataType.HALF)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
-		    sizeInBytes = size * 2;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.HALF))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (ShortPointer) inputTensorValuesPtr;
+                    sizeInBytes = size * 2;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE:
-                    if(!ndArray.dataType().equals(DataType.DOUBLE)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (DoublePointer)inputTensorValuesPtr;
-		    sizeInBytes = size * 8;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.DOUBLE))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (DoublePointer) inputTensorValuesPtr;
+                    sizeInBytes = size * 8;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32:
-                    if(!ndArray.dataType().equals(DataType.UINT32)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (IntPointer)inputTensorValuesPtr;
-		    sizeInBytes = size * 4;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.UINT32))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (IntPointer) inputTensorValuesPtr;
+                    sizeInBytes = size * 4;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
-                    if(!ndArray.dataType().equals(DataType.UINT64)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (LongPointer)inputTensorValuesPtr;
-		    sizeInBytes = size * 8;
-		    break;
+                    if (!ndArray.dataType().equals(DataType.UINT64))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (LongPointer) inputTensorValuesPtr;
+                    sizeInBytes = size * 8;
+                    break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16:
-                    if(!ndArray.dataType().equals(DataType.BFLOAT16)) throw new RuntimeException("INDArray data type does not match ONNX data type");
-		    input_tensor_values = (ShortPointer)inputTensorValuesPtr;
-		    sizeInBytes = size * 2;
-		    break;
-		default:
-		    throw new RuntimeException("Unsupported data type encountered");
-	    }
-	    Value inputTensor = Value.CreateTensor(memory_info.asOrtMemoryInfo(), input_tensor_values, sizeInBytes, dims, dims.capacity(), type);
+                    if (!ndArray.dataType().equals(DataType.BFLOAT16))
+                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    input_tensor_values = (ShortPointer) inputTensorValuesPtr;
+                    sizeInBytes = size * 2;
+                    break;
+                default:
+                    throw new RuntimeException("Unsupported data type encountered");
+            }
+            Value inputTensor = Value.CreateTensor(memory_info.asOrtMemoryInfo(), input_tensor_values, sizeInBytes, dims, dims.capacity(), type);
             return inputTensor;
-	}
+        }
 
-	private DataBuffer getDataBuffer(Value tens){
-		try (PointerScope scope = new PointerScope()) {
-	DataBuffer buffer = null;
-	    int type = tens.GetTensorTypeAndShapeInfo().GetElementType();
-	    long size = tens.GetTensorTypeAndShapeInfo().GetElementCount();
-            switch (type) {
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT:
-		    FloatPointer pFloat = tens.GetTensorMutableDataFloat().capacity(size);
-		    FloatIndexer floatIndexer = FloatIndexer.create(pFloat);
-		    buffer = Nd4j.createBuffer(pFloat, DataType.FLOAT, size, floatIndexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8:
-		    BytePointer pUint8 = tens.GetTensorMutableDataUByte().capacity(size);
-		    Indexer uint8Indexer = ByteIndexer.create(pUint8);
-		    buffer = Nd4j.createBuffer(pUint8, DataType.UINT8, size, uint8Indexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8:
-		    BytePointer pInt8 = tens.GetTensorMutableDataByte().capacity(size);
-		    Indexer int8Indexer = ByteIndexer.create(pInt8);
-		    buffer = Nd4j.createBuffer(pInt8, DataType.UINT8, size, int8Indexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16:
-		    ShortPointer pUint16 = tens.GetTensorMutableDataUShort().capacity(size);
-		    Indexer uint16Indexer = ShortIndexer.create(pUint16);
-		    buffer = Nd4j.createBuffer(pUint16, DataType.UINT16, size, uint16Indexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16:
-		    ShortPointer pInt16 = tens.GetTensorMutableDataShort().capacity(size);
-		    Indexer int16Indexer = ShortIndexer.create(pInt16);
-		    buffer = Nd4j.createBuffer(pInt16, DataType.INT16, size, int16Indexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32:
-		    IntPointer pInt32 = tens.GetTensorMutableDataInt().capacity(size);
-		    Indexer int32Indexer = IntIndexer.create(pInt32);
-		    buffer = Nd4j.createBuffer(pInt32, DataType.INT32, size, int32Indexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64:
-		    LongPointer pInt64 = tens.GetTensorMutableDataLong().capacity(size);
-		    Indexer int64Indexer = LongIndexer.create(pInt64);
-		    buffer = Nd4j.createBuffer(pInt64, DataType.INT64, size, int64Indexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
-		    BytePointer pString = tens.GetTensorMutableDataByte().capacity(size);
-		    Indexer stringIndexer = ByteIndexer.create(pString);
-		    buffer = Nd4j.createBuffer(pString, DataType.INT8, size, stringIndexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL:
-		    BoolPointer pBool = tens.GetTensorMutableDataBool().capacity(size);
-		    Indexer boolIndexer = BooleanIndexer.create(new BooleanPointer(pBool)); //Converting from JavaCPP Bool to Boolean here - C++ bool type size is not defined, could cause problems on some platforms
-		    buffer = Nd4j.createBuffer(pBool, DataType.BOOL, size, boolIndexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16:
-		    ShortPointer pFloat16 = tens.GetTensorMutableDataShort().capacity(size);
-		    Indexer float16Indexer = ShortIndexer.create(pFloat16);
-		    buffer = Nd4j.createBuffer(pFloat16, DataType.FLOAT16, size, float16Indexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE:
-		    DoublePointer pDouble = tens.GetTensorMutableDataDouble().capacity(size);
-		    Indexer doubleIndexer = DoubleIndexer.create(pDouble);
-		    buffer = Nd4j.createBuffer(pDouble, DataType.DOUBLE, size, doubleIndexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32:
-		    IntPointer pUint32 = tens.GetTensorMutableDataUInt().capacity(size);
-		    Indexer uint32Indexer = IntIndexer.create(pUint32);
-		    buffer = Nd4j.createBuffer(pUint32, DataType.UINT32, size, uint32Indexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
-		    LongPointer pUint64 = tens.GetTensorMutableDataULong().capacity(size);
-		    Indexer uint64Indexer = LongIndexer.create(pUint64);
-		    buffer = Nd4j.createBuffer(pUint64, DataType.UINT64, size, uint64Indexer);
-		    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16:
-		    ShortPointer pBfloat16 = tens.GetTensorMutableDataShort().capacity(size);
-		    Indexer bfloat16Indexer = ShortIndexer.create(pBfloat16);
-		    buffer = Nd4j.createBuffer(pBfloat16, DataType.BFLOAT16, size, bfloat16Indexer);
-		    break;
-		default:
-		    throw new RuntimeException("Unsupported data type encountered");
-	    }
-	    return buffer;
+        private DataBuffer getDataBuffer(Value tens) {
+            try (PointerScope scope = new PointerScope()) {
+                DataBuffer buffer = null;
+                int type = tens.GetTensorTypeAndShapeInfo().GetElementType();
+                long size = tens.GetTensorTypeAndShapeInfo().GetElementCount();
+                switch (type) {
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT:
+                        FloatPointer pFloat = tens.GetTensorMutableDataFloat().capacity(size);
+                        FloatIndexer floatIndexer = FloatIndexer.create(pFloat);
+                        buffer = Nd4j.createBuffer(pFloat, DataType.FLOAT, size, floatIndexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8:
+                        BytePointer pUint8 = tens.GetTensorMutableDataUByte().capacity(size);
+                        Indexer uint8Indexer = ByteIndexer.create(pUint8);
+                        buffer = Nd4j.createBuffer(pUint8, DataType.UINT8, size, uint8Indexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8:
+                        BytePointer pInt8 = tens.GetTensorMutableDataByte().capacity(size);
+                        Indexer int8Indexer = ByteIndexer.create(pInt8);
+                        buffer = Nd4j.createBuffer(pInt8, DataType.UINT8, size, int8Indexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16:
+                        ShortPointer pUint16 = tens.GetTensorMutableDataUShort().capacity(size);
+                        Indexer uint16Indexer = ShortIndexer.create(pUint16);
+                        buffer = Nd4j.createBuffer(pUint16, DataType.UINT16, size, uint16Indexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16:
+                        ShortPointer pInt16 = tens.GetTensorMutableDataShort().capacity(size);
+                        Indexer int16Indexer = ShortIndexer.create(pInt16);
+                        buffer = Nd4j.createBuffer(pInt16, DataType.INT16, size, int16Indexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32:
+                        IntPointer pInt32 = tens.GetTensorMutableDataInt().capacity(size);
+                        Indexer int32Indexer = IntIndexer.create(pInt32);
+                        buffer = Nd4j.createBuffer(pInt32, DataType.INT32, size, int32Indexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64:
+                        LongPointer pInt64 = tens.GetTensorMutableDataLong().capacity(size);
+                        Indexer int64Indexer = LongIndexer.create(pInt64);
+                        buffer = Nd4j.createBuffer(pInt64, DataType.INT64, size, int64Indexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
+                        BytePointer pString = tens.GetTensorMutableDataByte().capacity(size);
+                        Indexer stringIndexer = ByteIndexer.create(pString);
+                        buffer = Nd4j.createBuffer(pString, DataType.INT8, size, stringIndexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL:
+                        BoolPointer pBool = tens.GetTensorMutableDataBool().capacity(size);
+                        Indexer boolIndexer = BooleanIndexer.create(new BooleanPointer(pBool)); //Converting from JavaCPP Bool to Boolean here - C++ bool type size is not defined, could cause problems on some platforms
+                        buffer = Nd4j.createBuffer(pBool, DataType.BOOL, size, boolIndexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16:
+                        ShortPointer pFloat16 = tens.GetTensorMutableDataShort().capacity(size);
+                        Indexer float16Indexer = ShortIndexer.create(pFloat16);
+                        buffer = Nd4j.createBuffer(pFloat16, DataType.FLOAT16, size, float16Indexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE:
+                        DoublePointer pDouble = tens.GetTensorMutableDataDouble().capacity(size);
+                        Indexer doubleIndexer = DoubleIndexer.create(pDouble);
+                        buffer = Nd4j.createBuffer(pDouble, DataType.DOUBLE, size, doubleIndexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32:
+                        IntPointer pUint32 = tens.GetTensorMutableDataUInt().capacity(size);
+                        Indexer uint32Indexer = IntIndexer.create(pUint32);
+                        buffer = Nd4j.createBuffer(pUint32, DataType.UINT32, size, uint32Indexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
+                        LongPointer pUint64 = tens.GetTensorMutableDataULong().capacity(size);
+                        Indexer uint64Indexer = LongIndexer.create(pUint64);
+                        buffer = Nd4j.createBuffer(pUint64, DataType.UINT64, size, uint64Indexer);
+                        break;
+                    case ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16:
+                        ShortPointer pBfloat16 = tens.GetTensorMutableDataShort().capacity(size);
+                        Indexer bfloat16Indexer = ShortIndexer.create(pBfloat16);
+                        buffer = Nd4j.createBuffer(pBfloat16, DataType.BFLOAT16, size, bfloat16Indexer);
+                        break;
+                    default:
+                        throw new RuntimeException("Unsupported data type encountered");
+                }
+                return buffer;
 
-		}
-	}
+            }
+        }
     }
 }
