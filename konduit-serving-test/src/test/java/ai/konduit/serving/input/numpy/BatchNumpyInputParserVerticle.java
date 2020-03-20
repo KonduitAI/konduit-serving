@@ -71,7 +71,5 @@ public class BatchNumpyInputParserVerticle extends BaseRoutableVerticle {
 
             itemHandler.response().end();
         });
-        setupWebServer();
     }
-
 }

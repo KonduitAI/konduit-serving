@@ -71,7 +71,5 @@ public class BatchInputParserVerticle extends BaseRoutableVerticle {
 
             itemHandler.response().end();
         });
-        setupWebServer();
     }
-
 }

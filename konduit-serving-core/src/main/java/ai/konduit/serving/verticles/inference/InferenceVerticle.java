@@ -31,8 +31,10 @@ import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
 import io.vertx.core.Context;
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.ContextInternal;
+import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -59,16 +61,6 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     private PipelineRouteDefiner pipelineRouteDefiner;
 
     @Override
-    public void start(Future<Void> startFuture) throws Exception {
-        super.start(startFuture);
-    }
-
-    @Override
-    public void start() throws Exception {
-        super.start();
-    }
-
-    @Override
     public void stop() throws Exception {
         super.stop();
 
@@ -80,8 +72,8 @@ public class InferenceVerticle extends BaseRoutableVerticle {
 
     @Override
     public void init(Vertx vertx, Context context) {
-        this.context = context;
-        this.vertx = vertx;
+        super.init(vertx, context);
+
         inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
         pipelineRouteDefiner = new PipelineRouteDefiner();
         this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
@@ -95,31 +87,49 @@ public class InferenceVerticle extends BaseRoutableVerticle {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
                 pipelineStep.createRunner();
         }
-
-        setupWebServer();
     }
 
-    protected void setupWebServer() {
-        int portValue = inferenceConfiguration.getServingConfig().getHttpPort();
-        if (portValue == 0) {
-            String portEnvValue = System.getenv(VerticleConstants.PORT_FROM_ENV);
-            if (portEnvValue != null) {
-                portValue = Integer.parseInt(portEnvValue);
+    @Override
+    protected void setupWebServer(Promise<Void> startPromise) {
+        String portEnvValue = System.getenv(VerticleConstants.KONDUIT_SERVING_PORT);
+        if (portEnvValue != null) {
+            try {
+                port = Integer.parseInt(portEnvValue);
+            } catch (NumberFormatException exception) {
+                log.error("Environment variable \"{}={}\" isn't a valid port number.", VerticleConstants.KONDUIT_SERVING_PORT, portEnvValue);
+                startPromise.fail(exception);
+                return;
             }
+        } else {
+            port = inferenceConfiguration.getServingConfig().getHttpPort();
         }
 
-        final int portValueFinal = portValue;
+        if (port < 0 || port > 0xFFFF) {
+            startPromise.fail(new Exception(String.format("Valid port range is 0 <= port <= 65535. The given port was %s", port)));
+            return;
+        }
+
         List<PipelineStep> steps = inferenceConfiguration.getSteps();
         final int nSteps = steps == null ? 0 : steps.size();
         vertx.createHttpServer()
                 .requestHandler(router)
                 .exceptionHandler(Throwable::printStackTrace)
-                .listen(portValueFinal, inferenceConfiguration.getServingConfig().getListenHost(), listenResult -> {
-                    if (listenResult.failed()) {
-                        log.error("Could not start HTTP server on port {}", portValueFinal);
-                        listenResult.cause().printStackTrace();
+                .listen(port, inferenceConfiguration.getServingConfig().getListenHost(), handler -> {
+                    if (handler.failed()) {
+                        log.error("Could not start HTTP server");
+                        startPromise.fail(handler.cause());
                     } else {
-                        log.info("Server started on port {} with {} pipeline steps", portValueFinal, nSteps);
+                        port = handler.result().actualPort();
+                        inferenceConfiguration.getServingConfig().setHttpPort(port);
+
+                        try {
+                            ((ContextInternal) context).getDeployment().deploymentOptions().setConfig(new JsonObject(inferenceConfiguration.toJson()));
+
+                            log.info("Inference server started on port {} with {} pipeline steps", port, nSteps);
+                            startPromise.complete();
+                        } catch (Exception exception) {
+                            startPromise.fail(exception);
+                        }
                     }
                 });
     }

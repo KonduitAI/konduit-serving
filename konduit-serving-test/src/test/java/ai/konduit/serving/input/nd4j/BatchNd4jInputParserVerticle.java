@@ -71,7 +71,5 @@ public class BatchNd4jInputParserVerticle extends BaseRoutableVerticle {
 
             itemHandler.response().end();
         });
-        setupWebServer();
     }
-
 }

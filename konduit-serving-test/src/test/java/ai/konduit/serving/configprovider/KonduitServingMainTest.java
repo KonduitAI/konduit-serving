@@ -30,6 +30,7 @@ import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.train.TrainUtils;
+import ai.konduit.serving.util.PortUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.json.JsonObject;
@@ -51,8 +52,6 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.nio.charset.Charset;
 
 @RunWith(VertxUnitRunner.class)
@@ -75,50 +74,48 @@ public class KonduitServingMainTest {
         testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
     }
 
-    /**
-     * @return single available port number
-     */
-    public static int getAvailablePort() {
-        try {
-            try (ServerSocket socket = new ServerSocket(0)) {
-                return socket.getLocalPort();
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot find available port: " + e.getMessage(), e);
-        }
-    }
-
     @Test
-    public void testOnSuccessHook(TestContext testContext) {
+    public void testSuccess(TestContext testContext) {
         Async async = testContext.async();
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
-                .multiThreaded(false).configPort(getAvailablePort())
+                .multiThreaded(false)
                 .verticleClassName(InferenceVerticle.class.getName())
                 .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(async::complete)
-                .onFailure(() -> testContext.fail("onFailure called instead of onSuccess hook"))
+                .eventHandler(handler -> {
+                    if (handler.succeeded()) {
+                        async.complete();
+                    } else {
+                        testContext.fail("Failure event called instead of a success event");
+                    }
+                })
                 .build()
                 .runMain(args.toArgs());
     }
 
     @Test
-    public void testOnFailureHook(TestContext testContext) {
+    public void testFailure(TestContext testContext) {
         Async async = testContext.async();
 
         KonduitServingMainArgs args = KonduitServingMainArgs.builder()
                 .configStoreType("file").ha(false)
-                .multiThreaded(false).configPort(getAvailablePort())
+                .multiThreaded(false)
                 .verticleClassName(BatchInputParser.class.getName()) // Invalid verticle class name
                 .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
                 .build();
 
         KonduitServingMain.builder()
-                .onSuccess(() -> testContext.fail("onSuccess called instead of onFailure hook"))
-                .onFailure(async::complete)
+                .eventHandler(handler -> {
+                    if(handler.succeeded()) {
+                        testContext.fail("Success event called instead of a failure event");
+                    } else {
+                        testContext.assertTrue(handler.cause() instanceof ClassCastException);
+                        async.complete();
+                    }
+                })
                 .build()
                 .runMain(args.toArgs());
     }
@@ -142,7 +139,7 @@ public class KonduitServingMainTest {
         Schema outputSchema = outputSchemaBuilder.build();
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(getAvailablePort())
+                .httpPort(PortUtils.getAvailablePort())
                 .build();
 
         ModelConfig modelConfig = DL4JConfig.builder()

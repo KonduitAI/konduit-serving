@@ -52,6 +52,7 @@ import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.healthchecks.HealthCheckHandler;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -190,7 +191,7 @@ public class PipelineRouteDefiner {
                 .produces("application/json").handler(ctx -> {
             try {
                 ctx.response().putHeader("Content-Type", "application/json");
-                ctx.response().end(vertx.getOrCreateContext().config().encode());
+                ctx.response().end(inferenceConfiguration.toJson());
             } catch (Exception e) {
                 ctx.fail(500, e);
             }
@@ -203,7 +204,7 @@ public class PipelineRouteDefiner {
                 .produces("application/json").handler(ctx -> {
             try {
                 ctx.response().putHeader("Content-Type", "application/json");
-                ctx.response().end(vertx.getOrCreateContext().config().encodePrettily());
+                ctx.response().end(new JsonObject(inferenceConfiguration.toJson()).encodePrettily());
             } catch (Exception e) {
                 ctx.fail(500, e);
             }

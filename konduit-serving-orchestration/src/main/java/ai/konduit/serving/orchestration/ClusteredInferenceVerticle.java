@@ -23,10 +23,12 @@ package ai.konduit.serving.orchestration;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.configprovider.PipelineRouteDefiner;
+import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
 import io.vertx.core.Context;
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -47,20 +49,8 @@ import java.util.List;
 @lombok.extern.slf4j.Slf4j
 public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
 
-
     private InferenceConfiguration inferenceConfiguration;
     private ClusterManager clusterManager;
-
-    @Override
-    public void start(Future<Void> startFuture) throws Exception {
-        super.start(startFuture);
-    }
-
-    @Override
-    public void start() throws Exception {
-        super.start();
-
-    }
 
     @Override
     public void stop() throws Exception {
@@ -70,8 +60,8 @@ public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
 
     @Override
     public void init(Vertx vertx, Context context) {
-        this.context = context;
-        this.vertx = vertx;
+        super.init(vertx, context);
+
         inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
         //inference endpoints (pipeline execution, loading,..)
         this.router = new PipelineRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
@@ -89,33 +79,44 @@ public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
             ctx.response().putHeader("Content-Type", "application/json");
             ctx.response().end(new JsonObject().put("nodes", new JsonArray(nodes)).toBuffer());
         });
-
-        setupWebServer();
     }
 
-
-    protected void setupWebServer() {
+    @Override
+    protected void setupWebServer(Promise<Void> startPromise) {
         Preconditions.checkNotNull(inferenceConfiguration, "Inference configuration undefined!");
-        int portValue = inferenceConfiguration.getServingConfig().getHttpPort();
-        if (portValue == 0) {
-            String portEnvValue = System.getenv(ai.konduit.serving.verticles.VerticleConstants.PORT_FROM_ENV);
+        port = inferenceConfiguration.getServingConfig().getHttpPort();
+        if (port == 0) {
+            String portEnvValue = System.getenv(ai.konduit.serving.verticles.VerticleConstants.KONDUIT_SERVING_PORT);
             if (portEnvValue != null) {
-                portValue = Integer.parseInt(portEnvValue);
+                try {
+                    port = Integer.parseInt(portEnvValue);
+                } catch (NumberFormatException exception) {
+                    log.error("Environment variable \"{}={}\" isn't a valid port number.", VerticleConstants.KONDUIT_SERVING_PORT, portEnvValue);
+                    startPromise.fail(exception);
+                    return;
+                }
             }
         }
 
-        final int portValueFinal = portValue;
         vertx.createHttpServer()
                 .requestHandler(router)
                 .exceptionHandler(Throwable::printStackTrace)
-                .listen(portValueFinal, inferenceConfiguration.getServingConfig().getListenHost(), listenResult -> {
-                    if (listenResult.failed()) {
-                        log.debug("Could not start HTTP server");
-                        listenResult.cause().printStackTrace();
+                .listen(port, inferenceConfiguration.getServingConfig().getListenHost(), handler -> {
+                    if (handler.failed()) {
+                        log.error("Could not start HTTP server");
+                        startPromise.fail(handler.cause());
                     } else {
-                        log.debug("Server started on port " + portValueFinal);
+                        port = handler.result().actualPort();
+
+                        try {
+                            ((ContextInternal) context).getDeployment().deploymentOptions().setConfig(new JsonObject(inferenceConfiguration.toJson()));
+
+                            log.info("Server started on port {}", port);
+                            startPromise.complete();
+                        } catch (Exception exception) {
+                            startPromise.fail(exception);
+                        }
                     }
                 });
     }
-
 }

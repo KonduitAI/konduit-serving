@@ -44,6 +44,11 @@
         </dependency>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-tfjava</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-python</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -131,8 +136,6 @@
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
         </dependency>
-
-
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
@@ -148,6 +151,12 @@
                     <artifactId>guava</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.stefanbirkner</groupId>
+            <artifactId>system-rules</artifactId>
+            <version>1.19.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

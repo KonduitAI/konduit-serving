@@ -22,15 +22,19 @@
 
 package ai.konduit.serving.configprovider;
 
+import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.util.ObjectMappers;
 import com.beust.jcommander.JCommander;
 import io.vertx.config.ConfigRetriever;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
+import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 
 import java.util.Arrays;
 
@@ -47,11 +51,11 @@ import static java.lang.System.setProperty;
  */
 @AllArgsConstructor
 @Builder
+@Data
 public class KonduitServingMain {
 
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
-    private Runnable onSuccess;
-    private Runnable onFailure;
+    private Handler<AsyncResult<InferenceConfiguration>> eventHandler;
 
     static {
         setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
@@ -104,45 +108,49 @@ public class KonduitServingMain {
             final ConfigRetriever configRetriever = konduitServingNodeConfigurer.getConfigRetrieverOptions() != null ?
                     ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getConfigRetrieverOptions()) :
                     ConfigRetriever.create(vertx);
-            configRetriever.getConfig(result -> {
-                if (result.failed()) {
-                    log.error("Unable to retrieve configuration " + result.cause());
+            configRetriever.getConfig(handler -> {
+                if (handler.failed()) {
+                    log.error("Unable to retrieve configuration " + handler.cause());
 
-                    if (onFailure != null) {
-                        onFailure.run();
+                    if (eventHandler != null) {
+                        eventHandler.handle(Future.failedFuture(handler.cause()));
                     }
                 } else {
                     configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
 
-                    JsonObject json = result.result();
+                    JsonObject json = handler.result();
                     konduitServingNodeConfigurer.configureWithJson(json);
                     deployVerticle(konduitServingNodeConfigurer, vertx);
                 }
             });
-
-
-
         }
-
     }
-
 
     private void deployVerticle(KonduitServingNodeConfigurer konduitServingNodeConfigurer, Vertx vertx) {
         vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
             if (handler.failed()) {
                 log.error(String.format("Unable to deploy verticle %s", konduitServingNodeConfigurer.getVerticleClassName()), handler.cause());
-                if (onFailure != null) {
-                    onFailure.run();
+
+                if (eventHandler != null) {
+                    eventHandler.handle(Future.failedFuture(handler.cause()));
                 }
 
                 vertx.close();
             } else {
                 log.info(String.format("Deployed verticle %s", konduitServingNodeConfigurer.getVerticleClassName()));
-                if (onSuccess != null) {
-                    onSuccess.run();
+                if (eventHandler != null) {
+                    VertxImpl vertxImpl = (VertxImpl) vertx;
+                    DeploymentOptions deploymentOptions = vertxImpl.getDeployment(handler.result()).deploymentOptions();
+
+                    try {
+                        InferenceConfiguration inferenceConfiguration = ObjectMappers.fromJson(deploymentOptions.getConfig().encode(), InferenceConfiguration.class);
+                        eventHandler.handle(Future.succeededFuture(inferenceConfiguration));
+                    } catch (Exception exception){
+                        log.error("Unable to parse config json into an InferenceConfiguration object", exception);
+                        eventHandler.handle(Future.succeededFuture());
+                    }
                 }
             }
         });
-
     }
 }

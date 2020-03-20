@@ -32,7 +32,7 @@ public class VerticleConstants {
 
     // General
 
-    public final static String PORT_FROM_ENV = "PORT_FROM_ENV";
+    public final static String KONDUIT_SERVING_PORT = "KONDUIT_SERVING_PORT";
 
     public final static String CONVERTED_INFERENCE_DATA = "convertedInferenceData";
     public final static String HTTP_PORT_KEY = "httpPort";
