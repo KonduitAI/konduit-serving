@@ -40,13 +40,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
+import org.datavec.api.util.ClassPathResource;
 import org.datavec.image.data.Image;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
@@ -121,13 +121,13 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
 
     @Test
     public void runFaceDetector(TestContext testContext) throws Exception {
-        File imageFile = new File(TestUtils.testResourcesStorageDir(), "inference/onnx/data/1.jpg");
+        File imageFile = Paths.get(new ClassPathResource(".").getFile().getAbsolutePath(), "inference/onnx/data/1.jpg").toFile();
 
         if (!imageFile.exists()) {
             FileUtils.copyURLToFile(new URL("https://github.com/KonduitAI/konduit-serving-examples/raw/master/data/facedetector/1.jpg"), imageFile);
         }
         NativeImageLoader nativeImageLoader = new NativeImageLoader(240, 320);
-        Image image = nativeImageLoader.asImageMatrix(new File("konduit-serving-test/src/test/resources/data/1.jpg"));
+        Image image = nativeImageLoader.asImageMatrix(imageFile);
 
         INDArray contents = image.getImage();
 
