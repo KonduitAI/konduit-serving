@@ -312,7 +312,6 @@ public class ONNXThreadPool {
         private BlockingQueue<OnnxObservable> inputQueue;
         private AtomicBoolean shouldWork = new AtomicBoolean(true);
         private AtomicBoolean isStopped = new AtomicBoolean(false);
-        private Session replicatedModel;
         private AtomicLong counter = new AtomicLong(0);
         private boolean rootDevice;
 
@@ -336,8 +335,7 @@ public class ONNXThreadPool {
             try (PointerScope scope = new PointerScope()) {
 
                 // model should be replicated & initialized here
-                if (replicatedModel == null)
-                    replicatedModel = onnxModelLoader.loadModel();
+		Session replicatedModel = onnxModelLoader.loadModel();
 
                 long num_input_nodes = replicatedModel.GetInputCount();
                 long num_output_nodes = replicatedModel.GetOutputCount();
@@ -420,7 +418,7 @@ public class ONNXThreadPool {
                             request.setOutputException(e);
                         }
 
-                        replicatedModel = null;
+//                        replicatedModel = null;
                     }
                 }
             } catch (InterruptedException e) {
