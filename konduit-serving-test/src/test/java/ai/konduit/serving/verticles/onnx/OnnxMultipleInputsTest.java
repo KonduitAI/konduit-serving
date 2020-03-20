@@ -143,7 +143,7 @@ public class OnnxMultipleInputsTest extends BaseVerticleTest {
         System.out.println(inputTensorValues.get(1));
         System.out.println(bodyResult.getFloat(1));
 
-        assert Math.abs(bodyResult.getFloat(1) - 0.032786883) < 1e-6;
+        assertEquals(0.032786883, bodyResult.getFloat(1), 1e-6);
 
         assertArrayEquals(new long[]{1, 60}, bodyResult.shape());
     }

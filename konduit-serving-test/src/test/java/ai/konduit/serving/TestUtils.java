@@ -22,6 +22,11 @@ package ai.konduit.serving;
 
 import java.io.File;
 
+/**
+ * Test utilities for Konduit Serving tests
+ *
+ * @author Alex Black
+ */
 public class TestUtils {
 
     private TestUtils(){ }

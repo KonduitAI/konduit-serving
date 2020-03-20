@@ -440,6 +440,11 @@ public class ONNXThreadPool {
             }
         }
 
+        protected void validateType(DataType expected, INDArray array){
+            if (!array.dataType().equals(expected))
+                throw new RuntimeException("INDArray data type (" + array.dataType() + ") does not match required ONNX data type (" + expected + ")");
+        }
+
         private Value getTensor(INDArray ndArray, int type, long size, LongPointer dims) {
             Pointer inputTensorValuesPtr = ndArray.data().pointer();
 
@@ -448,86 +453,72 @@ public class ONNXThreadPool {
             Pointer input_tensor_values = null;
             switch (type) {
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT:
-                    if (!ndArray.dataType().equals(DataType.FLOAT))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
-                    input_tensor_values = (FloatPointer) inputTensorValuesPtr;
+                    validateType(DataType.FLOAT, ndArray);
+                    input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size * 4;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8:
-                    if (!ndArray.dataType().equals(DataType.UINT8))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.UINT8, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8:
-                    if (!ndArray.dataType().equals(DataType.INT8))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.INT8, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16:
-                    if (!ndArray.dataType().equals(DataType.UINT16))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.UINT16, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size * 2;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16:
-                    if (!ndArray.dataType().equals(DataType.INT16))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.INT16, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size * 2;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32:
-                    if (!ndArray.dataType().equals(DataType.INT32))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.INT32, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size * 4;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64:
-                    if (!ndArray.dataType().equals(DataType.INT64))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.INT64, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size * 8;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
-                    if (!ndArray.dataType().equals(DataType.INT8))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.INT8, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL:
-                    if (!ndArray.dataType().equals(DataType.BOOL))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.BOOL, ndArray);
                     input_tensor_values = inputTensorValuesPtr; //Casting Boolean to Bool here, sizes could different on some platforms
                     sizeInBytes = size;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16:
-                    if (!ndArray.dataType().equals(DataType.HALF))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.FLOAT16, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size * 2;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE:
-                    if (!ndArray.dataType().equals(DataType.DOUBLE))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.DOUBLE, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size * 8;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32:
-                    if (!ndArray.dataType().equals(DataType.UINT32))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.UINT32, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size * 4;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
-                    if (!ndArray.dataType().equals(DataType.UINT64))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.UINT64, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size * 8;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16:
-                    if (!ndArray.dataType().equals(DataType.BFLOAT16))
-                        throw new RuntimeException("INDArray data type does not match ONNX data type");
+                    validateType(DataType.BFLOAT16, ndArray);
                     input_tensor_values = inputTensorValuesPtr;
                     sizeInBytes = size * 2;
                     break;

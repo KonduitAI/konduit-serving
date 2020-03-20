@@ -106,7 +106,6 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
                 .step(modelPipelineConfig)
                 .build();
 
-//        return new JsonObject();
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
