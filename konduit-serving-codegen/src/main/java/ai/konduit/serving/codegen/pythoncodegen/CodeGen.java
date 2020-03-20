@@ -41,7 +41,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -107,7 +107,7 @@ public class CodeGen {
                 boolean deleted = classJson.delete();
                 System.out.println(deleted);
             }
-            FileUtils.writeStringToFile(classJson, objectMapper.writeValueAsString(jsonNode), Charset.defaultCharset());
+            FileUtils.writeStringToFile(classJson, objectMapper.writeValueAsString(jsonNode), StandardCharsets.UTF_8);
             File pythonFile = new File(String.format(projectBasePath + sep + "python"
                     + sep + "%s.py", clazz.getSimpleName().toLowerCase()));
 
@@ -118,7 +118,7 @@ public class CodeGen {
             if (p.exitValue() != 0) {
                 String errorMessage = "";
                 try (InputStream is = p.getInputStream()) {
-                    errorMessage += IOUtils.toString(is, Charset.defaultCharset());
+                    errorMessage += IOUtils.toString(is, StandardCharsets.UTF_8);
 
                 }
                 throw new IllegalStateException("Json schema conversion in python threw an error with output "
@@ -127,7 +127,7 @@ public class CodeGen {
             p.destroy();
 
             //change class names
-            String load = FileUtils.readFileToString(pythonFile, Charset.defaultCharset());
+            String load = FileUtils.readFileToString(pythonFile, StandardCharsets.UTF_8);
             if(PipelineStep.class.isAssignableFrom(clazz) && !clazz.equals(PipelineStep.class))
                 load = load.replaceFirst(replace.pattern(),"\nclass "
                         + clazz.getSimpleName() + "(PipelineStep):");
@@ -169,7 +169,7 @@ public class CodeGen {
             load = kwArgsAsUnderScore.toString();
             load = load.replace("d = dict()","d = empty_type_dict(self)");
             //load = load.replaceFirst("import enum",imports.toString());
-            FileUtils.writeStringToFile(newModule,load,Charset.defaultCharset(),true);
+            FileUtils.writeStringToFile(newModule,load, StandardCharsets.UTF_8,true);
 
             // Clean up JSON files after code generation.
             boolean pythonDeleted = pythonFile.delete();
@@ -181,7 +181,7 @@ public class CodeGen {
             }
         }
 
-        String loadedModule = FileUtils.readFileToString(newModule, Charset.defaultCharset());
+        String loadedModule = FileUtils.readFileToString(newModule, StandardCharsets.UTF_8);
 
         loadedModule = applyPythonWrappers(loadedModule);
         loadedModule = patchPythonDefaultValues(loadedModule);
@@ -190,14 +190,14 @@ public class CodeGen {
         String sb = "import enum\nfrom konduit.json_utils import empty_type_dict,DictWrapper,ListWrapper\n" +
                 loadedModule;
 
-        FileUtils.writeStringToFile(newModule, sb,Charset.defaultCharset(),false);
+        FileUtils.writeStringToFile(newModule, sb, StandardCharsets.UTF_8,false);
 
         Process autopepLinting = runtime.exec("autopep8 --in-place " + newModule);
         autopepLinting.waitFor(8, TimeUnit.SECONDS);
         if(autopepLinting.exitValue() != 0) {
             String errorMessage = "";
             try(InputStream is = autopepLinting.getInputStream()) {
-                errorMessage += IOUtils.toString(is,Charset.defaultCharset());
+                errorMessage += IOUtils.toString(is, StandardCharsets.UTF_8);
 
             }
             throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
@@ -209,7 +209,7 @@ public class CodeGen {
         if(blackLinting.exitValue() != 0) {
             String errorMessage = "";
             try(InputStream is = blackLinting.getInputStream()) {
-                errorMessage += IOUtils.toString(is,Charset.defaultCharset());
+                errorMessage += IOUtils.toString(is, StandardCharsets.UTF_8);
 
             }
             throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);

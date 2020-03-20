@@ -52,7 +52,7 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 @RunWith(VertxUnitRunner.class)
 public class KonduitServingMainTest {
@@ -69,7 +69,7 @@ public class KonduitServingMainTest {
     public static void beforeClass(TestContext testContext) throws Exception {
         JsonObject config = getConfig();
         File jsonConfigPath = folder.newFile("config.json");
-        FileUtils.write(jsonConfigPath, config.encodePrettily(), Charset.defaultCharset());
+        FileUtils.write(jsonConfigPath, config.encodePrettily(), StandardCharsets.UTF_8);
 
         testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
     }

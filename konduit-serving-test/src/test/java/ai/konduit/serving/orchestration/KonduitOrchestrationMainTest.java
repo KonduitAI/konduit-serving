@@ -14,7 +14,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static com.jayway.restassured.RestAssured.given;
 
@@ -40,7 +40,7 @@ public class KonduitOrchestrationMainTest {
                 .servingConfig(servingConfig)
                 .build();
         File tmpFile = new File(testDir.newFolder(), "file.json");
-        FileUtils.writeStringToFile(tmpFile, inferenceConfiguration.toJson(), Charset.defaultCharset());
+        FileUtils.writeStringToFile(tmpFile, inferenceConfiguration.toJson(), StandardCharsets.UTF_8);
         tmpFile.deleteOnExit();
         /*
          * Need to work out what a "node" is: eg, what happens when you deploy 2 instances on vertx?
