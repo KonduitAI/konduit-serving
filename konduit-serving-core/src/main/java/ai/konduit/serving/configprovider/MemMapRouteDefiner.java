@@ -127,15 +127,15 @@ public class MemMapRouteDefiner {
         File tempFile = new File(System.getProperty("user.home"), ".mmap-temp-file");
         if (!tempFile.exists()) {
             try {
-                Preconditions.checkState(tempFile.createNewFile(), String.format("Memmap temp file at path %s wasn't able to be created successfully. " +
-                        "Check that if you have write permissions to that file location", tempFile.getAbsolutePath()));
+                Preconditions.checkState(tempFile.createNewFile(), "Memmap temp file at path %s wasn't able to be created successfully. " +
+                        "Check that if you have write permissions to that file location", tempFile.getAbsolutePath());
             } catch (IOException e) {
-                log.error(String.format("Unable to create file at location: %s", tempFile.getAbsolutePath()), e);
+                log.error("Unable to create file at location: {}", tempFile.getAbsolutePath(), e);
             }
         }
 
-        Preconditions.checkState(tempFile.canWrite() && tempFile.canRead(), String.format("Unable to either read or write to %s for memmap temp file.",
-                tempFile.getAbsolutePath()));
+        Preconditions.checkState(tempFile.canWrite() && tempFile.canRead(), "Unable to either read or write to %s for memmap temp file.",
+                tempFile.getAbsolutePath());
 
         arr = new ThreadLocal<>();
         mmap = WorkspaceConfiguration.builder()

@@ -82,11 +82,11 @@ public class OnnxInferenceExecutioner implements
     @Override
     public INDArray[] execute(INDArray[] input) {
         Preconditions.checkNotNull(input, "Inputs must not be null!");
-        Preconditions.checkState(input.length == this.model.GetInputCount(), String.format("Number of inputs %d did not equal number of model inputs %d!", input.length, model.GetInputCount()));
+        Preconditions.checkState(input.length == this.model.GetInputCount(), "Number of inputs %s did not equal number of model inputs %s!", input.length, model.GetInputCount());
         synchronized (this.model) {
             try (AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions()) {
 
-                Map<String, INDArray> inputs = new LinkedHashMap(input.length);
+                Map<String, INDArray> inputs = new LinkedHashMap<>(input.length);
 
                 for (int i = 0; i < this.model.GetInputCount(); i++) {
                     inputs.put(this.model.GetInputName(i, allocator.asOrtAllocator()).getString(), input[i]);
