@@ -148,7 +148,6 @@
             <artifactId>vertx-health-check</artifactId>
             <version>${vertx-stack.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.arrow</groupId>
             <artifactId>arrow-vector</artifactId>
@@ -237,7 +236,6 @@
             <artifactId>deeplearning4j-modelimport</artifactId>
             <version>${datavec.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -252,8 +250,12 @@
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-arrow</artifactId>
+       </dependency>
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-nlp</artifactId>
+            <version>${dl4j.version}</version>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -266,6 +268,4 @@
             <version>${sysout-over-slf4j.version}</version>
         </dependency>
     </dependencies>
-
-
 </project>

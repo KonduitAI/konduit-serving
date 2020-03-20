@@ -194,6 +194,8 @@ def get_step(step_config):
         step = get_model_step(step_config, step_type)
     elif step_type == 'IMAGE_LOADING':
         step = get_image_load_step(step_config)
+    elif step_type == "WORD_PIECE_TOKENIZER":
+        step = get_word_piece_tokenizer_step(step_config)
     else:
         raise Exception("Step type of type " + step_type + " currently not supported.")
     return step
@@ -216,6 +218,15 @@ def get_image_load_step(step_config):
     :return: konduit.inference.ImageLoadingStep instance.
     """
     step = ImageLoadingStep(**step_config)
+    return step
+
+def get_word_piece_tokenizer_step(step_config):
+    """Get a BertStep from a configuration object
+
+    :param step_config: python dictionary with properties to create the BertStep
+    :return: konduit.inference.BertStep instance.
+    """
+    step = WordPieceTokenizerStep(**step_config)
     return step
 
 

@@ -2907,6 +2907,190 @@ class ImageLoadingStep(PipelineStep):
             )
         return d
 
+class WordPieceTokenizerStep(PipelineStep):
+
+    _types_map = {
+        "inputSchemas": {"type": dict, "subtype": None},
+        "outputSchemas": {"type": dict, "subtype": None},
+        "inputNames": {"type": list, "subtype": str},
+        "outputNames": {"type": list, "subtype": str},
+        "inputColumnNames": {"type": dict, "subtype": None},
+        "outputColumnNames": {"type": dict, "subtype": None},
+        "modelPath": {"type": str, "subtype": None},
+        "vocabPath": {"type": str, "subtype": None},
+    }
+    _formats_map = {
+        "inputNames": "table",
+        "outputNames": "table",
+    }
+
+    def __init__(
+            self,
+            input_schemas=None,
+            output_schemas=None,
+            input_names=None,
+            output_names=None,
+            input_column_names=None,
+            output_column_names=None,
+            model_path=None,
+            vocab_path=None,
+    ):
+        self.__input_schemas = input_schemas
+        self.__output_schemas = output_schemas
+        self.__input_names = input_names
+        self.__output_names = output_names
+        self.__input_column_names = input_column_names
+        self.__output_column_names = output_column_names
+        self.__model_path = model_path
+        self.__vocab_path = vocab_path
+
+    def _get_input_schemas(self):
+        return self.__input_schemas
+
+    def _set_input_schemas(self, value):
+        if (
+                not isinstance(value, dict)
+                and not isinstance(value, DictWrapper)
+                and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputSchemas must be type")
+        self.__input_schemas = value
+
+    input_schemas = property(_get_input_schemas, _set_input_schemas)
+
+    def _get_output_schemas(self):
+        return self.__output_schemas
+
+    def _set_output_schemas(self, value):
+        if (
+                not isinstance(value, dict)
+                and not isinstance(value, DictWrapper)
+                and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
+
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
+
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list values must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
+    def _get_output_names(self):
+        return self.__output_names
+
+    def _set_output_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("outputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("outputNames list values must be str")
+        self.__output_names = value
+
+    output_names = property(_get_output_names, _set_output_names)
+
+    def _get_input_column_names(self):
+        return self.__input_column_names
+
+    def _set_input_column_names(self, value):
+        if (
+                not isinstance(value, dict)
+                and not isinstance(value, DictWrapper)
+                and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputColumnNames must be type")
+        self.__input_column_names = value
+
+    input_column_names = property(_get_input_column_names, _set_input_column_names)
+
+    def _get_output_column_names(self):
+        return self.__output_column_names
+
+    def _set_output_column_names(self, value):
+        if (
+                not isinstance(value, dict)
+                and not isinstance(value, DictWrapper)
+                and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputColumnNames must be type")
+        self.__output_column_names = value
+
+    output_column_names = property(_get_output_column_names, _set_output_column_names)
+
+    def _get_model_path(self):
+        return self.__model_path
+
+    def _set_model_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("modelPath must be str")
+        self.__model_path = value
+
+    model_path = property(_get_model_path, _set_model_path)
+
+    def _get_vocab_path(self):
+        return self.__vocab_path
+
+    def _set_vocab_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("vocabPath must be str")
+        self.__vocab_path = value
+
+    vocab_path = property(_get_vocab_path, _set_vocab_path)
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__input_schemas is not None:
+            d["inputSchemas"] = (
+                self.__input_schemas.as_dict()
+                if hasattr(self.__input_schemas, "as_dict")
+                else self.__input_schemas
+            )
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
+            ]
+        if self.__output_names is not None:
+            d["outputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        if self.__input_column_names is not None:
+            d["inputColumnNames"] = (
+                self.__input_column_names.as_dict()
+                if hasattr(self.__input_column_names, "as_dict")
+                else self.__input_column_names
+            )
+        if self.__output_column_names is not None:
+            d["outputColumnNames"] = (
+                self.__output_column_names.as_dict()
+                if hasattr(self.__output_column_names, "as_dict")
+                else self.__output_column_names
+            )
+        if self.__model_path is not None:
+            d["modelPath"] = (
+                self.__model_path.as_dict()
+                if hasattr(self.__model_path, "as_dict")
+                else self.__model_path
+            )
+        if self.__vocab_path is not None:
+            d["vocabPath"] = (
+                self.__vocab_path.as_dict()
+                if hasattr(self.__vocab_path, "as_dict")
+                else self.__vocab_path
+            )
+        return d
 
 class MemMapConfig(object):
     """MemMapConfig
