@@ -119,11 +119,8 @@
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
-        <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}
-        </tensorflow.javacpp.version>
- 
-
-	<mkl-dnn.version>0.21.3</mkl-dnn.version>
+        <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}</tensorflow.javacpp.version>
+        <mkl-dnn.version>0.21.3</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
         <numpy.version>1.18.1</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
@@ -188,7 +185,7 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
-	    <dependency>
+            <dependency>
                 <groupId>org.bytedeco</groupId>
                 <artifactId>openblas</artifactId>
                 <version>${openblas.javacpp.version}</version>
@@ -652,10 +649,10 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-surefire-plugin</artifactId>
-		    <configuration>
-			    <forkCount>0</forkCount>
-		    </configuration>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <forkCount>0</forkCount>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>

@@ -18,42 +18,32 @@
  *
  *
  */
+package ai.konduit.serving;
 
-package ai.konduit.serving.model;
+import java.io.File;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import ai.konduit.serving.util.ObjectMappers;
-
-@Data
-@SuperBuilder
-@EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
 /**
- * Configuration for models in ONNX format.
+ * Test utilities for Konduit Serving tests
+ *
+ * @author Alex Black
  */
-public class OnnxConfig extends ModelConfig {
+public class TestUtils {
+
+    private TestUtils(){ }
+
+    private static File baseResourcesDir;
 
     /**
-     * Default ONNX config
-     *
-     * @return default
+     * Get the base storage directory for any test resources (downloaded and cached on system)
      */
-    public static OnnxConfig defaultConfig() {
-        return OnnxConfig.builder()
-                .build();
-
-    }
-
-    public static OnnxConfig fromJson(String json){
-        return ObjectMappers.fromJson(json, OnnxConfig.class);
-    }
-
-    public static OnnxConfig fromYaml(String yaml){
-        return ObjectMappers.fromYaml(yaml, OnnxConfig.class);
+    public static File testResourcesStorageDir(){
+        if(baseResourcesDir == null){
+            File f = new File(System.getProperty("user.home"), ".konduittest/");
+            if(!f.exists())
+                f.mkdirs();
+            baseResourcesDir = f;
+        }
+        return baseResourcesDir;
     }
 
 }

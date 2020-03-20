@@ -105,7 +105,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         }
 
         if (port < 0 || port > 0xFFFF) {
-            startPromise.fail(new Exception(String.format("Valid port range is 0 <= port <= 65535. The given port was %s", port)));
+            startPromise.fail(new Exception("Valid port range is 0 <= port <= 65535. The given port was " + port));
             return;
         }
 
