@@ -141,7 +141,7 @@ public class OnnxTest extends BaseVerticleTest {
 
             INDArray bodyResult = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
 
-            assert Math.abs(bodyResult.getFloat(0) - 1.9901832) < 1e-6;
+            assert Math.abs(bodyResult.getFloat(0) - 1.99018) < 1e-4;
 
             assertArrayEquals(new long[]{1, 1000}, bodyResult.shape());
         }
