@@ -36,7 +36,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven-shade-plugin.version}</version>
+                <version>${}</version>
                 <configuration>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <shadedClassifierName>bin</shadedClassifierName>

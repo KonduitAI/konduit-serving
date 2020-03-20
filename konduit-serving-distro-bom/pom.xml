@@ -24,6 +24,8 @@
                 </dependency>
             </dependencies>
         </profile>
+
+
         <profile>
             <id>pmml</id>
             <dependencies>
@@ -34,6 +36,19 @@
                 </dependency>
             </dependencies>
         </profile>
+
+        <profile>
+            <id>tensorflow</id>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.konduit.serving</groupId>
+                    <artifactId>konduit-serving-tfjava</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+
         <profile>
             <id>cpu</id>
             <activation>
@@ -52,13 +67,19 @@
         </profile>
 
         <profile>
+            <id>jetson-nano</id>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.konduit.serving</groupId>
+                    <artifactId>konduit-serving-gpu-nano</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+
+        <profile>
             <id>gpu</id>
-            <activation>
-                <property>
-                    <name>chip</name>
-                    <value>gpu</value>
-                </property>
-            </activation>
             <dependencies>
                 <dependency>
                     <groupId>ai.konduit.serving</groupId>
@@ -82,6 +103,11 @@
 
 
     <dependencies>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-orchestration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>

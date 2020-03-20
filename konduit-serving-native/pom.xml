@@ -12,16 +12,33 @@
     <artifactId>konduit-serving-native</artifactId>
 
     <name>konduit-serving-native</name>
-
+    <profiles>
+        <profile>
+            <id>intel</id>
+            <activation>
+                <property>
+                    <name>os.arch</name>
+                    <value>x86_64</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>mkl-platform</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>mkl-dnn-platform</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>tensorflow-platform</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-native-platform</artifactId>
@@ -49,14 +66,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>mkl-platform</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>mkl-dnn-platform</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>openblas</artifactId>
