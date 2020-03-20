@@ -22,6 +22,7 @@
 package ai.konduit.serving.verticles.onnx;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.TestUtils;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.ModelConfig;
@@ -76,10 +77,9 @@ public class OnnxTest extends BaseVerticleTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
+        File model = new File(TestUtils.testResourcesStorageDir(), "inference/onnx/squeezenet.onnx");
 
-        File model = Paths.get(new ClassPathResource(".").getFile().getAbsolutePath(), "inference/onnx/squeezenet.onnx").toFile();
-
-        if (!model.exists()) {
+        if (!model.exists() || model.length() == 0) {
             FileUtils.copyURLToFile(new URL("https://s3.amazonaws.com/onnx-model-zoo/squeezenet/squeezenet1.1/squeezenet1.1.onnx"), model);
         }
 

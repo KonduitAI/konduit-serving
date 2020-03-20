@@ -23,6 +23,7 @@
 package ai.konduit.serving.verticles.onnx;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.TestUtils;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.ModelConfig;
@@ -77,8 +78,7 @@ public class OnnxMultipleInputsTest extends BaseVerticleTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-
-        File model = Paths.get(new ClassPathResource(".").getFile().getAbsolutePath(), "inference/onnx/add.onnx").toFile();
+        File model = new File(TestUtils.testResourcesStorageDir(), "inference/onnx/add.onnx");
 
         if (!model.exists()) {
             FileUtils.copyURLToFile(new URL("https://raw.githubusercontent.com/onnx/onnx/master/onnx/backend/test/data/node/test_add/model.onnx"), model);

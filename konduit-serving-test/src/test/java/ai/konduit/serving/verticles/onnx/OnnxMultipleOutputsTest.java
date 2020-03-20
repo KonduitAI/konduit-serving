@@ -22,6 +22,7 @@
 package ai.konduit.serving.verticles.onnx;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.TestUtils;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.ModelConfig;
@@ -74,8 +75,7 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-
-        File model = Paths.get(new ClassPathResource(".").getFile().getAbsolutePath(), "inference/onnx/facedetector.onnx").toFile();
+        File model = new File(TestUtils.testResourcesStorageDir(), "inference/onnx/facedetector.onnx");
 
         if (!model.exists()) {
             FileUtils.copyURLToFile(new URL("https://raw.githubusercontent.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB/master/models/onnx/version-RFB-320.onnx"), model);
@@ -122,7 +122,8 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
 
     @Test
     public void runFaceDetector(TestContext testContext) throws Exception {
-        File imageFile = new File("konduit-serving-test/src/test/resources/data/1.jpg");
+        File imageFile = new File(TestUtils.testResourcesStorageDir(), "inference/onnx/data/1.jgp");
+
         if (!imageFile.exists()) {
             FileUtils.copyURLToFile(new URL("https://github.com/KonduitAI/konduit-serving-examples/raw/master/data/facedetector/1.jpg"), imageFile);
         }
