@@ -121,7 +121,7 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
 
     @Test
     public void runFaceDetector(TestContext testContext) throws Exception {
-        File imageFile = new File(TestUtils.testResourcesStorageDir(), "inference/onnx/data/1.jgp");
+        File imageFile = new File(TestUtils.testResourcesStorageDir(), "inference/onnx/data/1.jpg");
 
         if (!imageFile.exists()) {
             FileUtils.copyURLToFile(new URL("https://github.com/KonduitAI/konduit-serving-examples/raw/master/data/facedetector/1.jpg"), imageFile);

@@ -54,11 +54,6 @@ public class OnnxModelLoader implements ModelLoader<Session> {
         Env env = new Env(ORT_LOGGING_LEVEL_WARNING, new BytePointer("konduit-serving-onnx-session" + System.currentTimeMillis()));
 
         try (SessionOptions session_options = new SessionOptions()) {
-            session_options.SetIntraOpNumThreads(1);
-
-            session_options.SetGraphOptimizationLevel(ORT_ENABLE_EXTENDED);
-//        OrtSessionOptionsAppendExecutionProvider_Dnnl(session_options.asOrtSessionOptions(), 1);
-
             try (Pointer bp = Loader.getPlatform().toLowerCase().startsWith("windows") ? new CharPointer(model_path) : new BytePointer(model_path)) {
                 Session session = new Session(env, bp, session_options);
                 return session;
