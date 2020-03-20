@@ -31,7 +31,6 @@ import ai.konduit.serving.util.ObjectMappers;
 @Data
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
-//@NoArgsConstructor
 @AllArgsConstructor
 /**
  * Configuration for models in ONNX format.

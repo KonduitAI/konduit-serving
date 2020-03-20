@@ -42,8 +42,7 @@ import java.util.Map;
  */
 @Slf4j
 public class OnnxInferenceExecutioner implements
-        InferenceExecutioner<ModelLoader<Session>, INDArray[], INDArray[],
-                ParallelInferenceConfig, Session> {
+        InferenceExecutioner<ModelLoader<Session>, INDArray[], INDArray[], ParallelInferenceConfig, Session> {
 
     @Getter
     private ONNXThreadPool inference;
@@ -82,21 +81,21 @@ public class OnnxInferenceExecutioner implements
 
     @Override
     public INDArray[] execute(INDArray[] input) {
-	Preconditions.checkNotNull(input,"Inputs must not be null!");
-        Preconditions.checkState(input.length == this.model.GetInputCount(),String.format("Number of inputs %d did not equal number of model inputs %d!",input.length,model.GetInputCount()));
+        Preconditions.checkNotNull(input, "Inputs must not be null!");
+        Preconditions.checkState(input.length == this.model.GetInputCount(), String.format("Number of inputs %d did not equal number of model inputs %d!", input.length, model.GetInputCount()));
         synchronized (this.model) {
-            try(AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions()){
+            try (AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions()) {
 
-	    Map<String, INDArray> inputs = new LinkedHashMap(input.length);
+                Map<String, INDArray> inputs = new LinkedHashMap(input.length);
 
-            for (int i = 0; i < this.model.GetInputCount(); i++) {
-                inputs.put(this.model.GetInputName(i, allocator.asOrtAllocator()).getString(), input[i]);
+                for (int i = 0; i < this.model.GetInputCount(); i++) {
+                    inputs.put(this.model.GetInputName(i, allocator.asOrtAllocator()).getString(), input[i]);
+                }
+
+                Map<String, INDArray> ret = inference.output(inputs);
+                return ret.values().toArray(new INDArray[0]);
             }
-
-            Map<String, INDArray> ret = inference.output(inputs);
-            return ret.values().toArray(new INDArray[0]);
-          }
-	}
+        }
     }
 
     @Override
