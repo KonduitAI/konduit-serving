@@ -41,6 +41,7 @@ import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
+import ai.konduit.serving.pipeline.step.WordPieceTokenizerStep;
 import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
