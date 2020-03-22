@@ -188,11 +188,6 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @Test
-    public void testOnnxStep(){
-        testConfigSerDe(OnnxStep.builder().inputName("x").outputNames(Arrays.asList("y","z")).build());
-    }
-
-    @Test
     public void testPmmlStep(){
         testConfigSerDe(PmmlStep.builder().inputName("x").outputNames(Arrays.asList("y","z")).build());
     }
