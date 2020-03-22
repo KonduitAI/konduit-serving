@@ -37,6 +37,7 @@ import java.io.Serializable;
 public class WordTokenizerStep extends BasePipelineStep<WordTokenizerStep> implements Serializable
 {
     protected String vocabPath;
+    protected int sentenceMaxLen;
 
     @Override
     public Input.DataFormat[] validInputTypes() {

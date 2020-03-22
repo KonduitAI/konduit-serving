@@ -44,9 +44,7 @@ public class WordTokenizerStepRunner extends BaseStepRunner
 {
     private BertWordPieceTokenizerFactory tokenizer;
     private WordTokenizerStep tokenizerStep;
-
-
-    private final int MAX_LEN = 256;
+    private int sentenceMaxLen;
 
     public WordTokenizerStepRunner(PipelineStep pipelineStep)
     {
@@ -55,6 +53,7 @@ public class WordTokenizerStepRunner extends BaseStepRunner
         this.tokenizerStep = (WordTokenizerStep) pipelineStep;
 
         String vocabPath = this.tokenizerStep.getVocabPath();
+        this.sentenceMaxLen = this.tokenizerStep.getSentenceMaxLen();
 
         //load tokenizer
         try {
@@ -82,7 +81,7 @@ public class WordTokenizerStepRunner extends BaseStepRunner
 
         return BertIterator.builder()
                 .tokenizer(this.tokenizer)
-                .lengthHandling(BertIterator.LengthHandling.FIXED_LENGTH, this.MAX_LEN)
+                .lengthHandling(BertIterator.LengthHandling.FIXED_LENGTH, this.sentenceMaxLen)
                 .minibatchSize(1)
                 .sentenceProvider(provider)
                 .featureArrays(BertIterator.FeatureArrays.INDICES_MASK)

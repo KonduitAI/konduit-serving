@@ -2917,6 +2917,7 @@ class WordTokenizerStep(PipelineStep):
         "inputColumnNames": {"type": dict, "subtype": None},
         "outputColumnNames": {"type": dict, "subtype": None},
         "vocabPath": {"type": str, "subtype": None},
+        "sentenceMaxLen": {"type": int, "subtype": None},
     }
     _formats_map = {
         "inputNames": "table",
@@ -2932,6 +2933,7 @@ class WordTokenizerStep(PipelineStep):
             input_column_names=None,
             output_column_names=None,
             vocab_path=None,
+            sentence_max_len=256,
     ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
@@ -2940,6 +2942,7 @@ class WordTokenizerStep(PipelineStep):
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
         self.__vocab_path = vocab_path
+        self.__sentence_max_len = sentence_max_len
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -3031,6 +3034,16 @@ class WordTokenizerStep(PipelineStep):
 
     vocab_path = property(_get_vocab_path, _set_vocab_path)
 
+    def _get_sentence_max_len(self):
+        return self.__sentence_max_len
+
+    def _set_sentence_max_len(self, value):
+        if not isinstance(value, int):
+            raise TypeError("sentenceMaxLen must be int")
+        self.__sentence_max_len = value
+
+    sentence_max_len = property(_get_sentence_max_len, _set_sentence_max_len)
+
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__input_schemas is not None:
@@ -3070,6 +3083,12 @@ class WordTokenizerStep(PipelineStep):
                 self.__vocab_path.as_dict()
                 if hasattr(self.__vocab_path, "as_dict")
                 else self.__vocab_path
+            )
+        if self.__sentence_max_len is not None:
+            d["sentenceMaxLen"] = (
+                self.__sentence_max_len.as_dict()
+                if hasattr(self.__sentence_max_len, "as_dict")
+                else self.__sentence_max_len
             )
         return d
 
