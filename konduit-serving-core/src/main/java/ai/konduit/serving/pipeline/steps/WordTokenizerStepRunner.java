@@ -22,7 +22,7 @@
 package ai.konduit.serving.pipeline.steps;
 
 import ai.konduit.serving.pipeline.PipelineStep;
-import ai.konduit.serving.pipeline.step.WordPieceTokenizerStep;
+import ai.konduit.serving.pipeline.step.WordTokenizerStep;
 import ai.konduit.serving.util.WritableValueRetriever;
 import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
@@ -30,38 +30,31 @@ import org.datavec.api.writable.Writable;
 import org.deeplearning4j.iterator.BertIterator;
 import org.deeplearning4j.iterator.LabeledSentenceProvider;
 import org.deeplearning4j.iterator.provider.CollectionLabeledSentenceProvider;
-import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.BertWordPieceTokenizerFactory;
-import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.base.Preconditions;
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.datavec.api.writable.Text;
+import org.nd4j.linalg.dataset.api.MultiDataSet;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class WordPieceTokenizerStepRunner extends BaseStepRunner
+public class WordTokenizerStepRunner extends BaseStepRunner
 {
     private BertWordPieceTokenizerFactory tokenizer;
-    private WordPieceTokenizerStep bertStep;
+    private WordTokenizerStep tokenizerStep;
 
-    private ComputationGraph bertModel;
 
     private final int MAX_LEN = 256;
 
-    public WordPieceTokenizerStepRunner(PipelineStep pipelineStep)
+    public WordTokenizerStepRunner(PipelineStep pipelineStep)
     {
         super(pipelineStep);
 
-        this.bertStep = (WordPieceTokenizerStep) pipelineStep;
+        this.tokenizerStep = (WordTokenizerStep) pipelineStep;
 
-        //String inputName = (String) this.bertStep.getInputNames().get(0);
-        //String outputName = (String) this.bertStep.getOutputNames().get(0);
-
-        String modelPath = this.bertStep.getModelPath();
-        String vocabPath = this.bertStep.getVocabPath();
+        String vocabPath = this.tokenizerStep.getVocabPath();
 
         //load tokenizer
         try {
@@ -73,15 +66,6 @@ public class WordPieceTokenizerStepRunner extends BaseStepRunner
             throw new IllegalStateException("Failed to create BertWordPieceTokenizerFactory", e);
         }
 
-        //load Bert trained model
-        try {
-
-            this.bertModel = ModelSerializer.restoreComputationGraph(modelPath);
-
-        } catch (IOException e)
-        {
-            throw new IllegalStateException("Failed to load ComputationGraph model at path " + modelPath, e);
-        }
     }
 
     @Override
@@ -107,10 +91,6 @@ public class WordPieceTokenizerStepRunner extends BaseStepRunner
                 .build();
     }
 
-    public INDArray getOutput(BertIterator iterator)
-    {
-        return this.bertModel.output(iterator)[0];
-    }
 
     @Override
     public Record[] transform(Record[] input)
@@ -126,16 +106,20 @@ public class WordPieceTokenizerStepRunner extends BaseStepRunner
             if (text.toString().charAt(0) == '{')
             {
                 JsonObject jsonObject = new JsonObject(text.toString());
-                List<Writable> writables = new ArrayList<>();
+                List<Writable> featureWritable = new ArrayList<>();
+                List<Writable> featureMaskWritable = new ArrayList<>();
 
                 for (String field : jsonObject.fieldNames())
                 {
                     String sentence = (String) jsonObject.getValue(field);
 
-                    writables.add(WritableValueRetriever.writableFromValue(this.getOutput(this.getToken(sentence))));
+                    MultiDataSet mds = this.getToken(sentence).next();
+                    featureWritable.add(WritableValueRetriever.writableFromValue(mds.getFeatures(0)));
+                    featureMaskWritable.add(WritableValueRetriever.writableFromValue(mds.getFeaturesMaskArray(0)));
                 }
 
-                recordList.add(new org.datavec.api.records.impl.Record(writables, null));
+                recordList.add(new org.datavec.api.records.impl.Record(featureWritable, null));
+                recordList.add(new org.datavec.api.records.impl.Record(featureMaskWritable, null));
             }
 
         }

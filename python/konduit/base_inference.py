@@ -2907,7 +2907,7 @@ class ImageLoadingStep(PipelineStep):
             )
         return d
 
-class WordPieceTokenizerStep(PipelineStep):
+class WordTokenizerStep(PipelineStep):
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},
@@ -2916,7 +2916,6 @@ class WordPieceTokenizerStep(PipelineStep):
         "outputNames": {"type": list, "subtype": str},
         "inputColumnNames": {"type": dict, "subtype": None},
         "outputColumnNames": {"type": dict, "subtype": None},
-        "modelPath": {"type": str, "subtype": None},
         "vocabPath": {"type": str, "subtype": None},
     }
     _formats_map = {
@@ -2932,7 +2931,6 @@ class WordPieceTokenizerStep(PipelineStep):
             output_names=None,
             input_column_names=None,
             output_column_names=None,
-            model_path=None,
             vocab_path=None,
     ):
         self.__input_schemas = input_schemas
@@ -2941,7 +2939,6 @@ class WordPieceTokenizerStep(PipelineStep):
         self.__output_names = output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
-        self.__model_path = model_path
         self.__vocab_path = vocab_path
 
     def _get_input_schemas(self):
@@ -3024,16 +3021,6 @@ class WordPieceTokenizerStep(PipelineStep):
 
     output_column_names = property(_get_output_column_names, _set_output_column_names)
 
-    def _get_model_path(self):
-        return self.__model_path
-
-    def _set_model_path(self, value):
-        if not isinstance(value, str):
-            raise TypeError("modelPath must be str")
-        self.__model_path = value
-
-    model_path = property(_get_model_path, _set_model_path)
-
     def _get_vocab_path(self):
         return self.__vocab_path
 
@@ -3077,12 +3064,6 @@ class WordPieceTokenizerStep(PipelineStep):
                 self.__output_column_names.as_dict()
                 if hasattr(self.__output_column_names, "as_dict")
                 else self.__output_column_names
-            )
-        if self.__model_path is not None:
-            d["modelPath"] = (
-                self.__model_path.as_dict()
-                if hasattr(self.__model_path, "as_dict")
-                else self.__model_path
             )
         if self.__vocab_path is not None:
             d["vocabPath"] = (

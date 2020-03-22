@@ -34,9 +34,9 @@ import java.io.Serializable;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-public class WordPieceTokenizerStep extends BasePipelineStep<WordPieceTokenizerStep> implements Serializable
+public class WordTokenizerStep extends BasePipelineStep<WordTokenizerStep> implements Serializable
 {
-    protected String modelPath, vocabPath;
+    protected String vocabPath;
 
     @Override
     public Input.DataFormat[] validInputTypes() {
@@ -54,14 +54,14 @@ public class WordPieceTokenizerStep extends BasePipelineStep<WordPieceTokenizerS
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.steps.WordPieceTokenizerStepRunner";
+        return "ai.konduit.serving.pipeline.steps.WordTokenizerStepRunner";
     }
 
-    public static WordPieceTokenizerStep fromJson(String json){
-        return ObjectMappers.fromJson(json, WordPieceTokenizerStep.class);
+    public static WordTokenizerStep fromJson(String json){
+        return ObjectMappers.fromJson(json, WordTokenizerStep.class);
     }
 
-    public static WordPieceTokenizerStep fromYaml(String yaml){
-        return ObjectMappers.fromYaml(yaml, WordPieceTokenizerStep.class);
+    public static WordTokenizerStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, WordTokenizerStep.class);
     }
 }

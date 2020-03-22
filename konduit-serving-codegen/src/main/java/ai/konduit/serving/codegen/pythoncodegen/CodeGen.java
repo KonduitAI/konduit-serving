@@ -80,7 +80,7 @@ public class CodeGen {
                 ImageLoadingStep.class,
                 MemMapConfig.class,
                 InferenceConfiguration.class,
-                WordPieceTokenizerStep.class
+                WordTokenizerStep.class
         };
 
 
