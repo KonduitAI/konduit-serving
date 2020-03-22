@@ -254,7 +254,6 @@ public class PipelineExecutioner implements Closeable {
             log.warn("No pipeline steps configured.");
         }
 
-	System.out.println("init pipeline exec");
         this.pipeline = Pipeline.getPipeline(config.getSteps());
 
         for (int i = 0; i < config.getSteps().size(); i++) {
