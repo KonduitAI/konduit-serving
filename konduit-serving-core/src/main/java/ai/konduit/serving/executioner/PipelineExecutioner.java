@@ -248,14 +248,13 @@ public class PipelineExecutioner implements Closeable {
     /**
      * Init the pipeline executioner.
      */
-    public void init(Input.DataFormat inputDataFormat, PredictionType predictionType) {
+    public void init(){
         ServingConfig servingConfig = config.getServingConfig();
         if(config.getSteps().isEmpty()) {
             log.warn("No pipeline steps configured.");
         }
 
-        validateInputsAndOutputs(inputDataFormat, predictionType);
-
+	System.out.println("init pipeline exec");
         this.pipeline = Pipeline.getPipeline(config.getSteps());
 
         for (int i = 0; i < config.getSteps().size(); i++) {
@@ -287,16 +286,6 @@ public class PipelineExecutioner implements Closeable {
         }
 
         initDataTypes();
-
-        try {
-            if (servingConfig.getOutputDataFormat() == Output.DataFormat.JSON) {
-                multiOutputAdapter = outputAdapterFor(predictionType, objectDetectionConfig);
-            } else {
-                log.info("Skipping initialization of multi input adapter due to binary output.");
-            }
-        } catch (Exception e) {
-            log.error("Error initializing output adapter.", e);
-        }
 
         if (modelConfig != null && modelConfig.getModelConfigType().getModelType() != ModelConfig.ModelType.PMML
                 && (inputNames == null || inputNames.isEmpty())) {
@@ -372,11 +361,22 @@ public class PipelineExecutioner implements Closeable {
      * @param inputs             input data as array of {@link Record}
      */
     public void doInference(RoutingContext ctx,
-                            Output.DataFormat outputDataFormat,
+                            PredictionType predictionType,
+		            Input.DataFormat inputDataFormat,
+		            Output.DataFormat outputDataFormat,
                             Record[] inputs) {
+
+        validateInputsAndOutputs(inputDataFormat, predictionType);
+
         if (inputs == null || inputs.length < 1 || inputs[0] == null) {
             throw new IllegalStateException("No inputs specified!");
         }
+
+        try {
+                multiOutputAdapter = outputAdapterFor(predictionType, objectDetectionConfig);
+        } catch (Exception e) {
+            log.error("Error initializing output adapter.", e);
+	}
 
         String batchId = UUID.randomUUID().toString();
         long startTime = System.nanoTime();
@@ -469,8 +469,11 @@ public class PipelineExecutioner implements Closeable {
                             Object input,
                             Schema conversionSchema,
                             TransformProcess transformProcess,
-                            Schema outputSchema,
-                            Output.DataFormat outputDataFormat) {
+			    Schema outputSchema,
+		            Input.DataFormat inputDataFormat,
+			    Output.DataFormat outputDataFormat) {
+
+        validateInputsAndOutputs(inputDataFormat, predictionType);
 
         Record[] pipelineInput = PipelineExecutioner.createInput(input, transformProcess, conversionSchema);
         Record[] records = pipeline.doPipeline(pipelineInput);

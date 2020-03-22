@@ -309,8 +309,6 @@ public class PipelineRouteDefiner {
                     "content-type: application/json only accepts JSON as " +
                             "input data format and not " + inputDataFormat.name());
 
-            pipelineExecutioner.init(inputDataFormat, predictionType);
-
             initializeSchemas(inferenceConfiguration, true);
 
             try {
@@ -326,6 +324,7 @@ public class PipelineRouteDefiner {
                         inputSchema,
                         null,
                         outputSchema,
+			inputDataFormat,
                         inferenceConfiguration.getServingConfig().getOutputDataFormat());
                 if (start != null)
                     start.stop();
@@ -355,8 +354,6 @@ public class PipelineRouteDefiner {
             } catch(Exception e) {
                 predictionType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
             }
-
-            pipelineExecutioner.init(inputDataFormat, predictionType);
 
             Map<String, InputAdapter<io.vertx.core.buffer.Buffer, ?>> adapters = getInputAdapterMap(ctx);
 
@@ -437,6 +434,7 @@ public class PipelineRouteDefiner {
                             inputSchema,
                             null,
                             outputSchema,
+			    inputDataFormat,
                             inferenceConfiguration.getServingConfig().getOutputDataFormat());
 
                     if (start != null)
@@ -526,7 +524,7 @@ public class PipelineRouteDefiner {
                     if (batchCreationTimer != null) {
                         start = batchCreationTimer.start();
                     }
-                    pipelineExecutioner.doInference(ctx, dataFormat, inputs);
+                    pipelineExecutioner.doInference(ctx, predictionType, inputDataFormat, dataFormat, inputs);
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
@@ -550,6 +548,7 @@ public class PipelineRouteDefiner {
             //due to needing to sometime initialize retraining routes
             try {
                 pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration);
+		pipelineExecutioner.init();
             } catch (Exception e) {
                 log.error("Failed to initialize. Shutting down.", e);
             }
