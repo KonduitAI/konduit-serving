@@ -103,7 +103,7 @@ public class PytorchPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalTest
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -139,13 +139,12 @@ public class PytorchPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalTest
     }
 
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
 
         //Preparing input NDArray
         INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});

@@ -41,7 +41,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.python.PythonType;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -51,12 +50,8 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
@@ -85,10 +80,6 @@ public class PytorchPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTest 
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
         String pythonCodePath = new ClassPathResource("scripts/pytorch/NdArray_Pytorch_NdArray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
@@ -151,7 +142,6 @@ public class PytorchPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTest 
     }
 
     @Test(timeout = 60000)
-    //@Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -160,7 +150,6 @@ public class PytorchPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTest 
 
         //Preparing input NDArray
         INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-        System.out.println(arr);
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 

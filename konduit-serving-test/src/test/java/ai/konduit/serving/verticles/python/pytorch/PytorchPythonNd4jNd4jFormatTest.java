@@ -106,7 +106,7 @@ public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest 
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -143,7 +143,7 @@ public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest 
     }
 
 
-    @Test
+    @Test(timeout = 60000)
     @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 

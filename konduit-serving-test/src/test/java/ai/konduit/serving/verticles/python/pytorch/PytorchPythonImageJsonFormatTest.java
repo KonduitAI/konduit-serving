@@ -110,7 +110,7 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 600000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -137,10 +137,10 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
-        assertEquals(expectedArr.getInt(0), outputArray.getInt(0),1e-1);
+        assertEquals(expectedArr.getInt(0), outputArray.getInt(0), 1e-1);
     }
 
-    @Test
+    @Test(timeout = 600000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         System.out.println("testInferenceClassificationResult Start");

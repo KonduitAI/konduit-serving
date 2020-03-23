@@ -94,8 +94,8 @@ public class PytorchPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTes
         //ServingConfig set httpport and Input Formats
         ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.NUMPY)
-                .httpPort(port).
-                        build();
+                .httpPort(port)
+                .build();
 
         //Model config and set model type as Pytorch
         ImageLoadingStep imageLoadingStep = ImageLoadingStep.builder()
@@ -113,7 +113,7 @@ public class PytorchPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTes
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 600000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -133,13 +133,11 @@ public class PytorchPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTes
                 .andReturn();
 
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
     }
 
-    @Test
+    @Test(timeout = 600000)
     @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
@@ -161,7 +159,6 @@ public class PytorchPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTes
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         JsonArray expProb = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchImageTest.json");
         float[][] expNd = ObjectMappers.json().readValue(expProb.toString(), float[][].class);
         INDArray expectedArray = Nd4j.create(expNd);

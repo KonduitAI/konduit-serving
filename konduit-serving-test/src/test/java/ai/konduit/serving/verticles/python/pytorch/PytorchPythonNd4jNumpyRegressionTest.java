@@ -50,12 +50,8 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
@@ -83,11 +79,6 @@ public class PytorchPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVertical
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
-
         String pythonCodePath = new ClassPathResource("scripts/pytorch/RegressionTorch.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
@@ -108,7 +99,6 @@ public class PytorchPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVertical
                 .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
-        System.out.println("Inference---" + inferenceConfiguration.toJson());
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
@@ -140,12 +130,8 @@ public class PytorchPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVertical
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
-
-
     }
 
 }

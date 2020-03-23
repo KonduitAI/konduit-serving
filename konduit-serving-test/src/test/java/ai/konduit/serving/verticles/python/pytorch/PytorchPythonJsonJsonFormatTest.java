@@ -41,7 +41,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.python.PythonType;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -102,7 +101,7 @@ public class PytorchPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest 
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -135,7 +134,7 @@ public class PytorchPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTest 
 
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         this.context = context;

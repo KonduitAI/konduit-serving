@@ -115,7 +115,7 @@ public class PytorchPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 600000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -138,13 +138,12 @@ public class PytorchPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0), 1e-1);
     }
 
-    @Test
+    @Test(timeout = 600000)
     @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
@@ -168,7 +167,6 @@ public class PytorchPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         JsonArray expProb = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchImageTest.json");
         float[][] expNd = ObjectMappers.json().readValue(expProb.toString(), float[][].class);

@@ -103,7 +103,7 @@ public class PytorchPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTes
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -127,21 +127,18 @@ public class PytorchPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTes
                 .andReturn();
 
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNumpyTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNumpyTest.json", "raw");
         assertEquals(expectedArr, outputArray);
     }
 
 
-    @Test
+    @Test(timeout = 60000)
     @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
 
         //Preparing input NDArray
         INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
