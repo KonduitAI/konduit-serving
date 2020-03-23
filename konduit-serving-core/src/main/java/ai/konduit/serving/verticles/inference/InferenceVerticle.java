@@ -40,8 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 /**
- * A {@link io.vertx.core.Verticle} that takes multi part file uploads
- * as inputs.
+ * A {@link io.vertx.core.Verticle} that takes multi part file uploads as inputs.
  * <p>
  * Many computation graphs are usually multiple inputs
  * by name: Each part for a multi part file upload
