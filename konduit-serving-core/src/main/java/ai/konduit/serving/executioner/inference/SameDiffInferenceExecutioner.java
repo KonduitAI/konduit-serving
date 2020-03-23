@@ -24,9 +24,7 @@ package ai.konduit.serving.executioner.inference;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.model.loader.ModelLoader;
-import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
-import ai.konduit.serving.threadpool.samediff.SameDiffThreadPool;
-import ai.konduit.serving.threadpool.tensorflow.TensorFlowThreadPool;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.autodiff.execution.NativeGraphExecutioner;
@@ -35,10 +33,8 @@ import org.nd4j.autodiff.execution.conf.ExecutorConfiguration;
 import org.nd4j.autodiff.execution.conf.OutputMode;
 import org.nd4j.autodiff.samediff.SameDiff;
 import org.nd4j.base.Preconditions;
-import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.api.ops.executioner.OpExecutioner;
-import org.nd4j.linalg.factory.Nd4j;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
