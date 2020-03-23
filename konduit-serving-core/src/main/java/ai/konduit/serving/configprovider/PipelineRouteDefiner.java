@@ -26,6 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
+import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
@@ -40,6 +41,7 @@ import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
+import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
 import io.micrometer.core.instrument.LongTaskTimer;
@@ -62,11 +64,15 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpHeaders;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.base.Preconditions;
+import org.nd4j.linalg.io.ClassPathResource;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -119,8 +125,8 @@ public class PipelineRouteDefiner {
      * <p>
      * Health checks are automatically added at /healthcheck endpoints
      *
-     * @param vertx                  the input vertx instance for setting up
-     *                               the returned {@link Router} instance and endpoints
+     * @param vertx                  the input vertx instance for setting up the returned {@link Router}
+     *                               instance and endpoints
      * @param inferenceConfiguration the configuration to use for the {@link PipelineExecutioner}
      * @return the router with the endpoints defined
      * @see <a href="https://vertx.io/docs/vertx-health-check/java/">Vertx health checks</a>
@@ -180,13 +186,13 @@ public class PipelineRouteDefiner {
 
         healthCheckHandler = HealthCheckHandler.create(vertx);
 
-        /*
+        /**
          * Get a basic health check for a running Konduit server.
          * If a server is up, this endpoint will return status of 204.
          */
         router.get("/healthcheck*").handler(healthCheckHandler);
 
-        /*
+        /**
          * Get the Konduit server configuration in raw JSON format
          */
         router.get("/config")
@@ -199,7 +205,7 @@ public class PipelineRouteDefiner {
             }
         });
 
-        /*
+        /**
          * Get the Konduit server configuration in formatted, "pretty" JSON format
          */
         router.get("/config/pretty")
@@ -212,7 +218,51 @@ public class PipelineRouteDefiner {
             }
         });
 
-        /*
+        /**
+         * Sets up and endpoint to see server logs if
+         * {@link ServingConfig#isCreateLoggingEndpoints()} is true.
+         * Returns the last 100 lines of the log file.
+         */
+        if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
+            router.get("/logs")
+                    .handler(ctx -> {
+                        try {
+                            ctx.response()
+                                    .putHeader(HttpHeaders.CONTENT_TYPE, "text/html")
+                                    .end(FileUtils.readFileToString(new ClassPathResource("web/logs_page.html").getFile(), StandardCharsets.UTF_8));
+                        } catch (Exception e) {
+                            ctx.fail(500, e);
+                        }
+                    });
+
+            /**
+             * Sets up and endpoint to see server logs if {@link ServingConfig#isCreateLoggingEndpoints()}
+             * is true. Returns the number of last few lines determines by the path param
+             * {@code numberOfLastLinesToRead}. If the path param is an invalid integer,
+             * then the whole log file data will be read and returned.
+             */
+            router.get("/logs/:numberOfLastLinesToRead")
+                    .handler(ctx -> {
+                        String numberOfLinesString = ctx.pathParam("numberOfLastLinesToRead");
+
+                        ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
+                        try {
+                            if (numberOfLinesString.matches("-?\\d+")) {
+                                ctx.response().end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
+                            } else if("download".equalsIgnoreCase(numberOfLinesString)) {
+                                ctx.response().sendFile(LogUtils.getLogsFile().getAbsolutePath()).end();
+                            } else if("downloadAsZip".equalsIgnoreCase(numberOfLinesString)) {
+                                ctx.response().sendFile(LogUtils.getZippedLogs().getAbsolutePath()).end();
+                            } else {
+                                ctx.response().end(LogUtils.getLogs(-1));
+                            }
+                        } catch (Exception e) {
+                            ctx.fail(500, e);
+                        }
+                    });
+        }
+
+        /**
          * Get prometheus metrics from this endpoint.
          */
         router.get("/metrics").handler(io.vertx.micrometer.PrometheusScrapingHandler.create())
@@ -242,9 +292,11 @@ public class PipelineRouteDefiner {
         router.post("/dynamicschema")
                 .consumes("application/json")
                 .produces("application/json")
-                .handler(ctx -> pipelineExecutioner.doJsonInference(ctx.getBodyAsJson(),ctx));
+                .handler(ctx -> {
+                    pipelineExecutioner.doJsonInference(ctx.getBodyAsJson(),ctx);
+                });
 
-        /*
+        /**
          * Get the output of a pipeline for a given prediction type for JSON input data format.
          */
         router.post("/:predictionType/:inputDataFormat")
@@ -286,7 +338,7 @@ public class PipelineRouteDefiner {
         });
 
 
-        /*
+        /**
          * Multi-part request for pipeline outputs of given predictionType for
          */
         router.post("/:predictionType/:inputDataFormat")
@@ -345,6 +397,7 @@ public class PipelineRouteDefiner {
                 ctx.put(VerticleConstants.CONVERTED_INFERENCE_DATA, batch);
                 handler.complete();
             }, true, result -> ctx.next());
+
         });
 
         router.post("/:predictionType/:inputDataFormat")
@@ -399,6 +452,7 @@ public class PipelineRouteDefiner {
                     ctx.fail(e);
                     blockingCall.fail(e);
                 }
+
             }, true, result -> {
                 if (result.failed()) {
                     ctx.fail(result.cause());
@@ -419,7 +473,6 @@ public class PipelineRouteDefiner {
                         .converterArgs(pipelineExecutioner.getArgs())
                         .inputParts(inputNames())
                         .build();
-
                 try {
                     long nanos = System.nanoTime();
                     LongTaskTimer.Sample start = null;
@@ -441,6 +494,8 @@ public class PipelineRouteDefiner {
                     ctx.put(VerticleConstants.TRANSACTION_ID, transactionUUID);
                     ctx.put(VerticleConstants.CONVERTED_INFERENCE_DATA, batch);
                     handler.complete();
+
+
                 } catch (IOException e) {
                     ctx.fail(e);
                     log.error("Unable to convert inputs", e);
@@ -462,6 +517,8 @@ public class PipelineRouteDefiner {
                 return;
             }
 
+            String outputDataFormatString = ctx.pathParam("outputDataFormat");
+            Output.DataFormat dataFormat = Output.DataFormat.valueOf(outputDataFormatString.toUpperCase());
             ctx.vertx().executeBlocking(handler -> {
                 try {
                     long nanos = System.nanoTime();
@@ -469,7 +526,7 @@ public class PipelineRouteDefiner {
                     if (batchCreationTimer != null) {
                         start = batchCreationTimer.start();
                     }
-                    pipelineExecutioner.doInference(ctx, outputDataFormat, inputs);
+                    pipelineExecutioner.doInference(ctx, dataFormat, inputs);
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
@@ -477,15 +534,14 @@ public class PipelineRouteDefiner {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos))
                                 + " milliseconds");
                     }
-
                     handler.complete();
                 } catch (Exception e) {
+                    log.error("Failed to do inference ", e);
+                    ctx.fail(e);
                     handler.fail(e);
                 }
-            }, true, result -> {
-                if (result.failed())
-                    ctx.fail(result.cause());
-            });
+
+            }, true, result -> {});
         });
 
         if (pipelineExecutioner == null) {
@@ -555,6 +611,4 @@ public class PipelineRouteDefiner {
                 throw new IllegalStateException("Illegal adapter type!");
         }
     }
-
-
 }

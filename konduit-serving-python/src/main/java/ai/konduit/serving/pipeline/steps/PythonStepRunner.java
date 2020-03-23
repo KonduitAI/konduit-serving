@@ -41,7 +41,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,7 +100,7 @@ public class PythonStepRunner extends BaseStepRunner {
             String code = configEntry.getValue().getPythonCode();
             if (code == null) {
                 try {
-                    code = FileUtils.readFileToString(new File(currConfig.getPythonCodePath()), Charset.defaultCharset());
+                    code = FileUtils.readFileToString(new File(currConfig.getPythonCodePath()), StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     log.error("Unable to read code from " + currConfig.getPythonCodePath());
                 }

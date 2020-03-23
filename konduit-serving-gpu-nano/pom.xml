@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>konduit-serving</artifactId>
+        <groupId>ai.konduit.serving</groupId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>konduit-serving-gpu-nano</artifactId>
+
+    <name>konduit-serving-gpu-nano</name>
+
+    <properties>
+        <cuda.version>10.0</cuda.version>
+        <nd4j.cuda.version>${nd4j.version}-${cuda.version}</nd4j.cuda.version>
+        <javacpp.date>7.4</javacpp.date>
+        <cuda.javacpp.version>${cuda.version}-${javacpp.date}-${javacpp.version}</cuda.javacpp.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-cuda-10.0-platform</artifactId>
+            <version>${nd4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>cuda-platform</artifactId>
+            <version>10.0-7.4-1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+    </dependencies>
+</project>
