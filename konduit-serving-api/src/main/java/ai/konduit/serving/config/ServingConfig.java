@@ -58,6 +58,9 @@ public class ServingConfig implements TextConfig {
     private boolean logTimings = false;
 
     @Builder.Default
+    private boolean createLoggingEndpoints = false;
+
+    @Builder.Default
     private List<String> classificationLabels = new ArrayList<>(0);
 
     @Builder.Default

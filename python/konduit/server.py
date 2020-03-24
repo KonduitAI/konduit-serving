@@ -174,7 +174,7 @@ class Server(object):
                 break
             else:
                 print(output.decode("utf-8"), end="")
-                if b'Server started on port' in output:
+                if b'Inference server started on port' in output:
                     m = re.search('port (.+?) with', str(output))
                     if m:
                         port = int(m.group(1))

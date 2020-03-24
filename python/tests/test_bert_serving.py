@@ -69,3 +69,5 @@ def test_server_start():
     except Exception as e:
         print(e)
         server.stop()
+
+test_server_start()

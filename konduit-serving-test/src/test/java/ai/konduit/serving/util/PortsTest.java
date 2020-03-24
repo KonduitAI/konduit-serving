@@ -49,7 +49,7 @@ import org.nd4j.linalg.primitives.Pair;
 import java.io.File;
 import java.io.IOException;
 import java.net.BindException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static com.jayway.restassured.RestAssured.given;
 
@@ -308,7 +308,7 @@ public class PortsTest {
                 .build();
 
         File configSavePath = folder.newFile();
-        FileUtils.writeStringToFile(configSavePath, inferenceConfiguration.toJson(), Charset.defaultCharset());
+        FileUtils.writeStringToFile(configSavePath, inferenceConfiguration.toJson(), StandardCharsets.UTF_8);
         return configSavePath.getAbsolutePath();
     }
 }
