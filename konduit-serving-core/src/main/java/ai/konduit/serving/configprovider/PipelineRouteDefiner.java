@@ -29,6 +29,7 @@ import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
+import ai.konduit.serving.metrics.ClassificationMetrics;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.metrics.NativeMetrics;
 import ai.konduit.serving.pipeline.PipelineStep;
@@ -42,6 +43,7 @@ import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.LongTaskTimer.Sample;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -64,7 +66,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
+import org.datavec.api.writable.NDArrayWritable;
 import org.nd4j.base.Preconditions;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.*;
@@ -90,7 +96,7 @@ public class PipelineRouteDefiner {
     protected LongTaskTimer inferenceExecutionTimer, batchCreationTimer;
     protected HealthCheckHandler healthCheckHandler;
     private static JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
-
+    private List<Counter> classCounterIncrement;
 
     public List<String> inputNames() {
         return pipelineExecutioner.inputNames();
@@ -165,6 +171,12 @@ public class PipelineRouteDefiner {
                     case NATIVE:
                         new NativeMetrics().bindTo(registry);
                         break;
+                    case CLASSIFICATION:
+                        ClassificationMetrics classificationMetrics = new ClassificationMetrics(inferenceConfiguration.getServingConfig().getClassificationLabels());
+                        classificationMetrics.bindTo(registry);
+                        classCounterIncrement = classificationMetrics.getClassCounters();
+                        break;
+
                     case GPU:
                         try {
                             MeterBinder meterBinder = (MeterBinder) Class.forName("ai.konduit.serving.gpu.GpuMetrics").newInstance();
@@ -224,22 +236,7 @@ public class PipelineRouteDefiner {
 
 
         Preconditions.checkNotNull(inferenceConfiguration.getServingConfig(), "Please define a serving configuration.");
-        router.post().handler(BodyHandler.create()
-                .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
-                .setDeleteUploadedFilesOnEnd(true)
-                .setMergeFormAttributes(true))
-                .failureHandler(failureHandlder -> {
-                    if (failureHandlder.statusCode() == 404) {
-                        log.warn("404 at route " + failureHandlder.request().path());
-                    } else if (failureHandlder.failed()) {
-                        if (failureHandlder.failure() != null) {
-                            log.error("Request failed with cause ", failureHandlder.failure());
-                        } else {
-                            log.error("Request failed with unknown cause.");
-                        }
-                    }
-                });
-
+        generalHandler(inferenceConfiguration, router, log);
 
 
         router.post("/dynamicschema")
@@ -272,7 +269,7 @@ public class PipelineRouteDefiner {
                     start = inferenceExecutionTimer.start();
                 }
                 String jsonString = ctx.getBody().toString();
-                pipelineExecutioner.doInference(
+                Record[] records = pipelineExecutioner.doInference(
                         ctx,
                         predictionType,
                         jsonString,
@@ -280,8 +277,12 @@ public class PipelineRouteDefiner {
                         null,
                         outputSchema,
                         inferenceConfiguration.getServingConfig().getOutputDataFormat());
+
                 if (start != null)
                     start.stop();
+
+                incrementClassificationCounters(records);
+
             } catch (Exception e) {
                 log.error("Unable to perform json inference", e);
                 ctx.response().setStatusCode(500);
@@ -383,7 +384,7 @@ public class PipelineRouteDefiner {
                     if (inferenceExecutionTimer != null)
                         start = inferenceExecutionTimer.start();
 
-                    pipelineExecutioner.doInference(
+                    Record[] records = pipelineExecutioner.doInference(
                             ctx,
                             predictionType,
                             inputs,
@@ -392,12 +393,15 @@ public class PipelineRouteDefiner {
                             outputSchema,
                             inferenceConfiguration.getServingConfig().getOutputDataFormat());
 
+
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
                     if (inferenceConfiguration.serving().isLogTimings()) {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
+
+                    incrementClassificationCounters(records);
 
                     blockingCall.complete();
                 } catch (Exception e) {
@@ -479,7 +483,7 @@ public class PipelineRouteDefiner {
                     if (batchCreationTimer != null) {
                         start = batchCreationTimer.start();
                     }
-                    pipelineExecutioner.doInference(ctx, dataFormat, inputs);
+                    INDArray[] outputs = pipelineExecutioner.doInference(ctx, dataFormat, inputs);
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
@@ -487,6 +491,16 @@ public class PipelineRouteDefiner {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos))
                                 + " milliseconds");
                     }
+
+                    //output from argmax is a vector where each one is a decision index
+                    //use the decision index to increment the counter
+                    if(classCounterIncrement != null) {
+                        INDArray argMax = Nd4j.argMax(outputs[0], -1);
+                        for(int i = 0; i < argMax.length(); i++) {
+                            classCounterIncrement.get(argMax.getInt(i)).increment();
+                        }
+                    }
+
                     handler.complete();
                 } catch (Exception e) {
                     log.error("Failed to do inference ", e);
@@ -511,6 +525,35 @@ public class PipelineRouteDefiner {
         }
 
         return router;
+    }
+
+    static void generalHandler(InferenceConfiguration inferenceConfiguration, Router router, Logger log) {
+        router.post().handler(BodyHandler.create()
+                .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
+                .setDeleteUploadedFilesOnEnd(true)
+                .setMergeFormAttributes(true))
+                .failureHandler(failureHandlder -> {
+                    if (failureHandlder.statusCode() == 404) {
+                        log.warn("404 at route " + failureHandlder.request().path());
+                    } else if (failureHandlder.failed()) {
+                        if (failureHandlder.failure() != null) {
+                            log.error("Request failed with cause ", failureHandlder.failure());
+                        } else {
+                            log.error("Request failed with unknown cause.");
+                        }
+                    }
+                });
+    }
+
+    private void incrementClassificationCounters(Record[] records) {
+        if(classCounterIncrement != null) {
+            NDArrayWritable ndArrayWritable = (NDArrayWritable) records[0].getRecord().get(0);
+            INDArray output = ndArrayWritable.get();
+            INDArray argMax = Nd4j.argMax(output, -1);
+            for (int i = 0; i < argMax.length(); i++) {
+                classCounterIncrement.get(argMax.getInt(i)).increment();
+            }
+        }
     }
 
 

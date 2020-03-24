@@ -22,6 +22,9 @@
 
 package ai.konduit.serving.metrics;
 
+/**
+ * Metric types for prometheus
+ */
 public enum MetricType {
     CLASS_LOADER,
     JVM_MEMORY,
@@ -30,5 +33,6 @@ public enum MetricType {
     JVM_THREAD,
     LOGGING_METRICS,
     NATIVE,
-    GPU
+    GPU,
+    CLASSIFICATION
 }

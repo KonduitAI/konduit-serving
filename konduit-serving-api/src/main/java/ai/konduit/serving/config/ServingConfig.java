@@ -29,6 +29,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -55,6 +56,9 @@ public class ServingConfig implements TextConfig {
 
     @Builder.Default
     private boolean logTimings = false;
+
+    @Builder.Default
+    private List<String> classificationLabels = new ArrayList<>(0);
 
     @Builder.Default
     private List<MetricType> metricTypes = Arrays.asList(
