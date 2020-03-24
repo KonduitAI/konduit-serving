@@ -38,7 +38,6 @@ import org.datavec.api.writable.Writable;
 import org.datavec.image.data.ImageWritable;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
 import java.util.*;
 
