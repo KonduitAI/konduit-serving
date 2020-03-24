@@ -390,7 +390,6 @@ public class ONNXThreadPool {
                                     inputTensors[i] = inputTensor;
 
                                 }
-                                //TODO: Pass ValueVector here when possible, test w/ multiple inputs
 
                                 Value inputVal = new Value(num_input_nodes);
 

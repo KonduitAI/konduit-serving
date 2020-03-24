@@ -140,8 +140,6 @@ public class OnnxMultipleInputsTest extends BaseVerticleTest {
         assertEquals("Response failed", 200, response.getStatusCode());
 
         INDArray bodyResult = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println(inputTensorValues.get(1));
-        System.out.println(bodyResult.getFloat(1));
 
         assertEquals(0.032786883, bodyResult.getFloat(1), 1e-6);
 
