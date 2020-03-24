@@ -357,16 +357,6 @@
             </dependency>
             <dependency>
                 <groupId>org.bytedeco</groupId>
-                <artifactId>tensorflow-platform</artifactId>
-                <version>${tensorflow.javacpp.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.bytedeco</groupId>
-                <artifactId>tensorflow</artifactId>
-                <version>${tensorflow.javacpp.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.bytedeco</groupId>
                 <artifactId>javacv</artifactId>
                 <version>${javacpp.version}</version>
             </dependency>
@@ -409,6 +399,26 @@
                 <groupId>org.nd4j</groupId>
                 <artifactId>nd4j-jackson</artifactId>
                 <version>${dl4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>tensorflow</artifactId>
+                <version>${tensorflow.javacpp.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.bytedeco</groupId>
+                        <artifactId>mkl-dnn</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.bytedeco</groupId>
+                        <artifactId>mkl-dnn-platform</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>tensorflow-platform</artifactId>
+                <version>${tensorflow.javacpp.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.nd4j</groupId>
