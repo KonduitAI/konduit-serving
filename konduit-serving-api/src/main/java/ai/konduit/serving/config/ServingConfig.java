@@ -57,6 +57,9 @@ public class ServingConfig implements TextConfig {
     private boolean logTimings = false;
 
     @Builder.Default
+    private boolean createLoggingEndpoints = false;
+
+    @Builder.Default
     private List<MetricType> metricTypes = Arrays.asList(
             MetricType.CLASS_LOADER,
             MetricType.JVM_MEMORY,

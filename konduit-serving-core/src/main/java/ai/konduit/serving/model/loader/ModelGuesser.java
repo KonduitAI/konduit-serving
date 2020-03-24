@@ -35,7 +35,7 @@ import org.json.JSONObject;
 import org.nd4j.linalg.dataset.api.preprocessor.Normalizer;
 
 import java.io.*;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -210,7 +210,7 @@ public class ModelGuesser {
                     ZipEntry entry = zipFile.getEntry(ModelSerializer.CONFIGURATION_JSON);
                     log.debug("Loaded configuration");
                     try (InputStream is = zipFile.getInputStream(entry)) {
-                        String configJson = IOUtils.toString(is, Charset.defaultCharset());
+                        String configJson = IOUtils.toString(is, StandardCharsets.UTF_8);
                         JSONObject jsonObject = new JSONObject(configJson);
                         if (jsonObject.has("vertexInputs")) {
                             log.debug("Loading computation graph.");

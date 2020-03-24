@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.configprovider;
 
+import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.util.ObjectMappers;
 import com.beust.jcommander.JCommander;
@@ -35,6 +36,7 @@ import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.util.Arrays;
 
@@ -53,11 +55,12 @@ import static java.lang.System.setProperty;
 @Builder
 @Data
 public class KonduitServingMain {
-
     private static Logger log = LoggerFactory.getLogger(KonduitServingMain.class.getName());
     private Handler<AsyncResult<InferenceConfiguration>> eventHandler;
 
     static {
+        SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
+
         setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
         LoggerFactory.getLogger(LoggerFactory.class); // Required for Logback to work in Vertx
     }
@@ -127,6 +130,16 @@ public class KonduitServingMain {
     }
 
     private void deployVerticle(KonduitServingNodeConfigurer konduitServingNodeConfigurer, Vertx vertx) {
+        if(konduitServingNodeConfigurer.getInferenceConfiguration().getServingConfig().isCreateLoggingEndpoints()) {
+            try {
+                LogUtils.setFileAppenderIfNeeded();
+            } catch (Exception e) {
+                log.error(e);
+                eventHandler.handle(Future.failedFuture(e));
+                return;
+            }
+        }
+
         vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
             if (handler.failed()) {
                 log.error(String.format("Unable to deploy verticle %s", konduitServingNodeConfigurer.getVerticleClassName()), handler.cause());
