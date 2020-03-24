@@ -261,7 +261,6 @@ public class PipelineExecutionerTests {
         assertNotNull("Input names should not be null.", pipelineExecutioner.inputNames());
         assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         TestCase.assertEquals(TensorDataType.INT64, pipelineExecutioner.inputDataTypes.get("image_tensor"));
-        assertNotNull(pipelineExecutioner.getMultiOutputAdapter());
     }
 
 
