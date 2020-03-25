@@ -5,11 +5,12 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.externals import joblib
 work_dir = os.path.abspath("./src/test/resources/scripts/scikitlearn")
+print(work_dir)
 sys.path.append(work_dir)
 
-#input : load images here - Array of images
+# input : load images here - Array of images
 digits = datasets.load_digits()
-#imgPath1 =("src\\test\\resources\\data\\5.png")
+# imgPath1 =("src\\test\\resources\\data\\5.png")
 X_test = imgPath
 n_samples = len(digits.images)
 data = digits.images.reshape((n_samples, -1))
@@ -18,7 +19,4 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 filename =work_dir+'//'+'ScikitLearnmodel.sav'
 loaded_model = joblib.load(filename)
-result = loaded_model.predict(X_test)
-#resultOutput=result[0:5]
-#print("resultOutput----",result[0:4])
-results = loaded_model.score(X_test, y_test)
+result = loaded_model.predict(X_test).astype('float')
