@@ -151,6 +151,9 @@ public class PipelineRouteDefiner {
                     .builder("batch_creation")
                     .register(registry);
         }
+        else {
+            log.info("Not using metrics registry.");
+        }
 
         if (inferenceConfiguration.getServingConfig().getMetricTypes() != null && registry != null) {
             //don't add more than one type

@@ -23,6 +23,7 @@
 package ai.konduit.serving.configprovider;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.util.MetricsUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.beust.jcommander.Parameter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -46,6 +47,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.bytedeco.systems.global.linux;
 import org.bytedeco.systems.global.macosx;
 import org.bytedeco.systems.global.windows;
+import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -227,23 +229,14 @@ public class KonduitServingNodeConfigurer {
         //logging using slf4j: defaults to jul
         setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory");
 
-        registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-
-        MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
-                .setMicrometerRegistry(registry)
-                .setPrometheusOptions(new VertxPrometheusOptions()
-                        .setEnabled(true));
-        BackendRegistries.setupBackend(micrometerMetricsOptions);
-
-        log.info("Setup micro meter options.");
-
-        BackendRegistries.setupBackend(micrometerMetricsOptions);
+        Pair<MicrometerMetricsOptions, MeterRegistry> micrometerMetricsOptionsMeterRegistryPair = MetricsUtils.setupPrometheus();
+        registry = micrometerMetricsOptionsMeterRegistryPair.getRight();
 
         vertxOptions = new VertxOptions()
                 .setMaxEventLoopExecuteTime(eventLoopExecutionTimeout)
                 .setBlockedThreadCheckInterval(eventLoopTimeout)
                 .setWorkerPoolSize(workerPoolSize)
-                .setMetricsOptions(micrometerMetricsOptions);
+                .setMetricsOptions(micrometerMetricsOptionsMeterRegistryPair.getFirst());
 
         vertxOptions.getEventBusOptions().setClustered(isClustered);
         vertxOptions.getEventBusOptions().setPort(eventBusPort);
