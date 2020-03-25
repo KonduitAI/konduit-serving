@@ -38,10 +38,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  *
  * @author Adam Gibson
  */
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = ClassificationMetricsConfig.class, name = "ClassificationMetricsConfig"),
-})
-@JsonTypeInfo(use = NAME, include = PROPERTY)
+
 public interface MetricsConfig extends TextConfig {
 
     /**
