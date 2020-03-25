@@ -5,15 +5,22 @@ PROPOSAL
 
 Proposed by: Shams Ul Azeem (18-03-2020)
 
+Discussed with: Paul Dubs, Alex Black
+
 ## Context
 
-Currently, we have a main class called [KonduitServingMain](https://github.com/KonduitAI/konduit-serving/blob/45af79d15abe4912ccd81e78c9d215306472036e/konduit-serving-core/src/main/java/ai/konduit/serving/configprovider/KonduitServingMain.java) that is the entrypoint for a konduit-serving application to run. The main command line arguments are defined in [KonduitServingNodeConfigurer](https://github.com/KonduitAI/konduit-serving/blob/e791741b80721980f8b66a35ed42f20b30612d5c/konduit-serving-core/src/main/java/ai/konduit/serving/configprovider/KonduitServingNodeConfigurer.java) class. We also have a [Python CLI](https://github.com/KonduitAI/konduit-serving/blob/7965965b58217f2b4d983fd41aaea013264491ee/python/cli.py).
+Currently, we have a main class called [KonduitServingMain](https://github.com/KonduitAI/konduit-serving/blob/45af79d15abe4912ccd81e78c9d215306472036e/konduit-serving-core/src/main/java/ai/konduit/serving/configprovider/KonduitServingMain.java) that is the entrypoint for a konduit-serving application to run. The main command line arguments are defined inside [KonduitServingNodeConfigurer](https://github.com/KonduitAI/konduit-serving/blob/e791741b80721980f8b66a35ed42f20b30612d5c/konduit-serving-core/src/main/java/ai/konduit/serving/configprovider/KonduitServingNodeConfigurer.java) class. We also have an additional [Python CLI](https://github.com/KonduitAI/konduit-serving/blob/7965965b58217f2b4d983fd41aaea013264491ee/python/cli.py) that can be just implemented in Java. Vert.x Launcher supports the ability to start, stop and list running verticles out of the box.
 
 ## Proposal
 
-`KonduitServingNodeConfigurer` can be just an extension of the [Vert.x Launcher](https://vertx.io/docs/vertx-core/java/#_the_vert_x_launcher) class. Also, we can implement methods in this Launcher class that can contain the extra code that's available in both of the above classes (KonduitServingMain and KonduitServingNodeConfigurer). Furthermore, we can extend the CLI and write seperate classes for every command we want to add to the CLI (see the documentation [here](https://vertx.io/docs/vertx-core/java/#_extending_the_vert_x_launcher)). Depending on the final decided API we can register or unregister commands in Vert.x Launcher.
+- Extend `KonduitServingNodeConfigurer` from [Vert.x Launcher](https://vertx.io/docs/vertx-core/java/#_the_vert_x_launcher) class. 
+- Write all the initialization/tear-down logic inside the lifecycle methods of Vert.x Launcher which is present inside both of the above classes (KonduitServingMain and KonduitServingNodeConfigurer). 
+- Extend the CLI and write separate classes for every command we want to add to the CLI (see the documentation [here](https://vertx.io/docs/vertx-core/java/#_extending_the_vert_x_launcher)). 
+- Depending on the final decided API, register or unregister commands in Vert.x Launcher.
 
-Due to the ability of starting, stopping and listing running verticles (out of the box), the following CLI can be easily created (this is not decided yet, this is just for an example.):
+### Example CLI:
+
+The following CLI will be the start for how this will be look:
 
 #### Starting Verticles
 
@@ -39,13 +46,15 @@ The CLI can also have options for setting up deployment options like:
 
 #### Inspecting Verticles
 
-Details could include:
+Possible details will include:
 - configuration
 - host and port
 - current resource usage
 
-    konduit inspect # Give details of all the running verticles
-    konduit inspect --name=mnist-prediction-server # Details of a specific verticle
+```bash
+konduit inspect # Give details of all the running verticles
+konduit inspect --name=mnist-prediction-server # Details of a specific verticle
+```
 
 #### Running Predictions
 
@@ -64,15 +73,25 @@ Details could include:
 ## Consequences 
 
 ### Advantages
-- Properly defined exit codes that we can use for log messages
-- CLI will be implemented in java so we can test is more easily than the python tests for which we have to first have an uber-jar.
+- Properly defined exit codes that we will use for log messages
+- CLI will be implemented in java, so tests are more easily written as compared to the python CLI tests for which an uber-jar is required.
 - Can list processes easily (through the vert.x launcher `list` command).
-- Ability to start and stop vert.x server by name.
+- Ability to start and stop vert.x server by name/ID.
 - Easy CLI lifecycle management.
 - Already documented base commands.
-- We can get rid of our python CLI maintenance.
+- Getting rid of python CLI maintenance.
 - Ability for a verticle to join a clustered event-bus without many changes in the CLI. 
 - The default CLI contains option for both deployment and vert.x object initialization.
   
 ### Disadvantages
 - Code refactoring.
+
+## Discussion
+
+### 01. How would running KS from Python work?
+        
+Making sure that we can detect konduit-serving Jar file based on environment variables (currently `KONDUIT_JAR_PATH`) or a default path and if it's not available we'll download it. After that making sure the version corresponding to the python package is the one that's downloaded. After the jar file is in place, all the commands from the python CLI (for starting, stopping, listing servers) will be passed on to the java version of the CLI. Even the --help command will be written in java. This way there's no maintenance of multiple CLIs since all the commands are channeled to just one CLI. If there's a new update needed within the CLI, only the Java version will be extended.
+
+### 02. How does "--instances 3" work in practice?
+
+Vertx handles this internally. `--instances` option is internal to vert.x. It can run multiple verticles on the same port and runs them in the same java process. It distributes them between multiple threads. There's a small repo [here](https://github.com/ShamsUlAzeem/VertxMetricsDemonstrator/blob/master/src/main/java/tests/shamsulazeem/VerticleMetricsDemonstrator.java) that demonstrate how it performs. This is not exactly running on multiple nodes. It's just a way to utilize multiple CPU threads.
