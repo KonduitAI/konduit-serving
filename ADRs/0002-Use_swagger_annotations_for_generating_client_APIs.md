@@ -5,6 +5,8 @@ PROPOSAL
 
 Proposed by: Shams Ul Azeem (18-03-2020)
 
+Discussed with: Paul Dubs, Alex Black
+
 ## Context
 
 Considering only inferences, we have two endpoints that are responsible to take inputs for prediction.
@@ -13,19 +15,19 @@ Considering only inferences, we have two endpoints that are responsible to take 
 - multipart/form-data
   - /:predictionType/:inputDataFormat # For multipart inputs (FILES)
 
-Given those two endpoints we have done a ton of work on creating a python client that (as of right now) needs more proper documentation, examples and maintenance planning for getting the APIs to be easily adaptable.
+Given those two endpoints we have done a ton of work on creating a python client that (as of right now) needs more proper documentation, examples and maintenance planning for making the APIs more adaptable.
 
-Since, we're planning to have APIs in multiple languages, it might get difficult to maintain and document them seperately in the future. 
+Since, we're planning to have APIs in multiple languages (python, java, C# and others), it might get difficult to maintain and document them separately in the future. 
 
 ## Proposal
 
-Using swagger annotations to solve most of the documentation and client APIs issues.
+### Using swagger annotations to generate and document client APIs.
 
-[Swagger annotations](https://github.com/swagger-api/swagger-core/wiki/Swagger-2.X---Annotations) are a quick and easy way to generate openapi specifications from the source code. Annotations apply to classes, methods and arguments. Using this way, we'll be able to get ourselves out of maintaning client APIs in different languages.
+[Swagger annotations](https://github.com/swagger-api/swagger-core/wiki/Swagger-2.X---Annotations) are a quick and easy way to generate openapi specifications from the source code. Annotations apply to classes, methods and arguments. Using this way, it's easier to get rid of client APIs maintenance (generation, documentation and packaging) in different languages.
 
-### How it works?
+#### How it works?
 
-We'll have to update our source code into classes that contain APIs for different types of verticles. For example:
+By refactoring konduit-serving source code into classes that contain APIs for different types of verticles. For example:
 
 ```java
 @Path("/")
@@ -65,15 +67,15 @@ public class InferenceApi {
 }
 ```
 
-We'll have to do similar changes for the other verticles and their respective routers. Currently, we have the following classes to refactor based on the above details: 
+This will require similar refactoring for the other verticles and their respective routers. Currently, the following classes will have to be refactored based on the above details: 
 - PipelineRouteDefiner
 - MemMapRouteDefiner
 - ConverterInferenceVerticle
 - ClusteredVerticle
 
-# How it would look at the end?
+#### How it would look at the end?
 
-If we have an API that looks like the class above then we can generate an API specification that will look like: 
+Having an API that looks like the class above will generate an API specification that will look like: 
 
 ```yaml
 openapi: 3.0.1
@@ -366,22 +368,36 @@ components:
           writeOnly: true
 ```
 
-And from this yaml we can generate our clients using [openapi-generator](https://github.com/OpenAPITools/openapi-generator) by running something like: 
+And from this yaml the clients will be generated using [openapi-generator](https://github.com/OpenAPITools/openapi-generator). For example: 
 
 ```bash
 java -jar openapi-generator-cli.jar generate -i openapi.yaml -g python -o python_api_client
 ```
 
-The above command will generate the python clients for us and also the related docs for using the API in python. 
+The above command will generate the python clients for us and the related docs for using the API in python.
+ This will be a similar process for other languages as well.
 
 ## Consequences 
 
 ### Advantages
 - Documentation and maintenance will be easier.
 - Ability to create clients for any language that's supported by openapi-generator.
-- We won't have to maintain our own codegen for generating python clients.
+- Getting rid of konduit-serving codegen for generating python clients.
   
 ### Disadvantages
-- Required code refactoring and can take time.
-- We'll strictly have to adhere to how openapi wants us to define our APIs so, we'll lose a bit of flexibility there.
-- Since some of the generated APIs might be lacking so we'll have to write a small layer of wrapper APIs on top of the generate code and docs. So, that will take additional time.
+- Required code refactoring will take time.
+- Strictly adhering to what openapi allows for APIs to be defined, we'll lose a bit of flexibility there.
+- Since some generated APIs might be lacking, so we'll have to write a small layer of wrapper APIs on top of the generated code and docs. That will take additional time.
+
+## Discussion
+
+### 01. How are we going to integrate the generated endpoint API docs into Gitbook?
+        
+Gitbook doesn't have a way to integrate open api specification like readme [did](https://preview.readme.io/), but it's [open-source](https://github.com/readmeio/api-explorer). We can use that to showcase our REST APIs. Other way we can do is to generate [static html](https://raw.githack.com/swagger-api/swagger-codegen/master/samples/html/index.html) pages and update them through CSS. Another option is to use [swagger-ui](https://petstore.swagger.io/?_ga=2.10633204.1573157324.1584626439-1599309769.1584031022). Gitbook does has an option to define endpoint APIs as documented [here](https://docs.gitbook.com/editing-content/rich-content/with-command-palette#api-methods). We'll look into how much we can use Gitbook's functionality to publish our documents first and then look at the other mentioned options.
+    
+### 02. What are the restrictions we'll face with the usage of swagger-annotations?
+
+One thing is not being able to freely define functions, and their overloads since we'll have to make sure they fit together nicely with swagger annotations. Also, the generated APIs in different languages should be able to adapt our API framework. We can't use all kind of objects since some of those won't make sense for OpenApi. For example, using `Map<String, File>` as this won't work in sending multipart requests because swagger expects a `File[]` instead (these are the small things we'll have to be wary of). Also, we'll have to makes sure the generated APIs are easily extendable.
+
+### 03. What are we going to use wrapper layers for on top of the generated clients?
+ If we want numpy/INDArray types in our client APIs, there's no way to specify that in the openapi generator. The custom API layers on top of the generated clients will take care of that. These wrapper layers would be easier to maintain as compared to a fully maintained API client package for a specific language.
