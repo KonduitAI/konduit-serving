@@ -63,7 +63,7 @@ public class ConfigJsonCoverageTrackingTests {
 
     @AfterClass
     public static void afterClass(){
-        if(!seen.containsAll(allClasses)){
+        if(!seen.containsAll(allClasses)) {
             List<String> notTested = new ArrayList<>();
             for(Class<?> c : allClasses){
                 if(!seen.contains(c)) {

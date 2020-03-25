@@ -1,6 +1,8 @@
 package ai.konduit.serving.config.metrics.impl;
 
 import ai.konduit.serving.config.metrics.MetricsConfig;
+import ai.konduit.serving.model.KerasConfig;
+import ai.konduit.serving.util.ObjectMappers;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.*;
 
@@ -35,4 +37,14 @@ public class ClassificationMetricsConfig implements MetricsConfig {
     public Map<String, Object> configValues() {
         return Collections.singletonMap("classificationLabels",classificationLabels);
     }
+
+
+    public static ClassificationMetricsConfig fromJson(String json) {
+        return ObjectMappers.fromJson(json, ClassificationMetricsConfig.class);
+    }
+
+    public static ClassificationMetricsConfig fromYaml(String yaml) {
+        return ObjectMappers.fromYaml(yaml, ClassificationMetricsConfig.class);
+    }
+
 }
