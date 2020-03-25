@@ -181,6 +181,10 @@ public class PipelineRouteDefiner {
                         new NativeMetrics().bindTo(registry);
                         break;
                     case CLASSIFICATION:
+                        if(inferenceConfiguration.getServingConfig().getClassificationLabels() == null) {
+                            throw new IllegalStateException("Please specify classification labels to pair with classification metrics");
+                        }
+                        
                         ClassificationMetrics classificationMetrics = new ClassificationMetrics(inferenceConfiguration.getServingConfig().getClassificationLabels());
                         classificationMetrics.bindTo(registry);
                         classCounterIncrement = classificationMetrics.getClassCounters();
