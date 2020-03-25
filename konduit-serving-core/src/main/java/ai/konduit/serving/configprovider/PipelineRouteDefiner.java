@@ -27,6 +27,8 @@ import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.config.metrics.MetricsConfig;
+import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
@@ -181,13 +183,24 @@ public class PipelineRouteDefiner {
                         new NativeMetrics().bindTo(registry);
                         break;
                     case CLASSIFICATION:
-                        if(inferenceConfiguration.getServingConfig().getClassificationLabels() == null) {
+                        if(inferenceConfiguration.getServingConfig().getMetricsConfigurations() == null) {
                             throw new IllegalStateException("Please specify classification labels to pair with classification metrics");
                         }
+                        List<MetricsConfig> metricsConfigurations = inferenceConfiguration.getServingConfig().getMetricsConfigurations();
+                        for(MetricsConfig metricsConfig : metricsConfigurations) {
+                            if(metricsConfig instanceof ClassificationMetricsConfig) {
+                                ClassificationMetricsConfig classificationMetricsConfig = (ClassificationMetricsConfig) metricsConfig;
+                                if(classificationMetricsConfig.getClassificationLabels() == null || classificationMetricsConfig.getClassificationLabels().isEmpty()) {
+                                    throw new IllegalStateException("No classification labels configured for the classification metrics configuration. Please specify labels.");
+                                }
+                                
+                                ClassificationMetrics classificationMetrics = new ClassificationMetrics(classificationMetricsConfig.getClassificationLabels());
+                                classificationMetrics.bindTo(registry);
+                                classCounterIncrement = classificationMetrics.getClassCounters();
+                            }
 
-                        ClassificationMetrics classificationMetrics = new ClassificationMetrics(inferenceConfiguration.getServingConfig().getClassificationLabels());
-                        classificationMetrics.bindTo(registry);
-                        classCounterIncrement = classificationMetrics.getClassCounters();
+                        }
+
                         break;
 
                     case GPU:

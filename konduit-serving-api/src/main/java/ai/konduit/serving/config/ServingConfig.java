@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.config;
 
+import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
@@ -61,7 +62,7 @@ public class ServingConfig implements TextConfig {
     private boolean createLoggingEndpoints = false;
 
     @Builder.Default
-    private List<String> classificationLabels = new ArrayList<>(0);
+    private List<MetricsConfig> metricsConfigurations = new ArrayList<>(0);
 
     @Builder.Default
     private List<MetricType> metricTypes = Arrays.asList(

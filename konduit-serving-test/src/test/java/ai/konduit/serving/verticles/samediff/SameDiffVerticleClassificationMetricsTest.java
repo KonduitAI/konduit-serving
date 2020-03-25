@@ -33,7 +33,6 @@ import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.response.Response;
-import io.micrometer.core.instrument.binder.MeterBinder;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
@@ -86,7 +85,7 @@ public class SameDiffVerticleClassificationMetricsTest extends BaseVerticleTest 
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.ND4J)
-                .classificationLabels(Arrays.asList("0","1"))
+                .metricsConfigurations(Arrays.asList("0","1"))
                 .metricTypes(Arrays.asList(MetricType.CLASSIFICATION))
                 .httpPort(port)
                 .build();

@@ -63,6 +63,11 @@
     </profiles>
     <dependencies>
         <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.datavec</groupId>
             <artifactId>datavec-python</artifactId>
         </dependency>
