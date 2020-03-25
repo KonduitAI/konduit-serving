@@ -193,7 +193,7 @@ public class PipelineRouteDefiner {
                                 if(classificationMetricsConfig.getClassificationLabels() == null || classificationMetricsConfig.getClassificationLabels().isEmpty()) {
                                     throw new IllegalStateException("No classification labels configured for the classification metrics configuration. Please specify labels.");
                                 }
-                                
+
                                 ClassificationMetrics classificationMetrics = new ClassificationMetrics(classificationMetricsConfig.getClassificationLabels());
                                 classificationMetrics.bindTo(registry);
                                 classCounterIncrement = classificationMetrics.getClassCounters();

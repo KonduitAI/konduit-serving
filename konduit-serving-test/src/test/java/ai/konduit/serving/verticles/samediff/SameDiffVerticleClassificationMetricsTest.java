@@ -25,6 +25,7 @@ package ai.konduit.serving.verticles.samediff;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
@@ -85,7 +86,7 @@ public class SameDiffVerticleClassificationMetricsTest extends BaseVerticleTest 
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.ND4J)
-                .metricsConfigurations(Arrays.asList("0","1"))
+                .metricsConfigurations(Arrays.asList(ClassificationMetricsConfig.builder().classificationLabels(Arrays.asList("0","1")).build()))
                 .metricTypes(Arrays.asList(MetricType.CLASSIFICATION))
                 .httpPort(port)
                 .build();
