@@ -2,9 +2,7 @@ package ai.konduit.serving.config.metrics.impl;
 
 import ai.konduit.serving.config.metrics.MetricsConfig;
 import io.micrometer.core.instrument.binder.MeterBinder;
-import lombok.Builder;
-import lombok.Data;
-import lombok.SneakyThrows;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,6 +18,8 @@ import java.util.Map;
  */
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ClassificationMetricsConfig implements MetricsConfig {
 
     @Builder.Default
