@@ -44,6 +44,7 @@ import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
@@ -140,7 +141,7 @@ public class ScikitLearnPythonNumpyJsonFormatTest extends BaseMultiNumpyVertical
         assertTrue(jsonObject.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
         String ndarraySerde = jsonObject.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
+        INDArray outputArray = nd.getNdArray().castTo(DataType.INT32);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNumpyTest.json", "raw");
         assertEquals(expectedArr, outputArray);
     }

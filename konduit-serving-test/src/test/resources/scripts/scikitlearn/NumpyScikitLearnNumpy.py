@@ -38,7 +38,7 @@ test_input_np=inputValue
 preds = knn.predict(test_input_np)
 pred_species = [iris.target_names[p] for p in preds]
 print("Predictions:", pred_species)
-outputValue = np.array(preds)
+outputValue = np.array(preds).astype('float')
 print("Predictions output NumPy:", outputValue)
 # saving the model
 joblib.dump(knn, 'iris_knn.pkl')

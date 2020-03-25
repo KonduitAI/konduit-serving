@@ -43,6 +43,7 @@ import org.datavec.python.PythonType;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
@@ -130,12 +131,9 @@ public class ScikitLearnPythonJsonNumpyFormatTest extends BaseMultiNumpyVertical
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/json")
                 .andReturn();
-
         //TODO: Assertion for Numpy to be verified
-        INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnJsonTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
+        INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray()).castTo(DataType.INT32);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnJsonTest.json", "raw");
         assertEquals(expectedArr, outputArray);
     }
 

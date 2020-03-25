@@ -44,6 +44,6 @@ with open(filename, 'rb') as file:
  # Calculate the accuracy score and predict target values
 #score = pickle_model.score(Xtest, Ytest)
 #print("Test score: {0:.2f} %".format(100 * score))
-Ypredict = pickle_model.predict(Xr)
+Ypredict = pickle_model.predict(Xr).astype('float')
 
 print(Ypredict)

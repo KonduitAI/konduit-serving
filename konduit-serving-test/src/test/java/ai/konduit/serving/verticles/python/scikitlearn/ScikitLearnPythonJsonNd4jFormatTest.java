@@ -44,6 +44,7 @@ import org.datavec.python.PythonType;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.serde.binary.BinarySerde;
@@ -138,7 +139,7 @@ public class ScikitLearnPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalT
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         System.out.println(BinarySerde.readFromDisk(outputImagePath));
-        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
+        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath).castTo(DataType.INT32);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnJsonTest.json", "raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         assertEquals(expectedArr, outputArray);

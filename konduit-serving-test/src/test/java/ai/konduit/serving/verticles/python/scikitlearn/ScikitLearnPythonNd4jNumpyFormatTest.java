@@ -47,6 +47,7 @@ import org.datavec.python.PythonType;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
@@ -159,10 +160,8 @@ public class ScikitLearnPythonNd4jNumpyFormatTest extends BaseMultiNumpyVertical
                 .andReturn();
 
         //TODO: Assertion for Numpy to be verified
-        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray()).castTo(DataType.INT32);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
     }
 
@@ -211,9 +210,7 @@ public class ScikitLearnPythonNd4jNumpyFormatTest extends BaseMultiNumpyVertical
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
     }
 

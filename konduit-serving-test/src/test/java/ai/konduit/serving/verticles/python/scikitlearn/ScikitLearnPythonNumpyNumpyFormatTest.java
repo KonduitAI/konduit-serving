@@ -28,6 +28,7 @@ import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.output.adapter.SSDOutputAdapter;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -44,6 +45,7 @@ import org.datavec.python.PythonType;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
@@ -135,10 +137,8 @@ public class ScikitLearnPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertica
                 .andReturn();
 
         //TODO: Assertion for Numpy to be verified
-        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
+        INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray()).castTo(DataType.INT32);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNumpyTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
 
     }
@@ -169,9 +169,7 @@ public class ScikitLearnPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertica
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnNumpyTest.json");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
 
     }
