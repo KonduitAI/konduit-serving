@@ -46,6 +46,7 @@ import org.datavec.python.PythonType;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
@@ -138,7 +139,7 @@ public class PytorchPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
-        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
+        INDArray outputArray = BinarySerde.readFromDisk(outputImagePath).castTo(DataType.INT32);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0), 1e-1);
     }

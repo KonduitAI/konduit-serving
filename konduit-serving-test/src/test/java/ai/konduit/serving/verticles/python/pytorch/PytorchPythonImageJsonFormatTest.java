@@ -44,6 +44,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
 
@@ -135,7 +136,7 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
         assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray();
+        INDArray outputArray = nd.getNdArray().castTo(DataType.INT32);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0), 1e-1);
     }
