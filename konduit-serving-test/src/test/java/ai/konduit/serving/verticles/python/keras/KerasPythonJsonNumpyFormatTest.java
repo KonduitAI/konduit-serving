@@ -84,11 +84,6 @@ public class KerasPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
-
         String pythonCodePath = new ClassPathResource("scripts/keras/KerasJsonTest.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
@@ -136,9 +131,7 @@ public class KerasPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest {
 
         //TODO: Assertion for Numpy to be verified, Values are rounded off to 4 decimals
         INDArray outputArray = Nd4j.createNpyFromByteArray((output.getBody().asByteArray()));
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasJsonNumpyTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
     }
 
@@ -162,13 +155,10 @@ public class KerasPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest {
                 .body(not(isEmptyOrNullString()))
                 .post("/classification/json")
                 .andReturn();
-        System.out.println(output);
 
-           //TODO: Assertion for Numpy to be verified
+        //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/keras/KerasJsonNumpyTest.json");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
     }
 }

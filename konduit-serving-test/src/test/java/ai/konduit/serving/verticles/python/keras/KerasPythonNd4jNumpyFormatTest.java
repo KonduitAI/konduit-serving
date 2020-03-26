@@ -50,12 +50,8 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
@@ -83,10 +79,7 @@ public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
+
         String pythonCodePath = new ClassPathResource("scripts/keras/KerasNDArrayTest.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
@@ -107,7 +100,6 @@ public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
                 .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
-        System.out.println(inferenceConfiguration.toJson());
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
@@ -120,7 +112,6 @@ public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
 
         //Preparing input NDArray
         INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-        System.out.println(arr);
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
@@ -140,9 +131,7 @@ public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasNDArrayTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
     }
 
@@ -175,9 +164,7 @@ public class KerasPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/keras/KerasNDArrayTest.json");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
     }
 }

@@ -57,13 +57,9 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
@@ -93,10 +89,6 @@ public class KerasPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
 
         String pythonCodePath = new ClassPathResource("scripts/keras/KerasJsonTest.py").getFile().getAbsolutePath();
 
@@ -127,7 +119,6 @@ public class KerasPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest {
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
-
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
@@ -144,9 +135,7 @@ public class KerasPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest {
                 .andReturn();
 
         INDArray outputArray = BinarySerde.toArray(ByteBuffer.wrap(output.getBody().asByteArray()));
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasJsonNumpyTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr,outputArray);
     }
 
@@ -175,7 +164,6 @@ public class KerasPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest {
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         InputStream expectedIS = new FileInputStream("src/test/resources/Json/keras/KerasJsonTest.json");
         String encodedText = IOUtils.toString(expectedIS, StandardCharsets.UTF_8);

@@ -40,10 +40,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.python.PythonType;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
@@ -58,7 +56,6 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-@Ignore
 public class TensorFlowPythonJsonJsonRegressionTest extends BaseMultiNumpyVerticalTest {
 
     @Override
@@ -112,7 +109,7 @@ public class TensorFlowPythonJsonJsonRegressionTest extends BaseMultiNumpyVertic
         requestSpecification.port(port);
         JsonObject jsonObject = new JsonObject();
 
-        File json = new ClassPathResource("scripts/tensorFlow/TensorFlowRegression.json").getFile();
+        File json = new ClassPathResource("scripts/tensorFlow/TensorFlowRegressionInput.json").getFile();
         jsonObject.put("JsonInput", json.getAbsolutePath());
         requestSpecification.body(jsonObject.encode());
 

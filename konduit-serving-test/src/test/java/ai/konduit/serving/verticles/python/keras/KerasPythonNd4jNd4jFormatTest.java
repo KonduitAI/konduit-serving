@@ -88,10 +88,7 @@ public class KerasPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
+
         String pythonCodePath = new ClassPathResource("scripts/keras/KerasNDArrayTest.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
@@ -113,7 +110,6 @@ public class KerasPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
                 .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
-        System.out.println(inferenceConfiguration.toJson());
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
@@ -126,7 +122,6 @@ public class KerasPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
 
         //Preparing input NDArray
         INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-        System.out.println(arr);
 
         String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
 
@@ -145,9 +140,7 @@ public class KerasPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
                 .andReturn();
 
         INDArray outputArray = BinarySerde.toArray(ByteBuffer.wrap(response.getBody().asByteArray()));
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr,outputArray);
     }
 
@@ -182,7 +175,6 @@ public class KerasPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         JsonArray expProb = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/keras/KerasNdArrayTest.json");
         float[][] expNd = ObjectMappers.json().readValue(expProb.toString(), float[][].class);

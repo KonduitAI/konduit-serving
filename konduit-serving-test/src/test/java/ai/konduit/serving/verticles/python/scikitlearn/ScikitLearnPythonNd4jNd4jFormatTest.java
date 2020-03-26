@@ -56,12 +56,8 @@ import org.nd4j.serde.binary.BinarySerde;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
@@ -89,10 +85,6 @@ public class ScikitLearnPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalT
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
 
         String pythonCodePath = new ClassPathResource("scripts/scikitlearn/NDArrayScikitNDArrayInf.py").getFile().getAbsolutePath();
 

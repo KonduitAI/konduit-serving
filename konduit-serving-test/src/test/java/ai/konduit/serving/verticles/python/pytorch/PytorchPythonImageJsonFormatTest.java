@@ -143,9 +143,6 @@ public class PytorchPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest
 
     @Test(timeout = 600000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
-
-        System.out.println("testInferenceClassificationResult Start");
-
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);

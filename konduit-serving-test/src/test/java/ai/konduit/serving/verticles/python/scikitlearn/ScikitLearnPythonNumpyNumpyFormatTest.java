@@ -85,10 +85,6 @@ public class ScikitLearnPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertica
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
 
         String pythonCodePath = new ClassPathResource("scripts/scikitlearn/NumpyScikitLearnNumpy.py").getFile().getAbsolutePath();
 

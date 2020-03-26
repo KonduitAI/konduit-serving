@@ -25,11 +25,11 @@ package ai.konduit.serving.verticles.python.keras;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.response.Response;
@@ -108,7 +108,6 @@ public class KerasPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTest 
                 .servingConfig(servingConfig)
                 .steps(Arrays.asList(imageLoadingStep, pythonStepConfig))
                 .build();
-        System.out.println(inferenceConfiguration.toJson());
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
@@ -132,18 +131,13 @@ public class KerasPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTest 
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasImageTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
     }
 
     @Test(timeout = 60000)
     @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
-
-        System.out.println("testInferenceClassificationResult Start");
-
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
@@ -161,9 +155,7 @@ public class KerasPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTest 
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/keras/KerasImageTest.json");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
 
 

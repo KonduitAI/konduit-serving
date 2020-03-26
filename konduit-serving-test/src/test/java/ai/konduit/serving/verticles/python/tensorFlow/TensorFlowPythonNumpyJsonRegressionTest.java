@@ -20,15 +20,15 @@
  *
  */
 
-package ai.konduit.serving.verticles.python.scikitlearn;
+package ai.konduit.serving.verticles.python.tensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -36,7 +36,6 @@ import com.jayway.restassured.specification.RequestSpecification;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -44,27 +43,21 @@ import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-public class ScikitLearnPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalTest {
+public class TensorFlowPythonNumpyJsonRegressionTest extends BaseMultiNumpyVerticalTest {
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -85,14 +78,13 @@ public class ScikitLearnPythonNumpyJsonFormatTest extends BaseMultiNumpyVertical
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-
-        String pythonCodePath = new ClassPathResource("scripts/scikitlearn/NumpyScikitLearnNumpy.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/tensorflow/NumpyTensorFlowNdArrayRegression.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonCodePath(pythonCodePath)
-                .pythonInput("inputValue", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("outputValue", PythonType.TypeName.NDARRAY.name())
+                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonInput("input_numpy", PythonType.TypeName.NDARRAY.name())
+                .pythonOutput("output_var", PythonType.TypeName.NDARRAY.name())
                 .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
@@ -116,7 +108,7 @@ public class ScikitLearnPythonNumpyJsonFormatTest extends BaseMultiNumpyVertical
         requestSpecification.port(port);
 
         //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
+        INDArray arr = Nd4j.create(new double[]{0.0, 0.020202, 0.040404, 0.0606061, 0.0808081});
 
         byte[] xNpy = Nd4j.toNpyByteArray(arr);
 
@@ -132,52 +124,17 @@ public class ScikitLearnPythonNumpyJsonFormatTest extends BaseMultiNumpyVertical
                 .extract()
                 .body().asString();
 
-        JsonObject jsonObject = new JsonObject(response);
-        assertTrue(jsonObject.containsKey("default"));
-        assertTrue(jsonObject.getJsonObject("default").containsKey("ndArray"));
-        assertTrue(jsonObject.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
-        String ndarraySerde = jsonObject.getJsonObject("default").toString();
+        JsonObject jsonObject1 = new JsonObject(response);
+        assertTrue(jsonObject1.containsKey("default"));
+        assertTrue(jsonObject1.getJsonObject("default").containsKey("ndArray"));
+        assertTrue(jsonObject1.getJsonObject("default").getJsonObject("ndArray").containsKey("data"));
+        String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
-        INDArray outputArray = nd.getNdArray().castTo(DataType.INT32);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNumpyTest.json", "raw");
-        assertEquals(expectedArr, outputArray);
-    }
-
-    @Test(timeout = 60000)
-    public void testInferenceClassificationResult(TestContext context) throws Exception {
-        this.context = context;
-        RequestSpecification requestSpecification = given();
-        requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
-
-        //Preparing input NDArray
-        INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-
-        byte[] xNpy = Nd4j.toNpyByteArray(arr);
-
-        File xFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(xFile, xNpy);
-
-        requestSpecification.header("Content-Type", "multipart/form-data");
-        String response = requestSpecification.when()
-                .multiPart("default", xFile)
-                .expect().statusCode(200)
-                .body(not(isEmptyOrNullString()))
-                .post("/classification/numpy").then()
-                .extract()
-                .body().asString();
-
-        JsonObject jsonObjectClassification = new JsonObject(response);
-        assertTrue(jsonObjectClassification.containsKey("default"));
-        assertTrue(jsonObjectClassification.getJsonObject("default").containsKey("probabilities"));
-        JsonObject ndarraySerde = jsonObjectClassification.getJsonObject("default");
-        JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-        float[][] nd = ObjectMappers.json().readValue(probabilities.toString(), float[][].class);
-        INDArray outputArray = Nd4j.create(nd);
-        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnNumpyTest.json");
-        float[][] expNd = ObjectMappers.json().readValue(expArr.toString(), float[][].class);
-        INDArray expectedArray = Nd4j.create(expNd);
-        assertEquals(expectedArray, outputArray);
+        INDArray outputArray = nd.getNdArray();
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/tensorflow/TensorFlowNumpyRegression.json", "regression");
+        for (int i = 0; i < expectedArr.length(); i++) {
+            assertTrue("Expected and Actual does not match", (outputArray.getDouble(i) - expectedArr.getDouble(i)) < 0.1);
+        }
     }
 
 }

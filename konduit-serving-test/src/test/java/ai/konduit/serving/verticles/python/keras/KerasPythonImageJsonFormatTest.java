@@ -24,12 +24,12 @@ package ai.konduit.serving.verticles.python.keras;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -143,9 +143,6 @@ public class KerasPythonImageJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
     @Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
-
-        System.out.println("testInferenceClassificationResult Start");
-
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);

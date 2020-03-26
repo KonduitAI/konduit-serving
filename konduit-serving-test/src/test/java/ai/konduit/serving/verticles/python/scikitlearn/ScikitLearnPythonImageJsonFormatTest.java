@@ -83,10 +83,6 @@ public class ScikitLearnPythonImageJsonFormatTest extends BaseMultiNumpyVertical
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
 
         String pythonCodePath = new ClassPathResource("scripts/scikitlearn/Image_Scikitlearn_NDarray.py").getFile().getAbsolutePath();
 

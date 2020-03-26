@@ -25,11 +25,11 @@ package ai.konduit.serving.verticles.python.keras;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -111,7 +111,6 @@ public class KerasPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest {
                 .servingConfig(servingConfig)
                 .steps(Arrays.asList(imageLoadingStep, pythonStepConfig))
                 .build();
-        System.out.println(inferenceConfiguration.toJson());
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
@@ -133,12 +132,9 @@ public class KerasPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest {
                 .post("/raw/image").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
-
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasImageTest.json", "raw");
         assertEquals(expectedArr.getDouble(0), outputArray.getDouble(0), 1e-1);
@@ -148,9 +144,6 @@ public class KerasPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest {
     @Test(timeout = 60000)
     @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
-
-        System.out.println("testInferenceClassificationResult Start");
-
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);

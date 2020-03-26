@@ -83,10 +83,6 @@ public class ScikitLearnPythonNd4jJsonRegressionTest extends BaseMultiNumpyVerti
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
 
         String pythonCodePath = new ClassPathResource("scripts/scikitlearn/ScikitLearnRegression.py").getFile().getAbsolutePath();
 

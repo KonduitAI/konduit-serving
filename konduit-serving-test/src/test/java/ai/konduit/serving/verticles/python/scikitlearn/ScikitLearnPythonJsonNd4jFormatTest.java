@@ -85,10 +85,6 @@ public class ScikitLearnPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalT
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
 
         String pythonCodePath = new ClassPathResource("scripts/scikitlearn/JsonScikitNDArrayInf.py").getFile().getAbsolutePath();
 
@@ -138,7 +134,6 @@ public class ScikitLearnPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalT
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath).castTo(DataType.INT32);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnJsonTest.json", "raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0));

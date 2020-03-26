@@ -52,12 +52,8 @@ import org.nd4j.serde.binary.BinarySerde;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 
@@ -85,10 +81,6 @@ public class ScikitLearnPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVerti
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonPath = Arrays.stream(cachePackages())
-                .filter(Objects::nonNull)
-                .map(File::getAbsolutePath)
-                .collect(Collectors.joining(File.pathSeparator));
 
         String pythonCodePath = new ClassPathResource("scripts/scikitlearn/ScikitLearnRegression.py").getFile().getAbsolutePath();
 
@@ -139,11 +131,10 @@ public class ScikitLearnPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVerti
                 .post("/regression/nd4j").then()
                 .extract()
                 .body().asString();
-        System.out.println("response---"+response);
+
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json", "raw");
         Assert.assertEquals(expectedArr.getInt(0), outputArray.getInt(0));

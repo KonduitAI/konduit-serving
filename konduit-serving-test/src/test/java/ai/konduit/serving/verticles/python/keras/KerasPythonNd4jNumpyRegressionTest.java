@@ -101,7 +101,6 @@ public class KerasPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVerticalTe
                 .step(pythonStepConfig)
                 .servingConfig(servingConfig)
                 .build();
-        System.out.println("InferenceConfiguration.."+inferenceConfiguration.toJson());
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
@@ -131,9 +130,7 @@ public class KerasPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVerticalTe
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasNDArrayTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
 
     }
