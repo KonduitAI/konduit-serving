@@ -40,8 +40,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -53,34 +56,38 @@ public class CodeGen {
     public static void main( String[] args ) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper, JsonSchemaConfig.html5EnabledSchema());
-        Class<?>[] clazzes = {
-                TensorDataTypesConfig.class,
-                SavedModelConfig.class,
-                ParallelInferenceConfig.class,
-                ModelConfigType.class,
-                ModelConfig.class,
-                TensorDataType.class,
-                PmmlConfig.class,
-                ObjectDetectionConfig.class,
-                SchemaType.class,
-                Input.class,
-                Output.class,
-                SameDiffConfig.class,
-                TensorFlowConfig.class,
-                PythonConfig.class,
-                ServingConfig.class,
-                PipelineStep.class,
-                BasePipelineStep.class,
-                NormalizationConfig.class,
-                PythonStep.class,
-                TransformProcessStep.class,
-                ModelStep.class,
-                ArrayConcatenationStep.class,
-                JsonExpanderTransformStep.class,
-                ImageLoadingStep.class,
-                MemMapConfig.class,
-                InferenceConfiguration.class,
-        };
+        Set<Class<?>> clazzes = new LinkedHashSet() {{
+                add(TensorDataTypesConfig.class);
+                add(SavedModelConfig.class);
+                add(ParallelInferenceConfig.class);
+                add(ModelConfigType.class);
+                add(ModelConfig.class);
+                add(TensorDataType.class);
+                add(PmmlConfig.class);
+                add(ObjectDetectionConfig.class);
+                add(SchemaType.class);
+                add(Input.class);
+                add(Output.class);
+                add(KerasConfig.class);
+                add(DL4JConfig.class);
+                add(PmmlConfig.class);
+                add(SameDiffConfig.class);
+                add(TensorFlowConfig.class);
+                add(PythonConfig.class);
+                add(ServingConfig.class);
+                add(PipelineStep.class);
+                add(TextConfig.class);
+                add(BasePipelineStep.class);
+                add(NormalizationConfig.class);
+                add(PythonStep.class);
+                add(TransformProcessStep.class);
+                add(ModelStep.class);
+                add(ArrayConcatenationStep.class);
+                add(JsonExpanderTransformStep.class);
+                add(ImageLoadingStep.class);
+                add(MemMapConfig.class);
+                add(InferenceConfiguration.class);
+        }};
 
 
         String sep = File.separator;
@@ -193,18 +200,14 @@ public class CodeGen {
 
         Process autopepLinting = runtime.exec("autopep8 --in-place " + newModule);
         autopepLinting.waitFor(8, TimeUnit.SECONDS);
-        if(autopepLinting.exitValue() != 0) {
-            String errorMessage = "";
-            try(InputStream is = autopepLinting.getInputStream()) {
-                errorMessage += IOUtils.toString(is, StandardCharsets.UTF_8);
-
-            }
-            throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
-        }
-        autopepLinting.destroy();
+        showLintError(autopepLinting);
 
         Process blackLinting = runtime.exec("black " + newModule);
-        blackLinting.waitFor(5, TimeUnit.SECONDS);
+        blackLinting.waitFor(10, TimeUnit.SECONDS);
+        showLintError(blackLinting);
+    }
+
+    private static void showLintError(Process blackLinting) throws IOException {
         if(blackLinting.exitValue() != 0) {
             String errorMessage = "";
             try(InputStream is = blackLinting.getInputStream()) {
