@@ -31,12 +31,14 @@ import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.config.metrics.MetricsRenderer;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.MetricsBinderRendererAdapter;
+import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.metrics.ClassificationMetrics;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.metrics.NativeMetrics;
+import ai.konduit.serving.metrics.RegressionMetrics;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
@@ -204,6 +206,26 @@ public class PipelineRouteDefiner {
 
                         }
 
+                        break;
+                    case REGRESSION:
+                        if(inferenceConfiguration.getServingConfig().getMetricsConfigurations() == null) {
+                            throw new IllegalStateException("Please specify classification labels to pair with regression metrics");
+                        }
+
+                        List<MetricsConfig> metricsConfigurations2 = inferenceConfiguration.getServingConfig().getMetricsConfigurations();
+                        for(MetricsConfig metricsConfig : metricsConfigurations2) {
+                            if(metricsConfig instanceof RegressionMetricsConfig) {
+                                RegressionMetricsConfig regressionMetricsConfig = (RegressionMetricsConfig) metricsConfig;
+                                if(regressionMetricsConfig.getRegressionColumnLabels() == null || regressionMetricsConfig.getRegressionColumnLabels().isEmpty()) {
+                                    throw new IllegalStateException("No regression labels configured for the regression metrics configuration. Please specify labels.");
+                                }
+
+                                RegressionMetrics regressionMetrics = new RegressionMetrics(regressionMetricsConfig);
+                                regressionMetrics.bindTo(registry);
+                                metricsRenderers.add(regressionMetrics);
+                            }
+
+                        }
                         break;
 
                     case GPU:
