@@ -22,6 +22,8 @@
 
 package ai.konduit.serving.metrics;
 
+import ai.konduit.serving.config.metrics.MetricsConfig;
+import ai.konduit.serving.config.metrics.MetricsRenderer;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
@@ -41,7 +43,7 @@ import static java.util.Collections.emptyList;
  * which contains current information about the system and its devices
  * such as ram, cpu load, and gpu information
  */
-public class NativeMetrics implements MeterBinder {
+public class NativeMetrics implements MetricsRenderer {
 
     private final Iterable<Tag> tags;
 
@@ -126,6 +128,16 @@ public class NativeMetrics implements MeterBinder {
 
             }
 
+
+    }
+
+    @Override
+    public MetricsConfig config() {
+        return null;
+    }
+
+    @Override
+    public void updateMetrics(Object... args) {
 
     }
 }

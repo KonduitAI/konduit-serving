@@ -28,7 +28,9 @@ import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.config.metrics.MetricsConfig;
+import ai.konduit.serving.config.metrics.MetricsRenderer;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
+import ai.konduit.serving.config.metrics.impl.MetricsBinderRendererAdapter;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
@@ -104,7 +106,7 @@ public class PipelineRouteDefiner {
     protected LongTaskTimer inferenceExecutionTimer, batchCreationTimer;
     protected HealthCheckHandler healthCheckHandler;
     private static JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
-    private List<Counter> classCounterIncrement;
+    private List<MetricsRenderer> metricsRenderers;
 
     public List<String> inputNames() {
         return pipelineExecutioner.inputNames();
@@ -157,30 +159,31 @@ public class PipelineRouteDefiner {
             log.info("Not using metrics registry.");
         }
 
+        metricsRenderers = new ArrayList<>();
         if (inferenceConfiguration.getServingConfig().getMetricTypes() != null && registry != null) {
             //don't add more than one type
             for (MetricType metricType : new HashSet<>(inferenceConfiguration.getServingConfig().getMetricTypes())) {
                 switch (metricType) {
                     case CLASS_LOADER:
-                        new ClassLoaderMetrics().bindTo(registry);
+                        addMetric(new ClassLoaderMetrics(),registry);
                         break;
                     case JVM_MEMORY:
-                        new JvmMemoryMetrics().bindTo(registry);
+                        addMetric(new JvmMemoryMetrics(),registry);
                         break;
                     case JVM_GC:
-                        new JvmGcMetrics().bindTo(registry);
+                        addMetric(new JvmGcMetrics(),registry);
                         break;
                     case PROCESSOR:
-                        new ProcessorMetrics().bindTo(registry);
+                        addMetric(new ProcessorMetrics(),registry);
                         break;
                     case JVM_THREAD:
-                        new JvmThreadMetrics().bindTo(registry);
+                        addMetric(new JvmThreadMetrics(),registry);
                         break;
                     case LOGGING_METRICS:
-                        new LogbackMetrics().bindTo(registry);
+                        addMetric(new LogbackMetrics(),registry);
                         break;
                     case NATIVE:
-                        new NativeMetrics().bindTo(registry);
+                        addMetric(new NativeMetrics(),registry);
                         break;
                     case CLASSIFICATION:
                         if(inferenceConfiguration.getServingConfig().getMetricsConfigurations() == null) {
@@ -194,9 +197,9 @@ public class PipelineRouteDefiner {
                                     throw new IllegalStateException("No classification labels configured for the classification metrics configuration. Please specify labels.");
                                 }
 
-                                ClassificationMetrics classificationMetrics = new ClassificationMetrics(classificationMetricsConfig.getClassificationLabels());
+                                ClassificationMetrics classificationMetrics = new ClassificationMetrics(classificationMetricsConfig);
                                 classificationMetrics.bindTo(registry);
-                                classCounterIncrement = classificationMetrics.getClassCounters();
+                                metricsRenderers.add(classificationMetrics);
                             }
 
                         }
@@ -258,40 +261,40 @@ public class PipelineRouteDefiner {
         if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
             router.get("/logs")
                     .handler(ctx -> {
-                try {
-                    ctx.response()
-                            .putHeader(HttpHeaders.CONTENT_TYPE, "text/html")
-                            .end(FileUtils.readFileToString(new ClassPathResource("web/logs_page.html").getFile(), StandardCharsets.UTF_8));
-                } catch (Exception e) {
-                    ctx.fail(500, e);
-                }
-            });
+                        try {
+                            ctx.response()
+                                    .putHeader(HttpHeaders.CONTENT_TYPE, "text/html")
+                                    .end(FileUtils.readFileToString(new ClassPathResource("web/logs_page.html").getFile(), StandardCharsets.UTF_8));
+                        } catch (Exception e) {
+                            ctx.fail(500, e);
+                        }
+                    });
 
-        /**
-         * Sets up and endpoint to see server logs if {@link ServingConfig#isCreateLoggingEndpoints()}
-         * is true. Returns the number of last few lines determines by the path param
-         * {@code numberOfLastLinesToRead}. If the path param is an invalid integer,
-         * then the whole log file data will be read and returned.
-         */
+            /**
+             * Sets up and endpoint to see server logs if {@link ServingConfig#isCreateLoggingEndpoints()}
+             * is true. Returns the number of last few lines determines by the path param
+             * {@code numberOfLastLinesToRead}. If the path param is an invalid integer,
+             * then the whole log file data will be read and returned.
+             */
             router.get("/logs/:numberOfLastLinesToRead")
                     .handler(ctx -> {
-                String numberOfLinesString = ctx.pathParam("numberOfLastLinesToRead");
+                        String numberOfLinesString = ctx.pathParam("numberOfLastLinesToRead");
 
-                ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
-                try {
-                    if (numberOfLinesString.matches("-?\\d+")) {
-                        ctx.response().end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
-                    } else if("download".equalsIgnoreCase(numberOfLinesString)) {
-                        ctx.response().sendFile(LogUtils.getLogsFile().getAbsolutePath()).end();
-                    } else if("downloadAsZip".equalsIgnoreCase(numberOfLinesString)) {
-                        ctx.response().sendFile(LogUtils.getZippedLogs().getAbsolutePath()).end();
-                    } else {
-                        ctx.response().end(LogUtils.getLogs(-1));
-                    }
-                } catch (Exception e) {
-                    ctx.fail(500, e);
-                }
-            });
+                        ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
+                        try {
+                            if (numberOfLinesString.matches("-?\\d+")) {
+                                ctx.response().end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
+                            } else if("download".equalsIgnoreCase(numberOfLinesString)) {
+                                ctx.response().sendFile(LogUtils.getLogsFile().getAbsolutePath()).end();
+                            } else if("downloadAsZip".equalsIgnoreCase(numberOfLinesString)) {
+                                ctx.response().sendFile(LogUtils.getZippedLogs().getAbsolutePath()).end();
+                            } else {
+                                ctx.response().end(LogUtils.getLogs(-1));
+                            }
+                        } catch (Exception e) {
+                            ctx.fail(500, e);
+                        }
+                    });
         }
 
         /**
@@ -366,7 +369,10 @@ public class PipelineRouteDefiner {
                 if (start != null)
                     start.stop();
 
-                incrementClassificationCounters(records);
+                for(MetricsRenderer metricsRenderer : metricsRenderers) {
+                    metricsRenderer.updateMetrics(records);
+                }
+
 
             } catch (Exception e) {
                 log.error("Unable to perform json inference", e);
@@ -486,7 +492,9 @@ public class PipelineRouteDefiner {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
 
-                    incrementClassificationCounters(records);
+                    for(MetricsRenderer renderer : metricsRenderers) {
+                        renderer.updateMetrics(records);
+                    }
 
                     blockingCall.complete();
                 } catch (Exception e) {
@@ -577,14 +585,11 @@ public class PipelineRouteDefiner {
                                 + " milliseconds");
                     }
 
-                    //output from argmax is a vector where each one is a decision index
-                    //use the decision index to increment the counter
-                    if(classCounterIncrement != null) {
-                        INDArray argMax = Nd4j.argMax(outputs[0], -1);
-                        for(int i = 0; i < argMax.length(); i++) {
-                            classCounterIncrement.get(argMax.getInt(i)).increment();
-                        }
+
+                    for(MetricsRenderer renderer : metricsRenderers) {
+                        renderer.updateMetrics(outputs);
                     }
+
 
                     handler.complete();
                 } catch (Exception e) {
@@ -630,16 +635,7 @@ public class PipelineRouteDefiner {
                 });
     }
 
-    private void incrementClassificationCounters(Record[] records) {
-        if(classCounterIncrement != null) {
-            NDArrayWritable ndArrayWritable = (NDArrayWritable) records[0].getRecord().get(0);
-            INDArray output = ndArrayWritable.get();
-            INDArray argMax = Nd4j.argMax(output, -1);
-            for (int i = 0; i < argMax.length(); i++) {
-                classCounterIncrement.get(argMax.getInt(i)).increment();
-            }
-        }
-    }
+
 
 
     private void initializeSchemas(InferenceConfiguration inferenceConfiguration, boolean inputRequired) {
@@ -691,5 +687,12 @@ public class PipelineRouteDefiner {
             default:
                 throw new IllegalStateException("Illegal adapter type!");
         }
+    }
+
+
+    private void addMetric(MeterBinder meterBinder,MeterRegistry registry) {
+        MetricsBinderRendererAdapter metricsBinderRendererAdapter = new MetricsBinderRendererAdapter(meterBinder);
+        metricsBinderRendererAdapter.bindTo(registry);
+        metricsRenderers.add(metricsBinderRendererAdapter);
     }
 }
