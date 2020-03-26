@@ -4,7 +4,26 @@ from shutil import copyfile
 import os
 import sys
 import re
-from distutils.util import strtobool
+
+os_choices = [
+    "windows-x86_64",
+    "linux-x86_64",
+    "linux-x86_64-gpu",
+    "macosx-x86_64",
+    "linux-armhf",
+    "windows-x86_64-gpu",
+]
+
+
+def get_platform():
+    if sys.platform.startswith('win32'):
+        return "windows-x86_64"
+    elif sys.platform.startswith('darwin'):
+        return "macosx-x86_64"
+    elif sys.platform.startswith('linux'):
+        return "linux-x86_64"
+    else:
+        raise Exception("Please specify '--os'. Possible values are: " + os_choices.__str__())
 
 
 if __name__ == "__main__":
@@ -18,15 +37,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--os",
         type=str,
-        required=True,
-        choices=[
-            "windows-x86_64",
-            "linux-x86_64",
-            "linux-x86_64-gpu",
-            "macosx-x86_64",
-            "linux-armhf",
-            "windows-x86_64-gpu",
-        ],
+        default=get_platform(),
+        choices=os_choices,
         help="the javacpp.platform to use: windows-x86_64,linux-x86_64,linux-x86_64-gpu"
         " macosx-x86_64,linux-armhf,windows-x86_64-gpu ",
     )
@@ -62,7 +74,7 @@ if __name__ == "__main__":
     platform = args.os.replace("-gpu", "")
     command = [
         args.source + os.sep + "mvnw",
-        "-Puberjar",
+        "-Puberjar,tensorflow",
         "clean",
         "install",
         "-Dmaven.test.skip=true",
