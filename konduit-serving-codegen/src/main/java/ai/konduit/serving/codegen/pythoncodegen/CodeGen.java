@@ -43,8 +43,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -56,37 +59,42 @@ public class CodeGen {
     public static void main( String[] args ) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper, JsonSchemaConfig.html5EnabledSchema());
-        Class<?>[] clazzes = {
-                NoOpMetricsConfig.class,
+        /*
+        *  NoOpMetricsConfig.class,
                 ClassificationMetricsConfig.class,
                 RegressionMetricsConfig.class,
-                TensorDataTypesConfig.class,
-                SavedModelConfig.class,
-                ParallelInferenceConfig.class,
-                ModelConfigType.class,
-                ModelConfig.class,
-                TensorDataType.class,
-                PmmlConfig.class,
-                ObjectDetectionConfig.class,
-                SchemaType.class,
-                Input.class,
-                Output.class,
-                SameDiffConfig.class,
-                TensorFlowConfig.class,
-                PythonConfig.class,
-                ServingConfig.class,
-                PipelineStep.class,
-                BasePipelineStep.class,
-                NormalizationConfig.class,
-                PythonStep.class,
-                TransformProcessStep.class,
-                ModelStep.class,
-                ArrayConcatenationStep.class,
-                JsonExpanderTransformStep.class,
-                ImageLoadingStep.class,
-                MemMapConfig.class,
-                InferenceConfiguration.class,
-        };
+           */
+
+        Set<Class<?>> clazzes = new LinkedHashSet();
+        clazzes.add(TensorDataTypesConfig.class);
+        clazzes.add(SavedModelConfig.class);
+        clazzes.add(ParallelInferenceConfig.class);
+        clazzes.add(ModelConfigType.class);
+        clazzes.add(ModelConfig.class);
+        clazzes.add(TensorDataType.class);
+        clazzes.add(ObjectDetectionConfig.class);
+        clazzes.add(SchemaType.class);
+        clazzes.add(Input.class);
+        clazzes.add(Output.class);
+        clazzes.add(KerasConfig.class);
+        clazzes.add(DL4JConfig.class);
+        clazzes.add(PmmlConfig.class);
+        clazzes.add(SameDiffConfig.class);
+        clazzes.add(TensorFlowConfig.class);
+        clazzes.add(PythonConfig.class);
+        clazzes.add(ServingConfig.class);
+        clazzes.add(PipelineStep.class);
+        clazzes.add(TextConfig.class);
+        clazzes.add(BasePipelineStep.class);
+        clazzes.add(NormalizationConfig.class);
+        clazzes.add(PythonStep.class);
+        clazzes.add(TransformProcessStep.class);
+        clazzes.add(ModelStep.class);
+        clazzes.add(ArrayConcatenationStep.class);
+        clazzes.add(JsonExpanderTransformStep.class);
+        clazzes.add(ImageLoadingStep.class);
+        clazzes.add(MemMapConfig.class);
+        clazzes.add(InferenceConfiguration.class);
 
 
         String sep = File.separator;
@@ -199,18 +207,14 @@ public class CodeGen {
 
         Process autopepLinting = runtime.exec("autopep8 --in-place " + newModule);
         autopepLinting.waitFor(8, TimeUnit.SECONDS);
-        if(autopepLinting.exitValue() != 0) {
-            String errorMessage = "";
-            try(InputStream is = autopepLinting.getInputStream()) {
-                errorMessage += IOUtils.toString(is, StandardCharsets.UTF_8);
-
-            }
-            throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
-        }
-        autopepLinting.destroy();
+        showLintError(autopepLinting);
 
         Process blackLinting = runtime.exec("black " + newModule);
-        blackLinting.waitFor(5, TimeUnit.SECONDS);
+        blackLinting.waitFor(10, TimeUnit.SECONDS);
+        showLintError(blackLinting);
+    }
+
+    private static void showLintError(Process blackLinting) throws IOException {
         if(blackLinting.exitValue() != 0) {
             String errorMessage = "";
             try(InputStream is = blackLinting.getInputStream()) {
