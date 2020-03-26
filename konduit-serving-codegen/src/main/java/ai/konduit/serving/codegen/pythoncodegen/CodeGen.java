@@ -24,6 +24,7 @@ package ai.konduit.serving.codegen.pythoncodegen;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.*;
+import ai.konduit.serving.config.metrics.NoOpMetricsConfig;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
@@ -54,6 +55,7 @@ public class CodeGen {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper, JsonSchemaConfig.html5EnabledSchema());
         Class<?>[] clazzes = {
+                NoOpMetricsConfig.class,
                 TensorDataTypesConfig.class,
                 SavedModelConfig.class,
                 ParallelInferenceConfig.class,
