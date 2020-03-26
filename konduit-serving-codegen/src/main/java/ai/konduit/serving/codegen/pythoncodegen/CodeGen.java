@@ -63,7 +63,6 @@ public class CodeGen {
         clazzes.add(ModelConfigType.class);
         clazzes.add(ModelConfig.class);
         clazzes.add(TensorDataType.class);
-        clazzes.add(PmmlConfig.class);
         clazzes.add(ObjectDetectionConfig.class);
         clazzes.add(SchemaType.class);
         clazzes.add(Input.class);
