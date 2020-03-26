@@ -16,4 +16,6 @@
  * SPDX-License-Identifier: Apache-2.0
  ******************************************************************************/
 
+@Library('konduit-ci-scripts@feature/dependency-analysis') _
+
 konduitServingPipeline()
