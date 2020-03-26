@@ -54,12 +54,8 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
@@ -161,7 +157,6 @@ public class ScikitLearnPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalT
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray().castTo(DataType.INT32);
-        ;
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json", "raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         assertEquals(expectedArr, outputArray);

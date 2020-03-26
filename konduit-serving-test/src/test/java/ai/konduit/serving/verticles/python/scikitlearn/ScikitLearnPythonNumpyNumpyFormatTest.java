@@ -28,7 +28,6 @@ import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.output.adapter.SSDOutputAdapter;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -52,12 +51,8 @@ import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;

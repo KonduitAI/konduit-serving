@@ -1,0 +1,9 @@
+{
+  "regression" : {
+    "ndArray" : {
+      "dataType" : "FLOAT",
+      "shape" : [ 1 ],
+      "data" : [ -2.63726216e+10 ]
+    }
+  }
+}
