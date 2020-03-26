@@ -22,7 +22,12 @@
 package ai.konduit.serving.config.metrics;
 
 import ai.konduit.serving.config.metrics.impl.MetricsBinderRendererAdapter;
+import ai.konduit.serving.model.DL4JConfig;
+import ai.konduit.serving.util.ObjectMappers;
 import io.micrometer.core.instrument.binder.MeterBinder;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.Map;
@@ -33,6 +38,9 @@ import java.util.Map;
  *
  * @author Adam Gibson
  */
+@Builder
+@NoArgsConstructor
+@Data
 public class NoOpMetricsConfig implements MetricsConfig {
     @Override
     public Class<? extends MeterBinder> metricsBinderImplementation() {
@@ -43,4 +51,13 @@ public class NoOpMetricsConfig implements MetricsConfig {
     public Map<String, Object> configValues() {
         return Collections.emptyMap();
     }
+
+    public static NoOpMetricsConfig fromJson(String json){
+        return ObjectMappers.fromJson(json, NoOpMetricsConfig.class);
+    }
+
+    public static NoOpMetricsConfig fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, NoOpMetricsConfig.class);
+    }
+
 }

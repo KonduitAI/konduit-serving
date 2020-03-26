@@ -16,6 +16,7 @@
 package ai.konduit.serving.config;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.metrics.NoOpMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.metrics.ClassificationMetrics;
 import ai.konduit.serving.metrics.MetricType;
@@ -214,6 +215,8 @@ public class ConfigJsonCoverageTrackingTests {
 
     @Test
     public void testMetricConfig() {
+        testConfigSerDe(NoOpMetricsConfig
+                .builder().build());
         testConfigSerDe(ClassificationMetricsConfig
                 .builder().classificationLabels(Arrays.asList("0")).build());
     }
@@ -225,7 +228,7 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @Test
-    public void testMemMapConfig(){
+    public void testMemMapConfig() {
         testConfigSerDe(MemMapConfig.builder().arrayPath("/my/array/path").initialMemmapSize(100000).unkVectorPath("/my/array/unknown").build());
     }
 
