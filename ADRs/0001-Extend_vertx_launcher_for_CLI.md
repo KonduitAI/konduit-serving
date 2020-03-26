@@ -1,7 +1,7 @@
 # Extend Vert.x Launcher for creating a Konduit Serving CLI
 
 ## Status
-PROPOSAL
+ACCEPTED
 
 Proposed by: Shams Ul Azeem (18-03-2020)
 
