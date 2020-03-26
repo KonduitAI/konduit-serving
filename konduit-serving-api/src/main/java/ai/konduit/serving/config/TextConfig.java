@@ -17,6 +17,7 @@ package ai.konduit.serving.config;
 
 import ai.konduit.serving.config.metrics.NoOpMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
+import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import ai.konduit.serving.util.ObjectMappers;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
@@ -33,6 +34,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  * @author Alex Black
  */
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = RegressionMetricsConfig.class, name = "RegressionMetricsConfig"),
         @JsonSubTypes.Type(value = NoOpMetricsConfig.class, name = "NoOpMetricsConfig"),
         @JsonSubTypes.Type(value = ClassificationMetricsConfig.class, name = "ClassificationMetricsConfig"),
 })
