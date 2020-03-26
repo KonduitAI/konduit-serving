@@ -221,7 +221,7 @@ public class ConfigJsonCoverageTrackingTests {
         testConfigSerDe(ClassificationMetricsConfig
                 .builder().classificationLabels(Arrays.asList("0")).build());
         testConfigSerDe(RegressionMetricsConfig
-                .builder().regressionColumnLabels(Arrays.asList("0")).build());
+                .builder().regressionColumnLabels(Arrays.asList("0")).sampleTypes(Arrays.asList(RegressionMetricsConfig.SampleType.MAX)).build());
     }
 
     @Test
