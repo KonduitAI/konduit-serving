@@ -57,4 +57,4 @@ loaded_model.load_weights("src\\test\\resources\\inference\\keras\\KerasJsonMode
 loaded_model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 score = loaded_model.evaluate(Xr, Yr, verbose=0)
 output_array=np.array(score)
-print("output_array---",output_array)
+#print("output_array---",output_array)

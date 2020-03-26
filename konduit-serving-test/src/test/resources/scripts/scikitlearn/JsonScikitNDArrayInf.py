@@ -46,4 +46,4 @@ with open(filename, 'rb') as file:
 #print("Test score: {0:.2f} %".format(100 * score))
 Ypredict = pickle_model.predict(Xr).astype('float')
 
-print(Ypredict)
+#print(Ypredict)

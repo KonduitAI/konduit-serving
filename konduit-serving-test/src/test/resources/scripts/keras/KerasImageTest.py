@@ -31,4 +31,4 @@ class KerasTestImage:
 TestImg = KerasTestImage ()
 XTestImg1 = imgPath.reshape(1, 784)
 imageArray = TestImg.test(XTestImg1)
-print("imageArray",imageArray)
+#print("imageArray",imageArray)

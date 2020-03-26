@@ -70,5 +70,5 @@ output_np = np.array(output_pred1.detach().numpy())
 print('Numpy prediction output :',output_np)
 pred = pred.detach().numpy()
 
-print ("The accuracy is", accuracy_score(labels_test, np.argmax(pred, axis=1)))
+#print ("The accuracy is", accuracy_score(labels_test, np.argmax(pred, axis=1)))
 

@@ -18,4 +18,4 @@ my_test = inputValue
 objkeras = KerasTest()
 arr = objkeras.test(my_test)
 output_np = np.array(arr)
-print(arr)
+#print(arr)

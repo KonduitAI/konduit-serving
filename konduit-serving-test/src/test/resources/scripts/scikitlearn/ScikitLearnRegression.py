@@ -33,4 +33,4 @@ test_X = inputData
 model = joblib.load(os.path.join(work_dir,'inference\\scikitlearn\\regression_model.sav'))
 predictions = model.predict(test_X)
 pred = np.array([[predictions[0]]])
-print("Predictions ->",pred)
+#print("Predictions ->",pred)

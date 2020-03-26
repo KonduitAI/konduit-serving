@@ -17,4 +17,4 @@ class KerasTest:
 
 objKeras = KerasTest ()
 arr = objKeras.test(inputData)
-print(arr)
+#print(arr)
