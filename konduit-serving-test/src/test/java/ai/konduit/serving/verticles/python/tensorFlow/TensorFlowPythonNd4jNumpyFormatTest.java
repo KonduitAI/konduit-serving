@@ -106,7 +106,7 @@ public class TensorFlowPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalT
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -147,13 +147,11 @@ public class TensorFlowPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalT
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/nd4j").andReturn();
 
-        //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 
-    @Test
+    @Test(timeout = 60000)
     @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
@@ -195,7 +193,6 @@ public class TensorFlowPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalT
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 

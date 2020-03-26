@@ -127,10 +127,8 @@ public class TensorflowPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVerti
                 .body(not(isEmptyOrNullString()))
                 .post("/regression/nd4j")
                 .andReturn();
-        System.out.println(response);
-        //TODO: Assertion for Numpy to be verified
+
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         assertEquals(113680.33, outputArray.getDouble(0), 1e-1);
 
 

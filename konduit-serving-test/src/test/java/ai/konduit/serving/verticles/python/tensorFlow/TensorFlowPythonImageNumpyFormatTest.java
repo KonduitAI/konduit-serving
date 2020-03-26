@@ -110,7 +110,7 @@ public class TensorFlowPythonImageNumpyFormatTest extends BaseMultiNumpyVertical
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -129,9 +129,7 @@ public class TensorFlowPythonImageNumpyFormatTest extends BaseMultiNumpyVertical
                 .post("/raw/image")
                 .andReturn();
 
-        //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         assertEquals(7, outputArray.getDouble(0), 1e-1);
 
     }
@@ -157,7 +155,6 @@ public class TensorFlowPythonImageNumpyFormatTest extends BaseMultiNumpyVertical
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 

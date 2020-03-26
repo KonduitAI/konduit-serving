@@ -103,7 +103,7 @@ public class TensorFlowPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalT
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -124,16 +124,13 @@ public class TensorFlowPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalT
                 .post("/raw/json")
                 .andReturn();
 
-        //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json","raw");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json", "raw");
         assertEquals(expectedArr, outputArray);
 
     }
 
-    @Test
+    @Test(timeout = 60000)
     @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
@@ -156,9 +153,7 @@ public class TensorFlowPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalT
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json");
-        System.out.println("ExpectedNumpyArrayOutput"+expectedArr);
         assertEquals(expectedArr, outputArray);
 
     }

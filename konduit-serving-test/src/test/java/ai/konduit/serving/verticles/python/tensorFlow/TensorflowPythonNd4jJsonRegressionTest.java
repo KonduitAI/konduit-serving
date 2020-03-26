@@ -24,6 +24,7 @@ package ai.konduit.serving.verticles.python.tensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -38,6 +39,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.apache.commons.math3.util.Precision;
 import org.datavec.python.PythonType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +50,7 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.text.DecimalFormat;
 
 import static com.jayway.restassured.RestAssured.given;
 import static junit.framework.TestCase.assertEquals;
@@ -131,9 +134,8 @@ public class TensorflowPythonNd4jJsonRegressionTest extends BaseMultiNumpyVertic
         JsonArray values = ndarraySerde.getJsonArray("values");
         double[][] nd = ObjectMappers.json().readValue(values.toString(), double[][].class);
         INDArray outputArray = Nd4j.create(nd);
-        double outpuValue = values.getJsonArray(0).getDouble(0);
-        assertEquals(outputArray.getDouble(0), outpuValue);
-
-
+        double outputVal = Precision.round((outputArray.getDouble(0)),2);
+        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/tensorflow/TensorFlowNd4jRegression.json", "regression");
+        assertEquals(expectedArr.getDouble(0),outputVal);
     }
 }

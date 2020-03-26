@@ -49,7 +49,6 @@ import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
-import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
@@ -105,12 +104,11 @@ public class TensorFlowPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalT
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
 
         ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
                 .scaleImageTransform(20.0f)
@@ -144,7 +142,7 @@ public class TensorFlowPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalT
                 .post("/raw/numpy").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
+
         JsonObject jsonObject1 = new JsonObject(response);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
@@ -152,12 +150,11 @@ public class TensorFlowPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalT
         assertEquals(2, outputArray.getDouble(0), 1e-1);
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
 
         ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
                 .scaleImageTransform(20.0f)
@@ -189,7 +186,7 @@ public class TensorFlowPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalT
                 .post("/classification/numpy").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
+
         JsonObject jsonObject1 = new JsonObject(response);
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");

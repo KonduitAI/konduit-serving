@@ -133,7 +133,6 @@ public class TensorflowPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVertic
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         Assert.assertEquals(7, outputArray.getDouble(0), 1e-1);
 

@@ -1,0 +1,9 @@
+{
+  "regression" : {
+    "ndArray" : {
+      "dataType" : "DOUBLE",
+      "shape" : [ 1 ],
+      "data" : [ 113680.33 ]
+    }
+  }
+ }

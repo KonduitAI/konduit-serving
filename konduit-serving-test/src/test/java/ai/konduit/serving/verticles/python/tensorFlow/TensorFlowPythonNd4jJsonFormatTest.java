@@ -103,7 +103,7 @@ public class TensorFlowPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTe
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -145,7 +145,7 @@ public class TensorFlowPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTe
                 .post("/raw/nd4j").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
+
         JsonObject jsonObject1 = new JsonObject(response);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
@@ -153,7 +153,7 @@ public class TensorFlowPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTe
         assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -192,7 +192,7 @@ public class TensorFlowPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTe
                 .post("/classification/nd4j").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
+
         JsonObject jsonObject1 = new JsonObject(response);
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");

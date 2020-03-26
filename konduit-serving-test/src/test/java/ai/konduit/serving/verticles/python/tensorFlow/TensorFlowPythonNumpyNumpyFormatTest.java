@@ -110,7 +110,6 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
 
         ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
                 .scaleImageTransform(20.0f)
@@ -143,9 +142,7 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
                 .body(not(isEmptyOrNullString()))
                 .post("/raw/numpy").andReturn();
 
-        //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         assertEquals(2, outputArray.getDouble(0), 1e-1);
     }
 
@@ -188,7 +185,6 @@ public class TensorFlowPythonNumpyNumpyFormatTest extends BaseMultiNumpyVertical
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        System.out.println("NumpyArrayOutput"+outputArray);
         assertEquals(2, outputArray.getDouble(0), 1e-1);
     }
 

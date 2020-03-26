@@ -24,11 +24,11 @@ package ai.konduit.serving.verticles.python.tensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -101,7 +101,7 @@ public class TensorFlowPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTe
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -134,7 +134,7 @@ public class TensorFlowPythonJsonJsonFormatTest extends BaseMultiNumpyVerticalTe
 
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceClassificationResult(TestContext context) throws Exception {
 
         this.context = context;

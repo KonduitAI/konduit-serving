@@ -105,7 +105,7 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
         this.context = context;
         RequestSpecification requestSpecification = given();
@@ -151,12 +151,11 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         assertEquals(7, outputArray.getDouble(0), 1e-1);
     }
 
-    @Test
+    @Test(timeout = 60000)
     @Ignore
     public void testInferenceClassificationResult(TestContext context) throws Exception {
         this.context = context;
@@ -199,7 +198,6 @@ public class TensorFlowPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTe
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         assertEquals(7, outputArray.getDouble(0), 1e-1);
     }

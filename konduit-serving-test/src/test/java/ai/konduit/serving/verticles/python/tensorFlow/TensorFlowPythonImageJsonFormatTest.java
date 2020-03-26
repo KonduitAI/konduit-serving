@@ -106,7 +106,7 @@ public class TensorFlowPythonImageJsonFormatTest extends BaseMultiNumpyVerticalT
         return new JsonObject(inferenceConfiguration.toJson());
     }
 
-    @Test
+    @Test(timeout = 60000)
     public void testInferenceResult(TestContext context) throws Exception {
 
         this.context = context;
@@ -124,7 +124,7 @@ public class TensorFlowPythonImageJsonFormatTest extends BaseMultiNumpyVerticalT
                 .post("/raw/image").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
+
         JsonObject jsonObject1 = new JsonObject(output);
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
@@ -151,7 +151,7 @@ public class TensorFlowPythonImageJsonFormatTest extends BaseMultiNumpyVerticalT
                 .post("/classification/image").then()
                 .extract()
                 .body().asString();
-        System.out.println(output);
+
         JsonObject jsonObject1 = new JsonObject(output);
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");

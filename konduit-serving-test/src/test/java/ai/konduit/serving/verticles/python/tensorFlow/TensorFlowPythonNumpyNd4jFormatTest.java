@@ -111,7 +111,6 @@ public class TensorFlowPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalT
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
 
         ImageTransformProcess imageTransformProcess = new ImageTransformProcess.Builder()
                 .scaleImageTransform(20.0f)
@@ -145,11 +144,10 @@ public class TensorFlowPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalT
                 .post("/raw/numpy").then()
                 .extract()
                 .body().asString();
-        System.out.println(response);
+
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         assertEquals(2, outputArray.getDouble(0), 1e-1);
     }
@@ -191,11 +189,10 @@ public class TensorFlowPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalT
                 .post("/classification/numpy").then()
                 .extract()
                 .body().asString();
-        System.out.println(response);
+
         File outputImagePath = new File(
                 "src/main/resources/data/test-nd4j-output.zip");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
-        System.out.println(BinarySerde.readFromDisk(outputImagePath));
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         assertEquals(2, outputArray.getDouble(0), 1e-1);
     }
