@@ -8,10 +8,8 @@ from .client import Client
 from .server import Server
 from .utils import to_unix_path, update_dict_with_unix_paths
 
-USER_PATH = os.path.expanduser("~")
-KONDUIT_BASE_DIR = os.path.join(USER_PATH, ".konduit")
-KONDUIT_DIR = os.path.join(KONDUIT_BASE_DIR, "konduit-serving")
-KONDUIT_PID_STORAGE = os.path.join(KONDUIT_DIR, "pid.json")
+KONDUIT_BASE_DIR = os.getcwd()
+KONDUIT_PID_STORAGE = os.path.join(KONDUIT_BASE_DIR, "pid.json")
 MODEL_TYPES = [
     "TENSORFLOW",
     "KERAS",
