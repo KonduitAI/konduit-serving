@@ -28,7 +28,6 @@ import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.Getter;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;

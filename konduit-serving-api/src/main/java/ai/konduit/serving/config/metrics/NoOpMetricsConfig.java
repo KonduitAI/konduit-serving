@@ -22,7 +22,6 @@
 package ai.konduit.serving.config.metrics;
 
 import ai.konduit.serving.config.metrics.impl.MetricsBinderRendererAdapter;
-import ai.konduit.serving.model.DL4JConfig;
 import ai.konduit.serving.util.ObjectMappers;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.Builder;

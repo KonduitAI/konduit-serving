@@ -22,10 +22,8 @@
 
 package ai.konduit.serving.threadpool.pmml.observables;
 
-import lombok.*;
 import org.dmg.pmml.FieldName;
 
-import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;

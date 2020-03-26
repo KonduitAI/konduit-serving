@@ -1,11 +1,9 @@
 import argparse
-import subprocess
-from shutil import copyfile
 import os
-import sys
 import re
-from distutils.util import strtobool
-
+import subprocess
+import sys
+from shutil import copyfile
 
 if __name__ == "__main__":
     """

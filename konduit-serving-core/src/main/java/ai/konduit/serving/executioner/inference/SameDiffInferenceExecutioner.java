@@ -24,7 +24,6 @@ package ai.konduit.serving.executioner.inference;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.model.loader.ModelLoader;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.autodiff.execution.NativeGraphExecutioner;

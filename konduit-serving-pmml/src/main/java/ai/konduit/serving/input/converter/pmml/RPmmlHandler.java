@@ -26,7 +26,6 @@ import ai.konduit.serving.input.converter.ConverterPickle;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
 import org.dmg.pmml.PMML;
-import org.jpmml.rexp.*;
 
 import java.io.BufferedInputStream;
 import java.io.File;

@@ -29,17 +29,15 @@ import org.datavec.api.transform.serde.JsonMappers;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Text;
 import org.datavec.api.writable.Writable;
+import org.dmg.pmml.DataDictionary;
 import org.dmg.pmml.OutputField;
-import org.dmg.pmml.*;
+import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.Value;
-import org.jpmml.evaluator.*;
 import org.jpmml.evaluator.clustering.ClusterAffinityDistribution;
 import org.jpmml.evaluator.support_vector_machine.DistanceDistribution;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
-
-import java.util.*;
 
 public class PmmlUtils {
 

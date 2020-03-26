@@ -1,11 +1,10 @@
+import json
+import numpy as np
+import pytest
+import random
 from konduit import *
 from konduit.client import Client
 from konduit.json_utils import config_to_dict_with_type
-
-import json
-import random
-import numpy as np
-import pytest
 
 
 @pytest.mark.unit

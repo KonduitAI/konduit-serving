@@ -36,8 +36,6 @@ import org.dmg.pmml.FieldName;
 import org.jpmml.evaluator.Evaluator;
 import org.nd4j.base.Preconditions;
 
-import java.util.*;
-
 
 public class PmmlInferenceExecutionerStepRunner extends BaseStepRunner {
 

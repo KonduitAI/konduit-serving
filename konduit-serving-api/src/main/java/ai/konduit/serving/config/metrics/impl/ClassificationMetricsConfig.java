@@ -1,7 +1,6 @@
 package ai.konduit.serving.config.metrics.impl;
 
 import ai.konduit.serving.config.metrics.MetricsConfig;
-import ai.konduit.serving.model.KerasConfig;
 import ai.konduit.serving.util.ObjectMappers;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.*;
