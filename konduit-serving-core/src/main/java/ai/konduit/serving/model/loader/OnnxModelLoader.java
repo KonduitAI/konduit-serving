@@ -32,17 +32,15 @@ import org.bytedeco.onnxruntime.Env;
 import org.bytedeco.onnxruntime.Session;
 import org.bytedeco.onnxruntime.SessionOptions;
 
-import java.util.Date;
-
-import static org.bytedeco.onnxruntime.global.onnxruntime.ORT_ENABLE_EXTENDED;
 import static org.bytedeco.onnxruntime.global.onnxruntime.ORT_LOGGING_LEVEL_WARNING;
+import static org.bytedeco.onnxruntime.global.onnxruntime.OrtSessionOptionsAppendExecutionProvider_Dnnl;
 
 @Data
 @AllArgsConstructor
 
 public class OnnxModelLoader implements ModelLoader<Session> {
 
-    private String model_path;
+    private String modelPath;
 
     @Override
     public Buffer saveModel(Session model) {
@@ -53,10 +51,10 @@ public class OnnxModelLoader implements ModelLoader<Session> {
     public Session loadModel() throws Exception {
         Env env = new Env(ORT_LOGGING_LEVEL_WARNING, new BytePointer("konduit-serving-onnx-session" + System.currentTimeMillis()));
 
-        try (SessionOptions session_options = new SessionOptions()) {
-            try (Pointer bp = Loader.getPlatform().toLowerCase().startsWith("windows") ? new CharPointer(model_path) : new BytePointer(model_path)) {
-                Session session = new Session(env, bp, session_options);
-                return session;
+        try (SessionOptions sessionOptions = new SessionOptions()) {
+//            OrtSessionOptionsAppendExecutionProvider_Dnnl(session_options.asOrtSessionOptions(), 1);
+            try (Pointer bp = Loader.getPlatform().toLowerCase().startsWith("windows") ? new CharPointer(modelPath) : new BytePointer(modelPath)) {
+                return new Session(env, bp, sessionOptions);
             }
         }
     }
