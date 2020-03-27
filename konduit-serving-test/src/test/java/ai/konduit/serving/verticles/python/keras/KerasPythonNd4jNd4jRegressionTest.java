@@ -42,7 +42,9 @@ import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Assert;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -60,6 +62,9 @@ import static org.hamcrest.Matchers.not;
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class KerasPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVerticalTest {
+
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -129,8 +134,7 @@ public class KerasPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVerticalTes
                 .extract()
                 .body().asString();
 
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
+        File outputImagePath = new File(testDir.newFolder(), "file.json");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json", "raw");

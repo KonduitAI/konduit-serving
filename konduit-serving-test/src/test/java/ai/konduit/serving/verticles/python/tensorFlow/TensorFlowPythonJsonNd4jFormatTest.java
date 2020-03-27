@@ -43,7 +43,9 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
@@ -62,6 +64,9 @@ import static org.junit.Assert.assertTrue;
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class TensorFlowPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest {
+
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -127,8 +132,7 @@ public class TensorFlowPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTe
                 .extract()
                 .body().asString();
 
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
+        File outputImagePath = new File(testDir.newFolder(), "file.json");
         FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json", "raw");

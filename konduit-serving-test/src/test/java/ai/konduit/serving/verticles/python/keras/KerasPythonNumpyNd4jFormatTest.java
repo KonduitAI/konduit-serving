@@ -42,7 +42,9 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -62,6 +64,9 @@ import static org.junit.Assert.assertEquals;
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class KerasPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalTest {
+
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -141,7 +146,6 @@ public class KerasPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalTest {
         this.context = context;
         RequestSpecification requestSpecification = given();
         requestSpecification.port(port);
-        JsonObject jsonObject = new JsonObject();
 
         //Preparing input NDArray
         INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
@@ -160,8 +164,7 @@ public class KerasPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalTest {
                 .extract()
                 .body().asString();
 
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
+        File outputImagePath = new File(testDir.newFolder(), "file.json");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasNumpyTest.json", "classification");

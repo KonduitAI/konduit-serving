@@ -43,7 +43,9 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -62,6 +64,9 @@ import static org.junit.Assert.assertEquals;
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
+
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -134,8 +139,8 @@ public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest 
                 .extract()
                 .body().asString();
 
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
+        File outputImagePath = new File(testDir.newFolder(), "file.json");
+
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "raw");
@@ -173,8 +178,7 @@ public class PytorchPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest 
                 .extract()
                 .body().asString();
 
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
+        File outputImagePath = new File(testDir.newFolder(), "file.json");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         JsonArray expProb = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json");

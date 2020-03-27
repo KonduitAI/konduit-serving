@@ -25,10 +25,10 @@ package ai.konduit.serving.verticles.python.keras;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ai.konduit.serving.verticles.numpy.tensorflow.BaseMultiNumpyVerticalTest;
@@ -44,7 +44,9 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -55,12 +57,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.bytedeco.cpython.presets.python.cachePackages;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
@@ -68,6 +66,9 @@ import static org.junit.Assert.assertEquals;
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class KerasPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
+
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -172,8 +173,7 @@ public class KerasPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
                 .extract()
                 .body().asString();
 
-        File outputImagePath = new File(
-                "src/main/resources/data/test-nd4j-output.zip");
+        File outputImagePath = new File(testDir.newFolder(), "file.json");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
         JsonArray expProb = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/keras/KerasNdArrayTest.json");
