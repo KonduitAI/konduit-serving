@@ -4,7 +4,28 @@ from shutil import copyfile
 import os
 import sys
 import re
-from distutils.util import strtobool
+
+os_choices = [
+    "windows-x86_64",
+    "linux-x86_64",
+    "linux-x86_64-gpu",
+    "macosx-x86_64",
+    "linux-armhf",
+    "windows-x86_64-gpu",
+]
+
+
+def get_platform():
+    if sys.platform.startswith("win32"):
+        return "windows-x86_64"
+    elif sys.platform.startswith("darwin"):
+        return "macosx-x86_64"
+    elif sys.platform.startswith("linux"):
+        return "linux-x86_64"
+    else:
+        raise Exception(
+            "Please specify '--os'. Possible values are: " + os_choices.__str__()
+        )
 
 
 if __name__ == "__main__":
@@ -18,32 +39,20 @@ if __name__ == "__main__":
     parser.add_argument(
         "--os",
         type=str,
-        required=True,
-        choices=[
-            "windows-x86_64",
-            "linux-x86_64",
-            "linux-x86_64-gpu",
-            "macosx-x86_64",
-            "linux-armhf",
-            "windows-x86_64-gpu",
-        ],
+        default=get_platform(),
+        choices=os_choices,
         help="the javacpp.platform to use: windows-x86_64,linux-x86_64,linux-x86_64-gpu"
         " macosx-x86_64,linux-armhf,windows-x86_64-gpu ",
     )
 
     parser.add_argument(
-        "--spin", 
-        type=str, 
-        default="all", 
-        choices=[
-            "minimal", 
-            "python", 
-            "pmml", 
-            "all"
-        ], 
-        help = "whether to bundle Python, PMML, both or neither. Python bundling is" + 
-         "not encouraged with ARM, and PMML bundling is not encouraged if agpl" + 
-         "license is an issue."
+        "--spin",
+        type=str,
+        default="all",
+        choices=["minimal", "python", "pmml", "all"],
+        help="whether to bundle Python, PMML, both or neither. Python bundling is"
+        + "not encouraged with ARM, and PMML bundling is not encouraged if agpl"
+        + "license is an issue.",
     )
 
     parser.add_argument(
@@ -57,12 +66,19 @@ if __name__ == "__main__":
         default="konduit.jar",
     )
 
+    parser.add_argument(
+        "--show_build_command",
+        "-sbc",
+        help="show build command without running it",
+        action="store_true",
+    )
+
     args = parser.parse_args()
 
     platform = args.os.replace("-gpu", "")
     command = [
         args.source + os.sep + "mvnw",
-        "-Puberjar",
+        "-Puberjar,tensorflow",
         "clean",
         "install",
         "-Dmaven.test.skip=true",
@@ -90,18 +106,23 @@ if __name__ == "__main__":
         regex = r"<version>(\d+.\d+.\d+\S*)</version>"
         version = re.findall(regex, content)
 
+    if args.show_build_command:
+        print(" ".join(command))
+        exit(0)
+
     print("Running command: " + " ".join(command))
-    subprocess.call(command, shell=sys.platform.startswith('win'), cwd=args.source)
+    subprocess.call(command, shell=sys.platform.startswith("win"), cwd=args.source)
 
     # Copy the jar file to the path specified by the "target" argument
-    if arch != 'gpu':
+    if arch != "gpu":
         copyfile(
             os.path.join(
                 args.source,
                 "konduit-serving-uberjar",
                 "target",
-                "konduit-serving-uberjar-{}-{}-{}-{}.jar"\
-                .format(version[0], args.spin, args.os, arch),
+                "konduit-serving-uberjar-{}-{}-{}-{}.jar".format(
+                    version[0], args.spin, args.os, arch
+                ),
             ),
             os.path.join(args.source, args.target),
         )
@@ -111,15 +132,16 @@ if __name__ == "__main__":
                 args.source,
                 "konduit-serving-uberjar",
                 "target",
-                "konduit-serving-uberjar-{}-{}-{}.jar" \
-                    .format(version[0], args.spin, args.os),
-                    ),
+                "konduit-serving-uberjar-{}-{}-{}.jar".format(
+                    version[0], args.spin, args.os
+                ),
+            ),
             os.path.join(args.source, args.target),
         )
 
     # Copy the built jar file to the "python/tests" folder if it exists.
     if os.path.isdir(os.path.join(args.source, "python", "tests")):
         copyfile(
-            os.path.join(args.source, args.target), 
-            os.path.join(args.source, "python", "tests", "konduit.jar")
+            os.path.join(args.source, args.target),
+            os.path.join(args.source, "python", "tests", "konduit.jar"),
         )
