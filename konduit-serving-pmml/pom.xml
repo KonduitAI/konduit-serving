@@ -35,7 +35,6 @@
 
     <name>konduit-serving-pmml</name>
 
-    <url>http://skymind.ai/</url>
 
     <licenses>
         <license>
@@ -44,15 +43,13 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+
 
     <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
