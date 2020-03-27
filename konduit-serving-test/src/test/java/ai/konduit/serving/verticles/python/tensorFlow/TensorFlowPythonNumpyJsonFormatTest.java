@@ -22,6 +22,7 @@
 package ai.konduit.serving.verticles.python.tensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.PythonPathInfo;
 import ai.konduit.serving.model.PythonConfig;
@@ -92,9 +93,11 @@ public class TensorFlowPythonNumpyJsonFormatTest extends BaseMultiNumpyVerticalT
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
+        //ServingConfig set httpport and Input Formats
         ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(port)
-                .build();
+                .outputDataFormat(Output.DataFormat.JSON)
+                .httpPort(port).
+                        build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .step(pythonStepConfig)
