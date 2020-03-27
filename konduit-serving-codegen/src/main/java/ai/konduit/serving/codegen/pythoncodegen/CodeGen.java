@@ -60,7 +60,7 @@ public class CodeGen {
     public static void main( String[] args ) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper, JsonSchemaConfig.html5EnabledSchema());
-    
+
         Set<Class<?>> clazzes = new LinkedHashSet();
         clazzes.add(NoOpMetricsConfig.class);
         clazzes.add(ClassificationMetricsConfig.class);

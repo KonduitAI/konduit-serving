@@ -137,7 +137,7 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @Test
-    public void testInferenceConfiguration(){
+    public void testInferenceConfiguration() {
         InferenceConfiguration conf = InferenceConfiguration.builder()
                 .step(PythonStep.builder()
                         .pythonConfig("x", PythonConfig.builder().pythonCode("import numpy as np\nreturn np.ones(1)").build())
@@ -172,17 +172,23 @@ public class ConfigJsonCoverageTrackingTests {
                 .outputNames(Arrays.asList("z","a"))
                 .inputSchema("x", Arrays.asList(SchemaType.NDArray, SchemaType.Boolean))
                 .outputSchema("z", Arrays.asList(SchemaType.Image, SchemaType.Categorical))
-        .build());
+                .build());
     }
 
     @Test
-    public void testTransformProcessStep(){
-        testConfigSerDe(TransformProcessStep.builder()
+    public void testTransformProcessStep() {
+        TransformProcessStep build = TransformProcessStep.builder()
                 .transformProcess("x", new TransformProcess.Builder(new Schema.Builder().addColumnString("col").build())
-                        .stringToCategorical("col", Arrays.asList("a","b","c"))
+                        .stringToCategorical("col", Arrays.asList("a", "b", "c"))
                         .categoricalToOneHot("col")
                         .build())
-            .build());
+                .build();
+        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+                .step(build)
+                .build();
+
+        InferenceConfiguration.fromJson(inferenceConfiguration.toJson());
+        testConfigSerDe(build);
     }
 
     @Test
@@ -215,6 +221,18 @@ public class ConfigJsonCoverageTrackingTests {
 
     @Test
     public void testMetricConfig() {
+        ServingConfig servingConfig = ServingConfig.builder()
+                .metricsConfigurations(Arrays.asList(NoOpMetricsConfig.builder().build(),
+                        ClassificationMetricsConfig
+                                .builder().classificationLabels(Arrays.asList("0")).build(),
+                        RegressionMetricsConfig
+                                .builder().regressionColumnLabels(Arrays.asList("0")).sampleTypes(Arrays.asList(RegressionMetricsConfig.SampleType.MAX)).build()))
+                .build();
+        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+                .servingConfig(servingConfig)
+                .build();
+        assertEquals(inferenceConfiguration,InferenceConfiguration.fromJson(inferenceConfiguration.toJson()));
+
         testConfigSerDe(NoOpMetricsConfig
                 .builder().build());
         testConfigSerDe(ClassificationMetricsConfig

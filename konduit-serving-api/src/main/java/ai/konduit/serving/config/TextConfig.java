@@ -33,12 +33,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  *
  * @author Alex Black
  */
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = RegressionMetricsConfig.class, name = "RegressionMetricsConfig"),
-        @JsonSubTypes.Type(value = NoOpMetricsConfig.class, name = "NoOpMetricsConfig"),
-        @JsonSubTypes.Type(value = ClassificationMetricsConfig.class, name = "ClassificationMetricsConfig"),
-})
-@JsonTypeInfo(use = NAME, include = PROPERTY)
+
 public interface TextConfig {
 
     /**

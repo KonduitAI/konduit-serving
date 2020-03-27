@@ -22,7 +22,10 @@
 package ai.konduit.serving.config.metrics;
 
 import ai.konduit.serving.config.TextConfig;
+import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
+import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import io.micrometer.core.instrument.binder.MeterBinder;
+import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 
 import java.util.Map;
 
@@ -33,6 +36,11 @@ import java.util.Map;
  * @author Adam Gibson
  */
 
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = RegressionMetricsConfig.class, name = "RegressionMetricsConfig"),
+        @JsonSubTypes.Type(value = NoOpMetricsConfig.class, name = "NoOpMetricsConfig"),
+        @JsonSubTypes.Type(value = ClassificationMetricsConfig.class, name = "ClassificationMetricsConfig"),
+})
 public interface MetricsConfig extends TextConfig {
 
     /**
