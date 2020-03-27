@@ -100,14 +100,14 @@ public class KonduitServingMain {
     }
 
     public void runMain(KonduitServingNodeConfigurer konduitServingNodeConfigurer) {
+        Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
+
         //no need to configure, inference verticle exists
         if (konduitServingNodeConfigurer.getInferenceConfiguration() != null) {
             konduitServingNodeConfigurer.configureWithJson(new JsonObject(konduitServingNodeConfigurer.getInferenceConfiguration().toJson()));
 
-            Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
             deployVerticle(konduitServingNodeConfigurer, vertx);
         } else {
-            Vertx vertx = Vertx.vertx(konduitServingNodeConfigurer.getVertxOptions());
             final ConfigRetriever configRetriever = konduitServingNodeConfigurer.getConfigRetrieverOptions() != null ?
                     ConfigRetriever.create(vertx, konduitServingNodeConfigurer.getConfigRetrieverOptions()) :
                     ConfigRetriever.create(vertx);
@@ -118,12 +118,20 @@ public class KonduitServingMain {
                     if (eventHandler != null) {
                         eventHandler.handle(Future.failedFuture(handler.cause()));
                     }
+
+                    vertx.close();
                 } else {
                     configRetriever.close(); // We don't need the config retriever to periodically scan for config after it is successfully retrieved.
 
-                    JsonObject json = handler.result();
-                    konduitServingNodeConfigurer.configureWithJson(json);
-                    deployVerticle(konduitServingNodeConfigurer, vertx);
+                    try {
+                        JsonObject json = handler.result();
+                        konduitServingNodeConfigurer.configureWithJson(json);
+                        deployVerticle(konduitServingNodeConfigurer, vertx);
+                    } catch (Exception e) {
+                        log.error("Unable to deploy verticle", e);
+
+                        vertx.close();
+                    }
                 }
             });
         }
@@ -169,7 +177,8 @@ public class KonduitServingMain {
 
                         eventHandler.handle(Future.succeededFuture(inferenceConfiguration));
                     } catch (Exception exception){
-                        log.error("Unable to parse config json into an InferenceConfiguration object", exception);
+                        log.debug("Unable to parse json configuration into an InferenceConfiguration object. " +
+                                "This can be ignored if the verticle isn't an InferenceVerticle.", exception);
                         eventHandler.handle(Future.succeededFuture());
                     }
                 }
