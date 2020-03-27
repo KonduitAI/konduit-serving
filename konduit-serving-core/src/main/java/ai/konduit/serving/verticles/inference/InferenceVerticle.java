@@ -125,6 +125,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                         try {
                             ((ContextInternal) context).getDeployment().deploymentOptions().setConfig(new JsonObject(inferenceConfiguration.toJson()));
 
+                            log.info("Inference server is listening on host: \"{}\"", inferenceConfiguration.getServingConfig().getListenHost());
                             log.info("Inference server started on port {} with {} pipeline steps", port, nSteps);
                             startPromise.complete();
                         } catch (Exception exception) {
