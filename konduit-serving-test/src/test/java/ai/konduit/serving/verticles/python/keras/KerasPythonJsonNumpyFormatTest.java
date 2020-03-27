@@ -90,7 +90,6 @@ public class KerasPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest {
                 .pythonCodePath(pythonCodePath)
                 .pythonPath(PythonPathInfo.getPythonPath())
                 .pythonInput("JsonInput", PythonType.TypeName.STR.name())
-                //.pythonOutput("score", PythonType.TypeName.LIST.name())
                 .pythonOutput("output_array", PythonType.TypeName.NDARRAY.name())
                 .build();
 
