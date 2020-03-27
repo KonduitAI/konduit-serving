@@ -367,8 +367,6 @@ public class ONNXThreadPool {
                         OnnxObservable request = inputQueue.take();
                         counter.incrementAndGet();
 
-                        List<Map<String, INDArray>> batches = request.getInputBatches();
-
                         List<Map<String, INDArray>> out = doBatchInference(request, replicatedModel, inputNodeNames, outputNodeNames, inputTypes,
 					inputSizes, inputNodeDims); 
 
@@ -427,7 +425,7 @@ public class ONNXThreadPool {
 
                                 ValueVector outputVector = replicatedModel.Run(new RunOptions(), inputNodeNames, inputVal.position(0), numInputNodes, outputNodeNames, numOutputNodes);
 
-                                Map<String, INDArray> output = new LinkedHashMap<String, INDArray>();
+                                Map<String, INDArray> output = new LinkedHashMap<>();
 
                                 for (int i = 0; i < numOutputNodes; i++) {
                                     Value outValue = outputVector.get(i);
@@ -486,11 +484,6 @@ public class ONNXThreadPool {
                     validateType(DataType.INT64, ndArray);
                     inputTensorValues = inputTensorValuesPtr;
                     sizeInBytes = size * 8;
-                    break;
-                case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
-                    validateType(DataType.INT8, ndArray);
-                    inputTensorValues = inputTensorValuesPtr;
-                    sizeInBytes = size;
                     break;
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL:
                     validateType(DataType.BOOL, ndArray);

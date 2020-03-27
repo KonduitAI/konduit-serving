@@ -33,7 +33,6 @@ import org.bytedeco.onnxruntime.Session;
 import org.bytedeco.onnxruntime.SessionOptions;
 
 import static org.bytedeco.onnxruntime.global.onnxruntime.ORT_LOGGING_LEVEL_WARNING;
-import static org.bytedeco.onnxruntime.global.onnxruntime.OrtSessionOptionsAppendExecutionProvider_Dnnl;
 
 @Data
 @AllArgsConstructor
@@ -52,7 +51,6 @@ public class OnnxModelLoader implements ModelLoader<Session> {
         Env env = new Env(ORT_LOGGING_LEVEL_WARNING, new BytePointer("konduit-serving-onnx-session" + System.currentTimeMillis()));
 
         try (SessionOptions sessionOptions = new SessionOptions()) {
-//            OrtSessionOptionsAppendExecutionProvider_Dnnl(session_options.asOrtSessionOptions(), 1);
             try (Pointer bp = Loader.getPlatform().toLowerCase().startsWith("windows") ? new CharPointer(modelPath) : new BytePointer(modelPath)) {
                 return new Session(env, bp, sessionOptions);
             }
