@@ -287,6 +287,10 @@ public class PipelineRouteDefiner {
                             log.error("Request failed with unknown cause.");
                         }
                     }
+
+                    failureHandlder.response()
+                            .setStatusCode(500)
+                            .end(failureHandlder.failure().toString());
                 });
 
         router.post("/dynamicschema")
