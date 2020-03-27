@@ -119,10 +119,7 @@ public class TensorflowPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVertic
         //Preparing input NDArray
         INDArray arr = Nd4j.create(new float[]{-0.75110125f, -1.44211188f, -0.98801273f, -1.02871967f, -0.34094461f});
 
-        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-        //Create new file to write binary input data.
-        File file = new File(filePath + "/test-input.zip");
-
+        File file = new File(testDir.newFolder(), "file.json");
         BinarySerde.writeArrayToDisk(arr, file);
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "multipart/form-data");

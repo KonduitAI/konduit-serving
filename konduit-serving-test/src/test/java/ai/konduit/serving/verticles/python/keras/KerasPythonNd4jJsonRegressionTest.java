@@ -40,7 +40,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.datavec.python.PythonType;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -58,6 +60,8 @@ import static org.hamcrest.Matchers.not;
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class KerasPythonNd4jJsonRegressionTest extends BaseMultiNumpyVerticalTest {
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -114,8 +118,7 @@ public class KerasPythonNd4jJsonRegressionTest extends BaseMultiNumpyVerticalTes
         //Preparing input NDArray
         INDArray arr = Nd4j.create(new float[]{0.00632f, 18f, 2.31f, 0f, 0.538f, 6.575f, 65.2f, 4.09f, 1f, 296f, 15.3f, 4.98f}, 1, 12);
 
-        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-        File file = new File(filePath + "/test-input.zip");
+        File file = new File(testDir.newFolder(), "file.json");
         BinarySerde.writeArrayToDisk(arr, file);
         requestSpecification.body(jsonObject.encode().getBytes());
         requestSpecification.header("Content-Type", "multipart/form-data");

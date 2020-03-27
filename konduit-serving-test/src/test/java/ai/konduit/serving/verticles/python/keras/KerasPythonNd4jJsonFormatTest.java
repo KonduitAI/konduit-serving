@@ -153,12 +153,7 @@ public class KerasPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTest {
 
         //Preparing input NDArray
         INDArray arr = Nd4j.create(new float[][]{{1, 0, 5, 10}, {100, 55, 555, 1000}});
-
-        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-
-        //Create new file to write binary input data.
-        File file = new File(filePath + "/test-input.zip");
-
+        File file = new File(testDir.newFolder(), "file.json");
         BinarySerde.writeArrayToDisk(arr, file);
         requestSpecification.body(jsonObject.encode().getBytes());
 

@@ -45,7 +45,9 @@ import org.datavec.api.writable.Writable;
 import org.datavec.image.transform.ImageTransformProcess;
 import org.datavec.python.PythonType;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -64,6 +66,8 @@ import static org.junit.Assert.assertEquals;
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class ScikitLearnPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalTest {
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -135,11 +139,7 @@ public class ScikitLearnPythonNd4jNumpyFormatTest extends BaseMultiNumpyVertical
 
         INDArray image = ((NDArrayWritable) output[0][0]).get();
 
-        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-
-        //Create new file to write binary input data.
-        File file = new File(filePath + "/test-input.zip");
-
+        File file = new File(testDir.newFolder(), "file.json");
         BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
         requestSpecification.body(jsonObject.encode().getBytes());
 
@@ -184,11 +184,7 @@ public class ScikitLearnPythonNd4jNumpyFormatTest extends BaseMultiNumpyVertical
 
         INDArray image = ((NDArrayWritable) output[0][0]).get();
 
-        String filePath = new ClassPathResource("data").getFile().getAbsolutePath();
-
-        //Create new file to write binary input data.
-        File file = new File(filePath + "/test-input.zip");
-
+        File file = new File(testDir.newFolder(), "file.json");
         BinarySerde.writeArrayToDisk(image.reshape(28, 28), file);
         requestSpecification.body(jsonObject.encode().getBytes());
 
