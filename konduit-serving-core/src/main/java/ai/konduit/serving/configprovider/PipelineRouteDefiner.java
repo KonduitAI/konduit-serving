@@ -393,9 +393,14 @@ public class PipelineRouteDefiner {
                     start.stop();
 
                 vertx.runOnContext(handler -> {
+                    log.debug("Updating metrics post inference");
                     for(MetricsRenderer metricsRenderer : metricsRenderers) {
                         metricsRenderer.updateMetrics(records);
                     }
+
+                    log.debug("Done updating metrics post inference");
+
+
                 });
 
 
@@ -518,9 +523,13 @@ public class PipelineRouteDefiner {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
                     vertx.runOnContext(handler -> {
+                        log.debug("Updating metrics post inference");
                         for(MetricsRenderer renderer : metricsRenderers) {
                             renderer.updateMetrics(records);
                         }
+
+                        log.debug("Done updating metrics post inference");
+
 
                     });
 
@@ -616,9 +625,13 @@ public class PipelineRouteDefiner {
 
 
                     vertx.runOnContext(handler2 -> {
+                        log.debug("Updating metrics post inference");
+
                         for(MetricsRenderer renderer : metricsRenderers) {
                             renderer.updateMetrics(outputs);
                         }
+
+                        log.debug("Done updating metrics post inference");
 
                     });
 
