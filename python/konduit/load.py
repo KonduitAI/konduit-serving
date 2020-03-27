@@ -8,10 +8,8 @@ from .client import Client
 from .server import Server
 from .utils import to_unix_path, update_dict_with_unix_paths
 
-USER_PATH = os.path.expanduser("~")
-KONDUIT_BASE_DIR = os.path.join(USER_PATH, ".konduit")
-KONDUIT_DIR = os.path.join(KONDUIT_BASE_DIR, "konduit-serving")
-KONDUIT_PID_STORAGE = os.path.join(KONDUIT_DIR, "pid.json")
+KONDUIT_BASE_DIR = os.getcwd()
+KONDUIT_PID_STORAGE = os.path.join(KONDUIT_BASE_DIR, "pid.json")
 MODEL_TYPES = [
     "TENSORFLOW",
     "KERAS",
@@ -235,8 +233,34 @@ def get_model_step(step_config, step_type):
         step_type == "TENSORFLOW"
     ):  # TF has to extra properties, all others are identical
         model_config = TensorFlowConfig(
-            config_proto_path=pop_data(step_config, "config_proto_path"),
-            saved_model_config=pop_data(step_config, "saved_model_config"),
+            model_config_type=model_config_type,
+            tensor_data_types_config=get_tensor_data_types(step_config),
+        )
+    elif (
+            step_type == "KERAS"
+    ):  # TF has to extra properties, all others are identical
+        model_config = KerasConfig(
+            model_config_type=model_config_type,
+            tensor_data_types_config=get_tensor_data_types(step_config),
+        )
+    elif (
+            step_type == "DL4J"
+    ):  # TF has to extra properties, all others are identical
+        model_config = DL4JConfig(
+            model_config_type=model_config_type,
+            tensor_data_types_config=get_tensor_data_types(step_config),
+        )
+    elif (
+            step_type == "SAMEDIFF"
+    ):  # TF has to extra properties, all others are identical
+        model_config = SameDiffConfig(
+            model_config_type=model_config_type,
+            tensor_data_types_config=get_tensor_data_types(step_config),
+        )
+    elif (
+            step_type == "PMML"
+    ):  # TF has to extra properties, all others are identical
+        model_config = PmmlConfig(
             model_config_type=model_config_type,
             tensor_data_types_config=get_tensor_data_types(step_config),
         )
