@@ -26,8 +26,12 @@ import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
+import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
 import java.util.Map;
+
+import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
+import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
 /**
  * An {@link TextConfig} associated with
@@ -41,6 +45,7 @@ import java.util.Map;
         @JsonSubTypes.Type(value = NoOpMetricsConfig.class, name = "NoOpMetricsConfig"),
         @JsonSubTypes.Type(value = ClassificationMetricsConfig.class, name = "ClassificationMetricsConfig"),
 })
+@JsonTypeInfo(use = NAME, include = PROPERTY)
 public interface MetricsConfig extends TextConfig {
 
     /**
