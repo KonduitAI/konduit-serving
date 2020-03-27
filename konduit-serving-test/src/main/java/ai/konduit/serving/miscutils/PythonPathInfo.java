@@ -56,25 +56,10 @@ public class PythonPathInfo {
             if (line == null) {
                 break;
             }
-
             //Confirm the path
-            System.out.println(line);
             pythonPath = line;
-
         }
-
         return pythonPath;
-
-        //
-        //Python path to get from the JavaCPP
-        //        String pythonPath = Arrays.stream(cachePackages())
-        //                .filter(Objects::nonNull)
-        //                .map(File::getAbsolutePath)
-        //                .collect(Collectors.joining(File.pathSeparator));
-        //
-
-
     }
-
 
 }

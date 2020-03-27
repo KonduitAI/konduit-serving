@@ -23,6 +23,7 @@
 package ai.konduit.serving.verticles.python.tensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathInfo;
@@ -50,7 +51,6 @@ import org.nd4j.serde.binary.BinarySerde;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
-import java.text.DecimalFormat;
 
 import static com.jayway.restassured.RestAssured.given;
 import static junit.framework.TestCase.assertEquals;
@@ -92,9 +92,11 @@ public class TensorflowPythonNd4jJsonRegressionTest extends BaseMultiNumpyVertic
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
+        //ServingConfig set httpport and Input Formats
         ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(port)
-                .build();
+                .outputDataFormat(Output.DataFormat.JSON)
+                .httpPort(port).
+                        build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .step(pythonStepConfig)

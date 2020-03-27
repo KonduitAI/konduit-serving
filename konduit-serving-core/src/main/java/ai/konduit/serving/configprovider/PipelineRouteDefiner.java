@@ -226,40 +226,40 @@ public class PipelineRouteDefiner {
         if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
             router.get("/logs")
                     .handler(ctx -> {
-                        try {
-                            ctx.response()
-                                    .putHeader(HttpHeaders.CONTENT_TYPE, "text/html")
-                                    .end(FileUtils.readFileToString(new ClassPathResource("web/logs_page.html").getFile(), StandardCharsets.UTF_8));
-                        } catch (Exception e) {
-                            ctx.fail(500, e);
-                        }
-                    });
+                try {
+                    ctx.response()
+                            .putHeader(HttpHeaders.CONTENT_TYPE, "text/html")
+                            .end(FileUtils.readFileToString(new ClassPathResource("web/logs_page.html").getFile(), StandardCharsets.UTF_8));
+                } catch (Exception e) {
+                    ctx.fail(500, e);
+                }
+            });
 
-            /**
-             * Sets up and endpoint to see server logs if {@link ServingConfig#isCreateLoggingEndpoints()}
-             * is true. Returns the number of last few lines determines by the path param
-             * {@code numberOfLastLinesToRead}. If the path param is an invalid integer,
-             * then the whole log file data will be read and returned.
-             */
+        /**
+         * Sets up and endpoint to see server logs if {@link ServingConfig#isCreateLoggingEndpoints()}
+         * is true. Returns the number of last few lines determines by the path param
+         * {@code numberOfLastLinesToRead}. If the path param is an invalid integer,
+         * then the whole log file data will be read and returned.
+         */
             router.get("/logs/:numberOfLastLinesToRead")
                     .handler(ctx -> {
-                        String numberOfLinesString = ctx.pathParam("numberOfLastLinesToRead");
+                String numberOfLinesString = ctx.pathParam("numberOfLastLinesToRead");
 
-                        ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
-                        try {
-                            if (numberOfLinesString.matches("-?\\d+")) {
-                                ctx.response().end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
-                            } else if("download".equalsIgnoreCase(numberOfLinesString)) {
-                                ctx.response().sendFile(LogUtils.getLogsFile().getAbsolutePath()).end();
-                            } else if("downloadAsZip".equalsIgnoreCase(numberOfLinesString)) {
-                                ctx.response().sendFile(LogUtils.getZippedLogs().getAbsolutePath()).end();
-                            } else {
-                                ctx.response().end(LogUtils.getLogs(-1));
-                            }
-                        } catch (Exception e) {
-                            ctx.fail(500, e);
-                        }
-                    });
+                ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
+                try {
+                    if (numberOfLinesString.matches("-?\\d+")) {
+                        ctx.response().end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
+                    } else if("download".equalsIgnoreCase(numberOfLinesString)) {
+                        ctx.response().sendFile(LogUtils.getLogsFile().getAbsolutePath()).end();
+                    } else if("downloadAsZip".equalsIgnoreCase(numberOfLinesString)) {
+                        ctx.response().sendFile(LogUtils.getZippedLogs().getAbsolutePath()).end();
+                    } else {
+                        ctx.response().end(LogUtils.getLogs(-1));
+                    }
+                } catch (Exception e) {
+                    ctx.fail(500, e);
+                }
+            });
         }
 
         /**
