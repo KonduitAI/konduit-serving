@@ -82,11 +82,11 @@ public class ClassificationMetrics implements MetricsRenderer {
     @Override
     public void updateMetrics(Object... args) {
        if(args instanceof Record[]) {
-           Record[] records = (Record[]) args;
+           Record[] records = (Record[]) args[0];
            incrementClassificationCounters(records);
        }
        else if(args instanceof INDArray[]) {
-           INDArray[] output = (INDArray[]) args;
+           INDArray[] output = (INDArray[]) args[0];
            incrementClassificationCounters(output);
 
        }
