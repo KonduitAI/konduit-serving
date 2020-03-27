@@ -67,6 +67,7 @@ public class ClassificationMetrics implements MetricsRenderer {
         for(int i = 0; i < classificationMetricsConfig.getClassificationLabels().size(); i++) {
             classCounterIncrement.add(Counter.builder(classificationMetricsConfig.getClassificationLabels().get(i))
                     .tags(tags)
+                    .description("Classification counts seen so far for label " + classificationMetricsConfig.getClassificationLabels().get(i))
                     .baseUnit("classification.outcome")
                     .register(meterRegistry));
 

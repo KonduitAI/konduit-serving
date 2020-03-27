@@ -73,7 +73,8 @@ public class RegressionMetrics implements MetricsRenderer {
             StatCounterSupplier statCounterSupplier = new StatCounterSupplier(statCounter,regressionMetricsConfig.getSampleTypes().get(i));
             outputStatsGauges.add(Gauge.builder(regressionMetricsConfig.getRegressionColumnLabels().get(i),statCounterSupplier)
                     .tags(tags)
-                    .baseUnit("classification.outcome")
+                    .description("Regression values seen so far for label " + regressionMetricsConfig.getRegressionColumnLabels().get(i))
+                    .baseUnit("regression.outcome")
                     .register(meterRegistry));
 
 
