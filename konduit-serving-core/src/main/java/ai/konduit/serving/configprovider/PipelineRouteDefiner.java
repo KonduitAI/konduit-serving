@@ -392,9 +392,12 @@ public class PipelineRouteDefiner {
                 if (start != null)
                     start.stop();
 
-                for(MetricsRenderer metricsRenderer : metricsRenderers) {
-                    metricsRenderer.updateMetrics(records);
-                }
+                vertx.runOnContext(handler -> {
+                    for(MetricsRenderer metricsRenderer : metricsRenderers) {
+                        metricsRenderer.updateMetrics(records);
+                    }
+                });
+
 
 
             } catch (Exception e) {
@@ -514,10 +517,12 @@ public class PipelineRouteDefiner {
                     if (inferenceConfiguration.serving().isLogTimings()) {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
+                    vertx.runOnContext(handler -> {
+                        for(MetricsRenderer renderer : metricsRenderers) {
+                            renderer.updateMetrics(records);
+                        }
 
-                    for(MetricsRenderer renderer : metricsRenderers) {
-                        renderer.updateMetrics(records);
-                    }
+                    });
 
                     blockingCall.complete();
                 } catch (Exception e) {
@@ -609,9 +614,13 @@ public class PipelineRouteDefiner {
                     }
 
 
-                    for(MetricsRenderer renderer : metricsRenderers) {
-                        renderer.updateMetrics(outputs);
-                    }
+
+                    vertx.runOnContext(handler2 -> {
+                        for(MetricsRenderer renderer : metricsRenderers) {
+                            renderer.updateMetrics(outputs);
+                        }
+
+                    });
 
 
                     handler.complete();
