@@ -95,7 +95,7 @@ public class JsonSerdeUtils {
                         break;
                     case NDArray:
                         NDArrayWritable ndArrayWritable = (NDArrayWritable) writable;
-                        array.add(Nd4j.toNpyByteArray(ndArrayWritable.get()));
+                        array.add(ndArrayWritable.get().toStringFull());
                         break;
                     case Int:
                         array.add(writable.toInt());
