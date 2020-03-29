@@ -54,9 +54,9 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
     private NativeGraphExecutioner nativeGraphExecutioner;
     private static ExecutorConfiguration configuration = ExecutorConfiguration.builder()
             .executionMode(ExecutionMode.SEQUENTIAL)
+            .outputMode(OutputMode.EXPLICIT)
             .profilingMode(OpExecutioner.ProfilingMode.DISABLED)
             .gatherTimings(true)
-            .outputMode(OutputMode.IMPLICIT)
             .build();
 
     private SameDiff model;
@@ -89,7 +89,7 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
         synchronized (this.model) {
             Map<String, INDArray> inputs = new LinkedHashMap(input.length);
 
-            for (int i = 0; i < this.model.inputs().size(); i++) {
+            for (int i = 0; i < input.length; i++) {
                 inputs.put(this.model.inputs().get(i), input[i]);
                 this.model.associateArrayWithVariable(input[i], this.model.inputs().get(i));
             }
