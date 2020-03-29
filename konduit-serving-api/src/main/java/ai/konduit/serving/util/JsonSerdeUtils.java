@@ -18,14 +18,19 @@
 package ai.konduit.serving.util;
 
 import ai.konduit.serving.config.SchemaType;
+import ai.konduit.serving.output.adapter.RawOutputAdapter;
+import ai.konduit.serving.output.types.NDArrayOutput;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.*;
 import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.serde.json.JsonMappers;
+import org.nd4j.shade.jackson.core.JsonProcessingException;
 
 import java.time.Instant;
 import java.util.*;
@@ -37,6 +42,7 @@ import java.util.*;
  *
  * @author Adam Gibson
  */
+@Slf4j
 public class JsonSerdeUtils {
 
 
@@ -95,7 +101,16 @@ public class JsonSerdeUtils {
                         break;
                     case NDArray:
                         NDArrayWritable ndArrayWritable = (NDArrayWritable) writable;
-                        array.add(ndArrayWritable.get().toStringFull());
+                        String write = null;
+                        try {
+                            write = JsonMappers.getMapper().writeValueAsString(NDArrayOutput.builder()
+                                    .ndArray(ndArrayWritable.get()).batchId("").build());
+                            JsonObject jsonObject1 = new JsonObject(write);
+                            array.add(jsonObject1);
+                        } catch (JsonProcessingException e) {
+                            log.error("Unable to process json write during serde",e);
+                        }
+
                         break;
                     case Int:
                         array.add(writable.toInt());
@@ -182,6 +197,7 @@ public class JsonSerdeUtils {
         return new org.datavec.api.records.impl.Record(record,null);
     }
 
+
     /**
      * De serializes a schema using the
      * {@link JsonObject} methods
@@ -197,8 +213,13 @@ public class JsonSerdeUtils {
             SchemaType schemaType = schemaTypes.get(fieldName);
             switch (schemaType) {
                 case NDArray:
-                    INDArray arr = Nd4j.createNpyFromByteArray(schemaValues.getBinary(fieldName));
-                    ret.put(fieldName,arr);
+                    JsonObject jsonObject = schemaValues.getJsonObject(fieldName);
+                    try {
+                        INDArray arr =  JsonMappers.getMapper().readValue(jsonObject.toString(), NDArrayOutput.class).getNdArray();
+                        ret.put(fieldName,arr);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case Boolean:
                     ret.put(fieldName,schemaValues.getBoolean(fieldName));
@@ -244,14 +265,14 @@ public class JsonSerdeUtils {
         List<Integer> shapeList = new ArrayList<>();
         JsonArray currArr = arr;
         while(true) {
-           shapeList.add(currArr.size());
-           Object firstElement = currArr.getValue(0);
-           if (firstElement instanceof JsonArray){
-               currArr = (JsonArray)firstElement;
-           }
-           else {
-               break;
-           }
+            shapeList.add(currArr.size());
+            Object firstElement = currArr.getValue(0);
+            if (firstElement instanceof JsonArray){
+                currArr = (JsonArray)firstElement;
+            }
+            else {
+                break;
+            }
         }
 
         long[] shape = new long[shapeList.size()];
