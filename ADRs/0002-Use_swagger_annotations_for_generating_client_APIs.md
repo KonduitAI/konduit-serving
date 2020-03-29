@@ -1,7 +1,7 @@
 # Use Swagger annotations to generate and maintain konduit-serving clients.
 
 ## Status
-PROPOSAL
+ACCEPTED
 
 Proposed by: Shams Ul Azeem (18-03-2020)
 
