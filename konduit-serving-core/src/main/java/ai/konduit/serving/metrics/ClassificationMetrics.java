@@ -82,15 +82,23 @@ public class ClassificationMetrics implements MetricsRenderer {
 
     @Override
     public void updateMetrics(Object... args) {
-       if(args instanceof Record[]) {
-           Record[] records = (Record[]) args[0];
-           incrementClassificationCounters(records);
-       }
-       else if(args instanceof INDArray[]) {
-           INDArray[] output = (INDArray[]) args[0];
-           incrementClassificationCounters(output);
+        if(args[0] instanceof Record) {
+            Record records = (Record) args[0];
+            incrementClassificationCounters(new Record[]{records});
+        }
+        else if(args[0] instanceof Record[]) {
+            Record[] records = (Record[]) args[0];
+            incrementClassificationCounters(records);
+        }
+        else if(args[0] instanceof INDArray) {
+            INDArray output = (INDArray) args[0];
+            incrementClassificationCounters(new INDArray[] {output});
+        }
+        else if(args[0] instanceof INDArray[]) {
+            INDArray[] output = (INDArray[]) args[0];
+            incrementClassificationCounters(output);
 
-       }
+        }
     }
 
 
