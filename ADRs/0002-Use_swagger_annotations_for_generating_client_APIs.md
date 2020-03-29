@@ -19,7 +19,7 @@ Given those two endpoints we have done a ton of work on creating a python client
 
 Since, we're planning to have APIs in multiple languages (python, java, C# and others), it might get difficult to maintain and document them separately in the future. 
 
-## Proposal
+## Decision
 
 ### Using swagger annotations to generate and document client APIs.
 

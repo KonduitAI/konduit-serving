@@ -11,7 +11,7 @@ Discussed with: Paul Dubs, Alex Black
 
 Currently, we have a main class called [KonduitServingMain](https://github.com/KonduitAI/konduit-serving/blob/45af79d15abe4912ccd81e78c9d215306472036e/konduit-serving-core/src/main/java/ai/konduit/serving/configprovider/KonduitServingMain.java) that is the entrypoint for a konduit-serving application to run. The main command line arguments are defined inside [KonduitServingNodeConfigurer](https://github.com/KonduitAI/konduit-serving/blob/e791741b80721980f8b66a35ed42f20b30612d5c/konduit-serving-core/src/main/java/ai/konduit/serving/configprovider/KonduitServingNodeConfigurer.java) class. We also have an additional [Python CLI](https://github.com/KonduitAI/konduit-serving/blob/7965965b58217f2b4d983fd41aaea013264491ee/python/cli.py) that can be just implemented in Java. Vert.x Launcher supports the ability to start, stop and list running verticles out of the box.
 
-## Proposal
+## Decision
 
 - Extend `KonduitServingNodeConfigurer` from [Vert.x Launcher](https://vertx.io/docs/vertx-core/java/#_the_vert_x_launcher) class. 
 - Write all the initialization/tear-down logic inside the lifecycle methods of Vert.x Launcher which is present inside both of the above classes (KonduitServingMain and KonduitServingNodeConfigurer). 
