@@ -24,6 +24,7 @@ package ai.konduit.serving.executioner.inference;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.model.loader.ModelLoader;
+import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.autodiff.execution.NativeGraphExecutioner;
@@ -36,6 +37,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.api.ops.executioner.OpExecutioner;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -59,6 +61,8 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
             .gatherTimings(true)
             .build();
 
+
+    private List<String> inputs,outputs;
     private SameDiff model;
 
     @Override
@@ -80,7 +84,10 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
         nativeGraphExecutioner = new NativeGraphExecutioner();
         this.modelLoader = model;
         this.model = model();
-        log.info("Number of inputs is" + this.model.inputs().size());
+        SameDiffModelLoader sameDiffModelLoader = (SameDiffModelLoader) model;
+        this.inputs = sameDiffModelLoader.getInputNames();
+        this.outputs = sameDiffModelLoader.getOutputNames();
+        log.info("Inference execution loaded with inputs " + inputs + " and outputs " + outputs);
     }
 
     @Override
@@ -94,9 +101,14 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
                 this.model.associateArrayWithVariable(input[i], this.model.inputs().get(i));
             }
 
+            model.output(inputs,outputs);
+            Map<String, INDArray> ret =  model.output(inputs,outputs);
+            INDArray[] returnOutput = new INDArray[outputs.size()];
+            for(int i = 0; i < returnOutput.length; i++) {
+                returnOutput[i] = ret.get(outputs.get(i));
+            }
 
-            INDArray[] ret = nativeGraphExecutioner.executeGraph(model, configuration);
-            return ret;
+            return returnOutput;
         }
     }
 
