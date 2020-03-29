@@ -21,35 +21,22 @@
  */
 package ai.konduit.serving.miscutils;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 public class PythonPathUtils {
-
-    public PythonPathUtils() {
-    }
 
     public static String getPythonPath()
             throws Exception {
 
         //To get local Python path run the below command and get the path for python libraries.
         ProcessBuilder builder = new ProcessBuilder("python", "-c", "\"import sys, os; print(os.pathsep.join([path for path in sys.path if path]))\"");
-
         builder.redirectErrorStream(true);
-        Process p = builder.start();
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-            String line;
-            String pythonPath = "";
-            while (true) {
-                line = r.readLine();
-                if (line == null) {
-                    break;
-                }
-                //Confirm the path
-                pythonPath = line;
-            }
-            return pythonPath;
+
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {
+            return IOUtils.toString(bufferedReader);
         }
     }
-
 }
