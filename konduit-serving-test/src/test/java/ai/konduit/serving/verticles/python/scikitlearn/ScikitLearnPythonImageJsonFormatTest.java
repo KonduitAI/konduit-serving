@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
@@ -85,7 +85,7 @@ public class ScikitLearnPythonImageJsonFormatTest extends BaseMultiNumpyVertical
         String pythonCodePath = new ClassPathResource("scripts/scikitlearn/Image_Scikitlearn_NDarray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("imgPath", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("result", PythonType.TypeName.NDARRAY.name())
@@ -139,7 +139,7 @@ public class ScikitLearnPythonImageJsonFormatTest extends BaseMultiNumpyVertical
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray().castTo(DataType.INT32);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json", "raw");
         assertEquals(expectedArr, outputArray);
     }
 
@@ -167,7 +167,7 @@ public class ScikitLearnPythonImageJsonFormatTest extends BaseMultiNumpyVertical
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
         double outpuValue = outputArr.getJsonArray(0).getDouble(0);
-        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json");
+        JsonArray expArr = ExpectedAssertUtil.probabilitiesToJsonArray("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json");
         double expValue = expArr.getJsonArray(0).getDouble(0);
         assertEquals(expValue, outpuValue, 1e-1);
         assertEquals(expArr, outputArr);

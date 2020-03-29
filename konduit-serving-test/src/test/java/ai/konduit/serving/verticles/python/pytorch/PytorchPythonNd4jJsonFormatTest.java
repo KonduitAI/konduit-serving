@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -88,7 +88,7 @@ public class PytorchPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTest 
         String pythonCodePath = new ClassPathResource("scripts/pytorch/NdArray_Pytorch_NdArray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("inputValue", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("output_value", PythonType.TypeName.NDARRAY.name())
@@ -139,7 +139,7 @@ public class PytorchPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTest 
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/pytorch/PytorchNdArrayTest.json", "raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0), 1e-1);
     }
 
@@ -171,7 +171,7 @@ public class PytorchPythonNd4jJsonFormatTest extends BaseMultiNumpyVerticalTest 
         assertTrue(jsonObject1.getJsonObject("default").containsKey("probabilities"));
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
-        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchNdArrayTest.json");
+        JsonArray expArr = ExpectedAssertUtil.probabilitiesToJsonArray("src/test/resources/Json/pytorch/PytorchNdArrayTest.json");
         assertEquals(expArr, outputArr);
     }
 }

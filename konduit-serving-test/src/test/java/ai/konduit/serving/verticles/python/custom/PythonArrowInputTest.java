@@ -24,7 +24,7 @@ package ai.konduit.serving.verticles.python.custom;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -86,7 +86,7 @@ public class PythonArrowInputTest extends BaseMultiNumpyVerticalTest {
         String pythonCodePath = new ClassPathResource("scripts/custom/InputOutputPythonScripts.py").getFile().getAbsolutePath();
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonInput("inputVar", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("output", PythonType.TypeName.NDARRAY.name())
                 .build();

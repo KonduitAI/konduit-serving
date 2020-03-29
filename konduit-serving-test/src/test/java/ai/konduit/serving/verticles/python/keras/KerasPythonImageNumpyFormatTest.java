@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -85,7 +85,7 @@ public class KerasPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTest 
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonInput("imgPath", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("imageArray", PythonType.TypeName.NDARRAY.name())
                 .build();
@@ -131,7 +131,7 @@ public class KerasPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTest 
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasImageTest.json","raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/keras/KerasImageTest.json","raw");
         assertEquals(expectedArr, outputArray);
     }
 
@@ -155,7 +155,7 @@ public class KerasPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTest 
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/keras/KerasImageTest.json");
+        INDArray expectedArr = (INDArray) ExpectedAssertUtil.probabilitiesToJsonArray("src/test/resources/Json/keras/KerasImageTest.json");
         assertEquals(expectedArr, outputArray);
 
 

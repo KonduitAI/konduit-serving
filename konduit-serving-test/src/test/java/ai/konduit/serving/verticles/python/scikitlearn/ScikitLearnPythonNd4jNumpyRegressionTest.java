@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -89,7 +89,7 @@ public class ScikitLearnPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVert
         String pythonCodePath = new ClassPathResource("scripts/scikitlearn/ScikitLearnRegression.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("inputData", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("pred", PythonType.TypeName.NDARRAY.name())
@@ -134,7 +134,7 @@ public class ScikitLearnPythonNd4jNumpyRegressionTest extends BaseMultiNumpyVert
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json","raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json","raw");
         assertEquals(expectedArr, outputArray);
 
     }

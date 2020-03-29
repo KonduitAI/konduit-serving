@@ -27,7 +27,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -91,7 +91,7 @@ public class TensorFlowPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTe
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonInput("JsonInput", PythonType.TypeName.STR.name())
                 .pythonOutput("prediction", PythonType.TypeName.NDARRAY.name())
                 .build();
@@ -135,7 +135,7 @@ public class TensorFlowPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTe
         File outputImagePath = new File(testDir.newFolder(), "file.json");
         FileUtils.writeStringToFile(outputImagePath, output, Charset.defaultCharset());
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json", "raw");
         assertEquals(expectedArr, outputArray);
 
     }
@@ -168,7 +168,7 @@ public class TensorFlowPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTe
         JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
         JsonArray outputArr = ndarraySerde.getJsonArray("probabilities");
         double outpuValue = outputArr.getJsonArray(0).getDouble(0);
-        JsonArray expArr = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json");
+        JsonArray expArr = ExpectedAssertUtil.probabilitiesToJsonArray("src/test/resources/Json/tensorflow/TensorFlowJsonTest.json");
         double expValue = expArr.getJsonArray(0).getDouble(0);
         assertEquals(expValue, outpuValue, 1e-1);
         assertEquals(expArr, outputArr);

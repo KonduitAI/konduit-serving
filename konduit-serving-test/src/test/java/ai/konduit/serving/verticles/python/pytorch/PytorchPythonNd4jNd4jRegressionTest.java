@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -88,7 +88,7 @@ public class PytorchPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVerticalT
         String pythonCodePath = new ClassPathResource("scripts/pytorch/RegressionTorch.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("X_test", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("output", PythonType.TypeName.NDARRAY.name())
@@ -136,7 +136,7 @@ public class PytorchPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVerticalT
         File outputImagePath = new File(testDir.newFolder(), "file.json");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/scikitlearn/ScikitlearnNdArrayTest.json", "raw");
         Assert.assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
         Assert.assertEquals(expectedArr, outputArray);
     }

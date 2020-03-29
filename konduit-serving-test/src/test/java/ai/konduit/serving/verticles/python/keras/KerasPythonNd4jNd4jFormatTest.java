@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMappers;
@@ -93,7 +93,7 @@ public class KerasPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
         String pythonCodePath = new ClassPathResource("scripts/keras/KerasNDArrayTest.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("inputData", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("arr", PythonType.TypeName.NDARRAY.name())
@@ -137,7 +137,7 @@ public class KerasPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
                 .andReturn();
 
         INDArray outputArray = BinarySerde.toArray(ByteBuffer.wrap(response.getBody().asByteArray()));
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasNdArrayTest.json","raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/keras/KerasNdArrayTest.json","raw");
         assertEquals(expectedArr,outputArray);
     }
 
@@ -167,7 +167,7 @@ public class KerasPythonNd4jNd4jFormatTest extends BaseMultiNumpyVerticalTest {
         File outputImagePath = new File(testDir.newFolder(), "file.json");
         FileUtils.writeStringToFile(outputImagePath, response, Charset.defaultCharset());
         INDArray outputArray = BinarySerde.readFromDisk(outputImagePath);
-        JsonArray expProb = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/keras/KerasNdArrayTest.json");
+        JsonArray expProb = ExpectedAssertUtil.probabilitiesToJsonArray("src/test/resources/Json/keras/KerasNdArrayTest.json");
         float[][] expNd = ObjectMappers.json().readValue(expProb.toString(), float[][].class);
         INDArray expectedArray = Nd4j.create(expNd);
         assertEquals(expectedArray, outputArray);

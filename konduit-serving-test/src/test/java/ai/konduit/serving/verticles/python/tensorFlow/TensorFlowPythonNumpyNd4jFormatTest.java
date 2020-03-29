@@ -24,7 +24,7 @@ package ai.konduit.serving.verticles.python.tensorFlow;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -90,7 +90,7 @@ public class TensorFlowPythonNumpyNd4jFormatTest extends BaseMultiNumpyVerticalT
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonInput("img", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("prediction_np", PythonType.TypeName.NDARRAY.name())
                 .build();

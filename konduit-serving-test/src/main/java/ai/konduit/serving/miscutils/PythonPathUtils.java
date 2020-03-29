@@ -24,42 +24,32 @@ package ai.konduit.serving.miscutils;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-public class PythonPathInfo {
+public class PythonPathUtils {
 
-    public PythonPathInfo() {
+    public PythonPathUtils() {
     }
 
     public static String getPythonPath()
             throws Exception {
 
-        //To detect host OS.
-        String operSys = System.getProperty("os.name").toLowerCase();
-
         //To get local Python path run the below command and get the path for python libraries.
-        String[] args;
-        if (operSys.indexOf("win") >= 0) {
-            args = new String[] {"cmd.exe", "/c", "python -c \"import sys, os; print(os.pathsep.join([path for path in sys.path if path]))\"" , "with", "args"};
-        } else if (operSys.indexOf("nix") >= 0 || operSys.indexOf("nux") >= 0 || operSys.indexOf("aix") >= 0) {
-            args = new String[] {"/bin/bash", "-c", " python3.7 -c \"import os, sys; print(os.path.pathsep.join([path.strip() for path in sys.path if path.strip()]))\"" , "with", "args"};
-        } else{
-            args = new String[] {"cmd.exe", "/c", "python -c \"import sys, os; print(os.pathsep.join([path for path in sys.path if path]))\"" , "with", "args"};
-        }
+        ProcessBuilder builder = new ProcessBuilder("python", "-c", "\"import sys, os; print(os.pathsep.join([path for path in sys.path if path]))\"");
 
-        ProcessBuilder builder = new ProcessBuilder(args);
         builder.redirectErrorStream(true);
         Process p = builder.start();
-        BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        String line;
-        String pythonPath = "";
-        while (true) {
-            line = r.readLine();
-            if (line == null) {
-                break;
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+            String line;
+            String pythonPath = "";
+            while (true) {
+                line = r.readLine();
+                if (line == null) {
+                    break;
+                }
+                //Confirm the path
+                pythonPath = line;
             }
-            //Confirm the path
-            pythonPath = line;
+            return pythonPath;
         }
-        return pythonPath;
     }
 
 }

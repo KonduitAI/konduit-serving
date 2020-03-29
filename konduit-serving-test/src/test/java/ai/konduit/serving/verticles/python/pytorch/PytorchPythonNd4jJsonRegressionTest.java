@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMappers;
@@ -87,7 +87,7 @@ public class PytorchPythonNd4jJsonRegressionTest extends BaseMultiNumpyVerticalT
         String pythonCodePath = new ClassPathResource("scripts/pytorch/RegressionTorch.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("X_test", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("output", PythonType.TypeName.NDARRAY.name())
@@ -137,7 +137,7 @@ public class PytorchPythonNd4jJsonRegressionTest extends BaseMultiNumpyVerticalT
         JsonArray values = ndarraySerde.getJsonArray("values");
         double[][] nd = ObjectMappers.json().readValue(values.toString(), double[][].class);
         INDArray outputArray = Nd4j.create(nd);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchNd4jJsonRegression.json", "regression");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/pytorch/PytorchNd4jJsonRegression.json", "regression");
         assertEquals(outputArray.getInt(), expectedArr.getInt());
     }
 

@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMappers;
@@ -88,7 +88,7 @@ public class TensorflowPythonNd4jJsonRegressionTest extends BaseMultiNumpyVertic
         String pythonCodePath = new ClassPathResource("scripts/tensorFlow/TensorflowRegression.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("inputData", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("predictions", PythonType.TypeName.NDARRAY.name())
@@ -138,7 +138,7 @@ public class TensorflowPythonNd4jJsonRegressionTest extends BaseMultiNumpyVertic
         double[][] nd = ObjectMappers.json().readValue(values.toString(), double[][].class);
         INDArray outputArray = Nd4j.create(nd);
         double outputVal = Precision.round((outputArray.getDouble(0)),2);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/tensorflow/TensorFlowNd4jRegression.json", "regression");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/tensorflow/TensorFlowNd4jRegression.json", "regression");
         assertEquals(expectedArr.getDouble(0),outputVal);
     }
 }

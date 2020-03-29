@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -83,7 +83,7 @@ public class ScikitLearnPythonImageNumpyFormatTest extends BaseMultiNumpyVertica
         String pythonCodePath = new ClassPathResource("scripts/scikitlearn/Image_Scikitlearn_NDarray.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("imgPath", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("result", PythonType.TypeName.NDARRAY.name())
@@ -131,7 +131,7 @@ public class ScikitLearnPythonImageNumpyFormatTest extends BaseMultiNumpyVertica
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray()).castTo(DataType.INT32);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json","raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json","raw");
         assertEquals(expectedArr, outputArray);
     }
 
@@ -156,7 +156,7 @@ public class ScikitLearnPythonImageNumpyFormatTest extends BaseMultiNumpyVertica
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json");
+        INDArray expectedArr = (INDArray) ExpectedAssertUtil.probabilitiesToJsonArray("src/test/resources/Json/scikitlearn/ScikitlearnImageTest.json");
         assertEquals(expectedArr, outputArray);
     }
 

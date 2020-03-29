@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -99,7 +99,7 @@ public class KerasPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest {
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonInput("JsonInput", PythonType.TypeName.STR.name())
                 //.pythonOutput("score", PythonType.TypeName.LIST.name())
                 .pythonOutput("output_array", PythonType.TypeName.NDARRAY.name())
@@ -140,7 +140,7 @@ public class KerasPythonJsonNd4jFormatTest extends BaseMultiNumpyVerticalTest {
                 .andReturn();
 
         INDArray outputArray = BinarySerde.toArray(ByteBuffer.wrap(output.getBody().asByteArray()));
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasJsonNumpyTest.json","raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/keras/KerasJsonNumpyTest.json","raw");
         assertEquals(expectedArr,outputArray);
     }
 

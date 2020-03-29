@@ -25,7 +25,7 @@ package ai.konduit.serving.verticles.python.tensorFlow;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -82,7 +82,7 @@ public class TensorFlowPythonNumpyJsonRegressionTest extends BaseMultiNumpyVerti
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonInput("input_numpy", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("output_var", PythonType.TypeName.NDARRAY.name())
                 .build();
@@ -131,7 +131,7 @@ public class TensorFlowPythonNumpyJsonRegressionTest extends BaseMultiNumpyVerti
         String ndarraySerde = jsonObject1.getJsonObject("default").toString();
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray outputArray = nd.getNdArray();
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/tensorflow/TensorFlowNumpyRegression.json", "regression");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/tensorflow/TensorFlowNumpyRegression.json", "regression");
         for (int i = 0; i < expectedArr.length(); i++) {
             assertTrue("Expected and Actual does not match", (outputArray.getDouble(i) - expectedArr.getDouble(i)) < 0.1);
         }

@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -82,7 +82,7 @@ public class PytorchPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonInput("JsonInput", PythonType.TypeName.STR.name())
                 .pythonOutput("output_value", PythonType.TypeName.NDARRAY.name())
                 .build();
@@ -123,7 +123,7 @@ public class PytorchPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest
                 .andReturn();
 
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/pytorch/PytorchJsonTest.json", "raw");
         assertEquals(expectedArr.getInt(), outputArray.getInt());
     }
 
@@ -149,7 +149,7 @@ public class PytorchPythonJsonNumpyFormatTest extends BaseMultiNumpyVerticalTest
                 .andReturn();
 
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray());
-        INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchJsonTest.json");
+        INDArray expectedArr = (INDArray) ExpectedAssertUtil.probabilitiesToJsonArray("src/test/resources/Json/pytorch/PytorchJsonTest.json");
         assertEquals(expectedArr, outputArray);
 
     }

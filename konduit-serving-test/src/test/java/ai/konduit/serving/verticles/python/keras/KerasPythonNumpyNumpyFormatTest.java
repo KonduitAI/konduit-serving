@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -83,7 +83,7 @@ public class KerasPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTest 
         String pythonCodePath = new ClassPathResource("scripts/keras/NumpyKerasNumpy.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("inputValue", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("output_np", PythonType.TypeName.NDARRAY.name())
@@ -128,7 +128,7 @@ public class KerasPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTest 
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/keras/KerasNumpyTest.json","raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/keras/KerasNumpyTest.json","raw");
         assertEquals(expectedArr, outputArray);
     }
 
@@ -159,7 +159,7 @@ public class KerasPythonNumpyNumpyFormatTest extends BaseMultiNumpyVerticalTest 
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
-        INDArray expectedArr = (INDArray) ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/keras/KerasNumpyTest.json");
+        INDArray expectedArr = (INDArray) ExpectedAssertUtil.probabilitiesToJsonArray("src/test/resources/Json/keras/KerasNumpyTest.json");
         assertEquals(expectedArr, outputArray);
     }
 

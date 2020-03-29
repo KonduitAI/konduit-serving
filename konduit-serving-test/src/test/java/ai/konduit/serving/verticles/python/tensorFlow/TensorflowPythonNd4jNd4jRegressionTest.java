@@ -25,7 +25,7 @@ package ai.konduit.serving.verticles.python.tensorFlow;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -88,7 +88,7 @@ public class TensorflowPythonNd4jNd4jRegressionTest extends BaseMultiNumpyVertic
         String pythonCodePath = new ClassPathResource("scripts/tensorFlow/TensorflowRegression.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonCodePath(pythonCodePath)
                 .pythonInput("inputData", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("predictions", PythonType.TypeName.NDARRAY.name())

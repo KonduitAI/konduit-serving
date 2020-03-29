@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
-import ai.konduit.serving.miscutils.PythonPathInfo;
+import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
@@ -85,7 +85,7 @@ public class PytorchPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTes
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
-                .pythonPath(PythonPathInfo.getPythonPath())
+                .pythonPath(PythonPathUtils.getPythonPath())
                 .pythonInput("image_input", PythonType.TypeName.NDARRAY.name())
                 .pythonOutput("predicted_Ouput", PythonType.TypeName.NDARRAY.name())
                 .build();
@@ -134,7 +134,7 @@ public class PytorchPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTes
                 .andReturn();
 
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray()).castTo(DataType.INT32);
-        INDArray expectedArr = ExpectedAssertUtil.NdArrayAssert("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
+        INDArray expectedArr = ExpectedAssertUtil.fileAndKeyToNDArrayOutput("src/test/resources/Json/pytorch/PytorchImageTest.json", "raw");
         assertEquals(expectedArr.getInt(0), outputArray.getInt(0));
     }
 
@@ -160,7 +160,7 @@ public class PytorchPythonImageNumpyFormatTest extends BaseMultiNumpyVerticalTes
 
         //TODO: Assertion for Numpy to be verified
         INDArray outputArray = Nd4j.createNpyFromByteArray(output.getBody().asByteArray()).castTo(DataType.INT32);
-        JsonArray expProb = ExpectedAssertUtil.ProbabilitiesAssert("src/test/resources/Json/pytorch/PytorchImageTest.json");
+        JsonArray expProb = ExpectedAssertUtil.probabilitiesToJsonArray("src/test/resources/Json/pytorch/PytorchImageTest.json");
         float[][] expNd = ObjectMappers.json().readValue(expProb.toString(), float[][].class);
         INDArray expectedArray = Nd4j.create(expNd);
         assertEquals(expectedArray, outputArray);
