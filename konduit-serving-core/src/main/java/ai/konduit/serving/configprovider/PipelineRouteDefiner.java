@@ -370,7 +370,6 @@ public class PipelineRouteDefiner {
                     "content-type: application/json only accepts JSON as " +
                             "input data format and not " + inputDataFormat.name());
 
-            pipelineExecutioner.init(inputDataFormat, predictionType);
 
             initializeSchemas(inferenceConfiguration, true);
 
@@ -432,7 +431,7 @@ public class PipelineRouteDefiner {
                 predictionType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
             }
 
-            pipelineExecutioner.init(inputDataFormat, predictionType);
+            pipelineExecutioner.init();
 
             Map<String, InputAdapter<io.vertx.core.buffer.Buffer, ?>> adapters = getInputAdapterMap(ctx);
 
@@ -652,6 +651,7 @@ public class PipelineRouteDefiner {
             //due to needing to sometime initialize retraining routes
             try {
                 pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration);
+                pipelineExecutioner.init();
             } catch (Exception e) {
                 log.error("Failed to initialize. Shutting down.", e);
             }
