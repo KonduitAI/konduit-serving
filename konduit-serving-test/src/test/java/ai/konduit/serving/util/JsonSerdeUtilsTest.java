@@ -56,7 +56,7 @@ public class JsonSerdeUtilsTest {
 
 
     @Test
-    public void testDeSerializeSchemaValues() {
+    public void testDeSerializeSchemaValues() throws Exception {
         // Setup
         final JsonObject schemaValues = new JsonObject();
         SchemaType[] values = SchemaType.values();
@@ -66,8 +66,10 @@ public class JsonSerdeUtilsTest {
             schemaTypeMap.put(value.name(), value);
             switch (value) {
                 case NDArray:
-                    deSerializedAssertion.put(value.name(), Nd4j.scalar(1.0));
-                    schemaValues.put(value.name(), Nd4j.toNpyByteArray(Nd4j.scalar(1.0)));
+                    deSerializedAssertion.put(value.name(), Nd4j.scalar(1.0f));
+                    String write = JsonMappers.getMapper().writeValueAsString(NDArrayOutput.builder()
+                            .ndArray(Nd4j.scalar(1.0f)).batchId("").build());
+                    schemaValues.put(value.name(), new JsonObject(write));
                     break;
                 case Boolean:
                     deSerializedAssertion.put(value.name(), true);
