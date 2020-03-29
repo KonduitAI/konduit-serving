@@ -86,7 +86,6 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
     @Override
     public INDArray[] execute(INDArray[] input) {
         Preconditions.checkNotNull(input,"Inputs must not be null!");
-        Preconditions.checkState(input.length == this.model.inputs().size(),String.format("Number of inputs %d did not equal number of model inputs %d!",input.length,model.inputs().size()));
         synchronized (this.model) {
             Map<String, INDArray> inputs = new LinkedHashMap(input.length);
 
