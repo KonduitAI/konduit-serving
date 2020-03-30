@@ -76,6 +76,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.http.entity.ContentType.TEXT_PLAIN;
+
 /**
  * Handles setting up a router for doing pipeline based inference.
  *
@@ -277,20 +279,11 @@ public class PipelineRouteDefiner {
                 .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
                 .setDeleteUploadedFilesOnEnd(true)
                 .setMergeFormAttributes(true))
-                .failureHandler(failureHandlder -> {
-                    if (failureHandlder.statusCode() == 404) {
-                        log.warn("404 at route " + failureHandlder.request().path());
-                    } else if (failureHandlder.failed()) {
-                        if (failureHandlder.failure() != null) {
-                            log.error("Request failed with cause ", failureHandlder.failure());
-                        } else {
-                            log.error("Request failed with unknown cause.");
-                        }
-                    }
-
-                    failureHandlder.response()
-                            .setStatusCode(500)
-                            .end(failureHandlder.failure().toString());
+                .failureHandler(failureHandler -> {
+                    failureHandler.response()
+                            .setStatusCode(failureHandler.statusCode())
+                            .putHeader("Content-Type", TEXT_PLAIN.getMimeType())
+                            .end(failureHandler.failure().toString());
                 });
 
         router.post("/dynamicschema")

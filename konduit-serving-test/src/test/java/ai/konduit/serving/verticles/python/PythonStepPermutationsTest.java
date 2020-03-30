@@ -61,8 +61,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.jayway.restassured.RestAssured.given;
+import static javax.swing.RowFilter.ComparisonType.AFTER;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.apache.http.entity.ContentType.MULTIPART_FORM_DATA;
+import static org.datavec.python.PythonExecutioner.JAVACPP_PYTHON_APPEND_TYPE;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -94,7 +96,7 @@ public class PythonStepPermutationsTest {
                 { "Tensorflow", file("data/TensorFlowImageTest.png"),
                         Input.DataFormat.IMAGE,
                         Output.DataFormat.JSON,
-                        PredictionType.RAW,
+                        PredictionType.CLASSIFICATION,
                         map("img", TypeName.NDARRAY.name()),
                         map("prediction", TypeName.NDARRAY.name()),
                         script("scripts/tensorFlow/TensorFlowImageTest.py")
@@ -143,15 +145,17 @@ public class PythonStepPermutationsTest {
     }
 
     @Before
-    public void before() {
+    public void before(TestContext testContext) {
         this.vertx = Vertx.vertx(new VertxOptions()
                 .setMaxEventLoopExecuteTime(60)
                 .setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS)
-        );
+        ).exceptionHandler(throwable -> testContext.fail(throwable));
     }
 
     @Test(timeout = 60000)
     public void test(TestContext testContext) throws Exception {
+        System.setProperty(JAVACPP_PYTHON_APPEND_TYPE, AFTER.name());
+
         int port = PortUtils.getAvailablePort();
 
         List<PipelineStep> steps = new ArrayList<>();
@@ -178,25 +182,21 @@ public class PythonStepPermutationsTest {
 
         vertx.deployVerticle(InferenceVerticle.class, new DeploymentOptions().setConfig(inferenceConfiguration.toJsonObject()), handler -> {
             if(handler.succeeded()) {
-                try {
-                    String output = given().port(port)
-                            .header("Content-Type", mime())
-                            .multiPart("img", (File) data)
-                            .expect().statusCode(200)
-                            .post(url()).then()
-                            .extract()
-                            .body().asString();
+                String output = given().port(port)
+                        .header("Content-Type", mime())
+                        .multiPart("img", (File) data)
+                        .expect().statusCode(200)
+                        .post(url()).then()
+                        .extract()
+                        .body().asString();
 
-                    JsonObject jsonObject1 = new JsonObject(output);
-                    JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
-                    JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-                    double outpuValue = probabilities.getJsonArray(0).getDouble(0);
-                    assertEquals(7, outpuValue, 1e-1);
+                JsonObject jsonObject1 = new JsonObject(output);
+                JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
+                JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
+                double outpuValue = probabilities.getJsonArray(0).getDouble(0);
+                assertEquals(7, outpuValue, 1e-1);
 
-                    async.complete();
-                } catch (Exception e) {
-                    testContext.fail(e);
-                }
+                async.complete();
             } else {
                 testContext.fail();
             }

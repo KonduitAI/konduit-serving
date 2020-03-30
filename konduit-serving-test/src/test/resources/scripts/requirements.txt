@@ -1,3 +1,4 @@
+certifi
 matplotlib
 scikit-learn
 tensorflow

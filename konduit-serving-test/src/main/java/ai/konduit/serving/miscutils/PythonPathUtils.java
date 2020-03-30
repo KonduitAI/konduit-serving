@@ -22,17 +22,16 @@
 package ai.konduit.serving.miscutils;
 
 import org.apache.commons.io.IOUtils;
+import org.nd4j.linalg.io.ClassPathResource;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 public class PythonPathUtils {
 
-    public static String getPythonPath()
-            throws Exception {
-
-        //To get local Python path run the below command and get the path for python libraries.
-        ProcessBuilder builder = new ProcessBuilder("python", "-c", "\"import sys, os; print(os.pathsep.join([path for path in sys.path if path]))\"");
+    public static String getPythonPath() throws Exception {
+        ProcessBuilder builder = new ProcessBuilder("python",
+                new ClassPathResource("scripts/python_path.py").getFile().getAbsolutePath());
         builder.redirectErrorStream(true);
 
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {

@@ -6,6 +6,7 @@ sys.path.append(work_dir)
 
 import input_data
 import tensorflow.compat.v1 as tf
+
 tf.disable_v2_behavior()
 print("work_dir", work_dir)
 
@@ -52,7 +53,7 @@ output_layer = tf.matmul(layer_3, weights['out']) + biases['out']
 cross_entropy = tf.reduce_mean(
     tf.nn.softmax_cross_entropy_with_logits(
         labels=Y, logits=output_layer
-        ))
+    ))
 train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
 correct_pred = tf.equal(tf.argmax(output_layer, 1), tf.argmax(Y, 1))
@@ -61,20 +62,18 @@ accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
-saver = tf.train.Saver()
+
 # train on mini batches
 for i in range(n_iterations):
     batch_x, batch_y = mnist.train.next_batch(batch_size)
-    sess.run(train_step, feed_dict={
-        X: batch_x, Y: batch_y, keep_prob: dropout
-        })
+    sess.run(train_step, feed_dict={X: batch_x, Y: batch_y, keep_prob: dropout})
 
     # print loss and accuracy (per minibatch)
     if i % 100 == 0:
         minibatch_loss, minibatch_accuracy = sess.run(
             [cross_entropy, accuracy],
             feed_dict={X: batch_x, Y: batch_y, keep_prob: 1.0}
-            )
+        )
         print(
             "Iteration",
             str(i),
@@ -82,9 +81,7 @@ for i in range(n_iterations):
             str(minibatch_loss),
             "\t| Accuracy =",
             str(minibatch_accuracy)
-            )    
-
-print("Model saved as tensosFlow_Image")
+        )
 
 XTestImg = img.reshape(784)
 prediction = sess.run(tf.argmax(output_layer, 1), feed_dict={X: [XTestImg]})
