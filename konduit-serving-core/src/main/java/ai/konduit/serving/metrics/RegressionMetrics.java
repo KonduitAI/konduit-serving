@@ -22,9 +22,11 @@
 
 package ai.konduit.serving.metrics;
 
+import ai.konduit.serving.config.metrics.ColumnDistribution;
 import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.config.metrics.MetricsRenderer;
 import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
+import ai.konduit.serving.util.MetricRenderUtils;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
@@ -52,7 +54,6 @@ public class RegressionMetrics implements MetricsRenderer {
     @Getter
     private List<Gauge> outputStatsGauges;
     private List<StatCounter> statCounters;
-    private Supplier<Double> statCounterSupplier;
     private RegressionMetricsConfig regressionMetricsConfig;
 
     public RegressionMetrics(RegressionMetricsConfig regressionMetricsConfig) {
@@ -70,7 +71,10 @@ public class RegressionMetrics implements MetricsRenderer {
     public void bindTo(MeterRegistry meterRegistry) {
         for(int i = 0; i < regressionMetricsConfig.getRegressionColumnLabels().size(); i++) {
             StatCounter statCounter = new StatCounter();
-            StatCounterSupplier statCounterSupplier = new StatCounterSupplier(statCounter,regressionMetricsConfig.getSampleTypes().get(i));
+            ColumnDistribution columnDistribution = regressionMetricsConfig.getColumnDistributions() != null &&
+                    regressionMetricsConfig.getColumnDistributions().size() == regressionMetricsConfig.getRegressionColumnLabels().size() ?
+                    regressionMetricsConfig.getColumnDistributions().get(i) : null;
+            StatCounterSupplier statCounterSupplier = new StatCounterSupplier(statCounter,regressionMetricsConfig.getSampleTypes().get(i),columnDistribution);
             outputStatsGauges.add(Gauge.builder(regressionMetricsConfig.getRegressionColumnLabels().get(i),statCounterSupplier)
                     .tags(tags)
                     .description("Regression values seen so far for label " + regressionMetricsConfig.getRegressionColumnLabels().get(i))
@@ -86,34 +90,50 @@ public class RegressionMetrics implements MetricsRenderer {
     private static class StatCounterSupplier implements Serializable,Supplier<Number> {
         private StatCounter statCounter;
         private RegressionMetricsConfig.SampleType sampleType;
-
-        StatCounterSupplier(StatCounter statCounter, RegressionMetricsConfig.SampleType sampleType) {
+        private ColumnDistribution columnDistribution;
+        StatCounterSupplier(StatCounter statCounter, RegressionMetricsConfig.SampleType sampleType,ColumnDistribution columnDistribution) {
             this.statCounter = statCounter;
             this.sampleType = sampleType;
+            this.columnDistribution = columnDistribution;
         }
 
         @Override
         public Double get() {
+            Double ret = null;
             switch(sampleType) {
                 case SUM:
-                    return statCounter.getSum();
+                    ret = statCounter.getSum();
+                    break;
                 case MEAN:
-                    return statCounter.getMean();
+                    ret = statCounter.getMean();
+                    break;
                 case MIN:
-                    return statCounter.getMin();
+                    ret = statCounter.getMin();
+                    break;
                 case MAX:
-                    return statCounter.getMax();
+                    ret = statCounter.getMax();
+                    break;
                 case STDDEV_POP:
-                    return statCounter.getStddev(true);
+                    ret = statCounter.getStddev(true);
+                    break;
                 case STDDEV_NOPOP:
-                    return statCounter.getStddev(false);
+                    ret = statCounter.getStddev(false);
+                    break;
                 case VARIANCE_POP:
-                    return statCounter.getVariance(true);
+                    ret = statCounter.getVariance(true);
+                    break;
                 case VARIANCE_NOPOP:
-                    return statCounter.getVariance(false);
+                    ret = statCounter.getVariance(false);
+                    break;
                 default:
                     return 0.0;
             }
+
+            if(columnDistribution != null) {
+                ret = MetricRenderUtils.deNormalizeValue(ret,columnDistribution);
+            }
+
+            return ret;
         }
     }
 

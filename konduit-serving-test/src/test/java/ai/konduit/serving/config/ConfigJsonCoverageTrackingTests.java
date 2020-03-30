@@ -16,6 +16,7 @@
 package ai.konduit.serving.config;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.metrics.ColumnDistribution;
 import ai.konduit.serving.config.metrics.NoOpMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
@@ -233,6 +234,7 @@ public class ConfigJsonCoverageTrackingTests {
                 .build();
         assertEquals(inferenceConfiguration,InferenceConfiguration.fromJson(inferenceConfiguration.toJson()));
 
+        testConfigSerDe(ColumnDistribution.builder().build());
         testConfigSerDe(NoOpMetricsConfig
                 .builder().build());
         testConfigSerDe(ClassificationMetricsConfig

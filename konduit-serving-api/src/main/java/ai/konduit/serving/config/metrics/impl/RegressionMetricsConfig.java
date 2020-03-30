@@ -1,9 +1,11 @@
 package ai.konduit.serving.config.metrics.impl;
 
+import ai.konduit.serving.config.metrics.ColumnDistribution;
 import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.util.ObjectMappers;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.*;
+import org.nd4j.linalg.dataset.api.preprocessor.serializer.NormalizerType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +29,8 @@ public class RegressionMetricsConfig implements MetricsConfig {
     private List<String> regressionColumnLabels = new ArrayList<>(0);
     @Builder.Default
     private List<SampleType> sampleTypes = new ArrayList<>(0);
+    @Builder.Default
+    private List<ColumnDistribution> columnDistributions = new ArrayList<>(0);
 
     @Override
     @SneakyThrows
@@ -38,6 +42,7 @@ public class RegressionMetricsConfig implements MetricsConfig {
     public Map<String, Object> configValues() {
         return Collections.singletonMap("regressionColumnLabels", regressionColumnLabels);
     }
+
 
     public  enum SampleType {
         SUM,

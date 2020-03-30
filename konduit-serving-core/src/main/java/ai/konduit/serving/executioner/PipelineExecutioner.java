@@ -419,11 +419,11 @@ public class PipelineExecutioner implements Closeable {
         Preconditions.checkNotNull(pipeline,"Pipeline must not be null!");
         Record[] records = pipeline.doPipeline(pipelineInput);
         JsonObject writeJson = JsonSerdeUtils.convertRecords(records,outputNames());
-        String write = writeJson.encodePrettily();
         if(ctx != null) {
             ctx.response().putHeader("Content-Type", "application/json");
-            ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
-            ctx.response().end(write);
+            Buffer buffer = writeJson.toBuffer();
+            ctx.response().putHeader("Content-Length", String.valueOf(buffer.length()));
+            ctx.response().end(buffer);
         }
 
         return records;
