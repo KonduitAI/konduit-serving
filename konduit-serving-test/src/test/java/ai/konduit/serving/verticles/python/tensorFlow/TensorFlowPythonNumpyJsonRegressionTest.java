@@ -23,6 +23,7 @@
 package ai.konduit.serving.verticles.python.tensorFlow;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.ExpectedAssertUtil;
 import ai.konduit.serving.miscutils.PythonPathUtils;
@@ -90,6 +91,7 @@ public class TensorFlowPythonNumpyJsonRegressionTest extends BaseMultiNumpyVerti
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
+                .outputDataFormat(Output.DataFormat.JSON)
                 .httpPort(port)
                 .build();
 

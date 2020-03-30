@@ -63,7 +63,6 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
-@Ignore
 public class ScikitLearnPythonImageNd4jFormatTest extends BaseMultiNumpyVerticalTest {
     @Rule
     public TemporaryFolder testDir = new TemporaryFolder();
