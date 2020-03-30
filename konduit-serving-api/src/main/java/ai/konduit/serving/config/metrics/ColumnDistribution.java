@@ -33,6 +33,13 @@ import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
+/**
+ * Column distribution represents statistics and normalizer
+ * information for how to transform or denormalize values
+ * based on distribution information.
+ *
+ * @author Adam Gibson
+ */
 @Data
 @Builder
 @JsonTypeInfo(use = NAME, include = PROPERTY)
