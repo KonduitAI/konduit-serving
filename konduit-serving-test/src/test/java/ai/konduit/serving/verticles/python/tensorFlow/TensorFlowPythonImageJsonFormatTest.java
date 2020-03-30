@@ -161,6 +161,4 @@ public class TensorFlowPythonImageJsonFormatTest extends BaseMultiNumpyVerticalT
         double outpuValue = probabilities.getJsonArray(0).getDouble(0);
         assertEquals(7, outpuValue, 1e-1);
     }
-
-
 }

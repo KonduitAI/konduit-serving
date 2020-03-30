@@ -36,5 +36,4 @@ public abstract class BaseMultiNumpyVerticalTest extends BaseVerticleTest {
         return InferenceVerticle.class;
     }
 
-
 }

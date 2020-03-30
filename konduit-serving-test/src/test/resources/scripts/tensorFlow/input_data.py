@@ -296,6 +296,7 @@ def read_data_sets(train_dir,
   local_file = _maybe_download(train_images_file, train_dir,
                                source_url + train_images_file)
   with gfile.Open(local_file, 'rb') as f:
+    print(f)
     train_images = _extract_images(f)
 
   local_file = _maybe_download(train_labels_file, train_dir,

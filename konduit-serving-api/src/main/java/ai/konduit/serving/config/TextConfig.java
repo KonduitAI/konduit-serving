@@ -16,6 +16,7 @@
 package ai.konduit.serving.config;
 
 import ai.konduit.serving.util.ObjectMappers;
+import io.vertx.core.json.JsonObject;
 
 /**
  * TextConfig is an interface for any configuration in Konduit Serving that should be convertable to/from JSON and YAML
@@ -30,7 +31,7 @@ public interface TextConfig {
     /**
      * Convert a configuration to a JSON string
      *
-     * @return convert this object to a string
+     * @return the json representation of this configuration
      */
     default String toJson() {
         return ObjectMappers.toJson(this);
@@ -45,4 +46,12 @@ public interface TextConfig {
         return ObjectMappers.toYaml(this);
     }
 
+    /**
+     * Convert a configuration to {@link io.vertx.core.json.JsonObject}
+     *
+     * @return the {@link io.vertx.core.json.JsonObject} representation of this configuration
+     */
+    default JsonObject toJsonObject() {
+        return new JsonObject(this.toJson());
+    }
 }
