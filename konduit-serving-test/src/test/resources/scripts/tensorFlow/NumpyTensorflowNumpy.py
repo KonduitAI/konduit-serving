@@ -6,7 +6,6 @@ import numpy as np
 from PIL import Image
 work_dir = os.path.abspath("./src/test/resources/scripts/TensorFlow")
 sys.path.append(work_dir)
-print("Working Directory", work_dir)
 
 import input_data
 
@@ -88,13 +87,6 @@ for i in range(n_iterations):
             )
 saver.save(sess, 'TensorFlow_Image',global_step=1000)
 
-# print("Model saved as TensorFlow_Image")
-
-
-#prediction = sess.run(tf.argmax(output_layer, 1), feed_dict={X: [img]})
 prediction_np = np.array([sess.run(tf.argmax(output_layer, 1), feed_dict={X: [img_np]})])
-# print ("Prediction for test image:", np.squeeze(prediction))
-print("output numpy", prediction_np)
-
 sess.close()
 

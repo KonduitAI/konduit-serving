@@ -1,12 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Mar 23 20:28:22 2020
-
-@author: Shiva
-"""
-
 import numpy as np
-#import tensorflow as tf
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 import matplotlib.pyplot as plt
@@ -14,20 +6,16 @@ import json
 import os, sys
 work_dir = os.path.abspath("./src/test/resources/scripts/TensorFlow")
 sys.path.append(work_dir)
-print("Working Directory", work_dir)
 
 # read file
-#with open('TensorFlowRegressionInput.json', 'r') as myfile:
+
 with open(JsonInput, 'r') as myfile:
     data=myfile.read()
 
 # parse file
 obj = json.loads(data)
-print(obj)
-print("Data: " + str(obj['Data']))
 Xj = obj['Data']
 Yj = obj['Data1']
-print(Xj)
 
 Xt = []
 X = []
@@ -85,17 +73,6 @@ with tf.Session() as session:
 		
 	for i in range(30):
 		_ = session.run(train_op, feed_dict)
-		#print(i, "loss:", loss.eval(feed_dict))
-
-
-	print('Predicting')
 	y_pred_batch = session.run(y_pred, {x : x_batch})
 
 output_var = y_pred_batch.reshape(1,5)
-print(output_var)
-#plt.scatter(x_batch, y_batch)
-#plt.plot(x_batch, y_pred_batch, color='red')
-#plt.xlim(0, 2)
-#plt.ylim(0, 2)
-#plt.savefig('plot.png')
-

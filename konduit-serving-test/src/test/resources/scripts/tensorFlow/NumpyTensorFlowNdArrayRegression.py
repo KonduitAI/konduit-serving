@@ -1,18 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Mar 23 20:28:22 2020
-
-@author: Shiva
-"""
-
 import numpy as np
-#import tensorflow as tf
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 import os, sys
 work_dir = os.path.abspath("./src/test/resources/scripts/TensorFlow")
 sys.path.append(work_dir)
-print("Working Directory", work_dir)
 
 def linear_regression():
 	x = tf.placeholder(tf.float32, shape=(None, ), name='x')
@@ -28,11 +19,6 @@ def linear_regression():
 
 	return x, y, y_pred, loss
 
-
-
-#input_numpy1 = np.array([0.0,0.020202, 0.040404,0.0606061,0.0808081])
-#input_numpy2 = np.array([0.0,0.020202, 0.040404,0.0606061,0.0808081])
-
 x_batch = input_numpy
 y_batch = input_numpy
 x, y, y_pred, loss = linear_regression()
@@ -47,12 +33,6 @@ with tf.Session() as session:
 		
 	for i in range(30):
 		_ = session.run(train_op, feed_dict)
-		#print(i, "loss:", loss.eval(feed_dict))
-
-	print('Predicting')
 	y_pred_batch = session.run(y_pred, {x : x_batch})
 
 output_var = y_pred_batch.reshape(1,5)
-print(output_var)
-
-
