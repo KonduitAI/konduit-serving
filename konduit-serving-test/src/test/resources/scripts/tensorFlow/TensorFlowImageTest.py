@@ -85,8 +85,9 @@ for i in range(n_iterations):
         )
 
 # Not normalizing this so that the predictions are 0s everywhere except for the actual
-# output where it's 1.
+# output where it's 1. This is due to large logical unit values.
 XTestImg = img.reshape(784)
 prediction = sess.run(tf.nn.softmax(output_layer), feed_dict={X: [XTestImg]}).astype(np.double)
-print(prediction)
+print("Predictions: ", prediction)
+
 sess.close()

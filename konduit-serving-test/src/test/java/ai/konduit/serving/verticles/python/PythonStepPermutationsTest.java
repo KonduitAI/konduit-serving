@@ -44,7 +44,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunnerWithParametersFactory;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
-import org.assertj.core.util.Sets;
 import org.datavec.python.PythonType.TypeName;
 import org.junit.After;
 import org.junit.Before;
@@ -53,11 +52,14 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.serde.binary.BinarySerde;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -96,10 +98,12 @@ public class PythonStepPermutationsTest {
     private Vertx vertx;
 
     @Parameterized.Parameters(name = " {index} | {0}: {2} -> {3} | {4} ")
-    public static Set<Object []> input() throws IOException {
-        // TODO: Find a way to add equals and hashcode comparator, to remove duplicate entries, without creating a class.
-        return Sets.newLinkedHashSet(new Object[][] {
+    public static List<Object[]> input() throws IOException {
+        int testIndex = -1;
+
+        Object[][] permutations = new Object[][] {
                 // Tensorflow model types
+                // JSON Output
                 { "Tensorflow", file("data/TensorFlowImageTest.png"),
                         Input.DataFormat.IMAGE,
                         Output.DataFormat.JSON,
@@ -117,6 +121,26 @@ public class PythonStepPermutationsTest {
                         map("prediction", TypeName.NDARRAY.name()),
                         script("scripts/tensorFlow/TensorFlowImageTest.py"),
                         Nd4j.create(new double[] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 }, 1, 10)
+                },
+                // ND4J Output
+                { "Tensorflow", file("data/TensorFlowImageTest.png"),
+                        Input.DataFormat.IMAGE,
+                        Output.DataFormat.ND4J,
+                        PredictionType.RAW,
+                        map("img", TypeName.NDARRAY.name()),
+                        map("prediction", TypeName.NDARRAY.name()),
+                        script("scripts/tensorFlow/TensorFlowImageTest.py"),
+                        Nd4j.create(new double[] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 }, 1, 10)
+                },
+                // Numpy Output
+                { "Tensorflow", file("data/TensorFlowImageTest.png"),
+                        Input.DataFormat.IMAGE,
+                        Output.DataFormat.NUMPY,
+                        PredictionType.RAW,
+                        map("img", TypeName.NDARRAY.name()),
+                        map("prediction", TypeName.NDARRAY.name()),
+                        script("scripts/tensorFlow/TensorFlowImageTest.py"),
+                        Nd4j.create(new double[] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 }, 1, 10)
                 }
 
                 // Keras
@@ -124,7 +148,13 @@ public class PythonStepPermutationsTest {
                 // Deeplearning4j
                 // Pytorch
                 // Custom (Only Python)
-        });
+        };
+
+        if(testIndex < 0) {
+            return Arrays.asList(permutations);
+        } else {
+            return Arrays.asList(new Object[][] { permutations[testIndex] });
+        }
     }
 
     private static File file(String path) throws IOException {
@@ -159,6 +189,14 @@ public class PythonStepPermutationsTest {
         } else {
             throw new IllegalArgumentException("Values to be mapped should have an even number of elements");
         }
+    }
+
+    private static INDArray ndArray(byte[] bytes) {
+        return BinarySerde.toArray(ByteBuffer.wrap(bytes));
+    }
+
+    private static INDArray numpy(byte[] bytes) {
+        return Nd4j.createNpyFromByteArray(bytes);
     }
 
     @Before
@@ -225,6 +263,12 @@ public class PythonStepPermutationsTest {
                                 assertEquals(expected, ndArrayOutput.getNdArray());
                                 break;
                         }
+                        break;
+                    case ND4J:
+                        assertEquals(expected, ndArray(response.asByteArray()));
+                        break;
+                    case NUMPY:
+                        assertEquals(expected, numpy(response.asByteArray()));
                         break;
                 }
 
