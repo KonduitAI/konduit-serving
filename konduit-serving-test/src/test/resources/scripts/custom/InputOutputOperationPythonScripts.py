@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jan 27 12:48:58 2020
-"""
 if type(inputVar) == int:
     output = inputVar * 4
     print("The variable is int ",output)
