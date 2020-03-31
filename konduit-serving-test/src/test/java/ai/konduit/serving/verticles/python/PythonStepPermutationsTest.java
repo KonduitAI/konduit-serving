@@ -47,9 +47,7 @@ import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType.TypeName;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -92,9 +90,7 @@ public class PythonStepPermutationsTest {
     @NonNull Object expected;
     // ----------------------------------------------------------------------------------
 
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
+    private static final String PORT_KEY = "port";
     private Vertx vertx;
 
     @Parameterized.Parameters(name = " {index} | {0}: {2} -> {3} | {4} ")
@@ -104,42 +100,42 @@ public class PythonStepPermutationsTest {
         Object[][] permutations = new Object[][] {
                 // Tensorflow model types
                 // JSON Output
-                { "Tensorflow", file("data/TensorFlowImageTest.png"),
+                { "Tensorflow", file("data/7.png"),
                         Input.DataFormat.IMAGE,
                         Output.DataFormat.JSON,
                         PredictionType.CLASSIFICATION,
                         map("img", TypeName.NDARRAY.name()),
                         map("prediction", TypeName.NDARRAY.name()),
-                        script("scripts/tensorFlow/TensorFlowImageTest.py"),
+                        script("scripts/tensorFlow/image_tensorflow.py"),
                         ClassifierOutput.builder().decisions(new int[] { 7 }).probabilities(new double[][] {{ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 }}).build()
                 },
-                { "Tensorflow", file("data/TensorFlowImageTest.png"),
+                { "Tensorflow", file("data/7.png"),
                         Input.DataFormat.IMAGE,
                         Output.DataFormat.JSON,
                         PredictionType.RAW,
                         map("img", TypeName.NDARRAY.name()),
                         map("prediction", TypeName.NDARRAY.name()),
-                        script("scripts/tensorFlow/TensorFlowImageTest.py"),
+                        script("scripts/tensorFlow/image_tensorflow.py"),
                         Nd4j.create(new double[] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 }, 1, 10)
                 },
                 // ND4J Output
-                { "Tensorflow", file("data/TensorFlowImageTest.png"),
+                { "Tensorflow", file("data/7.png"),
                         Input.DataFormat.IMAGE,
                         Output.DataFormat.ND4J,
                         PredictionType.RAW,
                         map("img", TypeName.NDARRAY.name()),
                         map("prediction", TypeName.NDARRAY.name()),
-                        script("scripts/tensorFlow/TensorFlowImageTest.py"),
+                        script("scripts/tensorFlow/image_tensorflow.py"),
                         Nd4j.create(new double[] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 }, 1, 10)
                 },
                 // Numpy Output
-                { "Tensorflow", file("data/TensorFlowImageTest.png"),
+                { "Tensorflow", file("data/7.png"),
                         Input.DataFormat.IMAGE,
                         Output.DataFormat.NUMPY,
                         PredictionType.RAW,
                         map("img", TypeName.NDARRAY.name()),
                         map("prediction", TypeName.NDARRAY.name()),
-                        script("scripts/tensorFlow/TensorFlowImageTest.py"),
+                        script("scripts/tensorFlow/image_tensorflow.py"),
                         Nd4j.create(new double[] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 }, 1, 10)
                 }
 
@@ -200,83 +196,74 @@ public class PythonStepPermutationsTest {
     }
 
     @Before
-    public void before(TestContext testContext) {
+    public void before(TestContext testContext) throws Exception {
         this.vertx = Vertx.vertx(new VertxOptions()
                 .setMaxEventLoopExecuteTime(60)
                 .setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS)
         ).exceptionHandler(testContext::fail);
+
+        System.setProperty(JAVACPP_PYTHON_APPEND_TYPE, AFTER.name());
+
+        testContext.put(PORT_KEY, PortUtils.getAvailablePort());
+
+        List<PipelineStep> steps = new ArrayList<>();
+
+        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+                .servingConfig(ServingConfig.builder()
+                        .outputDataFormat(outputDataFormat)
+                        .httpPort(testContext.get(PORT_KEY))
+                        .build())
+                .steps(Collections.singletonList(
+                        new PythonStep(PythonConfig.builder()
+                                .pythonCode(script)
+                                .pythonPath(PythonPathUtils.getPythonPath())
+                                .pythonInputs(inputs)
+                                .pythonOutputs(outputs)
+                                .build())
+                        )
+                ).build();
+
+        vertx.deployVerticle(InferenceVerticle.class,
+                new DeploymentOptions().setConfig(inferenceConfiguration.toJsonObject()),
+                testContext.asyncAssertSuccess());
     }
 
     @Test(timeout = 60000)
     public void test(TestContext testContext) throws Exception {
-        System.setProperty(JAVACPP_PYTHON_APPEND_TYPE, AFTER.name());
+        Response response = given().port(testContext.get(PORT_KEY))
+                .header("Content-Type", mime())
+                .multiPart("default", (File) data)
+                .expect().statusCode(200)
+                .post(url()).then()
+                .extract()
+                .response();
 
-        int port = PortUtils.getAvailablePort();
+        switch(outputDataFormat) {
+            case JSON:
+                String output = new JsonObject(String.valueOf(response.asString())).getJsonObject("default").toString();
 
-        List<PipelineStep> steps = new ArrayList<>();
+                switch (predictionType) {
+                    case CLASSIFICATION:
+                        ClassifierOutput classifierOutput = ObjectMappers.fromJson(output, ClassifierOutput.class);
+                        ClassifierOutput expectedClassifierOutput = (ClassifierOutput) expected;
 
-        if(inputDataFormat.equals(Input.DataFormat.IMAGE)) {
-            steps.add(ImageLoadingStep.builder()
-                    .inputNames(new ArrayList<>(inputs.keySet()))
-                    .build());
-        }
-
-        steps.add(new PythonStep(PythonConfig.builder()
-                .pythonCode(script)
-                .pythonPath(PythonPathUtils.getPythonPath())
-                .pythonInputs(inputs)
-                .pythonOutputs(outputs)
-                .build()));
-
-        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
-                .servingConfig(ServingConfig.builder().outputDataFormat(outputDataFormat).httpPort(port).build())
-                .steps(steps)
-                .build();
-
-        Async async = testContext.async();
-
-        vertx.deployVerticle(InferenceVerticle.class, new DeploymentOptions().setConfig(inferenceConfiguration.toJsonObject()), handler -> {
-            if(handler.succeeded()) {
-                Response response = given().port(port)
-                        .header("Content-Type", mime())
-                        .multiPart("img", (File) data)
-                        .expect().statusCode(200)
-                        .post(url()).then()
-                        .extract()
-                        .response();
-
-                switch(outputDataFormat) {
-                    case JSON:
-                        String output = new JsonObject(String.valueOf(response.asString())).getJsonObject("default").toString();
-
-                        switch (predictionType) {
-                            case CLASSIFICATION:
-                                ClassifierOutput classifierOutput = ObjectMappers.fromJson(output, ClassifierOutput.class);
-                                ClassifierOutput expectedClassifierOutput = (ClassifierOutput) expected;
-
-                                assertArrayEquals(expectedClassifierOutput.getDecisions(), classifierOutput.getDecisions());
-                                assertArrayEquals(expectedClassifierOutput.getProbabilities(), classifierOutput.getProbabilities());
-                                break;
-                            case RAW:
-                                NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(output, NDArrayOutput.class);
-
-                                assertEquals(expected, ndArrayOutput.getNdArray());
-                                break;
-                        }
+                        assertArrayEquals(expectedClassifierOutput.getDecisions(), classifierOutput.getDecisions());
+                        assertArrayEquals(expectedClassifierOutput.getProbabilities(), classifierOutput.getProbabilities());
                         break;
-                    case ND4J:
-                        assertEquals(expected, ndArray(response.asByteArray()));
-                        break;
-                    case NUMPY:
-                        assertEquals(expected, numpy(response.asByteArray()));
+                    case RAW:
+                        NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(output, NDArrayOutput.class);
+
+                        assertEquals(expected, ndArrayOutput.getNdArray());
                         break;
                 }
-
-                async.complete();
-            } else {
-                testContext.fail();
-            }
-        });
+                break;
+            case ND4J:
+                assertEquals(expected, ndArray(response.asByteArray()));
+                break;
+            case NUMPY:
+                assertEquals(expected, numpy(response.asByteArray()));
+                break;
+        }
     }
 
     @After

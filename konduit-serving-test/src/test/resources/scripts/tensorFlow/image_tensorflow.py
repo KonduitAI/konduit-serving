@@ -1,6 +1,9 @@
 import os
 import numpy as np
 
+import tensorflow.python.util.deprecation as deprecation
+deprecation._PRINT_DEPRECATION_WARNINGS = False
+
 work_dir = os.path.abspath("./src/test/resources/scripts/TensorFlow")
 print("current_path", work_dir)
 sys.path.append(work_dir)
