@@ -58,6 +58,4 @@ public class VertxBufferImageInputAdapter extends BaseImageInputAdapter<Buffer> 
 
         return new NDArrayWritable(imageLoader.asMatrix(image));
     }
-
-
 }

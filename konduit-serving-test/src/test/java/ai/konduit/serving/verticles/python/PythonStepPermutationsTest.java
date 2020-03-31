@@ -27,8 +27,6 @@ import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.output.types.ClassifierOutput;
 import ai.konduit.serving.output.types.NDArrayOutput;
-import ai.konduit.serving.pipeline.PipelineStep;
-import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.util.PortUtils;
@@ -38,7 +36,6 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunnerWithParametersFactory;
 import lombok.NonNull;
@@ -91,6 +88,10 @@ public class PythonStepPermutationsTest {
     // ----------------------------------------------------------------------------------
 
     private static final String PORT_KEY = "port";
+    static {
+        System.setProperty(JAVACPP_PYTHON_APPEND_TYPE, AFTER.name());
+    }
+
     private Vertx vertx;
 
     @Parameterized.Parameters(name = " {index} | {0}: {2} -> {3} | {4} ")
@@ -202,11 +203,7 @@ public class PythonStepPermutationsTest {
                 .setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS)
         ).exceptionHandler(testContext::fail);
 
-        System.setProperty(JAVACPP_PYTHON_APPEND_TYPE, AFTER.name());
-
         testContext.put(PORT_KEY, PortUtils.getAvailablePort());
-
-        List<PipelineStep> steps = new ArrayList<>();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(ServingConfig.builder()
@@ -229,7 +226,7 @@ public class PythonStepPermutationsTest {
     }
 
     @Test(timeout = 60000)
-    public void test(TestContext testContext) throws Exception {
+    public void test(TestContext testContext) {
         Response response = given().port(testContext.get(PORT_KEY))
                 .header("Content-Type", mime())
                 .multiPart("default", (File) data)
