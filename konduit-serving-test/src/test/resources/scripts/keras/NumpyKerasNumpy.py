@@ -13,9 +13,7 @@ class KerasTest:
         arr = self.model.predict(inputarray)
         return arr
 
-#my_test = np.array(([100.677, 55.432, 2.569, 111.456], [1.876, 0.4567, 5.1234, 10.7654]))
 my_test = inputValue
 objkeras = KerasTest()
 arr = objkeras.test(my_test)
 output_np = np.array(arr)
-#print(arr)

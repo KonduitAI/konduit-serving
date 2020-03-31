@@ -1,4 +1,3 @@
-# Import required libraries
 import os
 import pandas as pd
 import numpy as np
@@ -13,7 +12,6 @@ import keras.backend.tensorflow_backend as tb
 tb._SYMBOLIC_SCOPE.value = True
 
 work_dir = os.path.abspath(".")
-#df = pd.read_csv('housing.csv')
 df = pd.read_csv(os.path.join(work_dir,'src\\test\\resources\\scripts\\keras\\housing.csv'))
 print(df.shape)
 df.describe()
@@ -41,9 +39,7 @@ model.compile(loss= "mean_squared_error" , optimizer="adam", metrics=["mean_squa
 model.fit(X_train, y_train, epochs=20)
 
 pred_train= model.predict(X_train)
-print(np.sqrt(mean_squared_error(y_train,pred_train)))
 My_test = inputData
-#My_test = np.array([[0.00632,18,2.31,0,0.538,6.575,65.2,4.09,1,296,15.3,4.98]])
 pred= model.predict(My_test)
-#print(pred)
+
 
