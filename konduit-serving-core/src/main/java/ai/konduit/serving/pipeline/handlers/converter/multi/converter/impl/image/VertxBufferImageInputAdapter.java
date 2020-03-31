@@ -26,6 +26,7 @@ import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.util.image.NativeImageLoader;
 import ai.konduit.serving.verticles.VerticleConstants;
 import io.vertx.core.buffer.Buffer;
+import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.image.data.ImageWritable;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -55,7 +56,7 @@ public class VertxBufferImageInputAdapter extends BaseImageInputAdapter<Buffer> 
             contextData.put(VerticleConstants.ORIGINAL_IMAGE_WIDTH, image.getWidth());
         }
 
-        return image;
+        return new NDArrayWritable(imageLoader.asMatrix(image));
     }
 
 

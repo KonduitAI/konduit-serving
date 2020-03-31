@@ -86,7 +86,7 @@ public class TensorFlowPythonNd4jNumpyFormatTest extends BaseMultiNumpyVerticalT
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        String pythonCodePath = new ClassPathResource("scripts/tensorflow/TensorFlowImageTest.py").getFile().getAbsolutePath();
+        String pythonCodePath = new ClassPathResource("scripts/tensorflow/image_tensorflow.py").getFile().getAbsolutePath();
 
         PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCodePath(pythonCodePath)
