@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 work_dir = os.path.abspath("./src/test/resources/scripts/TensorFlow")
 print("current_path", work_dir)
@@ -83,7 +84,9 @@ for i in range(n_iterations):
             str(minibatch_accuracy)
         )
 
+# Not normalizing this so that the predictions are 0s everywhere except for the actual
+# output where it's 1.
 XTestImg = img.reshape(784)
-prediction = sess.run(tf.argmax(output_layer, 1), feed_dict={X: [XTestImg]})
-
+prediction = sess.run(tf.nn.softmax(output_layer), feed_dict={X: [XTestImg]}).astype(np.double)
+print(prediction)
 sess.close()

@@ -25,15 +25,18 @@ import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.miscutils.PythonPathUtils;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.output.types.ClassifierOutput;
+import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.util.PortUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
+import com.jayway.restassured.response.Response;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -50,6 +53,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 
 import java.io.File;
@@ -65,6 +69,7 @@ import static javax.swing.RowFilter.ComparisonType.AFTER;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.apache.http.entity.ContentType.MULTIPART_FORM_DATA;
 import static org.datavec.python.PythonExecutioner.JAVACPP_PYTHON_APPEND_TYPE;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -82,6 +87,7 @@ public class PythonStepPermutationsTest {
     @NonNull Map<String, String> inputs;
     @NonNull Map<String, String> outputs;
     @NonNull String script;
+    @NonNull Object expected;
     // ----------------------------------------------------------------------------------
 
     @Rule
@@ -91,6 +97,7 @@ public class PythonStepPermutationsTest {
 
     @Parameterized.Parameters(name = " {index} | {0}: {2} -> {3} | {4} ")
     public static Set<Object []> input() throws IOException {
+        // TODO: Find a way to add equals and hashcode comparator, to remove duplicate entries, without creating a class.
         return Sets.newLinkedHashSet(new Object[][] {
                 // Tensorflow model types
                 { "Tensorflow", file("data/TensorFlowImageTest.png"),
@@ -99,7 +106,17 @@ public class PythonStepPermutationsTest {
                         PredictionType.CLASSIFICATION,
                         map("img", TypeName.NDARRAY.name()),
                         map("prediction", TypeName.NDARRAY.name()),
-                        script("scripts/tensorFlow/TensorFlowImageTest.py")
+                        script("scripts/tensorFlow/TensorFlowImageTest.py"),
+                        ClassifierOutput.builder().decisions(new int[] { 7 }).probabilities(new double[][] {{ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 }}).build()
+                },
+                { "Tensorflow", file("data/TensorFlowImageTest.png"),
+                        Input.DataFormat.IMAGE,
+                        Output.DataFormat.JSON,
+                        PredictionType.RAW,
+                        map("img", TypeName.NDARRAY.name()),
+                        map("prediction", TypeName.NDARRAY.name()),
+                        script("scripts/tensorFlow/TensorFlowImageTest.py"),
+                        Nd4j.create(new double[] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 }, 1, 10)
                 }
 
                 // Keras
@@ -149,7 +166,7 @@ public class PythonStepPermutationsTest {
         this.vertx = Vertx.vertx(new VertxOptions()
                 .setMaxEventLoopExecuteTime(60)
                 .setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS)
-        ).exceptionHandler(throwable -> testContext.fail(throwable));
+        ).exceptionHandler(testContext::fail);
     }
 
     @Test(timeout = 60000)
@@ -182,19 +199,34 @@ public class PythonStepPermutationsTest {
 
         vertx.deployVerticle(InferenceVerticle.class, new DeploymentOptions().setConfig(inferenceConfiguration.toJsonObject()), handler -> {
             if(handler.succeeded()) {
-                String output = given().port(port)
+                Response response = given().port(port)
                         .header("Content-Type", mime())
                         .multiPart("img", (File) data)
                         .expect().statusCode(200)
                         .post(url()).then()
                         .extract()
-                        .body().asString();
+                        .response();
 
-                JsonObject jsonObject1 = new JsonObject(output);
-                JsonObject ndarraySerde = jsonObject1.getJsonObject("default");
-                JsonArray probabilities = ndarraySerde.getJsonArray("probabilities");
-                double outpuValue = probabilities.getJsonArray(0).getDouble(0);
-                assertEquals(7, outpuValue, 1e-1);
+                switch(outputDataFormat) {
+                    case JSON:
+                        String output = new JsonObject(String.valueOf(response.asString())).getJsonObject("default").toString();
+
+                        switch (predictionType) {
+                            case CLASSIFICATION:
+                                ClassifierOutput classifierOutput = ObjectMappers.fromJson(output, ClassifierOutput.class);
+                                ClassifierOutput expectedClassifierOutput = (ClassifierOutput) expected;
+
+                                assertArrayEquals(expectedClassifierOutput.getDecisions(), classifierOutput.getDecisions());
+                                assertArrayEquals(expectedClassifierOutput.getProbabilities(), classifierOutput.getProbabilities());
+                                break;
+                            case RAW:
+                                NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(output, NDArrayOutput.class);
+
+                                assertEquals(expected, ndArrayOutput.getNdArray());
+                                break;
+                        }
+                        break;
+                }
 
                 async.complete();
             } else {
