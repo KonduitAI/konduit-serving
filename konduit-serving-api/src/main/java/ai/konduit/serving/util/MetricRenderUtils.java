@@ -22,6 +22,7 @@
 package ai.konduit.serving.util;
 
 import ai.konduit.serving.config.metrics.ColumnDistribution;
+import org.nd4j.base.Preconditions;
 
 /**
  * Util class for anything related to {@link ai.konduit.serving.config.metrics.MetricsRenderer}
@@ -58,6 +59,8 @@ public class MetricRenderUtils {
      * @return the de normalized value
      */
     public static double deNormalizeValue(double input, ColumnDistribution columnDistribution) {
+        Preconditions.checkNotNull(columnDistribution,"Column distribution must not be null!");
+        Preconditions.checkNotNull(columnDistribution.getNormalizerType(),"Normalizer type is null!");
         switch(columnDistribution.getNormalizerType()) {
             case MIN_MAX:
                 return  (input * columnDistribution.getMax()) + columnDistribution.getMin();
