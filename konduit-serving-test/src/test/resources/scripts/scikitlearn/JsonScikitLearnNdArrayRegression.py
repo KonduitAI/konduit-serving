@@ -11,7 +11,6 @@ with open('Diabetics.json', 'r') as myfile:
 obj = json.loads(data)
 Xj = obj['Data']
 Yj = obj['Data1']
-print(Xj)
 
 Xr = np.array([[Xj[0]], [Xj[1]],[Xj[2]],[Xj[3]],[Xj[4]],[Xj[5]],[Xj[6]],[Xj[7]],[Xj[8]],[Xj[9]],[Xj[0]], [Xj[1]],[Xj[2]],[Xj[3]],[Xj[4]],[Xj[5]],[Xj[6]],[Xj[7]],[Xj[8]],[Xj[9]]])
 
