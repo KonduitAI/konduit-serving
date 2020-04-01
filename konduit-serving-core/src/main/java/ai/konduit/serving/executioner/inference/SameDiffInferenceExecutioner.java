@@ -24,7 +24,7 @@ package ai.konduit.serving.executioner.inference;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.model.loader.ModelLoader;
-
+import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.autodiff.execution.NativeGraphExecutioner;
@@ -37,6 +37,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.api.ops.executioner.OpExecutioner;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -55,11 +56,13 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
     private NativeGraphExecutioner nativeGraphExecutioner;
     private static ExecutorConfiguration configuration = ExecutorConfiguration.builder()
             .executionMode(ExecutionMode.SEQUENTIAL)
+            .outputMode(OutputMode.EXPLICIT)
             .profilingMode(OpExecutioner.ProfilingMode.DISABLED)
             .gatherTimings(true)
-            .outputMode(OutputMode.IMPLICIT)
             .build();
 
+
+    private List<String> inputs,outputs;
     private SameDiff model;
 
     @Override
@@ -81,24 +84,31 @@ public class SameDiffInferenceExecutioner implements InferenceExecutioner<ModelL
         nativeGraphExecutioner = new NativeGraphExecutioner();
         this.modelLoader = model;
         this.model = model();
-        log.info("Number of inputs is" + this.model.inputs().size());
+        SameDiffModelLoader sameDiffModelLoader = (SameDiffModelLoader) model;
+        this.inputs = sameDiffModelLoader.getInputNames();
+        this.outputs = sameDiffModelLoader.getOutputNames();
+        log.info("Inference execution loaded with inputs " + inputs + " and outputs " + outputs);
     }
 
     @Override
     public INDArray[] execute(INDArray[] input) {
         Preconditions.checkNotNull(input,"Inputs must not be null!");
-        Preconditions.checkState(input.length == this.model.inputs().size(),String.format("Number of inputs %d did not equal number of model inputs %d!",input.length,model.inputs().size()));
         synchronized (this.model) {
             Map<String, INDArray> inputs = new LinkedHashMap(input.length);
 
-            for (int i = 0; i < this.model.inputs().size(); i++) {
+            for (int i = 0; i < input.length; i++) {
                 inputs.put(this.model.inputs().get(i), input[i]);
                 this.model.associateArrayWithVariable(input[i], this.model.inputs().get(i));
             }
 
+            model.output(inputs,outputs);
+            Map<String, INDArray> ret =  model.output(inputs,outputs);
+            INDArray[] returnOutput = new INDArray[outputs.size()];
+            for(int i = 0; i < returnOutput.length; i++) {
+                returnOutput[i] = ret.get(outputs.get(i));
+            }
 
-            INDArray[] ret = nativeGraphExecutioner.executeGraph(model, configuration);
-            return ret;
+            return returnOutput;
         }
     }
 

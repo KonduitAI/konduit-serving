@@ -1,7 +1,7 @@
 import konduit
-from konduit.load import server_from_file, client_from_file
 import numpy as np
 import pytest
+from konduit.load import server_from_file, client_from_file
 
 
 @pytest.mark.integration

@@ -1,5 +1,4 @@
 import json
-
 import pydatavec
 import pytest
 from konduit import *
