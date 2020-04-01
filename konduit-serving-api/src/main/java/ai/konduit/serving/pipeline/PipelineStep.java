@@ -35,6 +35,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = ImageLoadingStep.class, name = "ImageLoadingStep"),
         @JsonSubTypes.Type(value = JsonExpanderTransformStep.class, name = "JsonExpanderTransformStep"),
         @JsonSubTypes.Type(value = ArrayConcatenationStep.class, name = "ArrayConcatenationStep"),
+        @JsonSubTypes.Type(value = WordTokenizerStep.class, name = "WordTokenizerStep"),
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 public interface PipelineStep<T extends PipelineStep> extends Serializable, TextConfig {

@@ -48,6 +48,7 @@ import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
+import ai.konduit.serving.pipeline.step.WordTokenizerStep;
 import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
@@ -687,7 +688,7 @@ public class PipelineRouteDefiner {
         if (inputSchema == null && inputRequired) {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
                 if (pipelineStep instanceof ModelStep || pipelineStep instanceof PythonStep || pipelineStep
-                        instanceof TransformProcessStep) {
+                        instanceof TransformProcessStep || pipelineStep instanceof WordTokenizerStep) {
                     inputSchema = pipelineStep.inputSchemaForName("default");
                 }
             }
@@ -696,7 +697,7 @@ public class PipelineRouteDefiner {
         if (outputSchema == null) {
             for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
                 if (pipelineStep instanceof ModelStep || pipelineStep instanceof PythonStep || pipelineStep
-                        instanceof TransformProcessStep) {
+                        instanceof TransformProcessStep || pipelineStep instanceof WordTokenizerStep) {
                     outputSchema = pipelineStep.outputSchemaForName("default");
                 }
             }
