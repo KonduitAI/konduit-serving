@@ -18,6 +18,7 @@
 package ai.konduit.serving.util;
 
 import ai.konduit.serving.config.SchemaType;
+import ai.konduit.serving.output.types.NDArrayOutput;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
@@ -28,6 +29,7 @@ import org.datavec.api.writable.Writable;
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.serde.json.JsonMappers;
 
 import java.time.Instant;
 import java.util.*;
@@ -54,7 +56,7 @@ public class JsonSerdeUtilsTest {
 
 
     @Test
-    public void testDeSerializeSchemaValues() {
+    public void testDeSerializeSchemaValues() throws Exception {
         // Setup
         final JsonObject schemaValues = new JsonObject();
         SchemaType[] values = SchemaType.values();
@@ -64,8 +66,10 @@ public class JsonSerdeUtilsTest {
             schemaTypeMap.put(value.name(), value);
             switch (value) {
                 case NDArray:
-                    deSerializedAssertion.put(value.name(), Nd4j.scalar(1.0));
-                    schemaValues.put(value.name(), Nd4j.toNpyByteArray(Nd4j.scalar(1.0)));
+                    deSerializedAssertion.put(value.name(), Nd4j.scalar(1.0f));
+                    String write = JsonMappers.getMapper().writeValueAsString(NDArrayOutput.builder()
+                            .ndArray(Nd4j.scalar(1.0f)).batchId("").build());
+                    schemaValues.put(value.name(), new JsonObject(write));
                     break;
                 case Boolean:
                     deSerializedAssertion.put(value.name(), true);
@@ -139,7 +143,7 @@ public class JsonSerdeUtilsTest {
     }
 
     @Test
-    public void testCreateRecordFromJson() {
+    public void testCreateRecordFromJson() throws Exception {
         // Setup
         JsonObject schemaValues = new JsonObject();
         JsonObject jsonSchema = new JsonObject();
@@ -154,7 +158,8 @@ public class JsonSerdeUtilsTest {
             switch (value) {
                 case NDArray:
                     fieldInfo.put("shape",new JsonArray().add(1).add(1));
-                    schemaValues.put(value.name(), Nd4j.toNpyByteArray(Nd4j.scalar(1.0)));
+                    String write = JsonMappers.getMapper().writeValueAsString(NDArrayOutput.builder().ndArray(Nd4j.scalar(1.0)).batchId("").build());
+                    schemaValues.put(value.name(), new JsonObject(write));
                     break;
                 case Boolean:
                     schemaValues.put(value.name(), true);

@@ -1,7 +1,7 @@
 /*
  *
  *  * ******************************************************************************
- *  *  * Copyright (c) 2015-2019 Skymind Inc.
+ *  *
  *  *  * Copyright (c) 2019 Konduit AI.
  *  *  *
  *  *  * This program and the accompanying materials are made available under the
@@ -19,26 +19,35 @@
  *
  *
  */
+package ai.konduit.serving.config.metrics;
 
-package ai.konduit.serving.metrics;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.MeterBinder;
 
 /**
- * Metric types for prometheus
+ * An updatedable {@link MeterBinder} that allows
+ * updates of metrics beyond {@link MeterBinder#bindTo(MeterRegistry)}
+ *
+ * This allows encapsulation of logic for doing things like
+ * calling {@link Counter#increment()}
  *
  * @author Adam Gibson
  */
-public enum MetricType {
-    CLASS_LOADER,
-    JVM_MEMORY,
-    JVM_GC,
-    PROCESSOR,
-    JVM_THREAD,
-    LOGGING_METRICS,
-    NATIVE,
-    GPU,
-    //note these are machine learning metrics, not system metrics
-    //these are meant to analyze the output coming form the neural network when running
-    //in production
-    CLASSIFICATION,
-    REGRESSION
+public interface MetricsRenderer extends MeterBinder  {
+
+
+    /**
+     * The configuration for the metrics
+     * @return
+     */
+    MetricsConfig config();
+
+    /**
+     * Updates the metrics based on given arguments.
+     * @param args
+     */
+    void updateMetrics(Object...args);
+
+
 }

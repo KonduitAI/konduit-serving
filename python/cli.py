@@ -1,7 +1,6 @@
 import click
 import logging
 import numpy as np
-import sys
 import os as opos
 import subprocess
 

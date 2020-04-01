@@ -23,7 +23,6 @@
 package ai.konduit.serving.executioner;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
@@ -88,8 +87,7 @@ import java.util.zip.ZipOutputStream;
 @Slf4j
 public class PipelineExecutioner implements Closeable {
 
-    @Getter
-    protected MultiOutputAdapter multiOutputAdapter;
+
     protected List<String> inputNames, outputNames;
     protected Map<String, TensorDataType> inputDataTypes, outputDataTypes;
     @Getter
@@ -121,7 +119,7 @@ public class PipelineExecutioner implements Closeable {
      * Create a zip file buffer based on the given adapted output
      *
      * @param adapt              the adapted output, a map from String to {@link BatchOutput}
-     *                           from {@link RawMultiOutputAdapter}
+     * from {@link RawMultiOutputAdapter}
      * @param responseOutputType the response type
      * @return the zip file with each output's name being an entry in the zip file.
      */
@@ -220,41 +218,19 @@ public class PipelineExecutioner implements Closeable {
         }
     }
 
-    private void validateInputsAndOutputs(Input.DataFormat inputDataformat,
-                                          PredictionType predictionType) {
-        //configure validation for input and output
-        if(!config.getSteps().isEmpty()) {
-            PipelineStep finalPipelineStep = config.getSteps().get(config.getSteps().size() - 1);
-            PipelineStep startingPipelineStep = config.getSteps().get(0);
-
-            Preconditions.checkState(startingPipelineStep.isValidInputType(inputDataformat),
-                    "Configured input type is invalid for initial pipeline step of type "
-                            + startingPipelineStep.getClass().getName() + " expected input types were "
-                            + Arrays.toString(startingPipelineStep.validInputTypes())
-                            + ". If this list is null or empty, then any type is considered valid.");
-            Preconditions.checkState(finalPipelineStep.isValidOutputType(config.getServingConfig().getOutputDataFormat()),
-                    "Configured output type is invalid for final pipeline step of type "
-                            + finalPipelineStep.getClass().getName() + " expected output types were "
-                            + Arrays.toString(finalPipelineStep.validInputTypes())
-                            + ". If this list is null or empty, then any type is considered valid.");
-            Preconditions.checkState(finalPipelineStep.isValidPredictionType(predictionType),
-                    "Invalid prediction type configured for final pipeline step of type "
-                            + finalPipelineStep.getClass().getName() + " expected types were "
-                            + Arrays.toString(finalPipelineStep.validPredictionTypes())
-                            + ". If this list is null or empty, then any type is considered valid.");
-        }
-    }
-
     /**
      * Init the pipeline executioner.
      */
-    public void init(Input.DataFormat inputDataFormat, PredictionType predictionType) {
-        ServingConfig servingConfig = config.getServingConfig();
+    public void init() {
+        if(this.pipeline != null) {
+            log.debug("Pipeline already enabled.");
+            return;
+        }
+
         if(config.getSteps().isEmpty()) {
             log.warn("No pipeline steps configured.");
         }
 
-        validateInputsAndOutputs(inputDataFormat, predictionType);
 
         this.pipeline = Pipeline.getPipeline(config.getSteps());
 
@@ -288,15 +264,7 @@ public class PipelineExecutioner implements Closeable {
 
         initDataTypes();
 
-        try {
-            if (servingConfig.getOutputDataFormat() == Output.DataFormat.JSON) {
-                multiOutputAdapter = outputAdapterFor(predictionType, objectDetectionConfig);
-            } else {
-                log.info("Skipping initialization of multi input adapter due to binary output.");
-            }
-        } catch (Exception e) {
-            log.error("Error initializing output adapter.", e);
-        }
+
 
         if (modelConfig != null && modelConfig.getModelConfigType().getModelType() != ModelConfig.ModelType.PMML
                 && (inputNames == null || inputNames.isEmpty())) {
@@ -371,9 +339,9 @@ public class PipelineExecutioner implements Closeable {
      * @param outputDataFormat   the {@link Output.DataFormat} for the output
      * @param inputs             input data as array of {@link Record}
      */
-    public void doInference(RoutingContext ctx,
-                            Output.DataFormat outputDataFormat,
-                            Record[] inputs) {
+    public INDArray[] doInference(RoutingContext ctx,
+                                  Output.DataFormat outputDataFormat,
+                                  Record[] inputs) {
         if (inputs == null || inputs.length < 1 || inputs[0] == null) {
             throw new IllegalStateException("No inputs specified!");
         }
@@ -382,6 +350,13 @@ public class PipelineExecutioner implements Closeable {
         long startTime = System.nanoTime();
         INDArray[] arrays = pipeline.doPipelineArrays(inputs);
         logTimings(startTime);
+
+        MultiOutputAdapter multiOutputAdapter = null;
+        try {
+            multiOutputAdapter = outputDataFormat == Output.DataFormat.JSON ? outputAdapterFor(PredictionType.RAW,objectDetectionConfig) : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (multiOutputAdapter != null) {
             log.debug("Performing adaption.");
@@ -397,7 +372,8 @@ public class PipelineExecutioner implements Closeable {
                     if (array.closeable())
                         array.close();
                 }
-                return;
+
+                return arrays;
             }
             timedResponse(ctx, outputDataFormat, batchId, arrays, batchOutputMap);
 
@@ -412,6 +388,8 @@ public class PipelineExecutioner implements Closeable {
 
             timedResponse(ctx, outputDataFormat, batchId, arrays, namedBatchOutput);
         }
+
+        return arrays;
     }
 
 
@@ -423,7 +401,7 @@ public class PipelineExecutioner implements Closeable {
      * @param jsonBody the input
      * @param ctx the context
      */
-    public void doJsonInference(JsonObject jsonBody,RoutingContext ctx) {
+    public Record[] doJsonInference(JsonObject jsonBody,RoutingContext ctx) {
         JsonObject schema = jsonBody.getJsonObject("schema");
         JsonObject values = jsonBody.getJsonObject("values");
         Preconditions.checkState(schema.fieldNames().equals(values.fieldNames()),"Schema and Values must be the same field names!");
@@ -441,13 +419,14 @@ public class PipelineExecutioner implements Closeable {
         Preconditions.checkNotNull(pipeline,"Pipeline must not be null!");
         Record[] records = pipeline.doPipeline(pipelineInput);
         JsonObject writeJson = JsonSerdeUtils.convertRecords(records,outputNames());
-        String write = writeJson.encodePrettily();
         if(ctx != null) {
             ctx.response().putHeader("Content-Type", "application/json");
-            ctx.response().putHeader("Content-Length", String.valueOf(write.getBytes().length));
-            ctx.response().end(write);
+            Buffer buffer = writeJson.toBuffer();
+            ctx.response().putHeader("Content-Length", String.valueOf(buffer.length()));
+            ctx.response().end(buffer);
         }
 
+        return records;
     }
 
 
@@ -464,13 +443,13 @@ public class PipelineExecutioner implements Closeable {
      * @param outputSchema      the output schema
      * @param outputDataFormat  the output data type for the pipeline
      */
-    public void doInference(RoutingContext ctx,
-                            PredictionType predictionType,
-                            Object input,
-                            Schema conversionSchema,
-                            TransformProcess transformProcess,
-                            Schema outputSchema,
-                            Output.DataFormat outputDataFormat) {
+    public Record[] doInference(RoutingContext ctx,
+                                PredictionType predictionType,
+                                Object input,
+                                Schema conversionSchema,
+                                TransformProcess transformProcess,
+                                Schema outputSchema,
+                                Output.DataFormat outputDataFormat) {
 
         Record[] pipelineInput = PipelineExecutioner.createInput(input, transformProcess, conversionSchema);
         Record[] records = pipeline.doPipeline(pipelineInput);
@@ -570,6 +549,8 @@ public class PipelineExecutioner implements Closeable {
             ArrowWritableRecordBatch  convert =  ArrowUtils.getBatchFromRecord(arrowRecord);
             writeArrowResponse(ctx, outputSchema, convert);
         }
+
+        return records;
     }
 
     /**
