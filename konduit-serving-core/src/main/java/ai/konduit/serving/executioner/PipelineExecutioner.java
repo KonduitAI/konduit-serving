@@ -454,7 +454,7 @@ public class PipelineExecutioner implements Closeable {
     /**
      * Perform inference. Two endpoints in the pipeline route definer use this inference runner, both produce
      * JSON output, but take either JSON or multi-part input. See
-     * {@link ai.konduit.serving.configprovider.PipelineRouteDefiner} for more information.
+     * {@link ai.konduit.serving.routers.PipelineRouteDefiner} for more information.
      *
      * @param ctx               the routing context
      * @param predictionType    the prediction type, determines the output adapter used after prediction

@@ -20,7 +20,7 @@
  *
  */
 
-package ai.konduit.serving.configprovider;
+package ai.konduit.serving.routers;
 
 
 import ai.konduit.serving.InferenceConfiguration;

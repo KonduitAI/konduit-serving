@@ -23,7 +23,6 @@ import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.util.SchemaTypeUtils;
-import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -110,9 +109,9 @@ public class TestUtils {
         }
     }
 
-    public static JsonObject getConfig(TemporaryFolder folder) throws Exception {
+    public static InferenceConfiguration getConfig(TemporaryFolder trainDir) throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
-        File modelSave = folder.newFile("model.zip");
+        File modelSave = trainDir.newFile("model.zip");
         ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
 
         Schema.Builder schemaBuilder = new Schema.Builder();
@@ -148,11 +147,9 @@ public class TestUtils {
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .build();
 
-        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+        return InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .step(modelPipelineStep)
                 .build();
-
-        return new JsonObject(inferenceConfiguration.toJson());
     }
 }

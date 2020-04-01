@@ -22,9 +22,11 @@
 package ai.konduit.serving.orchestration;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.configprovider.PipelineRouteDefiner;
+import ai.konduit.serving.launcher.KonduitServingLauncher;
+import ai.konduit.serving.routers.PipelineRouteDefiner;
 import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
+import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -38,10 +40,10 @@ import org.nd4j.base.Preconditions;
 import java.util.List;
 
 /**
- * Multi node version of {@link ai.konduit.serving.verticles.inference.InferenceVerticle}.
- * Uses {@link ai.konduit.serving.configprovider.KonduitServingNodeConfigurer}
+ * Multi node version of {@link InferenceVerticle}.
+ * Uses {@link KonduitServingLauncher}
  * to handle logic of loading a pipeline from a {@link InferenceConfiguration}
- * and adds additional capabilities on top such as a {@link io.vertx.core.spi.cluster.ClusterManager}
+ * and adds additional capabilities on top such as a {@link ClusterManager}
  * awareness allowing for HA, load balancing, and other capabilities
  *
  * @author Adam Gibson

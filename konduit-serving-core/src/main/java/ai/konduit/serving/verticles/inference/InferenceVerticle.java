@@ -24,15 +24,14 @@ package ai.konduit.serving.verticles.inference;
 
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.configprovider.MemMapRouteDefiner;
-import ai.konduit.serving.configprovider.PipelineRouteDefiner;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.routers.MemMapRouteDefiner;
+import ai.konduit.serving.routers.PipelineRouteDefiner;
+import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
-import io.vertx.core.Context;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
@@ -71,26 +70,37 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     }
 
     @Override
-    public void init(Vertx vertx, Context context) {
-        super.init(vertx, context);
-
-        inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
-        pipelineRouteDefiner = new PipelineRouteDefiner();
-        this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
-        //define the memory map endpoints if the user specifies the memory map configuration
-        if (inferenceConfiguration.getMemMapConfig() != null) {
-            this.router = new MemMapRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
-        } else {
-            this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
-
-            // Checking if the configuration runners can be created without problems or not
-            for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
-                pipelineStep.createRunner();
-        }
-    }
-
-    @Override
     protected void setupWebServer(Promise<Void> startPromise) {
+        try {
+            inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
+
+            pipelineRouteDefiner = new PipelineRouteDefiner();
+            this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
+            //define the memory map endpoints if the user specifies the memory map configuration
+            if (inferenceConfiguration.getMemMapConfig() != null) {
+                this.router = new MemMapRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+            } else {
+                this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
+
+                // Checking if the configuration runners can be created without problems or not
+                for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
+                    pipelineStep.createRunner();
+            }
+        } catch (Exception exception) {
+            startPromise.fail(exception);
+            return;
+        }
+
+        if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
+            try {
+                LogUtils.setFileAppenderIfNeeded();
+            } catch (Exception exception) {
+                log.error("Error setting up file log appender.", exception);
+                startPromise.fail(exception);
+                return;
+            }
+        }
+
         String portEnvValue = System.getenv(VerticleConstants.KONDUIT_SERVING_PORT);
         if (portEnvValue != null) {
             try {

@@ -17,15 +17,12 @@
 package ai.konduit.serving.logs;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.configprovider.KonduitServingMain;
-import ai.konduit.serving.configprovider.KonduitServingMainArgs;
-import ai.konduit.serving.configprovider.KonduitServingNodeConfigurer;
+import ai.konduit.serving.deploy.DeployKonduitServing;
 import ai.konduit.serving.train.TestUtils;
-import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
-import io.vertx.core.VertxOptions;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.Timeout;
@@ -39,10 +36,8 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
 import static com.jayway.restassured.RestAssured.given;
@@ -53,7 +48,7 @@ public class LogsEndpointTest {
     private String mBaseLogDir = null;
     private Async mAsync = null;
 
-    public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
+    public static String CONFIG_KEY = "configKey";
 
     @Rule
     public Timeout rule = Timeout.seconds(240);
@@ -66,23 +61,12 @@ public class LogsEndpointTest {
 
     @BeforeClass
     public static void beforeClass(TestContext testContext) throws Exception {
-        File jsonConfigPath = folder.newFile("config.json");
-        testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
-
-        JsonObject config = TestUtils.getConfig(folder);
-        FileUtils.write(jsonConfigPath, config.encodePrettily(), StandardCharsets.UTF_8);
+        testContext.put(CONFIG_KEY, TestUtils.getConfig(folder));
     }
 
     @Test
     public void testLogs(TestContext testContext) {
         mAsync = testContext.async();
-
-        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                .configStoreType("file").ha(false)
-                .multiThreaded(false)
-                .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
-                .build();
 
         int numberOfLinesToReadFromLogs = 2;
 
@@ -93,31 +77,28 @@ public class LogsEndpointTest {
 
         mBaseLogDir = System.getProperty("user.dir");
 
-        KonduitServingMain konduitServingMain = KonduitServingMain.builder()
-                .eventHandler(handler -> {
-                    if(handler.succeeded()) {
-                        testContext.assertTrue(Paths.get(mBaseLogDir, "main.log").toFile().exists());
+        Handler<AsyncResult<InferenceConfiguration>> eventHandler = handler -> {
+            if(handler.succeeded()) {
+                testContext.assertTrue(Paths.get(mBaseLogDir, "main.log").toFile().exists());
 
-                        given().port(handler.result().getServingConfig().getHttpPort())
-                                .get(String.format("/logs/%s", numberOfLinesToReadFromLogs))
-                                .then()
-                                .assertThat()
-                                .statusCode(200)
-                                .and()
-                                .assertThat()
-                                .body(Matchers.not(Matchers.isEmptyOrNullString()),
-                                        new TestUtils.LinesCalculatingMatcher(numberOfLinesToReadFromLogs)); // This would mean that the log file has been found and it was read successfully
+                given().port(handler.result().getServingConfig().getHttpPort())
+                        .get(String.format("/logs/%s", numberOfLinesToReadFromLogs))
+                        .then()
+                        .assertThat()
+                        .statusCode(200)
+                        .and()
+                        .assertThat()
+                        .body(Matchers.not(Matchers.isEmptyOrNullString()),
+                                new TestUtils.LinesCalculatingMatcher(numberOfLinesToReadFromLogs)); // This would mean that the log file has been found and it was read successfully
 
-                        mAsync.complete();
-                    } else {
-                        testContext.fail(handler.cause());
-                    }
-                })
-                .build();
-
+                mAsync.complete();
+            } else {
+                testContext.fail(handler.cause());
+            }
+        };
 
         // Checking before setting environment variables
-        konduitServingMain.runMain(args.toArgs());
+        DeployKonduitServing.deployInference(getConfig(testContext), eventHandler);
         mAsync.await();
         mAsync = testContext.async();
 
@@ -127,7 +108,7 @@ public class LogsEndpointTest {
         testContext.assertEquals(mBaseLogDir, folder.getRoot().getAbsolutePath());
 
         // Checking after setting environment variables
-        konduitServingMain.runMain(args.toArgs());
+        DeployKonduitServing.deployInference(getConfig(testContext), eventHandler);
         mAsync.await();
     }
 
@@ -135,43 +116,33 @@ public class LogsEndpointTest {
     public void testWithBadLogsDirectory(TestContext testContext) {
         mAsync = testContext.async();
 
-        KonduitServingNodeConfigurer konduitServingNodeConfigurer = KonduitServingNodeConfigurer.builder()
-                .createPidFile(false)
-                .configStoreType("file").ha(false)
-                .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
-                .vertxOptions(new VertxOptions())
-                .build();
-
-        KonduitServingMain konduitServingMain = KonduitServingMain.builder()
-                .eventHandler(handler -> {
-                    if(handler.succeeded()) {
-                        testContext.fail("Logs file cannot be placed at an invalid directory.");
-                    } else {
-                        Throwable throwable = handler.cause();
-                        if(!Strings.isNullOrEmpty(System.getenv("KONDUIT_SERVING_LOG_DIR")) &&
-                                throwable.getMessage().contains("environment variable KONDUIT_SERVING_LOG_DIR") &&
-                                throwable.getMessage().contains("doesn't exist or is an invalid directory.")) {
-                            mAsync.countDown();
-                        } else if(throwable.getMessage().contains("system property user.dir") &&
-                                throwable.getMessage().contains("doesn't exist or is an invalid directory.")) {
-                            mAsync.countDown();
-                        } else {
-                            testContext.fail(handler.cause());
-                        }
-                    }
-                })
-                .build();
+        Handler<AsyncResult<InferenceConfiguration>> eventHandler = handler -> {
+            if(handler.succeeded()) {
+                testContext.fail("Logs file cannot be placed at an invalid directory.");
+            } else {
+                Throwable throwable = handler.cause();
+                if(!Strings.isNullOrEmpty(System.getenv("KONDUIT_SERVING_LOG_DIR")) &&
+                        throwable.getMessage().contains("environment variable KONDUIT_SERVING_LOG_DIR") &&
+                        throwable.getMessage().contains("doesn't exist or is an invalid directory.")) {
+                    mAsync.countDown();
+                } else if(throwable.getMessage().contains("system property user.dir") &&
+                        throwable.getMessage().contains("doesn't exist or is an invalid directory.")) {
+                    mAsync.countDown();
+                } else {
+                    testContext.fail(handler.cause());
+                }
+            }
+        };
 
         // Testing with a bad system property
         environmentVariables.set("KONDUIT_SERVING_LOG_DIR", folder.getRoot().getAbsolutePath() + "/nonExistentDirectory");
-        konduitServingMain.runMain(konduitServingNodeConfigurer);
+        DeployKonduitServing.deployInference(getConfig(testContext), eventHandler);
         mAsync.await();
         mAsync = testContext.async();
 
         // Testing with a bad Environment variable
         System.setProperty("user.dir", folder.getRoot().getAbsolutePath() + "/nonExistentDirectory");
-        konduitServingMain.runMain(konduitServingNodeConfigurer);
+        DeployKonduitServing.deployInference(getConfig(testContext), eventHandler);
         mAsync.await();
     }
 
@@ -179,20 +150,13 @@ public class LogsEndpointTest {
     public void testLogsWithStdOutAndStdErr(TestContext testContext) {
         Async async = testContext.async();
 
-        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                .configStoreType("file").ha(false)
-                .multiThreaded(false)
-                .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
-                .build();
-
         // Delete previous logs if they exist
         try {
             FileUtils.forceDelete(Paths.get(System.getProperty("user.dir"), "main.log").toFile());
         } catch (IOException ignore) {}
 
-        KonduitServingMain.builder()
-                .eventHandler(handler -> {
+        DeployKonduitServing.deployInference(getConfig(testContext),
+                handler -> {
                     if(handler.succeeded()) {
                         testContext.assertTrue(Paths.get(System.getProperty("user.dir"), "main.log").toFile().exists());
 
@@ -225,9 +189,7 @@ public class LogsEndpointTest {
                     } else {
                         testContext.fail(handler.cause());
                     }
-                })
-                .build()
-                .runMain(args.toArgs());
+                });
     }
 
     /**
@@ -237,8 +199,8 @@ public class LogsEndpointTest {
     @Test
     @Ignore
     public void testLogsUI(TestContext testContext) {
-        KonduitServingMain.builder()
-                .eventHandler(handler -> {
+        DeployKonduitServing.deployInference(getConfig(testContext),
+                handler -> {
                     if(handler.succeeded()) {
                         try {
                             InferenceConfiguration inferenceConfiguration = handler.result();
@@ -252,13 +214,12 @@ public class LogsEndpointTest {
                     } else {
                         testContext.fail(handler.cause());
                     }
-                }).build()
-                .runMain(KonduitServingMainArgs.builder()
-                        .configStoreType("file").ha(false)
-                        .multiThreaded(false)
-                        .verticleClassName(InferenceVerticle.class.getName())
-                        .configPath(testContext.get(CONFIG_FILE_PATH_KEY)).build().toArgs());
+                });
 
         testContext.async().await();
+    }
+
+    private InferenceConfiguration getConfig(TestContext testContext) {
+        return testContext.get(CONFIG_KEY);
     }
 }
