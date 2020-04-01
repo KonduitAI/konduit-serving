@@ -106,7 +106,6 @@ public class WordTokenizerStepRunner extends BaseStepRunner
             {
                 JsonObject jsonObject = new JsonObject(text.toString());
                 List<Writable> featureWritable = new ArrayList<>();
-                List<Writable> featureMaskWritable = new ArrayList<>();
 
                 for (String field : jsonObject.fieldNames())
                 {
@@ -114,11 +113,9 @@ public class WordTokenizerStepRunner extends BaseStepRunner
 
                     MultiDataSet mds = this.getToken(sentence).next();
                     featureWritable.add(WritableValueRetriever.writableFromValue(mds.getFeatures(0)));
-                    featureMaskWritable.add(WritableValueRetriever.writableFromValue(mds.getFeaturesMaskArray(0)));
                 }
 
                 recordList.add(new org.datavec.api.records.impl.Record(featureWritable, null));
-                recordList.add(new org.datavec.api.records.impl.Record(featureMaskWritable, null));
             }
 
         }

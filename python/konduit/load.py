@@ -3,6 +3,7 @@ import logging
 import os
 import yaml
 
+from .inference import *
 from .client import Client
 from .server import Server
 from .utils import to_unix_path, update_dict_with_unix_paths
