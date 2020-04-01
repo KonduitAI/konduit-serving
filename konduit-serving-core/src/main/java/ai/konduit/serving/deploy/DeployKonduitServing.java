@@ -71,7 +71,7 @@ public class DeployKonduitServing {
 
         vertx.deployVerticle(clazz(), deploymentOptions, handler -> {
             if (handler.failed()) {
-                log.error(String.format("Unable to ai.konduit.serving.deploy verticle %s", className()), handler.cause());
+                log.error(String.format("Unable to deploy verticle %s", className()), handler.cause());
 
                 if (eventHandler != null) {
                     eventHandler.handle(Future.failedFuture(handler.cause()));

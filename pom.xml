@@ -594,7 +594,7 @@
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/ai.konduit.serving.deploy/maven2/</url>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
 
     </distributionManagement>
@@ -697,7 +697,7 @@
                     <configuration>
                         <useReleaseProfile>false</useReleaseProfile>
                         <releaseProfiles>release</releaseProfiles>
-                        <goals>ai.konduit.serving.deploy</goals>
+                        <goals>deploy</goals>
                     </configuration>
                 </plugin>
                 <plugin>

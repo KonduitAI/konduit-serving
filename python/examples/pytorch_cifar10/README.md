@@ -33,7 +33,7 @@ After a few minutes you should see the `model.pt` file get created.
 Update the `python_path` setting in the konduit.yml file to match the expected
 path separators for your Operating System.
 
-Now it's ready to ai.konduit.serving.deploy, run the following command to install and start the server:
+Now it's ready to deploy, run the following command to install and start the server:
 
 ```shell script
 konduit init --os windows-x86_64

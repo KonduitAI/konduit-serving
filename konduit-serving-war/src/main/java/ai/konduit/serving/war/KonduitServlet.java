@@ -79,8 +79,8 @@ public class KonduitServlet extends HttpServlet {
 
             }
 
-            log.debug("Attempting to ai.konduit.serving.deploy verticle " + verticleClassName);
-            log("Attempting to ai.konduit.serving.deploy verticle " + verticleClassName);
+            log.debug("Attempting to deploy verticle " + verticleClassName);
+            log("Attempting to deploy verticle " + verticleClassName);
             DeploymentOptions deploymentOptions = new DeploymentOptions()
                     .setConfig(vertxConfig).setWorker(true)
                     .setHa(false).setInstances(1)
@@ -105,8 +105,8 @@ public class KonduitServlet extends HttpServlet {
 
             vertx.deployVerticle(verticleClassName, deploymentOptions, handler -> {
                 if (handler.failed()) {
-                    log.error("Unable to ai.konduit.serving.deploy verticle", handler.cause());
-                    log("Unable to ai.konduit.serving.deploy verticle", handler.cause());
+                    log.error("Unable to deploy verticle", handler.cause());
+                    log("Unable to deploy verticle", handler.cause());
                 } else {
                     log.debug("Deployed verticle");
                     log("Deployed verticle");
