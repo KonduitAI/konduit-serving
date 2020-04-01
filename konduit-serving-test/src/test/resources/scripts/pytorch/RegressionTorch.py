@@ -11,7 +11,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 work_dir = os.path.abspath("./src/test/resources")
 sys.path.append(work_dir)
-print("work_dir---",work_dir)
 
 class Regressor(nn.Module):
     def __init__(self):
@@ -34,8 +33,6 @@ class Regressor(nn.Module):
 model = Regressor()
 
 optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-#checkpoint = torch.load('RegressionModel.pt')
 checkpoint = torch.load(os.path.join(work_dir, 'inference', 'pytorch', 'RegressionModel.pt'))
 model.load_state_dict(checkpoint['model_state_dict'])
 optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -103,16 +100,8 @@ ps = model(train_batch[0])
 ps.shape
 
 #inference code
-#the X_test dimenstion is 1x288 columns
-#X_test will be input from Java
-print("X_test:\n" + str(X_test))
 X_test = X_val
 with torch.no_grad():
     model.eval()
     outputTensor = model(X_val)
-    print('outputis')
-
-print(outputTensor.shape)
-print(outputTensor[0])
-
 output = outputTensor.numpy()

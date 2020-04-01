@@ -5,14 +5,12 @@ import tensorflow.python.util.deprecation as deprecation
 deprecation._PRINT_DEPRECATION_WARNINGS = False
 
 work_dir = os.path.abspath("./src/test/resources/scripts/TensorFlow")
-print("current_path", work_dir)
 sys.path.append(work_dir)
 
 import input_data
 import tensorflow.compat.v1 as tf
 
 tf.disable_v2_behavior()
-print("work_dir", work_dir)
 
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)  # y labels are oh-encoded
 n_train = mnist.train.num_examples  # 55,000
@@ -91,6 +89,4 @@ for i in range(n_iterations):
 # output where it's 1. This is due to large logical unit values.
 XTestImg = img.reshape(784)
 prediction = sess.run(tf.nn.softmax(output_layer), feed_dict={X: [XTestImg]}).astype(np.double)
-print("Predictions: ", prediction)
-
 sess.close()

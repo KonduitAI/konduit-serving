@@ -1,4 +1,3 @@
-# load the iris dataset as an example
 import os
 import sys
 from sklearn.datasets import load_iris
@@ -32,14 +31,10 @@ y_pred = knn.predict(X_test)
 print("kNN model accuracy:", metrics.accuracy_score(y_test, y_pred))
 
 # making prediction for out of sample data
-#sample = [[3, 5, 4, 2], [2, 3, 5, 4]]
-#test_input_np = np.array(sample)
 test_input_np=inputValue
 preds = knn.predict(test_input_np)
 pred_species = [iris.target_names[p] for p in preds]
-print("Predictions:", pred_species)
 outputValue = np.array(preds).astype('float')
-print("Predictions output NumPy:", outputValue)
 # saving the model
 joblib.dump(knn, 'iris_knn.pkl')
 

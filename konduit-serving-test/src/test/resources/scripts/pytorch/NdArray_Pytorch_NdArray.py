@@ -9,11 +9,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from keras.utils import to_categorical
 import torch.nn.functional as F
-#work_dir = os.path.abspath("./src/test/resources/scripts/scikitlearn")
 work_dir = os.path.abspath(".")
 sys.path.append(work_dir)
-print("work_dir",work_dir)
-
 
 class Model(nn.Module):
     def __init__(self, input_dim):
@@ -59,12 +56,8 @@ for epoch in range(1, epochs+1):
 
 # Prediction
 x_test = Variable(torch.from_numpy(features_test)).float()
-print(x_test[0])
-#test = np.array(([6.1, 2.8, 4.7, 1.2]))
 test=np.array(inputValue)
 my_test = Variable(torch.from_numpy(test)).float()
-print(my_test[0])
 output_pred1 = model(my_test)
 output_pred1 = output_pred1.detach().numpy()
 output_value=np.array([np.argmax(output_pred1)])
-#print("output_value",output_value)

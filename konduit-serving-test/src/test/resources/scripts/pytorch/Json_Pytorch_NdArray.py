@@ -9,23 +9,17 @@ from sklearn.metrics import accuracy_score
 from keras.utils import to_categorical
 import torch.nn.functional as F
 work_dir = os.path.abspath(".")
-print("Work Directory", work_dir)
-
 
 import json
 
 # read file
-#with open('IrisY.json', 'r') as myfile:
 with open(JsonInput, 'r') as myfile:
     data=myfile.read()
 
 # parse file
 obj = json.loads(data)
-print(obj)
-print("Iris: " + str(obj['Iris']))
 Xj = obj['Iris']
 Yj = obj['IrisY']
-print(Xj)
 
 Xt = []
 X = []
@@ -74,10 +68,8 @@ def print_(loss):
 # Not using dataloader
 x_train, y_train = Variable(torch.from_numpy(features_train)).float(), Variable(torch.from_numpy(labels_train)).long()
 for epoch in range(1, epochs+1):
-    #print ("Epoch #",epoch)
     y_pred = model(x_train)
     loss = loss_fn(y_pred, y_train)
-    #print_(loss.item())
     
     # Zero gradients
     optimizer.zero_grad()
@@ -87,16 +79,7 @@ for epoch in range(1, epochs+1):
     
 # Prediction
 x_test = Variable(torch.from_numpy(features_test)).float()
-#print(x_test[0])
-#test = np.array(([6.1, 2.8, 4.7, 1.2]))
 my_test = Variable(torch.from_numpy(Xr)).float()
-print(my_test[0])
-#pred = model(x_test)
 output_pred1 = model(my_test)
-#print("my_test result",pred1)
-
 output_pred1 = output_pred1.detach().numpy()
-
-#print ("The accuracy is", accuracy_score(labels_test, np.argmax(pred, axis=1)))
 output_value=np.array([np.argmax(output_pred1)])
-#print("output_value",output_value)

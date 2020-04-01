@@ -43,11 +43,9 @@ def print_(loss):
 # Not using dataloader
 x_train, y_train = Variable(torch.from_numpy(features_train)).float(), Variable(torch.from_numpy(labels_train)).long()
 for epoch in range(1, epochs+1):
-    #print ("Epoch #",epoch)
     y_pred = model(x_train)
     loss = loss_fn(y_pred, y_train)
-    #print_(loss.item())
-    
+
     # Zero gradients
     optimizer.zero_grad()
     loss.backward() # Gradients
@@ -56,19 +54,10 @@ for epoch in range(1, epochs+1):
     
 # Prediction
 x_test = Variable(torch.from_numpy(features_test)).float()
-print(x_test[0])
-#test_input_np = np.array(([6.1, 2.8, 4.7, 1.2], [6.1, 2.8, 4.7, 1.2]))
 test_input_np=inputValue
 my_test = Variable(torch.from_numpy(test_input_np)).float()
-
-print(my_test[0])
 pred = model(x_test)
 output_pred1 = model(my_test)
-#print("my_test result",pred)
 
 output_np = np.array(output_pred1.detach().numpy())
-print('Numpy prediction output :',output_np)
 pred = pred.detach().numpy()
-
-#print ("The accuracy is", accuracy_score(labels_test, np.argmax(pred, axis=1)))
-

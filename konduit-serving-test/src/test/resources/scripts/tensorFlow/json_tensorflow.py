@@ -1,5 +1,3 @@
-#import tensorflow.compat.v1 as tf
-#tf.disable_v2_behavior()
 import os
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
@@ -7,18 +5,15 @@ import numpy as np
 from PIL import Image
 work_dir = os.path.abspath("./src/test/resources/scripts/TensorFlow")
 sys.path.append(work_dir)
-print("Working Directory", work_dir)
 import input_data
 
 import json
 # read file
-#with open('tensorflowImgPath.json', 'r') as myfile:
 with open(JsonInput, 'r') as myfile:
     data=myfile.read()
 
 # parse file
 obj = json.loads(data)
-print("ImagePath: " + str(obj['ImagePath']))
 ImgPath = obj['ImagePath']
 ImgPath1=work_dir+'//'+str(ImgPath[0])
 
@@ -95,13 +90,5 @@ for i in range(n_iterations):
 
 saver.save(sess, 'TensorFlowModel_Json',global_step=1000)
 
-# print("Model saved as TensorFlow_Image")
-
-
 prediction = sess.run(tf.argmax(output_layer, 1), feed_dict={X: [img]})
-# print ("Prediction for test image:", np.squeeze(prediction))
-
-
 sess.close()
-
-

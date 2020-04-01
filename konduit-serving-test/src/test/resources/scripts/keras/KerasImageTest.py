@@ -9,8 +9,6 @@ tb._SYMBOLIC_SCOPE.value = True
 # let's keep our keras backend tensorflow quiet
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
-# for testing on CPU
-#os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
 # keras imports for the dataset and building our neural network
 from keras.datasets import mnist
@@ -31,4 +29,3 @@ class KerasTestImage:
 TestImg = KerasTestImage ()
 XTestImg1 = imgPath.reshape(1, 784)
 imageArray = TestImg.test(XTestImg1)
-#print("imageArray",imageArray)

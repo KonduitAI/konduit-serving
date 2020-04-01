@@ -4,7 +4,7 @@ import numpy as np
 import json
 work_dir = os.path.abspath("./src/test/resources/scripts/scikitlearn")
 sys.path.append(work_dir)
-print("JsonInput",JsonInput)
+
 # read file
 with open(JsonInput, 'r') as myfile:
     data=myfile.read()
@@ -39,11 +39,6 @@ filename =work_dir+'\\'+'pickle_object.pkl'
 
 with open(filename, 'rb') as file:
     pickle_model = pickle.load(file)
-    
-    
- # Calculate the accuracy score and predict target values
-#score = pickle_model.score(Xtest, Ytest)
-#print("Test score: {0:.2f} %".format(100 * score))
-Ypredict = pickle_model.predict(Xr).astype('float')
 
-#print(Ypredict)
+ # Calculate the accuracy score and predict target values
+Ypredict = pickle_model.predict(Xr).astype('float')

@@ -1,18 +1,15 @@
-import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-np.random.seed(1234)
-
 import keras
 from keras.models import Sequential
 from keras.layers import Dense
-import keras.backend.tensorflow_backend as tb
-tb._SYMBOLIC_SCOPE.value = True
 
-work_dir = os.path.abspath(".")
-df = pd.read_csv(os.path.join(work_dir,'src\\test\\resources\\scripts\\keras\\housing.csv'))
+
+input_data = np.array([[0.0380759,	0.0506801,	0.0616962,	0.0218724,	0.0442235,	0.0348208,	0.0434008,	0.00259226,	0.0199084,	0.0176461,	0.0380759,	0.0506801]])
+
+df = pd.read_csv('housing.csv')
 print(df.shape)
 df.describe()
 
@@ -39,7 +36,5 @@ model.compile(loss= "mean_squared_error" , optimizer="adam", metrics=["mean_squa
 model.fit(X_train, y_train, epochs=20)
 
 pred_train= model.predict(X_train)
-My_test = inputData
-pred= model.predict(My_test)
-
-
+pred= model.predict(input_data)
+numPred = np.array(pred)

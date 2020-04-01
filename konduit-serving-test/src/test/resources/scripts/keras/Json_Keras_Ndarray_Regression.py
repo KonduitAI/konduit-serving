@@ -1,18 +1,28 @@
-import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-np.random.seed(1234)
 
 import keras
 from keras.models import Sequential
 from keras.layers import Dense
-import keras.backend.tensorflow_backend as tb
-tb._SYMBOLIC_SCOPE.value = True
+import json
 
-work_dir = os.path.abspath(".")
-df = pd.read_csv(os.path.join(work_dir,'src\\test\\resources\\scripts\\keras\\housing.csv'))
+with open('Housing.json', 'r') as myfile:
+    data=myfile.read()
+
+# parse file
+obj = json.loads(data)
+print(obj)
+print("Data: " + str(obj['Data']))
+Xj = obj['Data']
+Yj = obj['Data1']
+print(Xj)
+
+Xr = np.array([[Xj[0],Xj[1],Xj[2],Xj[3],Xj[4],Xj[5],Xj[6],Xj[7],Xj[8],Xj[9],Xj[0],Xj[1]]])
+
+
+df = pd.read_csv('housing.csv')
 print(df.shape)
 df.describe()
 
@@ -39,7 +49,6 @@ model.compile(loss= "mean_squared_error" , optimizer="adam", metrics=["mean_squa
 model.fit(X_train, y_train, epochs=20)
 
 pred_train= model.predict(X_train)
-My_test = inputData
-pred= model.predict(My_test)
+print(np.sqrt(mean_squared_error(y_train,pred_train)))
 
-
+pred= model.predict(Xr)

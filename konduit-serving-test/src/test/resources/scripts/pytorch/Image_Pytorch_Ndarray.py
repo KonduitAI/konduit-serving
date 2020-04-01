@@ -27,16 +27,6 @@ images, labels = dataiter.next()
 print(images.shape)
 print(labels.shape)
 
-#plt.imshow(images[0].numpy().squeeze(), cmap='gray_r')
-
-#figure = plt.figure()
-#num_of_images = 20
-#for index in range(1, num_of_images + 1):
-#    plt.subplot(6, 10, index)
- #   plt.axis('off')
-  #  plt.imshow(images[index].numpy().squeeze(), cmap='gray_r')
-    
-    
 input_size = 784
 hidden_sizes = [128, 64]
 output_size = 10
@@ -47,7 +37,6 @@ model = nn.Sequential(nn.Linear(input_size, hidden_sizes[0]),
                       nn.ReLU(),
                       nn.Linear(hidden_sizes[1], output_size),
                       nn.LogSoftmax(dim=1))
-#print(model)
 
 criterion = nn.NLLLoss()
 images, labels = next(iter(trainloader))
@@ -55,10 +44,7 @@ images = images.view(images.shape[0], -1)
 
 logps = model(images) #log probabilities
 loss = criterion(logps, labels) #calculate the NLL loss
-
-print('Before backward pass: \n', model[0].weight.grad)
 loss.backward()
-print('After backward pass: \n', model[0].weight.grad)
 
 optimizer = optim.SGD(model.parameters(), lr=0.003, momentum=0.9)
 time0 = time()
@@ -98,9 +84,6 @@ ps = torch.exp(logps)
 probab = list(ps.numpy()[0])
 predicted_Ouput = np.array([probab.index(max(probab))])
 
-print("Predicted Digit =",predicted_Ouput)
-#view_classify(img.view(1, 28, 28), ps)
-
 correct_count, all_count = 0, 0
 for images,labels in valloader:
   for i in range(len(labels)):
@@ -116,6 +99,3 @@ for images,labels in valloader:
     if(true_label == pred_label):
       correct_count += 1
     all_count += 1
-
-#print("Number Of Images Tested =", all_count)
-#print("\nModel Accuracy =", (correct_count/all_count))

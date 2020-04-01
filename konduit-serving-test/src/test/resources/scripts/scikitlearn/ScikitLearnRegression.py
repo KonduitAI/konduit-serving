@@ -7,8 +7,6 @@ from sklearn.impute import SimpleImputer
 work_dir = os.path.abspath("./src/test/resources")
 sys.path.append(work_dir)
 # import data
-#train = pd.read_csv('../../data/scikitlearn/regression_train.csv')
-#test = pd.read_csv('../../data/scikitlearn/regression_test.csv')
 train = pd.read_csv(os.path.join(work_dir,'data\\scikitlearn\\regression_train.csv'))
 test = pd.read_csv(os.path.join(work_dir,'data\\scikitlearn\\regression_test.csv'))
 
@@ -26,11 +24,7 @@ train_X, test_X = onehot_train_X.align(onehot_test_X, join='left', axis=1)
 my_imputer = SimpleImputer()
 train_X = my_imputer.fit_transform(train_X)
 test_X = my_imputer.transform(test_X)
-#print(test_X.shape)
-#print(test_X)
 test_X = inputData
-#model = joblib.load('../../inference/scikitlearn/regression_model.sav')
 model = joblib.load(os.path.join(work_dir,'inference\\scikitlearn\\regression_model.sav'))
 predictions = model.predict(test_X)
 pred = np.array([[predictions[0]]])
-#print("Predictions ->",pred)
