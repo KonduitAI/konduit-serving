@@ -131,9 +131,16 @@ class Client(object):
                 files=converted_input,
                 timeout=self.timeout,
             )
-        if "content-type" not in resp.headers.keys():
-            resp.headers["content-type"] = None
-        return self._parse_response(resp.content, resp.headers["content-type"])
+
+        if resp.status_code != 200:
+            raise Exception("Inference failed with error code: {}. "
+                            "See the error log below for more info:\n---\n{}\n---\n"
+                            .format(resp.status_code,
+                                    str(resp.content, "utf-8")))
+        else:
+            if "content-type" not in resp.headers.keys():
+                resp.headers["content-type"] = None
+            return self._parse_response(resp.content, resp.headers["content-type"])
 
     def _parse_response(self, content, content_type):
         try:

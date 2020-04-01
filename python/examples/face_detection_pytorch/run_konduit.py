@@ -1,9 +1,8 @@
+import cv2
+import os
 from konduit import *
 from konduit.server import Server
 from konduit.utils import default_python_path
-
-import os
-import cv2
 
 # Set the working directory to this folder and register
 # the "detect_image.py" script as code to be executed by konduit.

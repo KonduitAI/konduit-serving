@@ -26,6 +26,7 @@ import ai.konduit.serving.config.Input.DataFormat;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.util.ObjectMappers;
+import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.datavec.api.transform.TransformProcess;

@@ -159,7 +159,7 @@ public class PipelineExecutionerTests {
                 .build();
 
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration);
-        pipelineExecutioner.init(Input.DataFormat.IMAGE, Output.PredictionType.RAW);
+        pipelineExecutioner.init();
         // Run the test
         pipelineExecutioner.doJsonInference(wrapper,null);
     }
@@ -204,7 +204,7 @@ public class PipelineExecutionerTests {
                 .build();
 
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);
-        pipelineExecutioner.init(Input.DataFormat.IMAGE, Output.PredictionType.RAW);
+        pipelineExecutioner.init();
         assertNotNull("Input names should not be null.", pipelineExecutioner.inputNames());
         assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         assertNotNull(pipelineExecutioner.inputDataTypes);
@@ -257,11 +257,10 @@ public class PipelineExecutionerTests {
                 .build();
 
         PipelineExecutioner pipelineExecutioner = new PipelineExecutioner(configuration);
-        pipelineExecutioner.init(Input.DataFormat.IMAGE, Output.PredictionType.YOLO);
+        pipelineExecutioner.init();
         assertNotNull("Input names should not be null.", pipelineExecutioner.inputNames());
         assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         TestCase.assertEquals(TensorDataType.INT64, pipelineExecutioner.inputDataTypes.get("image_tensor"));
-        assertNotNull(pipelineExecutioner.getMultiOutputAdapter());
     }
 
 

@@ -765,6 +765,108 @@ class Output(object):
         return d
 
 
+class KerasConfig(object):
+
+    _types_map = {
+        "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
+        "modelConfigType": {"type": ModelConfigType, "subtype": None},
+    }
+    _formats_map = {}
+
+    def __init__(self, tensor_data_types_config=None, model_config_type=None):
+        self.__tensor_data_types_config = tensor_data_types_config
+        self.__model_config_type = model_config_type
+
+    def _get_tensor_data_types_config(self):
+        return self.__tensor_data_types_config
+
+    def _set_tensor_data_types_config(self, value):
+        if not isinstance(value, TensorDataTypesConfig):
+            raise TypeError("tensorDataTypesConfig must be TensorDataTypesConfig")
+        self.__tensor_data_types_config = value
+
+    tensor_data_types_config = property(
+        _get_tensor_data_types_config, _set_tensor_data_types_config
+    )
+
+    def _get_model_config_type(self):
+        return self.__model_config_type
+
+    def _set_model_config_type(self, value):
+        if not isinstance(value, ModelConfigType):
+            raise TypeError("modelConfigType must be ModelConfigType")
+        self.__model_config_type = value
+
+    model_config_type = property(_get_model_config_type, _set_model_config_type)
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__tensor_data_types_config is not None:
+            d["tensorDataTypesConfig"] = (
+                self.__tensor_data_types_config.as_dict()
+                if hasattr(self.__tensor_data_types_config, "as_dict")
+                else self.__tensor_data_types_config
+            )
+        if self.__model_config_type is not None:
+            d["modelConfigType"] = (
+                self.__model_config_type.as_dict()
+                if hasattr(self.__model_config_type, "as_dict")
+                else self.__model_config_type
+            )
+        return d
+
+
+class DL4JConfig(object):
+
+    _types_map = {
+        "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
+        "modelConfigType": {"type": ModelConfigType, "subtype": None},
+    }
+    _formats_map = {}
+
+    def __init__(self, tensor_data_types_config=None, model_config_type=None):
+        self.__tensor_data_types_config = tensor_data_types_config
+        self.__model_config_type = model_config_type
+
+    def _get_tensor_data_types_config(self):
+        return self.__tensor_data_types_config
+
+    def _set_tensor_data_types_config(self, value):
+        if not isinstance(value, TensorDataTypesConfig):
+            raise TypeError("tensorDataTypesConfig must be TensorDataTypesConfig")
+        self.__tensor_data_types_config = value
+
+    tensor_data_types_config = property(
+        _get_tensor_data_types_config, _set_tensor_data_types_config
+    )
+
+    def _get_model_config_type(self):
+        return self.__model_config_type
+
+    def _set_model_config_type(self, value):
+        if not isinstance(value, ModelConfigType):
+            raise TypeError("modelConfigType must be ModelConfigType")
+        self.__model_config_type = value
+
+    model_config_type = property(_get_model_config_type, _set_model_config_type)
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__tensor_data_types_config is not None:
+            d["tensorDataTypesConfig"] = (
+                self.__tensor_data_types_config.as_dict()
+                if hasattr(self.__tensor_data_types_config, "as_dict")
+                else self.__tensor_data_types_config
+            )
+        if self.__model_config_type is not None:
+            d["modelConfigType"] = (
+                self.__model_config_type.as_dict()
+                if hasattr(self.__model_config_type, "as_dict")
+                else self.__model_config_type
+            )
+        return d
+
+
 class SameDiffConfig(object):
     """SameDiffConfig
 
@@ -1146,6 +1248,7 @@ class ServingConfig(object):
         "outputDataFormat": {"type": str, "subtype": None},
         "uploadsDirectory": {"type": str, "subtype": None},
         "logTimings": {"type": bool, "subtype": None},
+        "createLoggingEndpoints": {"type": bool, "subtype": None},
         "metricTypes": {"type": list, "subtype": str},
     }
     _formats_map = {
@@ -1159,6 +1262,7 @@ class ServingConfig(object):
         output_data_format="NUMPY",
         uploads_directory="file-uploads/",
         log_timings=False,
+        create_logging_endpoints=False,
         metric_types=None,
     ):
         self.__http_port = http_port
@@ -1166,6 +1270,7 @@ class ServingConfig(object):
         self.__output_data_format = output_data_format
         self.__uploads_directory = uploads_directory
         self.__log_timings = log_timings
+        self.__create_logging_endpoints = create_logging_endpoints
         self.__metric_types = metric_types
 
     def _get_http_port(self):
@@ -1267,6 +1372,12 @@ class ServingConfig(object):
                 if hasattr(self.__log_timings, "as_dict")
                 else self.__log_timings
             )
+        if self.__create_logging_endpoints is not None:
+            d["createLoggingEndpoints"] = (
+                self.__create_logging_endpoints.as_dict()
+                if hasattr(self.__create_logging_endpoints, "as_dict")
+                else self.__create_logging_endpoints
+            )
         if self.__metric_types is not None:
             d["metricTypes"] = [
                 p.as_dict() if hasattr(p, "as_dict") else p for p in self.__metric_types
@@ -1293,61 +1404,45 @@ class PipelineStep(object):
     """
 
     _types_map = {
-        "inputColumnNames": {"type": dict, "subtype": None},
-        "outputColumnNames": {"type": dict, "subtype": None},
+        "inputNames": {"type": list, "subtype": str},
         "inputSchemas": {"type": dict, "subtype": None},
         "outputSchemas": {"type": dict, "subtype": None},
         "outputNames": {"type": list, "subtype": str},
-        "inputNames": {"type": list, "subtype": str},
+        "outputColumnNames": {"type": dict, "subtype": None},
+        "inputColumnNames": {"type": dict, "subtype": None},
     }
     _formats_map = {
-        "outputNames": "table",
         "inputNames": "table",
+        "outputNames": "table",
     }
 
     def __init__(
         self,
-        input_column_names=None,
-        output_column_names=None,
+        input_names=None,
         input_schemas=None,
         output_schemas=None,
         output_names=None,
-        input_names=None,
+        output_column_names=None,
+        input_column_names=None,
     ):
-        self.__input_column_names = input_column_names
-        self.__output_column_names = output_column_names
+        self.__input_names = input_names
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas
         self.__output_names = output_names
-        self.__input_names = input_names
+        self.__output_column_names = output_column_names
+        self.__input_column_names = input_column_names
 
-    def _get_input_column_names(self):
-        return self.__input_column_names
+    def _get_input_names(self):
+        return self.__input_names
 
-    def _set_input_column_names(self, value):
-        if (
-            not isinstance(value, dict)
-            and not isinstance(value, DictWrapper)
-            and not isinstance(value, DictWrapper)
-        ):
-            raise TypeError("inputColumnNames must be type")
-        self.__input_column_names = value
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
 
-    input_column_names = property(_get_input_column_names, _set_input_column_names)
-
-    def _get_output_column_names(self):
-        return self.__output_column_names
-
-    def _set_output_column_names(self, value):
-        if (
-            not isinstance(value, dict)
-            and not isinstance(value, DictWrapper)
-            and not isinstance(value, DictWrapper)
-        ):
-            raise TypeError("outputColumnNames must be type")
-        self.__output_column_names = value
-
-    output_column_names = property(_get_output_column_names, _set_output_column_names)
+    input_names = property(_get_input_names, _set_input_names)
 
     def _get_input_schemas(self):
         return self.__input_schemas
@@ -1389,32 +1484,40 @@ class PipelineStep(object):
 
     output_names = property(_get_output_names, _set_output_names)
 
-    def _get_input_names(self):
-        return self.__input_names
+    def _get_output_column_names(self):
+        return self.__output_column_names
 
-    def _set_input_names(self, value):
-        if not isinstance(value, list) and not isinstance(value, ListWrapper):
-            raise TypeError("inputNames must be list")
-        if not all(isinstance(i, str) for i in value):
-            raise TypeError("inputNames list valeus must be str")
-        self.__input_names = value
+    def _set_output_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputColumnNames must be type")
+        self.__output_column_names = value
 
-    input_names = property(_get_input_names, _set_input_names)
+    output_column_names = property(_get_output_column_names, _set_output_column_names)
+
+    def _get_input_column_names(self):
+        return self.__input_column_names
+
+    def _set_input_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputColumnNames must be type")
+        self.__input_column_names = value
+
+    input_column_names = property(_get_input_column_names, _set_input_column_names)
 
     def as_dict(self):
         d = empty_type_dict(self)
-        if self.__input_column_names is not None:
-            d["inputColumnNames"] = (
-                self.__input_column_names.as_dict()
-                if hasattr(self.__input_column_names, "as_dict")
-                else self.__input_column_names
-            )
-        if self.__output_column_names is not None:
-            d["outputColumnNames"] = (
-                self.__output_column_names.as_dict()
-                if hasattr(self.__output_column_names, "as_dict")
-                else self.__output_column_names
-            )
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
+            ]
         if self.__input_schemas is not None:
             d["inputSchemas"] = (
                 self.__input_schemas.as_dict()
@@ -1431,10 +1534,31 @@ class PipelineStep(object):
             d["outputNames"] = [
                 p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
             ]
-        if self.__input_names is not None:
-            d["inputNames"] = [
-                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
-            ]
+        if self.__output_column_names is not None:
+            d["outputColumnNames"] = (
+                self.__output_column_names.as_dict()
+                if hasattr(self.__output_column_names, "as_dict")
+                else self.__output_column_names
+            )
+        if self.__input_column_names is not None:
+            d["inputColumnNames"] = (
+                self.__input_column_names.as_dict()
+                if hasattr(self.__input_column_names, "as_dict")
+                else self.__input_column_names
+            )
+        return d
+
+
+class TextConfig(object):
+
+    _types_map = {}
+    _formats_map = {}
+
+    def __init__(self):
+        pass
+
+    def as_dict(self):
+        d = empty_type_dict(self)
         return d
 
 

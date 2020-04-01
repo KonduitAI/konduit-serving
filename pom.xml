@@ -114,7 +114,7 @@
         <javacpp-presets.version>1.5.3</javacpp-presets.version>
         <javacv.version>1.5.3</javacv.version>
         <opencv.version>4.2.0</opencv.version>
-        <cpython.version>3.7.6</cpython.version>
+        <cpython.version>3.7.7</cpython.version>
         <mkl.version>2020.0</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
@@ -123,7 +123,7 @@
         </tensorflow.javacpp.version>
         <mkl-dnn.version>0.21.3</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
-        <numpy.version>1.18.1</numpy.version>
+        <numpy.version>1.18.2</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
         <openblas.version>0.3.9</openblas.version>
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>

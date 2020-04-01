@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.config;
 
+import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
@@ -29,6 +30,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,6 +60,9 @@ public class ServingConfig implements TextConfig {
 
     @Builder.Default
     private boolean createLoggingEndpoints = false;
+
+    @Builder.Default
+    private List<MetricsConfig> metricsConfigurations = new ArrayList<>(0);
 
     @Builder.Default
     private List<MetricType> metricTypes = Arrays.asList(

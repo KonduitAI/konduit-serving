@@ -1,10 +1,9 @@
+import numpy as np
+import pytest
+import random
 from konduit import *
 from konduit.server import Server
 from konduit.utils import is_port_in_use
-
-import numpy as np
-import random
-import pytest
 
 
 @pytest.mark.integration
