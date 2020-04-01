@@ -35,7 +35,7 @@ public class KonduitOrchestrationMainTest {
                 .servingConfig(servingConfig)
                 .build();
         /*
-         * Need to work out what a "node" is: eg, what happens when you ai.konduit.serving.deploy 2 instances on vertx?
+         * Need to work out what a "node" is: eg, what happens when you deploy 2 instances on vertx?
          * What happens when you have 2 separate verticles?
          *
          * What should "nodes" return?
