@@ -370,7 +370,6 @@ public class PipelineRouteDefiner {
                     "content-type: application/json only accepts JSON as " +
                             "input data format and not " + inputDataFormat.name());
 
-
             initializeSchemas(inferenceConfiguration, true);
 
             try {
@@ -386,6 +385,7 @@ public class PipelineRouteDefiner {
                         inputSchema,
                         null,
                         outputSchema,
+			inputDataFormat,
                         inferenceConfiguration.getServingConfig().getOutputDataFormat());
 
                 if (start != null)
@@ -430,7 +430,6 @@ public class PipelineRouteDefiner {
             } catch(Exception e) {
                 predictionType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
             }
-
             pipelineExecutioner.init();
 
             Map<String, InputAdapter<io.vertx.core.buffer.Buffer, ?>> adapters = getInputAdapterMap(ctx);
@@ -512,6 +511,7 @@ public class PipelineRouteDefiner {
                             inputSchema,
                             null,
                             outputSchema,
+			    inputDataFormat,
                             inferenceConfiguration.getServingConfig().getOutputDataFormat());
 
 
@@ -612,7 +612,7 @@ public class PipelineRouteDefiner {
                     if (batchCreationTimer != null) {
                         start = batchCreationTimer.start();
                     }
-                    INDArray[] outputs = pipelineExecutioner.doInference(ctx, dataFormat, inputs);
+                    INDArray[] outputs = pipelineExecutioner.doInference(ctx, predictionType, inputDataFormat, dataFormat, inputs);
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
