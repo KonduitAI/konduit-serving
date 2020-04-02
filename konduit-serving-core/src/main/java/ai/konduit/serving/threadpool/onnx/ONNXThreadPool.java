@@ -328,7 +328,7 @@ public class ONNXThreadPool {
             try (PointerScope scope = new PointerScope()) {
 
                 // model should be replicated & initialized here
-		Session replicatedModel = onnxModelLoader.loadModel();
+                Session replicatedModel = onnxModelLoader.loadModel();
 
                 long numInputNodes = replicatedModel.GetInputCount();
                 long numOutputNodes = replicatedModel.GetOutputCount();
@@ -368,7 +368,7 @@ public class ONNXThreadPool {
                         counter.incrementAndGet();
 
                         List<Map<String, INDArray>> out = doBatchInference(request, replicatedModel, inputNodeNames, outputNodeNames, inputTypes,
-					inputSizes, inputNodeDims); 
+                                inputSizes, inputNodeDims);
 
                         request.setOutputBatches(out);
 
@@ -378,7 +378,7 @@ public class ONNXThreadPool {
                 Thread.currentThread().interrupt();
                 // do nothing
             } catch (Exception e) {
-		log.error("Error occurred doing inference", e);
+                log.error("Error occurred doing inference", e);
 
             } finally {
                 isStopped.set(true);
@@ -392,56 +392,56 @@ public class ONNXThreadPool {
             }
         }
 
-        protected void validateType(DataType expected, INDArray array){
+        protected void validateType(DataType expected, INDArray array) {
             if (!array.dataType().equals(expected))
                 throw new RuntimeException("INDArray data type (" + array.dataType() + ") does not match required ONNX data type (" + expected + ")");
         }
 
-	private List<Map<String, INDArray>> doBatchInference(OnnxObservable request, Session replicatedModel, PointerPointer<BytePointer> inputNodeNames,
-                     PointerPointer<BytePointer> outputNodeNames, int[] inputTypes, long[] inputSizes, LongPointer[] inputNodeDims) {
-        
-		List<Map<String, INDArray>> batches = request.getInputBatches();
+        private List<Map<String, INDArray>> doBatchInference(OnnxObservable request, Session replicatedModel, PointerPointer<BytePointer> inputNodeNames,
+                                                             PointerPointer<BytePointer> outputNodeNames, int[] inputTypes, long[] inputSizes, LongPointer[] inputNodeDims) {
 
-                long numInputNodes = replicatedModel.GetInputCount();	
-                long numOutputNodes = replicatedModel.GetOutputCount(); 
- 
-                List<Map<String, INDArray>> out = new ArrayList<>(batches.size());
+            List<Map<String, INDArray>> batches = request.getInputBatches();
 
-		try {
-	    		for (Map<String, INDArray> inBatch : batches) { 
-	    			Value[] inputTensors = new Value[(int) numInputNodes];
+            long numInputNodes = replicatedModel.GetInputCount();
+            long numOutputNodes = replicatedModel.GetOutputCount();
 
-                                for (int i = 0; i < numInputNodes; i++) {
-                                    BytePointer inputName = inputNodeNames.get(BytePointer.class, i);
-                                    Value inputTensor = getTensor(inBatch.get(inputName.getString()), inputTypes[i], inputSizes[i],inputNodeDims[i]);
-                                    inputTensors[i] = inputTensor;
-                                }
+            List<Map<String, INDArray>> out = new ArrayList<>(batches.size());
 
-                                Value inputVal = new Value(numInputNodes);
+            try {
+                for (Map<String, INDArray> inBatch : batches) {
+                    Value[] inputTensors = new Value[(int) numInputNodes];
 
-                                for (int i = 0; i < numInputNodes; i++) {
-                                    inputVal.position(i).put(inputTensors[i]);
-                                }
+                    for (int i = 0; i < numInputNodes; i++) {
+                        BytePointer inputName = inputNodeNames.get(BytePointer.class, i);
+                        Value inputTensor = getTensor(inBatch.get(inputName.getString()), inputTypes[i], inputSizes[i], inputNodeDims[i]);
+                        inputTensors[i] = inputTensor;
+                    }
 
-                                ValueVector outputVector = replicatedModel.Run(new RunOptions(), inputNodeNames, inputVal.position(0), numInputNodes, outputNodeNames, numOutputNodes);
+                    Value inputVal = new Value(numInputNodes);
 
-                                Map<String, INDArray> output = new LinkedHashMap<>();
+                    for (int i = 0; i < numInputNodes; i++) {
+                        inputVal.position(i).put(inputTensors[i]);
+                    }
 
-                                for (int i = 0; i < numOutputNodes; i++) {
-                                    Value outValue = outputVector.get(i);
+                    ValueVector outputVector = replicatedModel.Run(new RunOptions(), inputNodeNames, inputVal.position(0), numInputNodes, outputNodeNames, numOutputNodes);
 
-                                    DataBuffer buffer = getDataBuffer(outValue);
-                                    INDArray outArray = Nd4j.create(buffer);
-                                    output.put((outputNodeNames.get(BytePointer.class, i)).getString(), outArray);
+                    Map<String, INDArray> output = new LinkedHashMap<>();
 
-                                }
-                                out.add(output);
-                            }
-                        } catch (Exception e) {
-                            log.error("Error occurred doing inference", e);
-                        }
-		return out;
-	}
+                    for (int i = 0; i < numOutputNodes; i++) {
+                        Value outValue = outputVector.get(i);
+
+                        DataBuffer buffer = getDataBuffer(outValue);
+                        INDArray outArray = Nd4j.create(buffer);
+                        output.put((outputNodeNames.get(BytePointer.class, i)).getString(), outArray);
+
+                    }
+                    out.add(output);
+                }
+            } catch (Exception e) {
+                log.error("Error occurred doing inference", e);
+            }
+            return out;
+        }
 
         private Value getTensor(INDArray ndArray, int type, long size, LongPointer dims) {
             Pointer inputTensorValuesPtr = ndArray.data().pointer();

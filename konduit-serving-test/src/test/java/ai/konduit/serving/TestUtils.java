@@ -29,17 +29,18 @@ import java.io.File;
  */
 public class TestUtils {
 
-    private TestUtils(){ }
+    private TestUtils() {
+    }
 
     private static File baseResourcesDir;
 
     /**
      * Get the base storage directory for any test resources (downloaded and cached on system)
      */
-    public static File testResourcesStorageDir(){
-        if(baseResourcesDir == null){
+    public static File testResourcesStorageDir() {
+        if (baseResourcesDir == null) {
             File f = new File(System.getProperty("user.home"), ".konduittest/");
-            if(!f.exists())
+            if (!f.exists())
                 f.mkdirs();
             baseResourcesDir = f;
         }
