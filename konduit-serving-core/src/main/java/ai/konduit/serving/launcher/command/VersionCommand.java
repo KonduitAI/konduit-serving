@@ -22,6 +22,8 @@ import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,7 +53,7 @@ public class VersionCommand extends DefaultCommand {
         if (version != null) {
             return version;
         }
-        try (InputStream is = io.vertx.core.impl.launcher.commands.VersionCommand.class.getClassLoader().getResourceAsStream("META-INF/serving/serving-version.txt")) {
+        try (InputStream is = VersionCommand.class.getClassLoader().getResourceAsStream("META-INF/serving/serving-version.txt")) {
             if (is == null) {
                 throw new IllegalStateException("Cannot find serving-version.txt on classpath");
             }

@@ -43,7 +43,6 @@ public class StopCommand extends DefaultCommand {
      */
     private boolean redeploy;
 
-
     private static final Pattern PS = Pattern.compile("([0-9]+)\\s.*-Dserving.id=.*");
 
     /**
