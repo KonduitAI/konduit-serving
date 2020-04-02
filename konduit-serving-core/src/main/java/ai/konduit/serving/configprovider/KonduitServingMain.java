@@ -158,13 +158,23 @@ public class KonduitServingMain {
 
                 vertx.close();
             } else {
-                log.info(String.format("Deployed verticle %s", konduitServingNodeConfigurer.getVerticleClassName()));
                 if (eventHandler != null) {
                     VertxImpl vertxImpl = (VertxImpl) vertx;
                     DeploymentOptions deploymentOptions = vertxImpl.getDeployment(handler.result()).deploymentOptions();
 
                     try {
                         InferenceConfiguration inferenceConfiguration = ObjectMappers.fromJson(deploymentOptions.getConfig().encode(), InferenceConfiguration.class);
+
+                        int deploymentInstances = konduitServingNodeConfigurer.getDeploymentOptions().getInstances();
+                        log.info("\"{0}\" verticle instance{1} of type \"{2}\" {3} deployed with id: \"{4}\" " +
+                                        "with the following yaml configuration: \n{5}---",
+                                deploymentInstances,
+                                deploymentInstances == 1 ? "" : "s",
+                                konduitServingNodeConfigurer.getVerticleClassName(),
+                                deploymentInstances == 1 ? "is": "are",
+                                handler.result(),
+                                inferenceConfiguration.toYaml());
+
                         eventHandler.handle(Future.succeededFuture(inferenceConfiguration));
                     } catch (Exception exception){
                         log.debug("Unable to parse json configuration into an InferenceConfiguration object. " +
