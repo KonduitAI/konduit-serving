@@ -89,4 +89,4 @@ USER konduit
 
 WORKDIR ${HOME}
 
-RUN   mkdir ${HOME}/build && cd ${HOME}/build && git clone  --single-branch --branch ag_armtfrefactor https://github.com/KonduitAI/konduit-serving && cd konduit-serving && mvn -Djavacpp.platform=linux-arm64 -Dchip=gpu -Pjetson-nano clean install -Dmaven.test.skip=true
+RUN   mkdir ${HOME}/build && cd ${HOME}/build && git clone   https://github.com/KonduitAI/konduit-serving && cd konduit-serving && mvn -Djavacpp.platform=linux-arm64 -Dchip=gpu -Pjetson-nano clean install -Dmaven.test.skip=true

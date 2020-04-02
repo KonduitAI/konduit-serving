@@ -22,7 +22,9 @@
 
 package ai.konduit.serving.verticles;
 
+import ai.konduit.serving.util.MetricsUtils;
 import ai.konduit.serving.util.PortUtils;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
@@ -30,12 +32,14 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.VerticleFactory;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.Timeout;
+import io.vertx.micrometer.MicrometerMetricsOptions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.nd4j.linalg.api.memory.enums.DebugMode;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.primitives.Pair;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -60,9 +64,12 @@ public abstract class BaseVerticleTest {
     public void before(TestContext context) throws Exception {
         port = PortUtils.getAvailablePort();
         pubsubPort = PortUtils.getAvailablePort();
+        Pair<MicrometerMetricsOptions, MeterRegistry> micrometerMetricsOptionsMeterRegistryPair = MetricsUtils.setupPrometheus();
+
         System.setProperty("vertx.options.maxEventLoopExecuteTime", "240000");
         VertxOptions vertxOptions = new VertxOptions();
         vertxOptions.setMaxEventLoopExecuteTime(240000);
+        vertxOptions.setMetricsOptions(micrometerMetricsOptionsMeterRegistryPair.getFirst());
         vertx = Vertx.vertx(vertxOptions);
         Nd4j.getWorkspaceManager().setDebugMode(DebugMode.SPILL_EVERYTHING);
         setupVertx(vertx);

@@ -1,10 +1,8 @@
-from konduit import *
-from konduit.json_utils import config_to_dict_with_type
-
-from jnius import autoclass
 import json
 import pytest
-
+from jnius import autoclass
+from konduit import *
+from konduit.json_utils import config_to_dict_with_type
 
 StringJava = autoclass("java.lang.String")
 InferenceConfigurationJava = autoclass("ai.konduit.serving.InferenceConfiguration")

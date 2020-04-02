@@ -1,6 +1,6 @@
+import os
 import pytest
 from konduit.utils import *
-import os
 
 
 @pytest.mark.unit

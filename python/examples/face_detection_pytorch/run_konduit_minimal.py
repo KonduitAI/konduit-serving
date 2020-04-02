@@ -1,10 +1,8 @@
+import cv2
+import os
 from konduit import *
 from konduit.server import Server
 from konduit.utils import default_python_path
-
-import os
-import cv2
-
 
 work_dir = os.path.abspath(".")
 python_config = PythonConfig(
