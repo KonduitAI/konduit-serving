@@ -13,6 +13,7 @@ MODEL_TYPES = [
     "TENSORFLOW",
     "KERAS",
     "DL4J",
+    "ONNX",
     "PMML",
     "SAMEDIFF",
 ]

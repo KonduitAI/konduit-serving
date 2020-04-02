@@ -56,6 +56,10 @@ public class ModelConfigType implements Serializable, TextConfig {
         return new ModelConfigType(ModelConfig.ModelType.DL4J, path);
     }
 
+    public static ModelConfigType onnx(String path) {
+        return new ModelConfigType(ModelConfig.ModelType.ONNX, path);
+    }
+
     public static ModelConfigType keras(String path) {
         return new ModelConfigType(ModelConfig.ModelType.KERAS, path);
     }

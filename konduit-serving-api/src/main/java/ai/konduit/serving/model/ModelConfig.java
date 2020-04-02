@@ -74,8 +74,10 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = PmmlConfig.class, name = "PmmlConfig"),
         @JsonSubTypes.Type(value = SameDiffConfig.class, name = "SameDiffConfig"),
         @JsonSubTypes.Type(value = TensorFlowConfig.class, name = "TensorFlowConfig"),
+        @JsonSubTypes.Type(value = OnnxConfig.class, name = "OnnxConfig"),
         @JsonSubTypes.Type(value = KerasConfig.class, name = "KerasConfig"),
         @JsonSubTypes.Type(value = DL4JConfig.class, name= "DL4JConfig")
+
 })
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 @SuperBuilder
@@ -89,6 +91,7 @@ public abstract class ModelConfig implements Serializable, TextConfig {
 
     public enum ModelType {
         DL4J,
+        ONNX,
         PMML,
         TENSORFLOW,
         KERAS,

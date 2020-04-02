@@ -150,7 +150,7 @@ public class KonduitServingMain {
 
         vertx.deployVerticle(konduitServingNodeConfigurer.getVerticleClassName(), konduitServingNodeConfigurer.getDeploymentOptions(), handler -> {
             if (handler.failed()) {
-                log.error(String.format("Unable to deploy verticle %s", konduitServingNodeConfigurer.getVerticleClassName()), handler.cause());
+                log.error("Unable to deploy verticle {}", konduitServingNodeConfigurer.getVerticleClassName(), handler.cause());
 
                 if (eventHandler != null) {
                     eventHandler.handle(Future.failedFuture(handler.cause()));

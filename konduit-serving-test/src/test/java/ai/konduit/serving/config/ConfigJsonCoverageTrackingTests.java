@@ -261,6 +261,19 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @Test
+    public void testOnnxConfig(){
+        OnnxConfig d = OnnxConfig.builder()
+                .modelConfigType(ModelConfigType.onnx("/Some/Path/Here"))
+                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
+                        .inputDataType("in", TensorDataType.FLOAT)
+                        .outputDataType("out", TensorDataType.FLOAT)
+                        .build())
+                .build();
+
+        testConfigSerDe(d);
+    }
+
+    @Test
     public void testDL4JConfig(){
         DL4JConfig d = DL4JConfig.builder()
                 .modelConfigType(ModelConfigType.dl4j("/Some/Path/Here"))
