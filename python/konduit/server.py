@@ -2,10 +2,9 @@ import json
 import logging
 import os
 import re
+import requests
 import signal
 import subprocess
-
-import requests
 from konduit import KONDUIT_DIR
 from konduit.base_inference import PipelineStep
 from konduit.client import Client

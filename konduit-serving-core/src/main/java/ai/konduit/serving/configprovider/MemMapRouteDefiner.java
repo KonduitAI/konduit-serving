@@ -32,7 +32,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.ext.healthchecks.HealthCheckHandler;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.BodyHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.bytedeco.javacpp.BytePointer;
@@ -144,21 +143,7 @@ public class MemMapRouteDefiner {
                 .tempFilePath(tempFile.getAbsolutePath())
                 .build();
 
-        router.post().handler(BodyHandler.create()
-                .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
-                .setDeleteUploadedFilesOnEnd(true)
-                .setMergeFormAttributes(true))
-                .failureHandler(failureHandlder -> {
-                    if (failureHandlder.statusCode() == 404) {
-                        log.warn("404 at route " + failureHandlder.request().path());
-                    } else if (failureHandlder.failed()) {
-                        if (failureHandlder.failure() != null) {
-                            log.error("Request failed with cause ", failureHandlder.failure());
-                        } else {
-                            log.error("Request failed with unknown cause.");
-                        }
-                    }
-                });
+        PipelineRouteDefiner.generalHandler(inferenceConfiguration, router, log);
 
 
         router.get("/healthcheck*").handler(HealthCheckHandler.create(vertx));

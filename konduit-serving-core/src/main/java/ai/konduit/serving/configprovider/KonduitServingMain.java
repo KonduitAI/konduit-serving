@@ -22,8 +22,8 @@
 
 package ai.konduit.serving.configprovider;
 
-import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.util.ObjectMappers;
 import com.beust.jcommander.JCommander;
 import io.vertx.config.ConfigRetriever;

@@ -1,7 +1,7 @@
+import pytest
 from konduit.load import server_from_file
 from konduit.load import store_pid, pop_pid
 from konduit.server import stop_server_by_pid
-import pytest
 
 
 @pytest.mark.unit

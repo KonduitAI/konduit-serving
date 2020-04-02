@@ -1,7 +1,7 @@
-from konduit import *
 import glob
-import re
 import pytest
+import re
+from konduit import *
 
 
 def markdown_blocks(file_path, language="python"):

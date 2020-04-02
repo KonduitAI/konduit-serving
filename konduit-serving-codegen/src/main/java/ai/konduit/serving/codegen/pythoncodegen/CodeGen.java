@@ -24,6 +24,10 @@ package ai.konduit.serving.codegen.pythoncodegen;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.*;
+import ai.konduit.serving.config.metrics.NoOpMetricsConfig;
+import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
+import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
+import ai.konduit.serving.metrics.RegressionMetrics;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
@@ -56,7 +60,11 @@ public class CodeGen {
     public static void main( String[] args ) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper, JsonSchemaConfig.html5EnabledSchema());
+
         Set<Class<?>> clazzes = new LinkedHashSet();
+        clazzes.add(NoOpMetricsConfig.class);
+        clazzes.add(ClassificationMetricsConfig.class);
+        clazzes.add(RegressionMetricsConfig.class);
         clazzes.add(TensorDataTypesConfig.class);
         clazzes.add(SavedModelConfig.class);
         clazzes.add(ParallelInferenceConfig.class);
