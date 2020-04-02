@@ -19,8 +19,14 @@
 package ai.konduit.serving.launcher.command;
 
 import io.vertx.core.cli.CLIException;
+import io.vertx.core.cli.annotations.Description;
+import io.vertx.core.cli.annotations.Name;
+import io.vertx.core.cli.annotations.Summary;
 import io.vertx.core.spi.launcher.DefaultCommand;
 
+@Name("predict")
+@Summary("Run inference on konduit servers using given inputs")
+@Description("Sends file data or JSON input data to running konduit servers. ")
 public class PredictCommand extends DefaultCommand {
     @Override
     public void run() throws CLIException {

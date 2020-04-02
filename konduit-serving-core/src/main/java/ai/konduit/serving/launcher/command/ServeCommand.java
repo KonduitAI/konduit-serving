@@ -25,12 +25,12 @@ import io.vertx.core.cli.annotations.Summary;
 import io.vertx.core.impl.launcher.commands.StartCommand;
 
 @Name("serve")
-@Summary("Start a vert.x application in background")
-@Description("Start a vert.x application as a background service. The application is identified with an id that can be set using the `vertx-id` option. If not set a random UUID is generated. The application can be stopped with the `stop` command.")
+@Summary("Start a konduit server application in background")
+@Description("Start a konduit server application as a background service. The application is identified with an id that can be set using the `serving-id` option. If not set a random UUID is generated. The application can be stopped with the `stop` command.")
 public class ServeCommand extends StartCommand {
 
     /**
-     * Sets the "application id" that would be to stop the application and be listed in the {@link io.vertx.core.impl.launcher.commands.ListCommand} command.
+     * Sets the "application id" that would be to stop the application and be listed in the {@link ListCommand} command.
      *
      * @param id the application ID.
      */
@@ -39,5 +39,4 @@ public class ServeCommand extends StartCommand {
     public void setApplicationId(String id) {
         super.setApplicationId(id);
     }
-
 }

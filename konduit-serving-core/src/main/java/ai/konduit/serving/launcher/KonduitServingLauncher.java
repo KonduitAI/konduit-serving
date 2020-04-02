@@ -19,7 +19,7 @@
 package ai.konduit.serving.launcher;
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.launcher.command.ServeCommand;
+import ai.konduit.serving.launcher.command.*;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
@@ -102,5 +102,17 @@ public class KonduitServingLauncher extends Launcher {
     @Override
     public void afterConfigParsed(JsonObject config) {
         this.inferenceConfiguration = InferenceConfiguration.fromJson(config.encode());
+    }
+
+    public static void main(String[] args) {
+        new KonduitServingLauncher()
+                .unregister("start")
+                .unregister("test")
+                .register(ServeCommand.class, ServeCommand::new)
+                .register(ListCommand.class, ListCommand::new)
+                .register(StopCommand.class, StopCommand::new)
+                .register(PredictCommand.class, PredictCommand::new)
+                .register(VersionCommand.class, VersionCommand::new)
+                .dispatch(args);
     }
 }
