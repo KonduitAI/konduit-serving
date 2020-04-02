@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Name(value = "stop", priority = 1)
 @Summary("Stop a running konduit server")
 @Description("This command stops a konduit server started with the `serve` command. The command requires the " +
         "serving id as argument. Use the `list` command to get the list of running konduit servers")
