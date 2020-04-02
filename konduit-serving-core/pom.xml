@@ -157,16 +157,7 @@
             <groupId>org.apache.arrow</groupId>
             <artifactId>arrow-memory</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>onnxruntime</artifactId>
-            <version>${onnxruntime.javacpp.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>onnxruntime-platform</artifactId>
-            <version>${onnxruntime.javacpp.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>opencv-platform</artifactId>

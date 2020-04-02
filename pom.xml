@@ -151,6 +151,19 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>onnxruntime</artifactId>
+                <version>${onnxruntime.javacpp.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>onnxruntime-platform</artifactId>
+                <version>${onnxruntime.javacpp.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -739,6 +752,12 @@
     </repositories>
 
     <profiles>
+        <profile>
+            <id>onnx</id>
+            <modules>
+                <module>konduit-serving-onnx</module>
+            </modules>
+        </profile>
         <profile>
             <id>jetson-nano</id>
             <modules>
