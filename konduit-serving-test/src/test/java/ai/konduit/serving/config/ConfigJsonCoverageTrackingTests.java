@@ -16,6 +16,10 @@
 package ai.konduit.serving.config;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.metrics.ColumnDistribution;
+import ai.konduit.serving.config.metrics.NoOpMetricsConfig;
+import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
+import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
@@ -63,7 +67,7 @@ public class ConfigJsonCoverageTrackingTests {
 
     @AfterClass
     public static void afterClass(){
-        if(!seen.containsAll(allClasses)){
+        if(!seen.containsAll(allClasses)) {
             List<String> notTested = new ArrayList<>();
             for(Class<?> c : allClasses){
                 if(!seen.contains(c)) {
@@ -134,7 +138,7 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @Test
-    public void testInferenceConfiguration(){
+    public void testInferenceConfiguration() {
         InferenceConfiguration conf = InferenceConfiguration.builder()
                 .step(PythonStep.builder()
                         .pythonConfig("x", PythonConfig.builder().pythonCode("import numpy as np\nreturn np.ones(1)").build())
@@ -169,17 +173,23 @@ public class ConfigJsonCoverageTrackingTests {
                 .outputNames(Arrays.asList("z","a"))
                 .inputSchema("x", Arrays.asList(SchemaType.NDArray, SchemaType.Boolean))
                 .outputSchema("z", Arrays.asList(SchemaType.Image, SchemaType.Categorical))
-        .build());
+                .build());
     }
 
     @Test
-    public void testTransformProcessStep(){
-        testConfigSerDe(TransformProcessStep.builder()
+    public void testTransformProcessStep() {
+        TransformProcessStep build = TransformProcessStep.builder()
                 .transformProcess("x", new TransformProcess.Builder(new Schema.Builder().addColumnString("col").build())
-                        .stringToCategorical("col", Arrays.asList("a","b","c"))
+                        .stringToCategorical("col", Arrays.asList("a", "b", "c"))
                         .categoricalToOneHot("col")
                         .build())
-            .build());
+                .build();
+        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+                .step(build)
+                .build();
+
+        InferenceConfiguration.fromJson(inferenceConfiguration.toJson());
+        testConfigSerDe(build);
     }
 
     @Test
@@ -211,13 +221,36 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @Test
+    public void testMetricConfig() {
+        ServingConfig servingConfig = ServingConfig.builder()
+                .metricsConfigurations(Arrays.asList(NoOpMetricsConfig.builder().build(),
+                        ClassificationMetricsConfig
+                                .builder().classificationLabels(Arrays.asList("0")).build(),
+                        RegressionMetricsConfig
+                                .builder().regressionColumnLabels(Arrays.asList("0")).sampleTypes(Arrays.asList(RegressionMetricsConfig.SampleType.MAX)).build()))
+                .build();
+        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+                .servingConfig(servingConfig)
+                .build();
+        assertEquals(inferenceConfiguration,InferenceConfiguration.fromJson(inferenceConfiguration.toJson()));
+
+        testConfigSerDe(ColumnDistribution.builder().build());
+        testConfigSerDe(NoOpMetricsConfig
+                .builder().build());
+        testConfigSerDe(ClassificationMetricsConfig
+                .builder().classificationLabels(Arrays.asList("0")).build());
+        testConfigSerDe(RegressionMetricsConfig
+                .builder().regressionColumnLabels(Arrays.asList("0")).sampleTypes(Arrays.asList(RegressionMetricsConfig.SampleType.MAX)).build());
+    }
+
+    @Test
     public void testModelStep(){
         testConfigSerDe(ModelStep.builder().modelConfig(DL4JConfig.builder()
                 .modelConfigType(ModelConfigType.dl4j("/my/path/here")).build()).build());
     }
 
     @Test
-    public void testMemMapConfig(){
+    public void testMemMapConfig() {
         testConfigSerDe(MemMapConfig.builder().arrayPath("/my/array/path").initialMemmapSize(100000).unkVectorPath("/my/array/unknown").build());
     }
 
@@ -225,6 +258,19 @@ public class ConfigJsonCoverageTrackingTests {
     public void testParallelInferenceConfig(){
         testConfigSerDe(ParallelInferenceConfig.defaultConfig());
         testConfigSerDe(ParallelInferenceConfig.builder().batchLimit(5).workers(3).queueLimit(2).inferenceMode(InferenceMode.SEQUENTIAL).build());
+    }
+
+    @Test
+    public void testOnnxConfig(){
+        OnnxConfig d = OnnxConfig.builder()
+                .modelConfigType(ModelConfigType.onnx("/Some/Path/Here"))
+                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
+                        .inputDataType("in", TensorDataType.FLOAT)
+                        .outputDataType("out", TensorDataType.FLOAT)
+                        .build())
+                .build();
+
+        testConfigSerDe(d);
     }
 
     @Test

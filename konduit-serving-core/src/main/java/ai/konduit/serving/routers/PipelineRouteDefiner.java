@@ -27,11 +27,18 @@ import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.config.metrics.MetricsConfig;
+import ai.konduit.serving.config.metrics.MetricsRenderer;
+import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
+import ai.konduit.serving.config.metrics.impl.MetricsBinderRendererAdapter;
+import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
+import ai.konduit.serving.metrics.ClassificationMetrics;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.metrics.NativeMetrics;
+import ai.konduit.serving.metrics.RegressionMetrics;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
@@ -69,7 +76,9 @@ import org.apache.http.HttpHeaders;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.base.Preconditions;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.io.ClassPathResource;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -96,7 +105,7 @@ public class PipelineRouteDefiner {
     protected LongTaskTimer inferenceExecutionTimer, batchCreationTimer;
     protected HealthCheckHandler healthCheckHandler;
     private static JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
-
+    private List<MetricsRenderer> metricsRenderers;
 
     public List<String> inputNames() {
         return pipelineExecutioner.inputNames();
@@ -145,32 +154,77 @@ public class PipelineRouteDefiner {
                     .builder("batch_creation")
                     .register(registry);
         }
+        else {
+            log.info("Not using metrics registry.");
+        }
 
+        metricsRenderers = new ArrayList<>();
         if (inferenceConfiguration.getServingConfig().getMetricTypes() != null && registry != null) {
             //don't add more than one type
             for (MetricType metricType : new HashSet<>(inferenceConfiguration.getServingConfig().getMetricTypes())) {
                 switch (metricType) {
                     case CLASS_LOADER:
-                        new ClassLoaderMetrics().bindTo(registry);
+                        addMetric(new ClassLoaderMetrics(),registry);
                         break;
                     case JVM_MEMORY:
-                        new JvmMemoryMetrics().bindTo(registry);
+                        addMetric(new JvmMemoryMetrics(),registry);
                         break;
                     case JVM_GC:
-                        new JvmGcMetrics().bindTo(registry);
+                        addMetric(new JvmGcMetrics(),registry);
                         break;
                     case PROCESSOR:
-                        new ProcessorMetrics().bindTo(registry);
+                        addMetric(new ProcessorMetrics(),registry);
                         break;
                     case JVM_THREAD:
-                        new JvmThreadMetrics().bindTo(registry);
+                        addMetric(new JvmThreadMetrics(),registry);
                         break;
                     case LOGGING_METRICS:
-                        new LogbackMetrics().bindTo(registry);
+                        addMetric(new LogbackMetrics(),registry);
                         break;
                     case NATIVE:
-                        new NativeMetrics().bindTo(registry);
+                        addMetric(new NativeMetrics(),registry);
                         break;
+                    case CLASSIFICATION:
+                        if(inferenceConfiguration.getServingConfig().getMetricsConfigurations() == null) {
+                            throw new IllegalStateException("Please specify classification labels to pair with classification metrics");
+                        }
+                        List<MetricsConfig> metricsConfigurations = inferenceConfiguration.getServingConfig().getMetricsConfigurations();
+                        for(MetricsConfig metricsConfig : metricsConfigurations) {
+                            if(metricsConfig instanceof ClassificationMetricsConfig) {
+                                ClassificationMetricsConfig classificationMetricsConfig = (ClassificationMetricsConfig) metricsConfig;
+                                if(classificationMetricsConfig.getClassificationLabels() == null || classificationMetricsConfig.getClassificationLabels().isEmpty()) {
+                                    throw new IllegalStateException("No classification labels configured for the classification metrics configuration. Please specify labels.");
+                                }
+
+                                ClassificationMetrics classificationMetrics = new ClassificationMetrics(classificationMetricsConfig);
+                                classificationMetrics.bindTo(registry);
+                                metricsRenderers.add(classificationMetrics);
+                            }
+
+                        }
+
+                        break;
+                    case REGRESSION:
+                        if(inferenceConfiguration.getServingConfig().getMetricsConfigurations() == null) {
+                            throw new IllegalStateException("Please specify classification labels to pair with regression metrics");
+                        }
+
+                        List<MetricsConfig> metricsConfigurations2 = inferenceConfiguration.getServingConfig().getMetricsConfigurations();
+                        for(MetricsConfig metricsConfig : metricsConfigurations2) {
+                            if(metricsConfig instanceof RegressionMetricsConfig) {
+                                RegressionMetricsConfig regressionMetricsConfig = (RegressionMetricsConfig) metricsConfig;
+                                if(regressionMetricsConfig.getRegressionColumnLabels() == null || regressionMetricsConfig.getRegressionColumnLabels().isEmpty()) {
+                                    throw new IllegalStateException("No regression labels configured for the regression metrics configuration. Please specify labels.");
+                                }
+
+                                RegressionMetrics regressionMetrics = new RegressionMetrics(regressionMetricsConfig);
+                                regressionMetrics.bindTo(registry);
+                                metricsRenderers.add(regressionMetrics);
+                            }
+
+                        }
+                        break;
+
                     case GPU:
                         try {
                             MeterBinder meterBinder = (MeterBinder) Class.forName("ai.konduit.serving.gpu.GpuMetrics").newInstance();
@@ -226,40 +280,40 @@ public class PipelineRouteDefiner {
         if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
             router.get("/logs")
                     .handler(ctx -> {
-                try {
-                    ctx.response()
-                            .putHeader(HttpHeaders.CONTENT_TYPE, "text/html")
-                            .end(FileUtils.readFileToString(new ClassPathResource("web/logs_page.html").getFile(), StandardCharsets.UTF_8));
-                } catch (Exception e) {
-                    ctx.fail(500, e);
-                }
-            });
+                        try {
+                            ctx.response()
+                                    .putHeader(HttpHeaders.CONTENT_TYPE, "text/html")
+                                    .end(FileUtils.readFileToString(new ClassPathResource("web/logs_page.html").getFile(), StandardCharsets.UTF_8));
+                        } catch (Exception e) {
+                            ctx.fail(500, e);
+                        }
+                    });
 
-        /**
-         * Sets up and endpoint to see server logs if {@link ServingConfig#isCreateLoggingEndpoints()}
-         * is true. Returns the number of last few lines determines by the path param
-         * {@code numberOfLastLinesToRead}. If the path param is an invalid integer,
-         * then the whole log file data will be read and returned.
-         */
+            /**
+             * Sets up and endpoint to see server logs if {@link ServingConfig#isCreateLoggingEndpoints()}
+             * is true. Returns the number of last few lines determines by the path param
+             * {@code numberOfLastLinesToRead}. If the path param is an invalid integer,
+             * then the whole log file data will be read and returned.
+             */
             router.get("/logs/:numberOfLastLinesToRead")
                     .handler(ctx -> {
-                String numberOfLinesString = ctx.pathParam("numberOfLastLinesToRead");
+                        String numberOfLinesString = ctx.pathParam("numberOfLastLinesToRead");
 
-                ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
-                try {
-                    if (numberOfLinesString.matches("-?\\d+")) {
-                        ctx.response().end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
-                    } else if("download".equalsIgnoreCase(numberOfLinesString)) {
-                        ctx.response().sendFile(LogUtils.getLogsFile().getAbsolutePath()).end();
-                    } else if("downloadAsZip".equalsIgnoreCase(numberOfLinesString)) {
-                        ctx.response().sendFile(LogUtils.getZippedLogs().getAbsolutePath()).end();
-                    } else {
-                        ctx.response().end(LogUtils.getLogs(-1));
-                    }
-                } catch (Exception e) {
-                    ctx.fail(500, e);
-                }
-            });
+                        ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
+                        try {
+                            if (numberOfLinesString.matches("-?\\d+")) {
+                                ctx.response().end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
+                            } else if("download".equalsIgnoreCase(numberOfLinesString)) {
+                                ctx.response().sendFile(LogUtils.getLogsFile().getAbsolutePath()).end();
+                            } else if("downloadAsZip".equalsIgnoreCase(numberOfLinesString)) {
+                                ctx.response().sendFile(LogUtils.getZippedLogs().getAbsolutePath()).end();
+                            } else {
+                                ctx.response().end(LogUtils.getLogs(-1));
+                            }
+                        } catch (Exception e) {
+                            ctx.fail(500, e);
+                        }
+                    });
         }
 
         /**
@@ -273,6 +327,9 @@ public class PipelineRouteDefiner {
                 });
 
         Preconditions.checkNotNull(inferenceConfiguration.getServingConfig(), "Please define a serving configuration.");
+        generalHandler(inferenceConfiguration, router, log);
+
+
         router.post().handler(BodyHandler.create()
                 .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
                 .setDeleteUploadedFilesOnEnd(true)
@@ -313,8 +370,6 @@ public class PipelineRouteDefiner {
                     "content-type: application/json only accepts JSON as " +
                             "input data format and not " + inputDataFormat.name());
 
-            pipelineExecutioner.init(inputDataFormat, predictionType);
-
             initializeSchemas(inferenceConfiguration, true);
 
             try {
@@ -323,16 +378,32 @@ public class PipelineRouteDefiner {
                     start = inferenceExecutionTimer.start();
                 }
                 String jsonString = ctx.getBody().toString();
-                pipelineExecutioner.doInference(
+                Record[] records = pipelineExecutioner.doInference(
                         ctx,
                         predictionType,
                         jsonString,
                         inputSchema,
                         null,
                         outputSchema,
+			inputDataFormat,
                         inferenceConfiguration.getServingConfig().getOutputDataFormat());
+
                 if (start != null)
                     start.stop();
+
+                vertx.runOnContext(handler -> {
+                    log.debug("Updating metrics post inference");
+                    for(MetricsRenderer metricsRenderer : metricsRenderers) {
+                        metricsRenderer.updateMetrics(records);
+                    }
+
+                    log.debug("Done updating metrics post inference");
+
+
+                });
+
+
+
             } catch (Exception e) {
                 log.error("Unable to perform json inference", e);
                 ctx.response().setStatusCode(500);
@@ -359,8 +430,7 @@ public class PipelineRouteDefiner {
             } catch(Exception e) {
                 predictionType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
             }
-
-            pipelineExecutioner.init(inputDataFormat, predictionType);
+            pipelineExecutioner.init();
 
             Map<String, InputAdapter<io.vertx.core.buffer.Buffer, ?>> adapters = getInputAdapterMap(ctx);
 
@@ -434,14 +504,16 @@ public class PipelineRouteDefiner {
                     if (inferenceExecutionTimer != null)
                         start = inferenceExecutionTimer.start();
 
-                    pipelineExecutioner.doInference(
+                    Record[] records = pipelineExecutioner.doInference(
                             ctx,
                             predictionType,
                             inputs,
                             inputSchema,
                             null,
                             outputSchema,
+			    inputDataFormat,
                             inferenceConfiguration.getServingConfig().getOutputDataFormat());
+
 
                     if (start != null)
                         start.stop();
@@ -449,6 +521,16 @@ public class PipelineRouteDefiner {
                     if (inferenceConfiguration.serving().isLogTimings()) {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
+                    vertx.runOnContext(handler -> {
+                        log.debug("Updating metrics post inference");
+                        for(MetricsRenderer renderer : metricsRenderers) {
+                            renderer.updateMetrics(records);
+                        }
+
+                        log.debug("Done updating metrics post inference");
+
+
+                    });
 
                     blockingCall.complete();
                 } catch (Exception e) {
@@ -530,7 +612,7 @@ public class PipelineRouteDefiner {
                     if (batchCreationTimer != null) {
                         start = batchCreationTimer.start();
                     }
-                    pipelineExecutioner.doInference(ctx, dataFormat, inputs);
+                    INDArray[] outputs = pipelineExecutioner.doInference(ctx, predictionType, inputDataFormat, dataFormat, inputs);
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
@@ -538,6 +620,21 @@ public class PipelineRouteDefiner {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos))
                                 + " milliseconds");
                     }
+
+
+
+                    vertx.runOnContext(handler2 -> {
+                        log.debug("Updating metrics post inference");
+
+                        for(MetricsRenderer renderer : metricsRenderers) {
+                            renderer.updateMetrics(outputs);
+                        }
+
+                        log.debug("Done updating metrics post inference");
+
+                    });
+
+
                     handler.complete();
                 } catch (Exception e) {
                     log.error("Failed to do inference ", e);
@@ -554,6 +651,7 @@ public class PipelineRouteDefiner {
             //due to needing to sometime initialize retraining routes
             try {
                 pipelineExecutioner = new PipelineExecutioner(inferenceConfiguration);
+                pipelineExecutioner.init();
             } catch (Exception e) {
                 log.error("Failed to initialize. Shutting down.", e);
             }
@@ -563,6 +661,26 @@ public class PipelineRouteDefiner {
 
         return router;
     }
+
+    static void generalHandler(InferenceConfiguration inferenceConfiguration, Router router, Logger log) {
+        router.post().handler(BodyHandler.create()
+                .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
+                .setDeleteUploadedFilesOnEnd(true)
+                .setMergeFormAttributes(true))
+                .failureHandler(failureHandlder -> {
+                    if (failureHandlder.statusCode() == 404) {
+                        log.warn("404 at route " + failureHandlder.request().path());
+                    } else if (failureHandlder.failed()) {
+                        if (failureHandlder.failure() != null) {
+                            log.error("Request failed with cause ", failureHandlder.failure());
+                        } else {
+                            log.error("Request failed with unknown cause.");
+                        }
+                    }
+                });
+    }
+
+
 
 
     private void initializeSchemas(InferenceConfiguration inferenceConfiguration, boolean inputRequired) {
@@ -614,5 +732,12 @@ public class PipelineRouteDefiner {
             default:
                 throw new IllegalStateException("Illegal adapter type!");
         }
+    }
+
+
+    private void addMetric(MeterBinder meterBinder,MeterRegistry registry) {
+        MetricsBinderRendererAdapter metricsBinderRendererAdapter = new MetricsBinderRendererAdapter(meterBinder);
+        metricsBinderRendererAdapter.bindTo(registry);
+        metricsRenderers.add(metricsBinderRendererAdapter);
     }
 }

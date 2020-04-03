@@ -1,6 +1,7 @@
 import torch
-from .model.train import Model
 import torchvision.transforms as transforms
+
+from .model.train import Model
 
 transform = None
 model = None

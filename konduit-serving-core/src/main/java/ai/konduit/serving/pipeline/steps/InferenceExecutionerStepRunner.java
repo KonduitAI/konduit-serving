@@ -79,6 +79,9 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
                 case PMML:
                     inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.PmmlInferenceExecutionerFactory").newInstance();
                     break;
+                case ONNX:
+                    inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.OnnxInferenceExecutionerFactory").newInstance();
+                    break;
                 case KERAS:
                     inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.KerasInferenceExecutionerFactory").newInstance();
                     break;

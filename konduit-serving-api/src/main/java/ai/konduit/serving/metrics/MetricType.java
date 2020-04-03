@@ -22,6 +22,11 @@
 
 package ai.konduit.serving.metrics;
 
+/**
+ * Metric types for prometheus
+ *
+ * @author Adam Gibson
+ */
 public enum MetricType {
     CLASS_LOADER,
     JVM_MEMORY,
@@ -30,5 +35,10 @@ public enum MetricType {
     JVM_THREAD,
     LOGGING_METRICS,
     NATIVE,
-    GPU
+    GPU,
+    //note these are machine learning metrics, not system metrics
+    //these are meant to analyze the output coming form the neural network when running
+    //in production
+    CLASSIFICATION,
+    REGRESSION
 }

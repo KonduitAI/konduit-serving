@@ -115,7 +115,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         }
 
         if (port < 0 || port > 0xFFFF) {
-            startPromise.fail(new Exception(String.format("Valid port range is 0 <= port <= 65535. The given port was %s", port)));
+            startPromise.fail(new Exception("Valid port range is 0 <= port <= 65535. The given port was " + port));
             return;
         }
 
@@ -135,6 +135,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                         try {
                             ((ContextInternal) context).getDeployment().deploymentOptions().setConfig(new JsonObject(inferenceConfiguration.toJson()));
 
+                            log.info("Inference server is listening on host: \"{}\"", inferenceConfiguration.getServingConfig().getListenHost());
                             log.info("Inference server started on port {} with {} pipeline steps", port, nSteps);
                             startPromise.complete();
                         } catch (Exception exception) {
