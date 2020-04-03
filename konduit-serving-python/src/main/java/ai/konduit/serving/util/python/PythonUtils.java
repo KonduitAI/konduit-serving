@@ -83,7 +83,7 @@ public class PythonUtils {
      * @return the output {@link PythonVariables} where each
      * name in the map is associated with a column name in the schema.
      * A proper type is also chosen based on the schema
-     * @throws Exception
+     * @throws Exception throws exception if there's an issue while converting schema to python variables.
      */
     public static PythonVariables schemaToPythonVariables(Schema schema) throws Exception {
         PythonVariables pyVars = new PythonVariables();
@@ -198,11 +198,11 @@ public class PythonUtils {
         } else if (dtypeName.equals("float32")) {
             dtype = DataType.FLOAT;
         } else if (dtypeName.equals("int16")) {
-            dtype = DataType.SHORT;
+            dtype = DataType.INT16;
         } else if (dtypeName.equals("int32")) {
-            dtype = DataType.INT;
+            dtype = DataType.INT32;
         } else if (dtypeName.equals("int64")) {
-            dtype = DataType.LONG;
+            dtype = DataType.INT64;
         } else {
             throw new RuntimeException("Unsupported array type " + dtypeName + ".");
         }
@@ -318,11 +318,11 @@ public class PythonUtils {
         } else if (dtypeName.equals("float32")) {
             dtype = DataType.FLOAT;
         } else if (dtypeName.equals("int16")) {
-            dtype = DataType.SHORT;
+            dtype = DataType.INT16;
         } else if (dtypeName.equals("int32")) {
-            dtype = DataType.INT;
+            dtype = DataType.INT32;
         } else if (dtypeName.equals("int64")) {
-            dtype = DataType.LONG;
+            dtype = DataType.INT64;
         } else {
             throw new RuntimeException("Unsupported array type " + dtypeName + ".");
         }
@@ -344,6 +344,4 @@ public class PythonUtils {
         NumpyArray numpyArray = new NumpyArray(address, shape, stride, dtype, true);
         return numpyArray;
     }
-
-
 }

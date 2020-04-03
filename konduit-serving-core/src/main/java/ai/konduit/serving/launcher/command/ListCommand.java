@@ -72,10 +72,12 @@ public class ListCommand extends DefaultCommand {
                 cmd.add("WMIC");
                 cmd.add("PROCESS");
                 cmd.add("WHERE");
-                cmd.add("CommandLine like '%java.exe%'");
+                cmd.add("\"CommandLine like '%serving.id%' and name!='wmic.exe'\"");
                 cmd.add("GET");
                 cmd.add("CommandLine");
                 cmd.add("/VALUE");
+
+                //out.println(String.join(" ", cmd));
 
                 dumpFoundVertxApplications(cmd);
             } catch (InterruptedException e) {

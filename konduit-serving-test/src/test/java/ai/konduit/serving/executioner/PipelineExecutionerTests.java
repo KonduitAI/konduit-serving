@@ -175,7 +175,6 @@ public class PipelineExecutionerTests {
                 .inputDataType("image_tensor", TensorDataType.INT64)
                 .build();
 
-
         TensorFlowConfig modelConfig = TensorFlowConfig.builder()
                 .tensorDataTypesConfig(tensorDataTypesConfig)
                 .modelConfigType(
@@ -184,7 +183,6 @@ public class PipelineExecutionerTests {
                                 .modelType(ModelConfig.ModelType.TENSORFLOW)
                                 .build()
                 ).build();
-
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)

@@ -138,6 +138,8 @@ public class ConfigCommand extends DefaultCommand {
         return new JsonObject(
                 new InferenceConfiguration(
                         Arrays.asList(ImageLoadingStep.builder()
+                                .inputName("default")
+                                .outputName("default")
                                 .build()),
                         ServingConfig.builder()
                                 .build(),
@@ -150,6 +152,8 @@ public class ConfigCommand extends DefaultCommand {
         return new JsonObject(
                 new InferenceConfiguration(
                         Arrays.asList(PythonStep.builder()
+                                .inputName("default")
+                                .outputName("default")
                                 .build()),
                         ServingConfig.builder()
                                 .build(),
@@ -162,6 +166,8 @@ public class ConfigCommand extends DefaultCommand {
         return new JsonObject(
                 new InferenceConfiguration(
                         Arrays.asList(ModelStep.builder()
+                                .inputName("default")
+                                .outputName("default")
                                 .modelConfig(
                                         TensorFlowConfig.builder()
                                         .build()
@@ -178,6 +184,8 @@ public class ConfigCommand extends DefaultCommand {
         return new JsonObject(
                 new InferenceConfiguration(
                         Arrays.asList(ModelStep.builder()
+                                .inputName("default")
+                                .outputName("default")
                                 .build()),
                         ServingConfig.builder()
                                 .build(),
@@ -190,6 +198,8 @@ public class ConfigCommand extends DefaultCommand {
         return new JsonObject(
                 new InferenceConfiguration(
                         Arrays.asList(ModelStep.builder()
+                                .inputName("default")
+                                .outputName("default")
                                 .modelConfig(
                                         PmmlConfig.builder()
                                                 .build()
@@ -206,6 +216,8 @@ public class ConfigCommand extends DefaultCommand {
         return new JsonObject(
                 new InferenceConfiguration(
                         Arrays.asList(ModelStep.builder()
+                                .inputName("default")
+                                .outputName("default")
                                 .modelConfig(
                                         DL4JConfig.builder()
                                                 .build()
@@ -222,6 +234,8 @@ public class ConfigCommand extends DefaultCommand {
         return new JsonObject(
                 new InferenceConfiguration(
                         Arrays.asList(ModelStep.builder()
+                                .inputName("default")
+                                .outputName("default")
                                 .modelConfig(
                                         KerasConfig.builder()
                                                 .build()

@@ -116,13 +116,16 @@ public class StopCommand extends DefaultCommand {
                 "WMIC",
                 "PROCESS",
                 "WHERE",
-                "CommandLine like '%serving.id=" + id + "%'",
+                "\"CommandLine like '%serving.id=" + id + "' and name!='wmic.exe'\"",
                 "CALL",
                 "TERMINATE"
         );
 
+        //out.println(String.join(" ", cmd));
+
         try {
             final Process process = new ProcessBuilder(cmd).start();
+            //out.println(IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8));
             int result = process.waitFor();
             out.println("Application '" + id + "' terminated with status " + result);
             if (!redeploy) {
@@ -140,7 +143,7 @@ public class StopCommand extends DefaultCommand {
 
     private String pid() {
         try {
-            final Process process = new ProcessBuilder(Arrays.asList("sh", "-c", "ps ax | grep \"" + id + "\"")).start();
+            final Process process = new ProcessBuilder(Arrays.asList("sh", "-c", "ps ax | grep \"" + id + "$\"")).start();
             BufferedReader reader =
                     new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;

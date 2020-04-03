@@ -30,7 +30,7 @@ import java.util.*;
 @Summary("Start a konduit server application in background")
 @Description("Start a konduit server application as a background service. " +
         "The application is identified with an id that can be set using the `--serving-id` or `-id` option. " +
-        "The application can be stopped with the `stop` command." +
+        "The application can be stopped with the `stop` command. " +
         "This command takes the `run` command parameters. To see the " +
         "run command parameters, execute `run --help`")
 public class ServeCommand extends StartCommand {

@@ -28,6 +28,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 
 /**
  * TensorFlow extension of {@link ModelConfig}.
@@ -41,7 +42,7 @@ public class TensorFlowConfig extends ModelConfig {
 
     public final static String TENSORFLOW_EXECUTION_CONFIG_KEY = "tensorFlowConfig";
     private String configProtoPath;
-    private org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig savedModelConfig;
+    private SavedModelConfig savedModelConfig;
 
     public static TensorFlowConfig fromJson(String json){
         return ObjectMappers.fromJson(json, TensorFlowConfig.class);

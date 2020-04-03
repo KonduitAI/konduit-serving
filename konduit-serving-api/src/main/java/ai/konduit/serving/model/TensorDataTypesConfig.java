@@ -36,8 +36,8 @@ import java.util.Map;
  */
 public class TensorDataTypesConfig {
     @Singular
-    private Map<String, ai.konduit.serving.model.TensorDataType> inputDataTypes;
+    private Map<String, TensorDataType> inputDataTypes;
     @Singular
-    private Map<String, ai.konduit.serving.model.TensorDataType> outputDataTypes;
+    private Map<String, TensorDataType> outputDataTypes;
 
 }

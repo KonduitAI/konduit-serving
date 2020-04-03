@@ -21,6 +21,7 @@ package ai.konduit.serving.launcher.command;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.*;
 
+import java.io.File;
 import java.util.Arrays;
 
 import static ai.konduit.serving.launcher.KonduitServingLauncher.KONDUIT_PREFIX;
@@ -44,6 +45,30 @@ public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand 
             throw new CLIException(String.format("Invalid service type %s. " +
                     "Allowed values are: %s", konduitServiceType,
                     Arrays.asList(services.keySet())));
+        }
+    }
+
+    /**
+     * The main verticle configuration, it can be a json file or a json string.
+     *
+     * @param configuration the configuration
+     */
+    @Option(longName = "conf", argName = "config")
+    @Description("Specifies configuration that should be provided to the verticle. <config> should reference either a " +
+            "text file containing a valid JSON object which represents the configuration OR be a JSON string.")
+    public void setConfig(String configuration) {
+        File file = new File(configuration);
+        if(file.exists()) {
+            configuration = file.getAbsolutePath();
+        }
+
+        if (configuration != null) {
+            // For inlined configuration remove first and end single and double quotes if any
+            this.config = configuration.trim()
+                    .replaceAll("^\"|\"$", "")
+                    .replaceAll("^'|'$", "");
+        } else {
+            this.config = null;
         }
     }
 }
