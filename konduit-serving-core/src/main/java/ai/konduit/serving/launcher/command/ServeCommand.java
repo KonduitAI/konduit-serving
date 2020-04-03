@@ -22,8 +22,12 @@ import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.impl.launcher.commands.StartCommand;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Name("serve")
@@ -33,6 +37,7 @@ import java.util.*;
         "The application can be stopped with the `stop` command. " +
         "This command takes the `run` command parameters. To see the " +
         "run command parameters, execute `run --help`")
+@Slf4j
 public class ServeCommand extends StartCommand {
 
     private String id;
@@ -197,6 +202,35 @@ public class ServeCommand extends StartCommand {
         if (id == null) {
             id = UUID.randomUUID().toString();
         }
+
+        if (isProcessExists(id)) {
+            out.println(String.format("A konduit server with an id: '%s' already exists.", id));
+            System.exit(1);
+        }
+
         return id;
+    }
+
+    public boolean isProcessExists(String id) {
+        List<String> args;
+
+        if(SystemUtils.IS_OS_WINDOWS) {
+            args = Arrays.asList("WMIC", "PROCESS", "WHERE", "\"CommandLine like '%serving.id=" + id + "' and name!='wmic.exe'\"", "GET", "CommandLine");
+        } else {
+            args = Arrays.asList("sh", "-c", "ps ax | grep \"Dserving.id=" + id + "$\"");
+        }
+
+        String output = "";
+        try {
+            Process process = new ProcessBuilder(args).start();
+            output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+        } catch (Exception exception) {
+            out.println("An error occurred while checking for existing processes:\n" + exception.getMessage());
+            System.exit(1);
+        }
+
+        return output.trim()
+                .replace(System.lineSeparator(), "")
+                .matches("(.*)Dserving.id=" + id);
     }
 }

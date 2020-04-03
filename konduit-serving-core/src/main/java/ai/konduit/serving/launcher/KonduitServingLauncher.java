@@ -66,8 +66,6 @@ public class KonduitServingLauncher extends Launcher {
     static {
         LogUtils.setAppendersForCommandLine();
 
-        SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
-
         setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
         LoggerFactory.getLogger(LoggerFactory.class); // Required for Logback to work in Vertx
 

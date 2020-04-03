@@ -21,9 +21,12 @@ package ai.konduit.serving.launcher.command;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -68,9 +71,14 @@ public class StopCommand extends DefaultCommand {
     @Override
     public void run() {
         if (id == null) {
-            out.println("Application id not specified...");
+            out.println("Application id not specified. See `stop --help` for more info.");
             executionContext.execute("list");
             return;
+        }
+
+        if(!isProcessExists(id)) {
+            out.println(String.format("No konduit server exists with an id: '%s'.", id));
+            System.exit(0);
         }
 
         out.println("Stopping konduit server '" + id + "'");
@@ -143,7 +151,7 @@ public class StopCommand extends DefaultCommand {
 
     private String pid() {
         try {
-            final Process process = new ProcessBuilder(Arrays.asList("sh", "-c", "ps ax | grep \"" + id + "$\"")).start();
+            final Process process = new ProcessBuilder(Arrays.asList("sh", "-c", "ps ax | grep \"Dserving.id=" + id + "$\"")).start();
             BufferedReader reader =
                     new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -162,5 +170,28 @@ public class StopCommand extends DefaultCommand {
             e.printStackTrace(out);
         }
         return null;
+    }
+
+    public boolean isProcessExists(String id) {
+        List<String> args;
+
+        if(SystemUtils.IS_OS_WINDOWS) {
+            args = Arrays.asList("WMIC", "PROCESS", "WHERE", "\"CommandLine like '%serving.id=" + id + "' and name!='wmic.exe'\"", "GET", "CommandLine");
+        } else {
+            args = Arrays.asList("sh", "-c", "ps ax | grep \"Dserving.id=" + id + "$\"");
+        }
+
+        String output = "";
+        try {
+            Process process = new ProcessBuilder(args).start();
+            output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+        } catch (Exception exception) {
+            out.println("An error occurred while checking for existing processes:\n" + exception.getMessage());
+            System.exit(1);
+        }
+
+        return output.trim()
+                .replace(System.lineSeparator(), "")
+                .matches("(.*)Dserving.id=" + id);
     }
 }
