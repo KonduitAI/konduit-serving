@@ -36,7 +36,6 @@ import static org.bytedeco.onnxruntime.global.onnxruntime.ORT_LOGGING_LEVEL_WARN
 
 @Data
 @AllArgsConstructor
-
 public class OnnxModelLoader implements ModelLoader<Session> {
 
     private String modelPath;

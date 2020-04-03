@@ -22,14 +22,18 @@
 package ai.konduit.serving.onnx.threadpool;
 
 
+
 import ai.konduit.serving.model.loader.ModelLoader;
-import ai.konduit.serving.threadpool.onnx.observables.BasicOnnxInferenceObservable;
-import ai.konduit.serving.threadpool.onnx.observables.BatchedOnnxInferenceObservable;
-import ai.konduit.serving.threadpool.onnx.observables.OnnxObservable;
+import ai.konduit.serving.onnx.threadpool.observables.BasicOnnxInferenceObservable;
+import ai.konduit.serving.onnx.threadpool.observables.BatchedOnnxInferenceObservable;
+import ai.konduit.serving.onnx.threadpool.observables.OnnxObservable;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.bytedeco.javacpp.*;
+import org.bytedeco.javacpp.indexer.*;
+import org.bytedeco.onnxruntime.*;
 import org.deeplearning4j.parallelism.inference.InferenceMode;
 import org.deeplearning4j.parallelism.inference.observers.BasicInferenceObserver;
 import org.nd4j.linalg.api.buffer.DataBuffer;
