@@ -53,7 +53,7 @@ public class ServingConfig implements TextConfig {
     private Output.DataFormat outputDataFormat = Output.DataFormat.JSON;
 
     @Builder.Default
-    private String uploadsDirectory = "file-uploads/";
+    private String uploadsDirectory = System.getProperty("java.io.tmpdir");
 
     @Builder.Default
     private boolean logTimings = false;
