@@ -18,15 +18,17 @@
 
 package ai.konduit.serving.launcher.command;
 
-import io.vertx.core.cli.annotations.Description;
-import io.vertx.core.cli.annotations.Name;
-import io.vertx.core.cli.annotations.Option;
-import io.vertx.core.cli.annotations.Summary;
+import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.commands.StartCommand;
 
 @Name("serve")
 @Summary("Start a konduit server application in background")
-@Description("Start a konduit server application as a background service. The application is identified with an id that can be set using the `serving-id` option. If not set a random UUID is generated. The application can be stopped with the `stop` command.")
+@Description("Start a konduit server application as a background service. " +
+        "The application is identified with an id that can be set using the `--serving-id` or `-id` option. " +
+        "If not set, a random UUID is generated. " +
+        "The application can be stopped with the `stop` command." +
+        "This command takes the `run` command parameters. To see the " +
+        "run command parameters, execute `run --help`")
 public class ServeCommand extends StartCommand {
 
     /**
@@ -39,4 +41,5 @@ public class ServeCommand extends StartCommand {
     public void setApplicationId(String id) {
         super.setApplicationId(id);
     }
+
 }

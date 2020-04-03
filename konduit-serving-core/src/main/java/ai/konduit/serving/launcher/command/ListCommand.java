@@ -50,7 +50,7 @@ public class ListCommand extends DefaultCommand {
      */
     @Override
     public void run() {
-        out.println("Listing vert.x applications...");
+        out.println("Listing konduit servers...");
         List<String> cmd = new ArrayList<>();
         if (!ExecUtils.isWindows()) {
             try {
@@ -105,7 +105,7 @@ public class ListCommand extends DefaultCommand {
         process.waitFor();
         reader.close();
         if (none) {
-            out.println("No vert.x application found.");
+            out.println("No konduit servers found.");
         }
     }
 

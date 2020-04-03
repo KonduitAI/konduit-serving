@@ -25,19 +25,23 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.vertx.core.Launcher;
+import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import io.vertx.core.spi.VerticleFactory;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
+import org.nd4j.shade.guava.collect.ImmutableMap;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.io.File;
+import java.util.Map;
 
 import static io.vertx.core.file.FileSystemOptions.DEFAULT_FILE_CACHING_DIR;
 import static io.vertx.core.file.impl.FileResolver.CACHE_DIR_BASE_PROP_NAME;
@@ -47,6 +51,13 @@ import static java.lang.System.setProperty;
 
 @Slf4j
 public class KonduitServingLauncher extends Launcher {
+
+    public static final String KONDUIT_PREFIX = "konduit";
+
+    public static final Map<String, String> services = ImmutableMap.of(
+            "inference", InferenceVerticle.class.getName(),
+            "memmap", InferenceVerticle.class.getName()
+    );
 
     InferenceConfiguration inferenceConfiguration;
 
@@ -96,7 +107,24 @@ public class KonduitServingLauncher extends Launcher {
 
     @Override
     public void afterStartingVertx(Vertx vertx) {
-        super.afterStartingVertx(vertx);
+        vertx.registerVerticleFactory(new VerticleFactory() {
+
+            @Override
+            public String prefix() {
+                return "konduit";
+            }
+
+            @Override
+            public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+                String serviceType = verticleName.replace(KONDUIT_PREFIX + ":", "");
+
+                if(services.keySet().contains(serviceType)) {
+                    return (Verticle) ClassLoader.getSystemClassLoader().loadClass(services.get(verticleName)).newInstance();
+                } else {
+                    throw new IllegalArgumentException(String.format("Invalid service type %s. Possible values are: ", services.keySet().toString()));
+                }
+            }
+        });
     }
 
     @Override
@@ -109,10 +137,12 @@ public class KonduitServingLauncher extends Launcher {
                 .unregister("start")
                 .unregister("test")
                 .register(ServeCommand.class, ServeCommand::new)
+                .register(RunCommand.class, RunCommand::new)
                 .register(ListCommand.class, ListCommand::new)
                 .register(StopCommand.class, StopCommand::new)
                 .register(PredictCommand.class, PredictCommand::new)
                 .register(VersionCommand.class, VersionCommand::new)
+                .register(ConfigCommand.class, ConfigCommand::new)
                 .dispatch(args);
     }
 }
