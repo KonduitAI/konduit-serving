@@ -250,10 +250,11 @@ public class ConfigCommand extends DefaultCommand {
 
     private void printOrSave(String output) {
         if(outputFile == null) {
-            log.info(System.lineSeparator() + System.lineSeparator() + output);
+            log.info(output);
         } else {
             try {
                 FileUtils.writeStringToFile(outputFile, output, StandardCharsets.UTF_8);
+                log.info("Config file create successfully at {}", outputFile.getAbsolutePath());
             } catch (IOException exception) {
                 log.error(String.format("Unable to save configuration file to %s", outputFile.getAbsolutePath()), exception);
             }

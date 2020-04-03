@@ -20,6 +20,7 @@ package ai.konduit.serving.launcher;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.launcher.command.*;
+import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
@@ -63,6 +64,8 @@ public class KonduitServingLauncher extends Launcher {
     InferenceConfiguration inferenceConfiguration;
 
     static {
+        LogUtils.setAppendersForCommandLine();
+
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
 
         setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
@@ -119,10 +122,12 @@ public class KonduitServingLauncher extends Launcher {
             public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
                 String serviceType = verticleName.replace(KONDUIT_PREFIX + ":", "");
 
-                if(services.keySet().contains(serviceType)) {
+                if(services.containsKey(serviceType)) {
                     return (Verticle) ClassLoader.getSystemClassLoader().loadClass(services.get(serviceType)).newInstance();
                 } else {
-                    throw new IllegalArgumentException(String.format("Invalid service type %s. Possible values are: ", Arrays.asList(services.keySet())));
+                    log.error(String.format("Invalid service type %s. Possible values are: ", Arrays.asList(services.keySet())));
+                    System.exit(1);
+                    return null;
                 }
             }
         });

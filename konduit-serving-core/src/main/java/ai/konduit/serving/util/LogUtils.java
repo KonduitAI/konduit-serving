@@ -16,10 +16,12 @@
 
 package ai.konduit.serving.util;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.FileAppender;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
@@ -112,6 +114,35 @@ public class LogUtils {
 
             rootLogger.addAppender(fileAppender);
         }
+    }
+
+    /**
+     * Sets the appenders for command line.
+     */
+    public static void setAppendersForCommandLine() {
+        Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+
+        LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
+
+        rootLogger.detachAndStopAllAppenders();
+
+        ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
+
+        PatternLayoutEncoder consolePatternLayoutEncoder = new PatternLayoutEncoder();
+        consolePatternLayoutEncoder.setPattern("%msg%n");
+        consolePatternLayoutEncoder.setContext(context);
+        consolePatternLayoutEncoder.start();
+
+        consoleAppender.setEncoder(consolePatternLayoutEncoder);
+        consoleAppender.start();
+
+        rootLogger.addAppender(consoleAppender);
+
+        ((Logger) LoggerFactory.getLogger("uk.org.lidalia")).setLevel(Level.ERROR);
+        ((Logger) LoggerFactory.getLogger("org")).setLevel(Level.ERROR);
+        ((Logger) LoggerFactory.getLogger("io")).setLevel(Level.ERROR);
+
+        ((Logger) LoggerFactory.getLogger("ai")).setLevel(Level.INFO);
     }
 
     /**
