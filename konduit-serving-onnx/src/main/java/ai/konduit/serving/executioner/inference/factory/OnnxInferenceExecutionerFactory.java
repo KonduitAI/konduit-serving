@@ -25,6 +25,7 @@ import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.OnnxInferenceExecutioner;
 import ai.konduit.serving.model.ModelConfig;
+import ai.konduit.serving.model.loader.OnnxModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
 
 public class OnnxInferenceExecutionerFactory implements InferenceExecutionerFactory {

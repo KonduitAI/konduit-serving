@@ -23,7 +23,7 @@ package ai.konduit.serving.executioner.inference;
 
 import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.model.loader.ModelLoader;
-import ai.konduit.serving.threadpool.onnx.ONNXThreadPool;
+import ai.konduit.serving.onnx.threadpool.ONNXThreadPool;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.onnxruntime.AllocatorWithDefaultOptions;
