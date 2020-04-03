@@ -21,6 +21,8 @@ package ai.konduit.serving.launcher.command;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.*;
 
+import java.util.Arrays;
+
 import static ai.konduit.serving.launcher.KonduitServingLauncher.KONDUIT_PREFIX;
 import static ai.konduit.serving.launcher.KonduitServingLauncher.services;
 
@@ -40,8 +42,8 @@ public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand 
             super.setMainVerticle(KONDUIT_PREFIX + ":" + konduitServiceType);
         } else {
             throw new CLIException(String.format("Invalid service type %s. " +
-                    "Possible values are: %s", konduitServiceType,
-                    services.keySet().toString()));
+                    "Allowed values are: %s", konduitServiceType,
+                    Arrays.asList(services.keySet())));
         }
     }
 }

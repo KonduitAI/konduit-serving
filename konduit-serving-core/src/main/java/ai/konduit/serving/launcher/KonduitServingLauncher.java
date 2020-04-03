@@ -136,6 +136,7 @@ public class KonduitServingLauncher extends Launcher {
         new KonduitServingLauncher()
                 .unregister("start")
                 .unregister("test")
+                .unregister("version")
                 .register(ServeCommand.class, ServeCommand::new)
                 .register(RunCommand.class, RunCommand::new)
                 .register(ListCommand.class, ListCommand::new)

@@ -22,8 +22,6 @@ import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +30,7 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 @Name(value = "version", priority = 1)
-@Summary("Displays the version.")
+@Summary("Displays konduit-serving version.")
 @Description("Prints the vert.x core version used by the application.")
 @Slf4j
 public class VersionCommand extends DefaultCommand {
