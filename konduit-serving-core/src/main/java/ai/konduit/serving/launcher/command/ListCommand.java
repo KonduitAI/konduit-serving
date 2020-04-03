@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 @Description("List all konduit servers launched with the `serve` command")
 public class ListCommand extends DefaultCommand {
 
-    private final static Pattern PS = Pattern.compile("-serving.id=(.*)\\s*");
+    private final static Pattern PS = Pattern.compile("-Dserving.id=(.*)\\s*");
 
     private final static Pattern FAT_JAR_EXTRACTION = Pattern.compile("-jar (\\S*)");
 

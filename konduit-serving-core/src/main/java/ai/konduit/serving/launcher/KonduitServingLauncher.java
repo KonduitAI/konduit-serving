@@ -41,6 +41,7 @@ import org.nd4j.shade.guava.collect.ImmutableMap;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Map;
 
 import static io.vertx.core.file.FileSystemOptions.DEFAULT_FILE_CACHING_DIR;
@@ -55,8 +56,8 @@ public class KonduitServingLauncher extends Launcher {
     public static final String KONDUIT_PREFIX = "konduit";
 
     public static final Map<String, String> services = ImmutableMap.of(
-            "inference", InferenceVerticle.class.getName(),
-            "memmap", InferenceVerticle.class.getName()
+            "inference", InferenceVerticle.class.getCanonicalName(),
+            "memmap", InferenceVerticle.class.getCanonicalName()
     );
 
     InferenceConfiguration inferenceConfiguration;
@@ -111,7 +112,7 @@ public class KonduitServingLauncher extends Launcher {
 
             @Override
             public String prefix() {
-                return "konduit";
+                return KONDUIT_PREFIX;
             }
 
             @Override
@@ -119,9 +120,9 @@ public class KonduitServingLauncher extends Launcher {
                 String serviceType = verticleName.replace(KONDUIT_PREFIX + ":", "");
 
                 if(services.keySet().contains(serviceType)) {
-                    return (Verticle) ClassLoader.getSystemClassLoader().loadClass(services.get(verticleName)).newInstance();
+                    return (Verticle) ClassLoader.getSystemClassLoader().loadClass(services.get(serviceType)).newInstance();
                 } else {
-                    throw new IllegalArgumentException(String.format("Invalid service type %s. Possible values are: ", services.keySet().toString()));
+                    throw new IllegalArgumentException(String.format("Invalid service type %s. Possible values are: ", Arrays.asList(services.keySet())));
                 }
             }
         });
