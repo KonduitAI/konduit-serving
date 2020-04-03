@@ -84,8 +84,8 @@ public class KonduitServlet extends HttpServlet {
             DeploymentOptions deploymentOptions = new DeploymentOptions()
                     .setConfig(vertxConfig).setWorker(true)
                     .setHa(false).setInstances(1)
-                    .setMultiThreaded(false)
                     .setWorkerPoolSize(1);
+
             String[] split = verticleClassName.split("\\.");
             vertx.registerVerticleFactory(new VerticleFactory() {
                 @Override
@@ -186,14 +186,10 @@ public class KonduitServlet extends HttpServlet {
             });
         });
 
-
         request.putHeader("Content-Type", req.getHeader("Content-Type"));
         request.setChunked(false);
         request.end(Buffer.buffer(streamContent));
-
-
     }
-
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

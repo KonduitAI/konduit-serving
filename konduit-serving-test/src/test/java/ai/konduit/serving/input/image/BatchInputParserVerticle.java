@@ -59,7 +59,7 @@ public class BatchInputParserVerticle extends BaseRoutableVerticle {
                 .inputParts(Collections.singletonList(inputName))
                 .converters(Collections.singletonMap(inputName, new VertxBufferImageInputAdapter()))
                 .converterArgs(Collections.singletonMap(inputName, ConverterArgs.builder()
-                        .strings(Collections.singletonList(DataType.LONG.name())).build())).build();
+                        .strings(Collections.singletonList(DataType.INT64.name())).build())).build();
         BatchInputParserVerticle.this.inputParser = batchInputParser;
 
 

@@ -62,7 +62,7 @@ public class BatchNd4jInputParserVerticle extends BaseRoutableVerticle {
                 .inputParts(Collections.singletonList(inputName))
                 .converters(Collections.singletonMap(inputName, new VertxBufferNd4jInputAdapter()))
                 .converterArgs(Collections.singletonMap(inputName, ConverterArgs.builder()
-                        .strings(Collections.singletonList(DataType.LONG.name())).build())).build();
+                        .strings(Collections.singletonList(DataType.INT64.name())).build())).build();
         BatchNd4jInputParserVerticle.this.inputParser = batchInputParser;
 
 
