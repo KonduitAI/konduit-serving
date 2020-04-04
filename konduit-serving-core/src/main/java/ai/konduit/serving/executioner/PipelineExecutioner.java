@@ -23,6 +23,7 @@
 package ai.konduit.serving.executioner;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.ServingConfig;
@@ -218,19 +219,42 @@ public class PipelineExecutioner implements Closeable {
         }
     }
 
+    private void validateInputsAndOutputs(Input.DataFormat inputDataformat,
+                                          PredictionType predictionType) {
+        //configure validation for input and output
+        if(!config.getSteps().isEmpty()) {
+            PipelineStep finalPipelineStep = config.getSteps().get(config.getSteps().size() - 1);
+            PipelineStep startingPipelineStep = config.getSteps().get(0);
+
+            Preconditions.checkState(startingPipelineStep.isValidInputType(inputDataformat),
+                    "Configured input type is invalid for initial pipeline step of type "
+                            + startingPipelineStep.getClass().getName() + " expected input types were "
+                            + Arrays.toString(startingPipelineStep.validInputTypes())
+                            + ". If this list is null or empty, then any type is considered valid.");
+            Preconditions.checkState(finalPipelineStep.isValidOutputType(config.getServingConfig().getOutputDataFormat()),
+                    "Configured output type is invalid for final pipeline step of type "
+                            + finalPipelineStep.getClass().getName() + " expected output types were "
+                            + Arrays.toString(finalPipelineStep.validInputTypes())
+                            + ". If this list is null or empty, then any type is considered valid.");
+            Preconditions.checkState(finalPipelineStep.isValidPredictionType(predictionType),
+                    "Invalid prediction type configured for final pipeline step of type "
+                            + finalPipelineStep.getClass().getName() + " expected types were "
+                            + Arrays.toString(finalPipelineStep.validPredictionTypes())
+                            + ". If this list is null or empty, then any type is considered valid.");
+        }
+    }
+
     /**
      * Init the pipeline executioner.
      */
-    public void init() {
+    public void init(){
         if(this.pipeline != null) {
             log.debug("Pipeline already enabled.");
             return;
         }
-
         if(config.getSteps().isEmpty()) {
             log.warn("No pipeline steps configured.");
         }
-
 
         this.pipeline = Pipeline.getPipeline(config.getSteps());
 
@@ -263,8 +287,6 @@ public class PipelineExecutioner implements Closeable {
         }
 
         initDataTypes();
-
-
 
         if (modelConfig != null && modelConfig.getModelConfigType().getModelType() != ModelConfig.ModelType.PMML
                 && (inputNames == null || inputNames.isEmpty())) {
@@ -340,8 +362,12 @@ public class PipelineExecutioner implements Closeable {
      * @param inputs             input data as array of {@link Record}
      */
     public INDArray[] doInference(RoutingContext ctx,
+                                  PredictionType predictionType,
+                                  Input.DataFormat inputDataFormat,
                                   Output.DataFormat outputDataFormat,
                                   Record[] inputs) {
+
+        validateInputsAndOutputs(inputDataFormat, predictionType);
         if (inputs == null || inputs.length < 1 || inputs[0] == null) {
             throw new IllegalStateException("No inputs specified!");
         }
@@ -355,7 +381,7 @@ public class PipelineExecutioner implements Closeable {
         try {
             multiOutputAdapter = outputDataFormat == Output.DataFormat.JSON ? outputAdapterFor(PredictionType.RAW,objectDetectionConfig) : null;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error initializing output adapter.", e);
         }
 
         if (multiOutputAdapter != null) {
@@ -449,7 +475,9 @@ public class PipelineExecutioner implements Closeable {
                                 Schema conversionSchema,
                                 TransformProcess transformProcess,
                                 Schema outputSchema,
+                                Input.DataFormat inputDataFormat,
                                 Output.DataFormat outputDataFormat) {
+        validateInputsAndOutputs(inputDataFormat, predictionType);
 
         Record[] pipelineInput = PipelineExecutioner.createInput(input, transformProcess, conversionSchema);
         Record[] records = pipeline.doPipeline(pipelineInput);

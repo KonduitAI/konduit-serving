@@ -41,8 +41,7 @@ if __name__ == "__main__":
         type=str,
         default=get_platform(),
         choices=os_choices,
-        help="the javacpp.platform to use: windows-x86_64,linux-x86_64,linux-x86_64-gpu"
-        " macosx-x86_64,linux-armhf,windows-x86_64-gpu ",
+        help="the javacpp.platform to use: Possible values are: " + os_choices.__str__(),
     )
 
     parser.add_argument(
