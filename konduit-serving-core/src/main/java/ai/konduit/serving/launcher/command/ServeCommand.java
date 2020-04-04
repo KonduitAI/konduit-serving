@@ -114,7 +114,7 @@ public class ServeCommand extends StartCommand {
             Optional<String> maybeCommand = cliArguments.stream()
                     .filter(arg -> executionContext.launcher().getCommandNames().contains(arg))
                     .findFirst();
-            if (! maybeCommand.isPresent()) {
+            if (!maybeCommand.isPresent()) {
                 // No command, add `run`
                 ExecUtils.addArgument(cmd, "run");
             }
@@ -142,7 +142,6 @@ public class ServeCommand extends StartCommand {
             e.printStackTrace(out);
             ExecUtils.exitBecauseOfProcessIssue();
         }
-
     }
 
     private void addJavaCommand(List<String> cmd) {

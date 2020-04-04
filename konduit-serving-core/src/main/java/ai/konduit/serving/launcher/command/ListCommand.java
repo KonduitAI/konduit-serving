@@ -18,30 +18,34 @@
 
 package ai.konduit.serving.launcher.command;
 
+import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.ServingConfig;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Name(value = "list", priority = 1)
 @Summary("Lists the running konduit servers.")
 @Description("List all konduit servers launched with the `serve` command")
 public class ListCommand extends DefaultCommand {
 
     private final static Pattern PS = Pattern.compile("-Dserving.id=(.*)\\s*");
-
-    private final static Pattern FAT_JAR_EXTRACTION = Pattern.compile("-jar (\\S*)");
-
-    private final static Pattern VERTICLE_EXTRACTION = Pattern.compile("run (\\S*)");
 
     // Note about stack traces - the stack trace are printed on the stream passed to the command.
 
@@ -50,9 +54,28 @@ public class ListCommand extends DefaultCommand {
      */
     @Override
     public void run() {
-        out.println("Listing konduit servers...");
+        out.println("\nListing konduit servers...\n");
         List<String> cmd = new ArrayList<>();
-        if (!ExecUtils.isWindows()) {
+        if (ExecUtils.isWindows()) {
+            try {
+                // Use wmic.
+                cmd.add("WMIC");
+                cmd.add("PROCESS");
+                cmd.add("WHERE");
+                cmd.add("\"CommandLine like '%serving.id%' and name!='wmic.exe'\"");
+                cmd.add("GET");
+                cmd.add("CommandLine^,ProcessId");
+
+                //out.println(String.join(" ", cmd));
+
+                dumpFoundVertxApplications(cmd);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace(out);
+            } catch (Exception e) {
+                e.printStackTrace(out);
+            }
+        } else {
             try {
                 cmd.add("sh");
                 cmd.add("-c");
@@ -65,45 +88,36 @@ public class ListCommand extends DefaultCommand {
             } catch (Exception e) {
                 e.printStackTrace(out);
             }
-
-        } else {
-            try {
-                // Use wmic.
-                cmd.add("WMIC");
-                cmd.add("PROCESS");
-                cmd.add("WHERE");
-                cmd.add("\"CommandLine like '%serving.id%' and name!='wmic.exe'\"");
-                cmd.add("GET");
-                cmd.add("CommandLine");
-                cmd.add("/VALUE");
-
-                //out.println(String.join(" ", cmd));
-
-                dumpFoundVertxApplications(cmd);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                e.printStackTrace(out);
-            } catch (Exception e) {
-                e.printStackTrace(out);
-            }
         }
     }
 
     private void dumpFoundVertxApplications(List<String> cmd) throws IOException, InterruptedException {
+        String printFormat = " %1$-3s | %2$-15s | %3$-10s | %4$-20s | %5$-7s | %6$-10s \n";
+
         boolean none = true;
         final Process process = new ProcessBuilder(cmd).start();
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;
+        int index = 0;
         while ((line = reader.readLine()) != null) {
             final Matcher matcher = PS.matcher(line);
             if (matcher.find()) {
+                index++;
+                if(none) {
+                    out.format(printFormat, "#", "ID", "TYPE", "URL", "PID", "STATUS");
+                }
+
                 String id = matcher.group(1);
-                String details = extractApplicationDetails(line);
-                out.println(id + "\t" + details);
+                printServerDetails(index, printFormat, id, line);
                 none = false;
             }
         }
+
+        if(index > 0) {
+            out.println();
+        }
+
         process.waitFor();
         reader.close();
         if (none) {
@@ -111,23 +125,35 @@ public class ListCommand extends DefaultCommand {
         }
     }
 
-    /**
-     * Tries to extract the fat jar name of the verticle name. It's a best-effort approach looking at the name of the
-     * jar or to the verticle name from the command line. If not found, no details are returned (empty string).
-     *
-     * @return the details, empty if it cannot be extracted.
-     */
-    protected static String extractApplicationDetails(String line) {
-        Matcher matcher = FAT_JAR_EXTRACTION.matcher(line);
-        if (matcher.find()) {
-            return matcher.group(1);
-        } else {
-            matcher = VERTICLE_EXTRACTION.matcher(line);
-            if (matcher.find()) {
-                return matcher.group(1);
+    private void printServerDetails(int index, String printFormat, String id, String line) {
+        String pid = getServerPid(line);
+        String configuration = "Pending server start...";
+        String hostAndPort = "waiting...";
+        String status = "starting";
+        try {
+            configuration = FileUtils.readFileToString(Paths.get(System.getProperty("user.home"), ".konduit-serving", "servers", pid + ".data").toFile(), StandardCharsets.UTF_8);
+            ServingConfig servingConfig = InferenceConfiguration.fromJson(configuration).getServingConfig();
+            hostAndPort = String.format("%s:%s", servingConfig.getListenHost(), servingConfig.getHttpPort());
+            status = "started";
+        } catch (IOException exception) {
+            if(!(exception instanceof FileNotFoundException)) {
+                log.error("Error occurred while reading server configuration file", exception);
             }
         }
-        // No details.
-        return "";
+        out.format(printFormat, index, id, getServiceType(line), hostAndPort, pid, status);
+    }
+
+    private String getServerPid(String line) {
+        String[] splits = line.split(" ");
+
+        if(ExecUtils.isWindows()) {
+            return splits[splits.length -1].trim();
+        } else {
+            return splits[0].trim();
+        }
+    }
+
+    private String getServiceType(String line) {
+        return "inference";
     }
 }

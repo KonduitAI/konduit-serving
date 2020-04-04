@@ -25,10 +25,7 @@ import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.vertx.core.Launcher;
-import io.vertx.core.Verticle;
-import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
+import io.vertx.core.*;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
@@ -39,7 +36,6 @@ import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.shade.guava.collect.ImmutableMap;
-import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.io.File;
 import java.util.Arrays;
@@ -149,5 +145,12 @@ public class KonduitServingLauncher extends Launcher {
                 .register(VersionCommand.class, VersionCommand::new)
                 .register(ConfigCommand.class, ConfigCommand::new)
                 .dispatch(args);
+    }
+
+    @Override
+    public void handleDeployFailed(Vertx vertx, String mainVerticle, DeploymentOptions deploymentOptions, Throwable cause) {
+        log.error("\nFailed to start konduit server.\n");
+
+        super.handleDeployFailed(vertx, mainVerticle, deploymentOptions, cause);
     }
 }

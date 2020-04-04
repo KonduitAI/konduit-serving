@@ -31,7 +31,7 @@ import java.util.Scanner;
 
 @Name(value = "version", priority = 1)
 @Summary("Displays konduit-serving version.")
-@Description("Prints the vert.x core version used by the application.")
+@Description("Prints the konduit-serving version used by the application.")
 @Slf4j
 public class VersionCommand extends DefaultCommand {
 

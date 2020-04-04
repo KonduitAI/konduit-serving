@@ -35,8 +35,18 @@ import io.vertx.core.Promise;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.bytedeco.systems.global.linux;
+import org.bytedeco.systems.global.macosx;
+import org.bytedeco.systems.global.windows;
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.List;
+import java.io.File;
 
 /**
  * A {@link io.vertx.core.Verticle} that takes multi part file uploads
@@ -92,6 +102,8 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         }
 
         if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
+            SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
+
             try {
                 LogUtils.setFileAppenderIfNeeded();
             } catch (Exception exception) {
@@ -135,6 +147,32 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                         try {
                             ((ContextInternal) context).getDeployment().deploymentOptions().setConfig(new JsonObject(inferenceConfiguration.toJson()));
 
+                            int pid = getPid();
+
+                            if(pid != -1) {
+                                File processesDir = Paths.get(System.getProperty("user.home"), ".konduit-serving", "servers").toFile();
+
+                                vertx.setPeriodic(10000, periodicHandler -> {
+                                    if(!processesDir.exists()) {
+                                        if(!processesDir.mkdirs()) {
+                                            log.error("Unable to create processes directory {}", processesDir.getAbsolutePath());
+                                            return;
+                                        }
+                                    }
+
+                                    if(processesDir.exists()) {
+                                        File processConfigFile = Paths.get(processesDir.getAbsolutePath(), pid + ".data").toFile();
+
+                                        try {
+                                            FileUtils.writeStringToFile(processConfigFile, inferenceConfiguration.toJson(), StandardCharsets.UTF_8);
+                                            processConfigFile.deleteOnExit();
+                                        } catch (IOException exception) {
+                                            log.error("Unable to save process information at {}", processConfigFile.getAbsolutePath(), exception);
+                                        }
+                                    }
+                                });
+                            }
+
                             log.info("Inference server is listening on host: \"{}\"", inferenceConfiguration.getServingConfig().getListenHost());
                             log.info("Inference server started on port {} with {} pipeline steps", port, nSteps);
                             startPromise.complete();
@@ -143,5 +181,17 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                         }
                     }
                 });
+    }
+
+    private int getPid() throws UnsatisfiedLinkError {
+        if (SystemUtils.IS_OS_WINDOWS) {
+            return windows.GetCurrentProcessId();
+        } else if (SystemUtils.IS_OS_MAC) {
+            return macosx.getpid();
+        } else if (SystemUtils.IS_OS_LINUX){
+            return linux.getpid();
+        } else {
+            return -1;
+        }
     }
 }
