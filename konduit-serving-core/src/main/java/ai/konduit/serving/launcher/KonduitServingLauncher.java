@@ -134,9 +134,11 @@ public class KonduitServingLauncher extends Launcher {
 
     public static void main(String[] args) {
         new KonduitServingLauncher()
+                .unregister("bare")
                 .unregister("start")
                 .unregister("test")
                 .unregister("version")
+                .register(JoinCommand.class, JoinCommand::new)
                 .register(ServeCommand.class, ServeCommand::new)
                 .register(RunCommand.class, RunCommand::new)
                 .register(ListCommand.class, ListCommand::new)
@@ -144,6 +146,8 @@ public class KonduitServingLauncher extends Launcher {
                 .register(PredictCommand.class, PredictCommand::new)
                 .register(VersionCommand.class, VersionCommand::new)
                 .register(ConfigCommand.class, ConfigCommand::new)
+                .register(InspectCommand.class, InspectCommand::new)
+                .register(LogsCommand.class, LogsCommand::new)
                 .dispatch(args);
     }
 

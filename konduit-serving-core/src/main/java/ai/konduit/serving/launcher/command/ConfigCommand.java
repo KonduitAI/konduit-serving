@@ -40,8 +40,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @Name("config")
-@Summary("A helper command for creating JSON inference configuration")
-@Description("This command is a utility to create configurations that can be used to start konduit servers.")
+@Summary("A helper command for creating JSON for inference configuration")
+@Description("This command is a utility to create json configurations that can be consumed to start konduit servers.")
 @Slf4j
 public class ConfigCommand extends DefaultCommand {
 
