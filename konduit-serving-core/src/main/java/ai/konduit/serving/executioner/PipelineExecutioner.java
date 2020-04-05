@@ -233,8 +233,8 @@ public class PipelineExecutioner implements Closeable {
                             + ". If this list is null or empty, then any type is considered valid.");
             Preconditions.checkState(finalPipelineStep.isValidOutputType(config.getServingConfig().getOutputDataFormat()),
                     "Configured output type is invalid for final pipeline step of type "
-                            + finalPipelineStep.getClass().getName() + " expected output types were "
-                            + Arrays.toString(finalPipelineStep.validInputTypes())
+                            + finalPipelineStep.getClass().getName() + ". Expected output types were "
+                            + Arrays.toString(finalPipelineStep.validOutputTypes())
                             + ". If this list is null or empty, then any type is considered valid.");
             Preconditions.checkState(finalPipelineStep.isValidPredictionType(predictionType),
                     "Invalid prediction type configured for final pipeline step of type "

@@ -324,6 +324,10 @@ public class PipelineRouteDefiner {
                     if (failureHandler.failure() != null) {
                         log.error("Failed to scrape metrics", failureHandler.failure());
                     }
+
+                    failureHandler.response()
+                            .setStatusCode(500)
+                            .end(failureHandler.failure().toString());
                 });
 
         Preconditions.checkNotNull(inferenceConfiguration.getServingConfig(), "Please define a serving configuration.");
@@ -677,6 +681,10 @@ public class PipelineRouteDefiner {
                             log.error("Request failed with unknown cause.");
                         }
                     }
+
+                    failureHandlder.response()
+                            .setStatusCode(500)
+                            .end(failureHandlder.failure().toString());
                 });
     }
 

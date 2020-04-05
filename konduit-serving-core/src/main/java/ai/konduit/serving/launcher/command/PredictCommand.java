@@ -27,7 +27,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.*;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import io.vertx.ext.web.client.HttpRequest;
@@ -40,6 +39,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 import static ai.konduit.serving.launcher.command.InspectCommand.getPidFromId;
@@ -52,10 +52,10 @@ public class PredictCommand extends DefaultCommand {
 
     String id;
     String data;
-    Input.DataFormat inputDataFormat;
-    Output.PredictionType predictionType;
+    Input.DataFormat inputDataFormat = Input.DataFormat.JSON;
+    Output.PredictionType predictionType = Output.PredictionType.RAW;
 
-    @Argument(index = 0, argName = "<server-id>")
+    @Argument(index = 0, argName = "server-id")
     @Description("Konduit server id")
     public void setId(String id) {
         this.id = id;
@@ -70,13 +70,23 @@ public class PredictCommand extends DefaultCommand {
     @Option(longName = "input_type", shortName = "it")
     @Description("Input type. Choices are: [NUMPY,JSON,ND4J,IMAGE,ARROW]")
     public void setInputType(String inputType) {
+        try {
         inputDataFormat = Input.DataFormat.valueOf(inputType);
+        } catch (Exception exception) {
+            log.error("Input type should be one of {}", Arrays.asList(Input.DataFormat.values()));
+            System.exit(1);
+        }
     }
 
     @Option(longName = "prediction_type", shortName = "pt")
     @Description("Prediction type. Choices are: [CLASSIFICATION,YOLO,SSD,RCNN,RAW,REGRESSION]")
     public void setPredictionType(String predictionType) {
-        this.predictionType = Output.PredictionType.valueOf(predictionType);
+        try {
+            this.predictionType = Output.PredictionType.valueOf(predictionType);
+        } catch (Exception exception) {
+            log.error("Prediction type should be one of {}", Arrays.asList(Output.PredictionType.values()));
+            System.exit(1);
+        }
     }
 
     @Override
@@ -87,21 +97,9 @@ public class PredictCommand extends DefaultCommand {
                         FileUtils.readFileToString(Paths.get(System.getProperty("user.home"), ".konduit-serving", "servers", getPidFromId(id) + ".data")
                                 .toFile(), StandardCharsets.UTF_8));
 
-                JsonObject jsonData = null;
-                try {
-                    jsonData = new JsonObject(data);
-                } catch (Exception exception) {
-                    if(exception instanceof DecodeException) {
-                        log.info("Unable to parse input data as json. Reason: " + exception.getMessage());
-                    } else {
-                        log.error("Unable to read input data", exception);
-                        System.exit(1);
-                    }
-                }
-
                 HttpRequest<Buffer> request = WebClient.create(Vertx.vertx()).post(inferenceConfiguration.getServingConfig().getHttpPort(),
                         inferenceConfiguration.getServingConfig().getListenHost(),
-                        predictionType.name() + "/" + inputDataFormat.name());
+                        String.format("/%s/%s", predictionType, inputDataFormat));
 
                 Handler<AsyncResult<HttpResponse<Buffer>>> responseHandler = handler -> {
                     if(handler.succeeded()) {
@@ -111,22 +109,33 @@ public class PredictCommand extends DefaultCommand {
                     }
                 };
 
-                if(jsonData == null) {
+                JsonObject jsonData = null;
+                if (inputDataFormat == Input.DataFormat.JSON) {
+                    try {
+                        jsonData = new JsonObject(data);
+                    } catch (Exception exception) {
+                        log.info("Unable to parse input data as json. Reason: " + exception.getMessage());
+                        System.exit(1);
+                    }
+
+                    request.sendJsonObject(jsonData, responseHandler);
+                } else {
                     String[] filePaths = data.split(",");
                     List<String> inputNames = inferenceConfiguration.getSteps().get(0).getInputNames();
 
                     MultipartForm multipartForm = MultipartForm.create();
 
-                    if(filePaths.length != inputNames.size()) {
+                    if (filePaths.length != inputNames.size()) {
                         log.error("Number of provided data files ({}) are not equal to the number of inputs required ({}). " +
                                 "Input names are: {}", filePaths.length, inputNames.size(), inputNames);
                         System.exit(1);
                     }
 
-                    for(int i = 0; i < filePaths.length; i++) {
+                    for (int i = 0; i < filePaths.length; i++) {
                         File file = new File(filePaths[i]);
-                        if(!file.exists()) {
+                        if (!file.exists()) {
                             log.error("Input file '{}' doesn't exist", file.getAbsolutePath());
+                            System.exit(1);
                         }
 
                         multipartForm.binaryFileUpload(inputNames.get(i),
@@ -136,8 +145,6 @@ public class PredictCommand extends DefaultCommand {
                     }
 
                     request.sendMultipartForm(multipartForm, responseHandler);
-                } else {
-                    request.sendJsonObject(jsonData, responseHandler);
                 }
             } catch (Exception exception) {
                 log.error("Failed to read configuration file", exception);
