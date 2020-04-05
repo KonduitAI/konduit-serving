@@ -316,7 +316,7 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @Test
-    public void testBertConfig() {
-        testConfigSerDe(BertStep.builder().modelPath("/path/to/bert.zip").vocabPath("/path/to/vocab.txt").build());
+    public void testWordTokenizerConfig() {
+        testConfigSerDe(WordTokenizerStep.builder().vocabPath("/path/to/vocab.txt").sentenceMaxLen(256).build());
     }
 }
