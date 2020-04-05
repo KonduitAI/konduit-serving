@@ -24,7 +24,6 @@ package ai.konduit.serving.pipeline.steps;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.WordTokenizerStep;
 import ai.konduit.serving.util.WritableValueRetriever;
-import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.Writable;
 import org.deeplearning4j.iterator.BertIterator;
@@ -86,7 +85,7 @@ public class WordTokenizerStepRunner extends BaseStepRunner
         List<String> inputList = Collections.singletonList(input);
         List<String> labelList = Collections.singletonList("default");
 
-        LabeledSentenceProvider provider = new CollectionLabeledSentenceProvider(inputList, labelList, new Random(123));
+        LabeledSentenceProvider provider = new CollectionLabeledSentenceProvider(inputList, labelList, null);
 
         return BertIterator.builder()
                 .tokenizer(this.tokenizer)
@@ -111,7 +110,7 @@ public class WordTokenizerStepRunner extends BaseStepRunner
         {
             Text text = (Text) record.getRecord().get(0);
 
-            String sentence = (String) text.toString();
+            String sentence = text.toString();
 
             List<Writable> textWritable = new ArrayList<>();
 

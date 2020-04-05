@@ -75,7 +75,6 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
 
     protected  void initSchemasAndColumnsIfNeeded() {
         if(!(SchemaTypeUtils.allIsNullOrEmpty(inputNames) && SchemaTypeUtils.allIsNullOrEmpty(inputColumnNames) && SchemaTypeUtils.allIsNullOrEmpty(inputSchemas))) {
-            Set<String> namesTest = new HashSet<>(inputNames);
             if(SchemaTypeUtils.anyIsNullOrEmpty(inputColumnNames,inputSchemas)) {
                 inputColumnNames = new LinkedHashMap<>();
                 inputSchemas = new LinkedHashMap<>();
@@ -106,7 +105,6 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
         }
 
         if(!(SchemaTypeUtils.allIsNullOrEmpty(this.outputNames) && SchemaTypeUtils.allIsNullOrEmpty(this.outputSchemas) && SchemaTypeUtils.allIsNullOrEmpty(this.outputColumnNames))) {
-            Set<String> outputNamesTest = new HashSet<>(this.outputNames);
             if(SchemaTypeUtils.anyIsNullOrEmpty(outputSchemas,outputColumnNames)) {
                 outputColumnNames = new LinkedHashMap<>();
                 outputSchemas = new LinkedHashMap<>();
