@@ -16,6 +16,7 @@
 
 package ai.konduit.serving.util;
 
+import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -32,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.nd4j.shade.guava.base.Strings;
 import org.slf4j.LoggerFactory;
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -143,6 +145,48 @@ public class LogUtils {
         ((Logger) LoggerFactory.getLogger("io")).setLevel(Level.ERROR);
 
         ((Logger) LoggerFactory.getLogger("ai")).setLevel(Level.INFO);
+    }
+
+    /**
+     * Sets the file appender with the name of "FILE" if needed. If it's already been setup,
+     * it would be ignored.
+     */
+    public static void setAppendersForRunCommand(String serverId) throws Exception {
+        SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
+
+        File previousLogsFile = getLogsFile();
+
+        File newLogsFile = Paths.get(getLogsDir(), serverId + ".log").toFile();
+
+        if(!newLogsFile.equals(previousLogsFile)) {
+            ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)
+                    org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+
+            ((Logger) LoggerFactory.getLogger("uk.org.lidalia")).setLevel(Level.INFO);
+            ((Logger) LoggerFactory.getLogger("org")).setLevel(Level.INFO);
+            ((Logger) LoggerFactory.getLogger("io")).setLevel(Level.INFO);
+
+            LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
+
+            if(previousLogsFile != null) {
+                rootLogger.detachAppender("FILE");
+            }
+
+            FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+            fileAppender.setName("FILE");
+            fileAppender.setFile(newLogsFile.getAbsolutePath());
+            fileAppender.setContext(context);
+
+            PatternLayoutEncoder patternLayoutEncoder = new PatternLayoutEncoder();
+            patternLayoutEncoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
+            patternLayoutEncoder.setContext(context);
+            patternLayoutEncoder.start();
+
+            fileAppender.setEncoder(patternLayoutEncoder);
+            fileAppender.start();
+
+            rootLogger.addAppender(fileAppender);
+        }
     }
 
     /**

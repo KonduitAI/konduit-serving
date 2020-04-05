@@ -18,11 +18,15 @@
 
 package ai.konduit.serving.launcher.command;
 
+import ai.konduit.serving.util.LogUtils;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.*;
+import io.vertx.core.impl.launcher.CommandLineUtils;
+import org.nd4j.shade.guava.base.Strings;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 import static ai.konduit.serving.launcher.KonduitServingLauncher.KONDUIT_PREFIX;
 import static ai.konduit.serving.launcher.KonduitServingLauncher.services;
@@ -69,6 +73,30 @@ public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand 
                     .replaceAll("^'|'$", "");
         } else {
             this.config = null;
+        }
+    }
+
+    @Override
+    public void run() {
+        String serverId = getServerId();
+        try {
+            if(!Strings.isNullOrEmpty(serverId)) {
+                LogUtils.setAppendersForRunCommand(serverId);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        super.run();
+    }
+
+    private String getServerId() {
+        String[] commandSplits = CommandLineUtils.getCommand().split(" ");
+        String lastSegment = commandSplits[commandSplits.length - 1];
+        if(lastSegment.contains("serving.id")) {
+            return lastSegment.replace("-Dserving.id=", "").trim();
+        } else {
+            return null;
         }
     }
 }

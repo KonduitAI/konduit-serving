@@ -183,7 +183,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                 });
     }
 
-    private int getPid() throws UnsatisfiedLinkError {
+    public static int getPid() throws UnsatisfiedLinkError {
         if (SystemUtils.IS_OS_WINDOWS) {
             return windows.GetCurrentProcessId();
         } else if (SystemUtils.IS_OS_MAC) {

@@ -18,13 +18,20 @@
 
 package ai.konduit.serving.launcher.command;
 
+import ai.konduit.serving.util.LogUtils;
 import io.vertx.core.cli.CLIException;
-import io.vertx.core.cli.annotations.Argument;
-import io.vertx.core.cli.annotations.Description;
-import io.vertx.core.cli.annotations.Name;
-import io.vertx.core.cli.annotations.Summary;
+import io.vertx.core.cli.annotations.*;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+
+import java.io.File;
 
 @Slf4j
 @Name("logs")
@@ -33,14 +40,42 @@ import lombok.extern.slf4j.Slf4j;
 public class LogsCommand extends DefaultCommand {
 
     String id;
+    boolean follow;
 
-    @Argument(index = 0, argName = "<server-id>")
+    @Argument(index = 0, argName = "server-id")
+    @Description("Konduit server id")
     public void setId(String id) {
         this.id = id;
     }
 
+    @Option(longName = "follow", shortName = "f", flag = true)
+    @Description("Follow the logs output.")
+    public void setFollow(boolean follow) {
+        this.follow = follow;
+    }
+
     @Override
     public void run() throws CLIException {
+        try {
+            File logsFile = Paths.get(LogUtils.getLogsDir(), id + ".log").toFile();
 
+            if (follow) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(logsFile)));
+
+                String line;
+                while (true) {
+                    line = reader.readLine();
+                    if (line == null) {
+                        Thread.sleep(100);
+                    } else {
+                        out.println(line);
+                    }
+                }
+            } else {
+                out.println(FileUtils.readFileToString(logsFile, StandardCharsets.UTF_8));
+            }
+        } catch (Exception exception) {
+            log.error("Failed to read logs", exception);
+        }
     }
 }

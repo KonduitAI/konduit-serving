@@ -56,38 +56,26 @@ public class ListCommand extends DefaultCommand {
     public void run() {
         out.println("\nListing konduit servers...\n");
         List<String> cmd = new ArrayList<>();
-        if (ExecUtils.isWindows()) {
-            try {
-                // Use wmic.
+        try {
+            if (ExecUtils.isWindows()) {
                 cmd.add("WMIC");
                 cmd.add("PROCESS");
                 cmd.add("WHERE");
                 cmd.add("\"CommandLine like '%serving.id%' and name!='wmic.exe'\"");
                 cmd.add("GET");
                 cmd.add("CommandLine^,ProcessId");
-
-                //out.println(String.join(" ", cmd));
-
-                dumpFoundVertxApplications(cmd);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                e.printStackTrace(out);
-            } catch (Exception e) {
-                e.printStackTrace(out);
-            }
-        } else {
-            try {
+            } else {
                 cmd.add("sh");
                 cmd.add("-c");
                 cmd.add("ps ax | grep \"serving.id=\"");
-
-                dumpFoundVertxApplications(cmd);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                e.printStackTrace(out);
-            } catch (Exception e) {
-                e.printStackTrace(out);
             }
+
+            dumpFoundVertxApplications(cmd);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace(out);
+        } catch (Exception e) {
+            e.printStackTrace(out);
         }
     }
 
@@ -105,7 +93,9 @@ public class ListCommand extends DefaultCommand {
             if (matcher.find()) {
                 index++;
                 if(none) {
+                    out.print("\033[0;1m\033[04m"); // Bold and underlined
                     out.format(printFormat, "#", "ID", "TYPE", "URL", "PID", "STATUS");
+                    out.print("\033[0m"); // Resetting
                 }
 
                 String id = matcher.group(1);
@@ -126,10 +116,11 @@ public class ListCommand extends DefaultCommand {
     }
 
     private void printServerDetails(int index, String printFormat, String id, String line) {
-        String pid = getServerPid(line);
-        String configuration = "Pending server start...";
+        String pid = getPidFromLine(line);
+        String configuration;
         String hostAndPort = "waiting...";
         String status = "starting";
+
         try {
             configuration = FileUtils.readFileToString(Paths.get(System.getProperty("user.home"), ".konduit-serving", "servers", pid + ".data").toFile(), StandardCharsets.UTF_8);
             ServingConfig servingConfig = InferenceConfiguration.fromJson(configuration).getServingConfig();
@@ -137,13 +128,14 @@ public class ListCommand extends DefaultCommand {
             status = "started";
         } catch (IOException exception) {
             if(!(exception instanceof FileNotFoundException)) {
-                log.error("Error occurred while reading server configuration file", exception);
+                log.error("Error occurred while reading server configuration file\n", exception);
             }
         }
+
         out.format(printFormat, index, id, getServiceType(line), hostAndPort, pid, status);
     }
 
-    private String getServerPid(String line) {
+    public static String getPidFromLine(String line) {
         String[] splits = line.split(" ");
 
         if(ExecUtils.isWindows()) {

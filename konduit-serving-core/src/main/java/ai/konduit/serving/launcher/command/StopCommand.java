@@ -66,7 +66,7 @@ public class StopCommand extends DefaultCommand {
     }
 
     /**
-     * Stops a running vert.x application launched with the `start` command.
+     * Stops a running konduit server launched with the `serve` command.
      */
     @Override
     public void run() {

@@ -21,7 +21,7 @@ package ai.konduit.serving.launcher.command;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
-import io.vertx.core.impl.launcher.commands.StartCommand;
+import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -38,7 +38,7 @@ import java.util.*;
         "This command takes the `run` command parameters. To see the " +
         "run command parameters, execute `run --help`")
 @Slf4j
-public class ServeCommand extends StartCommand {
+public class ServeCommand extends DefaultCommand {
 
     private String id;
     private String launcher;
@@ -210,7 +210,7 @@ public class ServeCommand extends StartCommand {
         return id;
     }
 
-    public boolean isProcessExists(String id) {
+    public static boolean isProcessExists(String id) {
         List<String> args;
 
         if(SystemUtils.IS_OS_WINDOWS) {
@@ -224,7 +224,7 @@ public class ServeCommand extends StartCommand {
             Process process = new ProcessBuilder(args).start();
             output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
         } catch (Exception exception) {
-            out.println("An error occurred while checking for existing processes:\n" + exception.getMessage());
+            log.error("An error occurred while checking for existing processes:\n" + exception.getMessage());
             System.exit(1);
         }
 
