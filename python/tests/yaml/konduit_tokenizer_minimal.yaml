@@ -1,0 +1,33 @@
+serving:
+  http_port: 65322
+  log_timings: True
+  extra_start_args:
+    -Xmx8g
+  output_data_format: NUMPY
+steps:
+  tokenizer_preprocessing_step:
+    type: WORD_TOKENIZER
+    vocab_path: bert-large-uncased-vocab.txt
+    sentence_max_len: 10
+    input_names:
+      - sentence
+    input_column_names:
+      default:
+        - String
+    input_schemas:
+      default:
+        - String
+    output_names:
+      - feature
+    output_column_names:
+      default:
+        - NDArray
+    output_schemas:
+      default:
+        - NDArray
+client:
+  port: 65322
+  output_names:
+    - output
+  input_data_format: JSON
+  output_data_format: NUMPY

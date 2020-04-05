@@ -25,20 +25,31 @@ import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.util.ObjectMappers;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
+
+/**
+ * WordTokenizerStep defines custom texts tokenization step
+ *
+ * @author chia wei
+ */
 @Data
 @SuperBuilder
-@NoArgsConstructor
 public class WordTokenizerStep extends BasePipelineStep<WordTokenizerStep> implements Serializable
 {
     protected String vocabPath;
-    protected int sentenceMaxLen;
 
+    @Builder.Default
+    protected Integer sentenceMaxLen = 256;
+
+    public WordTokenizerStep()
+    {
+        this.sentenceMaxLen = 256;
+    }
     @Override
     public Input.DataFormat[] validInputTypes() {
         return new Input.DataFormat[]{

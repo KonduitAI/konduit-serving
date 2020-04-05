@@ -3069,7 +3069,7 @@ class WordTokenizerStep(PipelineStep):
             input_column_names=None,
             output_column_names=None,
             vocab_path=None,
-            sentence_max_len=256,
+            sentence_max_len=None,
     ):
         self.__input_schemas = input_schemas
         self.__output_schemas = output_schemas

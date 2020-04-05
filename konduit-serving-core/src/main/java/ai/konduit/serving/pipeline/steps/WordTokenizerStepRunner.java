@@ -40,11 +40,20 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/**
+ * Implementation of WordTokenizerStep
+ *
+ * This step turns sentences of designated lengths to tokens.
+ * Often, this step is used as a preprocessing steps to preprocess words
+ * for inference.
+ *
+ * @author chia wei
+ */
 public class WordTokenizerStepRunner extends BaseStepRunner
 {
     private BertWordPieceTokenizerFactory tokenizer;
     private WordTokenizerStep tokenizerStep;
-    private int sentenceMaxLen;
+    private Integer sentenceMaxLen;
 
     public WordTokenizerStepRunner(PipelineStep pipelineStep)
     {
@@ -102,25 +111,17 @@ public class WordTokenizerStepRunner extends BaseStepRunner
         {
             Text text = (Text) record.getRecord().get(0);
 
-            if (text.toString().charAt(0) == '{')
-            {
-                JsonObject jsonObject = new JsonObject(text.toString());
-                List<Writable> featureWritable = new ArrayList<>();
+            String sentence = (String) text.toString();
 
-                for (String field : jsonObject.fieldNames())
-                {
-                    String sentence = (String) jsonObject.getValue(field);
+            List<Writable> textWritable = new ArrayList<>();
 
-                    MultiDataSet mds = this.getToken(sentence).next();
-                    featureWritable.add(WritableValueRetriever.writableFromValue(mds.getFeatures(0)));
-                }
+            MultiDataSet mds = this.getToken(sentence).next();
 
-                recordList.add(new org.datavec.api.records.impl.Record(featureWritable, null));
-            }
+            textWritable.add(WritableValueRetriever.writableFromValue(mds.getFeatures(0)));
 
+            recordList.add(new org.datavec.api.records.impl.Record(textWritable, null));
         }
 
         return recordList.toArray(new Record[recordList.size()]);
     }
-
 }
