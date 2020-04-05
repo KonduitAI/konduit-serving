@@ -71,6 +71,7 @@ public class RegressionMetrics implements MetricsRenderer {
     public void bindTo(MeterRegistry meterRegistry) {
         for(int i = 0; i < regressionMetricsConfig.getRegressionColumnLabels().size(); i++) {
             StatCounter statCounter = new StatCounter();
+            statCounters.add(statCounter);
             ColumnDistribution columnDistribution = regressionMetricsConfig.getColumnDistributions() != null &&
                     regressionMetricsConfig.getColumnDistributions().size() == regressionMetricsConfig.getRegressionColumnLabels().size() ?
                     regressionMetricsConfig.getColumnDistributions().get(i) : null;
@@ -145,11 +146,11 @@ public class RegressionMetrics implements MetricsRenderer {
     @Override
     public void updateMetrics(Object... args) {
         if(args instanceof Record[]) {
-            Record[] records = (Record[]) args[0];
+            Record[] records = (Record[]) args;
             incrementClassificationCounters(records);
         }
         else if(args instanceof INDArray[]) {
-            INDArray[] output = (INDArray[]) args[0];
+            INDArray[] output = (INDArray[]) args;
             incrementClassificationCounters(output);
 
         }
@@ -178,12 +179,15 @@ public class RegressionMetrics implements MetricsRenderer {
                 statCounters.get(i).add(output.getDouble(i));
             }
         }
-        else if(output.isMatrix()) {
+        else if(output.isMatrix() && output.length() > 1) {
             for(int i = 0; i < output.rows(); i++) {
                 for(int j = 0; j < output.columns(); j++) {
                     statCounters.get(i).add(output.getDouble(i,j));
                 }
             }
+        }
+        else if(output.isScalar()) {
+            statCounters.get(0).add(output.sumNumber().doubleValue());
         }
         else {
             throw new IllegalArgumentException("Only vectors and matrices supported right now");
