@@ -44,6 +44,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class MultiLabelMetricsConfig implements MetricsConfig {
     @Getter
     private List<String> labels;
