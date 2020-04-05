@@ -26,6 +26,7 @@ import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.config.metrics.MetricsRenderer;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import lombok.Getter;
@@ -33,10 +34,12 @@ import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.primitives.AtomicDouble;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Classification metrics for counting number of classes
@@ -48,7 +51,7 @@ public class ClassificationMetrics implements MetricsRenderer {
 
     private Iterable<Tag> tags;
     @Getter
-    private List<Counter> classCounterIncrement;
+    private List<Gauge> classCounterIncrement;
 
     private ClassificationMetricsConfig classificationMetricsConfig;
 
@@ -65,7 +68,8 @@ public class ClassificationMetrics implements MetricsRenderer {
     @Override
     public void bindTo(MeterRegistry meterRegistry) {
         for(int i = 0; i < classificationMetricsConfig.getClassificationLabels().size(); i++) {
-            classCounterIncrement.add(Counter.builder(classificationMetricsConfig.getClassificationLabels().get(i))
+            CurrentClassTrackerCount classTrackerCount = new CurrentClassTrackerCount();
+            classCounterIncrement.add(Gauge.builder(classificationMetricsConfig.getClassificationLabels().get(i),classTrackerCount)
                     .tags(tags)
                     .description("Classification counts seen so far for label " + classificationMetricsConfig.getClassificationLabels().get(i))
                     .baseUnit("classification.outcome")
@@ -102,10 +106,38 @@ public class ClassificationMetrics implements MetricsRenderer {
     }
 
 
+    /**
+     * A counter that resets the in memory value when
+     * the metric is exported. It is assumed that when exported,
+     * a storage system captures the sampled value.
+     *
+     */
+    private static class CurrentClassTrackerCount implements Supplier<Number> {
+
+        private AtomicDouble currCounter = new AtomicDouble(0);
+
+        public void increment(double numberToIncrementBy) {
+            currCounter.getAndAdd(numberToIncrementBy);
+        }
+
+        public void reset() {
+            currCounter.set(0.0);
+        }
+
+        @Override
+        public Number get() { ;
+            double ret = currCounter.get();
+            reset();
+            return ret;
+        }
+    }
+
+
     private void incrementClassificationCounters(INDArray[] outputs) {
         INDArray argMax = Nd4j.argMax(outputs[0], -1);
         for(int i = 0; i < argMax.length(); i++) {
-            classCounterIncrement.get(argMax.getInt(i)).increment();
+            CurrentClassTrackerCount classTrackerCount = (CurrentClassTrackerCount) classCounterIncrement.get(argMax.getInt(i));
+            classTrackerCount.increment(1.0);
         }
     }
 
@@ -115,7 +147,8 @@ public class ClassificationMetrics implements MetricsRenderer {
             INDArray output = ndArrayWritable.get();
             INDArray argMax = Nd4j.argMax(output, -1);
             for (int i = 0; i < argMax.length(); i++) {
-                classCounterIncrement.get(argMax.getInt(i)).increment();
+                CurrentClassTrackerCount classTrackerCount = (CurrentClassTrackerCount) classCounterIncrement.get(argMax.getInt(i));
+                classTrackerCount.increment(1.0);
             }
         }
     }
