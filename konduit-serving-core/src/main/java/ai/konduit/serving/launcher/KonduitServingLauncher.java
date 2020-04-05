@@ -40,6 +40,7 @@ import org.nd4j.shade.guava.collect.ImmutableMap;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static io.vertx.core.file.FileSystemOptions.DEFAULT_FILE_CACHING_DIR;
 import static io.vertx.core.file.impl.FileResolver.CACHE_DIR_BASE_PROP_NAME;
@@ -101,6 +102,8 @@ public class KonduitServingLauncher extends Launcher {
         BackendRegistries.setupBackend(micrometerMetricsOptions);
 
         options.setMetricsOptions(micrometerMetricsOptions);
+        options.setMaxEventLoopExecuteTime(60);
+        options.setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS);
     }
 
     @Override

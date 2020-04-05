@@ -70,13 +70,13 @@ public class InspectCommand extends DefaultCommand {
                 cmd.add("WMIC");
                 cmd.add("PROCESS");
                 cmd.add("WHERE");
-                cmd.add("\"CommandLine like '%serving.id%' and name!='wmic.exe'\"");
+                cmd.add("\"CommandLine like '%serving.id=" + serverId + "' and name!='wmic.exe'\"");
                 cmd.add("GET");
                 cmd.add("CommandLine^,ProcessId");
             } else {
                 cmd.add("sh");
                 cmd.add("-c");
-                cmd.add("ps ax | grep \"serving.id=\"");
+                cmd.add("ps ax | grep \"serving.id=" + serverId + "$\"");
             }
 
             String[] outputSplits = IOUtils.toString(
