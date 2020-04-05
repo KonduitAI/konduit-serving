@@ -22,6 +22,7 @@
 package ai.konduit.serving.config.metrics.impl;
 
 import ai.konduit.serving.config.metrics.MetricsConfig;
+import ai.konduit.serving.util.ObjectMappers;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.*;
 
@@ -57,4 +58,14 @@ public class MultiLabelMetricsConfig implements MetricsConfig {
     public Map<String, Object> configValues() {
         return Collections.singletonMap("labels",labels);
     }
+
+
+    public static MultiLabelMetricsConfig fromJson(String json) {
+        return ObjectMappers.fromJson(json, MultiLabelMetricsConfig.class);
+    }
+
+    public static MultiLabelMetricsConfig fromYaml(String yaml) {
+        return ObjectMappers.fromYaml(yaml, MultiLabelMetricsConfig.class);
+    }
+
 }

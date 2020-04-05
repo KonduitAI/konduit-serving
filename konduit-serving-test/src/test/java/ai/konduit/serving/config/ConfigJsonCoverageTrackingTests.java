@@ -19,8 +19,10 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.metrics.ColumnDistribution;
 import ai.konduit.serving.config.metrics.NoOpMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
+import ai.konduit.serving.config.metrics.impl.MultiLabelMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import ai.konduit.serving.metrics.MetricType;
+import ai.konduit.serving.metrics.MultiLabelMetrics;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.step.*;
@@ -237,6 +239,8 @@ public class ConfigJsonCoverageTrackingTests {
         testConfigSerDe(ColumnDistribution.builder().build());
         testConfigSerDe(NoOpMetricsConfig
                 .builder().build());
+        testConfigSerDe(MultiLabelMetricsConfig
+                .builder().labels(Arrays.asList("0")).build());
         testConfigSerDe(ClassificationMetricsConfig
                 .builder().classificationLabels(Arrays.asList("0")).build());
         testConfigSerDe(RegressionMetricsConfig
