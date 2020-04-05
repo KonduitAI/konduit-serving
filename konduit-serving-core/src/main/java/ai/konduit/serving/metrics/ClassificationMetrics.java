@@ -26,6 +26,7 @@ import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.config.metrics.MetricsRenderer;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.ImmutableTag;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import lombok.Getter;
@@ -36,6 +37,7 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.primitives.AtomicDouble;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
@@ -56,7 +58,7 @@ public class ClassificationMetrics implements MetricsRenderer {
     private ClassificationMetricsConfig classificationMetricsConfig;
 
     public ClassificationMetrics(ClassificationMetricsConfig classificationMetricsConfig) {
-        this(classificationMetricsConfig, Collections.emptyList());
+        this(classificationMetricsConfig, Arrays.asList(new ImmutableTag("machinelearning","classification")));
     }
 
     public ClassificationMetrics(ClassificationMetricsConfig classificationMetricsConfig, Iterable<Tag> tags) {

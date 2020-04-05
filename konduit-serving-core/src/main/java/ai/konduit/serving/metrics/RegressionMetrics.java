@@ -28,6 +28,7 @@ import ai.konduit.serving.config.metrics.MetricsRenderer;
 import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import ai.konduit.serving.util.MetricRenderUtils;
 import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.ImmutableTag;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import lombok.Getter;
@@ -38,6 +39,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
@@ -57,7 +59,7 @@ public class RegressionMetrics implements MetricsRenderer {
     private RegressionMetricsConfig regressionMetricsConfig;
 
     public RegressionMetrics(RegressionMetricsConfig regressionMetricsConfig) {
-        this(regressionMetricsConfig, Collections.emptyList());
+        this(regressionMetricsConfig, Arrays.asList(new ImmutableTag("machinelearning","regression")));
     }
 
     public RegressionMetrics(RegressionMetricsConfig regressionMetricsConfig, Iterable<Tag> tags) {
