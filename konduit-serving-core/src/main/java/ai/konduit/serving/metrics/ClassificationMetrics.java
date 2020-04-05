@@ -51,6 +51,7 @@ public class ClassificationMetrics implements MetricsRenderer {
     private Iterable<Tag> tags;
     @Getter
     private List<Gauge> classCounterIncrement;
+    @Getter
     private List<CurrentClassTrackerCount> classTrackerCounts;
     private ClassificationMetricsConfig classificationMetricsConfig;
 
@@ -135,22 +136,22 @@ public class ClassificationMetrics implements MetricsRenderer {
 
 
     private void incrementClassificationCounters(INDArray[] outputs) {
-        INDArray argMax = Nd4j.argMax(outputs[0], -1);
-        for(int i = 0; i < argMax.length(); i++) {
-            CurrentClassTrackerCount classTrackerCount = classTrackerCounts.get(argMax.getInt(i));
-            classTrackerCount.increment(1.0);
-        }
+        handleNdArray(outputs[0]);
     }
 
     private void incrementClassificationCounters(Record[] records) {
         if(classCounterIncrement != null) {
             NDArrayWritable ndArrayWritable = (NDArrayWritable) records[0].getRecord().get(0);
             INDArray output = ndArrayWritable.get();
-            INDArray argMax = Nd4j.argMax(output, -1);
-            for (int i = 0; i < argMax.length(); i++) {
-                CurrentClassTrackerCount classTrackerCount = classTrackerCounts.get(argMax.getInt(i));
-                classTrackerCount.increment(1.0);
-            }
+            handleNdArray(output);
+        }
+    }
+
+    private void handleNdArray(INDArray array) {
+        INDArray argMax = Nd4j.argMax(array, -1);
+        for(int i = 0; i < argMax.length(); i++) {
+            CurrentClassTrackerCount classTrackerCount = classTrackerCounts.get(argMax.getInt(i));
+            classTrackerCount.increment(1.0);
         }
     }
 }
