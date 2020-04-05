@@ -25,7 +25,6 @@ package ai.konduit.serving.metrics;
 import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.config.metrics.MetricsRenderer;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
@@ -52,7 +51,7 @@ public class ClassificationMetrics implements MetricsRenderer {
     private Iterable<Tag> tags;
     @Getter
     private List<Gauge> classCounterIncrement;
-
+    private List<CurrentClassTrackerCount> classTrackerCounts;
     private ClassificationMetricsConfig classificationMetricsConfig;
 
     public ClassificationMetrics(ClassificationMetricsConfig classificationMetricsConfig) {
@@ -63,12 +62,14 @@ public class ClassificationMetrics implements MetricsRenderer {
         this.classificationMetricsConfig = classificationMetricsConfig;
         this.tags = tags;
         classCounterIncrement = new ArrayList<>();
+        classTrackerCounts = new ArrayList<>();
     }
 
     @Override
     public void bindTo(MeterRegistry meterRegistry) {
         for(int i = 0; i < classificationMetricsConfig.getClassificationLabels().size(); i++) {
             CurrentClassTrackerCount classTrackerCount = new CurrentClassTrackerCount();
+            classTrackerCounts.add(classTrackerCount);
             classCounterIncrement.add(Gauge.builder(classificationMetricsConfig.getClassificationLabels().get(i),classTrackerCount)
                     .tags(tags)
                     .description("Classification counts seen so far for label " + classificationMetricsConfig.getClassificationLabels().get(i))
@@ -136,7 +137,7 @@ public class ClassificationMetrics implements MetricsRenderer {
     private void incrementClassificationCounters(INDArray[] outputs) {
         INDArray argMax = Nd4j.argMax(outputs[0], -1);
         for(int i = 0; i < argMax.length(); i++) {
-            CurrentClassTrackerCount classTrackerCount = (CurrentClassTrackerCount) classCounterIncrement.get(argMax.getInt(i));
+            CurrentClassTrackerCount classTrackerCount = classTrackerCounts.get(argMax.getInt(i));
             classTrackerCount.increment(1.0);
         }
     }
@@ -147,7 +148,7 @@ public class ClassificationMetrics implements MetricsRenderer {
             INDArray output = ndArrayWritable.get();
             INDArray argMax = Nd4j.argMax(output, -1);
             for (int i = 0; i < argMax.length(); i++) {
-                CurrentClassTrackerCount classTrackerCount = (CurrentClassTrackerCount) classCounterIncrement.get(argMax.getInt(i));
+                CurrentClassTrackerCount classTrackerCount = classTrackerCounts.get(argMax.getInt(i));
                 classTrackerCount.increment(1.0);
             }
         }
