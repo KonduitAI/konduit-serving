@@ -3043,7 +3043,7 @@ class ImageLoadingStep(PipelineStep):
             )
         return d
 
-class WordTokenizerStep(PipelineStep):
+class WordPieceTokenizerStep(PipelineStep):
 
     _types_map = {
         "inputSchemas": {"type": dict, "subtype": None},

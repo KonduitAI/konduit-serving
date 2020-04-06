@@ -39,14 +39,14 @@ import java.io.Serializable;
  */
 @Data
 @SuperBuilder
-public class WordTokenizerStep extends BasePipelineStep<WordTokenizerStep> implements Serializable
+public class WordPieceTokenizerStep extends BasePipelineStep<WordPieceTokenizerStep> implements Serializable
 {
     protected String vocabPath;
 
     @Builder.Default
     protected Integer sentenceMaxLen = 256;
 
-    public WordTokenizerStep()
+    public WordPieceTokenizerStep()
     {
         this.sentenceMaxLen = 256;
     }
@@ -60,20 +60,20 @@ public class WordTokenizerStep extends BasePipelineStep<WordTokenizerStep> imple
     @Override
     public Output.DataFormat[] validOutputTypes() {
         return new Output.DataFormat[]{
-                Output.DataFormat.JSON
+                Output.DataFormat.NUMPY
         };
     }
 
     @Override
     public String pipelineStepClazz() {
-        return "ai.konduit.serving.pipeline.steps.WordTokenizerStepRunner";
+        return "ai.konduit.serving.pipeline.steps.WordPieceTokenizerStepRunner";
     }
 
-    public static WordTokenizerStep fromJson(String json){
-        return ObjectMappers.fromJson(json, WordTokenizerStep.class);
+    public static WordPieceTokenizerStep fromJson(String json){
+        return ObjectMappers.fromJson(json, WordPieceTokenizerStep.class);
     }
 
-    public static WordTokenizerStep fromYaml(String yaml){
-        return ObjectMappers.fromYaml(yaml, WordTokenizerStep.class);
+    public static WordPieceTokenizerStep fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, WordPieceTokenizerStep.class);
     }
 }

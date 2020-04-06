@@ -94,7 +94,7 @@ public class CodeGen {
         clazzes.add(ImageLoadingStep.class);
         clazzes.add(MemMapConfig.class);
         clazzes.add(InferenceConfiguration.class);
-        clazzes.add(WordTokenizerStep.class);
+        clazzes.add(WordPieceTokenizerStep.class);
 
 
         String sep = File.separator;

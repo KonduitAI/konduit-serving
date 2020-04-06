@@ -22,7 +22,7 @@
 package ai.konduit.serving.pipeline.steps;
 
 import ai.konduit.serving.pipeline.PipelineStep;
-import ai.konduit.serving.pipeline.step.WordTokenizerStep;
+import ai.konduit.serving.pipeline.step.WordPieceTokenizerStep;
 import ai.konduit.serving.util.WritableValueRetriever;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.Writable;
@@ -40,25 +40,24 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * Implementation of WordTokenizerStep
+ * Implementation of WordPieceTokenizerStep
  *
- * This step turns sentences of designated lengths to tokens.
- * Often, this step is used as a preprocessing steps to preprocess words
- * for inference.
+ * This step run tokenization using WordPiece algorithm to turn sentence of designated lengths to tokens.
+ * Often, this step is used as a preprocessing steps to preprocess words for latter processing
  *
  * @author chia wei
  */
-public class WordTokenizerStepRunner extends BaseStepRunner
+public class WordPieceTokenizerStepRunner extends BaseStepRunner
 {
     private BertWordPieceTokenizerFactory tokenizer;
-    private WordTokenizerStep tokenizerStep;
+    private WordPieceTokenizerStep tokenizerStep;
     private Integer sentenceMaxLen;
 
-    public WordTokenizerStepRunner(PipelineStep pipelineStep)
+    public WordPieceTokenizerStepRunner(PipelineStep pipelineStep)
     {
         super(pipelineStep);
 
-        this.tokenizerStep = (WordTokenizerStep) pipelineStep;
+        this.tokenizerStep = (WordPieceTokenizerStep) pipelineStep;
 
         String vocabPath = this.tokenizerStep.getVocabPath();
         this.sentenceMaxLen = this.tokenizerStep.getSentenceMaxLen();
