@@ -176,7 +176,7 @@ public class StopCommand extends DefaultCommand {
         List<String> args;
 
         if(SystemUtils.IS_OS_WINDOWS) {
-            args = Arrays.asList("WMIC", "PROCESS", "WHERE", "\"CommandLine like '%serving.id=" + id + "' and name!='wmic.exe'\"", "GET", "CommandLine");
+            args = Arrays.asList("WMIC", "PROCESS", "WHERE", "\"CommandLine like '%serving.id=" + id + "' and name!='wmic.exe'\"", "GET", "CommandLine", "/VALUE");
         } else {
             args = Arrays.asList("sh", "-c", "ps ax | grep \"Dserving.id=" + id + "$\"");
         }

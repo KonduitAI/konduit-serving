@@ -61,7 +61,7 @@ public class ConfigCommand extends DefaultCommand {
 
     @Option(longName = "type", shortName = "t", argName = "config-type")
     @DefaultValue("image")
-    @Description("Type of configuration you want to create boilerplate for.")
+    @Description("Type of configuration you want to create boilerplate for. Allowed values are: [image, python, tensorflow, onnx, pmml, dl4j, keras]")
     public void setType(String type) {
         try {
             this.type = ConfigType.valueOf(type);

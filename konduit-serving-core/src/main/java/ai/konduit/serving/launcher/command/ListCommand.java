@@ -55,6 +55,7 @@ public class ListCommand extends DefaultCommand {
     }
 
     private final static Pattern PS = Pattern.compile("-Dserving.id=(.*)\\s*");
+    private final static Pattern ST = Pattern.compile("\\s+-s\\s+(.*)\\s*");
 
     // Note about stack traces - the stack trace are printed on the stream passed to the command.
 
@@ -155,6 +156,11 @@ public class ListCommand extends DefaultCommand {
     }
 
     private String getServiceType(String line) {
-        return "inference";
+        Matcher matcher = ST.matcher(line);
+        if(matcher.find()) {
+            return matcher.group(1).trim();
+        } else {
+            return "inference"; // Default service assumed.
+        }
     }
 }
