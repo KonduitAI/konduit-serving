@@ -27,6 +27,8 @@ import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.AnsiConsole;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -39,11 +41,18 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.fusesource.jansi.Ansi.ansi;
+
 @Slf4j
 @Name(value = "list", priority = 1)
 @Summary("Lists the running konduit servers.")
 @Description("List all konduit servers launched with the `serve` command")
 public class ListCommand extends DefaultCommand {
+
+    static {
+        AnsiConsole.systemInstall();
+        Runtime.getRuntime().addShutdownHook(new Thread(AnsiConsole::systemUninstall));
+    }
 
     private final static Pattern PS = Pattern.compile("-Dserving.id=(.*)\\s*");
 
@@ -63,7 +72,7 @@ public class ListCommand extends DefaultCommand {
                 cmd.add("WHERE");
                 cmd.add("\"CommandLine like '%serving.id%' and name!='wmic.exe'\"");
                 cmd.add("GET");
-                cmd.add("CommandLine^,ProcessId");
+                cmd.add("CommandLine,ProcessId");
             } else {
                 cmd.add("sh");
                 cmd.add("-c");
@@ -93,12 +102,12 @@ public class ListCommand extends DefaultCommand {
             if (matcher.find()) {
                 index++;
                 if(none) {
-                    out.print("\033[0;1m\033[04m"); // Bold and underlined
+                    out.print(ansi().a(Ansi.Attribute.UNDERLINE).bold());
                     out.format(printFormat, "#", "ID", "TYPE", "URL", "PID", "STATUS");
-                    out.print("\033[0m"); // Resetting
+                    out.print(ansi().a(Ansi.Attribute.RESET));
                 }
 
-                String id = matcher.group(1);
+                String id = matcher.group(1).trim().split(" ")[0];
                 printServerDetails(index, printFormat, id, line);
                 none = false;
             }
