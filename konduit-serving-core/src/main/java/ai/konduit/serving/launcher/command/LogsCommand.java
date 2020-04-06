@@ -75,7 +75,7 @@ public class LogsCommand extends DefaultCommand {
                 out.println(FileUtils.readFileToString(logsFile, StandardCharsets.UTF_8));
             }
         } catch (Exception exception) {
-            log.error("Failed to read logs", exception);
+            log.error("Failed to read logs. Reason: {}", exception.getMessage());
         }
     }
 }

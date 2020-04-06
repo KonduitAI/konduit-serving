@@ -82,7 +82,7 @@ public class InspectCommand extends DefaultCommand {
             String[] outputSplits = IOUtils.toString(
                     new InputStreamReader(
                             new ProcessBuilder(cmd).start().getInputStream())).replace(System.lineSeparator(), "")
-                    .split(" ");
+                    .trim().split(" ");
 
             String pid;
             if(ExecUtils.isWindows()) {

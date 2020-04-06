@@ -67,7 +67,7 @@ public class PredictCommand extends DefaultCommand {
         this.data = data;
     }
 
-    @Option(longName = "input_type", shortName = "it")
+    @Option(longName = "input-type", shortName = "it")
     @Description("Input type. Choices are: [NUMPY,JSON,ND4J,IMAGE,ARROW]")
     public void setInputType(String inputType) {
         try {
@@ -78,7 +78,7 @@ public class PredictCommand extends DefaultCommand {
         }
     }
 
-    @Option(longName = "prediction_type", shortName = "pt")
+    @Option(longName = "prediction-type", shortName = "pt")
     @Description("Prediction type. Choices are: [CLASSIFICATION,YOLO,SSD,RCNN,RAW,REGRESSION]")
     public void setPredictionType(String predictionType) {
         try {
@@ -97,9 +97,12 @@ public class PredictCommand extends DefaultCommand {
                         FileUtils.readFileToString(Paths.get(System.getProperty("user.home"), ".konduit-serving", "servers", getPidFromId(id) + ".data")
                                 .toFile(), StandardCharsets.UTF_8));
 
-                HttpRequest<Buffer> request = WebClient.create(Vertx.vertx()).post(inferenceConfiguration.getServingConfig().getHttpPort(),
-                        inferenceConfiguration.getServingConfig().getListenHost(),
-                        String.format("/%s/%s", predictionType, inputDataFormat));
+                Vertx vertx = Vertx.vertx();
+
+                HttpRequest<Buffer> request = WebClient.create(vertx)
+                        .post(inferenceConfiguration.getServingConfig().getHttpPort(),
+                                inferenceConfiguration.getServingConfig().getListenHost(),
+                                String.format("/%s/%s", predictionType, inputDataFormat));
 
                 Handler<AsyncResult<HttpResponse<Buffer>>> responseHandler = handler -> {
                     if(handler.succeeded()) {
@@ -107,6 +110,8 @@ public class PredictCommand extends DefaultCommand {
                     } else {
                         log.error("Request failed: ", handler.cause());
                     }
+
+                    vertx.close();
                 };
 
                 JsonObject jsonData = null;

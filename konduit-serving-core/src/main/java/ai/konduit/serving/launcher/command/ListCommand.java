@@ -136,7 +136,7 @@ public class ListCommand extends DefaultCommand {
     }
 
     public static String getPidFromLine(String line) {
-        String[] splits = line.split(" ");
+        String[] splits = line.trim().split(" ");
 
         if(ExecUtils.isWindows()) {
             return splits[splits.length -1].trim();
