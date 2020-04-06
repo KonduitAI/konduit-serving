@@ -158,7 +158,8 @@ public class ListCommand extends DefaultCommand {
     private String getServiceType(String line) {
         Matcher matcher = ST.matcher(line);
         if(matcher.find()) {
-            return matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+            String output = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+            return output.trim().split(" ")[0];
         } else {
             return "inference"; // Default service assumed.
         }
