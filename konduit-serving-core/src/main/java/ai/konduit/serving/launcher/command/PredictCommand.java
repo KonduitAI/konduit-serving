@@ -62,7 +62,7 @@ public class PredictCommand extends DefaultCommand {
     }
 
     @Argument(index = 1, argName = "data")
-    @Description("Data to send to the server. Accepts JSON string, or a list of comma-separated file paths (corresponding to configured input names as input data")
+    @Description("Data to send to the server. Accepts JSON string, or a list of comma-separated file paths (corresponding to configured input names), as input data")
     public void setData(String data) {
         this.data = data;
     }

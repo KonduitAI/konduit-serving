@@ -52,8 +52,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
             return true;
         }
 
-        boolean ret =  Arrays.stream(validInputTypes()).anyMatch(input -> dataFormat.equals(input));
-        return ret;
+        return Arrays.stream(validInputTypes()).anyMatch(input -> dataFormat.equals(input));
     }
 
 
