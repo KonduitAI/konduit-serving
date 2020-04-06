@@ -72,7 +72,7 @@ public class InspectCommand extends DefaultCommand {
                 cmd.add("WHERE");
                 cmd.add("\"CommandLine like '%serving.id=" + serverId + "' and name!='wmic.exe'\"");
                 cmd.add("GET");
-                cmd.add("CommandLine^,ProcessId");
+                cmd.add("CommandLine,ProcessId");
             } else {
                 cmd.add("sh");
                 cmd.add("-c");
