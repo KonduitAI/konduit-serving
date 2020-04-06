@@ -66,7 +66,7 @@ public class ConfigCommand extends DefaultCommand {
         try {
             this.type = ConfigType.valueOf(type);
         } catch (Exception exception) {
-            log.error(String.format("Invalid config type \'%s\'. Allowed values are %s", type, Arrays.asList(ConfigType.values())));
+            log.error(String.format("Invalid config type '%s'. Allowed values are %s", type, Arrays.asList(ConfigType.values())));
             System.exit(1);
         }
     }
@@ -123,6 +123,7 @@ public class ConfigCommand extends DefaultCommand {
                 output = keras();
                 break;
             default:
+                log.error(String.format("Invalid config type \'%s\'. Allowed values are %s", type, Arrays.asList(ConfigType.values())));
                 System.exit(1);
                 return;
         }
