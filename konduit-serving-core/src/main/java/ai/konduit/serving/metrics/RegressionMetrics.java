@@ -40,7 +40,6 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -147,26 +146,34 @@ public class RegressionMetrics implements MetricsRenderer {
 
     @Override
     public void updateMetrics(Object... args) {
-        if(args instanceof Record[]) {
-            Record[] records = (Record[]) args;
-            incrementClassificationCounters(records);
+        if(args[0] instanceof Record) {
+            Record records = (Record) args[0];
+            incrementRegressionCounters(new Record[]{records});
         }
-        else if(args instanceof INDArray[]) {
-            INDArray[] output = (INDArray[]) args;
-            incrementClassificationCounters(output);
+        else if(args[0] instanceof Record[]) {
+            Record[] records = (Record[]) args[0];
+            incrementRegressionCounters(records);
+        }
+        else if(args[0] instanceof INDArray) {
+            INDArray output = (INDArray) args[0];
+            incrementRegressionCounters(new INDArray[] {output});
+        }
+        else if(args[0] instanceof INDArray[]) {
+            INDArray[] output = (INDArray[]) args[0];
+            incrementRegressionCounters(output);
 
         }
     }
 
 
-    private void incrementClassificationCounters(INDArray[] outputs) {
+    private void incrementRegressionCounters(INDArray[] outputs) {
         synchronized (statCounters) {
             handleNdArray(outputs[0]);
         }
 
     }
 
-    private void incrementClassificationCounters(Record[] records) {
+    private void incrementRegressionCounters(Record[] records) {
         synchronized (statCounters) {
             NDArrayWritable ndArrayWritable = (NDArrayWritable) records[0].getRecord().get(0);
             handleNdArray(ndArrayWritable.get());
