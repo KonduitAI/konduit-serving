@@ -58,3 +58,5 @@ konduit.jar
 pom.xml.versionsBackup
 konduit-serving-codegen/src/main/resources/docker/centos/aarch64/cuda/10.0/nvidia-deb/cuda-repo-l4t-10-0-local-10.0.326_1.0-1_arm64.deb
 konduit-serving-codegen/src/main/resources/docker/centos/aarch64/cuda/10.0/nvidia-deb/libcudnn7_7.6.3.28-1+cuda10.0_arm64.deb
+
+git.properties

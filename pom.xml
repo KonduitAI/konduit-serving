@@ -147,6 +147,7 @@
 
         <sysout-over-slf4j.version>1.0.2</sysout-over-slf4j.version>
         <guava.version>20.0</guava.version>
+        <maven-git-commit-plugin.version>2.2.2</maven-git-commit-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -672,6 +673,11 @@
         </plugins>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>pl.project13.maven</groupId>
+                    <artifactId>git-commit-id-plugin</artifactId>
+                    <version>${maven-git-commit-plugin.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>

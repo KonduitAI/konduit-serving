@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 import java.util.Scanner;
 
 @Name(value = "version", priority = 1)
@@ -39,7 +40,7 @@ public class VersionCommand extends DefaultCommand {
 
     @Override
     public void run() throws CLIException {
-        log.info(getVersion());
+        out.println(getVersion());
     }
 
     /**
@@ -51,13 +52,15 @@ public class VersionCommand extends DefaultCommand {
         if (version != null) {
             return version;
         }
-        try (InputStream is = VersionCommand.class.getClassLoader().getResourceAsStream("META-INF/serving/serving-version.txt")) {
+        try (InputStream is = VersionCommand.class.getClassLoader().getResourceAsStream("META-INF/git.properties")) {
             if (is == null) {
-                throw new IllegalStateException("Cannot find serving-version.txt on classpath");
+                throw new IllegalStateException("Cannot find git.properties on classpath");
             }
-            try (Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A")) {
-                return version = scanner.hasNext() ? scanner.next().trim() : "";
-            }
+            Properties gitProperties = new Properties();
+            gitProperties.load(is);
+            return version = String.format("Konduit serving version: %s\nCommit hash: %s",
+                    gitProperties.getProperty("git.build.version"),
+                    gitProperties.getProperty("git.commit.id").substring(0, 8));
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage());
         }

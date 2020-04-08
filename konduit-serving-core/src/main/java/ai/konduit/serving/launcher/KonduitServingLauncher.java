@@ -78,7 +78,7 @@ public class KonduitServingLauncher extends Launcher {
 
     @Override
     protected String getDefaultCommand() {
-        return ServeCommand.class.getAnnotation(Name.class).value();
+        return "--help";
     }
 
     /**
@@ -141,7 +141,7 @@ public class KonduitServingLauncher extends Launcher {
                 .unregister("start")
                 .unregister("test")
                 .unregister("version")
-                .register(JoinCommand.class, JoinCommand::new)
+                //.register(JoinCommand.class, JoinCommand::new) // TODO: Uncomment this after implementation and testing
                 .register(ServeCommand.class, ServeCommand::new)
                 .register(RunCommand.class, RunCommand::new)
                 .register(ListCommand.class, ListCommand::new)

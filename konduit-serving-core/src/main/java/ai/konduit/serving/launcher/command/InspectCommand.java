@@ -38,12 +38,17 @@ import java.util.List;
 @Slf4j
 @Name("inspect")
 @Summary("Inspect the details of a particular konduit server.")
-@Description("Inspect the details of a particular konduit server given an id.")
+@Description("Inspect the details of a particular konduit server given an id. To find a list of running servers and their details, use the 'list' command.\n\n" +
+        "Example usages:\n" +
+        "--------------\n" +
+        "- Prints the inference configuration of server with an id of 'inf_server':\n" +
+        "$ konduit inspect inf_server\n" +
+        "--------------")
 public class InspectCommand extends DefaultCommand {
 
     String id;
 
-    @Argument(index = 0, argName = "<server-id>")
+    @Argument(index = 0, argName = "server-id")
     @Description("Konduit server id")
     public void setId(String id) {
         this.id = id;
@@ -91,7 +96,7 @@ public class InspectCommand extends DefaultCommand {
                 pid = outputSplits[0].trim();
             }
 
-            return Integer.valueOf(pid);
+            return Integer.parseInt(pid);
         } catch (Exception exception) {
             log.error("Failed to fetch pid from server id", exception);
             System.exit(1);

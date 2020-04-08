@@ -36,7 +36,14 @@ import java.io.File;
 @Slf4j
 @Name("logs")
 @Summary("View the logs of a particular konduit server")
-@Description("View the logs of a particular konduit server given an id.")
+@Description("View the logs of a particular konduit server given an id.\n\n" +
+        "Example usages:\n" +
+        "--------------\n" +
+        "- Outputs the log file contents of server with an id of 'inf_server':\n" +
+        "$ konduit logs inf_server\n\n" +
+        "- Outputs and tail the log file contents of server with an id of 'inf_server':\n" +
+        "$ konduit logs inf_server -f\n" +
+        "--------------")
 public class LogsCommand extends DefaultCommand {
 
     String id;

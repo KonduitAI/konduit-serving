@@ -36,7 +36,12 @@ import java.util.*;
         "The application is identified with an id that can be set using the `--serving-id` or `-id` option. " +
         "The application can be stopped with the `stop` command. " +
         "This command takes the `run` command parameters. To see the " +
-        "run command parameters, execute `run --help`")
+        "run command parameters, execute `run --help`\n\n" +
+        "Example usages:\n" +
+        "--------------\n" +
+        "- Starts a server with an id of 'inf_server' using 'config.json' as configuration file:\n" +
+        "$ konduit serve -id inf_server --conf config.json\n" +
+        "--------------")
 @Slf4j
 public class ServeCommand extends DefaultCommand {
 

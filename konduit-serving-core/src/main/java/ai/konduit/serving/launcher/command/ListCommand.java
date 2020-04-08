@@ -46,7 +46,7 @@ import static org.fusesource.jansi.Ansi.ansi;
 @Slf4j
 @Name(value = "list", priority = 1)
 @Summary("Lists the running konduit servers.")
-@Description("List all konduit servers launched with the `serve` command")
+@Description("List all konduit servers launched through the `serve` command.")
 public class ListCommand extends DefaultCommand {
 
     static {

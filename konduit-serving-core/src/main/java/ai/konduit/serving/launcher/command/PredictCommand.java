@@ -47,7 +47,18 @@ import static ai.konduit.serving.launcher.command.InspectCommand.getPidFromId;
 @Slf4j
 @Name("predict")
 @Summary("Run inference on konduit servers using given inputs")
-@Description("Sends file data or JSON input data to running konduit servers. ")
+@Description("Sends file data or JSON input data to running konduit servers.\n\n" +
+        "Example usages:\n" +
+        "--------------\n" +
+        "- Sends input as JSON string to server with an id of 'inf_server' for processing:\n" +
+        "$ konduit predict inf_server \"{...}\"\n\n" +
+        "- Sends input (image.jpg) as 'image' to server with an id of 'inf_server' for processing:\n" +
+        "$ konduit predict -it IMAGE inf_server image.jpg\n\n" +
+        "- Sends input (input.npy) as 'numpy array binary' to server with an id of 'inf_server' for classification:\n" +
+        "$ konduit predict -it NUMPY -pt CLASSIFICATION inf_server input.npy\n\n" +
+        "- Sends inputs (input1.zip and input2.zip) as 'nd4j array binaries' to server with an id of 'inf_server' for classification:\n" +
+        "$ konduit predict -it ND4J -pt CLASSIFICATION inf_server input1.zip,input2.zip\n" +
+        "--------------")
 public class PredictCommand extends DefaultCommand {
 
     String id;

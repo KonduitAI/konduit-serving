@@ -36,7 +36,12 @@ import java.util.regex.Pattern;
 @Name(value = "stop", priority = 1)
 @Summary("Stop a running konduit server")
 @Description("This command stops a konduit server started with the `serve` command. The command requires the " +
-        "serving id as argument. Use the `list` command to get the list of running konduit servers")
+        "serving id as argument. Use the `list` command to get the list of running konduit servers.\n\n" +
+        "Example usages:\n" +
+        "--------------\n" +
+        "- Stops the server with an id of 'inf_server':\n" +
+        "$ konduit stop inf_server\n" +
+        "--------------")
 public class StopCommand extends DefaultCommand {
 
     private String id;
@@ -54,7 +59,7 @@ public class StopCommand extends DefaultCommand {
      * @param id the id.
      */
     @Argument(index = 0, argName = "serving.id", required = false)
-    @Description("The vert.x application id")
+    @Description("The konduit server id")
     public void setApplicationId(String id) {
         this.id = id;
     }

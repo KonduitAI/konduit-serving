@@ -141,6 +141,7 @@ public class LogUtils {
         rootLogger.addAppender(consoleAppender);
 
         ((Logger) LoggerFactory.getLogger("uk.org.lidalia")).setLevel(Level.ERROR);
+        ((Logger) LoggerFactory.getLogger("org.nd4j")).setLevel(Level.ERROR);
         ((Logger) LoggerFactory.getLogger("org")).setLevel(Level.ERROR);
         ((Logger) LoggerFactory.getLogger("io")).setLevel(Level.ERROR);
 
