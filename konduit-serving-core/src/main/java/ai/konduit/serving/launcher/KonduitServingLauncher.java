@@ -122,9 +122,16 @@ public class KonduitServingLauncher extends Launcher {
     }
 
     public static void main(String[] args) {
-        KonduitServingLauncher konduitServingLauncher = new KonduitServingLauncher();
+        KonduitServingLauncher konduitServingLauncher = new KonduitServingLauncher().setMainCommands();
 
-        konduitServingLauncher
+        if(args.length > 0 && RunCommand.class.getAnnotation(Name.class).value().equals(args[0]))
+            konduitServingLauncher.register(RunCommand.class, RunCommand::new);
+
+        konduitServingLauncher.dispatch(args);
+    }
+
+    public KonduitServingLauncher setMainCommands() {
+        return (KonduitServingLauncher) this
                 .unregister("bare")
                 .unregister("start")
                 .unregister("run")
@@ -139,11 +146,6 @@ public class KonduitServingLauncher extends Launcher {
                 .register(ConfigCommand.class, ConfigCommand::new)
                 .register(InspectCommand.class, InspectCommand::new)
                 .register(LogsCommand.class, LogsCommand::new);
-
-        if(args.length > 0 && RunCommand.class.getAnnotation(Name.class).value().equals(args[0]))
-            konduitServingLauncher.register(RunCommand.class, RunCommand::new);
-
-        konduitServingLauncher.dispatch(args);
     }
 
     @Override
