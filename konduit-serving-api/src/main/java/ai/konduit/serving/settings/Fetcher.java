@@ -62,6 +62,16 @@ public class Fetcher {
         return createAndValidateDirectory(commandLogsDirPath);
     }
 
+    public static File getFileUploadsDir() {
+        String fileUploadsDirEnv = System.getenv(EnvironmentConstants.FILE_UPLOADS_DIR);
+        String fileUploadsDirProp = System.getProperty(PropertiesConstants.FILE_UPLOADS_DIR);
+
+        String fileUploadsDirPath = !Strings.isNullOrEmpty(fileUploadsDirEnv) ? fileUploadsDirEnv :
+                !Strings.isNullOrEmpty(fileUploadsDirProp) ? fileUploadsDirProp : getDefaultFileUploadsDir();
+
+        return createAndValidateDirectory(fileUploadsDirPath);
+    }
+
     public static String getUserHomeDir() {
         return System.getProperty("user.home");
     }
@@ -76,6 +86,10 @@ public class Fetcher {
 
     public static String getDefaultCommandLogsDir() {
         return createAndValidateDirectory(new File(getWorkingDir(), Constants.DEFAULT_COMMAND_LOGS_DIR_NAME)).getAbsolutePath();
+    }
+
+    public static String getDefaultFileUploadsDir() {
+        return createAndValidateDirectory(System.getProperty("java.io.tmpdir")).getAbsolutePath();
     }
 
     public static File createAndValidateDirectory(String directoryPath) {

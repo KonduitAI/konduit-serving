@@ -24,6 +24,7 @@ package ai.konduit.serving.config;
 
 import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.metrics.MetricType;
+import ai.konduit.serving.settings.Fetcher;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,7 +54,7 @@ public class ServingConfig implements TextConfig {
     private Output.DataFormat outputDataFormat = Output.DataFormat.JSON;
 
     @Builder.Default
-    private String uploadsDirectory = System.getProperty("java.io.tmpdir");
+    private String uploadsDirectory = Fetcher.getFileUploadsDir().getAbsolutePath();
 
     @Builder.Default
     private boolean logTimings = false;
