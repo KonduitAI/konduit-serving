@@ -34,16 +34,18 @@ import java.util.*;
 import static ai.konduit.serving.launcher.command.RunCommand.DEFAULT_SERVICE;
 
 @Name("serve")
-@Summary("Start a konduit server application in background")
-@Description("Start a konduit server application as a background service. " +
+@Summary("Start a konduit server application")
+@Description("Start a konduit server application. " +
         "The application is identified with an id that can be set using the `--serving-id` or `-id` option. " +
         "The application can be stopped with the `stop` command. " +
         "This command takes the `run` command parameters. To see the " +
         "run command parameters, execute `run --help`\n\n" +
         "Example usages:\n" +
         "--------------\n" +
-        "- Starts a server with an id of 'inf_server' using 'config.json' as configuration file:\n" +
-        "$ konduit serve -id inf_server -c config.json\n" +
+        "- Starts a server in the foreground with an id of 'inf_server' using 'config.json' as configuration file:\n" +
+        "$ konduit serve -id inf_server -c config.json\n\n" +
+        "- Starts a server in the background with an id of 'inf_server' using 'config.json' as configuration file:\n" +
+        "$ konduit serve -id inf_server -c config.json -b\n" +
         "--------------")
 @Slf4j
 public class ServeCommand extends DefaultCommand {
