@@ -136,22 +136,28 @@ public class KonduitServingLauncher extends Launcher {
     }
 
     public static void main(String[] args) {
-        new KonduitServingLauncher()
+        KonduitServingLauncher konduitServingLauncher = new KonduitServingLauncher();
+
+        konduitServingLauncher
                 .unregister("bare")
                 .unregister("start")
+                .unregister("run")
                 .unregister("test")
                 .unregister("version")
                 //.register(JoinCommand.class, JoinCommand::new) // TODO: Uncomment this after implementation and testing
                 .register(ServeCommand.class, ServeCommand::new)
-                .register(RunCommand.class, RunCommand::new)
                 .register(ListCommand.class, ListCommand::new)
                 .register(StopCommand.class, StopCommand::new)
                 .register(PredictCommand.class, PredictCommand::new)
                 .register(VersionCommand.class, VersionCommand::new)
                 .register(ConfigCommand.class, ConfigCommand::new)
                 .register(InspectCommand.class, InspectCommand::new)
-                .register(LogsCommand.class, LogsCommand::new)
-                .dispatch(args);
+                .register(LogsCommand.class, LogsCommand::new);
+
+        if(args.length > 0 && RunCommand.class.getAnnotation(Name.class).value().equals(args[0]))
+            konduitServingLauncher.register(RunCommand.class, RunCommand::new);
+
+        konduitServingLauncher.dispatch(args);
     }
 
     @Override

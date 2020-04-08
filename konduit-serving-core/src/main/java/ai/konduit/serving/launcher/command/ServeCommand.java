@@ -30,6 +30,8 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static ai.konduit.serving.launcher.command.RunCommand.DEFAULT_SERVICE;
+
 @Name("serve")
 @Summary("Start a konduit server application in background")
 @Description("Start a konduit server application as a background service. " +
@@ -40,16 +42,62 @@ import java.util.*;
         "Example usages:\n" +
         "--------------\n" +
         "- Starts a server with an id of 'inf_server' using 'config.json' as configuration file:\n" +
-        "$ konduit serve -id inf_server --conf config.json\n" +
+        "$ konduit serve -id inf_server -c config.json\n" +
         "--------------")
 @Slf4j
 public class ServeCommand extends DefaultCommand {
 
     private String id;
     private String launcher;
+    private int instances = 1;
+    private String classpath;
+    private String service;
+    private String configuration;
 
     private boolean redirect;
     private String jvmOptions;
+
+    /**
+     * Sets the number of instance of the verticle to create.
+     *
+     * @param instances the number of instances
+     */
+    @Option(shortName = "i", longName = "instances", argName = "instances")
+    @DefaultValue("1")
+    @Description("Specifies how many instances of the server will be deployed. Defaults to 1.")
+    public void setInstances(int instances) {
+        this.instances = instances;
+    }
+
+    /**
+     * Sets the classpath.
+     *
+     * @param classpath the classpath
+     */
+    @Option(shortName = "cp", longName = "classpath", argName = "classpath")
+    @Description("Provides an extra classpath to be used for the verticle deployment.")
+    public void setClasspath(String classpath) {
+        this.classpath = classpath;
+    }
+
+    @Option(longName = "service", shortName = "s", argName = "type")
+    @DefaultValue(DEFAULT_SERVICE)
+    @Description("Service type that needs to be deployed. Defaults to \"inference\"")
+    public void setMainVerticle(String konduitServiceType) {
+        this.service = service;
+    }
+
+    /**
+     * The main verticle configuration, it can be a json file or a json string.
+     *
+     * @param configuration the configuration
+     */
+    @Option(shortName = "c", longName = "config", argName = "server-config", required = true)
+    @Description("Specifies configuration that should be provided to the verticle. <config> should reference either a " +
+            "text file containing a valid JSON object which represents the configuration OR be a JSON string.")
+    public void setConfig(String configuration) {
+        this.configuration = configuration;
+    }
 
     /**
      * Sets the "application id" that would be to stop the application and be listed in the {@link ListCommand} command.
@@ -68,7 +116,7 @@ public class ServeCommand extends DefaultCommand {
      *
      * @param options the jvm options
      */
-    @Option(longName = "java-opts")
+    @Option(shortName = "jo", longName = "java-opts")
     @Description("Java Virtual Machine options to pass to the spawned process such as \"-Xmx1G -Xms256m " +
             "-XX:MaxPermSize=256m\". If not set the `JAVA_OPTS` environment variable is used.")
     public void setJavaOptions(String options) {
@@ -91,7 +139,7 @@ public class ServeCommand extends DefaultCommand {
      *
      * @param redirect {@code true} to enable redirection, {@code false} otherwise.
      */
-    @Option(longName = "redirect", flag = true)
+    @Option(shortName = "r", longName = "redirect", flag = true)
     @Description("Whether the created process error streams and output streams needs to be redirected to the launcher process.")
     public void setRedirect(boolean redirect) {
         this.redirect = redirect;
@@ -108,7 +156,27 @@ public class ServeCommand extends DefaultCommand {
         addJavaCommand(cmd);
 
         // Must be called only once !
-        List<String> cliArguments = getArguments();
+        List<String> cliArguments = new ArrayList<>();
+
+        cliArguments.add("--instances");
+        cliArguments.add(String.valueOf(instances));
+
+        if(classpath != null) {
+            cliArguments.add("--classpath");
+            cliArguments.add(classpath);
+        }
+
+        if(service != null) {
+            cliArguments.add("-s");
+            cliArguments.add(service);
+        }
+
+        if(configuration != null) {
+            cliArguments.add("-c");
+            cliArguments.add(configuration);
+        }
+
+        cliArguments.addAll(getArguments());
 
         // Add the classpath to env.
         builder.environment().put("CLASSPATH", System.getProperty("java.class.path"));

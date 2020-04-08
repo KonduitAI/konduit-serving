@@ -25,8 +25,7 @@ import io.vertx.core.impl.launcher.CommandLineUtils;
 import org.nd4j.shade.guava.base.Strings;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
 
 import static ai.konduit.serving.launcher.KonduitServingLauncher.KONDUIT_PREFIX;
 import static ai.konduit.serving.launcher.KonduitServingLauncher.services;
@@ -36,19 +35,19 @@ import static ai.konduit.serving.launcher.KonduitServingLauncher.services;
 @Description("Runs a konduit server in the foreground.")
 public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand {
 
-    private static final String DEFAULT_SERVICE = "inference";
+    public static final String DEFAULT_SERVICE = "inference";
 
     @Override
     @Option(longName = "service", shortName = "s", argName = "type")
     @DefaultValue(DEFAULT_SERVICE)
     @Description("Service type that needs to be deployed. Defaults to \"inference\"")
     public void setMainVerticle(String konduitServiceType) {
-        if(services.keySet().contains(konduitServiceType)) {
+        if(services.containsKey(konduitServiceType)) {
             super.setMainVerticle(KONDUIT_PREFIX + ":" + konduitServiceType);
         } else {
             throw new CLIException(String.format("Invalid service type %s. " +
                     "Allowed values are: %s", konduitServiceType,
-                    Arrays.asList(services.keySet())));
+                    Collections.singletonList(services.keySet())));
         }
     }
 
@@ -57,7 +56,7 @@ public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand 
      *
      * @param configuration the configuration
      */
-    @Option(longName = "conf", argName = "config")
+    @Option(shortName = "c", longName = "config", argName = "config", required = true)
     @Description("Specifies configuration that should be provided to the verticle. <config> should reference either a " +
             "text file containing a valid JSON object which represents the configuration OR be a JSON string.")
     public void setConfig(String configuration) {
@@ -66,14 +65,7 @@ public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand 
             configuration = file.getAbsolutePath();
         }
 
-        if (configuration != null) {
-            // For inlined configuration remove first and end single and double quotes if any
-            this.config = configuration.trim()
-                    .replaceAll("^\"|\"$", "")
-                    .replaceAll("^'|'$", "");
-        } else {
-            this.config = null;
-        }
+        super.setConfig(configuration);
     }
 
     @Override
