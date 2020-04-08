@@ -58,8 +58,6 @@ public class KonduitServingLauncher extends Launcher {
             "memmap", InferenceVerticle.class.getCanonicalName()
     );
 
-    InferenceConfiguration inferenceConfiguration;
-
     static {
         LogUtils.setAppendersForCommandLine();
 
@@ -128,11 +126,6 @@ public class KonduitServingLauncher extends Launcher {
                 }
             }
         });
-    }
-
-    @Override
-    public void afterConfigParsed(JsonObject config) {
-        this.inferenceConfiguration = InferenceConfiguration.fromJson(config.encode());
     }
 
     public static void main(String[] args) {
