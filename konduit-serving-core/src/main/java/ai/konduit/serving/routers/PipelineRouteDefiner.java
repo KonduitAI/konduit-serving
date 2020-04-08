@@ -389,7 +389,7 @@ public class PipelineRouteDefiner {
                         inputSchema,
                         null,
                         outputSchema,
-			inputDataFormat,
+			            inputDataFormat,
                         inferenceConfiguration.getServingConfig().getOutputDataFormat());
 
                 if (start != null)
@@ -402,12 +402,7 @@ public class PipelineRouteDefiner {
                     }
 
                     log.debug("Done updating metrics post inference");
-
-
                 });
-
-
-
             } catch (Exception e) {
                 log.error("Unable to perform json inference", e);
                 ctx.response().setStatusCode(500);
@@ -415,7 +410,6 @@ public class PipelineRouteDefiner {
                 ctx.response().end();
             }
         });
-
 
         /**
          * Multi-part request for pipeline outputs of given predictionType for

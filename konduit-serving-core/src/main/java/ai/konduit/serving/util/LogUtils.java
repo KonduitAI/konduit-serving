@@ -17,6 +17,7 @@
 package ai.konduit.serving.util;
 
 import ai.konduit.serving.settings.Fetcher;
+import ai.konduit.serving.settings.constants.Constants;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -87,7 +88,7 @@ public class LogUtils {
     public static void setFileAppenderIfNeeded() throws Exception {
         File previousLogsFile = getEndpointLogsFile();
 
-        File newLogsFile = new File(Fetcher.getEndpointLogsDir(), "main.log");
+        File newLogsFile = new File(Fetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE);
 
         if(!newLogsFile.equals(previousLogsFile)) {
             ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)

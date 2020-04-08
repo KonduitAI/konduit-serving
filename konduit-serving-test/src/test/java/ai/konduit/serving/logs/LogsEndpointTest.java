@@ -18,6 +18,10 @@ package ai.konduit.serving.logs;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.deploy.DeployKonduitServing;
+import ai.konduit.serving.settings.Fetcher;
+import ai.konduit.serving.settings.constants.Constants;
+import ai.konduit.serving.settings.constants.EnvironmentConstants;
+import ai.konduit.serving.settings.constants.PropertiesConstants;
 import ai.konduit.serving.train.TestUtils;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -28,14 +32,15 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
-import org.assertj.core.util.Strings;
 import org.hamcrest.Matchers;
 import org.junit.*;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.nd4j.linalg.io.ClassPathResource;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -72,14 +77,14 @@ public class LogsEndpointTest {
 
         // Delete previous logs if they exist
         try {
-            FileUtils.forceDelete(Paths.get(System.getProperty("user.dir"), "main.log").toFile());
+            FileUtils.forceDelete(new File(Fetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE));
         } catch (IOException ignore) {}
 
-        mBaseLogDir = System.getProperty("user.dir");
+        mBaseLogDir = Fetcher.getEndpointLogsDir().getAbsolutePath();
 
         Handler<AsyncResult<InferenceConfiguration>> eventHandler = handler -> {
             if(handler.succeeded()) {
-                testContext.assertTrue(Paths.get(mBaseLogDir, "main.log").toFile().exists());
+                testContext.assertTrue(Paths.get(mBaseLogDir, Constants.MAIN_ENDPOINT_LOGS_FILE).toFile().exists());
 
                 given().port(handler.result().getServingConfig().getHttpPort())
                         .get(String.format("/logs/%s", numberOfLinesToReadFromLogs))
@@ -103,8 +108,8 @@ public class LogsEndpointTest {
         mAsync = testContext.async();
 
         // Now checking with environment variables
-        environmentVariables.set("KONDUIT_SERVING_LOG_DIR", folder.getRoot().getAbsolutePath());
-        mBaseLogDir = System.getenv("KONDUIT_SERVING_LOG_DIR");
+        environmentVariables.set(EnvironmentConstants.ENDPOINT_LOGS_DIR, folder.getRoot().getAbsolutePath());
+        mBaseLogDir = System.getenv(EnvironmentConstants.ENDPOINT_LOGS_DIR);
         testContext.assertEquals(mBaseLogDir, folder.getRoot().getAbsolutePath());
 
         // Checking after setting environment variables
@@ -113,20 +118,19 @@ public class LogsEndpointTest {
     }
 
     @Test
-    public void testWithBadLogsDirectory(TestContext testContext) {
+    public void testWithBadLogsDirectory(TestContext testContext) throws IOException {
+        String badDirectory = new ClassPathResource("logback.xml").getFile().getAbsolutePath();
+
         mAsync = testContext.async();
 
         Handler<AsyncResult<InferenceConfiguration>> eventHandler = handler -> {
             if(handler.succeeded()) {
                 testContext.fail("Logs file cannot be placed at an invalid directory.");
+                mAsync.complete();
             } else {
                 Throwable throwable = handler.cause();
-                if(!Strings.isNullOrEmpty(System.getenv("KONDUIT_SERVING_LOG_DIR")) &&
-                        throwable.getMessage().contains("environment variable KONDUIT_SERVING_LOG_DIR") &&
-                        throwable.getMessage().contains("doesn't exist or is an invalid directory.")) {
-                    mAsync.countDown();
-                } else if(throwable.getMessage().contains("system property user.dir") &&
-                        throwable.getMessage().contains("doesn't exist or is an invalid directory.")) {
+                if(throwable instanceof IllegalStateException  && throwable.getMessage().contains(
+                        String.format("Invalid directory: %s", badDirectory))) {
                     mAsync.countDown();
                 } else {
                     testContext.fail(handler.cause());
@@ -134,14 +138,15 @@ public class LogsEndpointTest {
             }
         };
 
-        // Testing with a bad system property
-        environmentVariables.set("KONDUIT_SERVING_LOG_DIR", folder.getRoot().getAbsolutePath() + "/nonExistentDirectory");
+        // Testing with a bad Environment property
+        environmentVariables.set(EnvironmentConstants.ENDPOINT_LOGS_DIR, badDirectory);
         DeployKonduitServing.deployInference(getConfig(testContext), eventHandler);
         mAsync.await();
         mAsync = testContext.async();
 
-        // Testing with a bad Environment variable
-        System.setProperty("user.dir", folder.getRoot().getAbsolutePath() + "/nonExistentDirectory");
+        // Testing with a bad system variable
+        environmentVariables.clear(EnvironmentConstants.ENDPOINT_LOGS_DIR);
+        System.setProperty(PropertiesConstants.ENDPOINT_LOGS_DIR, badDirectory);
         DeployKonduitServing.deployInference(getConfig(testContext), eventHandler);
         mAsync.await();
     }
@@ -152,13 +157,13 @@ public class LogsEndpointTest {
 
         // Delete previous logs if they exist
         try {
-            FileUtils.forceDelete(Paths.get(System.getProperty("user.dir"), "main.log").toFile());
+            FileUtils.forceDelete(Paths.get(System.getProperty(PropertiesConstants.ENDPOINT_LOGS_DIR), Constants.MAIN_ENDPOINT_LOGS_FILE).toFile());
         } catch (IOException ignore) {}
 
         DeployKonduitServing.deployInference(getConfig(testContext),
                 handler -> {
                     if(handler.succeeded()) {
-                        testContext.assertTrue(Paths.get(System.getProperty("user.dir"), "main.log").toFile().exists());
+                        testContext.assertTrue(new File(Fetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE).exists());
 
                         RequestSpecification requestSpecification = given().port(handler.result().getServingConfig().getHttpPort());
 

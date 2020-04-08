@@ -19,7 +19,7 @@
 package ai.konduit.serving.settings.constants;
 
 public class EnvironmentConstants {
-    public static final String WORKING_DIR = "konduit_working_dir";
-    public static final String ENDPOINT_LOGS_DIR = "konduit_endpoint_logs_dir";
-    public static final String COMMAND_LOGS_DIR = "konduit_command_logs_dir";
+    public static final String WORKING_DIR = "KONDUIT_WORKING_DIR";
+    public static final String ENDPOINT_LOGS_DIR = "KONDUIT_ENDPOINT_LOGS_DIR";
+    public static final String COMMAND_LOGS_DIR = "KONDUIT_COMMAND_LOGS_DIR";
 }

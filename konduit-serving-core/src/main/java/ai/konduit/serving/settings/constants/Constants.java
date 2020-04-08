@@ -23,4 +23,5 @@ public class Constants {
     public static final String DEFAULT_ENDPOINT_LOGS_DIR_NAME = "endpoint_logs";
     public static final String DEFAULT_COMMAND_LOGS_DIR_NAME = "command_logs";
     public static final String SERVERS_DATA_DIR_NAME = "servers";
+    public static final String MAIN_ENDPOINT_LOGS_FILE = "main.log";
 }
