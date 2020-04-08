@@ -304,7 +304,7 @@ public class PipelineRouteDefiner {
                             if (numberOfLinesString.matches("-?\\d+")) {
                                 ctx.response().end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
                             } else if("download".equalsIgnoreCase(numberOfLinesString)) {
-                                ctx.response().sendFile(LogUtils.getLogsFile().getAbsolutePath()).end();
+                                ctx.response().sendFile(LogUtils.getEndpointLogsFile().getAbsolutePath()).end();
                             } else if("downloadAsZip".equalsIgnoreCase(numberOfLinesString)) {
                                 ctx.response().sendFile(LogUtils.getZippedLogs().getAbsolutePath()).end();
                             } else {

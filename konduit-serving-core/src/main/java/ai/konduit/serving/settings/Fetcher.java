@@ -38,6 +38,10 @@ public class Fetcher {
         return createAndValidateDirectory(workingDirPath);
     }
 
+    public static File getServersDataDir() {
+        return createAndValidateDirectory(new File(getWorkingDir(), Constants.SERVERS_DATA_DIR_NAME));
+    }
+
     public static File getEndpointLogsDir() {
         String endpointLogsDirEnv = System.getenv(EnvironmentConstants.ENDPOINT_LOGS_DIR);
         String endpointLogsDirProp = System.getProperty(PropertiesConstants.ENDPOINT_LOGS_DIR);
@@ -63,15 +67,15 @@ public class Fetcher {
     }
 
     public static String getDefaultWorkingDir() {
-        return createAndValidateDirectory(Paths.get(getUserHomeDir(), Constants.DEFAULT_BASE_DIR).toFile()).getAbsolutePath();
+        return createAndValidateDirectory(Paths.get(getUserHomeDir(), Constants.DEFAULT_WORKING_BASE_DIR_NAME).toFile()).getAbsolutePath();
     }
 
     public static String getDefaultEndpointLogsDir() {
-        return createAndValidateDirectory(new File(getWorkingDir(), "endpoint_logs")).getAbsolutePath();
+        return createAndValidateDirectory(new File(getWorkingDir(), Constants.DEFAULT_ENDPOINT_LOGS_DIR_NAME)).getAbsolutePath();
     }
 
     public static String getDefaultCommandLogsDir() {
-        return createAndValidateDirectory(new File(getWorkingDir(), "command_logs")).getAbsolutePath();
+        return createAndValidateDirectory(new File(getWorkingDir(), Constants.DEFAULT_COMMAND_LOGS_DIR_NAME)).getAbsolutePath();
     }
 
     public static File createAndValidateDirectory(String directoryPath) {

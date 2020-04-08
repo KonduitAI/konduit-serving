@@ -18,22 +18,19 @@
 
 package ai.konduit.serving.launcher.command;
 
+import ai.konduit.serving.launcher.LauncherUtils;
+import ai.konduit.serving.settings.Fetcher;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Argument;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
-import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
 
 @Slf4j
 @Name("inspect")
@@ -56,10 +53,10 @@ public class InspectCommand extends DefaultCommand {
 
     @Override
     public void run() throws CLIException {
-        if(ServeCommand.isProcessExists(id)) {
+        if(LauncherUtils.isProcessExists(id)) {
             try {
                 out.format("\nKonduit server with the id '%s' is initialized with the following configuration: \n\n%s\n\n", id,
-                        FileUtils.readFileToString(Paths.get(System.getProperty("user.home"), ".konduit-serving", "servers", getPidFromId(id) + ".data").toFile(), StandardCharsets.UTF_8));
+                        FileUtils.readFileToString(new File(Fetcher.getServersDataDir(), LauncherUtils.getPidFromId(id) + ".data"), StandardCharsets.UTF_8));
             } catch (Exception exception) {
                 log.error("Failed to read configuration file", exception);
             }
@@ -68,39 +65,4 @@ public class InspectCommand extends DefaultCommand {
         }
     }
 
-    public static int getPidFromId(String serverId) {
-        List<String> cmd = new ArrayList<>();
-        try {
-            if (ExecUtils.isWindows()) {
-                cmd.add("WMIC");
-                cmd.add("PROCESS");
-                cmd.add("WHERE");
-                cmd.add("\"CommandLine like '%serving.id=" + serverId + "' and name!='wmic.exe'\"");
-                cmd.add("GET");
-                cmd.add("CommandLine,ProcessId");
-            } else {
-                cmd.add("sh");
-                cmd.add("-c");
-                cmd.add("ps ax | grep \"serving.id=" + serverId + "$\"");
-            }
-
-            String[] outputSplits = IOUtils.toString(
-                    new InputStreamReader(
-                            new ProcessBuilder(cmd).start().getInputStream())).replace(System.lineSeparator(), "")
-                    .trim().split(" ");
-
-            String pid;
-            if(ExecUtils.isWindows()) {
-                pid = outputSplits[outputSplits.length -1].trim();
-            } else {
-                pid = outputSplits[0].trim();
-            }
-
-            return Integer.parseInt(pid);
-        } catch (Exception exception) {
-            log.error("Failed to fetch pid from server id", exception);
-            System.exit(1);
-            return -1;
-        }
-    }
 }

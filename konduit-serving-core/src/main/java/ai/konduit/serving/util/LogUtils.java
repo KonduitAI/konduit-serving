@@ -16,7 +16,7 @@
 
 package ai.konduit.serving.util;
 
-import ai.konduit.serving.verticles.inference.InferenceVerticle;
+import ai.konduit.serving.settings.Fetcher;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -31,13 +31,11 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
-import org.nd4j.shade.guava.base.Strings;
 import org.slf4j.LoggerFactory;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +46,7 @@ public class LogUtils {
      * Gets the file where the logs are.
      * @return the logs file.
      */
-    public static File getLogsFile() {
+    public static File getEndpointLogsFile() {
         Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         FileAppender<ILoggingEvent> fileAppender = (FileAppender<ILoggingEvent>) rootLogger.getAppender("FILE");
 
@@ -87,9 +85,9 @@ public class LogUtils {
      * it would be ignored.
      */
     public static void setFileAppenderIfNeeded() throws Exception {
-        File previousLogsFile = getLogsFile();
+        File previousLogsFile = getEndpointLogsFile();
 
-        File newLogsFile = Paths.get(getLogsDir(), "main.log").toFile();
+        File newLogsFile = new File(Fetcher.getEndpointLogsDir(), "main.log");
 
         if(!newLogsFile.equals(previousLogsFile)) {
             ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)
@@ -169,7 +167,7 @@ public class LogUtils {
 
         FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
         fileAppender.setName("FILE");
-        fileAppender.setFile(Paths.get(getLogsDir(), serverId + ".log").toFile().getAbsolutePath());
+        fileAppender.setFile(new File(Fetcher.getCommandLogsDir(), serverId + ".log").getAbsolutePath());
         fileAppender.setContext(context);
 
         PatternLayoutEncoder patternLayoutEncoder = new PatternLayoutEncoder();
@@ -197,7 +195,7 @@ public class LogUtils {
      * @return current jvm process logs for konduit-serving.
      */
     public static String getLogs(int numOfLastLinesToRead) throws IOException {
-        File logsFile = getLogsFile();
+        File logsFile = getEndpointLogsFile();
 
         if(logsFile == null || !logsFile.exists()) return "";
 
@@ -213,37 +211,12 @@ public class LogUtils {
         }
     }
 
-    /**
-     * Returns the directory where all log files are
-     * @return log files directory
-     */
-    public static String getLogsDir() throws Exception {
-        String konduitServingLogDirFromEnv = System.getenv("KONDUIT_SERVING_LOG_DIR");
-        String selectedDirectory;
-        if(!Strings.isNullOrEmpty(konduitServingLogDirFromEnv)) {
-            File directory = new File(konduitServingLogDirFromEnv);
-            if(!(directory.exists() && directory.isDirectory())) {
-                throw new Exception(String.format("The path specified by the environment variable KONDUIT_SERVING_LOG_DIR=%s doesn't exist or is an invalid directory.", konduitServingLogDirFromEnv));
-            } else {
-                selectedDirectory = konduitServingLogDirFromEnv;
-            }
-        } else {
-            selectedDirectory = System.getProperty("user.dir");
-            File directory = new File(selectedDirectory);
-            if(!(directory.exists() && directory.isDirectory())) {
-                throw new Exception(String.format("The path specified by the system property user.dir=%s doesn't exist or is an invalid directory.", selectedDirectory));
-            }
-        }
-
-        return selectedDirectory;
-    }
-
     public static File getZippedLogs() throws Exception {
-        File zippedFile = Paths.get(LogUtils.getLogsDir(), "logs.zip").toFile();
+        File zippedFile = new File(Fetcher.getEndpointLogsDir(), "logs.zip");
 
         try (BufferedOutputStream archiveStream = new BufferedOutputStream(new FileOutputStream(zippedFile))) {
             try (ArchiveOutputStream archive = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream)) {
-                File logsFile = getLogsFile();
+                File logsFile = getEndpointLogsFile();
 
                 if(logsFile != null) {
                     ZipArchiveEntry entry = new ZipArchiveEntry(logsFile.getName());

@@ -28,6 +28,7 @@ import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.routers.MemMapRouteDefiner;
 import ai.konduit.serving.routers.PipelineRouteDefiner;
+import ai.konduit.serving.settings.Fetcher;
 import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
@@ -42,11 +43,10 @@ import org.bytedeco.systems.global.macosx;
 import org.bytedeco.systems.global.windows;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.List;
-import java.io.File;
 
 /**
  * A {@link io.vertx.core.Verticle} that takes multi part file uploads
@@ -150,25 +150,14 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                             int pid = getPid();
 
                             if(pid != -1) {
-                                File processesDir = Paths.get(System.getProperty("user.home"), ".konduit-serving", "servers").toFile();
-
                                 vertx.setPeriodic(10000, periodicHandler -> {
-                                    if(!processesDir.exists()) {
-                                        if(!processesDir.mkdirs()) {
-                                            log.error("Unable to create processes directory {}", processesDir.getAbsolutePath());
-                                            return;
-                                        }
-                                    }
+                                    try {
+                                        File processConfigFile = new File(Fetcher.getServersDataDir(), pid + ".data");
 
-                                    if(processesDir.exists()) {
-                                        File processConfigFile = Paths.get(processesDir.getAbsolutePath(), pid + ".data").toFile();
-
-                                        try {
-                                            FileUtils.writeStringToFile(processConfigFile, inferenceConfiguration.toJson(), StandardCharsets.UTF_8);
-                                            processConfigFile.deleteOnExit();
-                                        } catch (IOException exception) {
-                                            log.error("Unable to save process information at {}", processConfigFile.getAbsolutePath(), exception);
-                                        }
+                                        FileUtils.writeStringToFile(processConfigFile, inferenceConfiguration.toJson(), StandardCharsets.UTF_8);
+                                        processConfigFile.deleteOnExit();
+                                    } catch (IOException exception) {
+                                        log.error("Unable to save process information", exception);
                                     }
                                 });
                             }

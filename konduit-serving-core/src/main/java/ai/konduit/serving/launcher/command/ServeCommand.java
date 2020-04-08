@@ -19,16 +19,14 @@
 package ai.konduit.serving.launcher.command;
 
 import ai.konduit.serving.launcher.KonduitServingLauncher;
+import ai.konduit.serving.launcher.LauncherUtils;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static ai.konduit.serving.launcher.command.RunCommand.DEFAULT_SERVICE;
@@ -278,7 +276,7 @@ public class ServeCommand extends DefaultCommand {
             id = UUID.randomUUID().toString();
         }
 
-        if (isProcessExists(id)) {
+        if (LauncherUtils.isProcessExists(id)) {
             out.println(String.format("A konduit server with an id: '%s' already exists.", id));
             System.exit(1);
         }
@@ -286,26 +284,4 @@ public class ServeCommand extends DefaultCommand {
         return id;
     }
 
-    public static boolean isProcessExists(String id) {
-        List<String> args;
-
-        if(SystemUtils.IS_OS_WINDOWS) {
-            args = Arrays.asList("WMIC", "PROCESS", "WHERE", "\"CommandLine like '%serving.id=" + id + "' and name!='wmic.exe'\"", "GET", "CommandLine", "/VALUE");
-        } else {
-            args = Arrays.asList("sh", "-c", "ps ax | grep \"Dserving.id=" + id + "$\"");
-        }
-
-        String output = "";
-        try {
-            Process process = new ProcessBuilder(args).start();
-            output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
-        } catch (Exception exception) {
-            log.error("An error occurred while checking for existing processes:\n" + exception.getMessage());
-            System.exit(1);
-        }
-
-        return output.trim()
-                .replace(System.lineSeparator(), "")
-                .matches("(.*)Dserving.id=" + id);
-    }
 }

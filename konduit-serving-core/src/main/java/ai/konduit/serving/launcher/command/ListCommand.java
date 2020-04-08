@@ -20,6 +20,8 @@ package ai.konduit.serving.launcher.command;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.launcher.LauncherUtils;
+import ai.konduit.serving.settings.Fetcher;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
@@ -30,12 +32,8 @@ import org.apache.commons.io.FileUtils;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -126,13 +124,13 @@ public class ListCommand extends DefaultCommand {
     }
 
     private void printServerDetails(int index, String printFormat, String id, String line) {
-        String pid = getPidFromLine(line);
+        String pid = LauncherUtils.getPidFromLine(line);
         String configuration;
         String hostAndPort = "waiting...";
         String status = "starting";
 
         try {
-            configuration = FileUtils.readFileToString(Paths.get(System.getProperty("user.home"), ".konduit-serving", "servers", pid + ".data").toFile(), StandardCharsets.UTF_8);
+            configuration = FileUtils.readFileToString(new File(Fetcher.getServersDataDir(), pid + ".data"), StandardCharsets.UTF_8);
             ServingConfig servingConfig = InferenceConfiguration.fromJson(configuration).getServingConfig();
             hostAndPort = String.format("%s:%s", servingConfig.getListenHost(), servingConfig.getHttpPort());
             status = "started";
@@ -143,16 +141,6 @@ public class ListCommand extends DefaultCommand {
         }
 
         out.format(printFormat, index, id, getServiceType(line), hostAndPort, pid, status);
-    }
-
-    public static String getPidFromLine(String line) {
-        String[] splits = line.trim().split(" ");
-
-        if(ExecUtils.isWindows()) {
-            return splits[splits.length -1].trim();
-        } else {
-            return splits[0].trim();
-        }
     }
 
     private String getServiceType(String line) {

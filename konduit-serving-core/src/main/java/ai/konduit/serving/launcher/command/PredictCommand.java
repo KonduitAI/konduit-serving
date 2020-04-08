@@ -21,6 +21,8 @@ package ai.konduit.serving.launcher.command;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.launcher.LauncherUtils;
+import ai.konduit.serving.settings.Fetcher;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -42,7 +44,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static ai.konduit.serving.launcher.command.InspectCommand.getPidFromId;
+import static ai.konduit.serving.launcher.LauncherUtils.getPidFromId;
 
 @Slf4j
 @Name("predict")
@@ -102,11 +104,11 @@ public class PredictCommand extends DefaultCommand {
 
     @Override
     public void run() throws CLIException {
-        if(ServeCommand.isProcessExists(id)) {
+        if(LauncherUtils.isProcessExists(id)) {
             try {
                 InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(
-                        FileUtils.readFileToString(Paths.get(System.getProperty("user.home"), ".konduit-serving", "servers", getPidFromId(id) + ".data")
-                                .toFile(), StandardCharsets.UTF_8));
+                        FileUtils.readFileToString(new File(Fetcher.getServersDataDir(),
+                                getPidFromId(id) + ".data"), StandardCharsets.UTF_8));
 
                 Vertx vertx = Vertx.vertx();
 
