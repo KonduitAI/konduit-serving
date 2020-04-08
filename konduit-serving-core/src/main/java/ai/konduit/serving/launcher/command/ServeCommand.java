@@ -26,7 +26,9 @@ import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.util.*;
 
 import static ai.konduit.serving.launcher.command.RunCommand.DEFAULT_SERVICE;
@@ -199,10 +201,16 @@ public class ServeCommand extends DefaultCommand {
         try {
             builder.command(cmd);
             if (redirect) {
-                int runProcessExitCode = builder.inheritIO().start().waitFor();
+                BufferedReader reader =  new BufferedReader(new InputStreamReader(builder.start().getInputStream()));
 
-                if(runProcessExitCode != 0) {
-                    out.println("Server start was finished with non-zero exit code of " + runProcessExitCode);
+                String line;
+                while(true) {
+                    line = reader.readLine();
+                    if(line == null) {
+                        Thread.sleep(100);
+                    } else {
+                        out.println(line);
+                    }
                 }
             } else {
                 String commandLinePrefix = ((KonduitServingLauncher) executionContext.launcher()).commandLinePrefix();

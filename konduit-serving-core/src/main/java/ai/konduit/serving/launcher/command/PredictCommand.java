@@ -21,6 +21,7 @@ package ai.konduit.serving.launcher.command;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
+import ai.konduit.serving.launcher.KonduitServingLauncher;
 import ai.konduit.serving.launcher.LauncherUtils;
 import ai.konduit.serving.settings.Fetcher;
 import io.vertx.core.AsyncResult;
@@ -118,13 +119,27 @@ public class PredictCommand extends DefaultCommand {
                                 String.format("/%s/%s", predictionType, inputDataFormat));
 
                 Handler<AsyncResult<HttpResponse<Buffer>>> responseHandler = handler -> {
+                    boolean failed = false;
                     if(handler.succeeded()) {
-                        out.println(handler.result().body());
+                        String body = handler.result().bodyAsString();
+                        if(body == null) {
+                            out.format("Failed request.\nExecute '%s logs %s' to find the cause.\n",
+                                    ((KonduitServingLauncher) executionContext.launcher()).commandLinePrefix(),
+                                    id);
+                            failed = true;
+                        } else {
+                            out.println(handler.result().body());
+                        }
                     } else {
-                        log.error("Request failed: ", handler.cause());
+                        out.println("Request failed: " + handler.cause().getMessage());
+                        failed = true;
                     }
 
                     vertx.close();
+
+                    if(failed) {
+                        System.exit(1);
+                    }
                 };
 
                 JsonObject jsonData = null;
