@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.launcher.command;
 
+import ai.konduit.serving.launcher.KonduitServingLauncher;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
@@ -134,15 +135,10 @@ public class ServeCommand extends DefaultCommand {
         this.launcher = clazz;
     }
 
-    /**
-     * Whether the created process error streams and output streams needs to be redirected to the launcher process.
-     *
-     * @param redirect {@code true} to enable redirection, {@code false} otherwise.
-     */
-    @Option(shortName = "r", longName = "redirect", flag = true)
-    @Description("Whether the created process error streams and output streams needs to be redirected to the launcher process.")
-    public void setRedirect(boolean redirect) {
-        this.redirect = redirect;
+    @Option(shortName = "b", longName = "background", flag = true)
+    @Description("Runs the process in the background, if set.")
+    public void setRedirect(boolean background) {
+        this.redirect = !background;
     }
 
     /**
@@ -205,11 +201,18 @@ public class ServeCommand extends DefaultCommand {
         try {
             builder.command(cmd);
             if (redirect) {
-                builder.redirectError(ProcessBuilder.Redirect.INHERIT);
-                builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                int runProcessExitCode = builder.inheritIO().start().waitFor();
+
+                if(runProcessExitCode != 0) {
+                    out.println("Server start was finished with non-zero exit code of " + runProcessExitCode);
+                }
+            } else {
+                String commandLinePrefix = ((KonduitServingLauncher) executionContext.launcher()).commandLinePrefix();
+                builder.start();
+                out.format("For server status, execute: '%s list'\nFor logs, execute: '%s logs %s'\n",
+                        commandLinePrefix,
+                        commandLinePrefix, id);
             }
-            builder.start();
-            out.println(id);
         } catch (Exception e) {
             out.println("Cannot create konduit server process");
             e.printStackTrace(out);

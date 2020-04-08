@@ -155,39 +155,39 @@ public class LogUtils {
     public static void setAppendersForRunCommand(String serverId) throws Exception {
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
 
-        File previousLogsFile = getLogsFile();
+        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)
+                org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
 
-        File newLogsFile = Paths.get(getLogsDir(), serverId + ".log").toFile();
+        rootLogger.detachAndStopAllAppenders();
 
-        if(!newLogsFile.equals(previousLogsFile)) {
-            ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)
-                    org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        ((Logger) LoggerFactory.getLogger("uk.org.lidalia")).setLevel(Level.INFO);
+        ((Logger) LoggerFactory.getLogger("org.nd4j")).setLevel(Level.INFO);
+        ((Logger) LoggerFactory.getLogger("org")).setLevel(Level.INFO);
+        ((Logger) LoggerFactory.getLogger("io")).setLevel(Level.INFO);
 
-            ((Logger) LoggerFactory.getLogger("uk.org.lidalia")).setLevel(Level.INFO);
-            ((Logger) LoggerFactory.getLogger("org")).setLevel(Level.INFO);
-            ((Logger) LoggerFactory.getLogger("io")).setLevel(Level.INFO);
+        LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
 
-            LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
+        FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+        fileAppender.setName("FILE");
+        fileAppender.setFile(Paths.get(getLogsDir(), serverId + ".log").toFile().getAbsolutePath());
+        fileAppender.setContext(context);
 
-            if(previousLogsFile != null) {
-                rootLogger.detachAppender("FILE");
-            }
+        PatternLayoutEncoder patternLayoutEncoder = new PatternLayoutEncoder();
+        patternLayoutEncoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
+        patternLayoutEncoder.setContext(context);
+        patternLayoutEncoder.start();
 
-            FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
-            fileAppender.setName("FILE");
-            fileAppender.setFile(newLogsFile.getAbsolutePath());
-            fileAppender.setContext(context);
+        fileAppender.setEncoder(patternLayoutEncoder);
+        fileAppender.start();
 
-            PatternLayoutEncoder patternLayoutEncoder = new PatternLayoutEncoder();
-            patternLayoutEncoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
-            patternLayoutEncoder.setContext(context);
-            patternLayoutEncoder.start();
+        ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
+        consoleAppender.setName("CONSOLE");
+        consoleAppender.setContext(context);
+        consoleAppender.setEncoder(patternLayoutEncoder);
+        consoleAppender.start();
 
-            fileAppender.setEncoder(patternLayoutEncoder);
-            fileAppender.start();
-
-            rootLogger.addAppender(fileAppender);
-        }
+        rootLogger.addAppender(fileAppender);
+        rootLogger.addAppender(consoleAppender);
     }
 
     /**

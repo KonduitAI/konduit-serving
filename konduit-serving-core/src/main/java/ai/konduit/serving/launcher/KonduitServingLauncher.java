@@ -166,4 +166,8 @@ public class KonduitServingLauncher extends Launcher {
 
         super.handleDeployFailed(vertx, mainVerticle, deploymentOptions, cause);
     }
+
+    public String commandLinePrefix() {
+        return getCommandLinePrefix();
+    }
 }
