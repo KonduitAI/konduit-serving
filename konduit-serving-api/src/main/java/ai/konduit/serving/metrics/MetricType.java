@@ -40,5 +40,6 @@ public enum MetricType {
     //these are meant to analyze the output coming form the neural network when running
     //in production
     CLASSIFICATION,
-    REGRESSION
+    REGRESSION,
+    CUSTOM_MULTI_LABEL
 }
