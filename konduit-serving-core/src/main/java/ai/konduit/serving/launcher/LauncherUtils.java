@@ -18,7 +18,10 @@
 
 package ai.konduit.serving.launcher;
 
+import ai.konduit.serving.settings.Fetcher;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -29,8 +32,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.vertx.core.file.impl.FileResolver.CACHE_DIR_BASE_PROP_NAME;
+import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
+import static java.lang.System.setProperty;
+
 @Slf4j
 public class LauncherUtils {
+
+    public static void setCommonLoggingAndVertxProperties() {
+        setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
+        LoggerFactory.getLogger(LoggerFactory.class); // Required for Logback to work in Vertx
+
+        setProperty("vertx.cwd", Fetcher.getWorkingDir().getAbsolutePath()); // For setting the vertx working directory for runtime files.
+        setProperty(CACHE_DIR_BASE_PROP_NAME, Fetcher.getWorkingDir().getAbsolutePath()); // For setting caching directory for vertx related optimizations.
+    }
 
     public static int getPidFromId(String serverId) {
         List<String> cmd = new ArrayList<>();

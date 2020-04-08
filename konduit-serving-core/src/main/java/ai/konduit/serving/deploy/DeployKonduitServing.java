@@ -19,6 +19,7 @@
 package ai.konduit.serving.deploy;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.launcher.LauncherUtils;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.*;
@@ -44,12 +45,7 @@ public class DeployKonduitServing {
     static {
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
 
-        setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
-        LoggerFactory.getLogger(LoggerFactory.class); // Required for Logback to work in Vertx
-
-        setProperty("vertx.cwd", new File(".").getAbsolutePath());
-        setProperty(CACHE_DIR_BASE_PROP_NAME, DEFAULT_FILE_CACHING_DIR);
-        setProperty(DISABLE_CP_RESOLVING_PROP_NAME, Boolean.TRUE.toString());
+        LauncherUtils.setCommonLoggingAndVertxProperties();
     }
 
     public static void deployInference(DeploymentOptions deploymentOptions, Handler<AsyncResult<InferenceConfiguration>> eventHandler) {
@@ -89,7 +85,7 @@ public class DeployKonduitServing {
                         eventHandler.handle(Future.succeededFuture(inferenceConfiguration));
                     } catch (Exception exception){
                         log.debug("Unable to parse json configuration into an InferenceConfiguration object. " +
-                                "This can be ignored if the verticle isn't an InferenceVerticle.", exception);
+                                "This can be ignored if the verticle isn't an InferenceVerticle.", exception); // TODO: this is done for supporting other verticles in the future. For instance, 'ConverterVerticle'.
                         eventHandler.handle(Future.succeededFuture());
                     }
                 }

@@ -18,8 +18,8 @@
 
 package ai.konduit.serving.launcher;
 
-import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.launcher.command.*;
+import ai.konduit.serving.settings.Fetcher;
 import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -27,7 +27,6 @@ import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.vertx.core.*;
 import io.vertx.core.cli.annotations.Name;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import io.vertx.core.spi.VerticleFactory;
@@ -38,7 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.nd4j.shade.guava.collect.ImmutableMap;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -48,6 +46,16 @@ import static io.vertx.core.file.impl.FileResolver.DISABLE_CP_RESOLVING_PROP_NAM
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
 import static java.lang.System.setProperty;
 
+/**
+ * Initializes the {@link VertxOptions} for deployment and use in a
+ * {@link Vertx} instance.
+ * The following other initialization also happens:
+ * {@code Vertx Working Directory} gets set (vertx.cwd) and {vertx.caseDirBase)
+ * (vertx.disableFileCPResolving) gets set to true
+ * (vertx.logger-delegate-factory-class-name) gets set to io.vertx.core.logging.SLF4JLogDelegateFactory
+ * The {@link MeterRegistry} field and associated prometheus configuration gets setup
+ * The {@link VertxOptions} event but options also get set
+ */
 @Slf4j
 public class KonduitServingLauncher extends Launcher {
 
@@ -61,12 +69,7 @@ public class KonduitServingLauncher extends Launcher {
     static {
         LogUtils.setAppendersForCommandLine();
 
-        setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
-        LoggerFactory.getLogger(LoggerFactory.class); // Required for Logback to work in Vertx
-
-        setProperty("vertx.cwd", new File(".").getAbsolutePath());
-        setProperty(CACHE_DIR_BASE_PROP_NAME, DEFAULT_FILE_CACHING_DIR);
-        setProperty(DISABLE_CP_RESOLVING_PROP_NAME, Boolean.TRUE.toString());
+        LauncherUtils.setCommonLoggingAndVertxProperties();
     }
 
     @Override
@@ -79,16 +82,6 @@ public class KonduitServingLauncher extends Launcher {
         return "--help";
     }
 
-    /**
-     * Initializes the {@link VertxOptions} for deployment and use in a
-     * {@link Vertx} instance.
-     * The following other initialization also happens:
-     * {@code Vertx Working Directory} gets set (vertx.cwd) and {vertx.caseDirBase)
-     * (vertx.disableFileCPResolving) gets set to true
-     * (vertx.logger-delegate-factory-class-name) gets set to io.vertx.core.logging.SLF4JLogDelegateFactory
-     * The {@link MeterRegistry} field and associated prometheus configuration gets setup
-     * The {@link VertxOptions} event but options also get set
-     */
     @Override
     public void beforeStartingVertx(VertxOptions options) {
         MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
