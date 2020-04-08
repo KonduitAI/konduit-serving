@@ -120,7 +120,7 @@ public class KonduitServingLauncher extends Launcher {
                 if(services.containsKey(serviceType)) {
                     return (Verticle) ClassLoader.getSystemClassLoader().loadClass(services.get(serviceType)).newInstance();
                 } else {
-                    log.error(String.format("Invalid service type %s. Possible values are: ", Arrays.asList(services.keySet())));
+                    log.error("Invalid service type {}. Possible values are: {}", serviceType, services.keySet());
                     System.exit(1);
                     return null;
                 }

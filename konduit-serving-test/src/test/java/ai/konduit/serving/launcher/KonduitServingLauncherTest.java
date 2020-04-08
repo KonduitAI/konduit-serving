@@ -20,5 +20,14 @@ package ai.konduit.serving.launcher;
 
 public class KonduitServingLauncherTest {
 
+    // Needed tests
+    // 1. konduit help - --help,help
+    // 2. konduit serve, -b and not -b
+    // 3. konduit list
+    // 4. konduit logs, -f and not -f
+    // 5. konduit predict, -it IMAGE, -it JSON, -pt RAW, -pt CLASSIFICATION
+    // 6. konduit stop
+    // 7. konduit version, --version, version
+
 
 }

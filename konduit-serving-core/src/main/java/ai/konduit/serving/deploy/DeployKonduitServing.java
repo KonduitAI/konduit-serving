@@ -71,7 +71,7 @@ public class DeployKonduitServing {
 
         vertx.deployVerticle(clazz(), deploymentOptions, handler -> {
             if (handler.failed()) {
-                log.error(String.format("Unable to deploy verticle %s", className()), handler.cause());
+                log.error("Unable to deploy verticle {}", className(), handler.cause());
 
                 if (eventHandler != null) {
                     eventHandler.handle(Future.failedFuture(handler.cause()));
@@ -79,7 +79,7 @@ public class DeployKonduitServing {
 
                 vertx.close();
             } else {
-                log.info(String.format("Deployed verticle %s", className()));
+                log.info("Deployed verticle {}", className());
                 if (eventHandler != null) {
                     VertxImpl vertxImpl = (VertxImpl) vertx;
                     DeploymentOptions inferenceDeploymentOptions = vertxImpl.getDeployment(handler.result()).deploymentOptions();

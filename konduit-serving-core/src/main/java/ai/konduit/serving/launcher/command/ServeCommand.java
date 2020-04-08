@@ -283,7 +283,7 @@ public class ServeCommand extends DefaultCommand {
 
     private String getId() {
         if (id == null) {
-            id = UUID.randomUUID().toString();
+            id = UUID.randomUUID().toString().substring(0, 8);
         }
 
         if (LauncherUtils.isProcessExists(id)) {

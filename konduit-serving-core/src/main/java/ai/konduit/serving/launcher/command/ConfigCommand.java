@@ -90,15 +90,15 @@ public class ConfigCommand extends DefaultCommand {
         outputFile = new File(output);
         if(outputFile.exists()) {
             if(!outputFile.isFile()) {
-                log.error(String.format("'%s' is not a valid file location", outputFile));
+                log.error("'{}' is not a valid file location", outputFile);
             }
         } else {
             try {
                 if(!outputFile.createNewFile()) {
-                    log.error(String.format("'%s' is not a valid file location", outputFile));
+                    log.error("'{}' is not a valid file location", outputFile);
                 }
             } catch (Exception exception) {
-                log.error(String.format("Error while creating file: '%s'", outputFile), exception);
+                log.error("Error while creating file: '{}'", outputFile, exception);
             }
         }
     }
@@ -132,12 +132,12 @@ public class ConfigCommand extends DefaultCommand {
                         pipelineSteps.add(keras());
                         break;
                     default:
-                        log.error(String.format("Invalid config type '%s'. Allowed values are %s", type, Arrays.asList(ConfigType.values())));
+                        log.error("Invalid config type '{}'. Allowed values are {}", type, Arrays.asList(ConfigType.values()));
                         System.exit(1);
                         return;
                 }
             } catch (Exception exception) {
-                log.error(String.format("Invalid config type '%s'. Allowed values are %s", type, Arrays.asList(ConfigType.values())));
+                log.error("Invalid config type '{}'. Allowed values are {}", type, Arrays.asList(ConfigType.values()));
                 System.exit(1);
             }
         }
@@ -248,7 +248,7 @@ public class ConfigCommand extends DefaultCommand {
                 FileUtils.writeStringToFile(outputFile, output, StandardCharsets.UTF_8);
                 log.info("Config file created successfully at {}", outputFile.getAbsolutePath());
             } catch (IOException exception) {
-                log.error(String.format("Unable to save configuration file to %s", outputFile.getAbsolutePath()), exception);
+                log.error("Unable to save configuration file to {}", outputFile.getAbsolutePath(), exception);
             }
         }
     }
