@@ -34,6 +34,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.datavec.python.PythonType;
 
 import java.io.File;
 import java.io.IOException;
@@ -163,6 +164,16 @@ public class ConfigCommand extends DefaultCommand {
         return PythonStep.builder()
                 .inputName("default")
                 .outputName("default")
+                .pythonConfig("default",
+                        PythonConfig.builder()
+                                .pythonInput("x1", PythonType.TypeName.NDARRAY.name())
+                                .pythonInput("x2", PythonType.TypeName.NDARRAY.name())
+                                .pythonOutput("y1", PythonType.TypeName.NDARRAY.name())
+                                .pythonOutput("y2", PythonType.TypeName.NDARRAY.name())
+                                .pythonPath("# Execute <python -c 'import sys, os; print(os.pathsep.join([path for path in sys.path if path]))'> to find the value of it.")
+                                .pythonCode("<python-script # Remove this if 'pythonCodePath' is set>")
+                                .pythonCodePath("<python-code-path # Remove this if 'pythonCode' is set>")
+                                .build())
                 .build();
     }
 
@@ -172,6 +183,11 @@ public class ConfigCommand extends DefaultCommand {
                 .outputName("default")
                 .modelConfig(
                         TensorFlowConfig.builder()
+                                .modelConfigType(ModelConfigType.tensorFlow("<path-to-the-tensorflow-model>"))
+                                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
+                                        .inputDataType("default", TensorDataType.FLOAT)
+                                        .outputDataType("default", TensorDataType.FLOAT)
+                                        .build())
                                 .build()
                 )
                 .build();
@@ -183,6 +199,7 @@ public class ConfigCommand extends DefaultCommand {
                 .outputName("default")
                 .modelConfig(
                         OnnxConfig.builder()
+                                .modelConfigType(ModelConfigType.onnx("<path-to-the-onnx-model>"))
                                 .build())
                 .build();
     }
@@ -193,6 +210,7 @@ public class ConfigCommand extends DefaultCommand {
                 .outputName("default")
                 .modelConfig(
                         PmmlConfig.builder()
+                                .modelConfigType(ModelConfigType.pmml("<path-to-the-pmml-model"))
                                 .build()
                 )
                 .build();
@@ -204,6 +222,7 @@ public class ConfigCommand extends DefaultCommand {
                 .outputName("default")
                 .modelConfig(
                         DL4JConfig.builder()
+                                .modelConfigType(ModelConfigType.dl4j("<path-to-the-dl4j-model"))
                                 .build()
                 )
                 .build();
@@ -215,6 +234,7 @@ public class ConfigCommand extends DefaultCommand {
                 .outputName("default")
                 .modelConfig(
                         KerasConfig.builder()
+                                .modelConfigType(ModelConfigType.keras("<path-to-the-keras-model"))
                                 .build()
                 )
                 .build();
