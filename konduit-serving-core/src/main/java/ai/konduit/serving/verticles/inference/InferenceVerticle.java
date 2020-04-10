@@ -41,7 +41,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.bytedeco.systems.global.linux;
 import org.bytedeco.systems.global.macosx;
 import org.bytedeco.systems.global.windows;
-import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.io.File;
 import java.io.IOException;
@@ -102,15 +101,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         }
 
         if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
-            SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
-
-            try {
-                LogUtils.setFileAppenderIfNeeded();
-            } catch (Exception exception) {
-                log.error("Error setting up file log appender.", exception);
-                startPromise.fail(exception);
-                return;
-            }
+            LogUtils.setFileAppenderIfNeeded();
         }
 
         String portEnvValue = System.getenv(VerticleConstants.KONDUIT_SERVING_PORT);

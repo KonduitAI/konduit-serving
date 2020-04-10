@@ -57,7 +57,7 @@ public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand 
      * @param configuration the configuration
      */
     @Option(shortName = "c", longName = "config", argName = "config", required = true)
-    @Description("Specifies configuration that should be provided to the verticle. <config> should reference either a " +
+    @Description("Specifies a configuration that should be provided to the verticle. <config> should reference either a " +
             "text file containing a valid JSON object which represents the configuration OR be a JSON string.")
     public void setConfig(String configuration) {
         File file = new File(configuration);
@@ -65,22 +65,22 @@ public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand 
             configuration = file.getAbsolutePath();
         }
 
+        log.info("Processing configuration: {}", configuration);
         super.setConfig(configuration);
     }
 
     @Override
     public void run() {
         String serverId = getServerId();
-        log.debug("Starting konduit server with an id of '{}'", serverId);
-        try {
-            if(!Strings.isNullOrEmpty(serverId)) {
-                LogUtils.setAppendersForRunCommand(serverId);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        log.info("Starting konduit server with an id of '{}'", serverId);
+
+        if(!Strings.isNullOrEmpty(serverId)) {
+            LogUtils.setAppendersForRunCommand(serverId);
         }
 
         super.run();
+
+        log.info("Starting konduit server with an id of '{}'", serverId);
     }
 
     private String getServerId() {

@@ -79,7 +79,6 @@ public class ObjectMappers {
         return ret;
     }
 
-
     /**
      * Convert the specified object to a YAML String, throwing an unchecked exception (RuntimeException) if conversion fails
      *

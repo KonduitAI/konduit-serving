@@ -85,7 +85,9 @@ public class LogUtils {
      * Sets the file appender with the name of "FILE" if needed. If it's already been setup,
      * it would be ignored.
      */
-    public static void setFileAppenderIfNeeded() throws Exception {
+    public static void setFileAppenderIfNeeded() {
+        SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
+
         File previousLogsFile = getEndpointLogsFile();
 
         File newLogsFile = new File(Fetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE);
@@ -151,7 +153,7 @@ public class LogUtils {
      * Sets the file appender with the name of "FILE" if needed. If it's already been setup,
      * it would be ignored.
      */
-    public static void setAppendersForRunCommand(String serverId) throws Exception {
+    public static void setAppendersForRunCommand(String serverId) {
         String logFilePath = new File(Fetcher.getCommandLogsDir(), serverId + ".log").getAbsolutePath();
 
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
