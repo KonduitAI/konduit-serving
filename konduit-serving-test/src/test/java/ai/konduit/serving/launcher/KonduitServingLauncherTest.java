@@ -18,64 +18,194 @@
 
 package ai.konduit.serving.launcher;
 
+import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.ServingConfig;
+import ai.konduit.serving.output.types.NDArrayOutput;
+import ai.konduit.serving.pipeline.step.ImageLoadingStep;
+import ai.konduit.serving.settings.constants.EnvironmentConstants;
+import ai.konduit.serving.util.ObjectMappers;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.datavec.image.loader.NativeImageLoader;
+import org.hamcrest.Matchers;
+import org.junit.*;
+import org.junit.rules.TemporaryFolder;
+import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.shade.guava.collect.Streams;
 
+import javax.annotation.concurrent.NotThreadSafe;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
+@Slf4j
+@NotThreadSafe
 public class KonduitServingLauncherTest {
 
     private static final int TIMEOUT = 60000;
+    private static final String TEST_SERVER_ID = "konduit_serving_test_server";
 
-    // Needed tests
-    // 2. konduit serve, -b and not -b
-    // 3. konduit list, with servers, without servers
-    // 4. konduit logs, -f and not -f, with servers, without servers
-    // 5. konduit predict, -it IMAGE, -it JSON, -pt RAW, -pt CLASSIFICATION, with servers, without servers
-    // 6. konduit stop, run servers, without servers
-    // 7. konduit version, --version, version
+    @ClassRule
+    public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    @Before
+    public void before() throws IOException, InterruptedException {
+        stopAllProcesses();
+    }
 
     @Test(timeout = TIMEOUT)
-    public void testMainHelp() throws IOException {
+    public void testMainHelpAndVersion() throws IOException {
         String output = runAndGetOutput("--help"); // Testing with '--help'
-        assertTrue(hasAll(output, getMainCommandNames().toArray(new String[0])));
-        assertTrue(output.contains("Usage: konduit [COMMAND] [OPTIONS] [arg...]"));
+        assertThat(output, Matchers.containsString("Usage: konduit [COMMAND] [OPTIONS] [arg...]"));
+        assertThat(output, Matchers.stringContainsInOrder(getMainCommandNames()));
 
         output = runAndGetOutput("help"); // Testing with 'help'
-        assertTrue(hasAll(output, getMainCommandNames().toArray(new String[0])));
-        assertTrue(output.contains("Usage: konduit [COMMAND] [OPTIONS] [arg...]"));
+        assertThat(output, Matchers.containsString("Usage: konduit [COMMAND] [OPTIONS] [arg...]"));
+        assertThat(output, Matchers.stringContainsInOrder(getMainCommandNames()));
 
         output = runAndGetOutput("-h"); // Testing with '-h'
-        assertTrue(hasAll(output, getMainCommandNames().toArray(new String[0])));
-        assertTrue(output.contains("Usage: konduit [COMMAND] [OPTIONS] [arg...]"));
+        assertThat(output, Matchers.containsString("Usage: konduit [COMMAND] [OPTIONS] [arg...]"));
+        assertThat(output, Matchers.stringContainsInOrder(getMainCommandNames()));
+
+        Properties gitProperties = new Properties();
+        gitProperties.load(new ClassPathResource("META-INF/git.properties").getInputStream());
+
+        String matcherString = String.format("Konduit serving version: %s\nCommit hash: %s",
+                gitProperties.getProperty("git.build.version"),
+                gitProperties.getProperty("git.commit.id").substring(0, 8));
+
+        assertThat(runAndGetOutput("version"), Matchers.containsString(matcherString));
+        assertThat(runAndGetOutput("--version"), Matchers.containsString(matcherString));
     }
 
-    private String runAndGetOutput(String... commands) throws IOException {
-        return IOUtils.toString(runAndGetInputStream(commands), StandardCharsets.UTF_8);
+    @Test(timeout = TIMEOUT)
+    public void testServeForegroundAndList() throws IOException, InterruptedException {
+        // Running in foreground
+        String logs = runAndTailOutput(this::serverStartLogInLine, "serve", "-id", TEST_SERVER_ID, "-c", testAndGetImageConfiguration());
+        assertThat(runAndGetOutput("list"), Matchers.containsString(TEST_SERVER_ID));
+        assertThat(logs, Matchers.containsString(runAndGetOutput("logs", TEST_SERVER_ID)));
     }
 
-    private InputStream runAndGetInputStream(String... commands) throws IOException {
-        return new ProcessBuilder(getCommand(commands)).start().getInputStream();
-    }
-    private List<String> getCommand(String... commands) {
-        List<String> baseCommand = new ArrayList<>(Arrays.asList("java", "-cp", System.getProperty("java.class.path"),
-                "-Dvertx.cli.usage.prefix=konduit", KonduitServingLauncher.class.getCanonicalName()));
-        Collections.addAll(baseCommand, commands);
+    @Test(timeout = TIMEOUT)
+    public void testServeBackgroundWorkflow() throws IOException, InterruptedException {
+        // Running in foreground
+        String configuration = testAndGetImageConfiguration();
+        assertThat(runAndGetOutput("serve", "-id", TEST_SERVER_ID, "-c", configuration, "-b"),
+                Matchers.containsString(String.format("For server status, execute: 'konduit list'\nFor logs, execute: 'konduit logs %s'", TEST_SERVER_ID)));
+        String logs = runAndTailOutput(this::serverStartLogInLine, "logs", TEST_SERVER_ID, "-f");
+        assertThat(logs, Matchers.containsString(runAndGetOutput("logs", TEST_SERVER_ID)));
 
-        return baseCommand;
+        String inspectOutput = runAndGetOutput("inspect", TEST_SERVER_ID);
+        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(
+                inspectOutput.substring(inspectOutput.indexOf(System.lineSeparator()) + 1)); // Removing the first info line to get the json string
+
+        assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID, String.format("%s:%s",
+                inferenceConfiguration.getServingConfig().getListenHost(), inferenceConfiguration.getServingConfig().getHttpPort()))));
+
+        String imagePath = new ClassPathResource("/data/5.png").getFile().getAbsolutePath();
+        NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(runAndGetOutput("predict", "-it", "IMAGE", TEST_SERVER_ID,
+                imagePath), NDArrayOutput.class);
+
+        assertEquals(new NativeImageLoader().asMatrix(imagePath), ndArrayOutput.getNdArray());
     }
 
-    private boolean hasAll(String mainInput, String... toCompareWith) {
-        return Stream.of(toCompareWith).allMatch(mainInput::contains);
+    @After
+    public void after() throws IOException, InterruptedException {
+        stopAllProcesses();
+    }
+
+    @AfterClass
+    public static void afterClass() throws IOException {
+        log.debug("Listing running servers. This should report no running servers. If there are any running servers they should be terminated manually.");
+        log.debug("----------------------------------------------------------------------------");
+        log.debug(runAndGetOutput("list"));
+        log.debug("----------------------------------------------------------------------------");
+    }
+
+    private String runAndTailOutput(Function<String, Boolean> predicate, String... command) throws IOException, InterruptedException {
+        BufferedReader reader =  new BufferedReader(new InputStreamReader(runAndGetInputStream(command)));
+
+        boolean end = false;
+        List<String> output = new ArrayList<>();
+        String line;
+        while(!end) {
+            line = reader.readLine();
+            if(line == null) {
+                Thread.sleep(100);
+            } else {
+                log.debug(line);
+                output.add(line);
+                end = predicate.apply(line);
+            }
+        }
+
+        return String.join(System.lineSeparator(), output);
+    }
+
+    private static String runAndGetOutput(String... command) throws IOException {
+        return IOUtils.toString(runAndGetInputStream(command), StandardCharsets.UTF_8).trim();
+    }
+
+    private static InputStream runAndGetInputStream(String... command) throws IOException {
+        return startProcessFromCommand(command).getInputStream();
+    }
+
+    private static Process startProcessFromCommand(String... command) throws IOException {
+        return getProcessBuilderFromCommand(command).start();
+    }
+
+    private static ProcessBuilder getProcessBuilderFromCommand(String... command) throws IOException {
+        ProcessBuilder processBuilder = new ProcessBuilder(getCommand(command));
+        Map<String, String> environment = processBuilder.environment();
+        environment.put(EnvironmentConstants.WORKING_DIR, temporaryFolder.getRoot().getAbsolutePath());
+        environment.put(EnvironmentConstants.FILE_UPLOADS_DIR, temporaryFolder.getRoot().getAbsolutePath());
+        return processBuilder;
+    }
+
+    private static List<String> getCommand(String... command) {
+        return Streams.concat(getBaseCommand().stream(), Arrays.stream(command)).collect(Collectors.toList());
+    }
+
+    private static List<String> getBaseCommand() {
+        return Arrays.asList("java", "-cp", System.getProperty("java.class.path"),
+                "-Dvertx.cli.usage.prefix=konduit", KonduitServingLauncher.class.getCanonicalName());
     }
 
     private Collection<String> getMainCommandNames() {
         return new KonduitServingLauncher().setMainCommands().getCommandNames();
+    }
+
+    private String testAndGetImageConfiguration() throws IOException {
+        String inferenceConfigurationJson = runAndGetOutput("config", "-t", "image");
+
+        assertEquals(runAndGetOutput("config", "-t", "image"), InferenceConfiguration.builder()
+                .servingConfig(ServingConfig.builder()
+                        .uploadsDirectory(temporaryFolder.getRoot().getAbsolutePath())
+                        .build())
+                .step(ImageLoadingStep.builder()
+                        .inputName("default")
+                        .outputName("default").build())
+                .build().toJson());
+
+        return inferenceConfigurationJson;
+    }
+
+    private void stopAllProcesses() throws IOException, InterruptedException {
+        assertEquals(0, startProcessFromCommand("stop", TEST_SERVER_ID).waitFor());
+        Thread.sleep(5000);
+        assertThat(runAndGetOutput("list"), Matchers.containsString("No konduit servers found."));
+    }
+
+    private boolean serverStartLogInLine(String line) {
+        return Pattern.compile("Succeeded in deploying verticle").matcher(line).find();
     }
 }

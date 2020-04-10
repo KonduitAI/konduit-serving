@@ -19,7 +19,6 @@
 package ai.konduit.serving.launcher;
 
 import ai.konduit.serving.launcher.command.*;
-import ai.konduit.serving.settings.Fetcher;
 import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -27,8 +26,6 @@ import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.vertx.core.*;
 import io.vertx.core.cli.annotations.Name;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import io.vertx.core.spi.VerticleFactory;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
@@ -36,15 +33,8 @@ import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.shade.guava.collect.ImmutableMap;
 
-import java.io.File;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import static io.vertx.core.file.FileSystemOptions.DEFAULT_FILE_CACHING_DIR;
-import static io.vertx.core.file.impl.FileResolver.CACHE_DIR_BASE_PROP_NAME;
-import static io.vertx.core.file.impl.FileResolver.DISABLE_CP_RESOLVING_PROP_NAME;
-import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
-import static java.lang.System.setProperty;
 
 /**
  * Initializes the {@link VertxOptions} for deployment and use in a

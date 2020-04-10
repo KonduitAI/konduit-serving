@@ -152,10 +152,11 @@ public class LogUtils {
      * it would be ignored.
      */
     public static void setAppendersForRunCommand(String serverId) throws Exception {
+        String logFilePath = new File(Fetcher.getCommandLogsDir(), serverId + ".log").getAbsolutePath();
+
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
 
-        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)
-                org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 
         rootLogger.detachAndStopAllAppenders();
 
@@ -168,7 +169,8 @@ public class LogUtils {
 
         FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
         fileAppender.setName("FILE");
-        fileAppender.setFile(new File(Fetcher.getCommandLogsDir(), serverId + ".log").getAbsolutePath());
+        fileAppender.setFile(logFilePath);
+        fileAppender.setAppend(false);
         fileAppender.setContext(context);
 
         PatternLayoutEncoder patternLayoutEncoder = new PatternLayoutEncoder();
@@ -187,6 +189,8 @@ public class LogUtils {
 
         rootLogger.addAppender(fileAppender);
         rootLogger.addAppender(consoleAppender);
+
+        log.info("Logging file at: {}", logFilePath);
     }
 
     /**

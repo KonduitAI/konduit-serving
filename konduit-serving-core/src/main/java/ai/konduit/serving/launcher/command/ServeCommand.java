@@ -107,8 +107,9 @@ public class ServeCommand extends DefaultCommand {
      *
      * @param id the application ID.
      */
-    @Option(longName = "serving-id", shortName = "id", required = true)
-    @Description("Id of the serving process. This will be visible in the 'list' command. This id can be used to call 'predict' and 'stop' commands on the running servers.")
+    @Option(longName = "serving-id", shortName = "id")
+    @Description("Id of the serving process. This will be visible in the 'list' command. This id can be used to call 'predict' and 'stop' commands on the running servers. " +
+            "If not given then an 8 character UUID is created automatically.")
     public void setApplicationId(String id) {
         this.id = id;
     }
@@ -177,6 +178,7 @@ public class ServeCommand extends DefaultCommand {
         cliArguments.addAll(getArguments());
 
         // Add the classpath to env.
+        builder.environment().putAll(System.getenv());
         builder.environment().put("CLASSPATH", System.getProperty("java.class.path"));
 
         if (launcher != null) {
@@ -201,9 +203,9 @@ public class ServeCommand extends DefaultCommand {
         cliArguments.forEach(arg -> ExecUtils.addArgument(cmd, arg));
 
         try {
-            builder.command(cmd);
+            builder.command(cmd); // Setting the builder command
             if (redirect) {
-                BufferedReader reader =  new BufferedReader(new InputStreamReader(builder.start().getInputStream()));
+                BufferedReader reader =  new BufferedReader(new InputStreamReader(builder.command(cmd).start().getInputStream()));
 
                 String line;
                 while(true) {

@@ -47,7 +47,7 @@ public class LauncherUtils {
         setProperty(CACHE_DIR_BASE_PROP_NAME, Fetcher.getWorkingDir().getAbsolutePath()); // For setting caching directory for vertx related optimizations.
     }
 
-    public static int getPidFromId(String serverId) {
+    public static int getPidFromServerId(String serverId) {
         List<String> cmd = new ArrayList<>();
         try {
             if (ExecUtils.isWindows()) {
@@ -83,7 +83,7 @@ public class LauncherUtils {
         }
     }
 
-    public static String getPidFromLine(String line) {
+    public static String extractPidFromLine(String line) {
         String[] splits = line.trim().split(" ");
 
         if(ExecUtils.isWindows()) {

@@ -88,7 +88,7 @@ public class ListCommand extends DefaultCommand {
     }
 
     private void dumpFoundVertxApplications(List<String> cmd) throws IOException, InterruptedException {
-        String printFormat = " %1$-3s | %2$-15s | %3$-10s | %4$-20s | %5$-7s | %6$-10s \n";
+        String printFormat = " %1$-3s | %2$-30s | %3$-10s | %4$-20s | %5$-7s | %6$-10s \n";
 
         boolean none = true;
         final Process process = new ProcessBuilder(cmd).start();
@@ -124,7 +124,7 @@ public class ListCommand extends DefaultCommand {
     }
 
     private void printServerDetails(int index, String printFormat, String id, String line) {
-        String pid = LauncherUtils.getPidFromLine(line);
+        String pid = LauncherUtils.extractPidFromLine(line);
         String configuration;
         String hostAndPort = "waiting...";
         String status = "starting";

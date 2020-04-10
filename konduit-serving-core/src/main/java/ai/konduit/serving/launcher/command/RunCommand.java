@@ -71,6 +71,7 @@ public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand 
     @Override
     public void run() {
         String serverId = getServerId();
+        log.debug("Starting konduit server with an id of '{}'", serverId);
         try {
             if(!Strings.isNullOrEmpty(serverId)) {
                 LogUtils.setAppendersForRunCommand(serverId);

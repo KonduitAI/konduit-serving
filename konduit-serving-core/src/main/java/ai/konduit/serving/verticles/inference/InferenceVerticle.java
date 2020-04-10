@@ -150,19 +150,13 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                             int pid = getPid();
 
                             if(pid != -1) {
-                                vertx.setPeriodic(10000, periodicHandler -> {
-                                    try {
-                                        File processConfigFile = new File(Fetcher.getServersDataDir(), pid + ".data");
+                                saveInspectionDataIfRequired(pid);
 
-                                        FileUtils.writeStringToFile(processConfigFile, inferenceConfiguration.toJson(), StandardCharsets.UTF_8);
-                                        processConfigFile.deleteOnExit();
-                                    } catch (IOException exception) {
-                                        log.error("Unable to save process information", exception);
-                                    }
-                                });
+                                // Periodically checks for configuration updates and save them.
+                                vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
                             }
 
-                            log.info("Inference server is listening on host: \"{}\"", inferenceConfiguration.getServingConfig().getListenHost());
+                            log.info("Inference server is listening on host: '{}'", inferenceConfiguration.getServingConfig().getListenHost());
                             log.info("Inference server started on port {} with {} pipeline steps", port, nSteps);
                             startPromise.complete();
                         } catch (Exception exception) {
@@ -181,6 +175,27 @@ public class InferenceVerticle extends BaseRoutableVerticle {
             return linux.getpid();
         } else {
             return -1;
+        }
+    }
+
+    private void saveInspectionDataIfRequired(int pid) {
+        try {
+            File processConfigFile = new File(Fetcher.getServersDataDir(), pid + ".data");
+            String inferenceConfigurationJson = ((ContextInternal) context).getDeployment()
+                    .deploymentOptions().getConfig().encodePrettily();
+
+            if(processConfigFile.exists()) {
+                if(!FileUtils.readFileToString(processConfigFile, StandardCharsets.UTF_8).contains(inferenceConfigurationJson)) {
+                    FileUtils.writeStringToFile(processConfigFile, inferenceConfigurationJson, StandardCharsets.UTF_8);
+                }
+            } else {
+                FileUtils.writeStringToFile(processConfigFile, inferenceConfigurationJson, StandardCharsets.UTF_8);
+                log.info("Writing inspection data at '{}' with configuration: \n{}", processConfigFile.getAbsolutePath(),
+                        inferenceConfiguration.toJson());
+            }
+            processConfigFile.deleteOnExit();
+        } catch (IOException exception) {
+            log.error("Unable to save konduit server inspection information", exception);
         }
     }
 }

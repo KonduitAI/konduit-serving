@@ -56,7 +56,7 @@ public class InspectCommand extends DefaultCommand {
         if(LauncherUtils.isProcessExists(id)) {
             try {
                 out.format("\nKonduit server with the id '%s' is initialized with the following configuration: \n\n%s\n\n", id,
-                        FileUtils.readFileToString(new File(Fetcher.getServersDataDir(), LauncherUtils.getPidFromId(id) + ".data"), StandardCharsets.UTF_8));
+                        FileUtils.readFileToString(new File(Fetcher.getServersDataDir(), LauncherUtils.getPidFromServerId(id) + ".data"), StandardCharsets.UTF_8));
             } catch (Exception exception) {
                 log.error("Failed to read configuration file", exception);
             }

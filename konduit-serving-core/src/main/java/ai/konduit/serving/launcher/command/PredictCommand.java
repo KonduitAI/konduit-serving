@@ -45,7 +45,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static ai.konduit.serving.launcher.LauncherUtils.getPidFromId;
+import static ai.konduit.serving.launcher.LauncherUtils.getPidFromServerId;
 
 @Slf4j
 @Name("predict")
@@ -109,7 +109,7 @@ public class PredictCommand extends DefaultCommand {
             try {
                 InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(
                         FileUtils.readFileToString(new File(Fetcher.getServersDataDir(),
-                                getPidFromId(id) + ".data"), StandardCharsets.UTF_8));
+                                getPidFromServerId(id) + ".data"), StandardCharsets.UTF_8));
 
                 Vertx vertx = Vertx.vertx();
 
