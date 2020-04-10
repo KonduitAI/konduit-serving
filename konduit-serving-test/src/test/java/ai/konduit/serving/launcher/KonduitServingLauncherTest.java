@@ -24,6 +24,7 @@ import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.util.ObjectMappers;
+import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.datavec.image.loader.NativeImageLoader;
@@ -51,7 +52,7 @@ import static org.junit.Assert.assertThat;
 @NotThreadSafe
 public class KonduitServingLauncherTest {
 
-    private static final int TIMEOUT = 60000;
+    private static final int TIMEOUT = 120000;
     private static final String TEST_SERVER_ID = "konduit_serving_test_server";
 
     @ClassRule
@@ -108,12 +109,14 @@ public class KonduitServingLauncherTest {
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(
                 inspectOutput.substring(inspectOutput.indexOf(System.lineSeparator()) + 1)); // Removing the first info line to get the json string
 
-        assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID, String.format("%s:%s",
-                inferenceConfiguration.getServingConfig().getListenHost(), inferenceConfiguration.getServingConfig().getHttpPort()))));
+        assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID,
+                String.format("%s:%s",
+                        inferenceConfiguration.getServingConfig().getListenHost(),
+                        inferenceConfiguration.getServingConfig().getHttpPort()))));
 
         String imagePath = new ClassPathResource("/data/5.png").getFile().getAbsolutePath();
-        NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(runAndGetOutput("predict", "-it", "IMAGE", TEST_SERVER_ID,
-                imagePath), NDArrayOutput.class);
+        JsonObject outputJson = new JsonObject(runAndGetOutput("predict", "-it", "IMAGE", TEST_SERVER_ID, imagePath));
+        NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(outputJson.getJsonObject("default").encode(), NDArrayOutput.class);
 
         assertEquals(new NativeImageLoader().asMatrix(imagePath), ndArrayOutput.getNdArray());
     }
@@ -125,10 +128,10 @@ public class KonduitServingLauncherTest {
 
     @AfterClass
     public static void afterClass() throws IOException {
-        log.debug("Listing running servers. This should report no running servers. If there are any running servers they should be terminated manually.");
-        log.debug("----------------------------------------------------------------------------");
-        log.debug(runAndGetOutput("list"));
-        log.debug("----------------------------------------------------------------------------");
+        log.info("Listing running servers. This should report no running servers. If there are any running servers they should be terminated manually.");
+        log.info("----------------------------------------------------------------------------");
+        log.info("\n\n" + runAndGetOutput("list") + "\n\n");
+        log.info("----------------------------------------------------------------------------");
     }
 
     private String runAndTailOutput(Function<String, Boolean> predicate, String... command) throws IOException, InterruptedException {
@@ -142,7 +145,7 @@ public class KonduitServingLauncherTest {
             if(line == null) {
                 Thread.sleep(100);
             } else {
-                log.debug(line);
+                log.info(line);
                 output.add(line);
                 end = predicate.apply(line);
             }
@@ -163,7 +166,7 @@ public class KonduitServingLauncherTest {
         return getProcessBuilderFromCommand(command).start();
     }
 
-    private static ProcessBuilder getProcessBuilderFromCommand(String... command) throws IOException {
+    private static ProcessBuilder getProcessBuilderFromCommand(String... command) {
         ProcessBuilder processBuilder = new ProcessBuilder(getCommand(command));
         Map<String, String> environment = processBuilder.environment();
         environment.put(EnvironmentConstants.WORKING_DIR, temporaryFolder.getRoot().getAbsolutePath());
