@@ -139,6 +139,8 @@ public class PredictCommand extends DefaultCommand {
 
                     if(failed) {
                         System.exit(1);
+                    } else {
+                        System.exit(0);
                     }
                 };
 

@@ -65,7 +65,7 @@ public class KonduitServingLauncherTest {
     }
 
     @Test(timeout = TIMEOUT)
-    public void testMainHelpAndVersion() throws IOException {
+    public void testMainHelpAndVersion() throws IOException, InterruptedException {
         String output = runAndGetOutput("--help"); // Testing with '--help'
         assertThat(output, Matchers.containsString("Usage: konduit [COMMAND] [OPTIONS] [arg...]"));
         assertThat(output, Matchers.stringContainsInOrder(getMainCommandNames()));
@@ -120,7 +120,8 @@ public class KonduitServingLauncherTest {
                 "started")));
 
         String imagePath = new ClassPathResource("/data/5.png").getFile().getAbsolutePath();
-        JsonObject outputJson = new JsonObject(runAndGetOutput("predict", "-it", "IMAGE", TEST_SERVER_ID, imagePath));
+
+        JsonObject outputJson = new JsonObject(runAndGetOutput(false, "predict", "-it", "IMAGE", TEST_SERVER_ID, imagePath));
         NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(outputJson.getJsonObject("default").encode(), NDArrayOutput.class);
 
         assertEquals(new NativeImageLoader().asMatrix(imagePath), ndArrayOutput.getNdArray());
@@ -132,7 +133,7 @@ public class KonduitServingLauncherTest {
     }
 
     @AfterClass
-    public static void afterClass() throws IOException {
+    public static void afterClass() throws IOException, InterruptedException {
         log.info("\n\nListing running servers. This should report no running servers. If there are any running servers they should be terminated manually." + "\n" +
                 "----------------------------------------------------------------------------" +
                 "\n\n" +
@@ -160,8 +161,18 @@ public class KonduitServingLauncherTest {
         return output;
     }
 
-    private static String runAndGetOutput(String... command) throws IOException {
-        return IOUtils.toString(runAndGetInputStream(command), StandardCharsets.UTF_8).trim();
+    private static String runAndGetOutput(String... command) throws IOException, InterruptedException {
+        return runAndGetOutput(true, command);
+    }
+
+    private static String runAndGetOutput(boolean waitFor, String... command) throws IOException, InterruptedException {
+        Process process = startProcessFromCommand(command);
+
+        if(waitFor) {
+            assertEquals(0, process.waitFor());
+        }
+
+        return IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8).trim();
     }
 
     private static InputStream runAndGetInputStream(String... command) throws IOException {
@@ -197,7 +208,7 @@ public class KonduitServingLauncherTest {
         return new KonduitServingLauncher().setMainCommands().getCommandNames();
     }
 
-    private String testAndGetImageConfiguration() throws IOException {
+    private String testAndGetImageConfiguration() throws IOException, InterruptedException {
         String inferenceConfigurationJson = runAndGetOutput("config", "-t", "image");
 
         assertEquals(inferenceConfigurationJson, InferenceConfiguration.builder()
@@ -218,7 +229,7 @@ public class KonduitServingLauncherTest {
     }
 
     private void stopAllProcesses() throws IOException, InterruptedException {
-        log.info(IOUtils.toString(runAndGetInputStream("stop", TEST_SERVER_ID), StandardCharsets.UTF_8));
+        log.info(runAndGetOutput("stop", TEST_SERVER_ID), StandardCharsets.UTF_8);
         Thread.sleep(5000);
         assertThat(runAndGetOutput("list"), Matchers.containsString("No konduit servers found."));
     }
