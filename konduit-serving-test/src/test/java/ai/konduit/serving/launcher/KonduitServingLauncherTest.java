@@ -203,7 +203,7 @@ public class KonduitServingLauncherTest {
     }
 
     private void stopAllProcesses() throws IOException, InterruptedException {
-        assertEquals(0, startProcessFromCommand("stop", TEST_SERVER_ID).waitFor());
+        log.info(IOUtils.toString(runAndGetInputStream("stop", TEST_SERVER_ID), StandardCharsets.UTF_8));
         Thread.sleep(5000);
         assertThat(runAndGetOutput("list"), Matchers.containsString("No konduit servers found."));
     }
