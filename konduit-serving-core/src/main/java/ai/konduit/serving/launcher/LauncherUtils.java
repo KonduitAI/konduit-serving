@@ -107,7 +107,7 @@ public class LauncherUtils {
             Process process = new ProcessBuilder(args).start();
             output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
         } catch (Exception exception) {
-            log.error("An error occurred while checking for existing processes:\n" + exception.getMessage());
+            log.error("An error occurred while checking for existing processes:", exception);
             System.exit(1);
         }
 

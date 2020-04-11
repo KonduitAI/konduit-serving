@@ -21,18 +21,19 @@ package ai.konduit.serving.launcher.command;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.SystemUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static ai.konduit.serving.launcher.LauncherUtils.isProcessExists;
+
+@Slf4j
 @Name(value = "stop", priority = 1)
 @Summary("Stop a running konduit server")
 @Description("This command stops a konduit server started with the `serve` command. The command requires the " +
@@ -175,28 +176,5 @@ public class StopCommand extends DefaultCommand {
             e.printStackTrace(out);
         }
         return null;
-    }
-
-    public boolean isProcessExists(String id) {
-        List<String> args;
-
-        if(SystemUtils.IS_OS_WINDOWS) {
-            args = Arrays.asList("WMIC", "PROCESS", "WHERE", "\"CommandLine like '%serving.id=" + id + "' and name!='wmic.exe'\"", "GET", "CommandLine", "/VALUE");
-        } else {
-            args = Arrays.asList("sh", "-c", "ps ax | grep \"Dserving.id=" + id + "$\"");
-        }
-
-        String output = "";
-        try {
-            Process process = new ProcessBuilder(args).start();
-            output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
-        } catch (Exception exception) {
-            out.println("An error occurred while checking for existing processes:\n" + exception.getMessage());
-            System.exit(1);
-        }
-
-        return output.trim()
-                .replace(System.lineSeparator(), "")
-                .matches("(.*)Dserving.id=" + id);
     }
 }
