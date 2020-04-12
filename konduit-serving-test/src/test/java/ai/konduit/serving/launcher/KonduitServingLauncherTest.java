@@ -116,7 +116,7 @@ public class KonduitServingLauncherTest {
 
         String imagePath = new ClassPathResource("/data/5_32x32.png").getFile().getAbsolutePath();
 
-        JsonObject outputJson = new JsonObject(runAndGetOutput(false, "predict", "-it", "IMAGE", TEST_SERVER_ID, imagePath));
+        JsonObject outputJson = new JsonObject(runAndGetOutput("predict", "-it", "IMAGE", TEST_SERVER_ID, imagePath));
         NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(outputJson.getJsonObject("default").encode(), NDArrayOutput.class);
 
         assertEquals(new NativeImageLoader().asMatrix(imagePath), ndArrayOutput.getNdArray());
@@ -147,7 +147,7 @@ public class KonduitServingLauncherTest {
 
         String imagePath = new ClassPathResource("/data/5_32x32.png").getFile().getAbsolutePath();
 
-        JsonObject outputJson = new JsonObject(runAndGetOutput(false, "predict", "-it", "IMAGE", TEST_SERVER_ID, imagePath));
+        JsonObject outputJson = new JsonObject(runAndGetOutput("predict", "-it", "IMAGE", TEST_SERVER_ID, imagePath));
         NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(outputJson.getJsonObject("default").encode(), NDArrayOutput.class);
 
         assertEquals(new NativeImageLoader().asMatrix(imagePath), ndArrayOutput.getNdArray());
@@ -188,23 +188,17 @@ public class KonduitServingLauncherTest {
     }
 
     private static String runAndGetOutput(String... command) throws IOException, InterruptedException {
-        return runAndGetOutput(true, command);
-    }
-
-    private static String runAndGetOutput(boolean waitFor, String... command) throws IOException, InterruptedException {
         Process process = startProcessFromCommand(command);
 
         String output = getProcessOutput(process);
         String errorOutput = getProcessErrorOutput(process);
 
-        if(waitFor) {
-            assertEquals(
-                    "Process exited with non-zero exit code. Details: \n" +
-                             output + "\n" +
-                            errorOutput,
-                    0, process.waitFor()
-            );
-        }
+        assertEquals(
+                "Process exited with non-zero exit code. Details: \n" +
+                         output + "\n" +
+                        errorOutput,
+                0, process.waitFor()
+        );
 
         log.info("Process output: {}", output);
         log.warn("Process errors (ignore if none): '{}'", errorOutput);

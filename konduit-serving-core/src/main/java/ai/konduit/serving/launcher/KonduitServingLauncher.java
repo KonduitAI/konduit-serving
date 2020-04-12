@@ -33,6 +33,7 @@ import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.shade.guava.collect.ImmutableMap;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -51,7 +52,7 @@ public class KonduitServingLauncher extends Launcher {
 
     public static final String KONDUIT_PREFIX = "konduit";
 
-    public static final Map<String, String> services = ImmutableMap.of(
+    protected static final Map<String, String> services = ImmutableMap.of(
             "inference", InferenceVerticle.class.getCanonicalName(),
             "memmap", InferenceVerticle.class.getCanonicalName()
     );
@@ -60,6 +61,10 @@ public class KonduitServingLauncher extends Launcher {
         LogUtils.setAppendersForCommandLine();
 
         LauncherUtils.setCommonLoggingAndVertxProperties();
+    }
+
+    public static Map<String, String> getServicesMap() {
+        return services;
     }
 
     @Override
@@ -97,11 +102,16 @@ public class KonduitServingLauncher extends Launcher {
             }
 
             @Override
-            public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+            public Verticle createVerticle(String verticleName, ClassLoader classLoader)
+                    throws ClassNotFoundException,
+                    IllegalAccessException,
+                    InstantiationException,
+                    InvocationTargetException,
+                    NoSuchMethodException {
                 String serviceType = verticleName.replace(KONDUIT_PREFIX + ":", "");
 
                 if(services.containsKey(serviceType)) {
-                    return (Verticle) ClassLoader.getSystemClassLoader().loadClass(services.get(serviceType)).newInstance();
+                    return (Verticle) ClassLoader.getSystemClassLoader().loadClass(services.get(serviceType)).getConstructor().newInstance();
                 } else {
                     log.error("Invalid service type {}. Possible values are: {}", serviceType, services.keySet());
                     System.exit(1);
@@ -114,8 +124,8 @@ public class KonduitServingLauncher extends Launcher {
     public static void main(String[] args) {
         KonduitServingLauncher konduitServingLauncher = new KonduitServingLauncher().setMainCommands();
 
-        if(args.length > 0 && RunCommand.class.getAnnotation(Name.class).value().equals(args[0]))
-            konduitServingLauncher.register(RunCommand.class, RunCommand::new);
+        if(args.length > 0 && KonduitRunCommand.class.getAnnotation(Name.class).value().equals(args[0]))
+            konduitServingLauncher.register(KonduitRunCommand.class, KonduitRunCommand::new);
 
         konduitServingLauncher.dispatch(args);
     }

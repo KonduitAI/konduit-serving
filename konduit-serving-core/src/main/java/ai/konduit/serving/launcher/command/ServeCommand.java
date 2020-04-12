@@ -31,7 +31,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import static ai.konduit.serving.launcher.command.RunCommand.DEFAULT_SERVICE;
+import static ai.konduit.serving.launcher.command.KonduitRunCommand.DEFAULT_SERVICE;
 
 @Name("serve")
 @Summary("Start a konduit server application")

@@ -22,18 +22,18 @@ import ai.konduit.serving.util.LogUtils;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
+import io.vertx.core.impl.launcher.commands.RunCommand;
 import org.nd4j.shade.guava.base.Strings;
 
 import java.io.File;
 import java.util.Collections;
 
-import static ai.konduit.serving.launcher.KonduitServingLauncher.KONDUIT_PREFIX;
-import static ai.konduit.serving.launcher.KonduitServingLauncher.services;
+import static ai.konduit.serving.launcher.KonduitServingLauncher.*;
 
 @Name(value = "run", priority = 1)
 @Summary("Runs a konduit server in the foreground.")
 @Description("Runs a konduit server in the foreground.")
-public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand {
+public class KonduitRunCommand extends RunCommand {
 
     public static final String DEFAULT_SERVICE = "inference";
 
@@ -42,12 +42,12 @@ public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand 
     @DefaultValue(DEFAULT_SERVICE)
     @Description("Service type that needs to be deployed. Defaults to \"inference\"")
     public void setMainVerticle(String konduitServiceType) {
-        if(services.containsKey(konduitServiceType)) {
+        if(getServicesMap().containsKey(konduitServiceType)) {
             super.setMainVerticle(KONDUIT_PREFIX + ":" + konduitServiceType);
         } else {
             throw new CLIException(String.format("Invalid service type %s. " +
                     "Allowed values are: %s", konduitServiceType,
-                    Collections.singletonList(services.keySet())));
+                    Collections.singletonList(getServicesMap().keySet())));
         }
     }
 
@@ -56,6 +56,7 @@ public class RunCommand extends io.vertx.core.impl.launcher.commands.RunCommand 
      *
      * @param configuration the configuration
      */
+    @Override
     @Option(shortName = "c", longName = "config", argName = "config", required = true)
     @Description("Specifies a configuration that should be provided to the verticle. <config> should reference either a " +
             "text file containing a valid JSON object which represents the configuration OR be a JSON string.")

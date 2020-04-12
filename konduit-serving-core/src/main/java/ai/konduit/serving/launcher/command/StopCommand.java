@@ -135,11 +135,9 @@ public class StopCommand extends DefaultCommand {
                 "TERMINATE"
         );
 
-        //out.println(String.join(" ", cmd));
-
         try {
             final Process process = new ProcessBuilder(cmd).start();
-            //out.println(IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8));
+
             int result = process.waitFor();
             out.println("Application '" + id + "' terminated with status " + result);
             if (!redeploy) {
