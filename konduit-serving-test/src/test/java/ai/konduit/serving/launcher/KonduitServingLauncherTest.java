@@ -127,7 +127,8 @@ public class KonduitServingLauncherTest {
         // Running in foreground
         String configuration = testAndGetImageConfiguration();
         assertThat(runAndGetOutput("serve", "-id", TEST_SERVER_ID, "-c", configuration, "-b"),
-                Matchers.containsString(String.format("For server status, execute: 'konduit list'\nFor logs, execute: 'konduit logs %s'", TEST_SERVER_ID)));
+                Matchers.stringContainsInOrder(Arrays.asList("For server status, execute: 'konduit list'",
+                        String.format("For logs, execute: 'konduit logs %s'", TEST_SERVER_ID))));
 
         Thread.sleep(10000);
 

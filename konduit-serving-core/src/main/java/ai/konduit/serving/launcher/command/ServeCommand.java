@@ -87,7 +87,7 @@ public class ServeCommand extends DefaultCommand {
     @DefaultValue(DEFAULT_SERVICE)
     @Description("Service type that needs to be deployed. Defaults to \"inference\"")
     public void setMainVerticle(String konduitServiceType) {
-        this.service = service;
+        this.service = konduitServiceType;
     }
 
     /**
@@ -144,6 +144,23 @@ public class ServeCommand extends DefaultCommand {
         this.redirect = !background;
     }
 
+    private void addCustomServeOptions(List<String> cliArguments) {
+        if(classpath != null) {
+            cliArguments.add("--classpath");
+            cliArguments.add(classpath);
+        }
+
+        if(service != null) {
+            cliArguments.add("-s");
+            cliArguments.add(service);
+        }
+
+        if(configuration != null) {
+            cliArguments.add("-c");
+            cliArguments.add(configuration);
+        }
+    }
+
     /**
      * Starts the application in background.
      */
@@ -160,20 +177,7 @@ public class ServeCommand extends DefaultCommand {
         cliArguments.add("--instances");
         cliArguments.add(String.valueOf(instances));
 
-        if(classpath != null) {
-            cliArguments.add("--classpath");
-            cliArguments.add(classpath);
-        }
-
-        if(service != null) {
-            cliArguments.add("-s");
-            cliArguments.add(service);
-        }
-
-        if(configuration != null) {
-            cliArguments.add("-c");
-            cliArguments.add(configuration);
-        }
+        addCustomServeOptions(cliArguments);
 
         cliArguments.addAll(getArguments());
 
@@ -205,23 +209,25 @@ public class ServeCommand extends DefaultCommand {
         try {
             builder.command(cmd); // Setting the builder command
             if (redirect) {
-                BufferedReader reader =  new BufferedReader(new InputStreamReader(builder.command(cmd).start().getInputStream()));
+                try(BufferedReader reader =  new BufferedReader(new InputStreamReader(builder.command(cmd).start().getInputStream()))) {
 
-                String line;
-                while(true) {
-                    line = reader.readLine();
-                    if(line == null) {
-                        Thread.sleep(100);
-                    } else {
-                        out.println(line);
+                    String line;
+                    while (!Thread.currentThread().isInterrupted()) {
+                        line = reader.readLine();
+                        if (line == null) {
+                            Thread.sleep(100);
+                        } else {
+                            out.println(line);
+                        }
                     }
                 }
             } else {
                 String commandLinePrefix = ((KonduitServingLauncher) executionContext.launcher()).commandLinePrefix();
                 builder.start();
-                out.format("For server status, execute: '%s list'\nFor logs, execute: '%s logs %s'\n",
+                out.format("For server status, execute: '%s list'%nFor logs, execute: '%s logs %s'%n",
                         commandLinePrefix,
-                        commandLinePrefix, id);
+                        commandLinePrefix,
+                        id);
             }
         } catch (Exception e) {
             out.println("Cannot create konduit server process");

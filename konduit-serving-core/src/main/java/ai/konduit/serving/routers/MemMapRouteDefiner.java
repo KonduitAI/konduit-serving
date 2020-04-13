@@ -51,6 +51,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.netty.handler.codec.http.HttpHeaders.Values.APPLICATION_JSON;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+
 /**
  * MemMap Route Definer handles implementing
  * endpoints for returning views of a large
@@ -70,8 +73,10 @@ import java.util.List;
 @Slf4j
 public class MemMapRouteDefiner {
 
+    private static final String ARRAY_TYPE = "arrayType";
+
     private INDArray unknownVector;
-    private ThreadLocal<INDArray> arr;
+    private ThreadLocal<INDArray> mArray;
     private MemMapConfig memMapConfig;
 
     private WorkspaceConfiguration mmap;
@@ -109,19 +114,20 @@ public class MemMapRouteDefiner {
      * @return the router with the endpoints defined
      */
     public Router defineRoutes(Vertx vertx, InferenceConfiguration inferenceConfiguration) {
-        Long initialSize = inferenceConfiguration.getMemMapConfig().getInitialMemmapSize();
+        long initialSize = inferenceConfiguration.getMemMapConfig().getInitialMemmapSize();
         Router router = Router.router(vertx);
         memMapConfig = inferenceConfiguration.getMemMapConfig();
 
         String path =  inferenceConfiguration.getMemMapConfig().getUnkVectorPath();
-       if(path != null) {
+
+        if(path != null) {
            try {
                byte[] content = FileUtils.readFileToByteArray(new File(path));
                unknownVector = Nd4j.createNpyFromByteArray(content);
            } catch (IOException e) {
                throw new IllegalStateException("Unable to load unknown vector: " + path);
            }
-       }
+        }
 
         File tempFile = new File(System.getProperty("user.home"), ".mmap-temp-file");
         if (!tempFile.exists()) {
@@ -136,7 +142,7 @@ public class MemMapRouteDefiner {
         Preconditions.checkState(tempFile.canWrite() && tempFile.canRead(), "Unable to either read or write to %s for memmap temp file.",
                 tempFile.getAbsolutePath());
 
-        arr = new ThreadLocal<>();
+        mArray = new ThreadLocal<>();
         mmap = WorkspaceConfiguration.builder()
                 .initialSize(initialSize)
                 .policyLocation(LocationPolicy.MMAP)
@@ -146,12 +152,18 @@ public class MemMapRouteDefiner {
         PipelineRouteDefiner.generalHandler(inferenceConfiguration, router, log);
 
 
+        setRouteLinks(router, vertx);
+
+        return router;
+    }
+
+    private void setRouteLinks(Router router, Vertx vertx) {
         router.get("/healthcheck*").handler(HealthCheckHandler.create(vertx));
 
         router.get("/config")
-                .produces("application/json").handler(ctx -> {
+                .produces(APPLICATION_JSON).handler(ctx -> {
             try {
-                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().putHeader(CONTENT_TYPE, APPLICATION_JSON);
                 ctx.response().end(vertx.getOrCreateContext().config().encode());
             } catch (Exception e) {
                 ctx.fail(500, e);
@@ -159,54 +171,55 @@ public class MemMapRouteDefiner {
         });
 
         router.get("/config/pretty")
-                .produces("application/json").handler(ctx -> {
+                .produces(APPLICATION_JSON).handler(ctx -> {
             try {
-                ctx.response().putHeader("Content-Type", "application/json");
+                ctx.response().putHeader(CONTENT_TYPE, APPLICATION_JSON);
                 ctx.response().end(vertx.getOrCreateContext().config().encodePrettily());
             } catch (Exception e) {
                 ctx.fail(500, e);
             }
         });
 
-
         router.post("/array/:arrayType")
                 .handler(ctx -> {
-                    INDArray write  = getOrSetArrForContext();
-                    String paramType = ctx.pathParam("arrayType");
+                    INDArray write = getOrSetArrForContext();
+                    String paramType = ctx.pathParam(ARRAY_TYPE);
                     if(paramType.equals("json"))
                         writeArrayJson(write,ctx);
                     else
                         writeArrayBinary(write,ctx);
+
+                    mArray.remove();
                 });
-
-
 
         router.post("/array/indices/:arrayType")
                 .handler(ctx -> {
                     INDArray write  = getArrayFromContext(ctx);
-                    String paramType = ctx.pathParam("arrayType");
+                    String paramType = ctx.pathParam(ARRAY_TYPE);
                     if(paramType.equals("json"))
                         writeArrayJson(write,ctx);
                     else
                         writeArrayBinary(write,ctx);
+
+                    mArray.remove();
                 });
 
         router.post("/array/range/:from/:to/:arrayType")
                 .handler(ctx -> {
                     INDArray write = getArrayFromContextRange(ctx);
-                    String paramType = ctx.pathParam("arrayType");
+                    String paramType = ctx.pathParam(ARRAY_TYPE);
                     if (paramType.equals("json"))
                         writeArrayJson(write, ctx);
                     else
                         writeArrayBinary(write, ctx);
-                });
 
-        return router;
+                    mArray.remove();
+                });
     }
 
 
     private void writeArrayJson(INDArray write, io.vertx.ext.web.RoutingContext ctx) {
-        ctx.response().putHeader("Content-Type", "application/json");
+        ctx.response().putHeader(CONTENT_TYPE, APPLICATION_JSON);
         ctx.response().setChunked(false);
         ctx.response().end(write.toString());
     }
@@ -217,7 +230,7 @@ public class MemMapRouteDefiner {
         }
 
         Buffer writeBuffer = null;
-        String arrayType = ctx.pathParam("arrayType");
+        String arrayType = ctx.pathParam(ARRAY_TYPE);
 
         switch (arrayType) {
             case "numpy":
@@ -238,11 +251,12 @@ public class MemMapRouteDefiner {
                     ctx.response().setStatusCode(500);
 
                 }
-
+                break;
+            default:
                 break;
         }
 
-        ctx.response().putHeader("Content-Type", "application/octet-stream");
+        ctx.response().putHeader(CONTENT_TYPE, "application/octet-stream");
         ctx.response().setChunked(false);
         ctx.response().end(writeBuffer);
 
@@ -255,24 +269,20 @@ public class MemMapRouteDefiner {
         int from = Integer.parseInt(ctx.pathParam("from"));
         int to = Integer.parseInt(ctx.pathParam("to"));
 
-        INDArray arr = getOrSetArrForContext();
-        if (arr.isVector()) {
+        INDArray array = getOrSetArrForContext();
+        if (array.isVector()) {
             INDArrayIndex[] indices = new INDArrayIndex[1];
             indices[0] = NDArrayIndex.interval(from, to);
-            INDArray write = arr.get(indices);
-            return write;
+            return array.get(indices);
         } else {
-            INDArrayIndex[] indices = new INDArrayIndex[arr.rank()];
+            INDArrayIndex[] indices = new INDArrayIndex[array.rank()];
             for (int i = 0; i < indices.length; i++) {
                 indices[i] = NDArrayIndex.all();
             }
 
             indices[0] = NDArrayIndex.interval(from, to);
-            INDArray write = arr.get(indices);
-            return write;
+            return array.get(indices);
         }
-
-
     }
 
     private INDArray getOrSetArrForContext() {
@@ -284,19 +294,19 @@ public class MemMapRouteDefiner {
             throw new IllegalStateException("File not found at path " + path);
         }
 
-        if (arr.get() == null) {
-            try (MemoryWorkspace ws = Nd4j.getWorkspaceManager().getAndActivateWorkspace(mmap, memMapConfig.getWorkSpaceName())) {
+        if (mArray.get() == null) {
+            try (MemoryWorkspace ignored = Nd4j.getWorkspaceManager().getAndActivateWorkspace(mmap, memMapConfig.getWorkSpaceName())) {
                 if (path.endsWith("npy"))
-                    arr.set((Nd4j.createFromNpyFile(loadFrom)));
+                    mArray.set((Nd4j.createFromNpyFile(loadFrom)));
                 else {
-                    arr.set(BinarySerde.readFromDisk(loadFrom));
+                    mArray.set(BinarySerde.readFromDisk(loadFrom));
                 }
             } catch (IOException e) {
                 log.error("Error creating nd4j array", e);
             }
         }
 
-        return arr.get();
+        return mArray.get();
     }
 
     private INDArray getArrayFromContext(RoutingContext ctx) {
@@ -308,13 +318,12 @@ public class MemMapRouteDefiner {
             throw new IllegalStateException("No body found!");
         }
 
-        INDArray arr = getOrSetArrForContext();
+        INDArray array = getOrSetArrForContext();
 
 
-        JsonArray jsonArray = bodyAsJson;
         List<INDArray> slices = new ArrayList<>();
-        for (int i = 0; i < jsonArray.size(); i++) {
-            int idx = jsonArray.getInteger(i);
+        for (int i = 0; i < bodyAsJson.size(); i++) {
+            int idx = bodyAsJson.getInteger(i);
             if(idx < 0) {
                 if(unknownVector != null) {
                     slices.add(unknownVector);
@@ -326,11 +335,10 @@ public class MemMapRouteDefiner {
                     ctx.response().setChunked(false);
                 }
             } else
-                slices.add(arr.slice(idx));
+                slices.add(array.slice(idx));
         }
 
-        INDArray write = Nd4j.concat(0, slices.toArray(new INDArray[slices.size()]));
-        return write;
+        return Nd4j.concat(0, slices.toArray(new INDArray[slices.size()]));
     }
 
 }

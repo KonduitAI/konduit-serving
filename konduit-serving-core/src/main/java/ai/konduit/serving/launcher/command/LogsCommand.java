@@ -19,7 +19,6 @@
 package ai.konduit.serving.launcher.command;
 
 import ai.konduit.serving.settings.Fetcher;
-import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
@@ -60,20 +59,21 @@ public class LogsCommand extends DefaultCommand {
     }
 
     @Override
-    public void run() throws CLIException {
+    public void run() {
         try {
             File logsFile = new File(Fetcher.getCommandLogsDir(), id + ".log");
 
             if (follow) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(logsFile)));
+                try(BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(logsFile)))) {
 
-                String line;
-                while (true) {
-                    line = reader.readLine();
-                    if (line == null) {
-                        Thread.sleep(100);
-                    } else {
-                        out.println(line);
+                    String line;
+                    while (!Thread.currentThread().isInterrupted()) {
+                        line = reader.readLine();
+                        if (line == null) {
+                            Thread.sleep(100);
+                        } else {
+                            out.println(line);
+                        }
                     }
                 }
             } else {
