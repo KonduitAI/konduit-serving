@@ -31,14 +31,12 @@ import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.config.metrics.MetricsRenderer;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.MetricsBinderRendererAdapter;
+import ai.konduit.serving.config.metrics.impl.MultiLabelMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
-import ai.konduit.serving.metrics.ClassificationMetrics;
-import ai.konduit.serving.metrics.MetricType;
-import ai.konduit.serving.metrics.NativeMetrics;
-import ai.konduit.serving.metrics.RegressionMetrics;
+import ai.konduit.serving.metrics.*;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
@@ -224,6 +222,27 @@ public class PipelineRouteDefiner {
                             }
 
                         }
+                        break;
+                    case CUSTOM_MULTI_LABEL:
+                        if(inferenceConfiguration.getServingConfig().getMetricsConfigurations() == null) {
+                            throw new IllegalStateException("Please specify classification labels to pair with regression metrics");
+                        }
+
+                        List<MetricsConfig> metricsConfigurations3 = inferenceConfiguration.getServingConfig().getMetricsConfigurations();
+                        for(MetricsConfig metricsConfig : metricsConfigurations3) {
+                            if(metricsConfig instanceof MultiLabelMetricsConfig) {
+                                MultiLabelMetricsConfig multiLabelMetricsConfig = (MultiLabelMetricsConfig) metricsConfig;
+                                if(multiLabelMetricsConfig.getLabels() == null || multiLabelMetricsConfig.getLabels().isEmpty()) {
+                                    throw new IllegalStateException("No  labels configured for the regression metrics configuration. Please specify labels.");
+                                }
+
+                                MultiLabelMetrics regressionMetrics = new MultiLabelMetrics(multiLabelMetricsConfig);
+                                regressionMetrics.bindTo(registry);
+                                metricsRenderers.add(regressionMetrics);
+                            }
+
+                        }
+
                         break;
 
                     case GPU:

@@ -28,6 +28,7 @@ import ai.konduit.serving.config.metrics.MetricsRenderer;
 import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import ai.konduit.serving.util.MetricRenderUtils;
 import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.ImmutableTag;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import lombok.Getter;
@@ -38,7 +39,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -57,7 +58,7 @@ public class RegressionMetrics implements MetricsRenderer {
     private RegressionMetricsConfig regressionMetricsConfig;
 
     public RegressionMetrics(RegressionMetricsConfig regressionMetricsConfig) {
-        this(regressionMetricsConfig, Collections.emptyList());
+        this(regressionMetricsConfig, Arrays.asList(new ImmutableTag("machinelearning","regression")));
     }
 
     public RegressionMetrics(RegressionMetricsConfig regressionMetricsConfig, Iterable<Tag> tags) {
@@ -71,6 +72,7 @@ public class RegressionMetrics implements MetricsRenderer {
     public void bindTo(MeterRegistry meterRegistry) {
         for(int i = 0; i < regressionMetricsConfig.getRegressionColumnLabels().size(); i++) {
             StatCounter statCounter = new StatCounter();
+            statCounters.add(statCounter);
             ColumnDistribution columnDistribution = regressionMetricsConfig.getColumnDistributions() != null &&
                     regressionMetricsConfig.getColumnDistributions().size() == regressionMetricsConfig.getRegressionColumnLabels().size() ?
                     regressionMetricsConfig.getColumnDistributions().get(i) : null;
@@ -144,26 +146,34 @@ public class RegressionMetrics implements MetricsRenderer {
 
     @Override
     public void updateMetrics(Object... args) {
-        if(args instanceof Record[]) {
-            Record[] records = (Record[]) args[0];
-            incrementClassificationCounters(records);
+        if(args[0] instanceof Record) {
+            Record records = (Record) args[0];
+            incrementRegressionCounters(new Record[]{records});
         }
-        else if(args instanceof INDArray[]) {
+        else if(args[0] instanceof Record[]) {
+            Record[] records = (Record[]) args[0];
+            incrementRegressionCounters(records);
+        }
+        else if(args[0] instanceof INDArray) {
+            INDArray output = (INDArray) args[0];
+            incrementRegressionCounters(new INDArray[] {output});
+        }
+        else if(args[0] instanceof INDArray[]) {
             INDArray[] output = (INDArray[]) args[0];
-            incrementClassificationCounters(output);
+            incrementRegressionCounters(output);
 
         }
     }
 
 
-    private void incrementClassificationCounters(INDArray[] outputs) {
+    private void incrementRegressionCounters(INDArray[] outputs) {
         synchronized (statCounters) {
             handleNdArray(outputs[0]);
         }
 
     }
 
-    private void incrementClassificationCounters(Record[] records) {
+    private void incrementRegressionCounters(Record[] records) {
         synchronized (statCounters) {
             NDArrayWritable ndArrayWritable = (NDArrayWritable) records[0].getRecord().get(0);
             handleNdArray(ndArrayWritable.get());
@@ -178,12 +188,15 @@ public class RegressionMetrics implements MetricsRenderer {
                 statCounters.get(i).add(output.getDouble(i));
             }
         }
-        else if(output.isMatrix()) {
+        else if(output.isMatrix() && output.length() > 1) {
             for(int i = 0; i < output.rows(); i++) {
                 for(int j = 0; j < output.columns(); j++) {
                     statCounters.get(i).add(output.getDouble(i,j));
                 }
             }
+        }
+        else if(output.isScalar()) {
+            statCounters.get(0).add(output.sumNumber().doubleValue());
         }
         else {
             throw new IllegalArgumentException("Only vectors and matrices supported right now");
