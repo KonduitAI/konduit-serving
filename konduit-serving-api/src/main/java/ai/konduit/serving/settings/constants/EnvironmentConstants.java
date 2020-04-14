@@ -18,6 +18,10 @@
 
 package ai.konduit.serving.settings.constants;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EnvironmentConstants {
     public static final String WORKING_DIR = "KONDUIT_WORKING_DIR";
     public static final String ENDPOINT_LOGS_DIR = "KONDUIT_ENDPOINT_LOGS_DIR";

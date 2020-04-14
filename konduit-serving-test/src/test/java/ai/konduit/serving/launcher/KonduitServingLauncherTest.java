@@ -23,7 +23,9 @@ import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.settings.constants.EnvironmentConstants;
+import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.util.ObjectMappers;
+import ch.qos.logback.core.joran.spi.JoranException;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -32,6 +34,7 @@ import org.datavec.image.loader.NativeImageLoader;
 import org.hamcrest.Matchers;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.shade.guava.collect.Streams;
 
@@ -124,6 +127,8 @@ public class KonduitServingLauncherTest {
 
     @Test(timeout = TIMEOUT)
     public void testServeBackgroundWorkflow() throws IOException, InterruptedException {
+        Nd4j.create(10, 10);
+
         // Running in foreground
         String configuration = testAndGetImageConfiguration();
         assertThat(runAndGetOutput("serve", "-id", TEST_SERVER_ID, "-c", configuration, "-b"),
@@ -160,12 +165,14 @@ public class KonduitServingLauncherTest {
     }
 
     @AfterClass
-    public static void afterClass() throws IOException, InterruptedException {
+    public static void afterClass() throws IOException, InterruptedException, JoranException {
         log.info("\n\nListing running servers. This should report no running servers. If there are any running servers they should be terminated manually." + "\n" +
                 "----------------------------------------------------------------------------" +
                 "\n\n" +
                 runAndGetOutput("list") + "\n" +
                 "----------------------------------------------------------------------------");
+
+        LogUtils.setLoggingFromClassPath(); // Resetting logging properties if it was modified by the KonduitServingLauncher commands.
     }
 
     private List<String> runAndTailOutput(Function<String, Boolean> predicate, String... command) throws IOException, InterruptedException {

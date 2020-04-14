@@ -26,7 +26,6 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
-import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.TensorDataType;
@@ -646,7 +645,7 @@ public class PipelineExecutioner implements Closeable {
 
     private void logTimings(long startTime) {
         long stopTime = System.nanoTime();
-        if (config.serving().isLogTimings()) {
+        if (config.getServingConfig().isLogTimings()) {
             long diff = stopTime - startTime;
             long millis = TimeUnit.NANOSECONDS.toMillis(diff);
             log.info("Post write response timing in ms " + millis);

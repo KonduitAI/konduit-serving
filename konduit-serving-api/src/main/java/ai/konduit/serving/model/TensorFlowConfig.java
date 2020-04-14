@@ -40,7 +40,7 @@ import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 @SuperBuilder
 public class TensorFlowConfig extends ModelConfig {
 
-    public final static String TENSORFLOW_EXECUTION_CONFIG_KEY = "tensorFlowConfig";
+    public static final String TENSORFLOW_EXECUTION_CONFIG_KEY = "tensorFlowConfig";
     private String configProtoPath;
     private SavedModelConfig savedModelConfig;
 

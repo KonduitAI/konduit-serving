@@ -31,6 +31,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +43,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ServingConfig implements TextConfig {
+public class ServingConfig implements Serializable, TextConfig {
 
     @Builder.Default
     private int httpPort = 0;

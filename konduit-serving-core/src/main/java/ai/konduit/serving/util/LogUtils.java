@@ -22,16 +22,22 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.joran.spi.JoranException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
+import org.nd4j.linalg.io.ClassPathResource;
 import org.slf4j.LoggerFactory;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
@@ -42,13 +48,17 @@ import java.util.Collections;
 import java.util.List;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LogUtils {
+
+    public static final String ROOT_LOGGER = Logger.ROOT_LOGGER_NAME;
+
     /**
      * Gets the file where the logs are.
      * @return the logs file.
      */
     public static File getEndpointLogsFile() {
-        Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        Logger rootLogger = (Logger) LoggerFactory.getLogger(ROOT_LOGGER);
         FileAppender<ILoggingEvent> fileAppender = (FileAppender<ILoggingEvent>) rootLogger.getAppender("FILE");
 
         if(fileAppender != null) {
@@ -93,8 +103,7 @@ public class LogUtils {
         File newLogsFile = new File(Fetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE);
 
         if(!newLogsFile.equals(previousLogsFile)) {
-            ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)
-                    org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+            Logger rootLogger = (Logger) LoggerFactory.getLogger(ROOT_LOGGER);
 
             LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
 
@@ -123,7 +132,7 @@ public class LogUtils {
      * Sets the appenders for command line.
      */
     public static void setAppendersForCommandLine() {
-        Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        Logger rootLogger = (Logger) LoggerFactory.getLogger(ROOT_LOGGER);
 
         LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
 
@@ -158,7 +167,7 @@ public class LogUtils {
 
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
 
-        Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        Logger rootLogger = (Logger) LoggerFactory.getLogger(ROOT_LOGGER);
 
         rootLogger.detachAndStopAllAppenders();
 
@@ -218,7 +227,7 @@ public class LogUtils {
         }
     }
 
-    public static File getZippedLogs() throws Exception {
+    public static File getZippedLogs() throws ArchiveException, IOException {
         File zippedFile = new File(Fetcher.getEndpointLogsDir(), "logs.zip");
 
         try (BufferedOutputStream archiveStream = new BufferedOutputStream(new FileOutputStream(zippedFile))) {
@@ -241,5 +250,16 @@ public class LogUtils {
         }
 
         return zippedFile;
+    }
+
+    public static void setLoggingFromClassPath() throws IOException, JoranException {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+        loggerContext.reset();
+        JoranConfigurator configurator = new JoranConfigurator();
+        try(InputStream configStream = new ClassPathResource("logback.xml").getInputStream()){
+            configurator.setContext(loggerContext);
+            configurator.doConfigure(configStream); // loads logback file
+        }
     }
 }

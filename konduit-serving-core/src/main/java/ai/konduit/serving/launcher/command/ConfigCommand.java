@@ -25,7 +25,6 @@ import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
-import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Option;
@@ -58,14 +57,16 @@ import java.util.List;
 @Slf4j
 public class ConfigCommand extends DefaultCommand {
 
+    public static final String DEFAULT = "default";
+
     private enum ConfigType {
-        image,
-        python,
-        tensorflow,
-        onnx,
-        pmml,
-        dl4j,
-        keras
+        IMAGE,
+        PYTHON,
+        TENSORFLOW,
+        ONNX,
+        PMML,
+        DL4J,
+        KERAS
     }
 
     private String types;
@@ -104,31 +105,31 @@ public class ConfigCommand extends DefaultCommand {
     }
 
     @Override
-    public void run() throws CLIException {
+    public void run() {
         List<PipelineStep> pipelineSteps = new ArrayList<>();
 
         for (String type : types.split(",")) {
             try {
                 switch (ConfigType.valueOf(type.trim())) {
-                    case image:
+                    case IMAGE:
                         pipelineSteps.add(image());
                         break;
-                    case python:
+                    case PYTHON:
                         pipelineSteps.add(python());
                         break;
-                    case tensorflow:
+                    case TENSORFLOW:
                         pipelineSteps.add(tensorflow());
                         break;
-                    case onnx:
+                    case ONNX:
                         pipelineSteps.add(onnx());
                         break;
-                    case pmml:
+                    case PMML:
                         pipelineSteps.add(pmml());
                         break;
-                    case dl4j:
+                    case DL4J:
                         pipelineSteps.add(dl4j());
                         break;
-                    case keras:
+                    case KERAS:
                         pipelineSteps.add(keras());
                         break;
                     default:
@@ -155,16 +156,16 @@ public class ConfigCommand extends DefaultCommand {
 
     private PipelineStep<ImageLoadingStep> image() {
         return ImageLoadingStep.builder()
-                .inputName("default")
-                .outputName("default")
+                .inputName(DEFAULT)
+                .outputName(DEFAULT)
                 .build();
     }
 
     private PipelineStep<PythonStep> python() {
         return PythonStep.builder()
-                .inputName("default")
-                .outputName("default")
-                .pythonConfig("default",
+                .inputName(DEFAULT)
+                .outputName(DEFAULT)
+                .pythonConfig(DEFAULT,
                         PythonConfig.builder()
                                 .pythonInput("x1", PythonType.TypeName.NDARRAY.name())
                                 .pythonInput("x2", PythonType.TypeName.NDARRAY.name())
@@ -179,14 +180,14 @@ public class ConfigCommand extends DefaultCommand {
 
     private PipelineStep<ModelStep> tensorflow() {
         return ModelStep.builder()
-                .inputName("default")
-                .outputName("default")
+                .inputName(DEFAULT)
+                .outputName(DEFAULT)
                 .modelConfig(
                         TensorFlowConfig.builder()
                                 .modelConfigType(ModelConfigType.tensorFlow("<path-to-the-tensorflow-model>"))
                                 .tensorDataTypesConfig(TensorDataTypesConfig.builder()
-                                        .inputDataType("default", TensorDataType.FLOAT)
-                                        .outputDataType("default", TensorDataType.FLOAT)
+                                        .inputDataType(DEFAULT, TensorDataType.FLOAT)
+                                        .outputDataType(DEFAULT, TensorDataType.FLOAT)
                                         .build())
                                 .build()
                 )
@@ -195,8 +196,8 @@ public class ConfigCommand extends DefaultCommand {
 
     private PipelineStep<ModelStep> onnx() {
         return ModelStep.builder()
-                .inputName("default")
-                .outputName("default")
+                .inputName(DEFAULT)
+                .outputName(DEFAULT)
                 .modelConfig(
                         OnnxConfig.builder()
                                 .modelConfigType(ModelConfigType.onnx("<path-to-the-onnx-model>"))
@@ -206,8 +207,8 @@ public class ConfigCommand extends DefaultCommand {
 
     private PipelineStep<ModelStep> pmml() {
         return ModelStep.builder()
-                .inputName("default")
-                .outputName("default")
+                .inputName(DEFAULT)
+                .outputName(DEFAULT)
                 .modelConfig(
                         PmmlConfig.builder()
                                 .modelConfigType(ModelConfigType.pmml("<path-to-the-pmml-model"))
@@ -218,8 +219,8 @@ public class ConfigCommand extends DefaultCommand {
 
     private PipelineStep<ModelStep> dl4j() {
         return ModelStep.builder()
-                .inputName("default")
-                .outputName("default")
+                .inputName(DEFAULT)
+                .outputName(DEFAULT)
                 .modelConfig(
                         DL4JConfig.builder()
                                 .modelConfigType(ModelConfigType.dl4j("<path-to-the-dl4j-model"))
@@ -230,8 +231,8 @@ public class ConfigCommand extends DefaultCommand {
 
     private PipelineStep<ModelStep> keras() {
         return ModelStep.builder()
-                .inputName("default")
-                .outputName("default")
+                .inputName(DEFAULT)
+                .outputName(DEFAULT)
                 .modelConfig(
                         KerasConfig.builder()
                                 .modelConfigType(ModelConfigType.keras("<path-to-the-keras-model"))

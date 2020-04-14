@@ -18,6 +18,10 @@
 
 package ai.konduit.serving.settings.constants;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Constants {
     public static final String DEFAULT_WORKING_BASE_DIR_NAME = ".konduit-serving";
     public static final String DEFAULT_ENDPOINT_LOGS_DIR_NAME = "endpoint_logs";

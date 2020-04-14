@@ -63,17 +63,4 @@ public class InferenceConfiguration implements Serializable, TextConfig {
     public static InferenceConfiguration fromJson(String json) {
         return ObjectMappers.fromJson(json, InferenceConfiguration.class);
     }
-
-    /**
-     * Returns a serving configuration if one is defined
-     * or creates a new one if it doesn't exist
-     *
-     * @return the initialized or cached {@link ServingConfig}
-     */
-    public ServingConfig serving() {
-        if (servingConfig == null)
-            servingConfig = ServingConfig.builder().build();
-        return servingConfig;
-    }
-
 }

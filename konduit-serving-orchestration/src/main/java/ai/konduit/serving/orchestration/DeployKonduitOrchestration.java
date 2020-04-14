@@ -63,7 +63,7 @@ public class DeployKonduitOrchestration {
         setProperty(DISABLE_CP_RESOLVING_PROP_NAME, Boolean.TRUE.toString());
     }
 
-    public final static String NODE_COMMUNICATION_TOPIC = "NodeCommunication";
+    public static final String NODE_COMMUNICATION_TOPIC = "NodeCommunication";
 
     public static void deployInferenceClustered(DeploymentOptions deploymentOptions, Handler<AsyncResult<InferenceConfiguration>> eventHandler) {
         deployInferenceClustered(new VertxOptions().setMaxEventLoopExecuteTime(120).setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS),
