@@ -209,7 +209,7 @@ public class ServeCommand extends DefaultCommand {
         try {
             builder.command(cmd); // Setting the builder command
             if (redirect) {
-                try(BufferedReader reader =  new BufferedReader(new InputStreamReader(builder.command(cmd).start().getInputStream()))) {
+                try(BufferedReader reader = new BufferedReader(new InputStreamReader(builder.command(cmd).start().getInputStream()))) {
 
                     String line;
                     while (!Thread.currentThread().isInterrupted()) {
@@ -220,6 +220,8 @@ public class ServeCommand extends DefaultCommand {
                             out.println(line);
                         }
                     }
+                } catch (InterruptedException interruptedException) {
+                    log.error("Killing server ({}) process...", id);
                 }
             } else {
                 String commandLinePrefix = ((KonduitServingLauncher) executionContext.launcher()).commandLinePrefix();

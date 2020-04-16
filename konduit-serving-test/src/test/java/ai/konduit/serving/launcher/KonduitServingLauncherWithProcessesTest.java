@@ -34,6 +34,7 @@ import org.datavec.image.loader.NativeImageLoader;
 import org.hamcrest.Matchers;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
+import org.junit.rules.Timeout;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.shade.guava.collect.Streams;
@@ -45,6 +46,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -54,13 +56,15 @@ import static org.junit.Assert.assertThat;
 
 @Slf4j
 @NotThreadSafe
-public class KonduitServingLauncherTest {
+public class KonduitServingLauncherWithProcessesTest {
 
-    private static final int TIMEOUT = 120000;
     private static final String TEST_SERVER_ID = "konduit_serving_test_server";
     private static final String konduit_classpath = System.getProperty("konduit.test.class.path");
     private static final String system_classpath = System.getProperty("java.class.path");
     private static final String classpath = konduit_classpath == null ? system_classpath : konduit_classpath;
+
+    @Rule
+    public Timeout timeout = new Timeout(120, TimeUnit.SECONDS);
 
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -75,7 +79,7 @@ public class KonduitServingLauncherTest {
         stopAllProcesses();
     }
 
-    @Test(timeout = TIMEOUT)
+    @Test
     public void testMainHelpAndVersion() throws IOException, InterruptedException {
         String output = runAndGetOutput("--help"); // Testing with '--help'
         assertThat(output, Matchers.containsString("Usage: konduit [COMMAND] [OPTIONS] [arg...]"));
@@ -90,7 +94,7 @@ public class KonduitServingLauncherTest {
         assertThat(output, Matchers.stringContainsInOrder(getMainCommandNames()));
 
         Properties gitProperties = new Properties();
-        gitProperties.load(new ClassPathResource("META-INF/git.properties").getInputStream());
+        gitProperties.load(new ClassPathResource("META-INF/konduit-serving-core-git.properties").getInputStream());
 
         String matcherString = String.format("Konduit serving version: %s\nCommit hash: %s",
                 gitProperties.getProperty("git.build.version"),
@@ -100,7 +104,7 @@ public class KonduitServingLauncherTest {
         assertThat(runAndGetOutput("--version"), Matchers.containsString(matcherString));
     }
 
-    @Test(timeout = TIMEOUT)
+    @Test
     public void testServeForegroundWorkflow() throws IOException, InterruptedException {
         // Running in foreground
         List<String> logs = runAndTailOutput(this::serverStartLogInLine, "serve", "-id", TEST_SERVER_ID, "-c", testAndGetImageConfiguration());
@@ -125,7 +129,7 @@ public class KonduitServingLauncherTest {
         assertEquals(new NativeImageLoader().asMatrix(imagePath), ndArrayOutput.getNdArray());
     }
 
-    @Test(timeout = TIMEOUT)
+    @Test
     public void testServeBackgroundWorkflow() throws IOException, InterruptedException {
         Nd4j.create(10, 10);
 

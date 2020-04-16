@@ -24,6 +24,7 @@ import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.PmmlStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
@@ -47,12 +48,12 @@ import java.util.List;
 @Description("This command is a utility to create json configurations that can be consumed to start konduit servers.\n\n" +
         "Example usages:\n" +
         "--------------\n" +
-        "- Prints 'tensorflow' config in pretty format:\n" +
-        "$ konduit config -t tensorflow\n\n" +
-        "- Prints 'image + dl4j' config in minified format:\n" +
-        "$ konduit config -t image,dl4j -m\n\n" +
-        "- Saves 'image + dl4j' config in a 'config.json' file:\n" +
-        "$ konduit config -t image,dl4j -o config.json\n" +
+        "- Prints 'TENSORFLOW' config in pretty format:\n" +
+        "$ konduit config -t TENSORFLOW\n\n" +
+        "- Prints 'IMAGE + DL4J' config in minified format:\n" +
+        "$ konduit config -t IMAGE,Dl4J -m\n\n" +
+        "- Saves 'IMAGE + DL4J' config in a 'config.json' file:\n" +
+        "$ konduit config -t IMAGE,Dl4J -o config.json\n" +
         "--------------")
 @Slf4j
 public class ConfigCommand extends DefaultCommand {
@@ -110,7 +111,7 @@ public class ConfigCommand extends DefaultCommand {
 
         for (String type : types.split(",")) {
             try {
-                switch (ConfigType.valueOf(type.trim())) {
+                switch (ConfigType.valueOf(type.toUpperCase().trim())) {
                     case IMAGE:
                         pipelineSteps.add(image());
                         break;
@@ -206,7 +207,7 @@ public class ConfigCommand extends DefaultCommand {
     }
 
     private PipelineStep<ModelStep> pmml() {
-        return ModelStep.builder()
+        return PmmlStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
                 .modelConfig(
@@ -243,11 +244,11 @@ public class ConfigCommand extends DefaultCommand {
 
     private void printOrSave(String output) {
         if(outputFile == null) {
-            log.info(output);
+            out.println(output);
         } else {
             try {
                 FileUtils.writeStringToFile(outputFile, output, StandardCharsets.UTF_8);
-                log.info("Config file created successfully at {}", outputFile.getAbsolutePath());
+                out.format("Config file created successfully at %s%n", outputFile.getAbsolutePath());
             } catch (IOException exception) {
                 log.error("Unable to save configuration file to {}", outputFile.getAbsolutePath(), exception);
             }

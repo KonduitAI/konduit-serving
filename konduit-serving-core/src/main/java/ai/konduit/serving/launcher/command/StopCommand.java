@@ -84,7 +84,7 @@ public class StopCommand extends DefaultCommand {
 
         if(!isProcessExists(id)) {
             out.println(String.format("No konduit server exists with an id: '%s'.", id));
-            System.exit(0);
+            return;
         }
 
         out.println("Stopping konduit server '" + id + "'");
@@ -140,7 +140,7 @@ public class StopCommand extends DefaultCommand {
 
             int result = process.waitFor();
             out.println("Application '" + id + "' terminated with status " + result);
-            if (!redeploy) {
+            if (!redeploy && result != 0) {
                 // We leave the application using the same exit code.
                 ExecUtils.exit(result);
             }

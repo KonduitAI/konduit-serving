@@ -29,8 +29,6 @@ import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.AnsiConsole;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -39,21 +37,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.fusesource.jansi.Ansi.ansi;
-
 @Slf4j
 @Name(value = "list", priority = 1)
 @Summary("Lists the running konduit servers.")
 @Description("List all konduit servers launched through the `serve` command.")
 public class ListCommand extends DefaultCommand {
 
-    static {
-        AnsiConsole.systemInstall();
-        Runtime.getRuntime().addShutdownHook(new Thread(AnsiConsole::systemUninstall));
-    }
-
-    private final static Pattern PS = Pattern.compile("-Dserving.id=(.*)\\s*");
-    private final static Pattern ST = Pattern.compile("\\s+-s\\s+(.*)\\s*|\\s+--service\\s+(.*)\\s*");
+    private static final Pattern PS = Pattern.compile("-Dserving.id=(.*)\\s*");
+    private static final Pattern ST = Pattern.compile("\\s+-s\\s+(.*)\\s*|\\s+--service\\s+(.*)\\s*");
 
     // Note about stack traces - the stack trace are printed on the stream passed to the command.
 
@@ -101,9 +92,7 @@ public class ListCommand extends DefaultCommand {
             if (matcher.find()) {
                 index++;
                 if(none) {
-                    out.print(ansi().a(Ansi.Attribute.UNDERLINE).bold());
                     out.format(printFormat, "#", "ID", "TYPE", "URL", "PID", "STATUS");
-                    out.print(ansi().a(Ansi.Attribute.RESET));
                 }
 
                 String id = matcher.group(1).trim().split(" ")[0];
@@ -135,9 +124,7 @@ public class ListCommand extends DefaultCommand {
             hostAndPort = String.format("%s:%s", servingConfig.getListenHost(), servingConfig.getHttpPort());
             status = "started";
         } catch (IOException exception) {
-            if(!(exception instanceof FileNotFoundException)) {
-                log.error("Error occurred while reading server configuration file\n", exception);
-            }
+            log.error("Error occurred while reading server configuration file\n", exception);
         }
 
         out.format(printFormat, index, id, getServiceType(line), hostAndPort, pid, status);

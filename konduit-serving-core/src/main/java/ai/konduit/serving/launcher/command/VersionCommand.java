@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.Scanner;
 
 @Name(value = "version", priority = 1)
 @Summary("Displays konduit-serving version.")
@@ -52,9 +51,9 @@ public class VersionCommand extends DefaultCommand {
         if (version != null) {
             return version;
         }
-        try (InputStream is = VersionCommand.class.getClassLoader().getResourceAsStream("META-INF/git.properties")) {
+        try (InputStream is = VersionCommand.class.getClassLoader().getResourceAsStream("META-INF/konduit-serving-core-git.properties")) {
             if (is == null) {
-                throw new IllegalStateException("Cannot find git.properties on classpath");
+                throw new IllegalStateException("Cannot find konduit-serving-core-git.properties on classpath");
             }
             Properties gitProperties = new Properties();
             gitProperties.load(is);

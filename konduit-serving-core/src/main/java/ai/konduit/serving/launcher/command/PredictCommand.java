@@ -28,7 +28,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.launcher.DefaultCommand;
@@ -44,6 +43,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static ai.konduit.serving.launcher.LauncherUtils.getPidFromServerId;
 
@@ -104,7 +104,7 @@ public class PredictCommand extends DefaultCommand {
     }
 
     @Override
-    public void run() throws CLIException {
+    public void run() {
         if(LauncherUtils.isProcessExists(id)) {
             try {
                 InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(
@@ -118,12 +118,15 @@ public class PredictCommand extends DefaultCommand {
                                 inferenceConfiguration.getServingConfig().getListenHost(),
                                 String.format("/%s/%s", predictionType, inputDataFormat));
 
+
+                CountDownLatch countDownLatch = new CountDownLatch(1);
+
                 Handler<AsyncResult<HttpResponse<Buffer>>> responseHandler = handler -> {
                     boolean failed = false;
                     if(handler.succeeded()) {
                         String body = handler.result().bodyAsString();
                         if(body == null) {
-                            out.format("Failed request.\nExecute '%s logs %s' to find the cause.\n",
+                            out.format("Failed request.%nExecute '%s logs %s' to find the cause.%n",
                                     ((KonduitServingLauncher) executionContext.launcher()).commandLinePrefix(),
                                     id);
                             failed = true;
@@ -140,7 +143,7 @@ public class PredictCommand extends DefaultCommand {
                     if(failed) {
                         System.exit(1);
                     } else {
-                        System.exit(0);
+                        countDownLatch.countDown();
                     }
                 };
 
@@ -156,7 +159,7 @@ public class PredictCommand extends DefaultCommand {
                     request.sendJsonObject(jsonData, responseHandler);
                 } else {
                     String[] filePaths = data.split(",");
-                    List<String> inputNames = inferenceConfiguration.getSteps().get(0).getInputNames();
+                    List inputNames = inferenceConfiguration.getSteps().get(0).getInputNames();
 
                     MultipartForm multipartForm = MultipartForm.create();
 
@@ -173,13 +176,15 @@ public class PredictCommand extends DefaultCommand {
                             System.exit(1);
                         }
 
-                        multipartForm.binaryFileUpload(inputNames.get(i),
+                        multipartForm.binaryFileUpload((String) inputNames.get(i),
                                 Paths.get(filePaths[i]).getFileName().toString(),
                                 filePaths[i],
                                 "application/x-binary");
                     }
 
                     request.sendMultipartForm(multipartForm, responseHandler);
+
+                    countDownLatch.await();
                 }
             } catch (Exception exception) {
                 log.error("Failed to read configuration file", exception);
