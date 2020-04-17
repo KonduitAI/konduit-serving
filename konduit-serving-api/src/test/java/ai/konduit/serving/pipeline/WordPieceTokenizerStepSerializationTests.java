@@ -28,9 +28,10 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-public class WordPiecePipelineStepTests
+public class WordPieceTokenizerStepSerializationTests
 {
     protected static InferenceConfiguration config;
+
     @BeforeClass
     public static void initialize() throws Exception
     {
