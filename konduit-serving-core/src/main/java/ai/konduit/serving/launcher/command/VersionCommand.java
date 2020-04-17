@@ -18,7 +18,6 @@
 
 package ai.konduit.serving.launcher.command;
 
-import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
@@ -38,7 +37,7 @@ public class VersionCommand extends DefaultCommand {
     private static String version;
 
     @Override
-    public void run() throws CLIException {
+    public void run() {
         out.println(getVersion());
     }
 
@@ -57,9 +56,10 @@ public class VersionCommand extends DefaultCommand {
             }
             Properties gitProperties = new Properties();
             gitProperties.load(is);
-            return version = String.format("Konduit serving version: %s\nCommit hash: %s",
+            version = String.format("Konduit serving version: %s%nCommit hash: %s",
                     gitProperties.getProperty("git.build.version"),
                     gitProperties.getProperty("git.commit.id").substring(0, 8));
+            return version;
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage());
         }

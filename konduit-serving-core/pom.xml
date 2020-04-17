@@ -50,7 +50,7 @@
                 <configuration>
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
                     <generateGitPropertiesFilename>
-                        src/main/resources/META-INF/git.properties
+                        src/main/resources/META-INF/konduit-serving-core-git.properties
                     </generateGitPropertiesFilename>
                     <gitDescribe>
                         <skip>true</skip>
