@@ -82,7 +82,7 @@ public class PredictCommand extends DefaultCommand {
     }
 
     @Option(longName = "input-type", shortName = "it")
-    @Description("Input type. Choices are: [NUMPY,JSON,ND4J,IMAGE,ARROW]")
+    @Description("Input type. Choices are: [NUMPY,JSON,ND4J,IMAGE,ARROW]. Default is: 'JSON'")
     public void setInputType(String inputType) {
         try {
         inputDataFormat = Input.DataFormat.valueOf(inputType);
@@ -93,7 +93,7 @@ public class PredictCommand extends DefaultCommand {
     }
 
     @Option(longName = "prediction-type", shortName = "pt")
-    @Description("Prediction type. Choices are: [CLASSIFICATION,YOLO,SSD,RCNN,RAW,REGRESSION]")
+    @Description("Prediction type. Choices are: [CLASSIFICATION,YOLO,SSD,RCNN,RAW,REGRESSION]. Default is: 'RAW'")
     public void setPredictionType(String predictionType) {
         try {
             this.predictionType = Output.PredictionType.valueOf(predictionType);

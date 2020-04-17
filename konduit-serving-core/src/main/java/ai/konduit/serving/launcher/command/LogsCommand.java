@@ -65,7 +65,6 @@ public class LogsCommand extends DefaultCommand {
 
             if (follow) {
                 try(BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(logsFile)))) {
-
                     String line;
                     while (!Thread.currentThread().isInterrupted()) {
                         line = reader.readLine();
@@ -75,6 +74,8 @@ public class LogsCommand extends DefaultCommand {
                             out.println(line);
                         }
                     }
+                } catch (InterruptedException interruptedException) {
+                    log.error("Interrupting...");
                 }
             } else {
                 out.println(FileUtils.readFileToString(logsFile, StandardCharsets.UTF_8));

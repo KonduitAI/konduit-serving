@@ -212,7 +212,7 @@ public class ConfigCommand extends DefaultCommand {
                 .outputName(DEFAULT)
                 .modelConfig(
                         PmmlConfig.builder()
-                                .modelConfigType(ModelConfigType.pmml("<path-to-the-pmml-model"))
+                                .modelConfigType(ModelConfigType.pmml("<path-to-the-pmml-model>"))
                                 .build()
                 )
                 .build();
@@ -224,7 +224,7 @@ public class ConfigCommand extends DefaultCommand {
                 .outputName(DEFAULT)
                 .modelConfig(
                         DL4JConfig.builder()
-                                .modelConfigType(ModelConfigType.dl4j("<path-to-the-dl4j-model"))
+                                .modelConfigType(ModelConfigType.dl4j("<path-to-the-dl4j-model>"))
                                 .build()
                 )
                 .build();
@@ -236,7 +236,7 @@ public class ConfigCommand extends DefaultCommand {
                 .outputName(DEFAULT)
                 .modelConfig(
                         KerasConfig.builder()
-                                .modelConfigType(ModelConfigType.keras("<path-to-the-keras-model"))
+                                .modelConfigType(ModelConfigType.keras("<path-to-the-keras-model>"))
                                 .build()
                 )
                 .build();

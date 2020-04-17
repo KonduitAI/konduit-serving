@@ -100,7 +100,7 @@ public class KonduitServingLauncherWithoutProcessesTest {
         Properties gitProperties = new Properties();
         gitProperties.load(new ClassPathResource("META-INF/konduit-serving-core-git.properties").getInputStream());
 
-        String matcherString = String.format("Konduit serving version: %s\nCommit hash: %s",
+        String matcherString = String.format("Konduit serving version: %s%nCommit hash: %s",
                 gitProperties.getProperty("git.build.version"),
                 gitProperties.getProperty("git.commit.id").substring(0, 8));
 
@@ -132,7 +132,7 @@ public class KonduitServingLauncherWithoutProcessesTest {
         String imagePath = new ClassPathResource("/data/5_32x32.png").getFile().getAbsolutePath();
 
         String predictionOutput = runAndGetOutput("predict", "-it", "IMAGE", TEST_SERVER_ID, imagePath);
-        JsonObject outputJson = new JsonObject(predictionOutput.substring(predictionOutput.indexOf("{")));
+        JsonObject outputJson = new JsonObject(predictionOutput.substring(predictionOutput.indexOf("{"), predictionOutput.lastIndexOf("}") + 1));
 
         NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(outputJson.getJsonObject("default").encode(), NDArrayOutput.class);
 
@@ -171,7 +171,7 @@ public class KonduitServingLauncherWithoutProcessesTest {
         String imagePath = new ClassPathResource("/data/5_32x32.png").getFile().getAbsolutePath();
 
         String predictionOutput = runAndGetOutput("predict", "-it", "IMAGE", TEST_SERVER_ID, imagePath);
-        JsonObject outputJson = new JsonObject(predictionOutput.substring(predictionOutput.indexOf("{")));
+        JsonObject outputJson = new JsonObject(predictionOutput.substring(predictionOutput.indexOf("{"), predictionOutput.lastIndexOf("}") + 1));
 
         NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(outputJson.getJsonObject("default").encode(), NDArrayOutput.class);
 

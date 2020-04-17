@@ -96,7 +96,7 @@ public class KonduitServingLauncherWithProcessesTest {
         Properties gitProperties = new Properties();
         gitProperties.load(new ClassPathResource("META-INF/konduit-serving-core-git.properties").getInputStream());
 
-        String matcherString = String.format("Konduit serving version: %s\nCommit hash: %s",
+        String matcherString = String.format("Konduit serving version: %s%nCommit hash: %s",
                 gitProperties.getProperty("git.build.version"),
                 gitProperties.getProperty("git.commit.id").substring(0, 8));
 
