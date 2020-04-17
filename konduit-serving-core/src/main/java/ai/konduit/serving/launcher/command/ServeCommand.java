@@ -198,6 +198,7 @@ public class ServeCommand extends DefaultCommand {
         } else if (isLaunchedAsFatJar()) {
             ExecUtils.addArgument(cmd, "-jar");
             ExecUtils.addArgument(cmd, CommandLineUtils.getJar());
+            ExecUtils.addArgument(cmd, "run");
         } else {
             // probably a `vertx` command line usage, or in IDE.
             ExecUtils.addArgument(cmd, CommandLineUtils.getFirstSegmentOfCommand());
@@ -207,6 +208,7 @@ public class ServeCommand extends DefaultCommand {
         cliArguments.forEach(arg -> ExecUtils.addArgument(cmd, arg));
 
         try {
+            log.info("INFO: Running command {}", String.join(" ", cmd));
             builder.command(cmd); // Setting the builder command
             if (redirect) {
                 try(BufferedReader reader = new BufferedReader(new InputStreamReader(builder.command(cmd).start().getInputStream()))) {
