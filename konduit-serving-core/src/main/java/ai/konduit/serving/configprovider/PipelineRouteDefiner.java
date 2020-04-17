@@ -704,20 +704,23 @@ public class PipelineRouteDefiner {
 
 
     private void initializeSchemas(InferenceConfiguration inferenceConfiguration, boolean inputRequired) {
+
+        List<PipelineStep> pipelineSteps = inferenceConfiguration.getSteps();
+
         if (inputSchema == null && inputRequired) {
-            PipelineStep pipelineStep = inferenceConfiguration.getSteps().get(0);
+            Object pipelineStep = pipelineSteps.get(0);
             if (pipelineStep instanceof ModelStep || pipelineStep instanceof PythonStep || pipelineStep
                     instanceof TransformProcessStep || pipelineStep instanceof WordPieceTokenizerStep) {
-                inputSchema = pipelineStep.inputSchemaForName("default");
+                inputSchema = inferenceConfiguration.getSteps().get(0).inputSchemaForName("default");
             }
         }
 
         if (outputSchema == null) {
-            List<PipelineStep> pipelineSteps = inferenceConfiguration.getSteps();
-            PipelineStep pipelineStep = pipelineSteps.get(pipelineSteps.size() - 1);
+            Integer lastIndex = pipelineSteps.size() - 1;
+            Object pipelineStep = pipelineSteps.get(lastIndex);
             if (pipelineStep instanceof ModelStep || pipelineStep instanceof PythonStep || pipelineStep
                     instanceof TransformProcessStep || pipelineStep instanceof WordPieceTokenizerStep) {
-                outputSchema = pipelineStep.outputSchemaForName("default");
+                outputSchema = pipelineSteps.get(lastIndex).outputSchemaForName("default");
             }
         }
     }
