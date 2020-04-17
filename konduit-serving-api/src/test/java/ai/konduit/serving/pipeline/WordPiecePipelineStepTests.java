@@ -45,19 +45,16 @@ public class WordPiecePipelineStepTests
     @Test
     public void testWorkPieceStepJsonSanity() throws Exception
     {
-        System.out.println("testWorkPieceStepJsonSanity");
         assertEquals(config, InferenceConfiguration.fromJson(config.toJson()));
     }
     @Test
     public void testWorkPieceStepYamlSanity() throws Exception
     {
-        System.out.println("testWorkPieceStepYamlSanity");
         assertEquals(config, InferenceConfiguration.fromYaml(config.toYaml()));
     }
     @Test
     public void testWorkPieceStepConfig() throws Exception
     {
-        System.out.println("testWorkPieceStepConfig");
         WordPieceTokenizerStep wordConfig = WordPieceTokenizerStep.builder()
                 .sentenceMaxLen(150)
                 .vocabPath("sample.txt")
