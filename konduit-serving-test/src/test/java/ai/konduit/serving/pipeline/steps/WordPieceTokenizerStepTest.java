@@ -59,7 +59,7 @@ public class WordPieceTokenizerStepTest
                 .vocabPath(classPathResource.getFile().getAbsolutePath())
                 .sentenceMaxLen(100)
                 .inputName("default")
-                .inputSchema("default", Collections.singletonList(SchemaType.NDArray))
+                .inputSchema("default", Collections.singletonList(SchemaType.String))
                 .inputColumnName("default", Collections.singletonList("first"))
                 .outputSchema("default", Collections.singletonList(SchemaType.NDArray))
                 .outputColumnName("default", Collections.singletonList("first"))
