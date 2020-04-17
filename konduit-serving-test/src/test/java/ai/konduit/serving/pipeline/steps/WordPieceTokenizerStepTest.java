@@ -83,6 +83,17 @@ public class WordPieceTokenizerStepTest
         assertEquals(inferenceConfiguration,InferenceConfiguration.fromJson(inferenceConfiguration.toJson()));
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testInvalidVocabPath() throws Exception
+    {
+        WordPieceTokenizerStep invalidStep = WordPieceTokenizerStep.builder()
+                .vocabPath("sample/path/vocab.txt")
+                .sentenceMaxLen(100)
+                .build();
+
+        WordPieceTokenizerStepRunner step = new WordPieceTokenizerStepRunner(invalidStep);
+    }
+
     @Test
     public void testWordPieceStepInference() throws Exception
     {

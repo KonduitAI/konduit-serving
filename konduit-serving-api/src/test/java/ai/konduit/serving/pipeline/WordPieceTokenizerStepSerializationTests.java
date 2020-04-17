@@ -22,37 +22,68 @@
 package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.InferenceConfiguration;
+import ai.konduit.serving.config.Input;
+import ai.konduit.serving.config.Output;
 import ai.konduit.serving.pipeline.step.WordPieceTokenizerStep;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 public class WordPieceTokenizerStepSerializationTests
 {
     protected static InferenceConfiguration config;
+    protected static WordPieceTokenizerStep wordPieceTokenizerStep;
 
     @BeforeClass
     public static void initialize() throws Exception
     {
-        WordPieceTokenizerStep wordConfig = WordPieceTokenizerStep.builder()
+        wordPieceTokenizerStep = WordPieceTokenizerStep.builder()
                 .sentenceMaxLen(256)
                 .vocabPath("bert-base-uncased-vocab.txt")
                 .build();
+
         config = InferenceConfiguration.builder()
-                .step(wordConfig)
+                .step(wordPieceTokenizerStep)
                 .build();
     }
     @Test
-    public void testWorkPieceStepJsonSanity() throws Exception
+    public void testWordPieceStepJsonSanity() throws Exception
     {
         assertEquals(config, InferenceConfiguration.fromJson(config.toJson()));
     }
+
     @Test
-    public void testWorkPieceStepYamlSanity() throws Exception
+    public void testWordPieceStepYamlSanity() throws Exception
     {
         assertEquals(config, InferenceConfiguration.fromYaml(config.toYaml()));
     }
+
+    @Test
+    public void testWordPieceFromJson()
+    {
+        assertNotNull(WordPieceTokenizerStep.fromJson(wordPieceTokenizerStep.toJson()));
+    }
+
+    @Test
+    public void testWordPieceFromYaml()
+    {
+        assertNotNull(WordPieceTokenizerStep.fromYaml(wordPieceTokenizerStep.toYaml()));
+    }
+
+    @Test
+    public void testWordPieceValidInputType()
+    {
+        assertEquals(Input.DataFormat.JSON, wordPieceTokenizerStep.validInputTypes()[0]);
+    }
+
+    @Test
+    public void testWordPieceValidOutputType()
+    {
+        assertEquals(Output.DataFormat.NUMPY, wordPieceTokenizerStep.validOutputTypes()[0]);
+    }
+
     @Test
     public void testWorkPieceStepConfig() throws Exception
     {
@@ -60,6 +91,7 @@ public class WordPieceTokenizerStepSerializationTests
                 .sentenceMaxLen(150)
                 .vocabPath("sample.txt")
                 .build();
+
         InferenceConfiguration anotherConfig = InferenceConfiguration.builder()
                 .step(wordConfig)
                 .build();
