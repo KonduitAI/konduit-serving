@@ -31,6 +31,8 @@ import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.util.PortUtils;
 import ch.qos.logback.core.joran.spi.JoranException;
+import com.jayway.restassured.response.Response;
+import com.mashape.unirest.http.Unirest;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.image.loader.NativeImageLoader;
@@ -44,11 +46,13 @@ import org.nd4j.linalg.io.ClassPathResource;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.ConnectException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.*;
 
 @Slf4j
@@ -218,7 +222,14 @@ public class KonduitServingLauncherWithoutProcessesTest {
         boolean isServerStarted = false;
         while(!runCommandThread.isInterrupted()) {
             Thread.sleep(2000);
-            isServerStarted = !PortUtils.isPortAvailable(port);
+
+            try {
+                Response response = given().port(port).get("/config").andReturn();
+                isServerStarted = response.statusCode() == 200;
+            } catch (Exception exception) {
+                log.info("Unable to connect to the server. Trying again...");
+            }
+
             if(isServerStarted) {
                 break;
             }
