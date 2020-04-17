@@ -96,7 +96,7 @@
         <slf4j.version>1.7.26</slf4j.version>
         <junit.version>4.12</junit.version>
         <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
-        <dependency-check-maven.version>5.3.1</dependency-check-maven.version>
+        <dependency-check-maven.version>5.3.2</dependency-check-maven.version>
         <modelmapper.version>2.1.1</modelmapper.version>
         <jcommander.version>1.78</jcommander.version>
         <common.dbutils.version>1.6</common.dbutils.version>
@@ -1057,12 +1057,10 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <formats>
-                                <format>XML</format>
-                                <format>HTML</format>
-                            </formats>
+                            <format>XML</format>
                             <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                             <nugetconfAnalyzerEnabled>false</nugetconfAnalyzerEnabled>
+                            <skipProvidedScope>true</skipProvidedScope>
                         </configuration>
                     </plugin>
                 </plugins>
