@@ -7,6 +7,9 @@ from .inference import *
 from .client import Client
 from .server import Server
 from .utils import to_unix_path, update_dict_with_unix_paths
+from .base_inference import ServingConfig
+from .base_inference import PythonConfig
+from .base_inference import PythonStep
 
 KONDUIT_BASE_DIR = os.getcwd()
 KONDUIT_PID_STORAGE = os.path.join(KONDUIT_BASE_DIR, "pid.json")
