@@ -96,7 +96,7 @@
         <slf4j.version>1.7.26</slf4j.version>
         <junit.version>4.12</junit.version>
         <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
-        <dependency-check-maven.version>5.3.1</dependency-check-maven.version>
+        <dependency-check-maven.version>5.3.2</dependency-check-maven.version>
         <modelmapper.version>2.1.1</modelmapper.version>
         <jcommander.version>1.78</jcommander.version>
         <common.dbutils.version>1.6</common.dbutils.version>
@@ -111,17 +111,17 @@
         <jackson.version>2.10.0</jackson.version>
         <tensorflow.version>1.15.2</tensorflow.version>
 
-        <javacpp.version>1.5.3-SNAPSHOT</javacpp.version>
-        <javacpp-presets.version>1.5.3-SNAPSHOT</javacpp-presets.version>
+        <javacpp.version>1.5.3</javacpp.version>
+        <javacpp-presets.version>1.5.3</javacpp-presets.version>
         <javacv.version>1.5.3</javacv.version>
-        <opencv.version>4.2.0</opencv.version>
+        <opencv.version>4.3.0</opencv.version>
         <cpython.version>3.7.7</cpython.version>
-        <mkl.version>2020.0</mkl.version>
+        <mkl.version>2020.1</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
         <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}</tensorflow.javacpp.version>
-        <mkl-dnn.version>0.21.3</mkl-dnn.version>
+        <mkl-dnn.version>0.21.4</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
         <numpy.version>1.18.2</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
@@ -661,9 +661,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <forkCount>0</forkCount>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
@@ -1054,12 +1051,10 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <formats>
-                                <format>XML</format>
-                                <format>HTML</format>
-                            </formats>
+                            <format>XML</format>
                             <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                             <nugetconfAnalyzerEnabled>false</nugetconfAnalyzerEnabled>
+                            <skipProvidedScope>true</skipProvidedScope>
                         </configuration>
                     </plugin>
                 </plugins>
