@@ -18,10 +18,12 @@
 
 package ai.konduit.serving.launcher;
 
-import ai.konduit.serving.settings.Fetcher;
+import ai.konduit.serving.settings.DirectoryFetcher;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -36,17 +38,31 @@ import static io.vertx.core.file.impl.FileResolver.CACHE_DIR_BASE_PROP_NAME;
 import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
 import static java.lang.System.setProperty;
 
+/**
+ * Common utility class for {@link KonduitServingLauncher} and its corresponding commands.
+ */
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LauncherUtils {
 
+    /**
+     * This sets some of the common properties for vertx and logs. This will set the working directory
+     * for vertx and channels the vertx related logs to the logback configuration that konduit-serving
+     * utilizes.
+     */
     public static void setCommonLoggingAndVertxProperties() {
         setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
         LoggerFactory.getLogger(LoggerFactory.class); // Required for Logback to work in Vertx
 
-        setProperty("vertx.cwd", Fetcher.getWorkingDir().getAbsolutePath()); // For setting the vertx working directory for runtime files.
-        setProperty(CACHE_DIR_BASE_PROP_NAME, Fetcher.getWorkingDir().getAbsolutePath()); // For setting caching directory for vertx related optimizations.
+        setProperty("vertx.cwd", DirectoryFetcher.getWorkingDir().getAbsolutePath()); // For setting the vertx working directory for runtime files.
+        setProperty(CACHE_DIR_BASE_PROP_NAME, DirectoryFetcher.getWorkingDir().getAbsolutePath()); // For setting caching directory for vertx related optimizations.
     }
 
+    /**
+     * Gets the process id of the konduit server process given its application id.
+     * @param serverId application id of the konduit server application.
+     * @return process id of the konduit server process.
+     */
     public static int getPidFromServerId(String serverId) {
         List<String> cmd = new ArrayList<>();
         try {
@@ -83,6 +99,12 @@ public class LauncherUtils {
         }
     }
 
+    /**
+     * Parses the command line that was used to start the konduit server and extracts the
+     * application id (name) of the server.
+     * @param line command line that was used to start the konduit server.
+     * @return application id of the konduit server.
+     */
     public static String extractPidFromLine(String line) {
         String[] splits = line.trim().split(" ");
 
@@ -93,13 +115,18 @@ public class LauncherUtils {
         }
     }
 
-    public static boolean isProcessExists(String id) {
+    /**
+     * Checks if there is a konduit server running with the given application id.
+     * @param applicationId application id of the konduit server.
+     * @return true if the server process exists, false otherwise.
+     */
+    public static boolean isProcessExists(String applicationId) {
         List<String> args;
 
         if(SystemUtils.IS_OS_WINDOWS) {
-            args = Arrays.asList("WMIC", "PROCESS", "WHERE", "\"CommandLine like '%serving.id=" + id + "' and name!='wmic.exe'\"", "GET", "CommandLine", "/VALUE");
+            args = Arrays.asList("WMIC", "PROCESS", "WHERE", "\"CommandLine like '%serving.id=" + applicationId + "' and name!='wmic.exe'\"", "GET", "CommandLine", "/VALUE");
         } else {
-            args = Arrays.asList("sh", "-c", "ps ax | grep \"Dserving.id=" + id + "$\"");
+            args = Arrays.asList("sh", "-c", "ps ax | grep \"Dserving.id=" + applicationId + "$\"");
         }
 
         String output = "";
@@ -113,6 +140,6 @@ public class LauncherUtils {
 
         return output.trim()
                 .replace(System.lineSeparator(), "")
-                .matches("(.*)Dserving.id=" + id);
+                .matches("(.*)Dserving.id=" + applicationId);
     }
 }

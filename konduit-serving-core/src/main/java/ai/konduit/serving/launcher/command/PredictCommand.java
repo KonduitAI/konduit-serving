@@ -23,7 +23,7 @@ import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.launcher.KonduitServingLauncher;
 import ai.konduit.serving.launcher.LauncherUtils;
-import ai.konduit.serving.settings.Fetcher;
+import ai.konduit.serving.settings.DirectoryFetcher;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -64,10 +64,10 @@ import static ai.konduit.serving.launcher.LauncherUtils.getPidFromServerId;
         "--------------")
 public class PredictCommand extends DefaultCommand {
 
-    String id;
-    String data;
-    Input.DataFormat inputDataFormat = Input.DataFormat.JSON;
-    Output.PredictionType predictionType = Output.PredictionType.RAW;
+    private String id;
+    private String data;
+    private Input.DataFormat inputDataFormat = Input.DataFormat.JSON;
+    private Output.PredictionType predictionType = Output.PredictionType.RAW;
 
     @Argument(index = 0, argName = "server-id")
     @Description("Konduit server id")
@@ -108,7 +108,7 @@ public class PredictCommand extends DefaultCommand {
         if(LauncherUtils.isProcessExists(id)) {
             try {
                 InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(
-                        FileUtils.readFileToString(new File(Fetcher.getServersDataDir(),
+                        FileUtils.readFileToString(new File(DirectoryFetcher.getServersDataDir(),
                                 getPidFromServerId(id) + ".data"), StandardCharsets.UTF_8));
 
                 Vertx vertx = Vertx.vertx();
@@ -152,7 +152,11 @@ public class PredictCommand extends DefaultCommand {
                     try {
                         jsonData = new JsonObject(data);
                     } catch (Exception exception) {
-                        log.info("Unable to parse input data as json. Reason: " + exception.getMessage());
+                        if(exception.getMessage() != null) {
+                            log.info("Unable to parse input data as json. Reason: {}", exception.getMessage());
+                        } else {
+                            log.info("Unable to parse input data as json", exception);
+                        }
                         System.exit(1);
                     }
 

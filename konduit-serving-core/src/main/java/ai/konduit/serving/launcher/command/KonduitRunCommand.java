@@ -80,8 +80,6 @@ public class KonduitRunCommand extends RunCommand {
         }
 
         super.run();
-
-        log.info("Starting konduit server with an id of '{}'", serverId);
     }
 
     private String getServerId() {

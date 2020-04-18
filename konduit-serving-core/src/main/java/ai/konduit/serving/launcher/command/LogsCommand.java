@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.launcher.command;
 
-import ai.konduit.serving.settings.Fetcher;
+import ai.konduit.serving.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +43,8 @@ import java.nio.charset.StandardCharsets;
         "--------------")
 public class LogsCommand extends DefaultCommand {
 
-    String id;
-    boolean follow;
+    private String id;
+    private boolean follow;
 
     @Argument(index = 0, argName = "server-id")
     @Description("Konduit server id")
@@ -61,7 +61,7 @@ public class LogsCommand extends DefaultCommand {
     @Override
     public void run() {
         try {
-            File logsFile = new File(Fetcher.getCommandLogsDir(), id + ".log");
+            File logsFile = new File(DirectoryFetcher.getCommandLogsDir(), id + ".log");
 
             if (follow) {
                 try(BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(logsFile)))) {
@@ -81,7 +81,11 @@ public class LogsCommand extends DefaultCommand {
                 out.println(FileUtils.readFileToString(logsFile, StandardCharsets.UTF_8));
             }
         } catch (Exception exception) {
-            log.error("Failed to read logs. Reason: {}", exception.getMessage());
+            if(exception.getMessage() != null) {
+                log.error("Failed to read logs. Reason: {}", exception.getMessage());
+            } else {
+                log.error("Failed to read logs", exception);
+            }
         }
     }
 }

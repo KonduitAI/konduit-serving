@@ -168,6 +168,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
+            <!--
+                The plugin below is used for creating a maven property "konduit.test.class.path"
+                that will contain the classpath value. This was needed because the tests run sometimes have different
+                value for the system property "java.class.path" than the actual classpath.
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -185,6 +190,11 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+                This plugin is used for creating a system property that can be used for tests. The property
+                "konduit.test.class.path" will contain the value of the classpath which was build from parsing
+                the whole project's classpath.
+            -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>

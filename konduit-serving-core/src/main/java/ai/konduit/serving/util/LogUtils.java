@@ -16,7 +16,7 @@
 
 package ai.konduit.serving.util;
 
-import ai.konduit.serving.settings.Fetcher;
+import ai.konduit.serving.settings.DirectoryFetcher;
 import ai.konduit.serving.settings.constants.Constants;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -100,7 +100,7 @@ public class LogUtils {
 
         File previousLogsFile = getEndpointLogsFile();
 
-        File newLogsFile = new File(Fetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE);
+        File newLogsFile = new File(DirectoryFetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE);
 
         if(!newLogsFile.equals(previousLogsFile)) {
             Logger rootLogger = (Logger) LoggerFactory.getLogger(ROOT_LOGGER);
@@ -163,7 +163,7 @@ public class LogUtils {
      * it would be ignored.
      */
     public static void setAppendersForRunCommand(String serverId) {
-        String logFilePath = new File(Fetcher.getCommandLogsDir(), serverId + ".log").getAbsolutePath();
+        String logFilePath = new File(DirectoryFetcher.getCommandLogsDir(), serverId + ".log").getAbsolutePath();
 
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
 
@@ -228,7 +228,7 @@ public class LogUtils {
     }
 
     public static File getZippedLogs() throws ArchiveException, IOException {
-        File zippedFile = new File(Fetcher.getEndpointLogsDir(), "logs.zip");
+        File zippedFile = new File(DirectoryFetcher.getEndpointLogsDir(), "logs.zip");
 
         try (BufferedOutputStream archiveStream = new BufferedOutputStream(new FileOutputStream(zippedFile))) {
             try (ArchiveOutputStream archive = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream)) {

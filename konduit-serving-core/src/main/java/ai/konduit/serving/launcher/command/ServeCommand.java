@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
@@ -211,20 +212,7 @@ public class ServeCommand extends DefaultCommand {
             log.info("INFO: Running command {}", String.join(" ", cmd));
             builder.command(cmd); // Setting the builder command
             if (redirect) {
-                try(BufferedReader reader = new BufferedReader(new InputStreamReader(builder.command(cmd).start().getInputStream()))) {
-
-                    String line;
-                    while (!Thread.currentThread().isInterrupted()) {
-                        line = reader.readLine();
-                        if (line == null) {
-                            Thread.sleep(100);
-                        } else {
-                            out.println(line);
-                        }
-                    }
-                } catch (InterruptedException interruptedException) {
-                    log.error("Killing server ({}) process...", id);
-                }
+                runAndTailOutput(builder);
             } else {
                 String commandLinePrefix = ((KonduitServingLauncher) executionContext.launcher()).commandLinePrefix();
                 builder.start();
@@ -237,6 +225,23 @@ public class ServeCommand extends DefaultCommand {
             out.println("Cannot create konduit server process");
             e.printStackTrace(out);
             ExecUtils.exitBecauseOfProcessIssue();
+        }
+    }
+
+    private void runAndTailOutput(ProcessBuilder builder) throws IOException {
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {
+
+            String line;
+            while (!Thread.currentThread().isInterrupted()) {
+                line = reader.readLine();
+                if (line == null) {
+                    Thread.sleep(100);
+                } else {
+                    out.println(line);
+                }
+            }
+        } catch (InterruptedException interruptedException) {
+            log.error("Killing server ({}) process. Reason: {}", id, interruptedException.getMessage());
         }
     }
 
