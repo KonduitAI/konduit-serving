@@ -32,11 +32,9 @@ import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.util.PortUtils;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.jayway.restassured.response.Response;
-import com.mashape.unirest.http.Unirest;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.image.loader.NativeImageLoader;
-import org.fusesource.jansi.FilterPrintStream;
 import org.hamcrest.Matchers;
 import org.junit.*;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
@@ -44,9 +42,9 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.Timeout;
 import org.nd4j.linalg.io.ClassPathResource;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.ConnectException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -56,6 +54,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.*;
 
 @Slf4j
+@NotThreadSafe
 public class KonduitServingLauncherWithoutProcessesTest {
 
     private static final String TEST_SERVER_ID = "konduit_serving_test_server";
@@ -332,7 +331,7 @@ public class KonduitServingLauncherWithoutProcessesTest {
         return InferenceConfiguration.fromJson(configOutput.substring(configOutput.indexOf("{")));
     }
 
-    private static class LauncherPrintStream extends FilterPrintStream {
+    private static class LauncherPrintStream extends PrintStream {
 
         public LauncherPrintStream(PrintStream ps) {
             super(ps);

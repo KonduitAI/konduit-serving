@@ -296,12 +296,5 @@
             <artifactId>sysout-over-slf4j</artifactId>
             <version>${sysout-over-slf4j.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.fusesource.jansi</groupId>
-            <artifactId>jansi</artifactId>
-            <version>1.18</version>
-        </dependency>
     </dependencies>
-
-
 </project>
