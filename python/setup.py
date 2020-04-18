@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="konduit",
-    version="0.1.4",
+    version="0.1.5",
     packages=find_packages(),
     install_requires=[
         "requests>=2.22.0",
@@ -14,7 +14,6 @@ setup(
         "Cython",
         "pydl4j",
         "pydatavec",
-        "click",
         "pyyaml",
     ],
     py_modules=["konduit", "cli"],
