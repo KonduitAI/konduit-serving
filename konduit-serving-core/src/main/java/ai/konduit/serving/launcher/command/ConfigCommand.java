@@ -51,9 +51,9 @@ import java.util.List;
         "- Prints 'TENSORFLOW' config in pretty format:\n" +
         "$ konduit config -t TENSORFLOW\n\n" +
         "- Prints 'IMAGE + DL4J' config in minified format:\n" +
-        "$ konduit config -t IMAGE,Dl4J -m\n\n" +
+        "$ konduit config -t IMAGE,DL4J -m\n\n" +
         "- Saves 'IMAGE + DL4J' config in a 'config.json' file:\n" +
-        "$ konduit config -t IMAGE,Dl4J -o config.json\n" +
+        "$ konduit config -t IMAGE,DL4J -o config.json\n" +
         "--------------")
 @Slf4j
 public class ConfigCommand extends DefaultCommand {
