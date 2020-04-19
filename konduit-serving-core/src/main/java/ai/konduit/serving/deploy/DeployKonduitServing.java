@@ -22,22 +22,18 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.launcher.LauncherUtils;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.vertx.core.*;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import io.vertx.micrometer.MicrometerMetricsOptions;
+import io.vertx.micrometer.VertxPrometheusOptions;
+import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
-
-import static io.vertx.core.file.FileSystemOptions.DEFAULT_FILE_CACHING_DIR;
-import static io.vertx.core.file.impl.FileResolver.CACHE_DIR_BASE_PROP_NAME;
-import static io.vertx.core.file.impl.FileResolver.DISABLE_CP_RESOLVING_PROP_NAME;
-import static io.vertx.core.logging.LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME;
-import static java.lang.System.setProperty;
 
 @Slf4j
 public class DeployKonduitServing {
@@ -54,7 +50,18 @@ public class DeployKonduitServing {
     }
 
     public static void deployInference(InferenceConfiguration inferenceConfiguration, Handler<AsyncResult<InferenceConfiguration>> eventHandler) {
-        deployInference(new VertxOptions().setMaxEventLoopExecuteTime(120).setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS),
+        MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
+                .setMicrometerRegistry(new PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
+                .setPrometheusOptions(new VertxPrometheusOptions()
+                        .setEnabled(true));
+
+        log.info("Setup micro meter options.");
+        BackendRegistries.setupBackend(micrometerMetricsOptions);
+
+        deployInference(new VertxOptions()
+                        .setMetricsOptions(micrometerMetricsOptions)
+                        .setMaxEventLoopExecuteTime(120)
+                        .setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS),
                 new DeploymentOptions().setConfig(new JsonObject(inferenceConfiguration.toJson())), eventHandler);
     }
 

@@ -82,12 +82,8 @@ public class RegressionMetrics implements MetricsRenderer {
                     .description("Regression values seen so far for label " + regressionMetricsConfig.getRegressionColumnLabels().get(i))
                     .baseUnit("regression.outcome")
                     .register(meterRegistry));
-
-
         }
     }
-
-
 
     private static class StatCounterSupplier implements Serializable,Supplier<Number> {
         private StatCounter statCounter;
@@ -165,7 +161,6 @@ public class RegressionMetrics implements MetricsRenderer {
         }
     }
 
-
     private void incrementRegressionCounters(INDArray[] outputs) {
         synchronized (statCounters) {
             handleNdArray(outputs[0]);
@@ -178,8 +173,6 @@ public class RegressionMetrics implements MetricsRenderer {
             NDArrayWritable ndArrayWritable = (NDArrayWritable) records[0].getRecord().get(0);
             handleNdArray(ndArrayWritable.get());
         }
-
-
     }
 
     private void handleNdArray(INDArray output) {

@@ -47,6 +47,7 @@ import ai.konduit.serving.pipeline.step.TransformProcessStep;
 import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.LongTaskTimer.Sample;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -142,8 +143,15 @@ public class PipelineRouteDefiner {
     public Router defineRoutes(Vertx vertx, InferenceConfiguration inferenceConfiguration) {
         Router router = Router.router(vertx);
 
+        Counter requestsHandlerCounter = null;
+
         MeterRegistry registry = BackendRegistries.getDefaultNow();
         if (registry != null) {
+            Counter serverUpTimeCounter = registry.counter("server.up.time");
+            vertx.setPeriodic(1000, handler -> serverUpTimeCounter.increment());
+
+            requestsHandlerCounter = registry.counter("requests.handled");
+
             log.info("Using metrics registry " + registry.getClass().getName() + " for inference");
             inferenceExecutionTimer = LongTaskTimer
                     .builder("inference")
@@ -163,30 +171,31 @@ public class PipelineRouteDefiner {
             for (MetricType metricType : new HashSet<>(inferenceConfiguration.getServingConfig().getMetricTypes())) {
                 switch (metricType) {
                     case CLASS_LOADER:
-                        addMetric(new ClassLoaderMetrics(),registry);
+                        addMetric(new ClassLoaderMetrics(), registry);
                         break;
                     case JVM_MEMORY:
-                        addMetric(new JvmMemoryMetrics(),registry);
+                        addMetric(new JvmMemoryMetrics(), registry);
                         break;
                     case JVM_GC:
-                        addMetric(new JvmGcMetrics(),registry);
+                        addMetric(new JvmGcMetrics(), registry);
                         break;
                     case PROCESSOR:
-                        addMetric(new ProcessorMetrics(),registry);
+                        addMetric(new ProcessorMetrics(), registry);
                         break;
                     case JVM_THREAD:
-                        addMetric(new JvmThreadMetrics(),registry);
+                        addMetric(new JvmThreadMetrics(), registry);
                         break;
                     case LOGGING_METRICS:
-                        addMetric(new LogbackMetrics(),registry);
+                        addMetric(new LogbackMetrics(), registry);
                         break;
                     case NATIVE:
-                        addMetric(new NativeMetrics(),registry);
+                        addMetric(new NativeMetrics(), registry);
                         break;
                     case CLASSIFICATION:
                         if(inferenceConfiguration.getServingConfig().getMetricsConfigurations() == null) {
                             throw new IllegalStateException("Please specify classification labels to pair with classification metrics");
                         }
+
                         List<MetricsConfig> metricsConfigurations = inferenceConfiguration.getServingConfig().getMetricsConfigurations();
                         for(MetricsConfig metricsConfig : metricsConfigurations) {
                             if(metricsConfig instanceof ClassificationMetricsConfig) {
@@ -199,7 +208,6 @@ public class PipelineRouteDefiner {
                                 classificationMetrics.bindTo(registry);
                                 metricsRenderers.add(classificationMetrics);
                             }
-
                         }
 
                         break;
@@ -220,8 +228,8 @@ public class PipelineRouteDefiner {
                                 regressionMetrics.bindTo(registry);
                                 metricsRenderers.add(regressionMetrics);
                             }
-
                         }
+
                         break;
                     case CUSTOM_MULTI_LABEL:
                         if(inferenceConfiguration.getServingConfig().getMetricsConfigurations() == null) {
@@ -240,11 +248,9 @@ public class PipelineRouteDefiner {
                                 regressionMetrics.bindTo(registry);
                                 metricsRenderers.add(regressionMetrics);
                             }
-
                         }
 
                         break;
-
                     case GPU:
                         try {
                             MeterBinder meterBinder = (MeterBinder) Class.forName("ai.konduit.serving.gpu.GpuMetrics").getConstructor().newInstance();
@@ -252,9 +258,9 @@ public class PipelineRouteDefiner {
                         } catch (Exception e) {
                             log.error("Unable to setup gpu metrics. Please ensure the gpu dependency has been properly included in the classpath.", e);
                         }
+
                         break;
                 }
-
             }
         }
 
@@ -382,9 +388,13 @@ public class PipelineRouteDefiner {
         /*
          * Get the output of a pipeline for a given prediction type for JSON input data format.
          */
+        Counter finalRequestsHandlerCounter = requestsHandlerCounter;
         router.post("/:predictionType/:inputDataFormat")
                 .consumes("application/json")
                 .produces("application/json").handler(ctx -> {
+
+            if(finalRequestsHandlerCounter != null) finalRequestsHandlerCounter.increment();
+
             predictionType = PredictionType.valueOf(ctx.pathParam(PREDICTION_TYPE).toUpperCase());
             inputDataFormat = Input.DataFormat.valueOf(ctx.pathParam(INPUT_DATA_FORMAT).toUpperCase());
 
@@ -435,6 +445,9 @@ public class PipelineRouteDefiner {
         router.post("/:predictionType/:inputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed").handler(ctx -> {
+
+            if(finalRequestsHandlerCounter != null) finalRequestsHandlerCounter.increment();
+
             inputDataFormat = Input.DataFormat.valueOf(ctx.pathParam(INPUT_DATA_FORMAT).toUpperCase());
 
             try {
@@ -527,12 +540,12 @@ public class PipelineRouteDefiner {
                             inputSchema,
                             null,
                             outputSchema,
-			    inputDataFormat,
+			                inputDataFormat,
                             inferenceConfiguration.getServingConfig().getOutputDataFormat());
-
 
                     if (start != null)
                         start.stop();
+
                     long endNanos = System.nanoTime();
                     if (inferenceConfiguration.getServingConfig().isLogTimings()) {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");

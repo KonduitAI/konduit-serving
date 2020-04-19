@@ -23,7 +23,6 @@ package ai.konduit.serving.metrics;
 
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import io.vertx.micrometer.backends.BackendRegistries;
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -44,9 +43,9 @@ public class ClassificationMetricsTests {
         classificationMetrics.bindTo(new SimpleMeterRegistry());
         INDArray arr = Nd4j.scalar(1.0).reshape(1,1);
         classificationMetrics.updateMetrics(new INDArray[] {arr});
-        double value = classificationMetrics.getClassCounterIncrement().get(0).value();
+        double value = classificationMetrics.getClassCounterIncrement().get(0).count();
         assertEquals(1.0,value,1e-3);
-        assertEquals(0.0,classificationMetrics.getClassCounterIncrement().get(0).value(),1e-3);
+        assertEquals(0.0,classificationMetrics.getClassCounterIncrement().get(0).count(),1e-3);
     }
 
 }

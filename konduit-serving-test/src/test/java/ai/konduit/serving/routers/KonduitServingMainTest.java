@@ -52,7 +52,7 @@ import java.io.File;
 public class KonduitServingMainTest {
 
     @Rule
-    public Timeout rule = Timeout.seconds(240);
+    public Timeout rule = Timeout.seconds(100000);
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
