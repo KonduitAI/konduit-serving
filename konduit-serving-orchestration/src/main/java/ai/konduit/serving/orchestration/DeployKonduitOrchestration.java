@@ -24,12 +24,17 @@ package ai.konduit.serving.orchestration;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.util.ObjectMappers;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.vertx.core.*;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import io.vertx.micrometer.MicrometerMetricsOptions;
+import io.vertx.micrometer.VertxPrometheusOptions;
+import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
@@ -66,12 +71,34 @@ public class DeployKonduitOrchestration {
     public static final String NODE_COMMUNICATION_TOPIC = "NodeCommunication";
 
     public static void deployInferenceClustered(DeploymentOptions deploymentOptions, Handler<AsyncResult<InferenceConfiguration>> eventHandler) {
-        deployInferenceClustered(new VertxOptions().setMaxEventLoopExecuteTime(120).setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS),
+        MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
+                .setMicrometerRegistry(new PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
+                .setPrometheusOptions(new VertxPrometheusOptions()
+                        .setEnabled(true));
+
+        log.info("Setup micro meter options.");
+        BackendRegistries.setupBackend(micrometerMetricsOptions);
+
+        deployInferenceClustered(new VertxOptions()
+                        .setMaxEventLoopExecuteTime(120)
+                        .setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS)
+                        .setMetricsOptions(micrometerMetricsOptions),
                 deploymentOptions, eventHandler);
     }
 
     public static void deployInferenceClustered(InferenceConfiguration inferenceConfiguration, Handler<AsyncResult<InferenceConfiguration>> eventHandler) {
-        deployInferenceClustered(new VertxOptions().setMaxEventLoopExecuteTime(120).setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS),
+        MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
+                .setMicrometerRegistry(new PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
+                .setPrometheusOptions(new VertxPrometheusOptions()
+                        .setEnabled(true));
+
+        log.info("Setup micro meter options.");
+        BackendRegistries.setupBackend(micrometerMetricsOptions);
+
+        deployInferenceClustered(new VertxOptions()
+                        .setMaxEventLoopExecuteTime(120)
+                        .setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS)
+                        .setMetricsOptions(micrometerMetricsOptions),
                 new DeploymentOptions().setConfig(new JsonObject(inferenceConfiguration.toJson())), eventHandler);
     }
 
