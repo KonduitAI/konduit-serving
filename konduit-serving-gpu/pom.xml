@@ -20,7 +20,6 @@
         <cuda.javacpp.version>${cuda.version}-${javacpp.date}-${javacpp.version}</cuda.javacpp.version>
     </properties>
 
-
     <profiles>
         <profile>
             <id>arm</id>
