@@ -2,7 +2,6 @@ import os
 import sys
 import requests
 import subprocess
-import logging as log
 import click
 
 KONDUIT_SERVING_VERSION = "0.1.0-20200416.141921-81"
@@ -50,16 +49,16 @@ def download_if_required(url, save_path):
     response = requests.get(url, stream=True)
     status_code = response.status_code
     if status_code != 200:
-        log.error("Failed with a status code of {}".format(status_code))
+        print("Failed with a status code of {}".format(status_code))
         return
 
     total = response.headers.get('content-length')
 
     if os.path.exists(save_path) and os.path.getsize(KONDUIT_JAR_PATH) == total:
-        log.info("The required CLI binary has already been downloaded.")
+        print("The required CLI binary has already been downloaded.")
         return
     else:
-        log.info("Downloading command line binaries")
+        print("Downloading command line binaries")
 
     with open(save_path, 'wb') as f:
         if total is None:
@@ -133,7 +132,7 @@ def build_jar(operating_sys, spin):
     help="Your operating system. Choose from {}. "
          "Defaults to the cpu version of the "
          "current OS platform in use."
-         .format(os_choices.__str__()),
+        .format(os_choices.__str__()),
 )
 @click.option(
     "--https",
@@ -173,8 +172,8 @@ def init(platform, https, commit_hash, spin, download):
 
 def cli():
     if not os.path.exists(KONDUIT_JAR_PATH):
-        log.info("No konduit binaries found. See 'konduit-init --help' or just run 'konduit-init'"
-                 " to initialize a konduit jar binary.")
+        print("No konduit binaries found. See 'konduit-init --help' or just run 'konduit-init'"
+              " to initialize a konduit jar binary.")
     else:
         arguments = ["java", "-jar", "-Dvertx.cli.usage.prefix=konduit", KONDUIT_JAR_PATH]
         arguments.extend(sys.argv[1:])
