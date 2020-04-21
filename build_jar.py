@@ -80,6 +80,9 @@ if __name__ == "__main__":
     command = [args.source + os.sep + "mvnw", "-Puberjar,tensorflow", "clean", "install", "-Dmaven.test.skip=true",
                "-Djavacpp.platform=" + args.os, "-Dchip={}".format(args.chip)]
 
+    if args.chip == "gpu":
+        command.append("-Pgpu,intel")
+
     if args.spin == "all" or args.spin == "python":
         command.append("-Ppython")
     if args.spin == "all" or args.spin == "pmml":

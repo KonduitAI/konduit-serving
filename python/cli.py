@@ -3,6 +3,7 @@ import sys
 import requests
 import subprocess
 import click
+from packaging.version import parse
 
 USER_PATH = os.path.expanduser("~")
 KONDUIT_BASE_DIR = os.path.join(USER_PATH, ".konduit-serving")
@@ -12,7 +13,7 @@ KONDUIT_JAR_PATH = os.path.join(KONDUIT_JAR_DIR, "konduit.jar")
 
 DOWNLOAD_TAG = "cli_base"
 
-CURRENT_KONDUIT_VERSION = "0.1.0-SNAPSHOT"
+LAST_COMPATIBLE_KONDUIT_VERSION = "0.1.0-SNAPSHOT"
 DEFAULT_KONDUIT_TAG = "cli_base_2"
 KONDUIT_JAR_URL_FORMAT = "https://github.com/KonduitAI/konduit-serving/releases/download/" \
                        "{tag}/konduit-serving-uberjar-{version}-{spin}-{platform}-{chip}.jar"
@@ -192,7 +193,7 @@ def get_jar_url(platform, version, spin, chip):
 )
 @click.option(
     "-v", "--version",
-    default=CURRENT_KONDUIT_VERSION,
+    default=LAST_COMPATIBLE_KONDUIT_VERSION,
     show_default=True,
     help="Only works with the `--download` option to specify the version of konduit-serving to be downloaded.",
 )
@@ -204,7 +205,11 @@ def get_jar_url(platform, version, spin, chip):
 )
 def init(platform, https, tag, spin, chip, version, download):
     if download:
-        download_if_required(get_jar_url(platform, version, spin, chip), KONDUIT_JAR_PATH)
+        if parse(LAST_COMPATIBLE_KONDUIT_VERSION) < parse(version):
+            print("This version of Python CLI is only compatible with versions <= {}"
+                  .format(LAST_COMPATIBLE_KONDUIT_VERSION))
+        else:
+            download_if_required(get_jar_url(platform, version, spin, chip), KONDUIT_JAR_PATH)
     else:
         git_clone_konduit(https, tag)
         build_jar(platform, spin, chip)

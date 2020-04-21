@@ -15,7 +15,8 @@ setup(
         "pydl4j",
         "pydatavec",
         "pyyaml",
-        "click"
+        "click",
+        "packaging"
     ],
     py_modules=["konduit", "cli"],
     extras_require={
