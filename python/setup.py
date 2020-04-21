@@ -28,8 +28,8 @@ setup(
     license="Apache",
     description="konduit: Enterprise Runtime for Machine Learning Models",
     long_description="konduit: Enterprise Runtime for Machine Learning Models",
-    author="Max Pumperla",
-    author_email="max@skymind.global",
+    author="Max Pumperla, Shams Ul Azeem",
+    author_email="max@konduit.ai, shams@konduit.ai",
     url="https://github.com/KonduitAI/konduit-serving",
     classifiers=[
         "Development Status :: 3 - Alpha",

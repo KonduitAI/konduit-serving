@@ -4,30 +4,22 @@ import requests
 import subprocess
 import click
 
-KONDUIT_SERVING_VERSION = "0.1.0-20200416.141921-81"
-SPIN = "all"
-PLATFORM = "windows-x86_64" if sys.platform.startswith("win") else "linux-x86_64"
-CHIP = "cpu"
-KONDUIT_JAR_URL = "https://oss.sonatype.org/content/repositories/snapshots/" \
-                  "ai/konduit/serving/konduit-serving-uberjar/" \
-                  "0.1.0-SNAPSHOT/" \
-                  "konduit-serving-uberjar-{}-{}-{}-{}.jar".format(KONDUIT_SERVING_VERSION, SPIN, PLATFORM, CHIP)
-
 USER_PATH = os.path.expanduser("~")
 KONDUIT_BASE_DIR = os.path.join(USER_PATH, ".konduit-serving")
 KONDUIT_SOURCE_DIR = os.path.join(KONDUIT_BASE_DIR, "source")
 KONDUIT_JAR_DIR = os.path.join(KONDUIT_BASE_DIR, "jar")
 KONDUIT_JAR_PATH = os.path.join(KONDUIT_JAR_DIR, "konduit.jar")
 
-DEFAULT_KONDUIT_COMMIT_HASH = "512bb17"
+CURRENT_KONDUIT_VERSION = "0.1.0-SNAPSHOT"
+DEFAULT_KONDUIT_TAG = "cli_base"
+KONDUIT_JAR_URL_FORMAT = "https://github.com/KonduitAI/konduit-serving/releases/download/" \
+                       "{tag}/konduit-serving-uberjar-{version}-{spin}-{platform}-{chip}.jar"
 
 os_choices = [
     "windows-x86_64",
     "linux-x86_64",
-    "linux-x86_64-gpu",
     "macosx-x86_64",
     "linux-armhf",
-    "windows-x86_64-gpu",
 ]
 
 
@@ -75,7 +67,7 @@ def download_if_required(url, save_path):
     sys.stdout.write('\n')
 
 
-def git_clone_konduit(use_https=True, commit_hash=DEFAULT_KONDUIT_COMMIT_HASH):
+def git_clone_konduit(use_https=True, tag=DEFAULT_KONDUIT_TAG):
     """Clone the konduit-serving git repo, if it doesn't already exist locally."""
 
     if not os.path.exists(KONDUIT_SOURCE_DIR):
@@ -89,15 +81,15 @@ def git_clone_konduit(use_https=True, commit_hash=DEFAULT_KONDUIT_COMMIT_HASH):
         if not os.listdir(KONDUIT_SOURCE_DIR):
             subprocess.call(["git", "clone", repo, KONDUIT_SOURCE_DIR],
                             shell=sys.platform.startswith("win"))
-        subprocess.call(["git", "checkout", commit_hash], cwd=KONDUIT_SOURCE_DIR,
+        subprocess.call(["git", "checkout", tag], cwd=KONDUIT_SOURCE_DIR,
                         shell=sys.platform.startswith("win"))
     except Exception as e:
         raise RuntimeError(">>> Could not clone konduit-serving repository and switch to commit hash {}"
                            "Make sure to have git installed. Type 'konduit-init --help' for help .\n"
-                           .format(commit_hash), e)
+                           .format(tag), e)
 
 
-def build_jar(operating_sys, spin):
+def build_jar(operating_sys, spin, chip):
     """Build the actual JAR, using our mvnw wrapper under the hood."""
 
     if not os.path.exists(KONDUIT_JAR_DIR):
@@ -106,6 +98,14 @@ def build_jar(operating_sys, spin):
     if operating_sys is None:
         operating_sys = get_platform()
 
+    # Pulling in changes if needed
+    try:
+        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "pull"])
+    except Exception as e:
+        raise RuntimeError(">>> Could not pull changes from konduit-serving repository. Make sure to have "
+                           "git installed. Type " + "konduit-init --help for help resolving this.\n", e)
+
+    # Building the uber-jar file
     try:
         subprocess.call(
             [
@@ -117,6 +117,8 @@ def build_jar(operating_sys, spin):
                 KONDUIT_SOURCE_DIR,
                 "--spin",
                 spin,
+                "--chip",
+                chip,
                 "--target",
                 KONDUIT_JAR_PATH
             ],
@@ -126,13 +128,31 @@ def build_jar(operating_sys, spin):
         RuntimeError("Failed to build jar.\n", e)
 
 
+def get_git_tags():
+    response = requests.get("https://api.github.com/repos/KonduitAI/konduit-serving/tags")
+    status_code = response.status_code
+    if status_code == 200:
+        tags = response.json()
+        return [tag['name'] for tag in tags]
+    else:
+        return [DEFAULT_KONDUIT_TAG]
+
+
+def get_jar_url(platform, version, spin, chip):
+    return KONDUIT_JAR_URL_FORMAT.format(version=version,
+                                         platform=platform,
+                                         tag="cli_base",
+                                         spin=spin,
+                                         chip=chip)
+
+
 @click.command()
 @click.option(
-    "--platform",
+    "-p", "--platform",
     help="Your operating system. Choose from {}. "
          "Defaults to the cpu version of the "
-         "current OS platform in use."
-        .format(os_choices.__str__()),
+         "current OS platform in use.",
+    type=click.Choice(os_choices),
 )
 @click.option(
     "--https",
@@ -142,13 +162,14 @@ def build_jar(operating_sys, spin):
     help="If True, use HTTPS to clone konduit-serving, else SSH.",
 )
 @click.option(
-    "--commit_hash",
-    default=DEFAULT_KONDUIT_COMMIT_HASH,
+    "-t", "--tag",
+    default=DEFAULT_KONDUIT_TAG,
     show_default=True,
-    help="The commit hash to build the source code from.",
+    help="The git tag to build the source code from.",
+    type=click.Choice(get_git_tags())
 )
 @click.option(
-    "--spin",
+    "-s", "--spin",
     default="all",
     show_default=True,
     help="Whether to bundle Python ('python'), PMML ('pmml'), both ('all') " +
@@ -156,18 +177,32 @@ def build_jar(operating_sys, spin):
          "and PMML bundling is not encouraged if agpl license is an issue.",
 )
 @click.option(
-    "--download",
+    "-c", "--chip",
+    default="cpu",
+    show_default=True,
+    help="Specifies the chip architecture which could be cpu, gpu (CUDA) or arm.",
+    type=click.Choice(["cpu", "gpu", "arm"])
+)
+@click.option(
+    "-v", "--version",
+    default=CURRENT_KONDUIT_VERSION,
+    show_default=True,
+    help="Only works with the `--download` option to the specified version of konduit-serving.",
+)
+@click.option(
+    "-d", "--download",
     type=bool,
     default=False,
     show_default=True,
-    help="Set to True if you want to download the pre-built jar file instead of building it.",
+    help="Set to True if you want to download the pre-built jar file instead of building it. "
+         "Works with the `--platform`, `chip`, `version` and `spin` options.",
 )
-def init(platform, https, commit_hash, spin, download):
+def init(platform, https, tag, spin, chip, version, download):
     if download:
-        download_if_required(KONDUIT_JAR_URL, KONDUIT_JAR_PATH)
+        download_if_required(get_jar_url(platform, version, spin, chip), KONDUIT_JAR_PATH)
     else:
-        git_clone_konduit(https, commit_hash)
-        build_jar(platform, spin)
+        git_clone_konduit(https, tag)
+        build_jar(platform, spin, chip)
 
 
 def cli():
