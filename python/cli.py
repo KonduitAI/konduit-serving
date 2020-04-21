@@ -205,7 +205,7 @@ def get_jar_url(platform, version, spin, chip):
 )
 def init(platform, https, tag, spin, chip, version, download):
     if download:
-        if parse(LAST_COMPATIBLE_KONDUIT_VERSION) < parse(version):
+        if parse(LAST_COMPATIBLE_KONDUIT_VERSION.replace("-SNAPSHOT", "")) < parse(version.replace("-SNAPSHOT", "")):
             print("This version of Python CLI is only compatible with versions <= {}"
                   .format(LAST_COMPATIBLE_KONDUIT_VERSION))
         else:
