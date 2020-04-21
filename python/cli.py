@@ -11,7 +11,7 @@ KONDUIT_JAR_DIR = os.path.join(KONDUIT_BASE_DIR, "jar")
 KONDUIT_JAR_PATH = os.path.join(KONDUIT_JAR_DIR, "konduit.jar")
 
 CURRENT_KONDUIT_VERSION = "0.1.0-SNAPSHOT"
-DEFAULT_KONDUIT_TAG = "cli_base"
+DEFAULT_KONDUIT_TAG = "cli_base_2"
 KONDUIT_JAR_URL_FORMAT = "https://github.com/KonduitAI/konduit-serving/releases/download/" \
                        "{tag}/konduit-serving-uberjar-{version}-{spin}-{platform}-{chip}.jar"
 
@@ -41,6 +41,7 @@ def download_if_required(url, save_path):
     response = requests.get(url, stream=True)
     status_code = response.status_code
     if status_code != 200:
+        print("Download path: {}".format(url))
         print("Failed with a status code of {}".format(status_code))
         return
 
@@ -101,8 +102,9 @@ def build_jar(operating_sys, spin, chip):
     # Pulling in changes if needed
     try:
         subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "pull"])
+        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "fetch", "--all"])
     except Exception as e:
-        raise RuntimeError(">>> Could not pull changes from konduit-serving repository. Make sure to have "
+        raise RuntimeError(">>> Could not fetch and pull changes from konduit-serving repository. Make sure to have "
                            "git installed. Type " + "konduit-init --help for help resolving this.\n", e)
 
     # Building the uber-jar file
@@ -139,6 +141,9 @@ def get_git_tags():
 
 
 def get_jar_url(platform, version, spin, chip):
+    if not platform:
+        platform = get_platform()
+
     return KONDUIT_JAR_URL_FORMAT.format(version=version,
                                          platform=platform,
                                          tag="cli_base",
@@ -149,7 +154,7 @@ def get_jar_url(platform, version, spin, chip):
 @click.command()
 @click.option(
     "-p", "--platform",
-    help="Your operating system. Choose from {}. "
+    help="Your operating system. "
          "Defaults to the cpu version of the "
          "current OS platform in use.",
     type=click.Choice(os_choices),
@@ -187,15 +192,13 @@ def get_jar_url(platform, version, spin, chip):
     "-v", "--version",
     default=CURRENT_KONDUIT_VERSION,
     show_default=True,
-    help="Only works with the `--download` option to the specified version of konduit-serving.",
+    help="Only works with the `--download` option to specify the version of konduit-serving to be downloaded.",
 )
 @click.option(
     "-d", "--download",
-    type=bool,
-    default=False,
-    show_default=True,
-    help="Set to True if you want to download the pre-built jar file instead of building it. "
-         "Works with the `--platform`, `chip`, `version` and `spin` options.",
+    is_flag=True,
+    help="If set, downloads the pre-built jar file instead of building it. "
+         "Also works with `--platform`, `--chip`, `--version` and `--spin` options.",
 )
 def init(platform, https, tag, spin, chip, version, download):
     if download:
