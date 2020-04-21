@@ -172,7 +172,7 @@ def init(platform, https, commit_hash, spin, download):
 
 
 def cli():
-    if not os.path.exists(KONDUIT_JAR_DIR):
+    if not os.path.exists(KONDUIT_JAR_PATH):
         log.info("No konduit binaries found. See 'konduit-init --help' or just run 'konduit-init'"
                  " to initialize a konduit jar binary.")
     else:
