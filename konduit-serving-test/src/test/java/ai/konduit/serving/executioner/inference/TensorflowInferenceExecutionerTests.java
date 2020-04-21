@@ -45,7 +45,7 @@ public class TensorflowInferenceExecutionerTests {
     @Rule
     public TemporaryFolder testDir = new TemporaryFolder();
 
-    @Test(timeout = 60000)
+    @Test(timeout = 24000)
     public void testInferenceExecutioner() throws Exception {
         TensorflowModelLoader tensorflowModelLoader = TensorflowModelLoader.builder()
                 .inputNames(Arrays.asList("input_0", "input_1"))
@@ -68,7 +68,7 @@ public class TensorflowInferenceExecutionerTests {
         tensorflowInferenceExecutioner.stop();
     }
 
-    @Test
+    @Test(timeout = 24000)
     public void testSavedModelInferenceExecutioner() throws Exception {
         File f = testDir.newFolder();
         new ClassPathResource("/inference/tensorflow/saved_model_counter/00000123/").copyDirectory(f);

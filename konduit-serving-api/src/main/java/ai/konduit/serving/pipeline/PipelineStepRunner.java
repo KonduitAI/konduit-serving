@@ -28,6 +28,7 @@ import org.datavec.api.writable.Writable;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.Closeable;
+import java.util.Map;
 
 
 /**
@@ -89,4 +90,8 @@ public interface PipelineStepRunner extends Closeable {
      * @return the output from the transform
      */
     Record[] transform(Record[] input);
+
+    static Object someMethod(Map input) {
+        return null;
+    }
 }

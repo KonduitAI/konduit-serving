@@ -24,6 +24,12 @@ package ai.konduit.serving.verticles.base;
 
 import ai.konduit.serving.verticles.Routable;
 import ai.konduit.serving.verticles.VerticleConstants;
+import io.swagger.v3.oas.annotations.ExternalDocumentation;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.License;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -43,6 +49,21 @@ import lombok.extern.slf4j.Slf4j;
 @EqualsAndHashCode(callSuper = true)
 @Slf4j
 @Data
+@OpenAPIDefinition(
+        info = @Info(
+                title = "Konduit Serving REST API",
+                version = "0.1.0-SNAPSHOT",
+                description = "RESTful API for various operations inside konduit-serving",
+                license = @License(name = "Apache 2.0", url = "https://github.com/KonduitAI/konduit-serving/blob/master/LICENSE"),
+                contact = @Contact(url = "https://konduit.ai/contact", name = "Konduit AI", email = "hello@konduit.ai")
+        ),
+        tags = {
+                @Tag(name = "inference", description = "Tag for grouping inference server operations"),
+                @Tag(name = "convert", description = "Tag for grouping converter operations"),
+                @Tag(name = "memmap", description = "Tag for grouping memory mapping operations")
+        },
+        externalDocs = @ExternalDocumentation(description = "Online documentation", url = "https://serving.oss.konduit.ai")
+)
 public abstract class BaseRoutableVerticle extends AbstractVerticle implements Routable {
 
     private final static int DEFAULT_HTTP_PORT = 0; // 0 will find an available port when running HttpServer#listen

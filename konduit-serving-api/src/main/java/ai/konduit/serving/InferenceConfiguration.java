@@ -27,8 +27,10 @@ import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.config.TextConfig;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ObjectMappers;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
 
@@ -36,6 +38,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@XmlRootElement
+@Schema
 public class InferenceConfiguration implements Serializable, TextConfig {
 
     @Singular

@@ -39,6 +39,7 @@ import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
 public class NDArrayOutput implements BatchOutput {
 
     private String batchId;
+
     @JsonSerialize(using = NDArrayTextSerializer.class)
     @JsonDeserialize(using = NDArrayTextDeSerializer.class)
     private INDArray ndArray;

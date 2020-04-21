@@ -51,8 +51,8 @@ import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(VertxUnitRunner.class)
 @NotThreadSafe
+@RunWith(VertxUnitRunner.class)
 public class TestPythonJsonNdArrayScalarInput extends BaseMultiNumpyVerticalTest {
 
     @Override
@@ -122,7 +122,6 @@ public class TestPythonJsonNdArrayScalarInput extends BaseMultiNumpyVerticalTest
         NDArrayOutput nd = ObjectMappers.json().readValue(ndarraySerde, NDArrayOutput.class);
         INDArray value = nd.getNdArray();
         assertEquals(4, value.getDouble(0), 1e-1);
-
     }
 
 }
