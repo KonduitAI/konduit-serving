@@ -15,6 +15,7 @@ setup(
         "pydl4j",
         "pydatavec",
         "pyyaml",
+        "click"
     ],
     py_modules=["konduit", "cli"],
     extras_require={
@@ -22,7 +23,7 @@ setup(
         "codegen": ["jsonschema2popo"],
         "dev": ["black", "pre-commit"],
     },
-    entry_points={"console_scripts": ["konduit=cli:cli"]},
+    entry_points={"console_scripts": ["konduit=cli:cli", "konduit-init=cli:init"]},
     include_package_data=True,
     license="Apache",
     description="konduit: Enterprise Runtime for Machine Learning Models",
