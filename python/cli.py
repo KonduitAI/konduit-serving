@@ -10,6 +10,8 @@ KONDUIT_SOURCE_DIR = os.path.join(KONDUIT_BASE_DIR, "source")
 KONDUIT_JAR_DIR = os.path.join(KONDUIT_BASE_DIR, "jar")
 KONDUIT_JAR_PATH = os.path.join(KONDUIT_JAR_DIR, "konduit.jar")
 
+DOWNLOAD_TAG = "cli_base"
+
 CURRENT_KONDUIT_VERSION = "0.1.0-SNAPSHOT"
 DEFAULT_KONDUIT_TAG = "cli_base_2"
 KONDUIT_JAR_URL_FORMAT = "https://github.com/KonduitAI/konduit-serving/releases/download/" \
@@ -146,7 +148,7 @@ def get_jar_url(platform, version, spin, chip):
 
     return KONDUIT_JAR_URL_FORMAT.format(version=version,
                                          platform=platform,
-                                         tag="cli_base",
+                                         tag=DOWNLOAD_TAG,
                                          spin=spin,
                                          chip=chip)
 
