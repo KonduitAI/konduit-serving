@@ -318,4 +318,9 @@ public class ConfigJsonCoverageTrackingTests {
         testConfigSerDe(ModelConfigType.keras("/path/to/keras.hdf5"));
         testConfigSerDe(ModelConfigType.tensorFlow("/path/to/tensorflow.pb"));
     }
+
+    @Test
+    public void testWordPieceTokenizerConfig() {
+        testConfigSerDe(WordPieceTokenizerStep.builder().vocabPath("/path/to/vocab.txt").sentenceMaxLen(256).build());
+    }
 }

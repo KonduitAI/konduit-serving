@@ -75,7 +75,6 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
 
     protected  void initSchemasAndColumnsIfNeeded() {
         if(!(SchemaTypeUtils.allIsNullOrEmpty(inputNames) && SchemaTypeUtils.allIsNullOrEmpty(inputColumnNames) && SchemaTypeUtils.allIsNullOrEmpty(inputSchemas))) {
-            Set<String> namesTest = new HashSet<>(inputNames);
             if(SchemaTypeUtils.anyIsNullOrEmpty(inputColumnNames,inputSchemas)) {
                 inputColumnNames = new LinkedHashMap<>();
                 inputSchemas = new LinkedHashMap<>();
@@ -84,7 +83,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
                     inputSchemas.put(inputName, Collections.singletonList(SchemaType.NDArray));
                 });
             }
-            Preconditions.checkState(namesTest.equals(inputSchemas.keySet()) && namesTest.equals(inputColumnNames.keySet()),"Input schema types, input column names, and input names specified are not consistent!");
+            Preconditions.checkState(this.inputSchemas.keySet().equals(this.inputColumnNames.keySet()),"Input schema types and input column names specified are not consistent!");
         }
         else if(SchemaTypeUtils.anyIsNullOrEmpty(inputColumnNames,inputSchemas)) {
             inputColumnNames = new LinkedHashMap<>();
@@ -105,9 +104,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
             this.inputColumnNames.put("default",Arrays.asList("default"));
         }
 
-
         if(!(SchemaTypeUtils.allIsNullOrEmpty(this.outputNames) && SchemaTypeUtils.allIsNullOrEmpty(this.outputSchemas) && SchemaTypeUtils.allIsNullOrEmpty(this.outputColumnNames))) {
-            Set<String> outputNamesTest = new HashSet<>(this.outputNames);
             if(SchemaTypeUtils.anyIsNullOrEmpty(outputSchemas,outputColumnNames)) {
                 outputColumnNames = new LinkedHashMap<>();
                 outputSchemas = new LinkedHashMap<>();
@@ -116,9 +113,8 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
                     outputSchemas.put(inputName, Collections.singletonList(SchemaType.NDArray));
                 });
             }
-            Preconditions.checkState(this.outputSchemas.keySet().equals(this.outputColumnNames.keySet())
-                            && this.outputSchemas.keySet().equals(outputNamesTest),
-                    "Output schemas and input column name names are not consistent!");
+            Preconditions.checkState(this.outputSchemas.keySet().equals(this.outputColumnNames.keySet()),
+                    "Output schema types and output column names specified are not consistent!");
         } else if(SchemaTypeUtils.anyIsNullOrEmpty(outputSchemas,outputColumnNames)) {
             outputColumnNames = new LinkedHashMap<>();
             outputSchemas = new LinkedHashMap<>();
