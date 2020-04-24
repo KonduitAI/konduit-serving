@@ -37,6 +37,7 @@ import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.metrics.*;
 import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.image.VertxBufferImageInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.nd4j.VertxBufferNd4jInputAdapter;
@@ -44,6 +45,7 @@ import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.numpy
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
+import ai.konduit.serving.pipeline.step.WordPieceTokenizerStep;
 import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
@@ -702,20 +704,19 @@ public class PipelineRouteDefiner {
 
     private void initializeSchemas(InferenceConfiguration inferenceConfiguration, boolean inputRequired) {
         if (inputSchema == null && inputRequired) {
-            for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                if (pipelineStep instanceof ModelStep || pipelineStep instanceof PythonStep || pipelineStep
-                        instanceof TransformProcessStep) {
-                    inputSchema = pipelineStep.inputSchemaForName("default");
-                }
+            Object pipelineStep = inferenceConfiguration.getSteps().get(0);
+            if (pipelineStep instanceof ModelStep || pipelineStep instanceof PythonStep || pipelineStep
+                    instanceof TransformProcessStep || pipelineStep instanceof WordPieceTokenizerStep) {
+                inputSchema = inferenceConfiguration.getSteps().get(0).inputSchemaForName("default");
             }
         }
 
         if (outputSchema == null) {
-            for (PipelineStep pipelineStep : inferenceConfiguration.getSteps()) {
-                if (pipelineStep instanceof ModelStep || pipelineStep instanceof PythonStep || pipelineStep
-                        instanceof TransformProcessStep) {
-                    outputSchema = pipelineStep.outputSchemaForName("default");
-                }
+            Integer lastIndex = inferenceConfiguration.getSteps().size() - 1;
+            Object pipelineStep = inferenceConfiguration.getSteps().get(lastIndex);
+            if (pipelineStep instanceof ModelStep || pipelineStep instanceof PythonStep || pipelineStep
+                    instanceof TransformProcessStep || pipelineStep instanceof WordPieceTokenizerStep) {
+                outputSchema = inferenceConfiguration.getSteps().get(lastIndex).outputSchemaForName("default");
             }
         }
     }

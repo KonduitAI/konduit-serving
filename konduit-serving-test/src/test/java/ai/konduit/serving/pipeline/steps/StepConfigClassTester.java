@@ -22,10 +22,7 @@
 
 package ai.konduit.serving.pipeline.steps;
 
-import ai.konduit.serving.pipeline.step.ImageLoadingStep;
-import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.pipeline.step.PythonStep;
-import ai.konduit.serving.pipeline.step.TransformProcessStep;
+import ai.konduit.serving.pipeline.step.*;
 import org.junit.Test;
 
 public class StepConfigClassTester {
@@ -36,6 +33,7 @@ public class StepConfigClassTester {
         Class.forName(new ModelStep().pipelineStepClazz());
         Class.forName(new PythonStep().pipelineStepClazz());
         Class.forName(new TransformProcessStep().pipelineStepClazz());
+        Class.forName(new WordPieceTokenizerStep().pipelineStepClazz());
 
     }
 
