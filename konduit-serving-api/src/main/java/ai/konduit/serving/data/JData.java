@@ -1,22 +1,29 @@
 package ai.konduit.serving.data;
 
+import ai.konduit.serving.util.ObjectMappers;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import javax.json.JsonValue;
 import java.io.File;
 import java.io.OutputStream;
-import java.util.List;
+import java.util.*;
 
 public class JData implements Data {
+
+    private Map<String, Object> dataMap = new HashMap<>();
+
     @Override
     public String toJson() {
-        return null;
+        return ObjectMappers.toJson(dataMap);
     }
 
     @Override
     public List<String> keys() {
-        return null;
+        Set<String> keys = dataMap.keySet();
+        List<String> retVal = new ArrayList<>();
+        retVal.addAll(keys);
+        return retVal;
     }
 
     @Override
@@ -36,12 +43,20 @@ public class JData implements Data {
 
     @Override
     public INDArray getArray(String key) {
-        return null;
+        INDArray data = (INDArray) dataMap.get(key);
+        return data;
     }
 
     @Override
     public String getString(String key) {
-        return null;
+        String data = (String)dataMap.get(key);
+        return data;
+    }
+
+    @Override
+    public boolean getBoolean(String key) {
+        Boolean data = (Boolean) dataMap.get(key);
+        return data;
     }
 
     @Override
@@ -51,7 +66,28 @@ public class JData implements Data {
 
     @Override
     public Data getData(String key) {
-        return null;
+        Data data = (Data)dataMap.get(key);
+        return data;
+    }
+
+    @Override
+    public void put(String key, String data) {
+        dataMap.put(key, data);
+    }
+
+    @Override
+    public void put(String key, INDArray data) {
+        dataMap.put(key, data);
+    }
+
+    @Override
+    public void put(String key, byte[] data) {
+        dataMap.put(key, data);
+    }
+
+    @Override
+    public void put(String key, Data data) {
+        dataMap.put(key, data);
     }
 
     @Override
@@ -82,5 +118,23 @@ public class JData implements Data {
     @Override
     public byte[] asBytes() {
         return new byte[0];
+    }
+
+    private static Data instance = null;
+
+    static Data makeData(String key, Object data) {
+        if (instance == null) {
+            instance = new JData();
+        }
+        if (data instanceof String) {
+            instance.put(key, (String)data);
+        }
+        else if (data instanceof INDArray) {
+            instance.put(key, (INDArray) data);
+        }
+        else {
+            throw new IllegalStateException("Trying to put data of not supported type");
+        }
+        return instance;
     }
 }

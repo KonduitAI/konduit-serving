@@ -23,21 +23,15 @@ public interface Data {
 
     // Getters
     INDArray getArray(String key);
-
     String getString(String key);
-
+    boolean getBoolean(String key);
     List<JsonValue.ValueType> getList(String key, DataType type);
-
     Data getData(String key);
 
-    /* getArray(String, NDArray)
-     getString(String, String)
-     getBoolean(String, boolean)
-
-    * put(String, String)
-    * put(String, INDArray)
-    * put(String, byte[])
-    */
+    void put(String key, String data);
+    void put(String key, INDArray data);
+    void put(String key, byte[] data);
+    void put(String key, Data data);
 
     boolean hasMetaData();
     Data getMetaData();
@@ -64,7 +58,4 @@ public interface Data {
         return null;
     }
 
-    static Data makeData(String key, Object data) {
-        return null;
-    }
 }
