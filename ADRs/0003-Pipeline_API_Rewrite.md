@@ -1,11 +1,11 @@
 # Pipeline API Rewrite
 
 ## Status
-PROPOSED
+Accepted (25/04/2020)
 
-Proposed by: Alex Black (10-04-2020)
+Proposed by: Alex Black (10/04/2020)
 
-Discussed with: ...
+Discussed with: Shams, Paul, Adam
 
 ## Context
  
@@ -148,7 +148,7 @@ Our starting point:
 2. Remove the concept of pre-defined, fixed schemas for PipelineStep and PipelineStepRunner
 
 With regards to (1), the current pipeline definition of `Record[] --> Record[]` is replaced with something else.
-For now, I'll refer to this as the `Data` class (name subject to change) - and thus pipelines are defined as `Data --> Data` operations.
+It is proposed to call this the `Data` class - and thus pipelines are defined as `Data --> Data` operations.
 
 There are two aspects to consider here: *API* - what users and developers will interact with when writing pipeline steps,
 and *Storage* - the actual data structure used to store and serialize `Data` instances.
@@ -413,7 +413,7 @@ This proposal should satisfy all of the requirements mentioned earlier:
 * Supports optional values in and out
 * Good usability - yes (IMO)
 * Easier to write and maintain pipeline steps
-* JSON serializable
+* JSON serializable (ideally YAML serializable also)
 * Metadata support (optionally present or absent) - for both input/requests, and output
 * Binary serializable, suitable for long-term storage - via Flatbuffers or Protobuf, which TBD
   
@@ -433,3 +433,39 @@ This proposal should satisfy all of the requirements mentioned earlier:
 
 
 ## Discussion
+
+
+> Micro service deployment / remote endpoints: What is the background here? Is it planned to allow a single konduit-serving deployment to be spread along multiple containers? Or is this more for the case where we'd like to ship off something to an already existing and deployed service, so this effectively becomes some sort of RPC call?
+
+Yes, split between multiple containers is something we'll need. Not frequently, but some deployment situations will require this.
+
+Consider for example the following scenarios:
+
+* A pipeline with 2 models - a face detector (run on an edge device) and a powerful face verification model (run on a powerful remote server)
+  The idea is that the edge device does the initial detection, and only if a face is detected pass on the data to a remote server.
+  We can't and/or don't want to run the entire pipeline on one machine.
+* A pipeline that requires multiple docker containers for isolation
+  We can't embed _every_ language in KS/Java like we do with Python; in some cases, we'll need to split things up into multiple docker containers.
+  C#, Matlab, R, Swift, etc come to mind here as things we might deploy in a separate docker image, even if all images are run on the one machine.
+* A situation where we need non-linear scaling of pipeline steps
+  For example: The first step does filtering (like in the face detection example) and we need 20 multi-core CPU machines to do that filtering. Then only 0.1% of the cases actually make it to one of 2 GPU machines; so our deployment is (20 CPU + 2 GPU) not (20 GPU)
+
+Both aren't something we need right now, but I think it's inevitable that we'll run into some deployment scenarios where the current "single process monolithic" design won't work.
+
+> Schema Validation: Wouldn't it be possible to make steps queryable for what input and output they want? Having a definition time checker for schema validation would be quite nice. But I guess that could be added in another step, and doesn't have to be built in right now.
+
+That's not a bad idea, but it would have to be optional... not all steps will really know their inputs/outputs until runtime. And some inputs/outputs will be dynamic (most won't be though).
+For example, in model steps - we won't know the placeholder/input names (or even number of inputs/outputs) until we load a specific model.
+But yes, let's revisit this.
+
+
+> Metadata: I like that input meta data is available at all steps. But wouldn't it be nice to have meta data be addable by the steps?
+
+Yes, I don't think I covered that, but I something like that in mind too.
+So for example an image loading step could return metadata about the original image (format, dimensions, filename, etc) back to the user, no matter how many other steps are present after the image loading step.
+
+
+
+> Mapping between model steps: In the end you acknowledge that naming mismatches may be a problem, maybe the easiest way instead of guessing is to make this explicit, and have a reusable "MappingStep" that just maps one name to another?
+
+For the ("input", "mask") vs. ("features", "featureMask") type labeling problem - yes, I don't see any alternative to that (other than the unambiguous cases like single array input, etc)
