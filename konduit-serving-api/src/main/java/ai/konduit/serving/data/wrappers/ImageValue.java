@@ -18,16 +18,30 @@
  *
  *
  */
-package ai.konduit.serving.data;
+package ai.konduit.serving.data.wrappers;
 
-public enum ValueType {
-    NDARRAY,
-    STRING,
-    BYTES,
-    IMAGE,
-    DOUBLE,
-    INT64,
-    BOOLEAN,
-    DATA,
-    LIST
+import ai.konduit.serving.data.Value;
+import ai.konduit.serving.data.ValueType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import org.datavec.image.data.Image;
+
+@AllArgsConstructor
+public class ImageValue implements Value<Image> {
+    private Image image;
+
+    @Override
+    public ValueType type() {
+        return ValueType.IMAGE;
+    }
+
+    @Override
+    public Image get() {
+        return image;
+    }
+
+    @Override
+    public void set(Image value) {
+        this.image = value;
+    }
 }

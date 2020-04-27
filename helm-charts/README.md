@@ -3,7 +3,7 @@
 ## Overview
 
 This folder contains the [helm charts](https://helm.sh/docs/developing_charts/)
-for kunduit. These are examples for running konduit on kubernetes.
+for konduit. These are examples for running konduit on kubernetes.
 
 ## Modules
 

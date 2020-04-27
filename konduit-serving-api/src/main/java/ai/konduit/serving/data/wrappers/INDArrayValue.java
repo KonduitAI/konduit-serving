@@ -18,16 +18,29 @@
  *
  *
  */
-package ai.konduit.serving.data;
+package ai.konduit.serving.data.wrappers;
 
-public enum ValueType {
-    NDARRAY,
-    STRING,
-    BYTES,
-    IMAGE,
-    DOUBLE,
-    INT64,
-    BOOLEAN,
-    DATA,
-    LIST
+import ai.konduit.serving.data.Value;
+import ai.konduit.serving.data.ValueType;
+import lombok.AllArgsConstructor;
+import org.nd4j.linalg.api.ndarray.INDArray;
+
+@AllArgsConstructor
+public class INDArrayValue implements Value<INDArray> {
+    private INDArray value;
+
+    @Override
+    public INDArray get() {
+        return value;
+    }
+
+    @Override
+    public void set(INDArray value) {
+        this.value = value;
+    }
+
+    @Override
+    public ValueType type() {
+        return ValueType.NDARRAY;
+    }
 }

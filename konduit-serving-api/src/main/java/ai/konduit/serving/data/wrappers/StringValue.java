@@ -18,16 +18,32 @@
  *
  *
  */
-package ai.konduit.serving.data;
+package ai.konduit.serving.data.wrappers;
 
-public enum ValueType {
-    NDARRAY,
-    STRING,
-    BYTES,
-    IMAGE,
-    DOUBLE,
-    INT64,
-    BOOLEAN,
-    DATA,
-    LIST
+import ai.konduit.serving.data.Value;
+import ai.konduit.serving.data.ValueType;
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
+public class StringValue implements Value<String> {
+    private String value;
+
+    public void setValue(Object input) {
+        value = (String)input;
+    }
+
+    @Override
+    public String get() {
+        return value;
+    }
+
+    @Override
+    public void set(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public ValueType type() {
+        return ValueType.STRING;
+    }
 }

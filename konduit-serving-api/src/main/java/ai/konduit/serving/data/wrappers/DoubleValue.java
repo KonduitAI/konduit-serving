@@ -18,16 +18,29 @@
  *
  *
  */
-package ai.konduit.serving.data;
+package ai.konduit.serving.data.wrappers;
 
-public enum ValueType {
-    NDARRAY,
-    STRING,
-    BYTES,
-    IMAGE,
-    DOUBLE,
-    INT64,
-    BOOLEAN,
-    DATA,
-    LIST
+import ai.konduit.serving.data.Value;
+import ai.konduit.serving.data.ValueType;
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
+public class DoubleValue implements Value<Double> {
+
+    private double value;
+
+    @Override
+    public ValueType type() {
+        return ValueType.DOUBLE;
+    }
+
+    @Override
+    public Double get() {
+        return value;
+    }
+
+    @Override
+    public void set(Double value) {
+        this.value = value;
+    }
 }

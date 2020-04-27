@@ -18,16 +18,30 @@
  *
  *
  */
-package ai.konduit.serving.data;
+package ai.konduit.serving.data.wrappers;
 
-public enum ValueType {
-    NDARRAY,
-    STRING,
-    BYTES,
-    IMAGE,
-    DOUBLE,
-    INT64,
-    BOOLEAN,
-    DATA,
-    LIST
+import ai.konduit.serving.data.Value;
+import ai.konduit.serving.data.ValueType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
+@AllArgsConstructor
+public class BooleanValue implements Value<Boolean> {
+
+    private boolean value;
+
+    @Override
+    public ValueType type() {
+        return ValueType.BOOLEAN;
+    }
+
+    @Override
+    public Boolean get() {
+        return value;
+    }
+
+    @Override
+    public void set(Boolean value) {
+        this.value = value;
+    }
 }

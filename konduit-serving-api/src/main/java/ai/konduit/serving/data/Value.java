@@ -20,14 +20,11 @@
  */
 package ai.konduit.serving.data;
 
-public enum ValueType {
-    NDARRAY,
-    STRING,
-    BYTES,
-    IMAGE,
-    DOUBLE,
-    INT64,
-    BOOLEAN,
-    DATA,
-    LIST
+public interface Value<T> {
+
+    ValueType type();
+
+    T get();
+
+    void set(T value);
 }

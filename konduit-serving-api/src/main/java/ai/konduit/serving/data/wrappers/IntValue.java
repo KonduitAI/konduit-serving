@@ -18,16 +18,29 @@
  *
  *
  */
-package ai.konduit.serving.data;
+package ai.konduit.serving.data.wrappers;
 
-public enum ValueType {
-    NDARRAY,
-    STRING,
-    BYTES,
-    IMAGE,
-    DOUBLE,
-    INT64,
-    BOOLEAN,
-    DATA,
-    LIST
+import ai.konduit.serving.data.Value;
+import ai.konduit.serving.data.ValueType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
+@AllArgsConstructor
+public class IntValue implements Value<Long> {
+    private long value;
+
+    @Override
+    public ValueType type() {
+        return ValueType.INT64;
+    }
+
+    @Override
+    public Long get() {
+        return value;
+    }
+
+    @Override
+    public void set(Long value) {
+        this.value = value;
+    }
 }
