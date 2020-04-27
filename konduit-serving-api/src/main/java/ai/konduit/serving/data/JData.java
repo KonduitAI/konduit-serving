@@ -23,21 +23,21 @@ package ai.konduit.serving.data;
 import ai.konduit.serving.data.wrappers.*;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
 import org.datavec.image.data.Image;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.io.CollectionUtils;
 
 import javax.json.JsonValue;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 
 @Slf4j
 public class JData implements Data {
 
     private Map<String, Value> dataMap = new HashMap<>();
+    private Data metaData;
 
     @Override
     public Map<String, Value> getDataMap() {
@@ -60,8 +60,9 @@ public class JData implements Data {
     @Override
     public String key(int id) {
         String retVal = null;
+        Iterator<Map.Entry<String,Value>> iterator = dataMap.entrySet().iterator();
         for (int i = 0; i < id; ++i) {
-
+            retVal = iterator.next().getKey();
         }
         return retVal;
     }
@@ -174,22 +175,22 @@ public class JData implements Data {
 
     @Override
     public void put(String key, Data data) {
-         //dataMap.addAll(data.getDataMap());
+        this.dataMap.putAll(data.getDataMap());
     }
 
     @Override
     public boolean hasMetaData() {
-        return false;
+        return metaData != null;
     }
 
     @Override
     public Data getMetaData() {
-        return null;
+        return metaData;
     }
 
     @Override
     public void setMetaData(Data data) {
-
+        this.metaData = data;
     }
 
     @Override
@@ -204,7 +205,8 @@ public class JData implements Data {
 
     public static Data fromFile(File fromFile) {
         Data retVal = JData.empty();
-        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(fromFile))) {
+        try (ObjectInputStream osi = new ObjectInputStream(new FileInputStream(fromFile))) {
+            retVal = (JData)osi.readObject();
 
         } catch (Exception e) {
             log.error("Error saving Data object to file",e);
@@ -214,14 +216,27 @@ public class JData implements Data {
 
     @Override
     public void write(OutputStream toStream) {
-        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(toStream))) {
-            writer.print(dataMap);
+        try (ObjectOutputStream oos = new ObjectOutputStream(toStream)) {
+            oos.writeObject(this.dataMap);
+            if (hasMetaData())
+                oos.writeObject(metaData.getDataMap());
+        } catch (IOException e) {
+            log.error("Error serializing Data", e);
         }
     }
 
     @Override
     public byte[] asBytes() {
-        return new byte[0];
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             ObjectOutput out = new ObjectOutputStream(bos)) {
+            out.writeObject(this.dataMap);
+            if (hasMetaData())
+                out.writeObject(metaData.getDataMap());
+            return bos.toByteArray();
+        } catch (IOException e) {
+            log.error("Failed to convert Data to bytes[]", e);
+        }
+        return null;
     }
 
     private static Data instance = null;
@@ -267,5 +282,52 @@ public class JData implements Data {
             throw new IllegalStateException("Trying to put data of not supported type");
         }
         return instance;
+    }
+
+    public static class DataBuilder {
+        private JData instance;
+
+        public DataBuilder() {
+            instance = new JData();
+        }
+
+        public DataBuilder withStringData(String key, String data) {
+            instance.put(key, data);
+            return this;
+        }
+
+        public DataBuilder withBooleanData(String key, Boolean data) {
+            instance.put(key, data);
+            return this;
+        }
+
+        public DataBuilder withBytesData(String key, byte[] data) {
+            instance.put(key, data);
+            return this;
+        }
+
+        public DataBuilder withDoubleData(String key, Double data) {
+            instance.put(key, data);
+            return this;
+        }
+
+        public DataBuilder withImageData(String key, Image data) {
+            instance.put(key, data);
+            return this;
+        }
+
+        public DataBuilder withNDArrayData(String key, INDArray data) {
+            instance.put(key, data);
+            return this;
+        }
+
+        public DataBuilder withIntValue(String key, Long data) {
+            instance.put(key, data);
+            return this;
+        }
+
+        public JData builld() {
+            return instance;
+        }
     }
 }

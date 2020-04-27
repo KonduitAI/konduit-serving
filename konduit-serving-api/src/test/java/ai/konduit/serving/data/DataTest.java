@@ -118,4 +118,25 @@ public class DataTest {
         someData.save(new File("temp"));
         Data restoredData = JData.fromFile(new File("temp"));
     }
+
+    @Test
+    public void testBuilderVSFactory() {
+        Data built = new JData.DataBuilder().
+                withBooleanData("key1", true).
+                withStringData("key2","null").
+                builld();
+
+        Data made = JData.makeData("key1", true);
+        made.put("key2", "null");
+
+        Data madeFromEmpty = JData.empty();
+        madeFromEmpty.put("key1", true);
+        madeFromEmpty.put("key2", "null");
+
+        assertEquals(built.getDataMap().get("key1").get(), made.getDataMap().get("key1").get());
+        assertEquals(built.getDataMap().get("key2").get(), made.getDataMap().get("key2").get());
+
+        assertEquals(built.getDataMap().get("key1").get(), madeFromEmpty.getDataMap().get("key1").get());
+        assertEquals(built.getDataMap().get("key2").get(), madeFromEmpty.getDataMap().get("key2").get());
+    }
 }
