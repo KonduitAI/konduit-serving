@@ -48,13 +48,11 @@ import org.nd4j.linalg.api.buffer.DataBuffer;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.net.URL;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.Collections;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertArrayEquals;
@@ -98,8 +96,8 @@ public class OnnxTest extends BaseVerticleTest {
 
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)
-                .inputNames(Arrays.asList("data_0"))
-                .outputNames(Arrays.asList("squeezenet0_flatten0_reshape0"))
+                .inputNames(Collections.singletonList("data_0"))
+                .outputNames(Collections.singletonList("squeezenet0_flatten0_reshape0"))
                 .build();
 
 
@@ -141,7 +139,7 @@ public class OnnxTest extends BaseVerticleTest {
 
             INDArray bodyResult = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
 
-            assert Math.abs(bodyResult.getFloat(0) - 1.99018) < 1e-4;
+            assertEquals(1.99018, bodyResult.getFloat(0), 1e-4);
 
             assertArrayEquals(new long[]{1, 1000}, bodyResult.shape());
         }

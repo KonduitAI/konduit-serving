@@ -42,6 +42,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.image.data.Image;
 import org.junit.After;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -50,18 +51,23 @@ import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class OnnxMultipleOutputsTest extends BaseVerticleTest {
+
+    @BeforeClass
+    public static void beforeClass(TestContext testContext) throws IOException {
+    }
 
     @Override
     public Class<? extends AbstractVerticle> getVerticalClazz() {
@@ -72,6 +78,7 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
     public Handler<HttpServerRequest> getRequest() {
         return null;
     }
+
 
     @Override
     public JsonObject getConfigObject() throws Exception {
@@ -96,10 +103,9 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
 
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)
-                .inputNames(Arrays.asList("input"))
+                .inputNames(Collections.singletonList("input"))
                 .outputNames(Arrays.asList("scores", "boxes"))
                 .build();
-
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
@@ -167,11 +173,11 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
         byte[] bytes2 = com.google.common.io.ByteStreams.toByteArray(entryStream2);
 
         INDArray bodyResult = Nd4j.createNpyFromByteArray(bytes);
-        assert Math.abs(bodyResult.getFloat(0) - 0.9539676) < 1e-6;
+        assertEquals(0.9539676, bodyResult.getFloat(0), 1e-6);
         assertArrayEquals(new long[]{1, 8840}, bodyResult.shape());
 
         INDArray bodyResult2 = Nd4j.createNpyFromByteArray(bytes2);
-        assert Math.abs(bodyResult2.getFloat(0) - 0.002913665) < 1e-6;
+        assertEquals(0.002913665, bodyResult2.getFloat(0), 1e-6);
         assertArrayEquals(new long[]{1, 17680}, bodyResult2.shape());
     }
 
@@ -179,5 +185,4 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
     public void after(TestContext context) {
         super.after(context);
     }
-
 }

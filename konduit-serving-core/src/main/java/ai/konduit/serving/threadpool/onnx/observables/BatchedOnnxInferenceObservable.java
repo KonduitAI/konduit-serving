@@ -50,11 +50,9 @@ public class BatchedOnnxInferenceObservable extends Observable implements OnnxOb
     private AtomicBoolean isLocked = new AtomicBoolean(false);
     private AtomicBoolean isReadLocked = new AtomicBoolean(false);
 
-
     public BatchedOnnxInferenceObservable(List<Map<String, INDArray>> inputs) {
         this.input = inputs;
     }
-
 
     @Override
     public void addInput(@NonNull List<Map<String, INDArray>> input) {
@@ -69,7 +67,6 @@ public class BatchedOnnxInferenceObservable extends Observable implements OnnxOb
         }
         this.input = input;
     }
-
 
     @Override
     public List<Map<String, INDArray>> getInputBatches() {
@@ -92,7 +89,6 @@ public class BatchedOnnxInferenceObservable extends Observable implements OnnxOb
             return Collections.singletonList(input.get(0));
         }
     }
-
 
     @Override
     public void setOutputBatches(List<Map<String, INDArray>> output) {
@@ -143,6 +139,4 @@ public class BatchedOnnxInferenceObservable extends Observable implements OnnxOb
 
         return result;
     }
-
-
 }
