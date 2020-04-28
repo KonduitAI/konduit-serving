@@ -62,9 +62,11 @@ public class InferenceConfiguration implements Serializable, TextConfig {
                 PythonStep pythonStep = (PythonStep) step;
                 Map<String, PythonConfig> pythonConfigs = pythonStep.getPythonConfigs();
 
-                for(String key : pythonConfigs.keySet()) {
-                    if(pythonStep.getInputNames() == null || !pythonStep.getInputNames().contains(key))
-                        pythonStep.step(key, pythonConfigs.get(key));
+                if (pythonConfigs != null) {
+                    for (String key : pythonConfigs.keySet()) {
+                        if (pythonStep.getInputNames() == null || !pythonStep.getInputNames().contains(key))
+                            pythonStep.step(key, pythonConfigs.get(key));
+                    }
                 }
             }
 

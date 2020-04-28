@@ -210,9 +210,11 @@ def get_python_step(step_config):
     :return: konduit.inference.PythonStep instance.
     """
 
-    python_config = PythonConfig(**step_config)
-    step = PythonStep().step(python_config)
-    return step
+    python_step = PythonStep()
+    for key, python_config in step_config:
+        python_step.step(key, PythonConfig(**python_config))
+
+    return python_step
 
 
 def get_image_load_step(step_config):
