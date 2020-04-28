@@ -35,6 +35,8 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.python.PythonType;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
+import org.nd4j.shade.jackson.annotation.JsonSetter;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,10 +52,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
+@Data
 public class PythonStep extends BasePipelineStep<PythonStep> {
 
-    @Getter
-    @Setter
     @Singular
     private Map<String, PythonConfig> pythonConfigs;
 

@@ -4,11 +4,8 @@ serving:
   log_timings: True
   extra_start_args: -Xmx8g
 steps:
-  tensorflow_step:
-    type: TENSORFLOW
+  - type: TENSORFLOW
     path: ../data/mnist_2.0.0.pb
-    input_names:
-      - input_layer
     output_names:
       - output_layer/Softmax
     input_data_types:

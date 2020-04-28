@@ -1,13 +1,8 @@
 serving:
   http_port: 1337
 steps:
-  tensorflow_step:
-    type: TENSORFLOW
+  - type: TENSORFLOW
     path: bert_mrpc_frozen.pb
-    input_names:
-      - IteratorGetNext:0
-      - IteratorGetNext:1
-      - IteratorGetNext:4
     output_names:
       - loss/Softmax
     parallel_inference_config:

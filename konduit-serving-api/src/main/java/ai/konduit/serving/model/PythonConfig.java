@@ -47,7 +47,6 @@ import java.util.Map;
 @AllArgsConstructor
 public class PythonConfig implements Serializable {
 
-
     private String  pythonCode, pythonCodePath, pythonPath;
 
     @Singular
@@ -58,6 +57,4 @@ public class PythonConfig implements Serializable {
     private boolean setupAndRun;
 
     private static String defaultPythonPath;
-
-
 }

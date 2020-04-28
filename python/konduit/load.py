@@ -209,6 +209,7 @@ def get_python_step(step_config):
     :param step_config: python dictionary with properties to create a PipelineStep
     :return: konduit.inference.PythonStep instance.
     """
+
     python_config = PythonConfig(**step_config)
     step = PythonStep().step(python_config)
     return step
@@ -241,64 +242,28 @@ def get_model_step(step_config, step_type):
     :param step_type: type of the step (TENSORFLOW, KERAS, DL4J, PMML or SAMEDIFF)
     :return: konduit.inference.ModelStep instance.
     """
-    model_path = pop_data(step_config, "path")
+
     if (
         step_type == "TENSORFLOW"
     ):  # TF has to extra properties, all others are identical
-        model_config = TensorFlowConfig(
-            path=model_path,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
+        model_step = TensorFlowStep(**step_config)
     elif (
             step_type == "KERAS"
     ):  # TF has to extra properties, all others are identical
-        model_config = KerasConfig(
-            path=model_path,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
+        model_step = KerasStep(**step_config)
     elif (
             step_type == "DL4J"
     ):  # TF has to extra properties, all others are identical
-        model_config = DL4JConfig(
-            path=model_path,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
+        model_step = Dl4jStep(**step_config)
     elif (
             step_type == "SAMEDIFF"
     ):  # TF has to extra properties, all others are identical
-        model_config = SameDiffConfig(
-            path=model_path,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
+        model_step = SameDiffStep(**step_config)
     elif (
             step_type == "PMML"
     ):  # TF has to extra properties, all others are identical
-        model_config = PmmlConfig(
-            path=model_path,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
+        model_step = PmmlStep(**step_config)
     else:
-        model_config = ModelConfig(
-            path=model_path,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
-    step_config["model_config"] = model_config
-    step_config = extract_parallel_inference(step_config)
-    step = ModelStep(**step_config)
-    return step
+        model_step = ModelStep(**step_config)
 
-
-def get_tensor_data_types(step_config):
-    input_data_types = pop_data(step_config, "input_data_types")
-    output_data_types = pop_data(step_config, "output_data_types")
-    return TensorDataTypesConfig(
-        input_data_types=input_data_types, output_data_types=output_data_types
-    )
-
-
-def extract_parallel_inference(step_config):
-    pi_config = pop_data(step_config, "parallel_inference_config")
-    if pi_config:
-        pic = ParallelInferenceConfig(**pi_config)
-        step_config["parallel_inference_config"] = pic
-    return step_config
+    return model_step

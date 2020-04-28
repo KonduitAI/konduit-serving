@@ -32,6 +32,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.nd4j.shade.jackson.annotation.JsonIgnore;
 import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
+import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
+import org.nd4j.shade.jackson.databind.annotation.JsonPOJOBuilder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
