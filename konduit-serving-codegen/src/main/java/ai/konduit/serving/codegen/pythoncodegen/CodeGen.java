@@ -219,7 +219,6 @@ public class CodeGen {
             String errorMessage = "";
             try(InputStream is = blackLinting.getInputStream()) {
                 errorMessage += IOUtils.toString(is, StandardCharsets.UTF_8);
-
             }
             throw new IllegalStateException("Code linting failed with error message: "+ errorMessage);
         }
