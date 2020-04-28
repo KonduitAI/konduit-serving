@@ -25,9 +25,8 @@ package ai.konduit.serving.verticles.samediff;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.SameDiffConfig;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.SameDiffStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.response.Response;
@@ -87,10 +86,8 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
                 .httpPort(port)
                 .build();
 
-        SameDiffConfig modelConfig = SameDiffConfig.builder().path(tmpSameDiffFile.getAbsolutePath()).build();
-
-        ModelStep modelPipelineConfig = ModelStep.builder()
-                .modelConfig(modelConfig)
+        SameDiffStep modelPipelineConfig = SameDiffStep.builder()
+                .path(tmpSameDiffFile.getAbsolutePath())
                 .inputNames(Arrays.asList("x", "y"))
                 .outputNames(Collections.singletonList("output"))
                 .build();

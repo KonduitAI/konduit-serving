@@ -25,9 +25,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.TestUtils;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.OnnxConfig;
-import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.OnnxStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.response.Response;
@@ -57,7 +55,6 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class OnnxTest extends BaseVerticleTest {
@@ -85,10 +82,8 @@ public class OnnxTest extends BaseVerticleTest {
                 .httpPort(port)
                 .build();
 
-        OnnxConfig modelConfig = OnnxConfig.builder().path(model.getAbsolutePath()).build();
-
-        ModelStep modelPipelineConfig = ModelStep.builder()
-                .modelConfig(modelConfig)
+        OnnxStep modelPipelineConfig = OnnxStep.builder()
+                .path(model.getAbsolutePath())
                 .inputNames(Collections.singletonList("data_0"))
                 .outputNames(Collections.singletonList("squeezenet0_flatten0_reshape0"))
                 .build();

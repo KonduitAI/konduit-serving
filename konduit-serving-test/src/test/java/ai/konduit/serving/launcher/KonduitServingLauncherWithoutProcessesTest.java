@@ -24,7 +24,7 @@ import ai.konduit.serving.model.*;
 import ai.konduit.serving.output.types.NDArrayOutput;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.pipeline.step.PmmlStep;
+import ai.konduit.serving.pipeline.step.model.*;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.util.LogUtils;
@@ -187,15 +187,11 @@ public class KonduitServingLauncherWithoutProcessesTest {
     public void testConfigs() {
         assertEquals(getConfig("image").getSteps().get(0).getClass(), ImageLoadingStep.class);
         assertEquals(getConfig("python").getSteps().get(0).getClass(), PythonStep.class);
-        assertEquals(((ModelStep) getConfig("tensorflow").getSteps().get(0)).getModelConfig().getClass(), TensorFlowConfig.class);
-        assertEquals(((ModelStep) getConfig("onnx").getSteps().get(0)).getModelConfig().getClass(), OnnxConfig.class);
-
-        ModelStep modelStep = (ModelStep) getConfig("pmml").getSteps().get(0);
-        assertEquals(modelStep.getClass(), PmmlStep.class);
-        assertEquals(modelStep.getModelConfig().getClass(), PmmlConfig.class);
-
-        assertEquals(((ModelStep) getConfig("dl4j").getSteps().get(0)).getModelConfig().getClass(), DL4JConfig.class);
-        assertEquals(((ModelStep) getConfig("keras").getSteps().get(0)).getModelConfig().getClass(), KerasConfig.class);
+        assertEquals(getConfig("tensorflow").getSteps().get(0).getClass(), TensorFlowStep.class);
+        assertEquals(getConfig("onnx").getSteps().get(0).getClass(), OnnxStep.class);
+        assertEquals(getConfig("pmml").getSteps().get(0).getClass(), PmmlStep.class);
+        assertEquals(getConfig("dl4j").getSteps().get(0).getClass(), Dl4jStep.class);
+        assertEquals(getConfig("keras").getSteps().get(0).getClass(), KerasStep.class);
     }
 
     @Test

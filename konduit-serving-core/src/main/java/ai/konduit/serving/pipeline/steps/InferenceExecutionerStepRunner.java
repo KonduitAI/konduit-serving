@@ -37,7 +37,6 @@ import org.nd4j.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -65,7 +64,7 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
         InferenceExecutionerFactory inferenceExecutionerFactory;
 
         try {
-            inferenceExecutionerFactory = modelPipelineStepConfig.getModelConfig().createExecutionerFactory() ;
+            inferenceExecutionerFactory = modelPipelineStepConfig.createExecutionerFactory() ;
 
             Preconditions.checkNotNull(modelPipelineStepConfig, "NO pipeline configuration found!");
             Preconditions.checkNotNull(modelPipelineStepConfig.getParallelInferenceConfig(), "No parallel inference configuration found!");

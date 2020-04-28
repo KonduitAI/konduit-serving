@@ -25,6 +25,7 @@ import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.step.*;
+import ai.konduit.serving.pipeline.step.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
@@ -146,7 +147,7 @@ public class ConfigJsonCoverageTrackingTests {
                         .inputNames(Collections.singletonList("x"))
                         .outputNames(Collections.singletonList("z"))
                         .build())
-                .step(ModelStep.builder().modelConfig(DL4JConfig.builder().path("/my/model/path.bin").build()).build())
+                .step(Dl4jStep.builder().path("/my/model/path.bin").build())
                 .servingConfig(ServingConfig.builder().httpPort(12345).logTimings(true).build())
                 .build();
 
@@ -253,11 +254,6 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @Test
-    public void testModelStep(){
-        testConfigSerDe(ModelStep.builder().modelConfig(DL4JConfig.builder().path("/my/path/here").build()).build());
-    }
-
-    @Test
     public void testMemMapConfig() {
         testConfigSerDe(MemMapConfig.builder().arrayPath("/my/array/path").initialMemmapSize(100000).unkVectorPath("/my/array/unknown").build());
     }
@@ -270,38 +266,38 @@ public class ConfigJsonCoverageTrackingTests {
 
     @Test
     public void testOnnxConfig(){
-        testConfigSerDe(OnnxConfig.builder().path("/Some/Path/Here").build());
+        testConfigSerDe(OnnxStep.builder().path("/Some/Path/Here").build());
     }
 
     @Test
     public void testDL4JConfig(){
-        testConfigSerDe(DL4JConfig.builder().path("/Some/Path/Here").build());
+        testConfigSerDe(Dl4jStep.builder().path("/Some/Path/Here").build());
     }
 
     @Test
     public void testKerasConfig(){
-        testConfigSerDe(KerasConfig.builder().path("/path/to/model.kdf5").build());
+        testConfigSerDe(KerasStep.builder().path("/path/to/model.kdf5").build());
     }
 
     @Test
     public void testPmmlConfig(){
-        testConfigSerDe(PmmlConfig.builder().build());
-        testConfigSerDe(PmmlConfig.builder().evaluatorFactoryName("my.factory.class").build());
+        testConfigSerDe(PmmlStep.builder().build());
+        testConfigSerDe(PmmlStep.builder().evaluatorFactoryName("my.factory.class").build());
     }
 
     @Test
     public void testSameDiffConfig(){
-        testConfigSerDe(SameDiffConfig.builder().path("/my/model/path.fb").build());
+        testConfigSerDe(SameDiffStep.builder().path("/my/model/path.fb").build());
     }
 
     @Test
     public void testTensorFlowConfig(){
-        testConfigSerDe(TensorFlowConfig.builder().build());
+        testConfigSerDe(TensorFlowStep.builder().build());
     }
 
     @Test
     public void testModelConfigType(){
-        testConfigSerDe(KerasConfig.builder().path("/path/to/keras.hdf5").build());
+        testConfigSerDe(KerasStep.builder().path("/path/to/keras.hdf5").build());
     }
 
     @Test

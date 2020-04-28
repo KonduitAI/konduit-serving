@@ -25,10 +25,9 @@ package ai.konduit.serving.executioner.inference.factory;
 import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.SameDiffInferenceExecutioner;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.SameDiffConfig;
 import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.SameDiffStep;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -38,18 +37,17 @@ import java.util.List;
 public class SameDiffInferenceExecutionerFactory implements InferenceExecutionerFactory {
     @Override
     public InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception {
-        SameDiffConfig sameDiffconfig = null;
-        ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
+        SameDiffStep sameDiffStep = null;
         ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 
         try {
-            sameDiffconfig = (SameDiffConfig) inferenceConfiguration;
+            sameDiffStep = (SameDiffStep) modelPipelineStepConfig;
         } catch (Exception e) {
             log.error("Could not extract SameDiffConfig. Did you provide one to your verticle?");
         }
 
         SameDiffModelLoader modelLoader = new SameDiffModelLoader(
-                new File(sameDiffconfig.getPath()),
+                new File(sameDiffStep.getPath()),
                 modelPipelineStepConfig.getInputNames(),
                 modelPipelineStepConfig.getOutputNames());
 
@@ -60,7 +58,6 @@ public class SameDiffInferenceExecutionerFactory implements InferenceExecutioner
         if (inputNames.isEmpty() || outputNames.isEmpty()) {
             throw new IllegalStateException("Input and output names are empty!");
         }
-
 
         return new InitializedInferenceExecutionerConfig(inferenceExecutioner, inputNames, outputNames);
     }

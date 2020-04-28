@@ -20,10 +20,10 @@ import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.MultiComputationGraphInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.MultiLayerNetworkInferenceExecutioner;
-import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.loader.dl4j.cg.ComputationGraphModelLoader;
 import ai.konduit.serving.model.loader.dl4j.mln.MultiLayerNetworkModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.Dl4jStep;
 import lombok.extern.slf4j.Slf4j;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.util.DL4JModelValidator;
@@ -38,8 +38,8 @@ public class Dl4jInferenceExecutionerFactory implements InferenceExecutionerFact
 
     @Override
     public InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception {
-        ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
-        File modelPath = new File(inferenceConfiguration.getPath());
+        Dl4jStep dl4jStep = (Dl4jStep) modelPipelineStepConfig;
+        File modelPath = new File(dl4jStep.getPath());
 
         ValidationResult mlnValidationResult = DL4JModelValidator.validateMultiLayerNetwork(modelPath);
         ValidationResult cgValidationResult;

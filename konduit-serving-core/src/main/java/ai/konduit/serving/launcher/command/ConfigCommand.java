@@ -24,7 +24,7 @@ import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.pipeline.step.PmmlStep;
+import ai.konduit.serving.pipeline.step.model.*;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
@@ -192,22 +192,20 @@ public class ConfigCommand extends DefaultCommand {
     }
 
     private PipelineStep<ModelStep> tensorflow() {
-        return ModelStep.builder()
+        return TensorFlowStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(TensorFlowConfig.builder()
-                                .path("<path-to-the-tensorflow-model>")
-                                .inputDataType(DEFAULT, TensorDataType.FLOAT)
-                                .outputDataType(DEFAULT, TensorDataType.FLOAT)
-                                .build())
+                .path("<path-to-the-tensorflow-model>")
+                .inputDataType(DEFAULT, TensorDataType.FLOAT)
+                .outputDataType(DEFAULT, TensorDataType.FLOAT)
                 .build();
     }
 
     private PipelineStep<ModelStep> onnx() {
-        return ModelStep.builder()
+        return OnnxStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(OnnxConfig.builder().path("<path-to-the-onnx-model>").build())
+                .path("<path-to-the-onnx-model>")
                 .build();
     }
 
@@ -215,23 +213,23 @@ public class ConfigCommand extends DefaultCommand {
         return PmmlStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(PmmlConfig.builder().path("<path-to-the-pmml-model>").build())
+                .path("<path-to-the-pmml-model>")
                 .build();
     }
 
     private PipelineStep<ModelStep> dl4j() {
-        return ModelStep.builder()
+        return Dl4jStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(DL4JConfig.builder().path("<path-to-the-dl4j-model>").build())
+                .path("<path-to-the-dl4j-model>")
                 .build();
     }
 
     private PipelineStep<ModelStep> keras() {
-        return ModelStep.builder()
+        return KerasStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(KerasConfig.builder().path("<path-to-the-keras-model>").build())
+                .path("<path-to-the-keras-model>")
                 .build();
     }
 

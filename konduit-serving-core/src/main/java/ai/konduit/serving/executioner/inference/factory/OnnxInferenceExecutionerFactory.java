@@ -24,18 +24,18 @@ package ai.konduit.serving.executioner.inference.factory;
 import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.OnnxInferenceExecutioner;
-import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.loader.OnnxModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.OnnxStep;
 
 public class OnnxInferenceExecutionerFactory implements InferenceExecutionerFactory {
 
     @Override
     public InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception {
-        ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
+        OnnxStep onnxStep = (OnnxStep) modelPipelineStepConfig;
         ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 
-        String onnxConfigPath = inferenceConfiguration.getPath();
+        String onnxConfigPath = onnxStep.getPath();
 
         OnnxInferenceExecutioner inferenceExecutioner = new OnnxInferenceExecutioner();
         OnnxModelLoader modelLoader1 = new OnnxModelLoader(onnxConfigPath);

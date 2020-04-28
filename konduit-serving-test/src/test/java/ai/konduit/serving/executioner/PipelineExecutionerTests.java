@@ -30,6 +30,7 @@ import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.pipeline.step.model.TensorFlowStep;
 import ai.konduit.serving.util.PortUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -170,20 +171,16 @@ public class PipelineExecutionerTests {
         System.out.println("Started on port " + port);
         String path = new ClassPathResource("inference/tensorflow/mnist/lenet_frozen.pb").getFile().getAbsolutePath();
 
-        TensorFlowConfig modelConfig = TensorFlowConfig.builder()
-                .path(path)
-                .inputDataType("image_tensor", TensorDataType.INT64)
-                .build();
-
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .build();
 
-        ModelStep modelStepConfig = ModelStep.builder()
+        TensorFlowStep modelStepConfig = TensorFlowStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)
                 .inputNames(Collections.singletonList("image_tensor"))
                 .outputNames(Collections.singletonList("detection_classes"))
-                .modelConfig(modelConfig)
+                .path(path)
+                .inputDataType("image_tensor", TensorDataType.INT64)
                 .build();
 
 
@@ -223,14 +220,10 @@ public class PipelineExecutionerTests {
                 .httpPort(port)
                 .build();
 
-        TensorFlowConfig modelConfig = TensorFlowConfig.builder()
+        TensorFlowStep modelStepConfig = TensorFlowStep.builder()
+                .parallelInferenceConfig(parallelInferenceConfig)
                 .path(path)
                 .inputDataType("image_tensor", TensorDataType.INT64)
-                .build();
-
-        ModelStep modelStepConfig = ModelStep.builder()
-                .parallelInferenceConfig(parallelInferenceConfig)
-                .modelConfig(modelConfig)
                 .inputNames(Collections.singletonList("image_tensor"))
                 .outputNames(Collections.singletonList("detection_classes"))
                 .build();

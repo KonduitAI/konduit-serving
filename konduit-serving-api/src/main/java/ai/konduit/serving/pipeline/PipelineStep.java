@@ -6,6 +6,7 @@ import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.config.TextConfig;
 import ai.konduit.serving.pipeline.step.*;
+import ai.konduit.serving.pipeline.step.model.*;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
@@ -15,8 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.EXISTING_PROPERTY;
-import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
 /** PipelineStep collects all ETL and model related properties (input schema,
@@ -28,8 +27,18 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  */
 
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = ModelStep.class, name = "MODEL"),
-        @JsonSubTypes.Type(value = ModelStep.class, name = "ModelStep"),
+        @JsonSubTypes.Type(value = PmmlStep.class, name = "PMML"),
+        @JsonSubTypes.Type(value = PmmlStep.class, name = "PmmlConfig"),
+        @JsonSubTypes.Type(value = SameDiffStep.class, name = "SAMEDIFF"),
+        @JsonSubTypes.Type(value = SameDiffStep.class, name = "SameDiffConfig"),
+        @JsonSubTypes.Type(value = TensorFlowStep.class, name = "TENSORFLOW"),
+        @JsonSubTypes.Type(value = TensorFlowStep.class, name = "TensorFlowConfig"),
+        @JsonSubTypes.Type(value = OnnxStep.class, name = "ONNX"),
+        @JsonSubTypes.Type(value = OnnxStep.class, name = "OnnxConfig"),
+        @JsonSubTypes.Type(value = KerasStep.class, name = "KERAS"),
+        @JsonSubTypes.Type(value = KerasStep.class, name = "KerasConfig"),
+        @JsonSubTypes.Type(value = Dl4jStep.class, name= "DL4J"),
+        @JsonSubTypes.Type(value = Dl4jStep.class, name= "DL4JConfig"),
         @JsonSubTypes.Type(value = PythonStep.class, name = "PYTHON"),
         @JsonSubTypes.Type(value = PythonStep.class, name = "PythonStep"),
         @JsonSubTypes.Type(value = PmmlStep.class, name = "PMML"),

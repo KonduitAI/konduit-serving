@@ -27,8 +27,6 @@ import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.input.conversion.ConverterArgs;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.PmmlConfig;
 import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.output.adapter.*;
 import ai.konduit.serving.output.types.BatchOutput;
@@ -38,6 +36,7 @@ import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.PmmlStep;
 import ai.konduit.serving.util.ArrowUtils;
 import ai.konduit.serving.util.JsonSerdeUtils;
 import ai.konduit.serving.util.ObjectMappers;
@@ -105,7 +104,7 @@ public class PipelineExecutioner implements Closeable {
     private Pipeline pipeline;
     private Schema inputSchema = null;
     private Schema outputSchema = null;
-    private ModelConfig modelConfig = null;
+    private ModelStep modelStep = null;
     private ObjectDetectionConfig objectDetectionConfig = null;
     @Getter
     private static JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
@@ -275,8 +274,7 @@ public class PipelineExecutioner implements Closeable {
 
             // Specific PipelineStep types require special treatment.
             if (pipelineStep instanceof ModelStep) {
-                ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
-                modelConfig = modelPipelineStepConfig.getModelConfig();
+                modelStep = (ModelStep) pipelineStep;
             }
 
             if (pipelineStep instanceof ImageLoadingStep) {
@@ -287,7 +285,7 @@ public class PipelineExecutioner implements Closeable {
 
         initDataTypes();
 
-        if (modelConfig != null && !(modelConfig instanceof PmmlConfig)
+        if (modelStep != null && !(modelStep instanceof PmmlStep)
                 && (inputNames == null || inputNames.isEmpty())) {
             throw new IllegalStateException(
                     "No inputs defined! Please specify input names for your verticle via the model configuration.");
@@ -739,14 +737,14 @@ public class PipelineExecutioner implements Closeable {
     }
 
     private void initDataTypes() {
-        if (modelConfig != null && modelConfig.getInputDataTypes() != null) {
-            Map<String, TensorDataType> types = modelConfig.getInputDataTypes();
+        if (modelStep != null && modelStep.getInputDataTypes() != null) {
+            Map<String, TensorDataType> types = modelStep.getInputDataTypes();
             if (types != null && types.size() >= 1 && inputDataTypes == null)
                 inputDataTypes = initDataTypes(inputNames, types, "default");
         }
 
-        if (modelConfig != null && modelConfig.getOutputDataTypes() != null) {
-            Map<String, TensorDataType> types = modelConfig.getOutputDataTypes();
+        if (modelStep != null && modelStep.getOutputDataTypes() != null) {
+            Map<String, TensorDataType> types = modelStep.getOutputDataTypes();
             if (types != null && types.size() >= 1 && outputDataTypes == null)
                 outputDataTypes = initDataTypes(outputNames, types, "output");
         }

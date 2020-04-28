@@ -26,9 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.PmmlConfig;
-import ai.konduit.serving.pipeline.step.PmmlStep;
+import ai.konduit.serving.pipeline.step.model.PmmlStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.AbstractVerticle;
@@ -89,17 +87,13 @@ public class PmmlIrisTest extends BaseVerticleTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        PmmlConfig pmmlConfig = PmmlConfig.builder()
-                .path(new ClassPathResource("/inference/iris/classification/IrisTree.xml").getFile().getAbsolutePath())
-                .build();
-
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .outputDataFormat(ai.konduit.serving.config.Output.DataFormat.JSON)
                 .build();
 
         PmmlStep pmmlPipelineStep = PmmlStep.builder()
-                .modelConfig(pmmlConfig)
+                .path(new ClassPathResource("/inference/iris/classification/IrisTree.xml").getFile().getAbsolutePath())
                 .inputName("default")
                 .inputColumnName("default", Arrays.asList(
                         "sepal_length",

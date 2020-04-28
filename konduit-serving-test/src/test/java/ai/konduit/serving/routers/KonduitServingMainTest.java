@@ -25,9 +25,8 @@ package ai.konduit.serving.routers;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.deploy.DeployKonduitServing;
-import ai.konduit.serving.model.DL4JConfig;
-import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.Dl4jStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.PortUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
@@ -117,14 +116,12 @@ public class KonduitServingMainTest {
                 .httpPort(PortUtils.getAvailablePort())
                 .build();
 
-        DL4JConfig modelConfig = DL4JConfig.builder().path(modelSave.getAbsolutePath()).build();
-
-        ModelStep modelPipelineStep = ModelStep.builder()
+        Dl4jStep modelPipelineStep = Dl4jStep.builder()
                 .inputName("default")
                 .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
                 .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
                 .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
-                .modelConfig(modelConfig)
+                .path(modelSave.getAbsolutePath())
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .build();
 
