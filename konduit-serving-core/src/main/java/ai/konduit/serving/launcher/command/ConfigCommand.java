@@ -72,6 +72,7 @@ public class ConfigCommand extends DefaultCommand {
 
     private String types;
     private boolean minified;
+    private boolean yaml;
     private File outputFile;
 
     @Option(longName = "types", shortName = "t", argName = "config-types", required = true)
@@ -85,6 +86,10 @@ public class ConfigCommand extends DefaultCommand {
     public void setMinified(boolean minified) {
         this.minified = minified;
     }
+
+    @Option(longName = "yaml", shortName = "y", flag = true)
+    @Description("Set if you want the output to be a yaml configuration.")
+    public void setYaml(boolean yaml) { this.yaml = yaml; }
 
     @Option(longName = "output", shortName = "o", argName = "output-file")
     @Description("Optional: If set, the generated json will be saved here. Otherwise, it's printed on the console.")
@@ -144,14 +149,25 @@ public class ConfigCommand extends DefaultCommand {
             }
         }
 
-        JsonObject output = new JsonObject(InferenceConfiguration.builder()
+        InferenceConfiguration inferenceConfiguration =
+                InferenceConfiguration.builder()
                 .servingConfig(ServingConfig.builder().build())
-                .steps(pipelineSteps).build().toJson());
+                .steps(pipelineSteps).build();
 
-        if (minified) {
-            printOrSave(output.encode());
+        if(yaml) {
+            if (minified) {
+                printOrSave(inferenceConfiguration.toYaml() + "\n");
+            } else {
+                printOrSave(inferenceConfiguration.toYaml());
+            }
         } else {
-            printOrSave(output.encodePrettily());
+            JsonObject output = new JsonObject(inferenceConfiguration.toJson());
+
+            if (minified) {
+                printOrSave(output.encode());
+            } else {
+                printOrSave(output.encodePrettily());
+            }
         }
     }
 
@@ -184,14 +200,11 @@ public class ConfigCommand extends DefaultCommand {
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
                 .modelConfig(
-                        TensorFlowConfig.builder()
-                                .modelConfigType(ModelConfigType.tensorFlow("<path-to-the-tensorflow-model>"))
-                                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
+                        ModelConfig.tensorFlow("<path-to-the-tensorflow-model>",
+                                TensorDataTypesConfig.builder()
                                         .inputDataType(DEFAULT, TensorDataType.FLOAT)
                                         .outputDataType(DEFAULT, TensorDataType.FLOAT)
-                                        .build())
-                                .build()
-                )
+                                        .build()))
                 .build();
     }
 
@@ -199,10 +212,7 @@ public class ConfigCommand extends DefaultCommand {
         return ModelStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(
-                        OnnxConfig.builder()
-                                .modelConfigType(ModelConfigType.onnx("<path-to-the-onnx-model>"))
-                                .build())
+                .modelConfig(ModelConfig.onnx("<path-to-the-onnx-model>"))
                 .build();
     }
 
@@ -210,11 +220,7 @@ public class ConfigCommand extends DefaultCommand {
         return PmmlStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(
-                        PmmlConfig.builder()
-                                .modelConfigType(ModelConfigType.pmml("<path-to-the-pmml-model>"))
-                                .build()
-                )
+                .modelConfig(ModelConfig.pmml("<path-to-the-pmml-model>"))
                 .build();
     }
 
@@ -222,11 +228,7 @@ public class ConfigCommand extends DefaultCommand {
         return ModelStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(
-                        DL4JConfig.builder()
-                                .modelConfigType(ModelConfigType.dl4j("<path-to-the-dl4j-model>"))
-                                .build()
-                )
+                .modelConfig(ModelConfig.dl4j("<path-to-the-dl4j-model>"))
                 .build();
     }
 
@@ -234,11 +236,7 @@ public class ConfigCommand extends DefaultCommand {
         return ModelStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(
-                        KerasConfig.builder()
-                                .modelConfigType(ModelConfigType.keras("<path-to-the-keras-model>"))
-                                .build()
-                )
+                .modelConfig(ModelConfig.keras("<path-to-the-keras-model>"))
                 .build();
     }
 

@@ -22,7 +22,6 @@
 
 package ai.konduit.serving.executioner.inference.factory;
 
-import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.executioner.inference.*;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
@@ -53,11 +52,9 @@ public class InferenceExecutionerFactoryTests {
     public void testTensorflow() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/tensorflow/frozen_model.pb");
         TensorflowInferenceExecutionerFactory tensorflowInferenceExecutionerFactory = new TensorflowInferenceExecutionerFactory();
-        TensorFlowConfig tensorFlowConfig = TensorFlowConfig.builder()
-                .modelConfigType(ModelConfigType.tensorFlow(classPathResource.getFile().getAbsolutePath()))
-                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
-                        .inputDataType("default", TensorDataType.INT32).build())
-                .configProtoPath(classPathResource.getFile().getAbsolutePath()).build();
+        TensorFlowConfig tensorFlowConfig = ModelConfig.tensorFlow(classPathResource.getFile().getAbsolutePath(),
+                TensorDataTypesConfig.builder().inputDataType("default", TensorDataType.INT32).build(),
+                classPathResource.getFile().getAbsolutePath());
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
@@ -94,13 +91,7 @@ public class InferenceExecutionerFactoryTests {
     @Test
     public void testKerasSequential() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/keras/bidirectional_lstm_tensorflow_1.h5");
-        ModelConfig modelConfig = KerasConfig.builder()
-                .modelConfigType(ModelConfigType.keras(classPathResource.getFile().getAbsolutePath()))
-                .build();
-
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(1139)
-                .build();
+        ModelConfig modelConfig = ModelConfig.keras(classPathResource.getFile().getAbsolutePath());
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
@@ -121,11 +112,8 @@ public class InferenceExecutionerFactoryTests {
     public void testSameDiff() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/tensorflow/frozen_model.pb");
         SameDiffInferenceExecutionerFactory tensorflowInferenceExecutionerFactory = new SameDiffInferenceExecutionerFactory();
-        SameDiffConfig tensorFlowConfig = SameDiffConfig.builder()
-                .modelConfigType(ModelConfigType.sameDiff(classPathResource.getFile().getAbsolutePath()))
-                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
-                        .inputDataType("default", TensorDataType.INT32).build())
-                .build();
+        SameDiffConfig tensorFlowConfig = ModelConfig.sameDiff(classPathResource.getFile().getAbsolutePath(),
+                TensorDataTypesConfig.builder().inputDataType("default", TensorDataType.INT32).build());
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
@@ -150,9 +138,7 @@ public class InferenceExecutionerFactoryTests {
         File tmpZip = new File(dir, "dl4j_mln_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
-                .build();
+        ModelConfig modelConfig = ModelConfig.dl4j(tmpZip.getAbsolutePath());
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
@@ -177,9 +163,7 @@ public class InferenceExecutionerFactoryTests {
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
-                .build();
+        ModelConfig modelConfig = ModelConfig.dl4j(tmpZip.getAbsolutePath());
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")

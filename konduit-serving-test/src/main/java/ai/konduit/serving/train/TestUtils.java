@@ -20,7 +20,6 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.DL4JConfig;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.AllArgsConstructor;
@@ -131,12 +130,7 @@ public class TestUtils {
                 .createLoggingEndpoints(true)
                 .build();
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder().modelLoadingPath(modelSave.getAbsolutePath())
-                                .modelType(ModelConfig.ModelType.DL4J)
-                                .build()
-                ).build();
+        DL4JConfig modelConfig = ModelConfig.dl4j(modelSave.getAbsolutePath());
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")

@@ -26,7 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.model.ModelConfigType;
+import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.PmmlConfig;
 import ai.konduit.serving.pipeline.step.PmmlStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
@@ -89,9 +89,7 @@ public class PmmlIrisTest extends BaseVerticleTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        PmmlConfig pmmlConfig = PmmlConfig.builder()
-                .modelConfigType(ModelConfigType.pmml(new ClassPathResource("/inference/iris/classification/IrisTree.xml").getFile().getAbsolutePath()))
-                .build();
+        PmmlConfig pmmlConfig = ModelConfig.pmml(new ClassPathResource("/inference/iris/classification/IrisTree.xml").getFile().getAbsolutePath());
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)

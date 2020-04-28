@@ -19,9 +19,7 @@ package ai.konduit.serving.util;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.deploy.DeployKonduitServing;
-import ai.konduit.serving.model.DL4JConfig;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
@@ -246,12 +244,7 @@ public class PortsTest {
                 .httpPort(port)
                 .build();
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder().modelLoadingPath(testContext.get(SAVED_MODEL_PATH))
-                                .modelType(ModelConfig.ModelType.DL4J)
-                                .build()
-                ).build();
+        ModelConfig modelConfig = ModelConfig.dl4j(testContext.get(SAVED_MODEL_PATH));
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")

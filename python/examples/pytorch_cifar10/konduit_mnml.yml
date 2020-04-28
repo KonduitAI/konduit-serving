@@ -4,7 +4,7 @@ serving:
   log_timings: True
 steps:
   image_loading_step:
-    type: IMAGE_LOADING
+    type: IMAGE
     image_processing_required_layout: CHW # TODO: Need an optional no minibach option
     dimensions_configs: # TODO we should replace the list with a dictionary to prevent confusion.
       width: 32

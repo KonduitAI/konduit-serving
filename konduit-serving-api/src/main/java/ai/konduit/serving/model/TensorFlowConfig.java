@@ -51,4 +51,9 @@ public class TensorFlowConfig extends ModelConfig {
     public static TensorFlowConfig fromYaml(String yaml){
         return ObjectMappers.fromYaml(yaml, TensorFlowConfig.class);
     }
+
+    @Override
+    public String getInferenceExecutionerFactoryClassName() {
+        return "ai.konduit.serving.executioner.inference.factory.TensorflowInferenceExecutionerFactory";
+    }
 }

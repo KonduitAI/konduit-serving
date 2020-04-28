@@ -28,8 +28,6 @@ import ai.konduit.serving.config.metrics.NoOpMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.MultiLabelMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
-import ai.konduit.serving.metrics.MultiLabelMetrics;
-import ai.konduit.serving.metrics.RegressionMetrics;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
@@ -63,7 +61,7 @@ public class CodeGen {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper, JsonSchemaConfig.html5EnabledSchema());
 
-        Set<Class<?>> clazzes = new LinkedHashSet();
+        Set<Class<?>> clazzes = new LinkedHashSet<>();
         clazzes.add(MultiLabelMetricsConfig.class);
         clazzes.add(NoOpMetricsConfig.class);
         clazzes.add(ClassificationMetricsConfig.class);
@@ -71,7 +69,6 @@ public class CodeGen {
         clazzes.add(TensorDataTypesConfig.class);
         clazzes.add(SavedModelConfig.class);
         clazzes.add(ParallelInferenceConfig.class);
-        clazzes.add(ModelConfigType.class);
         clazzes.add(ModelConfig.class);
         clazzes.add(TensorDataType.class);
         clazzes.add(ObjectDetectionConfig.class);
@@ -83,6 +80,7 @@ public class CodeGen {
         clazzes.add(PmmlConfig.class);
         clazzes.add(SameDiffConfig.class);
         clazzes.add(TensorFlowConfig.class);
+        clazzes.add(OnnxConfig.class);
         clazzes.add(PythonConfig.class);
         clazzes.add(ServingConfig.class);
         clazzes.add(PipelineStep.class);
@@ -98,7 +96,6 @@ public class CodeGen {
         clazzes.add(MemMapConfig.class);
         clazzes.add(InferenceConfiguration.class);
         clazzes.add(WordPieceTokenizerStep.class);
-
 
         String sep = File.separator;
 

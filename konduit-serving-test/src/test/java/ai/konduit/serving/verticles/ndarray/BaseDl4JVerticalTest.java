@@ -26,7 +26,6 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.DL4JConfig;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.output.types.ClassifierOutput;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
@@ -95,9 +94,7 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
 
         Nd4j.getRandom().setSeed(42);
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.dl4j(modelSave.getAbsolutePath()))
-                .build();
+        ModelConfig modelConfig = ModelConfig.dl4j(modelSave.getAbsolutePath());
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)

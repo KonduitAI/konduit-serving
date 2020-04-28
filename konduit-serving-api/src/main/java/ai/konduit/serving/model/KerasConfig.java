@@ -35,4 +35,9 @@ public class KerasConfig extends ModelConfig {
     public static KerasConfig fromYaml(String yaml){
         return ObjectMappers.fromYaml(yaml, KerasConfig.class);
     }
+
+    @Override
+    public String getInferenceExecutionerFactoryClassName() {
+        return "ai.konduit.serving.executioner.inference.factory.KerasInferenceExecutionerFactory";
+    }
 }

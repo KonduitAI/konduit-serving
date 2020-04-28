@@ -28,7 +28,6 @@ import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.metrics.MetricType;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.model.SameDiffConfig;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
@@ -91,13 +90,7 @@ public class SameDiffVerticleClassificationMetricsTest extends BaseVerticleTest 
                 .httpPort(port)
                 .build();
 
-        SameDiffConfig modelConfig = SameDiffConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder()
-                                .modelType(ModelConfig.ModelType.SAMEDIFF)
-                                .modelLoadingPath(tmpSameDiffFile.getAbsolutePath())
-                                .build()
-                ).build();
+        SameDiffConfig modelConfig = ModelConfig.sameDiff(tmpSameDiffFile.getAbsolutePath());
 
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)

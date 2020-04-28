@@ -286,7 +286,7 @@ public class PipelineRouteDefiner {
                 .produces("application/json").handler(ctx -> {
             try {
                 ctx.response().putHeader("Content-Type", "application/json");
-                ctx.response().end(new JsonObject(inferenceConfiguration.toJson()).encodePrettily());
+                ctx.response().end(inferenceConfiguration.toJsonObject().encodePrettily());
             } catch (Exception e) {
                 ctx.fail(500, e);
             }

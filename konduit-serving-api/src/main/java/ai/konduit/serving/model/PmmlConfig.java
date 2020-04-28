@@ -70,4 +70,9 @@ public class PmmlConfig extends ModelConfig {
     public static PmmlConfig fromYaml(String yaml){
         return ObjectMappers.fromYaml(yaml, PmmlConfig.class);
     }
+
+    @Override
+    public String getInferenceExecutionerFactoryClassName() {
+        return "ai.konduit.serving.executioner.inference.factory.PmmlInferenceExecutionerFactory";
+    }
 }

@@ -42,7 +42,7 @@ public class PmmlInferenceExecutionerFactory implements InferenceExecutionerFact
 
         PmmlConfig pmmlConfig = (PmmlConfig) inferenceConfiguration;
         String evaluationModelFactory = pmmlConfig.evaluatorFactoryName();
-        String pmmlConfigPath = inferenceConfiguration.getModelConfigType().getModelLoadingPath();
+        String pmmlConfigPath = inferenceConfiguration.getPath();
         ModelEvaluatorFactory modelEvaluatorFactory = ModelEvaluatorFactory.newInstance();
         PmmlInferenceExecutioner inferenceExecutioner = new PmmlInferenceExecutioner();
         PmmlModelLoader modelLoader1 = new PmmlModelLoader(modelEvaluatorFactory, new File(pmmlConfigPath));

@@ -27,7 +27,6 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.DL4JConfig;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
@@ -116,9 +115,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .httpPort(port)
                 .build();
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.dl4j(modelSave.getAbsolutePath()))
-                .build();
+        ModelConfig modelConfig = ModelConfig.dl4j(modelSave.getAbsolutePath());
 
         PipelineStep modelStepConfig = new ModelStep(modelConfig)
                 .setInput(inputSchema)

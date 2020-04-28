@@ -39,7 +39,7 @@ public class Dl4jInferenceExecutionerFactory implements InferenceExecutionerFact
     @Override
     public InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception {
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
-        File modelPath = new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath());
+        File modelPath = new File(inferenceConfiguration.getPath());
 
         ValidationResult mlnValidationResult = DL4JModelValidator.validateMultiLayerNetwork(modelPath);
         ValidationResult cgValidationResult;

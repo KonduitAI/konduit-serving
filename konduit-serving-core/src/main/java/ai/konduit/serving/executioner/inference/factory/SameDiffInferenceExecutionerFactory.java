@@ -26,7 +26,6 @@ import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.SameDiffInferenceExecutioner;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.model.SameDiffConfig;
 import ai.konduit.serving.model.loader.samediff.SameDiffModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
@@ -49,17 +48,11 @@ public class SameDiffInferenceExecutionerFactory implements InferenceExecutioner
             log.error("Could not extract SameDiffConfig. Did you provide one to your verticle?");
         }
 
-        ModelConfigType modelLoadingConfig2 = inferenceConfiguration.getModelConfigType();
+        SameDiffModelLoader modelLoader = new SameDiffModelLoader(
+                new File(sameDiffconfig.getPath()),
+                modelPipelineStepConfig.getInputNames(),
+                modelPipelineStepConfig.getOutputNames());
 
-        SameDiffModelLoader modelLoader;
-        String modelPath = null;
-        if (modelLoadingConfig2 != null) {
-            if (modelLoadingConfig2.getModelLoadingPath() != null) {
-                modelPath = modelLoadingConfig2.getModelLoadingPath();
-            }
-        }
-
-        modelLoader = new SameDiffModelLoader(new File(modelPath), modelPipelineStepConfig.getInputNames(), modelPipelineStepConfig.getOutputNames());
         SameDiffInferenceExecutioner inferenceExecutioner = new SameDiffInferenceExecutioner();
         inferenceExecutioner.initialize(modelLoader, parallelInferenceConfig);
         List<String> inputNames = modelPipelineStepConfig.getInputNames();

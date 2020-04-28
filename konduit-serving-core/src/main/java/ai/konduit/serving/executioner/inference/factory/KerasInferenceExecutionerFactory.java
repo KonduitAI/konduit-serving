@@ -48,9 +48,9 @@ public class KerasInferenceExecutionerFactory implements InferenceExecutionerFac
         ModelLoader kerasLoader;
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
         ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
-        if (ModelGuesser.isKerasComputationGraphFile(new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath()))) {
+        if (ModelGuesser.isKerasComputationGraphFile(new File(inferenceConfiguration.getPath()))) {
             MultiComputationGraphInferenceExecutioner inferenceExecutioner = new MultiComputationGraphInferenceExecutioner();
-            kerasLoader = new ComputationGraphModelLoader(new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath()));
+            kerasLoader = new ComputationGraphModelLoader(new File(inferenceConfiguration.getPath()));
             ComputationGraph model = (ComputationGraph) kerasLoader.loadModel();
             int numInputs = model.getNumInputArrays();
             int numOutputs = model.getNumOutputArrays();
@@ -64,7 +64,7 @@ public class KerasInferenceExecutionerFactory implements InferenceExecutionerFac
             return new InitializedInferenceExecutionerConfig(inferenceExecutioner, inputNames, outputNames);
         } else {
             MultiLayerNetworkInferenceExecutioner inferenceExecutioner = new MultiLayerNetworkInferenceExecutioner();
-            kerasLoader = new MultiLayerNetworkModelLoader(new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath()));
+            kerasLoader = new MultiLayerNetworkModelLoader(new File(inferenceConfiguration.getPath()));
             List<String> inputNames = Collections.singletonList("default");
             List<String> outputNames = Collections.singletonList("default");
             inferenceExecutioner.initialize(kerasLoader, parallelInferenceConfig);

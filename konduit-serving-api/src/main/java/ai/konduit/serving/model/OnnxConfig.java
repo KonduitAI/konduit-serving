@@ -28,25 +28,14 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import ai.konduit.serving.util.ObjectMappers;
 
+/**
+ * Configuration for models in ONNX format.
+ */
 @Data
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
-/**
- * Configuration for models in ONNX format.
- */
 public class OnnxConfig extends ModelConfig {
-
-    /**
-     * Default ONNX config
-     *
-     * @return default
-     */
-    public static OnnxConfig defaultConfig() {
-        return OnnxConfig.builder()
-                .build();
-
-    }
 
     public static OnnxConfig fromJson(String json){
         return ObjectMappers.fromJson(json, OnnxConfig.class);
@@ -56,4 +45,8 @@ public class OnnxConfig extends ModelConfig {
         return ObjectMappers.fromYaml(yaml, OnnxConfig.class);
     }
 
+    @Override
+    public String getInferenceExecutionerFactoryClassName() {
+        return "ai.konduit.serving.executioner.inference.factory.OnnxInferenceExecutionerFactory";
+    }
 }

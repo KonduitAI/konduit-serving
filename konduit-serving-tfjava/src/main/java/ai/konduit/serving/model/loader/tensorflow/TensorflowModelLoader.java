@@ -105,13 +105,13 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
         SavedModelConfig savedModelConfig = config.getSavedModelConfig();
         List<String> inputNames = modelPipelineStepConfig.getInputNames();
         List<String> outputNames = modelPipelineStepConfig.getOutputNames();
-        String modelConfigPath = config.getModelConfigType().getModelLoadingPath();
+        String modelConfigPath = config.getPath();
         Preconditions.checkNotNull(modelConfigPath, "No model configuration path specified!");
         Preconditions.checkNotNull(inputNames, "No input names specified!");
         Preconditions.checkNotNull(outputNames, "No output names specified!");
 
         try {
-            TensorflowModelLoader tensorflowModelLoader = TensorflowModelLoader.builder()
+            return TensorflowModelLoader.builder()
                     .savedModelConfig(savedModelConfig)
                     .inputNames(inputNames)
                     .outputNames(outputNames)
@@ -121,9 +121,6 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
                     .configFile(sessionConfigPath != null ? new File(sessionConfigPath) : null)
                     .protoFile(modelConfigPath != null ? new File(modelConfigPath) : null)
                     .build();
-
-            return tensorflowModelLoader;
-
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -153,7 +150,7 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
             Preconditions.checkNotNull(outputNames, "No output names specified!");
         }
 
-        TensorflowGraphHolder tensorflowGraphHolder = TensorflowGraphHolder.builder()
+        return TensorflowGraphHolder.builder()
                 .configProto(configFile == null ? null : FileUtils.readFileToByteArray(configFile))
                 .graphContent(protoFile == null ? null : FileUtils.readFileToByteArray(protoFile))
                 .inputNames(inputNames)
@@ -162,8 +159,6 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
                 .castingInputTypes(castingInputTypes)
                 .castingOutputTypes(castingOutputTypes)
                 .build();
-
-        return tensorflowGraphHolder;
     }
 
 }

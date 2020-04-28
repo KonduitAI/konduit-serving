@@ -26,7 +26,6 @@ import ai.konduit.serving.TestUtils;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.model.OnnxConfig;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
@@ -86,13 +85,7 @@ public class OnnxTest extends BaseVerticleTest {
                 .httpPort(port)
                 .build();
 
-        OnnxConfig modelConfig = OnnxConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder()
-                                .modelType(ModelConfig.ModelType.ONNX)
-                                .modelLoadingPath(model.getAbsolutePath())
-                                .build()
-                ).build();
+        OnnxConfig modelConfig = ModelConfig.onnx(model.getAbsolutePath());
 
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)

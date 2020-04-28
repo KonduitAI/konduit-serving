@@ -26,7 +26,6 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.model.SameDiffConfig;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
@@ -52,6 +51,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertArrayEquals;
@@ -87,18 +87,12 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
                 .httpPort(port)
                 .build();
 
-        SameDiffConfig modelConfig = SameDiffConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder()
-                                .modelType(ModelConfig.ModelType.SAMEDIFF)
-                                .modelLoadingPath(tmpSameDiffFile.getAbsolutePath())
-                                .build()
-                ).build();
+        SameDiffConfig modelConfig = ModelConfig.sameDiff(tmpSameDiffFile.getAbsolutePath());
 
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)
                 .inputNames(Arrays.asList("x", "y"))
-                .outputNames(Arrays.asList("output"))
+                .outputNames(Collections.singletonList("output"))
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()

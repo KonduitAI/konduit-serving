@@ -50,31 +50,17 @@ public class PythonDocStrings {
                         "    \"\"\""
         );
 
-        code = code.replace(
-                "class ModelConfigType(object):\n",
-                "class ModelConfigType(object):\n" +
-                        "    \"\"\"ModelConfigType\n" +
-                        "\n" +
-                        "    This model configuration has meta data for a model loader, which\n" +
-                        "    includes the model loading path and the model type. It's used in\n" +
-                        "    konduit.ModelConfig.\n" +
-                        "\n" +
-                        "    :param model_type: Can be any of 'DL4J',\n" +
-                        "        'PMML', 'TENSORFLOW', 'KERAS', and 'SAMEDIFF'.\n" +
-                        "    :param model_loading_path: path to the model file\n" +
-                        "    \"\"\""
-        );
 
         code = code.replace(
                 "class ModelConfig(object):\n",
                 "class ModelConfig(object):\n" +
                         "    \"\"\"ModelConfig\n" +
                         "\n" +
-                        "    Model configurations hold the TensorDataTypeConfig and the\n" +
-                        "    .ModelConfigType of the model you want to serve.\n" +
+                        "    Model configurations hold the TensorDataTypeConfig, \n" +
+                        "    type and path of the model you want to serve.\n" +
                         "\n" +
                         "    :param tensor_data_types_config: konduit.TensorDataTypeConfig\n" +
-                        "    :param model_config_type: konduit.ModelConfigType\n" +
+                        "    :param path: path to the model file\n" +
                         "    \"\"\""
         );
 
@@ -100,7 +86,7 @@ public class PythonDocStrings {
                         "    Configuration for models in PMML format\n" +
                         "\n" +
                         "    :param tensor_data_types_config: konduit.TensorDataTypesConfig\n" +
-                        "    :param model_config_type: konduit.ModelConfigType\n" +
+                        "    :param path: path to the model file\n" +
                         "    :param evaluator_factory_name: defaults to \"org.jpmml.evaluator.ModelEvaluatorFactory\". Custom extensions\n" +
                         "           have to be written in Java.\n" +
                         "    \"\"\""
@@ -175,7 +161,7 @@ public class PythonDocStrings {
                         "    Extension of ModelConfig to DL4J SameDiff models\n" +
                         "\n" +
                         "    :param tensor_data_types_config: konduit.TensorDataTypesConfig\n" +
-                        "    :param model_config_type: konduit.ModelConfigType\n" +
+                        "    :param path: path to the model file\n" +
                         "    \"\"\""
         );
 
@@ -188,7 +174,7 @@ public class PythonDocStrings {
                         "    with TensorFlow models.\n" +
                         "\n" +
                         "    :param tensor_data_types_config: konduit.TensorDataTypesConfig\n" +
-                        "    :param model_config_type: konduit.ModelConfigType\n" +
+                        "    :param path: path to the model file\n" +
                         "    :param config_proto_path: path to the TensorFlow ProtoBuf model file.\n" +
                         "    :param saved_model_config: konduit.SavedModelConfig\n" +
                         "    \"\"\""
@@ -203,8 +189,6 @@ public class PythonDocStrings {
                         "    code either as string to `python_code` or as path to a Python script to `python_code_path`.\n" +
                         "    Additionally, you can modify or extend your Python path by setting `python_path` accordingly.\n" +
                         "\n" +
-                        "    :param tensor_data_types_config: konduit.TensorDataTypesConfig\n" +
-                        "    :param model_config_type: konduit.ModelConfigType\n" +
                         "    :param python_code: Python code as str\n" +
                         "    :param python_code_path: full qualifying path to the Python script you want to run, as str\n" +
                         "    :param python_inputs: list of Python input variable names\n" +

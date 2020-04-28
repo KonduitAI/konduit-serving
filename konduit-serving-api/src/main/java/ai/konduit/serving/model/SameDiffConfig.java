@@ -39,7 +39,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class SameDiffConfig extends ModelConfig {
 
-    public final static String SAME_DIFF_EXECUTION_CONFIG_KEY = "sameDiffConfig";
+    public static final String SAME_DIFF_EXECUTION_CONFIG_KEY = "sameDiffConfig";
     private TensorDataTypesConfig tensorDataTypesConfig;
 
     public static SameDiffConfig fromJson(String json){
@@ -50,4 +50,8 @@ public class SameDiffConfig extends ModelConfig {
         return ObjectMappers.fromYaml(yaml, SameDiffConfig.class);
     }
 
+    @Override
+    public String getInferenceExecutionerFactoryClassName() {
+        return "ai.konduit.serving.executioner.inference.factory.SameDiffInferenceExecutionerFactory";
+    }
 }

@@ -28,6 +28,7 @@ import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.model.ModelConfig;
+import ai.konduit.serving.model.PmmlConfig;
 import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.model.TensorDataTypesConfig;
 import ai.konduit.serving.output.adapter.*;
@@ -287,12 +288,11 @@ public class PipelineExecutioner implements Closeable {
 
         initDataTypes();
 
-        if (modelConfig != null && modelConfig.getModelConfigType().getModelType() != ModelConfig.ModelType.PMML
+        if (modelConfig != null && !(modelConfig instanceof PmmlConfig)
                 && (inputNames == null || inputNames.isEmpty())) {
             throw new IllegalStateException(
                     "No inputs defined! Please specify input names for your verticle via the model configuration.");
         }
-
     }
 
     public List<String> inputNames() {

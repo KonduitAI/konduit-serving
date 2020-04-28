@@ -85,7 +85,7 @@ public class PipelineExecutionerTests {
                     fieldInfo.put("shape",new JsonArray().add(1).add(1));
                     schemaValues.put(value.name(), Nd4j.toNpyByteArray(Nd4j.scalar(1.0)));
                     break;
-               //need to wait till dl4j can support the boolean type in the python executioner
+               // todo: need to wait till dl4j can support the boolean type in the python executioner
                     /* case Boolean:
                     pythonConfig.pythonInput(value.name(),Type.BOOL.name());
                     schemaValues.put(value.name(), true);
@@ -175,14 +175,7 @@ public class PipelineExecutionerTests {
                 .inputDataType("image_tensor", TensorDataType.INT64)
                 .build();
 
-        TensorFlowConfig modelConfig = TensorFlowConfig.builder()
-                .tensorDataTypesConfig(tensorDataTypesConfig)
-                .modelConfigType(
-                        ModelConfigType.builder()
-                                .modelLoadingPath(path)
-                                .modelType(ModelConfig.ModelType.TENSORFLOW)
-                                .build()
-                ).build();
+        TensorFlowConfig modelConfig = ModelConfig.tensorFlow(path, tensorDataTypesConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
@@ -236,10 +229,7 @@ public class PipelineExecutionerTests {
                 .httpPort(port)
                 .build();
 
-        TensorFlowConfig modelConfig = TensorFlowConfig.builder()
-                .tensorDataTypesConfig(tensorDataTypesConfig)
-                .modelConfigType(ModelConfigType.tensorFlow(path))
-                .build();
+        TensorFlowConfig modelConfig = ModelConfig.tensorFlow(path, tensorDataTypesConfig);
 
         ModelStep modelStepConfig = ModelStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)

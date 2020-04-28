@@ -35,7 +35,7 @@ public class OnnxInferenceExecutionerFactory implements InferenceExecutionerFact
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
         ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 
-        String onnxConfigPath = inferenceConfiguration.getModelConfigType().getModelLoadingPath();
+        String onnxConfigPath = inferenceConfiguration.getPath();
 
         OnnxInferenceExecutioner inferenceExecutioner = new OnnxInferenceExecutioner();
         OnnxModelLoader modelLoader1 = new OnnxModelLoader(onnxConfigPath);

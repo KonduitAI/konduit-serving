@@ -203,7 +203,7 @@ public class KonduitServingLauncherWithoutProcessesTest {
         int port = PortUtils.getAvailablePort();
 
         Thread runCommandThread = new Thread(() -> runCommand("run", "-c",
-                new JsonObject(InferenceConfiguration.builder()
+                InferenceConfiguration.builder()
                         .servingConfig(ServingConfig.builder()
                                 .httpPort(port)
                                 .uploadsDirectory(temporaryFolder.getRoot().getAbsolutePath())
@@ -212,7 +212,7 @@ public class KonduitServingLauncherWithoutProcessesTest {
                                 .inputName("default")
                                 .outputName("default")
                                 .build())
-                        .build().toJson()).encode(),
+                        .build().toJsonObject().encode(),
                 "-i", "1",
                 "-s", "inference"));
         runCommandThread.start();

@@ -67,7 +67,6 @@ public class ModelStep extends BasePipelineStep<ModelStep> {
                 DataFormat.JSON,
                 DataFormat.IMAGE
         };
-
     }
 
     @Override

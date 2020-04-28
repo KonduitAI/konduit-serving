@@ -16,11 +16,14 @@
 
 package ai.konduit.serving.model;
 
+import ai.konduit.serving.executioner.inference.factory.InferenceExecutionerFactory;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  *
@@ -37,5 +40,10 @@ public class DL4JConfig extends ModelConfig {
 
     public static DL4JConfig fromYaml(String yaml){
         return ObjectMappers.fromYaml(yaml, DL4JConfig.class);
+    }
+
+    @Override
+    public String getInferenceExecutionerFactoryClassName() {
+        return "ai.konduit.serving.executioner.inference.factory.Dl4jInferenceExecutionerFactory";
     }
 }
