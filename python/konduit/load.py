@@ -241,48 +241,45 @@ def get_model_step(step_config, step_type):
     :param step_type: type of the step (TENSORFLOW, KERAS, DL4J, PMML or SAMEDIFF)
     :return: konduit.inference.ModelStep instance.
     """
-    model_config_type = ModelConfigType(
-        model_type=step_type,
-        model_loading_path=pop_data(step_config, "model_loading_path"),
-    )
+    model_path = pop_data(step_config, "path")
     if (
         step_type == "TENSORFLOW"
     ):  # TF has to extra properties, all others are identical
         model_config = TensorFlowConfig(
-            model_config_type=model_config_type,
+            path=model_path,
             tensor_data_types_config=get_tensor_data_types(step_config),
         )
     elif (
             step_type == "KERAS"
     ):  # TF has to extra properties, all others are identical
         model_config = KerasConfig(
-            model_config_type=model_config_type,
+            path=model_path,
             tensor_data_types_config=get_tensor_data_types(step_config),
         )
     elif (
             step_type == "DL4J"
     ):  # TF has to extra properties, all others are identical
         model_config = DL4JConfig(
-            model_config_type=model_config_type,
+            path=model_path,
             tensor_data_types_config=get_tensor_data_types(step_config),
         )
     elif (
             step_type == "SAMEDIFF"
     ):  # TF has to extra properties, all others are identical
         model_config = SameDiffConfig(
-            model_config_type=model_config_type,
+            path=model_path,
             tensor_data_types_config=get_tensor_data_types(step_config),
         )
     elif (
             step_type == "PMML"
     ):  # TF has to extra properties, all others are identical
         model_config = PmmlConfig(
-            model_config_type=model_config_type,
+            path=model_path,
             tensor_data_types_config=get_tensor_data_types(step_config),
         )
     else:
         model_config = ModelConfig(
-            model_config_type=model_config_type,
+            path=model_path,
             tensor_data_types_config=get_tensor_data_types(step_config),
         )
     step_config["model_config"] = model_config

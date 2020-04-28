@@ -521,21 +521,12 @@ class ModelConfig(object):
     _types_map = {
         "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
         "path": {"type": str, "subtype": None},
-        "inferenceExecutionerFactoryClassName": {"type": str, "subtype": None},
     }
     _formats_map = {}
 
-    def __init__(
-        self,
-        tensor_data_types_config=None,
-        path=None,
-        inference_executioner_factory_class_name=None,
-    ):
+    def __init__(self, tensor_data_types_config=None, path=None):
         self.__tensor_data_types_config = tensor_data_types_config
         self.__path = path
-        self.__inference_executioner_factory_class_name = (
-            inference_executioner_factory_class_name
-        )
 
     def _get_tensor_data_types_config(self):
         return self.__tensor_data_types_config
@@ -559,19 +550,6 @@ class ModelConfig(object):
 
     path = property(_get_path, _set_path)
 
-    def _get_inference_executioner_factory_class_name(self):
-        return self.__inference_executioner_factory_class_name
-
-    def _set_inference_executioner_factory_class_name(self, value):
-        if not isinstance(value, str):
-            raise TypeError("inferenceExecutionerFactoryClassName must be str")
-        self.__inference_executioner_factory_class_name = value
-
-    inference_executioner_factory_class_name = property(
-        _get_inference_executioner_factory_class_name,
-        _set_inference_executioner_factory_class_name,
-    )
-
     def as_dict(self):
         d = empty_type_dict(self)
         if self.__tensor_data_types_config is not None:
@@ -585,12 +563,6 @@ class ModelConfig(object):
                 self.__path.as_dict()
                 if hasattr(self.__path, "as_dict")
                 else self.__path
-            )
-        if self.__inference_executioner_factory_class_name is not None:
-            d["inferenceExecutionerFactoryClassName"] = (
-                self.__inference_executioner_factory_class_name.as_dict()
-                if hasattr(self.__inference_executioner_factory_class_name, "as_dict")
-                else self.__inference_executioner_factory_class_name
             )
         return d
 

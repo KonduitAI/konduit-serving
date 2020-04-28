@@ -24,12 +24,9 @@ package ai.konduit.serving.model;
 
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.TextConfig;
-import ai.konduit.serving.executioner.inference.InferenceExecutioner;
 import ai.konduit.serving.executioner.inference.factory.InferenceExecutionerFactory;
 import ai.konduit.serving.output.types.ClassifierOutput;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
@@ -37,7 +34,7 @@ import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
@@ -71,6 +68,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @JsonIgnoreProperties({"map", "empty"})
 @JsonSubTypes({
         @JsonSubTypes.Type(value = PmmlConfig.class, name = "PMML"),
@@ -87,65 +85,18 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = DL4JConfig.class, name= "DL4JConfig")
 })
 @JsonTypeInfo(use = NAME, property = "type")
-@SuperBuilder
 public abstract class ModelConfig implements Serializable, TextConfig {
 
-    @JsonProperty
-    private TensorDataTypesConfig tensorDataTypesConfig;
+    @Singular
+    private Map<String, TensorDataType> inputDataTypes;
+
+    @Singular
+    private Map<String, TensorDataType> outputDataTypes;
 
     @JsonProperty
     private String path;
 
-    public enum ModelType {
-        DL4J,
-        ONNX,
-        PMML,
-        TENSORFLOW,
-        KERAS,
-        SAMEDIFF
-    }
-
-    public static DL4JConfig dl4j(String path) {
-        return DL4JConfig.builder().path(path).build();
-    }
-
-    public static OnnxConfig onnx(String path) {
-        return OnnxConfig.builder().path(path).build();
-    }
-
-    public static KerasConfig keras(String path) {
-        return KerasConfig.builder().path(path).build();
-    }
-
-    public static TensorFlowConfig tensorFlow(String path, TensorDataTypesConfig tensorDataTypesConfig) {
-        return tensorFlow(path, tensorDataTypesConfig, null);
-    }
-
-    public static TensorFlowConfig tensorFlow(String path, TensorDataTypesConfig tensorDataTypesConfig,
-                                              String configProtoPath) {
-        return TensorFlowConfig.builder()
-                .path(path)
-                .tensorDataTypesConfig(tensorDataTypesConfig)
-                .configProtoPath(configProtoPath)
-                .build();
-    }
-
-    public static SameDiffConfig sameDiff(String path) {
-        return sameDiff(path, null);
-    }
-
-    public static SameDiffConfig sameDiff(String path, TensorDataTypesConfig tensorDataTypesConfig) {
-        return SameDiffConfig.builder()
-                .path(path)
-                .tensorDataTypesConfig(tensorDataTypesConfig)
-                .build();
-    }
-
-    public static PmmlConfig pmml(String path) {
-        return PmmlConfig.builder().path(path).build();
-    }
-
-    public abstract String getInferenceExecutionerFactoryClassName();
+    protected abstract String getInferenceExecutionerFactoryClassName();
 
     public InferenceExecutionerFactory createExecutionerFactory() throws Exception {
         return (InferenceExecutionerFactory) Class

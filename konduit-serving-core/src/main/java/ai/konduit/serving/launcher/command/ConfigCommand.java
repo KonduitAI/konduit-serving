@@ -155,11 +155,7 @@ public class ConfigCommand extends DefaultCommand {
                 .steps(pipelineSteps).build();
 
         if(yaml) {
-            if (minified) {
-                printOrSave(inferenceConfiguration.toYaml() + "\n");
-            } else {
-                printOrSave(inferenceConfiguration.toYaml());
-            }
+            printOrSave(inferenceConfiguration.toYaml());
         } else {
             JsonObject output = new JsonObject(inferenceConfiguration.toJson());
 
@@ -199,12 +195,11 @@ public class ConfigCommand extends DefaultCommand {
         return ModelStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(
-                        ModelConfig.tensorFlow("<path-to-the-tensorflow-model>",
-                                TensorDataTypesConfig.builder()
-                                        .inputDataType(DEFAULT, TensorDataType.FLOAT)
-                                        .outputDataType(DEFAULT, TensorDataType.FLOAT)
-                                        .build()))
+                .modelConfig(TensorFlowConfig.builder()
+                                .path("<path-to-the-tensorflow-model>")
+                                .inputDataType(DEFAULT, TensorDataType.FLOAT)
+                                .outputDataType(DEFAULT, TensorDataType.FLOAT)
+                                .build())
                 .build();
     }
 
@@ -212,7 +207,7 @@ public class ConfigCommand extends DefaultCommand {
         return ModelStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(ModelConfig.onnx("<path-to-the-onnx-model>"))
+                .modelConfig(OnnxConfig.builder().path("<path-to-the-onnx-model>").build())
                 .build();
     }
 
@@ -220,7 +215,7 @@ public class ConfigCommand extends DefaultCommand {
         return PmmlStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(ModelConfig.pmml("<path-to-the-pmml-model>"))
+                .modelConfig(PmmlConfig.builder().path("<path-to-the-pmml-model>").build())
                 .build();
     }
 
@@ -228,7 +223,7 @@ public class ConfigCommand extends DefaultCommand {
         return ModelStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(ModelConfig.dl4j("<path-to-the-dl4j-model>"))
+                .modelConfig(DL4JConfig.builder().path("<path-to-the-dl4j-model>").build())
                 .build();
     }
 
@@ -236,7 +231,7 @@ public class ConfigCommand extends DefaultCommand {
         return ModelStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(ModelConfig.keras("<path-to-the-keras-model>"))
+                .modelConfig(KerasConfig.builder().path("<path-to-the-keras-model>").build())
                 .build();
     }
 

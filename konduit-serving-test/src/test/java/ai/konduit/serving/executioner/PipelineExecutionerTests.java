@@ -49,7 +49,6 @@ import static org.junit.Assert.assertNotNull;
 
 public class PipelineExecutionerTests {
 
-
     @Test
     @Ignore
     public void testDoJsonInference() {
@@ -171,11 +170,10 @@ public class PipelineExecutionerTests {
         System.out.println("Started on port " + port);
         String path = new ClassPathResource("inference/tensorflow/mnist/lenet_frozen.pb").getFile().getAbsolutePath();
 
-        TensorDataTypesConfig tensorDataTypesConfig = TensorDataTypesConfig.builder()
+        TensorFlowConfig modelConfig = TensorFlowConfig.builder()
+                .path(path)
                 .inputDataType("image_tensor", TensorDataType.INT64)
                 .build();
-
-        TensorFlowConfig modelConfig = ModelConfig.tensorFlow(path, tensorDataTypesConfig);
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
@@ -210,10 +208,6 @@ public class PipelineExecutionerTests {
         System.out.println("Started on port " + port);
         String path = new ClassPathResource("inference/tensorflow/mnist/lenet_frozen.pb").getFile().getAbsolutePath();
 
-        TensorDataTypesConfig tensorDataTypesConfig = TensorDataTypesConfig.builder()
-                .inputDataType("image_tensor", TensorDataType.INT64)
-                .build();
-
         ObjectDetectionConfig objectRecognitionConfig = ObjectDetectionConfig
                 .builder()
                 .numLabels(80)
@@ -229,7 +223,10 @@ public class PipelineExecutionerTests {
                 .httpPort(port)
                 .build();
 
-        TensorFlowConfig modelConfig = ModelConfig.tensorFlow(path, tensorDataTypesConfig);
+        TensorFlowConfig modelConfig = TensorFlowConfig.builder()
+                .path(path)
+                .inputDataType("image_tensor", TensorDataType.INT64)
+                .build();
 
         ModelStep modelStepConfig = ModelStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)
@@ -250,6 +247,4 @@ public class PipelineExecutionerTests {
         assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         TestCase.assertEquals(TensorDataType.INT64, pipelineExecutioner.inputDataTypes.get("image_tensor"));
     }
-
-
 }

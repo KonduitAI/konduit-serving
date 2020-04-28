@@ -23,45 +23,22 @@
 package ai.konduit.serving.model;
 
 import ai.konduit.serving.util.ObjectMappers;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
-
 
 /**
  * Configuration for models in PMML format.
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@SuperBuilder
 @AllArgsConstructor
+@SuperBuilder
 public class PmmlConfig extends ModelConfig {
 
-    public final static String DEFAULT_EVALUATOR_FACTORY = "org.jpmml.evaluator.ModelEvaluatorFactory";
+    public static final String DEFAULT_EVALUATOR_FACTORY = "org.jpmml.evaluator.ModelEvaluatorFactory";
+
     @Builder.Default
     private String evaluatorFactoryName = DEFAULT_EVALUATOR_FACTORY;
-
-    public PmmlConfig(){
-        this.evaluatorFactoryName = DEFAULT_EVALUATOR_FACTORY;
-    }
-
-    /**
-     * Default PMML config
-     *
-     * @return default
-     */
-    public static PmmlConfig defaultConfig() {
-        return PmmlConfig.builder()
-                .evaluatorFactoryName(DEFAULT_EVALUATOR_FACTORY)
-                .build();
-
-    }
-
-    public String evaluatorFactoryName() {
-        return evaluatorFactoryName == null ? DEFAULT_EVALUATOR_FACTORY : evaluatorFactoryName;
-    }
 
     public static PmmlConfig fromJson(String json){
         return ObjectMappers.fromJson(json, PmmlConfig.class);
@@ -76,3 +53,4 @@ public class PmmlConfig extends ModelConfig {
         return "ai.konduit.serving.executioner.inference.factory.PmmlInferenceExecutionerFactory";
     }
 }
+

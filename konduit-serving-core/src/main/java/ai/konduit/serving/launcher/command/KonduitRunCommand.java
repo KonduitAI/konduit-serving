@@ -126,7 +126,6 @@ public class KonduitRunCommand extends RunCommand {
                 log.error("Given configuration: {} does not contain a valid JSON/YAML object", configurationString);
                 log.error("\n\nErrors while processing as a json string:", jsonProcessingErrors);
                 log.error("\n\nErrors while processing as a yaml string:", yamlProcessingErrors);
-                // todo: add logic for minified yaml string
                 return null;
             }
         }

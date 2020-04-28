@@ -6,7 +6,7 @@ serving:
 steps:
   tensorflow_step:
     type: TENSORFLOW
-    model_loading_path: ../data/mnist_2.0.0.pb
+    path: ../data/mnist_2.0.0.pb
     input_names:
       - input_layer
     output_names:

@@ -94,7 +94,7 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
 
         Nd4j.getRandom().setSeed(42);
 
-        ModelConfig modelConfig = ModelConfig.dl4j(modelSave.getAbsolutePath());
+        DL4JConfig modelConfig = DL4JConfig.builder().path(modelSave.getAbsolutePath()).build();
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)

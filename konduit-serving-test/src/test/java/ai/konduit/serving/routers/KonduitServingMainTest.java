@@ -117,7 +117,7 @@ public class KonduitServingMainTest {
                 .httpPort(PortUtils.getAvailablePort())
                 .build();
 
-        DL4JConfig modelConfig = ModelConfig.dl4j(modelSave.getAbsolutePath());
+        DL4JConfig modelConfig = DL4JConfig.builder().path(modelSave.getAbsolutePath()).build();
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")

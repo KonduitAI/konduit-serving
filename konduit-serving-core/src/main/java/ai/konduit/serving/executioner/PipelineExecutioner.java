@@ -30,7 +30,6 @@ import ai.konduit.serving.input.conversion.ConverterArgs;
 import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.PmmlConfig;
 import ai.konduit.serving.model.TensorDataType;
-import ai.konduit.serving.model.TensorDataTypesConfig;
 import ai.konduit.serving.output.adapter.*;
 import ai.konduit.serving.output.types.BatchOutput;
 import ai.konduit.serving.output.types.NDArrayOutput;
@@ -88,19 +87,22 @@ import java.util.zip.ZipOutputStream;
 @Slf4j
 public class PipelineExecutioner implements Closeable {
 
+    protected List<String> inputNames;
+    protected List<String> outputNames;
+    public Map<String, TensorDataType> inputDataTypes;
+    public Map<String, TensorDataType> outputDataTypes;
 
-    protected List<String> inputNames, outputNames;
-    protected Map<String, TensorDataType> inputDataTypes, outputDataTypes;
     @Getter
     protected Map<String, ConverterArgs> args;
     @Getter
-    protected Labels yoloLabels, ssdLabels;
+    protected Labels yoloLabels;
+    @Getter
+    protected Labels ssdLabels;
     //the output type for the response: default json
     @Getter
     protected InferenceConfiguration config;
     @Getter
     private Pipeline pipeline;
-    private TensorDataTypesConfig tensorDataTypesConfig;
     private Schema inputSchema = null;
     private Schema outputSchema = null;
     private ModelConfig modelConfig = null;
@@ -140,16 +142,13 @@ public class PipelineExecutioner implements Closeable {
 
             }
             out.flush();
-            out.close();
 
             return Buffer.buffer(baos.toByteArray());
-
         } catch (IOException e) {
             log.error("Unable to zip buffer", e);
         }
 
         return null;
-
     }
 
     /**
@@ -278,8 +277,8 @@ public class PipelineExecutioner implements Closeable {
             if (pipelineStep instanceof ModelStep) {
                 ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
                 modelConfig = modelPipelineStepConfig.getModelConfig();
-                tensorDataTypesConfig = modelConfig.getTensorDataTypesConfig();
             }
+
             if (pipelineStep instanceof ImageLoadingStep) {
                 ImageLoadingStep imageLoadingStepConfig = (ImageLoadingStep) pipelineStep;
                 objectDetectionConfig = imageLoadingStepConfig.getObjectDetectionConfig();
@@ -595,7 +594,7 @@ public class PipelineExecutioner implements Closeable {
      * @param input the input object
      * @param transformProcess the {@link TransformProcess} to use
      * @param conversionSchema The {@link Schema} to use
-     * @return
+     * @return the DataVec type input records.
      */
     public static Record[] createInput(Object input,TransformProcess transformProcess,Schema conversionSchema) {
         Preconditions.checkNotNull(input, "Input data was null!");
@@ -609,7 +608,7 @@ public class PipelineExecutioner implements Closeable {
             }
 
             JsonArray jsonArray = new JsonArray(inputJson);
-            ArrowWritableRecordBatch convert = null;
+            ArrowWritableRecordBatch convert;
             try {
                 convert = mapConverter.convert(conversionSchema, jsonArray, transformProcess);
             } catch (Exception e) {
@@ -737,22 +736,20 @@ public class PipelineExecutioner implements Closeable {
         } catch (Exception e) {
             ctx.fail(e);
         }
-
     }
 
     private void initDataTypes() {
-        if (tensorDataTypesConfig != null && tensorDataTypesConfig.getInputDataTypes() != null) {
-            Map<String, TensorDataType> types = tensorDataTypesConfig.getInputDataTypes();
+        if (modelConfig != null && modelConfig.getInputDataTypes() != null) {
+            Map<String, TensorDataType> types = modelConfig.getInputDataTypes();
             if (types != null && types.size() >= 1 && inputDataTypes == null)
                 inputDataTypes = initDataTypes(inputNames, types, "default");
         }
 
-        if (tensorDataTypesConfig != null && tensorDataTypesConfig.getOutputDataTypes() != null) {
-            Map<String, TensorDataType> types = tensorDataTypesConfig.getOutputDataTypes();
+        if (modelConfig != null && modelConfig.getOutputDataTypes() != null) {
+            Map<String, TensorDataType> types = modelConfig.getOutputDataTypes();
             if (types != null && types.size() >= 1 && outputDataTypes == null)
                 outputDataTypes = initDataTypes(outputNames, types, "output");
         }
-
     }
 
     private Map<String, TensorDataType> initDataTypes(List<String> namesValidation,

@@ -146,7 +146,7 @@ public class ConfigJsonCoverageTrackingTests {
                         .inputNames(Collections.singletonList("x"))
                         .outputNames(Collections.singletonList("z"))
                         .build())
-                .step(ModelStep.builder().modelConfig(ModelConfig.dl4j("/my/model/path.bin")).build())
+                .step(ModelStep.builder().modelConfig(DL4JConfig.builder().path("/my/model/path.bin").build()).build())
                 .servingConfig(ServingConfig.builder().httpPort(12345).logTimings(true).build())
                 .build();
 
@@ -254,7 +254,7 @@ public class ConfigJsonCoverageTrackingTests {
 
     @Test
     public void testModelStep(){
-        testConfigSerDe(ModelStep.builder().modelConfig(ModelConfig.dl4j("/my/path/here")).build());
+        testConfigSerDe(ModelStep.builder().modelConfig(DL4JConfig.builder().path("/my/path/here").build()).build());
     }
 
     @Test
@@ -270,30 +270,28 @@ public class ConfigJsonCoverageTrackingTests {
 
     @Test
     public void testOnnxConfig(){
-        OnnxConfig d = ModelConfig.onnx("/Some/Path/Here");
-
-        testConfigSerDe(d);
+        testConfigSerDe(OnnxConfig.builder().path("/Some/Path/Here").build());
     }
 
     @Test
     public void testDL4JConfig(){
-        testConfigSerDe(ModelConfig.dl4j("/Some/Path/Here"));
+        testConfigSerDe(DL4JConfig.builder().path("/Some/Path/Here").build());
     }
 
     @Test
     public void testKerasConfig(){
-        testConfigSerDe(ModelConfig.keras("/path/to/model.kdf5"));
+        testConfigSerDe(KerasConfig.builder().path("/path/to/model.kdf5").build());
     }
 
     @Test
     public void testPmmlConfig(){
-        testConfigSerDe(PmmlConfig.defaultConfig());
+        testConfigSerDe(PmmlConfig.builder().build());
         testConfigSerDe(PmmlConfig.builder().evaluatorFactoryName("my.factory.class").build());
     }
 
     @Test
     public void testSameDiffConfig(){
-        testConfigSerDe(ModelConfig.sameDiff("/my/model/path.fb"));
+        testConfigSerDe(SameDiffConfig.builder().path("/my/model/path.fb").build());
     }
 
     @Test
@@ -303,12 +301,7 @@ public class ConfigJsonCoverageTrackingTests {
 
     @Test
     public void testModelConfigType(){
-        testConfigSerDe(ModelConfig.keras("/path/to/keras.hdf5"));
-        testConfigSerDe(ModelConfig.tensorFlow("/path/to/tensorflow.pb",
-                TensorDataTypesConfig.builder()
-                        .inputDataType("in", TensorDataType.FLOAT)
-                        .outputDataType("out", TensorDataType.FLOAT)
-                        .build()));
+        testConfigSerDe(KerasConfig.builder().path("/path/to/keras.hdf5").build());
     }
 
     @Test

@@ -82,7 +82,7 @@ public class SameDiffVerticleNumpyTest extends BaseVerticleTest {
                 .httpPort(port)
                 .build();
 
-        SameDiffConfig modelConfig = ModelConfig.sameDiff(tmpSameDiffFile.getAbsolutePath());
+        SameDiffConfig modelConfig = SameDiffConfig.builder().path(tmpSameDiffFile.getAbsolutePath()).build();
 
         ModelStep config = ModelStep.builder()
                 .modelConfig(modelConfig)

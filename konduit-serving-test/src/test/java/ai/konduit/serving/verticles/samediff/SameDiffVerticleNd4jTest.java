@@ -87,7 +87,7 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
                 .httpPort(port)
                 .build();
 
-        SameDiffConfig modelConfig = ModelConfig.sameDiff(tmpSameDiffFile.getAbsolutePath());
+        SameDiffConfig modelConfig = SameDiffConfig.builder().path(tmpSameDiffFile.getAbsolutePath()).build();
 
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)

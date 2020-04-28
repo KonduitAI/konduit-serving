@@ -3,4 +3,4 @@ serving:
 steps:
   keras_step:
     type: KERAS
-    model_loading_path: resources/keras/embedding_lstm_tensorflow_2.h5
+    path: resources/keras/embedding_lstm_tensorflow_2.h5

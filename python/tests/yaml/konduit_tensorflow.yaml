@@ -3,7 +3,7 @@ serving:
 steps:
   tensorflow_step:
     type: TENSORFLOW
-    model_loading_path: bert_mrpc_frozen.pb
+    path: bert_mrpc_frozen.pb
     input_names:
       - IteratorGetNext:0
       - IteratorGetNext:1

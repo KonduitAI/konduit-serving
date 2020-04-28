@@ -3,20 +3,6 @@ package ai.konduit.serving.codegen.pythoncodegen;
 public class PythonDocStrings {
 
     public static String generateDocs(String code) {
-
-        code = code.replace(
-                "class TensorDataTypesConfig(object):\n",
-                "class TensorDataTypesConfig(object):\n"+
-                        "    \"\"\"TensorDataTypesConfig\n" +
-                        "    \n" +
-                        "    Configures TensorDataTypes for inputs and outputs of a step.\n" +
-                        "    \n" +
-                        "    :param input_data_types: List of input konduit.TensorDataType\n" +
-                        "    :param output_data_types: List of output konduit.TensorDataType\n" +
-                        "    \"\"\""
-        );
-
-
         code = code.replace(
                 "class SavedModelConfig(object):\n",
                 "class SavedModelConfig(object):\n" +
@@ -85,7 +71,8 @@ public class PythonDocStrings {
                         "\n" +
                         "    Configuration for models in PMML format\n" +
                         "\n" +
-                        "    :param tensor_data_types_config: konduit.TensorDataTypesConfig\n" +
+                        "    :param input_data_types: List of input konduit.TensorDataType\n" +
+                        "    :param output_data_types: List of output konduit.TensorDataType\n" +
                         "    :param path: path to the model file\n" +
                         "    :param evaluator_factory_name: defaults to \"org.jpmml.evaluator.ModelEvaluatorFactory\". Custom extensions\n" +
                         "           have to be written in Java.\n" +
@@ -160,7 +147,8 @@ public class PythonDocStrings {
                         "\n" +
                         "    Extension of ModelConfig to DL4J SameDiff models\n" +
                         "\n" +
-                        "    :param tensor_data_types_config: konduit.TensorDataTypesConfig\n" +
+                        "    :param input_data_types: List of input konduit.TensorDataType\n" +
+                        "    :param output_data_types: List of output konduit.TensorDataType\n" +
                         "    :param path: path to the model file\n" +
                         "    \"\"\""
         );
@@ -173,7 +161,8 @@ public class PythonDocStrings {
                         "    TensorFlow extension of konduit.ModelConfig used to define model steps\n" +
                         "    with TensorFlow models.\n" +
                         "\n" +
-                        "    :param tensor_data_types_config: konduit.TensorDataTypesConfig\n" +
+                        "    :param input_data_types: List of input konduit.TensorDataType\n" +
+                        "    :param output_data_types: List of output konduit.TensorDataType\n" +
                         "    :param path: path to the model file\n" +
                         "    :param config_proto_path: path to the TensorFlow ProtoBuf model file.\n" +
                         "    :param saved_model_config: konduit.SavedModelConfig\n" +

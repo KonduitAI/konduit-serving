@@ -3,4 +3,4 @@ serving:
 steps:
   samediff_step:
     type: SAMEDIFF
-    model_loading_path: resources/tensorflow/frozen_model.pb
+    path: resources/tensorflow/frozen_model.pb

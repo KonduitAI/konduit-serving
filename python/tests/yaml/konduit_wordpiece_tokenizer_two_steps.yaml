@@ -27,7 +27,7 @@ steps:
         - NDArray
   dl4j_inference_step:
     type: DL4J
-    model_loading_path: bert.zip
+    path: bert.zip
     input_names:
       - default
     input_column_names:

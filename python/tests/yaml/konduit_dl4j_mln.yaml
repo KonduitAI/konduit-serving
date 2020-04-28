@@ -3,4 +3,4 @@ serving:
 steps:
   dl4j_mln_step:
     type: DL4J
-    model_loading_path: resources/dl4j/dl4j_mln_model.zip
+    path: resources/dl4j/dl4j_mln_model.zip

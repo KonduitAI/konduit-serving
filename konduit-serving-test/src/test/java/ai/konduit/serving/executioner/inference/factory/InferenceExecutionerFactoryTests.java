@@ -52,9 +52,11 @@ public class InferenceExecutionerFactoryTests {
     public void testTensorflow() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/tensorflow/frozen_model.pb");
         TensorflowInferenceExecutionerFactory tensorflowInferenceExecutionerFactory = new TensorflowInferenceExecutionerFactory();
-        TensorFlowConfig tensorFlowConfig = ModelConfig.tensorFlow(classPathResource.getFile().getAbsolutePath(),
-                TensorDataTypesConfig.builder().inputDataType("default", TensorDataType.INT32).build(),
-                classPathResource.getFile().getAbsolutePath());
+
+        TensorFlowConfig tensorFlowConfig = TensorFlowConfig.builder()
+                .path(classPathResource.getFile().getAbsolutePath())
+                .inputDataType("default", TensorDataType.INT32)
+                .build();
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
@@ -91,7 +93,7 @@ public class InferenceExecutionerFactoryTests {
     @Test
     public void testKerasSequential() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/keras/bidirectional_lstm_tensorflow_1.h5");
-        ModelConfig modelConfig = ModelConfig.keras(classPathResource.getFile().getAbsolutePath());
+        ModelConfig modelConfig = KerasConfig.builder().path(classPathResource.getFile().getAbsolutePath()).build();
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
@@ -112,8 +114,10 @@ public class InferenceExecutionerFactoryTests {
     public void testSameDiff() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/tensorflow/frozen_model.pb");
         SameDiffInferenceExecutionerFactory tensorflowInferenceExecutionerFactory = new SameDiffInferenceExecutionerFactory();
-        SameDiffConfig tensorFlowConfig = ModelConfig.sameDiff(classPathResource.getFile().getAbsolutePath(),
-                TensorDataTypesConfig.builder().inputDataType("default", TensorDataType.INT32).build());
+        SameDiffConfig tensorFlowConfig = SameDiffConfig.builder()
+                .path(classPathResource.getFile().getAbsolutePath())
+                .inputDataType("default", TensorDataType.INT32)
+                .build();
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
@@ -138,7 +142,7 @@ public class InferenceExecutionerFactoryTests {
         File tmpZip = new File(dir, "dl4j_mln_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
-        ModelConfig modelConfig = ModelConfig.dl4j(tmpZip.getAbsolutePath());
+        ModelConfig modelConfig = DL4JConfig.builder().path(tmpZip.getAbsolutePath()).build();
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")
@@ -163,7 +167,7 @@ public class InferenceExecutionerFactoryTests {
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
 
-        ModelConfig modelConfig = ModelConfig.dl4j(tmpZip.getAbsolutePath());
+        ModelConfig modelConfig = DL4JConfig.builder().path(tmpZip.getAbsolutePath()).build();
 
         ModelStep modelPipelineStep = ModelStep.builder()
                 .inputName("default")

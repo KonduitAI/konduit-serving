@@ -34,13 +34,10 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
-@NoArgsConstructor
 @SuperBuilder
 public class SameDiffConfig extends ModelConfig {
 
     public static final String SAME_DIFF_EXECUTION_CONFIG_KEY = "sameDiffConfig";
-    private TensorDataTypesConfig tensorDataTypesConfig;
 
     public static SameDiffConfig fromJson(String json){
         return ObjectMappers.fromJson(json, SameDiffConfig.class);

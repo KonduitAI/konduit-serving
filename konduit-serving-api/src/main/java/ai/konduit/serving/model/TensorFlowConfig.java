@@ -23,10 +23,7 @@
 package ai.konduit.serving.model;
 
 import ai.konduit.serving.util.ObjectMappers;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 

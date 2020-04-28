@@ -89,7 +89,9 @@ public class PmmlIrisTest extends BaseVerticleTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        PmmlConfig pmmlConfig = ModelConfig.pmml(new ClassPathResource("/inference/iris/classification/IrisTree.xml").getFile().getAbsolutePath());
+        PmmlConfig pmmlConfig = PmmlConfig.builder()
+                .path(new ClassPathResource("/inference/iris/classification/IrisTree.xml").getFile().getAbsolutePath())
+                .build();
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)

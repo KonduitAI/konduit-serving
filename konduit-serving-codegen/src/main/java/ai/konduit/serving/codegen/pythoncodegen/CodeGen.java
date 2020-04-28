@@ -66,7 +66,6 @@ public class CodeGen {
         clazzes.add(NoOpMetricsConfig.class);
         clazzes.add(ClassificationMetricsConfig.class);
         clazzes.add(RegressionMetricsConfig.class);
-        clazzes.add(TensorDataTypesConfig.class);
         clazzes.add(SavedModelConfig.class);
         clazzes.add(ParallelInferenceConfig.class);
         clazzes.add(ModelConfig.class);

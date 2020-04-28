@@ -38,6 +38,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import onnx.Onnx;
 import org.apache.commons.io.FileUtils;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
@@ -86,7 +87,7 @@ public class OnnxMultipleInputsTest extends BaseVerticleTest {
                 .httpPort(port)
                 .build();
 
-        OnnxConfig modelConfig = ModelConfig.onnx(model.getAbsolutePath());
+        OnnxConfig modelConfig = OnnxConfig.builder().path(model.getAbsolutePath()).build();
 
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)

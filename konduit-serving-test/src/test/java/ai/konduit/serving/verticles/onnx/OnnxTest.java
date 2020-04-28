@@ -85,7 +85,7 @@ public class OnnxTest extends BaseVerticleTest {
                 .httpPort(port)
                 .build();
 
-        OnnxConfig modelConfig = ModelConfig.onnx(model.getAbsolutePath());
+        OnnxConfig modelConfig = OnnxConfig.builder().path(model.getAbsolutePath()).build();
 
         ModelStep modelPipelineConfig = ModelStep.builder()
                 .modelConfig(modelConfig)

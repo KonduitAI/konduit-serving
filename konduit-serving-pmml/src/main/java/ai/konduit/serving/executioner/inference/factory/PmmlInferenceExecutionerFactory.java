@@ -40,8 +40,6 @@ public class PmmlInferenceExecutionerFactory implements InferenceExecutionerFact
         ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
         ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
 
-        PmmlConfig pmmlConfig = (PmmlConfig) inferenceConfiguration;
-        String evaluationModelFactory = pmmlConfig.evaluatorFactoryName();
         String pmmlConfigPath = inferenceConfiguration.getPath();
         ModelEvaluatorFactory modelEvaluatorFactory = ModelEvaluatorFactory.newInstance();
         PmmlInferenceExecutioner inferenceExecutioner = new PmmlInferenceExecutioner();

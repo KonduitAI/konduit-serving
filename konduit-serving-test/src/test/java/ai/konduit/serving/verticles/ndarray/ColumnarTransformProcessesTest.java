@@ -115,7 +115,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .httpPort(port)
                 .build();
 
-        ModelConfig modelConfig = ModelConfig.dl4j(modelSave.getAbsolutePath());
+        DL4JConfig modelConfig = DL4JConfig.builder().path(modelSave.getAbsolutePath()).build();
 
         PipelineStep modelStepConfig = new ModelStep(modelConfig)
                 .setInput(inputSchema)

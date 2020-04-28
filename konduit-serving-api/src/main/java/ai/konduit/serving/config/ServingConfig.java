@@ -45,7 +45,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties(value = {
+@JsonIgnoreProperties({
         "extraStartArgs",
         "extraJarArgs",
         "jarPath",
