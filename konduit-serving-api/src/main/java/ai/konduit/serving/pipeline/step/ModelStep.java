@@ -34,6 +34,7 @@ import ai.konduit.serving.pipeline.config.NormalizationConfig;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.nd4j.shade.jackson.annotation.JsonAlias;
 import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -79,6 +80,7 @@ public abstract class ModelStep extends BasePipelineStep<ModelStep> {
     private Map<String, TensorDataType> outputDataTypes;
 
     @JsonProperty
+    @JsonAlias("modelLoadingPath")
     private String path;
 
     @Builder.Default

@@ -30,13 +30,14 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ObjectMappers;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.python.PythonType;
-import org.nd4j.shade.jackson.annotation.JsonProperty;
-import org.nd4j.shade.jackson.annotation.JsonSetter;
 
 import java.util.*;
 import java.util.stream.Collectors;

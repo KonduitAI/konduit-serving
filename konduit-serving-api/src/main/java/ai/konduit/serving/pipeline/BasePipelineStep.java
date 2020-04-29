@@ -32,12 +32,9 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.base.Preconditions;
-import org.nd4j.shade.guava.collect.Streams;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * PipelineStep collects all ETL related properties (input schema,
