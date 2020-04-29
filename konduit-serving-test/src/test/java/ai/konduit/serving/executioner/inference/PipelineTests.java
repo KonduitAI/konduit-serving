@@ -25,6 +25,7 @@ package ai.konduit.serving.executioner.inference;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.pipeline.PmmlInferenceExecutionerStepRunner;
 import ai.konduit.serving.pipeline.step.*;
+import ai.konduit.serving.pipeline.step.model.*;
 import ai.konduit.serving.pipeline.steps.*;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import org.datavec.api.records.Record;
@@ -58,7 +59,6 @@ public class PipelineTests {
                 .appendStringColumnTransform("first", "two")
                 .build();
 
-
         TransformProcessStep config = TransformProcessStep.builder()
                 .inputName("default")
                 .inputSchema("default", Collections.singletonList(SchemaType.String))
@@ -84,8 +84,6 @@ public class PipelineTests {
 
         assertEquals(1, step.getPipelineStep().getInputSchemas().size());
         assertEquals(1, step.getPipelineStep().getOutputSchemas().size());
-
-
     }
 
     @Test
@@ -115,12 +113,9 @@ public class PipelineTests {
 
         assertEquals(1, transform.length);
 
-
         INDArray[] transformed = SchemaTypeUtils.toArrays(transform);
         assertEquals(Nd4j.scalar(2.0).reshape(1,1), transformed[0].reshape(1,1));
-
     }
-
 
     @Test
     public void testStepToRunnerMapping() {
@@ -136,8 +131,20 @@ public class PipelineTests {
         TransformProcessStep config = TransformProcessStep.builder().build();
         assertEquals(TransformProcessStepRunner.class.getName(), config.pipelineStepClazz());
 
-        ModelStep modelStep = ModelStep.builder().build();
-        assertEquals(InferenceExecutionerStepRunner.class.getName(), modelStep.pipelineStepClazz());
+        Dl4jStep dl4jStep = Dl4jStep.builder().build();
+        assertEquals(InferenceExecutionerStepRunner.class.getName(), dl4jStep.pipelineStepClazz());
+
+        KerasStep kerasStep = KerasStep.builder().build();
+        assertEquals(InferenceExecutionerStepRunner.class.getName(), kerasStep.pipelineStepClazz());
+
+        TensorFlowStep tensorFlowStep = TensorFlowStep.builder().build();
+        assertEquals(InferenceExecutionerStepRunner.class.getName(), tensorFlowStep.pipelineStepClazz());
+
+        OnnxStep onnxStep = OnnxStep.builder().build();
+        assertEquals(InferenceExecutionerStepRunner.class.getName(), onnxStep.pipelineStepClazz());
+
+        SameDiffStep sameDiffStep = SameDiffStep.builder().build();
+        assertEquals(InferenceExecutionerStepRunner.class.getName(), sameDiffStep.pipelineStepClazz());
 
         PmmlStep pmmlStep = PmmlStep.builder().build();
         assertEquals(PmmlInferenceExecutionerStepRunner.class.getName(), pmmlStep.pipelineStepClazz());
@@ -145,5 +152,4 @@ public class PipelineTests {
         TransformProcessStep tpStep = TransformProcessStep.builder().build();
         assertEquals(TransformProcessStepRunner.class.getName(), tpStep.pipelineStepClazz());
     }
-
 }

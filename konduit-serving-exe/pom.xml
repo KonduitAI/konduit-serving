@@ -110,7 +110,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>ai.konduit.serving.configprovider.KonduitServingMain</mainClass>
+                                    <mainClass>ai.konduit.serving.launcher.KonduitServingLauncher</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -135,7 +135,7 @@
                             <jar>target/${project.artifactId}-${project.version}-bin.jar</jar>
                             <errTitle>encc</errTitle>
                             <classPath>
-                                <mainClass>ai.konduit.serving.configprovider.KonduitServingMain</mainClass>
+                                <mainClass>ai.konduit.serving.launcher.KonduitServingLauncher</mainClass>
                                 <addDependencies>true</addDependencies>
                                 <preCp>anything</preCp>
                             </classPath>

@@ -25,10 +25,7 @@ package ai.konduit.serving.verticles.samediff;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.model.SameDiffConfig;
-import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.SameDiffStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.response.Response;
@@ -50,6 +47,7 @@ import org.nd4j.linalg.factory.Nd4j;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertArrayEquals;
@@ -83,18 +81,10 @@ public class SameDiffVerticleNumpyTest extends BaseVerticleTest {
                 .httpPort(port)
                 .build();
 
-        SameDiffConfig modelConfig = SameDiffConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder()
-                                .modelType(ModelConfig.ModelType.SAMEDIFF)
-                                .modelLoadingPath(tmpSameDiffFile.getAbsolutePath())
-                                .build()
-                ).build();
-
-        ModelStep config = ModelStep.builder()
-                .modelConfig(modelConfig)
+        SameDiffStep config = SameDiffStep.builder()
+                .path(tmpSameDiffFile.getAbsolutePath())
                 .inputNames(Arrays.asList("x", "y"))
-                .outputNames(Arrays.asList("output"))
+                .outputNames(Collections.singletonList("output"))
                 .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
@@ -132,9 +122,5 @@ public class SameDiffVerticleNumpyTest extends BaseVerticleTest {
         INDArray bodyResult = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
         assertArrayEquals(new long[]{2}, bodyResult.shape());
         assertEquals(Nd4j.create(new float[]{3.0f, 5.0f}), bodyResult);
-
-
     }
-
-
 }

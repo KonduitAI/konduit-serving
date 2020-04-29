@@ -1,6 +1,5 @@
 serving:
   http_port: 1337
 steps:
-  tf_step:
-    type: TENSORFLOW
-    model_loading_path: resources/tensorflow/frozen_model.pb
+  - type: TENSORFLOW
+    path: resources/tensorflow/frozen_model.pb

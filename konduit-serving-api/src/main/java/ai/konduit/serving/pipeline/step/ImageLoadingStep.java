@@ -79,6 +79,7 @@ public class ImageLoadingStep extends BasePipelineStep<ImageLoadingStep> impleme
     @Override
     public Output.DataFormat[] validOutputTypes() {
         return new Output.DataFormat[] {
+                Output.DataFormat.JSON,
                 Output.DataFormat.ND4J,
                 Output.DataFormat.NUMPY
         };

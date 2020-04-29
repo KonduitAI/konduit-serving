@@ -22,15 +22,11 @@
 
 package ai.konduit.serving.verticles.ndarray;
 
-
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.model.DL4JConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.TransformProcessStep;
+import ai.konduit.serving.pipeline.step.model.Dl4jStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.http.ContentType;
@@ -60,7 +56,7 @@ import static ai.konduit.serving.train.TrainUtils.getIrisOutputSchema;
 import static ai.konduit.serving.train.TrainUtils.getTrainedNetwork;
 import static com.jayway.restassured.RestAssured.given;
 
-/*
+/**
  * Example of an asynchronous JUnit test for a Verticle.
  */
 @RunWith(VertxUnitRunner.class)
@@ -92,7 +88,6 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
         }
     }
 
-
     @Override
     public JsonObject getConfigObject() throws Exception {
         Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = getTrainedNetwork();
@@ -116,11 +111,7 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .httpPort(port)
                 .build();
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.dl4j(modelSave.getAbsolutePath()))
-                .build();
-
-        PipelineStep modelStepConfig = new ModelStep(modelConfig)
+        ModelStep modelStepConfig = Dl4jStep.builder().path(modelSave.getAbsolutePath()).build()
                 .setInput(inputSchema)
                 .setOutput(outputSchema);
 
@@ -130,10 +121,8 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .step(modelStepConfig)
                 .build();
 
-
         System.out.println(inferenceConfiguration.toJson());
         return new JsonObject(inferenceConfiguration.toJson());
-
     }
 
     @Test(timeout = 60000)
@@ -152,9 +141,5 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
                 .port(port)
                 .post("/classification/json")
                 .then().statusCode(200);
-
-
     }
-
-
 }

@@ -74,7 +74,6 @@ public class ONNXThreadPool {
     private InferenceWorker[] zoo;
     private ObservablesProvider provider;
 
-
     protected void init() {
         observables = new LinkedBlockingQueue<>(queueLimit);
 
@@ -94,7 +93,6 @@ public class ONNXThreadPool {
             zoo[i].setDaemon(true);
             zoo[i].start();
         }
-
 
         if (inferenceMode == InferenceMode.BATCHED) {
             log.debug("Initializing ObservablesProvider...");
@@ -126,7 +124,6 @@ public class ONNXThreadPool {
         System.gc();
     }
 
-
     /**
      * Generate predictions/outputSchema from the network, optionally using input masks for predictions
      *
@@ -138,7 +135,6 @@ public class ONNXThreadPool {
 
         BasicInferenceObserver observer = new BasicInferenceObserver();
         OnnxObservable observable;
-
 
         //Batch of 1
         List<Map<String, INDArray>> inputs = Collections.singletonList(input);
@@ -167,7 +163,6 @@ public class ONNXThreadPool {
         return observable.getOutput().get(0);
     }
 
-
     public static class Builder {
         private ModelLoader<Session> onnxModelLoader;
         private int workers = DEFAULT_NUM_WORKERS;
@@ -178,7 +173,6 @@ public class ONNXThreadPool {
         public Builder(@NonNull ModelLoader<Session> onnxModelLoader) {
             this.onnxModelLoader = onnxModelLoader;
         }
-
 
         /**
          * This method allows you to define mode that'll be used during inference. Options are:
@@ -194,7 +188,6 @@ public class ONNXThreadPool {
             this.inferenceMode = inferenceMode;
             return this;
         }
-
 
         /**
          * This method defines, how many model copies will be used for inference.
@@ -316,7 +309,6 @@ public class ONNXThreadPool {
             this.onnxModelLoader = modelLoader;
             this.setDaemon(true);
             this.setName("InferenceThread-" + id);
-
         }
 
         protected long getCounterValue() {
@@ -326,7 +318,6 @@ public class ONNXThreadPool {
         @Override
         public void run() {
             try (PointerScope scope = new PointerScope()) {
-
                 // model should be replicated & initialized here
                 Session replicatedModel = onnxModelLoader.loadModel();
 
@@ -371,7 +362,6 @@ public class ONNXThreadPool {
                                 inputSizes, inputNodeDims);
 
                         request.setOutputBatches(out);
-
                     }
                 }
             } catch (InterruptedException e) {
@@ -379,7 +369,6 @@ public class ONNXThreadPool {
                 // do nothing
             } catch (Exception e) {
                 log.error("Error occurred doing inference", e);
-
             } finally {
                 isStopped.set(true);
             }
@@ -399,7 +388,6 @@ public class ONNXThreadPool {
 
         private List<Map<String, INDArray>> doBatchInference(OnnxObservable request, Session replicatedModel, PointerPointer<BytePointer> inputNodeNames,
                                                              PointerPointer<BytePointer> outputNodeNames, int[] inputTypes, long[] inputSizes, LongPointer[] inputNodeDims) {
-
             List<Map<String, INDArray>> batches = request.getInputBatches();
 
             long numInputNodes = replicatedModel.GetInputCount();
@@ -431,9 +419,7 @@ public class ONNXThreadPool {
                         Value outValue = outputVector.get(i);
 
                         DataBuffer buffer = getDataBuffer(outValue);
-                        INDArray outArray = Nd4j.create(buffer);
-                        output.put((outputNodeNames.get(BytePointer.class, i)).getString(), outArray);
-
+                        output.put((outputNodeNames.get(BytePointer.class, i)).getString(), Nd4j.create(buffer));
                     }
                     out.add(output);
                 }
@@ -448,7 +434,7 @@ public class ONNXThreadPool {
 
             long sizeInBytes;
             MemoryInfo memoryInfo = MemoryInfo.CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-            Pointer inputTensorValues = null;
+            Pointer inputTensorValues;
             switch (type) {
                 case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT:
                     validateType(DataType.FLOAT, ndArray);

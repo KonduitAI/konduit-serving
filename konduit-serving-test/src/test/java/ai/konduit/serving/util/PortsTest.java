@@ -18,21 +18,16 @@ package ai.konduit.serving.util;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.configprovider.KonduitServingMain;
-import ai.konduit.serving.configprovider.KonduitServingMainArgs;
-import ai.konduit.serving.model.DL4JConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
+import ai.konduit.serving.deploy.DeployKonduitServing;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.Dl4jStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
-import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
@@ -47,9 +42,7 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.BindException;
-import java.nio.charset.StandardCharsets;
 
 import static com.jayway.restassured.RestAssured.given;
 
@@ -74,18 +67,11 @@ public class PortsTest {
     }
 
     @Test
-    public void testRandomPort(TestContext testContext) throws IOException {
+    public void testRandomPort(TestContext testContext) {
         Async async = testContext.async();
 
-        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                .configStoreType("file").ha(false)
-                .multiThreaded(false)
-                .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(getConfig(testContext, 0))
-                .build();
-
-        KonduitServingMain.builder()
-                .eventHandler(handler -> {
+        DeployKonduitServing.deployInference(getConfig(testContext, 0),
+                handler -> {
                     if(handler.succeeded()) {
                         int port = handler.result().getServingConfig().getHttpPort();
 
@@ -101,26 +87,18 @@ public class PortsTest {
                     } else {
                         testContext.fail(handler.cause());
                     }
-                })
-                .build()
-                .runMain(args.toArgs());
+                });
     }
 
     @Test
-    public void testConflictedPort(TestContext testContext) throws IOException {
+    public void testConflictedPort(TestContext testContext) {
         Async async = testContext.async(2);
 
-        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                .configStoreType("file").ha(false)
-                .multiThreaded(false)
-                .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(getConfig(testContext, PortUtils.getAvailablePort()))
-                .build();
+        InferenceConfiguration inferenceConfiguration = getConfig(testContext, PortUtils.getAvailablePort());
 
-        KonduitServingMain konduitServingMain = KonduitServingMain.builder().build();
-        konduitServingMain.setEventHandler(handler -> {
-            if (handler.succeeded()) {
-                int port = handler.result().getServingConfig().getHttpPort();
+        DeployKonduitServing.deployInference(inferenceConfiguration, outerHandler -> {
+            if (outerHandler.succeeded()) {
+                int port = outerHandler.result().getServingConfig().getHttpPort();
 
                 testContext.assertTrue(port > 0 && port <= 0xFFFF);
 
@@ -130,39 +108,38 @@ public class PortsTest {
                         .then()
                         .statusCode(204);
 
-                konduitServingMain.runMain(args.toArgs());
+                DeployKonduitServing.deployInference(inferenceConfiguration, innerHandler -> {
+                    if (innerHandler.failed()) {
+                        Throwable throwable = innerHandler.cause();
+
+                        if (throwable instanceof BindException &&
+                                throwable.getMessage().contains("Address already in use")) {
+                            async.countDown();
+                        } else {
+                            testContext.fail(throwable);
+                        }
+                    } else {
+                        testContext.fail("The second deployment should fail here due to conflicted port.");
+                    }
+                });
+
                 async.countDown();
             } else {
-                Throwable throwable = handler.cause();
-                if(throwable instanceof BindException &&
-                        throwable.getMessage().contains("Address already in use")) {
-                    async.countDown();
-                } else {
-                    testContext.fail(throwable);
-                }
+                testContext.fail(outerHandler.cause());
             }
         });
-
-        konduitServingMain.runMain(args.toArgs());
     }
 
     @Test
-    public void testPortFromEnvironment(TestContext testContext) throws IOException {
+    public void testPortFromEnvironment(TestContext testContext) {
         int selectedPort = PortUtils.getAvailablePort();  // Making sure it's an available port
-
         environmentVariables.set(VerticleConstants.KONDUIT_SERVING_PORT, String.valueOf(selectedPort));
 
         Async async = testContext.async();
 
-        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                .configStoreType("file").ha(false)
-                .multiThreaded(false)
-                .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(getConfig(testContext, -1))  // this port number will be ignored in this case because the port value will be taken from the environment VerticleConstants#KONDUIT_SERVING_PORT
-                .build();
-
-        KonduitServingMain.builder()
-                .eventHandler(handler -> {
+        DeployKonduitServing.deployInference(
+                getConfig(testContext, -1), // this port number will be ignored in this case because the port value will be taken from the environment VerticleConstants#KONDUIT_SERVING_PORT
+                handler -> {
                     if(handler.succeeded()) {
                         int port = handler.result().getServingConfig().getHttpPort();
 
@@ -178,13 +155,11 @@ public class PortsTest {
                     } else {
                         testContext.fail(handler.cause());
                     }
-                })
-                .build()
-                .runMain(args.toArgs());
+                });
     }
 
     @Test
-    public void testPortFromBadEnvironment(TestContext testContext) throws IOException {
+    public void testPortFromBadEnvironment(TestContext testContext) {
         Object[] invalidPorts = new Object[] { "stringValue", -400, 100000};
 
         Async[] asyncs = new Async[invalidPorts.length];
@@ -195,15 +170,9 @@ public class PortsTest {
             int finalI = i;
             environmentVariables.set(VerticleConstants.KONDUIT_SERVING_PORT, String.valueOf(invalidPorts[finalI]));
 
-            KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                    .configStoreType("file").ha(false)
-                    .multiThreaded(false)
-                    .verticleClassName(InferenceVerticle.class.getName())
-                    .configPath(getConfig(testContext, -1)) // this port number will be ignored in this case because the port value will be taken from the environment VerticleConstants#KONDUIT_SERVING_PORT
-                    .build();
-
-            KonduitServingMain.builder()
-                    .eventHandler(handler -> {
+            DeployKonduitServing.deployInference(
+                    getConfig(testContext, -1), // this port number will be ignored in this case because the port value will be taken from the environment VerticleConstants#KONDUIT_SERVING_PORT)
+                    handler -> {
                         if(handler.succeeded()) {
                             testContext.fail(String.format("Success event called with port value: %s", invalidPorts[finalI]));
                         } else {
@@ -217,29 +186,20 @@ public class PortsTest {
                                 testContext.fail(throwable);
                             }
                         }
-                    })
-                    .build()
-                    .runMain(args.toArgs());
+                    });
 
             asyncs[i].await();
         }
     }
 
     @Test
-    public void testSpecifiedPortWithoutEnvironment(TestContext testContext) throws Exception {
+    public void testSpecifiedPortWithoutEnvironment(TestContext testContext) {
         int selectedPort = PortUtils.getAvailablePort();  // Making sure it's an available port
 
         Async async = testContext.async();
 
-        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                .configStoreType("file").ha(false)
-                .multiThreaded(false)
-                .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(getConfig(testContext, selectedPort))
-                .build();
-
-        KonduitServingMain.builder()
-                .eventHandler(handler -> {
+        DeployKonduitServing.deployInference(getConfig(testContext, selectedPort),
+                handler -> {
                     if(handler.succeeded()) {
                         int port = handler.result().getServingConfig().getHttpPort();
 
@@ -255,9 +215,7 @@ public class PortsTest {
                     } else {
                         testContext.fail(handler.cause());
                     }
-                })
-                .build()
-                .runMain(args.toArgs());
+                });
     }
 
     private static String trainAndSaveModel() throws Exception {
@@ -268,7 +226,7 @@ public class PortsTest {
         return modelSave.getAbsolutePath();
     }
 
-    public static String getConfig(TestContext testContext, int port) throws IOException {
+    public static InferenceConfiguration getConfig(TestContext testContext, int port) {
         Schema.Builder schemaBuilder = new Schema.Builder();
         schemaBuilder.addColumnDouble("petal_length")
                 .addColumnDouble("petal_width")
@@ -286,29 +244,18 @@ public class PortsTest {
                 .httpPort(port)
                 .build();
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder().modelLoadingPath(testContext.get(SAVED_MODEL_PATH))
-                                .modelType(ModelConfig.ModelType.DL4J)
-                                .build()
-                ).build();
-
-        ModelStep modelPipelineStep = ModelStep.builder()
+        Dl4jStep modelPipelineStep = Dl4jStep.builder()
                 .inputName("default")
                 .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
                 .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
                 .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
-                .modelConfig(modelConfig)
+                .path(testContext.get(SAVED_MODEL_PATH))
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .build();
 
-        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+        return InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .step(modelPipelineStep)
                 .build();
-
-        File configSavePath = folder.newFile();
-        FileUtils.writeStringToFile(configSavePath, inferenceConfiguration.toJson(), StandardCharsets.UTF_8);
-        return configSavePath.getAbsolutePath();
     }
 }

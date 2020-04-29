@@ -20,13 +20,12 @@
  *
  */
 
-package ai.konduit.serving.configprovider;
+package ai.konduit.serving.routers;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
-import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.config.metrics.MetricsRenderer;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
@@ -37,7 +36,6 @@ import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.input.adapter.InputAdapter;
 import ai.konduit.serving.input.conversion.BatchInputParser;
 import ai.konduit.serving.metrics.*;
-import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.arrow.ArrowBinaryInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.image.VertxBufferImageInputAdapter;
 import ai.konduit.serving.pipeline.handlers.converter.multi.converter.impl.nd4j.VertxBufferNd4jInputAdapter;
@@ -61,7 +59,6 @@ import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.healthchecks.HealthCheckHandler;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -92,6 +89,9 @@ import java.util.concurrent.TimeUnit;
 @Getter
 public class PipelineRouteDefiner {
 
+    public static final String PREDICTION_TYPE = "predictionType";
+    public static final String INPUT_DATA_FORMAT = "inputDataFormat";
+
     protected Input.DataFormat inputDataFormat;
     protected PredictionType predictionType;
     protected Output.DataFormat outputDataFormat;
@@ -99,10 +99,11 @@ public class PipelineRouteDefiner {
     protected PipelineExecutioner pipelineExecutioner;
     protected InferenceConfiguration inferenceConfiguration;
     //cached for columnar inputs, not used in binary endpoints
-    protected Schema inputSchema, outputSchema = null;
-    protected LongTaskTimer inferenceExecutionTimer, batchCreationTimer;
+    protected Schema inputSchema = null;
+    protected Schema outputSchema = null;
+    protected LongTaskTimer inferenceExecutionTimer;
+    protected LongTaskTimer batchCreationTimer;
     protected HealthCheckHandler healthCheckHandler;
-    private static JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
     private List<MetricsRenderer> metricsRenderers;
 
     public List<String> inputNames() {
@@ -112,7 +113,6 @@ public class PipelineRouteDefiner {
     public List<String> outputNames() {
         return pipelineExecutioner.outputNames();
     }
-
 
     /**
      * Define the routes and initialize the internal
@@ -246,7 +246,7 @@ public class PipelineRouteDefiner {
 
                     case GPU:
                         try {
-                            MeterBinder meterBinder = (MeterBinder) Class.forName("ai.konduit.serving.gpu.GpuMetrics").newInstance();
+                            MeterBinder meterBinder = (MeterBinder) Class.forName("ai.konduit.serving.gpu.GpuMetrics").getConstructor().newInstance();
                             meterBinder.bindTo(registry);
                         } catch (Exception e) {
                             log.error("Unable to setup gpu metrics. Please ensure the gpu dependency has been properly included in the classpath.", e);
@@ -259,13 +259,13 @@ public class PipelineRouteDefiner {
 
         healthCheckHandler = HealthCheckHandler.create(vertx);
 
-        /**
+        /*
          * Get a basic health check for a running Konduit server.
          * If a server is up, this endpoint will return status of 204.
          */
         router.get("/healthcheck*").handler(healthCheckHandler);
 
-        /**
+        /*
          * Get the Konduit server configuration in raw JSON format
          */
         router.get("/config")
@@ -278,20 +278,20 @@ public class PipelineRouteDefiner {
             }
         });
 
-        /**
+        /*
          * Get the Konduit server configuration in formatted, "pretty" JSON format
          */
         router.get("/config/pretty")
                 .produces("application/json").handler(ctx -> {
             try {
                 ctx.response().putHeader("Content-Type", "application/json");
-                ctx.response().end(new JsonObject(inferenceConfiguration.toJson()).encodePrettily());
+                ctx.response().end(inferenceConfiguration.toJsonObject().encodePrettily());
             } catch (Exception e) {
                 ctx.fail(500, e);
             }
         });
 
-        /**
+        /*
          * Sets up and endpoint to see server logs if
          * {@link ServingConfig#isCreateLoggingEndpoints()} is true.
          * Returns the last 100 lines of the log file.
@@ -308,7 +308,7 @@ public class PipelineRouteDefiner {
                         }
                     });
 
-            /**
+            /*
              * Sets up and endpoint to see server logs if {@link ServingConfig#isCreateLoggingEndpoints()}
              * is true. Returns the number of last few lines determines by the path param
              * {@code numberOfLastLinesToRead}. If the path param is an invalid integer,
@@ -323,7 +323,7 @@ public class PipelineRouteDefiner {
                             if (numberOfLinesString.matches("-?\\d+")) {
                                 ctx.response().end(LogUtils.getLogs(Integer.parseInt(numberOfLinesString)));
                             } else if("download".equalsIgnoreCase(numberOfLinesString)) {
-                                ctx.response().sendFile(LogUtils.getLogsFile().getAbsolutePath()).end();
+                                ctx.response().sendFile(LogUtils.getEndpointLogsFile().getAbsolutePath()).end();
                             } else if("downloadAsZip".equalsIgnoreCase(numberOfLinesString)) {
                                 ctx.response().sendFile(LogUtils.getZippedLogs().getAbsolutePath()).end();
                             } else {
@@ -335,7 +335,7 @@ public class PipelineRouteDefiner {
                     });
         }
 
-        /**
+        /*
          * Get prometheus metrics from this endpoint.
          */
         router.get("/metrics").handler(io.vertx.micrometer.PrometheusScrapingHandler.create())
@@ -343,6 +343,10 @@ public class PipelineRouteDefiner {
                     if (failureHandler.failure() != null) {
                         log.error("Failed to scrape metrics", failureHandler.failure());
                     }
+
+                    failureHandler.response()
+                            .setStatusCode(500)
+                            .end(failureHandler.failure().toString());
                 });
 
         Preconditions.checkNotNull(inferenceConfiguration.getServingConfig(), "Please define a serving configuration.");
@@ -372,18 +376,16 @@ public class PipelineRouteDefiner {
         router.post("/dynamicschema")
                 .consumes("application/json")
                 .produces("application/json")
-                .handler(ctx -> {
-                    pipelineExecutioner.doJsonInference(ctx.getBodyAsJson(),ctx);
-                });
+                .handler(ctx -> pipelineExecutioner.doJsonInference(ctx.getBodyAsJson(),ctx));
 
-        /**
+        /*
          * Get the output of a pipeline for a given prediction type for JSON input data format.
          */
         router.post("/:predictionType/:inputDataFormat")
                 .consumes("application/json")
                 .produces("application/json").handler(ctx -> {
-            predictionType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
-            inputDataFormat = Input.DataFormat.valueOf(ctx.pathParam("inputDataFormat").toUpperCase());
+            predictionType = PredictionType.valueOf(ctx.pathParam(PREDICTION_TYPE).toUpperCase());
+            inputDataFormat = Input.DataFormat.valueOf(ctx.pathParam(INPUT_DATA_FORMAT).toUpperCase());
 
             Preconditions.checkState(inputDataFormat.equals(Input.DataFormat.JSON),
                     "content-type: application/json only accepts JSON as " +
@@ -404,7 +406,7 @@ public class PipelineRouteDefiner {
                         inputSchema,
                         null,
                         outputSchema,
-			inputDataFormat,
+			            inputDataFormat,
                         inferenceConfiguration.getServingConfig().getOutputDataFormat());
 
                 if (start != null)
@@ -417,12 +419,7 @@ public class PipelineRouteDefiner {
                     }
 
                     log.debug("Done updating metrics post inference");
-
-
                 });
-
-
-
             } catch (Exception e) {
                 log.error("Unable to perform json inference", e);
                 ctx.response().setStatusCode(500);
@@ -431,23 +428,22 @@ public class PipelineRouteDefiner {
             }
         });
 
-
-        /**
+        /*
          * Multi-part request for pipeline outputs of given predictionType for
          */
         router.post("/:predictionType/:inputDataFormat")
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed").handler(ctx -> {
-            inputDataFormat = Input.DataFormat.valueOf(ctx.pathParam("inputDataFormat").toUpperCase());
+            inputDataFormat = Input.DataFormat.valueOf(ctx.pathParam(INPUT_DATA_FORMAT).toUpperCase());
 
             try {
                 // Sometimes we have predictionType coming in as outputDataFormat if that's the case
                 // then the right place for the pipelineExecutioner to be initialized is at the
                 // "/:outputDataFormat/:inputDataFormat" route
-                outputDataFormat = Output.DataFormat.valueOf(ctx.pathParam("predictionType").toUpperCase());
+                outputDataFormat = Output.DataFormat.valueOf(ctx.pathParam(PREDICTION_TYPE).toUpperCase());
                 predictionType = PredictionType.RAW;
             } catch(Exception e) {
-                predictionType = PredictionType.valueOf(ctx.pathParam("predictionType").toUpperCase());
+                predictionType = PredictionType.valueOf(ctx.pathParam(PREDICTION_TYPE).toUpperCase());
             }
             pipelineExecutioner.init();
 
@@ -476,7 +472,7 @@ public class PipelineRouteDefiner {
                 }
 
                 long endNanos = System.nanoTime();
-                if (inferenceConfiguration.serving().isLogTimings()) {
+                if (inferenceConfiguration.getServingConfig().isLogTimings()) {
                     log.info("Timing for batch creation was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                 }
                 if (batch == null) {
@@ -537,7 +533,7 @@ public class PipelineRouteDefiner {
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
-                    if (inferenceConfiguration.serving().isLogTimings()) {
+                    if (inferenceConfiguration.getServingConfig().isLogTimings()) {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
                     vertx.runOnContext(handler -> {
@@ -589,7 +585,7 @@ public class PipelineRouteDefiner {
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
-                    if (inferenceConfiguration.serving().isLogTimings()) {
+                    if (inferenceConfiguration.getServingConfig().isLogTimings()) {
                         log.info("Timing for batch creation was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
                     if (batch == null) {
@@ -613,7 +609,6 @@ public class PipelineRouteDefiner {
                 .consumes("multipart/form-data")
                 .consumes("multipart/mixed")
                 .produces("application/octet-stream").handler((RoutingContext ctx) -> {
-
             Record[] inputs = ctx.get(VerticleConstants.CONVERTED_INFERENCE_DATA);
             if (inputs == null) {
                 log.warn("No inputs found. Bad request");
@@ -635,12 +630,10 @@ public class PipelineRouteDefiner {
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
-                    if (inferenceConfiguration.serving().isLogTimings()) {
+                    if (inferenceConfiguration.getServingConfig().isLogTimings()) {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos))
                                 + " milliseconds");
                     }
-
-
 
                     vertx.runOnContext(handler2 -> {
                         log.debug("Updating metrics post inference");
@@ -650,9 +643,7 @@ public class PipelineRouteDefiner {
                         }
 
                         log.debug("Done updating metrics post inference");
-
                     });
-
 
                     handler.complete();
                 } catch (Exception e) {
@@ -688,7 +679,7 @@ public class PipelineRouteDefiner {
                 .setMergeFormAttributes(true))
                 .failureHandler(failureHandlder -> {
                     if (failureHandlder.statusCode() == 404) {
-                        log.warn("404 at route " + failureHandlder.request().path());
+                        log.warn("404 at route {}", failureHandlder.request().path());
                     } else if (failureHandlder.failed()) {
                         if (failureHandlder.failure() != null) {
                             log.error("Request failed with cause ", failureHandlder.failure());
@@ -696,8 +687,14 @@ public class PipelineRouteDefiner {
                             log.error("Request failed with unknown cause.");
                         }
                     }
+
+                    failureHandlder.response()
+                            .setStatusCode(500)
+                            .end(failureHandlder.failure().toString());
                 });
     }
+
+
 
 
 
@@ -723,7 +720,7 @@ public class PipelineRouteDefiner {
 
     private Map<String, InputAdapter<Buffer, ?>> getInputAdapterMap(RoutingContext ctx) {
         Map<String, InputAdapter<Buffer, ?>> adapters = new HashMap<>();
-        Input.DataFormat inputAdapterType = Input.DataFormat.valueOf(ctx.pathParam("inputDataFormat").toUpperCase());
+        Input.DataFormat inputAdapterType = Input.DataFormat.valueOf(ctx.pathParam(INPUT_DATA_FORMAT).toUpperCase());
         InputAdapter<Buffer,?> adapter = getInputAdapter(inputAdapterType);
         for(String inputName : inputNames()) {
             adapters.put(inputName,adapter);

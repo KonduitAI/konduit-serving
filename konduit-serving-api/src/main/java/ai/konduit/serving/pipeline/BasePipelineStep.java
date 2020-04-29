@@ -57,10 +57,14 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
     protected Map<String,List<SchemaType>> outputSchemas;
 
     @Singular
-    protected List<String> inputNames, outputNames;
+    protected List<String> inputNames;
+    @Singular
+    protected List<String> outputNames;
 
     @Singular
-    protected Map<String, List<String>> inputColumnNames, outputColumnNames;
+    protected Map<String, List<String>> inputColumnNames;
+    @Singular
+    protected Map<String, List<String>> outputColumnNames;
 
     public BasePipelineStep(Map<String, List<SchemaType>> inputSchemas, Map<String, List<SchemaType>> outputSchemas, List<String> inputNames, List<String> outputNames, Map<String, List<String>> inputColumnNames, Map<String, List<String>> outputColumnNames) {
         this.inputSchemas = inputSchemas;
@@ -79,7 +83,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
                 inputColumnNames = new LinkedHashMap<>();
                 inputSchemas = new LinkedHashMap<>();
                 inputNames.forEach(inputName -> {
-                    inputColumnNames.put(inputName, Arrays.asList("default"));
+                    inputColumnNames.put(inputName, Collections.singletonList("default"));
                     inputSchemas.put(inputName, Collections.singletonList(SchemaType.NDArray));
                 });
             }
@@ -90,18 +94,18 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
             inputSchemas = new LinkedHashMap<>();
             log.info("Auto initializing inputs with default column name default and default column type NDArray");
             inputNames.forEach(inputName -> {
-                inputColumnNames.put(inputName, Arrays.asList("default"));
+                inputColumnNames.put(inputName, Collections.singletonList("default"));
                 inputSchemas.put(inputName, Collections.singletonList(SchemaType.NDArray));
             });
         }
 
         else { //initialize all default values
             log.info("No input names or column names or types found. Initializing with default name of default, default column name of default and NDArray type");
-            this.inputNames = new ArrayList<>(Arrays.asList("default"));
+            this.inputNames = new ArrayList<>(Collections.singletonList("default"));
             this.inputSchemas = new LinkedHashMap<>();
             this.inputSchemas.put("default",Collections.singletonList(SchemaType.NDArray));
             this.inputColumnNames = new LinkedHashMap<>();
-            this.inputColumnNames.put("default",Arrays.asList("default"));
+            this.inputColumnNames.put("default", Collections.singletonList("default"));
         }
 
         if(!(SchemaTypeUtils.allIsNullOrEmpty(this.outputNames) && SchemaTypeUtils.allIsNullOrEmpty(this.outputSchemas) && SchemaTypeUtils.allIsNullOrEmpty(this.outputColumnNames))) {
@@ -109,7 +113,7 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
                 outputColumnNames = new LinkedHashMap<>();
                 outputSchemas = new LinkedHashMap<>();
                 outputNames.forEach(inputName -> {
-                    outputColumnNames.put(inputName, Arrays.asList("default"));
+                    outputColumnNames.put(inputName, Collections.singletonList("default"));
                     outputSchemas.put(inputName, Collections.singletonList(SchemaType.NDArray));
                 });
             }
@@ -120,15 +124,15 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
             outputSchemas = new LinkedHashMap<>();
             log.info("Auto initializing outputs with default column name default and default column type NDArray");
             outputNames.forEach(inputName -> {
-                outputColumnNames.put(inputName, Arrays.asList("default"));
+                outputColumnNames.put(inputName, Collections.singletonList("default"));
                 outputSchemas.put(inputName, Collections.singletonList(SchemaType.NDArray));
             });
         } else { //initialize all default values
-            this.outputNames = new ArrayList<>(Arrays.asList("default"));
+            this.outputNames = new ArrayList<>(Collections.singletonList("default"));
             this.outputSchemas = new LinkedHashMap<>();
             this.outputSchemas.put("default",Collections.singletonList(SchemaType.NDArray));
             this.outputColumnNames = new LinkedHashMap<>();
-            this.outputColumnNames.put("default",Arrays.asList("default"));
+            this.outputColumnNames.put("default", Collections.singletonList("default"));
         }
     }
 
@@ -199,9 +203,9 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
             names = new ArrayList<>();
         }
         if (!names.contains(inputName)) {
-
-            names.add(inputName);
-            this.setInputNames(names);
+            List<String> tempInputNames = new ArrayList<>(names);
+            tempInputNames.add(inputName);
+            this.setInputNames(tempInputNames);
 
             List<String> columnNames = SchemaTypeUtils.columnNames(inputSchema);
             setInputColumns(inputName, columnNames);
@@ -276,8 +280,9 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
         }
 
         if (!names.contains(outputName)) {
-            names.add(outputName);
-            setOutputNames(names);
+            List<String> tempList = new ArrayList<>(names);
+            tempList.add(outputName);
+            setOutputNames(tempList);
 
             List<String> columnNames = SchemaTypeUtils.columnNames(outputSchema);
             setOutputColumns(outputName, columnNames);
@@ -394,14 +399,15 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
         }
     }
 
-
     protected void setInputColumns(String inputName, List<String> columnNames) {
         Map<String, List<String>> inputCols = this.getInputColumnNames();
         if (inputCols == null) {
             inputCols = new HashMap<>();
         }
-        inputCols.put(inputName, columnNames);
-        this.setInputColumnNames(inputCols);
+
+        Map<String, List<String>> tempMap = new HashMap<>(inputCols);
+        tempMap.put(inputName, columnNames);
+        this.setInputColumnNames(tempMap);
     }
 
     protected void setOutputColumns(String outputName, List<String> columnNames) {
@@ -409,8 +415,10 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
         if (outputCols == null) {
             outputCols = new HashMap<>();
         }
-        outputCols.put(outputName, columnNames);
-        this.setOutputColumnNames(outputCols);
+
+        Map<String, List<String>> tempMap = new HashMap<>(outputCols);
+        tempMap.put(outputName, columnNames);
+        this.setOutputColumnNames(tempMap);
     }
 
     protected void setInputTypes(String inputName, List<SchemaType> types) {
@@ -418,8 +426,10 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
         if (schemas == null) {
             schemas = new HashMap<>();
         }
-        schemas.put(inputName, types);
-        this.setInputSchemas(schemas);
+
+        Map<String, List<SchemaType>> tempMap = new HashMap<>(schemas);
+        tempMap.put(inputName, types);
+        this.setInputSchemas(tempMap);
     }
 
     protected void setOutputTypes(String outputName, List<SchemaType> types) {
@@ -427,7 +437,9 @@ public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements
         if (schemas == null) {
             schemas = new HashMap<>();
         }
-        schemas.put(outputName, types);
-        setOutputSchemas(schemas);
+
+        Map<String, List<SchemaType>> tempMap = new HashMap<>(schemas);
+        tempMap.put(outputName, types);
+        setOutputSchemas(tempMap);
     }
 }

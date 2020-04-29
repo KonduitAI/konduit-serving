@@ -31,14 +31,19 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.records.Record;
+import org.junit.rules.TemporaryFolder;
 import org.nd4j.linalg.api.buffer.DataType;
 
 import java.io.IOException;
 import java.util.Collections;
 
 @Getter
+@Slf4j
 public class BatchNd4jInputParserVerticle extends BaseRoutableVerticle {
+
+    TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     public final static String INPUT_NAME_KEY = "inputNameKey";
     private BatchInputParser inputParser;
@@ -57,11 +62,19 @@ public class BatchNd4jInputParserVerticle extends BaseRoutableVerticle {
                 .inputParts(Collections.singletonList(inputName))
                 .converters(Collections.singletonMap(inputName, new VertxBufferNd4jInputAdapter()))
                 .converterArgs(Collections.singletonMap(inputName, ConverterArgs.builder()
-                        .strings(Collections.singletonList(DataType.LONG.name())).build())).build();
+                        .strings(Collections.singletonList(DataType.INT64.name())).build())).build();
         BatchNd4jInputParserVerticle.this.inputParser = batchInputParser;
 
 
-        router().post().handler(BodyHandler.create().setMergeFormAttributes(true));
+        router().post().handler(BodyHandler.create()
+                .setUploadsDirectory(System.getProperty("java.io.tmpdir"))
+                .setMergeFormAttributes(true))
+                .failureHandler(failureHandler -> {
+                    log.error("Request failed due to: ", failureHandler.failure());
+                    failureHandler.response()
+                            .setStatusCode(failureHandler.statusCode())
+                            .end(failureHandler.failure().getMessage());
+                });
         router.post("/").handler(itemHandler -> {
             try {
                 BatchNd4jInputParserVerticle.this.batch = batchInputParser.createBatch(itemHandler);

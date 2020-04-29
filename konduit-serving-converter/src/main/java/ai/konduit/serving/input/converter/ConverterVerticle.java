@@ -56,7 +56,6 @@ import java.io.File;
 @Slf4j
 public class ConverterVerticle extends BaseRoutableVerticle {
 
-
     public final static String UPLOAD_KEY = "uploadKey";
     public final static String DEFAULT_UPLOAD_PATH = "upload";
     public final static String DEFAULT_UNZIP_DIR = "unzip";

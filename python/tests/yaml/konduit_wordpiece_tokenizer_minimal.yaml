@@ -5,8 +5,7 @@ serving:
     -Xmx8g
   output_data_format: NUMPY
 steps:
-  tokenizer_preprocessing_step:
-    type: WORDPIECE_TOKENIZER
+  - type: WORDPIECE_TOKENIZER
     vocab_path: bert-large-uncased-vocab.txt
     sentence_max_len: 10
     input_names:

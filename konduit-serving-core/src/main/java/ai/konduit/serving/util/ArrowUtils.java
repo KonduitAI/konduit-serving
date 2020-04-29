@@ -164,7 +164,7 @@ public class ArrowUtils {
         direct.rewind();
         switch (type) {
             case Integer:
-                buffer = Nd4j.createBuffer(direct, DataType.INT, cols, 0L);
+                buffer = Nd4j.createBuffer(direct, DataType.INT32, cols, 0L);
                 break;
             case Float:
                 buffer = Nd4j.createBuffer(direct, DataType.FLOAT, cols);
@@ -173,7 +173,7 @@ public class ArrowUtils {
                 buffer = Nd4j.createBuffer(direct, DataType.DOUBLE, cols);
                 break;
             case Long:
-                buffer = Nd4j.createBuffer(direct, DataType.LONG, cols);
+                buffer = Nd4j.createBuffer(direct, DataType.INT64, cols);
         }
 
         return Nd4j.create(buffer, cols, 1);

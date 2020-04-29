@@ -102,13 +102,13 @@ public enum TensorDataType {
             case BOOL:
                 return DataType.BOOL;
             case INT32:
-                return DataType.INT;
+                return DataType.INT32;
             case INT64:
-                return DataType.LONG;
+                return DataType.INT64;
             case STRING:
                 return DataType.UTF8;
             case HALF:
-                return DataType.HALF;
+                return DataType.FLOAT16;
             default:
                 throw new IllegalArgumentException("Unsupported type " + tensorDataType.name());
         }

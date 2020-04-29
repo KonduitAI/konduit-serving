@@ -6,6 +6,7 @@ import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.config.TextConfig;
 import ai.konduit.serving.pipeline.step.*;
+import ai.konduit.serving.pipeline.step.model.*;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
@@ -15,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
 /** PipelineStep collects all ETL and model related properties (input schema,
@@ -27,19 +27,37 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  */
 
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = ModelStep.class, name = "ModelStep"),
+        @JsonSubTypes.Type(value = PmmlStep.class, name = "PMML"),
+        @JsonSubTypes.Type(value = PmmlStep.class, name = "PmmlConfig"),
+        @JsonSubTypes.Type(value = SameDiffStep.class, name = "SAMEDIFF"),
+        @JsonSubTypes.Type(value = SameDiffStep.class, name = "SameDiffConfig"),
+        @JsonSubTypes.Type(value = TensorFlowStep.class, name = "TENSORFLOW"),
+        @JsonSubTypes.Type(value = TensorFlowStep.class, name = "TensorFlowConfig"),
+        @JsonSubTypes.Type(value = OnnxStep.class, name = "ONNX"),
+        @JsonSubTypes.Type(value = OnnxStep.class, name = "OnnxConfig"),
+        @JsonSubTypes.Type(value = KerasStep.class, name = "KERAS"),
+        @JsonSubTypes.Type(value = KerasStep.class, name = "KerasConfig"),
+        @JsonSubTypes.Type(value = Dl4jStep.class, name= "DL4J"),
+        @JsonSubTypes.Type(value = Dl4jStep.class, name= "DL4JConfig"),
+        @JsonSubTypes.Type(value = PythonStep.class, name = "PYTHON"),
         @JsonSubTypes.Type(value = PythonStep.class, name = "PythonStep"),
+        @JsonSubTypes.Type(value = PmmlStep.class, name = "PMML"),
         @JsonSubTypes.Type(value = PmmlStep.class, name = "PmmlStep"),
+        @JsonSubTypes.Type(value = TransformProcessStep.class, name = "TRANSFORM"),
         @JsonSubTypes.Type(value = TransformProcessStep.class, name = "TransformProcessStep"),
+        @JsonSubTypes.Type(value = CustomPipelineStep.class, name = "CUSTOM"),
         @JsonSubTypes.Type(value = CustomPipelineStep.class, name = "CustomPipelineStep"),
+        @JsonSubTypes.Type(value = ImageLoadingStep.class, name = "IMAGE"),
         @JsonSubTypes.Type(value = ImageLoadingStep.class, name = "ImageLoadingStep"),
+        @JsonSubTypes.Type(value = JsonExpanderTransformStep.class, name = "JSON_EXPANDER"),
         @JsonSubTypes.Type(value = JsonExpanderTransformStep.class, name = "JsonExpanderTransformStep"),
+        @JsonSubTypes.Type(value = ArrayConcatenationStep.class, name = "ARRAY_CONCAT"),
         @JsonSubTypes.Type(value = ArrayConcatenationStep.class, name = "ArrayConcatenationStep"),
-        @JsonSubTypes.Type(value = WordPieceTokenizerStep.class, name = "WordPieceTokenizerStep"),
+        @JsonSubTypes.Type(value = WordPieceTokenizerStep.class, name = "WORDPIECE_TOKENIZER"),
+        @JsonSubTypes.Type(value = WordPieceTokenizerStep.class, name = "WordPieceTokenizerStep")
 })
-@JsonTypeInfo(use = NAME, include = PROPERTY)
+@JsonTypeInfo(use = NAME, property = "type")
 public interface PipelineStep<T extends PipelineStep> extends Serializable, TextConfig {
-
 
     /**
      * Returns true if the input data format
@@ -53,10 +71,8 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
             return true;
         }
 
-        boolean ret =  Arrays.stream(validInputTypes()).anyMatch(input -> dataFormat.equals(input));
-        return ret;
+        return Arrays.asList(validInputTypes()).contains(dataFormat);
     }
-
 
     /**
      * Returns true if the output data format
@@ -72,16 +88,14 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
             return true;
         }
 
-        boolean ret =  Arrays.stream(validOutputTypes()).anyMatch(input -> dataFormat.equals(input));
-        return ret;
+        return Arrays.asList(validOutputTypes()).contains(dataFormat);
     }
-
 
     /**
      * Valid {@link PredictionType}s
      * if this {@link PipelineStep} is the last step
      * in a pipeline.
-     * Have {@link #validPredictionTypes()} return null or empty array
+     * Have this return null or empty array
      * if you would like any type to be valid.
      *
      * @return the valid prediction type
@@ -89,73 +103,69 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
     PredictionType[] validPredictionTypes();
 
     /**
-     * Returns true if the {@link #validPredictionTypes()}
-     * is contained within the input or if {@link #validPredictionTypes()}
+     * Checks for the validity of {@link PredictionType} input.
+     *
+     *
      * is null or empty
      * @param predictionType the prediction type
-     * @return
+     * @return Returns true if {@code predictionType} is contained within {@link #validPredictionTypes()}
      */
     default boolean isValidPredictionType(PredictionType predictionType) {
         if(validPredictionTypes() == null || validPredictionTypes().length < 1)
             return true;
-        boolean ret =  Arrays.stream(validPredictionTypes()).anyMatch(input -> predictionType.equals(input));
-        return ret;
+        return Arrays.asList(validPredictionTypes()).contains(predictionType);
     }
 
-
     /**
-     * Returns the valid {@link Input.DataFormat}
-     * when the input is the beginning of a pipeline
-     * @return
+     * Returns an array of valid {@link Input.DataFormat} with the current pipeline step.
+     * Currently this works when the pipeline step is the beginning of the whole pipeline.
+     * @return array of valid {@link Input.DataFormat}s
      */
     Input.DataFormat[] validInputTypes();
 
     /**
-     * Returns the valid {@link Output.DataFormat}
-     * when the output is the end of a pipeline
-     * @return
+     * Returns an array of valid {@link Output.DataFormat} with the current pipeline step.
+     * Currently this works when the pipeline step is at the end of the whole pipeline.
+     * @return array of valid {@link Output.DataFormat}s
      */
     Output.DataFormat[] validOutputTypes();
 
     /**
      * Getter for the input column names
-     * @return
+     * @return input column names
      */
     Map<String,List<String>> getInputColumnNames();
 
     /**
-     * Getter for the input column names
-     * @return
+     * Getter for the output column names
+     * @return output column names
      */
     Map<String,List<String>> getOutputColumnNames();
 
     /**
      * Getter for the input schema
-     * @return
+     * @return the input schema
      */
     Map<String,List<SchemaType>> getInputSchemas();
 
     /**
-     * Getter for the input schema
-     * @return
+     * Getter for the output schema
+     * @return the output schema
      */
     Map<String,List<SchemaType>> getOutputSchemas();
 
     /**
-     * Getter for the output names for this
-     * pipeline step
-     * @return
+     * Getter for the output names for the current pipeline step
+     * @return output names
      */
     List<String> getOutputNames();
 
     /**
      *
-     * Getter for the input names for this pipeline step
-     * @return
+     * Getter for the input names for the current pipeline step
+     * @return input names
      */
     List<String> getInputNames();
-
-
 
     /**
      * Define a single input for a Pipeline Step from explicit
@@ -179,8 +189,6 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @throws Exception key error
      */
     T setInput(String inputName, Schema inputSchema) throws Exception;
-
-
 
     /**
      * Define a single output for a TransformProcess Step from explicit
@@ -240,7 +248,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
-     default T setInput(Schema inputSchema) throws Exception {
+    default T setInput(Schema inputSchema) throws Exception {
         return setInput("default", inputSchema);
     }
 
@@ -341,3 +349,4 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      */
     String pipelineStepClazz();
 }
+

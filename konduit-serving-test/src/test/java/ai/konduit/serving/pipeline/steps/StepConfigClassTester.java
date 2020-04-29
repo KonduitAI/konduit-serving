@@ -23,6 +23,7 @@
 package ai.konduit.serving.pipeline.steps;
 
 import ai.konduit.serving.pipeline.step.*;
+import ai.konduit.serving.pipeline.step.model.*;
 import org.junit.Test;
 
 public class StepConfigClassTester {
@@ -30,11 +31,14 @@ public class StepConfigClassTester {
     @Test
     public void testPipelineClasses() throws Exception {
         Class.forName(new ImageLoadingStep().pipelineStepClazz());
-        Class.forName(new ModelStep().pipelineStepClazz());
+        Class.forName(new Dl4jStep().pipelineStepClazz());
+        Class.forName(new TensorFlowStep().pipelineStepClazz());
+        Class.forName(new KerasStep().pipelineStepClazz());
+        Class.forName(new PmmlStep().pipelineStepClazz());
+        Class.forName(new SameDiffStep().pipelineStepClazz());
+        Class.forName(new OnnxStep().pipelineStepClazz());
         Class.forName(new PythonStep().pipelineStepClazz());
         Class.forName(new TransformProcessStep().pipelineStepClazz());
         Class.forName(new WordPieceTokenizerStep().pipelineStepClazz());
-
     }
-
 }
