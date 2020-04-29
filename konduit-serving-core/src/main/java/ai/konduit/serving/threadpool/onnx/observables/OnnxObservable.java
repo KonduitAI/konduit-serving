@@ -41,7 +41,6 @@ public interface OnnxObservable {
 
     void addInput(List<Map<String, INDArray>> inputs);
 
-
     void setOutputBatches(List<Map<String, INDArray>> output);
 
     void addObserver(Observer observer);
@@ -51,5 +50,4 @@ public interface OnnxObservable {
     Exception getOutputException();
 
     void setOutputException(Exception e);
-
 }

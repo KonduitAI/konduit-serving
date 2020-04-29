@@ -24,7 +24,7 @@ import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
-import ai.konduit.serving.pipeline.step.PmmlStep;
+import ai.konduit.serving.pipeline.step.model.*;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
@@ -72,6 +72,7 @@ public class ConfigCommand extends DefaultCommand {
 
     private String types;
     private boolean minified;
+    private boolean yaml;
     private File outputFile;
 
     @Option(longName = "types", shortName = "t", argName = "config-types", required = true)
@@ -85,6 +86,10 @@ public class ConfigCommand extends DefaultCommand {
     public void setMinified(boolean minified) {
         this.minified = minified;
     }
+
+    @Option(longName = "yaml", shortName = "y", flag = true)
+    @Description("Set if you want the output to be a yaml configuration.")
+    public void setYaml(boolean yaml) { this.yaml = yaml; }
 
     @Option(longName = "output", shortName = "o", argName = "output-file")
     @Description("Optional: If set, the generated json will be saved here. Otherwise, it's printed on the console.")
@@ -144,14 +149,21 @@ public class ConfigCommand extends DefaultCommand {
             }
         }
 
-        JsonObject output = new JsonObject(InferenceConfiguration.builder()
+        InferenceConfiguration inferenceConfiguration =
+                InferenceConfiguration.builder()
                 .servingConfig(ServingConfig.builder().build())
-                .steps(pipelineSteps).build().toJson());
+                .steps(pipelineSteps).build();
 
-        if (minified) {
-            printOrSave(output.encode());
+        if(yaml) {
+            printOrSave(inferenceConfiguration.toYaml());
         } else {
-            printOrSave(output.encodePrettily());
+            JsonObject output = new JsonObject(inferenceConfiguration.toJson());
+
+            if (minified) {
+                printOrSave(output.encode());
+            } else {
+                printOrSave(output.encodePrettily());
+            }
         }
     }
 
@@ -180,29 +192,20 @@ public class ConfigCommand extends DefaultCommand {
     }
 
     private PipelineStep<ModelStep> tensorflow() {
-        return ModelStep.builder()
+        return TensorFlowStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(
-                        TensorFlowConfig.builder()
-                                .modelConfigType(ModelConfigType.tensorFlow("<path-to-the-tensorflow-model>"))
-                                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
-                                        .inputDataType(DEFAULT, TensorDataType.FLOAT)
-                                        .outputDataType(DEFAULT, TensorDataType.FLOAT)
-                                        .build())
-                                .build()
-                )
+                .path("<path-to-the-tensorflow-model>")
+                .inputDataType(DEFAULT, TensorDataType.FLOAT)
+                .outputDataType(DEFAULT, TensorDataType.FLOAT)
                 .build();
     }
 
     private PipelineStep<ModelStep> onnx() {
-        return ModelStep.builder()
+        return OnnxStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(
-                        OnnxConfig.builder()
-                                .modelConfigType(ModelConfigType.onnx("<path-to-the-onnx-model>"))
-                                .build())
+                .path("<path-to-the-onnx-model>")
                 .build();
     }
 
@@ -210,35 +213,23 @@ public class ConfigCommand extends DefaultCommand {
         return PmmlStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(
-                        PmmlConfig.builder()
-                                .modelConfigType(ModelConfigType.pmml("<path-to-the-pmml-model>"))
-                                .build()
-                )
+                .path("<path-to-the-pmml-model>")
                 .build();
     }
 
     private PipelineStep<ModelStep> dl4j() {
-        return ModelStep.builder()
+        return Dl4jStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(
-                        DL4JConfig.builder()
-                                .modelConfigType(ModelConfigType.dl4j("<path-to-the-dl4j-model>"))
-                                .build()
-                )
+                .path("<path-to-the-dl4j-model>")
                 .build();
     }
 
     private PipelineStep<ModelStep> keras() {
-        return ModelStep.builder()
+        return KerasStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
-                .modelConfig(
-                        KerasConfig.builder()
-                                .modelConfigType(ModelConfigType.keras("<path-to-the-keras-model>"))
-                                .build()
-                )
+                .path("<path-to-the-keras-model>")
                 .build();
     }
 

@@ -30,6 +30,7 @@ import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
+import ai.konduit.serving.pipeline.step.model.TensorFlowStep;
 import ai.konduit.serving.util.PortUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -48,7 +49,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 public class PipelineExecutionerTests {
-
 
     @Test
     @Ignore
@@ -85,7 +85,7 @@ public class PipelineExecutionerTests {
                     fieldInfo.put("shape",new JsonArray().add(1).add(1));
                     schemaValues.put(value.name(), Nd4j.toNpyByteArray(Nd4j.scalar(1.0)));
                     break;
-               //need to wait till dl4j can support the boolean type in the python executioner
+               // todo: need to wait till dl4j can support the boolean type in the python executioner
                     /* case Boolean:
                     pythonConfig.pythonInput(value.name(),Type.BOOL.name());
                     schemaValues.put(value.name(), true);
@@ -171,28 +171,16 @@ public class PipelineExecutionerTests {
         System.out.println("Started on port " + port);
         String path = new ClassPathResource("inference/tensorflow/mnist/lenet_frozen.pb").getFile().getAbsolutePath();
 
-        TensorDataTypesConfig tensorDataTypesConfig = TensorDataTypesConfig.builder()
-                .inputDataType("image_tensor", TensorDataType.INT64)
-                .build();
-
-        TensorFlowConfig modelConfig = TensorFlowConfig.builder()
-                .tensorDataTypesConfig(tensorDataTypesConfig)
-                .modelConfigType(
-                        ModelConfigType.builder()
-                                .modelLoadingPath(path)
-                                .modelType(ModelConfig.ModelType.TENSORFLOW)
-                                .build()
-                ).build();
-
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .build();
 
-        ModelStep modelStepConfig = ModelStep.builder()
+        TensorFlowStep modelStepConfig = TensorFlowStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)
                 .inputNames(Collections.singletonList("image_tensor"))
                 .outputNames(Collections.singletonList("detection_classes"))
-                .modelConfig(modelConfig)
+                .path(path)
+                .inputDataType("image_tensor", TensorDataType.INT64)
                 .build();
 
 
@@ -217,10 +205,6 @@ public class PipelineExecutionerTests {
         System.out.println("Started on port " + port);
         String path = new ClassPathResource("inference/tensorflow/mnist/lenet_frozen.pb").getFile().getAbsolutePath();
 
-        TensorDataTypesConfig tensorDataTypesConfig = TensorDataTypesConfig.builder()
-                .inputDataType("image_tensor", TensorDataType.INT64)
-                .build();
-
         ObjectDetectionConfig objectRecognitionConfig = ObjectDetectionConfig
                 .builder()
                 .numLabels(80)
@@ -236,14 +220,10 @@ public class PipelineExecutionerTests {
                 .httpPort(port)
                 .build();
 
-        TensorFlowConfig modelConfig = TensorFlowConfig.builder()
-                .tensorDataTypesConfig(tensorDataTypesConfig)
-                .modelConfigType(ModelConfigType.tensorFlow(path))
-                .build();
-
-        ModelStep modelStepConfig = ModelStep.builder()
+        TensorFlowStep modelStepConfig = TensorFlowStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)
-                .modelConfig(modelConfig)
+                .path(path)
+                .inputDataType("image_tensor", TensorDataType.INT64)
                 .inputNames(Collections.singletonList("image_tensor"))
                 .outputNames(Collections.singletonList("detection_classes"))
                 .build();
@@ -260,6 +240,4 @@ public class PipelineExecutionerTests {
         assertNotNull("Output names should not be null.", pipelineExecutioner.outputNames());
         TestCase.assertEquals(TensorDataType.INT64, pipelineExecutioner.inputDataTypes.get("image_tensor"));
     }
-
-
 }

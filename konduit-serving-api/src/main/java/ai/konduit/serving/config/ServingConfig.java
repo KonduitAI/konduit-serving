@@ -30,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -43,6 +44,12 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({
+        "extraStartArgs",
+        "extraJarArgs",
+        "jarPath",
+        "configPath"
+})
 public class ServingConfig implements Serializable, TextConfig {
 
     @Builder.Default

@@ -180,7 +180,7 @@ public class JsonArrayMapConverter extends BaseJsonArrayConverter {
                         throw new IllegalArgumentException("Illegal type found " + value.getClass());
                     }
                 } else {
-                    ArrowConverter.setValue(schema.getType(j), vectors.get(j), jsonObject.getValue(schema.getName(j)), i);
+                    ArrowConverter.setValue(schema.getType(j), vectors.get(j), jsonObject.getValue(jsonObject.fieldNames().iterator().next()), i);
                 }
             }
         }

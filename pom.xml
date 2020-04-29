@@ -152,10 +152,16 @@
         <javax.version>2.1.1</javax.version>
         <javax-validation-api.version>2.0.1.Final</javax-validation-api.version>
         <swagger-core.version>2.1.1</swagger-core.version>
+        <fastutil.version>8.1.1</fastutil.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>it.unimi.dsi</groupId>
+                <artifactId>fastutil</artifactId>
+                <version>${fastutil.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>

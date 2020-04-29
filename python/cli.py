@@ -154,6 +154,10 @@ def get_jar_url(platform, version, spin, chip):
                                          chip=chip)
 
 
+git_tags = get_git_tags()
+DEFAULT_KONDUIT_TAG = git_tags[0]  # Assuming the first one in the response is the most recent one
+
+
 @click.command()
 @click.option(
     "-p", "--platform",
@@ -174,7 +178,7 @@ def get_jar_url(platform, version, spin, chip):
     default=DEFAULT_KONDUIT_TAG,
     show_default=True,
     help="The git tag to build the source code from.",
-    type=click.Choice(get_git_tags())
+    type=click.Choice(git_tags)
 )
 @click.option(
     "-s", "--spin",

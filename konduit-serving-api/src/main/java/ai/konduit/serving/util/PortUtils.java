@@ -19,7 +19,6 @@ package ai.konduit.serving.util;
 import lombok.NoArgsConstructor;
 
 import java.io.IOException;
-import java.net.DatagramSocket;
 import java.net.ServerSocket;
 
 @NoArgsConstructor

@@ -24,7 +24,7 @@ package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.executioner.inference.PmmlInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.factory.PmmlInferenceExecutionerFactory;
-import ai.konduit.serving.pipeline.step.PmmlStep;
+import ai.konduit.serving.pipeline.step.model.PmmlStep;
 import ai.konduit.serving.pipeline.steps.BaseStepRunner;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.util.WritableValueRetriever;

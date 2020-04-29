@@ -2,67 +2,169 @@ import enum
 from konduit.json_utils import empty_type_dict, DictWrapper, ListWrapper
 
 
-class TensorDataTypesConfig(object):
-    """TensorDataTypesConfig
-
-    Configures TensorDataTypes for inputs and outputs of a step.
-
-    :param input_data_types: List of input konduit.TensorDataType
-    :param output_data_types: List of output konduit.TensorDataType
-    """
+class MultiLabelMetricsConfig(object):
 
     _types_map = {
-        "inputDataTypes": {"type": dict, "subtype": None},
-        "outputDataTypes": {"type": dict, "subtype": None},
+        "labels": {"type": list, "subtype": str},
     }
-    _formats_map = {}
+    _formats_map = {
+        "labels": "table",
+    }
 
-    def __init__(self, input_data_types=None, output_data_types=None):
-        self.__input_data_types = input_data_types
-        self.__output_data_types = output_data_types
+    def __init__(self, labels=None):
+        self.__labels = labels
 
-    def _get_input_data_types(self):
-        return self.__input_data_types
+    def _get_labels(self):
+        return self.__labels
 
-    def _set_input_data_types(self, value):
-        if (
-            not isinstance(value, dict)
-            and not isinstance(value, DictWrapper)
-            and not isinstance(value, DictWrapper)
-        ):
-            raise TypeError("inputDataTypes must be type")
-        self.__input_data_types = value
+    def _set_labels(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("labels must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("labels list valeus must be str")
+        self.__labels = value
 
-    input_data_types = property(_get_input_data_types, _set_input_data_types)
-
-    def _get_output_data_types(self):
-        return self.__output_data_types
-
-    def _set_output_data_types(self, value):
-        if (
-            not isinstance(value, dict)
-            and not isinstance(value, DictWrapper)
-            and not isinstance(value, DictWrapper)
-        ):
-            raise TypeError("outputDataTypes must be type")
-        self.__output_data_types = value
-
-    output_data_types = property(_get_output_data_types, _set_output_data_types)
+    labels = property(_get_labels, _set_labels)
 
     def as_dict(self):
         d = empty_type_dict(self)
-        if self.__input_data_types is not None:
-            d["inputDataTypes"] = (
-                self.__input_data_types.as_dict()
-                if hasattr(self.__input_data_types, "as_dict")
-                else self.__input_data_types
+        if self.__labels is not None:
+            d["labels"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__labels
+            ]
+        return d
+
+
+class NoOpMetricsConfig(object):
+
+    _types_map = {}
+    _formats_map = {}
+
+    def __init__(self):
+        pass
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        return d
+
+
+class ClassificationMetricsConfig(object):
+
+    _types_map = {
+        "classificationLabels": {"type": list, "subtype": str},
+    }
+    _formats_map = {
+        "classificationLabels": "table",
+    }
+
+    def __init__(self, classification_labels=None):
+        self.__classificationLabels = classificationLabels
+
+    def _get_classificationLabels(self):
+        return self.__classificationLabels
+
+    def _set_classificationLabels(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("classificationLabels must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("classificationLabels list valeus must be str")
+        self.__classificationLabels = value
+
+    classificationLabels = property(
+        _get_classificationLabels, _set_classificationLabels
+    )
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__classificationLabels is not None:
+            d["classificationLabels"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p
+                for p in self.__classification_labels
+            ]
+        return d
+
+
+class RegressionMetricsConfig(object):
+
+    _types_map = {
+        "regressionColumnLabels": {"type": list, "subtype": str},
+        "sampleTypes": {"type": list, "subtype": str},
+        "columnDistributions": {"type": list, "subtype": ColumnDistribution},
+    }
+    _formats_map = {
+        "regressionColumnLabels": "table",
+        "sampleTypes": "table",
+        "columnDistributions": "table",
+    }
+
+    def __init__(
+        self,
+        regression_column_labels=None,
+        sample_types=None,
+        column_distributions=None,
+    ):
+        self.__regression_column_labels = regression_column_labels
+        self.__sample_types = sample_types
+        self.__column_distributions = column_distributions
+
+    def _get_regression_column_labels(self):
+        return self.__regression_column_labels
+
+    def _set_regression_column_labels(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("regressionColumnLabels must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("regressionColumnLabels list valeus must be str")
+        self.__regression_column_labels = value
+
+    regression_column_labels = property(
+        _get_regression_column_labels, _set_regression_column_labels
+    )
+
+    def _get_sample_types(self):
+        return self.__sample_types
+
+    def _set_sample_types(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("sampleTypes must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("sampleTypes list valeus must be str")
+        self.__sample_types = value
+
+    sample_types = property(_get_sample_types, _set_sample_types)
+
+    def _get_column_distributions(self):
+        return self.__column_distributions
+
+    def _set_column_distributions(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("columnDistributions must be list")
+        if not all(isinstance(i, ColumnDistribution) for i in value):
+            raise TypeError(
+                "columnDistributions list valeus must be ColumnDistribution"
             )
-        if self.__output_data_types is not None:
-            d["outputDataTypes"] = (
-                self.__output_data_types.as_dict()
-                if hasattr(self.__output_data_types, "as_dict")
-                else self.__output_data_types
-            )
+        self.__column_distributions = value
+
+    column_distributions = property(
+        _get_column_distributions, _set_column_distributions
+    )
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__regression_column_labels is not None:
+            d["regressionColumnLabels"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p
+                for p in self.__regression_column_labels
+            ]
+        if self.__sample_types is not None:
+            d["sampleTypes"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__sample_types
+            ]
+        if self.__column_distributions is not None:
+            d["columnDistributions"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p
+                for p in self.__column_distributions
+            ]
         return d
 
 
@@ -342,130 +444,6 @@ class ParallelInferenceConfig(object):
         return d
 
 
-class ModelConfigType(object):
-    """ModelConfigType
-
-    This model configuration has meta data for a model loader, which
-    includes the model loading path and the model type. It's used in
-    konduit.ModelConfig.
-
-    :param model_type: Can be any of 'DL4J',
-        'PMML', 'TENSORFLOW', 'KERAS', and 'SAMEDIFF'.
-    :param model_loading_path: path to the model file
-    """
-
-    _modelType_enum = enum.Enum(
-        "_modelType_enum", "DL4J PMML TENSORFLOW KERAS SAMEDIFF", module=__name__
-    )
-    _types_map = {
-        "modelType": {"type": str, "subtype": None},
-        "modelLoadingPath": {"type": str, "subtype": None},
-    }
-    _formats_map = {}
-
-    def __init__(self, model_type=None, model_loading_path=None):
-        self.__model_type = model_type
-        self.__model_loading_path = model_loading_path
-
-    def _get_model_type(self):
-        return self.__model_type
-
-    def _set_model_type(self, value):
-        if not isinstance(value, str):
-            raise TypeError("modelType must be str")
-        if value in self._modelType_enum.__members__:
-            self.__type = value
-        else:
-            raise ValueError("Value {} not in _modelType_enum list".format(value))
-
-    model_type = property(_get_model_type, _set_model_type)
-
-    def _get_model_loading_path(self):
-        return self.__model_loading_path
-
-    def _set_model_loading_path(self, value):
-        if not isinstance(value, str):
-            raise TypeError("modelLoadingPath must be str")
-        self.__model_loading_path = value
-
-    model_loading_path = property(_get_model_loading_path, _set_model_loading_path)
-
-    def as_dict(self):
-        d = empty_type_dict(self)
-        if self.__model_type is not None:
-            d["modelType"] = (
-                self.__model_type.as_dict()
-                if hasattr(self.__model_type, "as_dict")
-                else self.__model_type
-            )
-        if self.__model_loading_path is not None:
-            d["modelLoadingPath"] = (
-                self.__model_loading_path.as_dict()
-                if hasattr(self.__model_loading_path, "as_dict")
-                else self.__model_loading_path
-            )
-        return d
-
-
-class ModelConfig(object):
-    """ModelConfig
-
-    Model configurations hold the TensorDataTypeConfig and the
-    .ModelConfigType of the model you want to serve.
-
-    :param tensor_data_types_config: konduit.TensorDataTypeConfig
-    :param model_config_type: konduit.ModelConfigType
-    """
-
-    _types_map = {
-        "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
-        "modelConfigType": {"type": ModelConfigType, "subtype": None},
-    }
-    _formats_map = {}
-
-    def __init__(self, tensor_data_types_config=None, model_config_type=None):
-        self.__tensor_data_types_config = tensor_data_types_config
-        self.__model_config_type = model_config_type
-
-    def _get_tensor_data_types_config(self):
-        return self.__tensor_data_types_config
-
-    def _set_tensor_data_types_config(self, value):
-        if not isinstance(value, TensorDataTypesConfig):
-            raise TypeError("tensorDataTypesConfig must be TensorDataTypesConfig")
-        self.__tensor_data_types_config = value
-
-    tensor_data_types_config = property(
-        _get_tensor_data_types_config, _set_tensor_data_types_config
-    )
-
-    def _get_model_config_type(self):
-        return self.__model_config_type
-
-    def _set_model_config_type(self, value):
-        if not isinstance(value, ModelConfigType):
-            raise TypeError("modelConfigType must be ModelConfigType")
-        self.__model_config_type = value
-
-    model_config_type = property(_get_model_config_type, _set_model_config_type)
-
-    def as_dict(self):
-        d = empty_type_dict(self)
-        if self.__tensor_data_types_config is not None:
-            d["tensorDataTypesConfig"] = (
-                self.__tensor_data_types_config.as_dict()
-                if hasattr(self.__tensor_data_types_config, "as_dict")
-                else self.__tensor_data_types_config
-            )
-        if self.__model_config_type is not None:
-            d["modelConfigType"] = (
-                self.__model_config_type.as_dict()
-                if hasattr(self.__model_config_type, "as_dict")
-                else self.__model_config_type
-            )
-        return d
-
-
 class TensorDataType(object):
     """TensorDataType
 
@@ -680,354 +658,6 @@ class Output(object):
         return d
 
 
-class KerasConfig(object):
-
-    _types_map = {
-        "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
-        "modelConfigType": {"type": ModelConfigType, "subtype": None},
-    }
-    _formats_map = {}
-
-    def __init__(self, tensor_data_types_config=None, model_config_type=None):
-        self.__tensor_data_types_config = tensor_data_types_config
-        self.__model_config_type = model_config_type
-
-    def _get_tensor_data_types_config(self):
-        return self.__tensor_data_types_config
-
-    def _set_tensor_data_types_config(self, value):
-        if not isinstance(value, TensorDataTypesConfig):
-            raise TypeError("tensorDataTypesConfig must be TensorDataTypesConfig")
-        self.__tensor_data_types_config = value
-
-    tensor_data_types_config = property(
-        _get_tensor_data_types_config, _set_tensor_data_types_config
-    )
-
-    def _get_model_config_type(self):
-        return self.__model_config_type
-
-    def _set_model_config_type(self, value):
-        if not isinstance(value, ModelConfigType):
-            raise TypeError("modelConfigType must be ModelConfigType")
-        self.__model_config_type = value
-
-    model_config_type = property(_get_model_config_type, _set_model_config_type)
-
-    def as_dict(self):
-        d = empty_type_dict(self)
-        if self.__tensor_data_types_config is not None:
-            d["tensorDataTypesConfig"] = (
-                self.__tensor_data_types_config.as_dict()
-                if hasattr(self.__tensor_data_types_config, "as_dict")
-                else self.__tensor_data_types_config
-            )
-        if self.__model_config_type is not None:
-            d["modelConfigType"] = (
-                self.__model_config_type.as_dict()
-                if hasattr(self.__model_config_type, "as_dict")
-                else self.__model_config_type
-            )
-        return d
-
-
-class DL4JConfig(object):
-
-    _types_map = {
-        "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
-        "modelConfigType": {"type": ModelConfigType, "subtype": None},
-    }
-    _formats_map = {}
-
-    def __init__(self, tensor_data_types_config=None, model_config_type=None):
-        self.__tensor_data_types_config = tensor_data_types_config
-        self.__model_config_type = model_config_type
-
-    def _get_tensor_data_types_config(self):
-        return self.__tensor_data_types_config
-
-    def _set_tensor_data_types_config(self, value):
-        if not isinstance(value, TensorDataTypesConfig):
-            raise TypeError("tensorDataTypesConfig must be TensorDataTypesConfig")
-        self.__tensor_data_types_config = value
-
-    tensor_data_types_config = property(
-        _get_tensor_data_types_config, _set_tensor_data_types_config
-    )
-
-    def _get_model_config_type(self):
-        return self.__model_config_type
-
-    def _set_model_config_type(self, value):
-        if not isinstance(value, ModelConfigType):
-            raise TypeError("modelConfigType must be ModelConfigType")
-        self.__model_config_type = value
-
-    model_config_type = property(_get_model_config_type, _set_model_config_type)
-
-    def as_dict(self):
-        d = empty_type_dict(self)
-        if self.__tensor_data_types_config is not None:
-            d["tensorDataTypesConfig"] = (
-                self.__tensor_data_types_config.as_dict()
-                if hasattr(self.__tensor_data_types_config, "as_dict")
-                else self.__tensor_data_types_config
-            )
-        if self.__model_config_type is not None:
-            d["modelConfigType"] = (
-                self.__model_config_type.as_dict()
-                if hasattr(self.__model_config_type, "as_dict")
-                else self.__model_config_type
-            )
-        return d
-
-
-class PmmlConfig(object):
-    """PmmlConfig
-
-    Configuration for models in PMML format
-
-    :param tensor_data_types_config: konduit.TensorDataTypesConfig
-    :param model_config_type: konduit.ModelConfigType
-    :param evaluator_factory_name: defaults to "org.jpmml.evaluator.ModelEvaluatorFactory". Custom extensions
-           have to be written in Java.
-    """
-
-    _types_map = {
-        "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
-        "modelConfigType": {"type": ModelConfigType, "subtype": None},
-        "evaluatorFactoryName": {"type": str, "subtype": None},
-    }
-    _formats_map = {}
-
-    def __init__(
-        self,
-        tensor_data_types_config=None,
-        model_config_type=None,
-        evaluator_factory_name=None,
-    ):
-        self.__tensor_data_types_config = tensor_data_types_config
-        self.__model_config_type = model_config_type
-        self.__evaluator_factory_name = evaluator_factory_name
-
-    def _get_tensor_data_types_config(self):
-        return self.__tensor_data_types_config
-
-    def _set_tensor_data_types_config(self, value):
-        if not isinstance(value, TensorDataTypesConfig):
-            raise TypeError("tensorDataTypesConfig must be TensorDataTypesConfig")
-        self.__tensor_data_types_config = value
-
-    tensor_data_types_config = property(
-        _get_tensor_data_types_config, _set_tensor_data_types_config
-    )
-
-    def _get_model_config_type(self):
-        return self.__model_config_type
-
-    def _set_model_config_type(self, value):
-        if not isinstance(value, ModelConfigType):
-            raise TypeError("modelConfigType must be ModelConfigType")
-        self.__model_config_type = value
-
-    model_config_type = property(_get_model_config_type, _set_model_config_type)
-
-    def _get_evaluator_factory_name(self):
-        return self.__evaluator_factory_name
-
-    def _set_evaluator_factory_name(self, value):
-        if not isinstance(value, str):
-            raise TypeError("evaluatorFactoryName must be str")
-        self.__evaluator_factory_name = value
-
-    evaluator_factory_name = property(
-        _get_evaluator_factory_name, _set_evaluator_factory_name
-    )
-
-    def as_dict(self):
-        d = empty_type_dict(self)
-        if self.__tensor_data_types_config is not None:
-            d["tensorDataTypesConfig"] = (
-                self.__tensor_data_types_config.as_dict()
-                if hasattr(self.__tensor_data_types_config, "as_dict")
-                else self.__tensor_data_types_config
-            )
-        if self.__model_config_type is not None:
-            d["modelConfigType"] = (
-                self.__model_config_type.as_dict()
-                if hasattr(self.__model_config_type, "as_dict")
-                else self.__model_config_type
-            )
-        if self.__evaluator_factory_name is not None:
-            d["evaluatorFactoryName"] = (
-                self.__evaluator_factory_name.as_dict()
-                if hasattr(self.__evaluator_factory_name, "as_dict")
-                else self.__evaluator_factory_name
-            )
-        return d
-
-
-class SameDiffConfig(object):
-    """SameDiffConfig
-
-    Extension of ModelConfig to DL4J SameDiff models
-
-    :param tensor_data_types_config: konduit.TensorDataTypesConfig
-    :param model_config_type: konduit.ModelConfigType
-    """
-
-    _types_map = {
-        "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
-        "modelConfigType": {"type": ModelConfigType, "subtype": None},
-    }
-    _formats_map = {}
-
-    def __init__(self, tensor_data_types_config=None, model_config_type=None):
-        self.__tensor_data_types_config = tensor_data_types_config
-        self.__model_config_type = model_config_type
-
-    def _get_tensor_data_types_config(self):
-        return self.__tensor_data_types_config
-
-    def _set_tensor_data_types_config(self, value):
-        if not isinstance(value, TensorDataTypesConfig):
-            raise TypeError("tensorDataTypesConfig must be TensorDataTypesConfig")
-        self.__tensor_data_types_config = value
-
-    tensor_data_types_config = property(
-        _get_tensor_data_types_config, _set_tensor_data_types_config
-    )
-
-    def _get_model_config_type(self):
-        return self.__model_config_type
-
-    def _set_model_config_type(self, value):
-        if not isinstance(value, ModelConfigType):
-            raise TypeError("modelConfigType must be ModelConfigType")
-        self.__model_config_type = value
-
-    model_config_type = property(_get_model_config_type, _set_model_config_type)
-
-    def as_dict(self):
-        d = empty_type_dict(self)
-        if self.__tensor_data_types_config is not None:
-            d["tensorDataTypesConfig"] = (
-                self.__tensor_data_types_config.as_dict()
-                if hasattr(self.__tensor_data_types_config, "as_dict")
-                else self.__tensor_data_types_config
-            )
-        if self.__model_config_type is not None:
-            d["modelConfigType"] = (
-                self.__model_config_type.as_dict()
-                if hasattr(self.__model_config_type, "as_dict")
-                else self.__model_config_type
-            )
-        return d
-
-
-class TensorFlowConfig(object):
-    """TensorFlowConfig
-
-    TensorFlow extension of konduit.ModelConfig used to define model steps
-    with TensorFlow models.
-
-    :param tensor_data_types_config: konduit.TensorDataTypesConfig
-    :param model_config_type: konduit.ModelConfigType
-    :param config_proto_path: path to the TensorFlow ProtoBuf model file.
-    :param saved_model_config: konduit.SavedModelConfig
-    """
-
-    _types_map = {
-        "tensorDataTypesConfig": {"type": TensorDataTypesConfig, "subtype": None},
-        "modelConfigType": {"type": ModelConfigType, "subtype": None},
-        "configProtoPath": {"type": str, "subtype": None},
-        "savedModelConfig": {"type": SavedModelConfig, "subtype": None},
-    }
-    _formats_map = {}
-
-    def __init__(
-        self,
-        tensor_data_types_config=None,
-        model_config_type=None,
-        config_proto_path=None,
-        saved_model_config=None,
-    ):
-        self.__tensor_data_types_config = tensor_data_types_config
-        self.__model_config_type = model_config_type
-        self.__config_proto_path = config_proto_path
-        self.__saved_model_config = saved_model_config
-
-    def _get_tensor_data_types_config(self):
-        return self.__tensor_data_types_config
-
-    def _set_tensor_data_types_config(self, value):
-        if not isinstance(value, TensorDataTypesConfig):
-            raise TypeError("tensorDataTypesConfig must be TensorDataTypesConfig")
-        self.__tensor_data_types_config = value
-
-    tensor_data_types_config = property(
-        _get_tensor_data_types_config, _set_tensor_data_types_config
-    )
-
-    def _get_model_config_type(self):
-        return self.__model_config_type
-
-    def _set_model_config_type(self, value):
-        if not isinstance(value, ModelConfigType):
-            raise TypeError("modelConfigType must be ModelConfigType")
-        self.__model_config_type = value
-
-    model_config_type = property(_get_model_config_type, _set_model_config_type)
-
-    def _get_config_proto_path(self):
-        return self.__config_proto_path
-
-    def _set_config_proto_path(self, value):
-        if not isinstance(value, str):
-            raise TypeError("configProtoPath must be str")
-        self.__config_proto_path = value
-
-    config_proto_path = property(_get_config_proto_path, _set_config_proto_path)
-
-    def _get_saved_model_config(self):
-        return self.__saved_model_config
-
-    def _set_saved_model_config(self, value):
-        if not isinstance(value, SavedModelConfig):
-            raise TypeError("savedModelConfig must be SavedModelConfig")
-        self.__saved_model_config = value
-
-    saved_model_config = property(_get_saved_model_config, _set_saved_model_config)
-
-    def as_dict(self):
-        d = empty_type_dict(self)
-        if self.__tensor_data_types_config is not None:
-            d["tensorDataTypesConfig"] = (
-                self.__tensor_data_types_config.as_dict()
-                if hasattr(self.__tensor_data_types_config, "as_dict")
-                else self.__tensor_data_types_config
-            )
-        if self.__model_config_type is not None:
-            d["modelConfigType"] = (
-                self.__model_config_type.as_dict()
-                if hasattr(self.__model_config_type, "as_dict")
-                else self.__model_config_type
-            )
-        if self.__config_proto_path is not None:
-            d["configProtoPath"] = (
-                self.__config_proto_path.as_dict()
-                if hasattr(self.__config_proto_path, "as_dict")
-                else self.__config_proto_path
-            )
-        if self.__saved_model_config is not None:
-            d["savedModelConfig"] = (
-                self.__saved_model_config.as_dict()
-                if hasattr(self.__saved_model_config, "as_dict")
-                else self.__saved_model_config
-            )
-        return d
-
-
 class PythonConfig(object):
     """PythonConfig
 
@@ -1035,8 +665,6 @@ class PythonConfig(object):
     code either as string to `python_code` or as path to a Python script to `python_code_path`.
     Additionally, you can modify or extend your Python path by setting `python_path` accordingly.
 
-    :param tensor_data_types_config: konduit.TensorDataTypesConfig
-    :param model_config_type: konduit.ModelConfigType
     :param python_code: Python code as str
     :param python_code_path: full qualifying path to the Python script you want to run, as str
     :param python_inputs: list of Python input variable names
@@ -1249,20 +877,23 @@ class ServingConfig(object):
         "uploadsDirectory": {"type": str, "subtype": None},
         "logTimings": {"type": bool, "subtype": None},
         "createLoggingEndpoints": {"type": bool, "subtype": None},
+        "metricsConfigurations": {"type": list, "subtype": MetricsConfig},
         "metricTypes": {"type": list, "subtype": str},
     }
     _formats_map = {
+        "metricsConfigurations": "table",
         "metricTypes": "table",
     }
 
     def __init__(
         self,
         http_port=None,
-        listen_host="localhost",
+        listen_host=None,
         output_data_format="NUMPY",
         uploads_directory="file-uploads/",
-        log_timings=False,
-        create_logging_endpoints=False,
+        log_timings=None,
+        create_logging_endpoints=None,
+        metrics_configurations=None,
         metric_types=None,
     ):
         self.__http_port = http_port
@@ -1271,6 +902,7 @@ class ServingConfig(object):
         self.__uploads_directory = uploads_directory
         self.__log_timings = log_timings
         self.__create_logging_endpoints = create_logging_endpoints
+        self.__metrics_configurations = metrics_configurations
         self.__metric_types = metric_types
 
     def _get_http_port(self):
@@ -1340,6 +972,20 @@ class ServingConfig(object):
         _get_create_logging_endpoints, _set_create_logging_endpoints
     )
 
+    def _get_metrics_configurations(self):
+        return self.__metrics_configurations
+
+    def _set_metrics_configurations(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("metricsConfigurations must be list")
+        if not all(isinstance(i, MetricsConfig) for i in value):
+            raise TypeError("metricsConfigurations list valeus must be MetricsConfig")
+        self.__metrics_configurations = value
+
+    metrics_configurations = property(
+        _get_metrics_configurations, _set_metrics_configurations
+    )
+
     def _get_metric_types(self):
         return self.__metric_types
 
@@ -1390,6 +1036,11 @@ class ServingConfig(object):
                 if hasattr(self.__create_logging_endpoints, "as_dict")
                 else self.__create_logging_endpoints
             )
+        if self.__metrics_configurations is not None:
+            d["metricsConfigurations"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p
+                for p in self.__metrics_configurations
+            ]
         if self.__metric_types is not None:
             d["metricTypes"] = [
                 p.as_dict() if hasattr(p, "as_dict") else p for p in self.__metric_types
@@ -2153,7 +1804,9 @@ class ModelStep(PipelineStep):
         "outputNames": {"type": list, "subtype": str},
         "inputColumnNames": {"type": dict, "subtype": None},
         "outputColumnNames": {"type": dict, "subtype": None},
-        "modelConfig": {"type": ModelConfig, "subtype": None},
+        "inputDataTypes": {"type": dict, "subtype": None},
+        "outputDataTypes": {"type": dict, "subtype": None},
+        "path": {"type": str, "subtype": None},
         "parallelInferenceConfig": {"type": ParallelInferenceConfig, "subtype": None},
         "normalizationConfig": {"type": NormalizationConfig, "subtype": None},
     }
@@ -2170,7 +1823,9 @@ class ModelStep(PipelineStep):
         output_names=None,
         input_column_names=None,
         output_column_names=None,
-        model_config=None,
+        input_data_types=None,
+        output_data_types=None,
+        path=None,
         parallel_inference_config=None,
         normalization_config=None,
     ):
@@ -2180,7 +1835,9 @@ class ModelStep(PipelineStep):
         self.__output_names = output_names
         self.__input_column_names = input_column_names
         self.__output_column_names = output_column_names
-        self.__model_config = model_config
+        self.__input_data_types = input_data_types
+        self.__output_data_types = output_data_types
+        self.__path = path
         self.__parallel_inference_config = parallel_inference_config
         self.__normalization_config = normalization_config
 
@@ -2264,15 +1921,43 @@ class ModelStep(PipelineStep):
 
     output_column_names = property(_get_output_column_names, _set_output_column_names)
 
-    def _get_model_config(self):
-        return self.__model_config
+    def _get_input_data_types(self):
+        return self.__input_data_types
 
-    def _set_model_config(self, value):
-        if not isinstance(value, ModelConfig):
-            raise TypeError("modelConfig must be ModelConfig")
-        self.__model_config = value
+    def _set_input_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputDataTypes must be type")
+        self.__input_data_types = value
 
-    model_config = property(_get_model_config, _set_model_config)
+    input_data_types = property(_get_input_data_types, _set_input_data_types)
+
+    def _get_output_data_types(self):
+        return self.__output_data_types
+
+    def _set_output_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputDataTypes must be type")
+        self.__output_data_types = value
+
+    output_data_types = property(_get_output_data_types, _set_output_data_types)
+
+    def _get_path(self):
+        return self.__path
+
+    def _set_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("path must be str")
+        self.__path = value
+
+    path = property(_get_path, _set_path)
 
     def _get_parallel_inference_config(self):
         return self.__parallel_inference_config
@@ -2332,11 +2017,23 @@ class ModelStep(PipelineStep):
                 if hasattr(self.__output_column_names, "as_dict")
                 else self.__output_column_names
             )
-        if self.__model_config is not None:
-            d["modelConfig"] = (
-                self.__model_config.as_dict()
-                if hasattr(self.__model_config, "as_dict")
-                else self.__model_config
+        if self.__input_data_types is not None:
+            d["inputDataTypes"] = (
+                self.__input_data_types.as_dict()
+                if hasattr(self.__input_data_types, "as_dict")
+                else self.__input_data_types
+            )
+        if self.__output_data_types is not None:
+            d["outputDataTypes"] = (
+                self.__output_data_types.as_dict()
+                if hasattr(self.__output_data_types, "as_dict")
+                else self.__output_data_types
+            )
+        if self.__path is not None:
+            d["path"] = (
+                self.__path.as_dict()
+                if hasattr(self.__path, "as_dict")
+                else self.__path
             )
         if self.__parallel_inference_config is not None:
             d["parallelInferenceConfig"] = (
@@ -2349,6 +2046,1739 @@ class ModelStep(PipelineStep):
                 self.__normalization_config.as_dict()
                 if hasattr(self.__normalization_config, "as_dict")
                 else self.__normalization_config
+            )
+        return d
+
+
+class KerasStep(PipelineStep):
+
+    _types_map = {
+        "inputSchemas": {"type": dict, "subtype": None},
+        "outputSchemas": {"type": dict, "subtype": None},
+        "inputNames": {"type": list, "subtype": str},
+        "outputNames": {"type": list, "subtype": str},
+        "inputColumnNames": {"type": dict, "subtype": None},
+        "outputColumnNames": {"type": dict, "subtype": None},
+        "inputDataTypes": {"type": dict, "subtype": None},
+        "outputDataTypes": {"type": dict, "subtype": None},
+        "path": {"type": str, "subtype": None},
+        "parallelInferenceConfig": {"type": ParallelInferenceConfig, "subtype": None},
+        "normalizationConfig": {"type": NormalizationConfig, "subtype": None},
+        "inferenceExecutionerFactoryClassName": {"type": str, "subtype": None},
+    }
+    _formats_map = {
+        "inputNames": "table",
+        "outputNames": "table",
+    }
+
+    def __init__(
+        self,
+        input_schemas=None,
+        output_schemas=None,
+        input_names=None,
+        output_names=None,
+        input_column_names=None,
+        output_column_names=None,
+        input_data_types=None,
+        output_data_types=None,
+        path=None,
+        parallel_inference_config=None,
+        normalization_config=None,
+        inference_executioner_factory_class_name=None,
+    ):
+        self.__input_schemas = input_schemas
+        self.__output_schemas = output_schemas
+        self.__input_names = input_names
+        self.__output_names = output_names
+        self.__input_column_names = input_column_names
+        self.__output_column_names = output_column_names
+        self.__input_data_types = input_data_types
+        self.__output_data_types = output_data_types
+        self.__path = path
+        self.__parallel_inference_config = parallel_inference_config
+        self.__normalization_config = normalization_config
+        self.__inference_executioner_factory_class_name = (
+            inference_executioner_factory_class_name
+        )
+
+    def _get_input_schemas(self):
+        return self.__input_schemas
+
+    def _set_input_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputSchemas must be type")
+        self.__input_schemas = value
+
+    input_schemas = property(_get_input_schemas, _set_input_schemas)
+
+    def _get_output_schemas(self):
+        return self.__output_schemas
+
+    def _set_output_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
+
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
+
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
+    def _get_output_names(self):
+        return self.__output_names
+
+    def _set_output_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("outputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("outputNames list valeus must be str")
+        self.__output_names = value
+
+    output_names = property(_get_output_names, _set_output_names)
+
+    def _get_input_column_names(self):
+        return self.__input_column_names
+
+    def _set_input_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputColumnNames must be type")
+        self.__input_column_names = value
+
+    input_column_names = property(_get_input_column_names, _set_input_column_names)
+
+    def _get_output_column_names(self):
+        return self.__output_column_names
+
+    def _set_output_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputColumnNames must be type")
+        self.__output_column_names = value
+
+    output_column_names = property(_get_output_column_names, _set_output_column_names)
+
+    def _get_input_data_types(self):
+        return self.__input_data_types
+
+    def _set_input_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputDataTypes must be type")
+        self.__input_data_types = value
+
+    input_data_types = property(_get_input_data_types, _set_input_data_types)
+
+    def _get_output_data_types(self):
+        return self.__output_data_types
+
+    def _set_output_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputDataTypes must be type")
+        self.__output_data_types = value
+
+    output_data_types = property(_get_output_data_types, _set_output_data_types)
+
+    def _get_path(self):
+        return self.__path
+
+    def _set_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("path must be str")
+        self.__path = value
+
+    path = property(_get_path, _set_path)
+
+    def _get_parallel_inference_config(self):
+        return self.__parallel_inference_config
+
+    def _set_parallel_inference_config(self, value):
+        if not isinstance(value, ParallelInferenceConfig):
+            raise TypeError("parallelInferenceConfig must be ParallelInferenceConfig")
+        self.__parallel_inference_config = value
+
+    parallel_inference_config = property(
+        _get_parallel_inference_config, _set_parallel_inference_config
+    )
+
+    def _get_normalization_config(self):
+        return self.__normalization_config
+
+    def _set_normalization_config(self, value):
+        if not isinstance(value, NormalizationConfig):
+            raise TypeError("normalizationConfig must be NormalizationConfig")
+        self.__normalization_config = value
+
+    normalization_config = property(
+        _get_normalization_config, _set_normalization_config
+    )
+
+    def _get_inference_executioner_factory_class_name(self):
+        return self.__inference_executioner_factory_class_name
+
+    def _set_inference_executioner_factory_class_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("inferenceExecutionerFactoryClassName must be str")
+        self.__inference_executioner_factory_class_name = value
+
+    inference_executioner_factory_class_name = property(
+        _get_inference_executioner_factory_class_name,
+        _set_inference_executioner_factory_class_name,
+    )
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__input_schemas is not None:
+            d["inputSchemas"] = (
+                self.__input_schemas.as_dict()
+                if hasattr(self.__input_schemas, "as_dict")
+                else self.__input_schemas
+            )
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
+            ]
+        if self.__output_names is not None:
+            d["outputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        if self.__input_column_names is not None:
+            d["inputColumnNames"] = (
+                self.__input_column_names.as_dict()
+                if hasattr(self.__input_column_names, "as_dict")
+                else self.__input_column_names
+            )
+        if self.__output_column_names is not None:
+            d["outputColumnNames"] = (
+                self.__output_column_names.as_dict()
+                if hasattr(self.__output_column_names, "as_dict")
+                else self.__output_column_names
+            )
+        if self.__input_data_types is not None:
+            d["inputDataTypes"] = (
+                self.__input_data_types.as_dict()
+                if hasattr(self.__input_data_types, "as_dict")
+                else self.__input_data_types
+            )
+        if self.__output_data_types is not None:
+            d["outputDataTypes"] = (
+                self.__output_data_types.as_dict()
+                if hasattr(self.__output_data_types, "as_dict")
+                else self.__output_data_types
+            )
+        if self.__path is not None:
+            d["path"] = (
+                self.__path.as_dict()
+                if hasattr(self.__path, "as_dict")
+                else self.__path
+            )
+        if self.__parallel_inference_config is not None:
+            d["parallelInferenceConfig"] = (
+                self.__parallel_inference_config.as_dict()
+                if hasattr(self.__parallel_inference_config, "as_dict")
+                else self.__parallel_inference_config
+            )
+        if self.__normalization_config is not None:
+            d["normalizationConfig"] = (
+                self.__normalization_config.as_dict()
+                if hasattr(self.__normalization_config, "as_dict")
+                else self.__normalization_config
+            )
+        if self.__inference_executioner_factory_class_name is not None:
+            d["inferenceExecutionerFactoryClassName"] = (
+                self.__inference_executioner_factory_class_name.as_dict()
+                if hasattr(self.__inference_executioner_factory_class_name, "as_dict")
+                else self.__inference_executioner_factory_class_name
+            )
+        return d
+
+
+class Dl4jStep(PipelineStep):
+
+    _types_map = {
+        "inputSchemas": {"type": dict, "subtype": None},
+        "outputSchemas": {"type": dict, "subtype": None},
+        "inputNames": {"type": list, "subtype": str},
+        "outputNames": {"type": list, "subtype": str},
+        "inputColumnNames": {"type": dict, "subtype": None},
+        "outputColumnNames": {"type": dict, "subtype": None},
+        "inputDataTypes": {"type": dict, "subtype": None},
+        "outputDataTypes": {"type": dict, "subtype": None},
+        "path": {"type": str, "subtype": None},
+        "parallelInferenceConfig": {"type": ParallelInferenceConfig, "subtype": None},
+        "normalizationConfig": {"type": NormalizationConfig, "subtype": None},
+        "inferenceExecutionerFactoryClassName": {"type": str, "subtype": None},
+    }
+    _formats_map = {
+        "inputNames": "table",
+        "outputNames": "table",
+    }
+
+    def __init__(
+        self,
+        input_schemas=None,
+        output_schemas=None,
+        input_names=None,
+        output_names=None,
+        input_column_names=None,
+        output_column_names=None,
+        input_data_types=None,
+        output_data_types=None,
+        path=None,
+        parallel_inference_config=None,
+        normalization_config=None,
+        inference_executioner_factory_class_name=None,
+    ):
+        self.__input_schemas = input_schemas
+        self.__output_schemas = output_schemas
+        self.__input_names = input_names
+        self.__output_names = output_names
+        self.__input_column_names = input_column_names
+        self.__output_column_names = output_column_names
+        self.__input_data_types = input_data_types
+        self.__output_data_types = output_data_types
+        self.__path = path
+        self.__parallel_inference_config = parallel_inference_config
+        self.__normalization_config = normalization_config
+        self.__inference_executioner_factory_class_name = (
+            inference_executioner_factory_class_name
+        )
+
+    def _get_input_schemas(self):
+        return self.__input_schemas
+
+    def _set_input_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputSchemas must be type")
+        self.__input_schemas = value
+
+    input_schemas = property(_get_input_schemas, _set_input_schemas)
+
+    def _get_output_schemas(self):
+        return self.__output_schemas
+
+    def _set_output_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
+
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
+
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
+    def _get_output_names(self):
+        return self.__output_names
+
+    def _set_output_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("outputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("outputNames list valeus must be str")
+        self.__output_names = value
+
+    output_names = property(_get_output_names, _set_output_names)
+
+    def _get_input_column_names(self):
+        return self.__input_column_names
+
+    def _set_input_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputColumnNames must be type")
+        self.__input_column_names = value
+
+    input_column_names = property(_get_input_column_names, _set_input_column_names)
+
+    def _get_output_column_names(self):
+        return self.__output_column_names
+
+    def _set_output_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputColumnNames must be type")
+        self.__output_column_names = value
+
+    output_column_names = property(_get_output_column_names, _set_output_column_names)
+
+    def _get_input_data_types(self):
+        return self.__input_data_types
+
+    def _set_input_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputDataTypes must be type")
+        self.__input_data_types = value
+
+    input_data_types = property(_get_input_data_types, _set_input_data_types)
+
+    def _get_output_data_types(self):
+        return self.__output_data_types
+
+    def _set_output_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputDataTypes must be type")
+        self.__output_data_types = value
+
+    output_data_types = property(_get_output_data_types, _set_output_data_types)
+
+    def _get_path(self):
+        return self.__path
+
+    def _set_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("path must be str")
+        self.__path = value
+
+    path = property(_get_path, _set_path)
+
+    def _get_parallel_inference_config(self):
+        return self.__parallel_inference_config
+
+    def _set_parallel_inference_config(self, value):
+        if not isinstance(value, ParallelInferenceConfig):
+            raise TypeError("parallelInferenceConfig must be ParallelInferenceConfig")
+        self.__parallel_inference_config = value
+
+    parallel_inference_config = property(
+        _get_parallel_inference_config, _set_parallel_inference_config
+    )
+
+    def _get_normalization_config(self):
+        return self.__normalization_config
+
+    def _set_normalization_config(self, value):
+        if not isinstance(value, NormalizationConfig):
+            raise TypeError("normalizationConfig must be NormalizationConfig")
+        self.__normalization_config = value
+
+    normalization_config = property(
+        _get_normalization_config, _set_normalization_config
+    )
+
+    def _get_inference_executioner_factory_class_name(self):
+        return self.__inference_executioner_factory_class_name
+
+    def _set_inference_executioner_factory_class_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("inferenceExecutionerFactoryClassName must be str")
+        self.__inference_executioner_factory_class_name = value
+
+    inference_executioner_factory_class_name = property(
+        _get_inference_executioner_factory_class_name,
+        _set_inference_executioner_factory_class_name,
+    )
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__input_schemas is not None:
+            d["inputSchemas"] = (
+                self.__input_schemas.as_dict()
+                if hasattr(self.__input_schemas, "as_dict")
+                else self.__input_schemas
+            )
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
+            ]
+        if self.__output_names is not None:
+            d["outputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        if self.__input_column_names is not None:
+            d["inputColumnNames"] = (
+                self.__input_column_names.as_dict()
+                if hasattr(self.__input_column_names, "as_dict")
+                else self.__input_column_names
+            )
+        if self.__output_column_names is not None:
+            d["outputColumnNames"] = (
+                self.__output_column_names.as_dict()
+                if hasattr(self.__output_column_names, "as_dict")
+                else self.__output_column_names
+            )
+        if self.__input_data_types is not None:
+            d["inputDataTypes"] = (
+                self.__input_data_types.as_dict()
+                if hasattr(self.__input_data_types, "as_dict")
+                else self.__input_data_types
+            )
+        if self.__output_data_types is not None:
+            d["outputDataTypes"] = (
+                self.__output_data_types.as_dict()
+                if hasattr(self.__output_data_types, "as_dict")
+                else self.__output_data_types
+            )
+        if self.__path is not None:
+            d["path"] = (
+                self.__path.as_dict()
+                if hasattr(self.__path, "as_dict")
+                else self.__path
+            )
+        if self.__parallel_inference_config is not None:
+            d["parallelInferenceConfig"] = (
+                self.__parallel_inference_config.as_dict()
+                if hasattr(self.__parallel_inference_config, "as_dict")
+                else self.__parallel_inference_config
+            )
+        if self.__normalization_config is not None:
+            d["normalizationConfig"] = (
+                self.__normalization_config.as_dict()
+                if hasattr(self.__normalization_config, "as_dict")
+                else self.__normalization_config
+            )
+        if self.__inference_executioner_factory_class_name is not None:
+            d["inferenceExecutionerFactoryClassName"] = (
+                self.__inference_executioner_factory_class_name.as_dict()
+                if hasattr(self.__inference_executioner_factory_class_name, "as_dict")
+                else self.__inference_executioner_factory_class_name
+            )
+        return d
+
+
+class PmmlStep(PipelineStep):
+
+    _types_map = {
+        "inputSchemas": {"type": dict, "subtype": None},
+        "outputSchemas": {"type": dict, "subtype": None},
+        "inputNames": {"type": list, "subtype": str},
+        "outputNames": {"type": list, "subtype": str},
+        "inputColumnNames": {"type": dict, "subtype": None},
+        "outputColumnNames": {"type": dict, "subtype": None},
+        "inputDataTypes": {"type": dict, "subtype": None},
+        "outputDataTypes": {"type": dict, "subtype": None},
+        "path": {"type": str, "subtype": None},
+        "parallelInferenceConfig": {"type": ParallelInferenceConfig, "subtype": None},
+        "normalizationConfig": {"type": NormalizationConfig, "subtype": None},
+        "evaluatorFactoryName": {"type": str, "subtype": None},
+        "inferenceExecutionerFactoryClassName": {"type": str, "subtype": None},
+    }
+    _formats_map = {
+        "inputNames": "table",
+        "outputNames": "table",
+    }
+
+    def __init__(
+        self,
+        input_schemas=None,
+        output_schemas=None,
+        input_names=None,
+        output_names=None,
+        input_column_names=None,
+        output_column_names=None,
+        input_data_types=None,
+        output_data_types=None,
+        path=None,
+        parallel_inference_config=None,
+        normalization_config=None,
+        evaluator_factory_name=None,
+        inference_executioner_factory_class_name=None,
+    ):
+        self.__input_schemas = input_schemas
+        self.__output_schemas = output_schemas
+        self.__input_names = input_names
+        self.__output_names = output_names
+        self.__input_column_names = input_column_names
+        self.__output_column_names = output_column_names
+        self.__input_data_types = input_data_types
+        self.__output_data_types = output_data_types
+        self.__path = path
+        self.__parallel_inference_config = parallel_inference_config
+        self.__normalization_config = normalization_config
+        self.__evaluator_factory_name = evaluator_factory_name
+        self.__inference_executioner_factory_class_name = (
+            inference_executioner_factory_class_name
+        )
+
+    def _get_input_schemas(self):
+        return self.__input_schemas
+
+    def _set_input_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputSchemas must be type")
+        self.__input_schemas = value
+
+    input_schemas = property(_get_input_schemas, _set_input_schemas)
+
+    def _get_output_schemas(self):
+        return self.__output_schemas
+
+    def _set_output_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
+
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
+
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
+    def _get_output_names(self):
+        return self.__output_names
+
+    def _set_output_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("outputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("outputNames list valeus must be str")
+        self.__output_names = value
+
+    output_names = property(_get_output_names, _set_output_names)
+
+    def _get_input_column_names(self):
+        return self.__input_column_names
+
+    def _set_input_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputColumnNames must be type")
+        self.__input_column_names = value
+
+    input_column_names = property(_get_input_column_names, _set_input_column_names)
+
+    def _get_output_column_names(self):
+        return self.__output_column_names
+
+    def _set_output_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputColumnNames must be type")
+        self.__output_column_names = value
+
+    output_column_names = property(_get_output_column_names, _set_output_column_names)
+
+    def _get_input_data_types(self):
+        return self.__input_data_types
+
+    def _set_input_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputDataTypes must be type")
+        self.__input_data_types = value
+
+    input_data_types = property(_get_input_data_types, _set_input_data_types)
+
+    def _get_output_data_types(self):
+        return self.__output_data_types
+
+    def _set_output_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputDataTypes must be type")
+        self.__output_data_types = value
+
+    output_data_types = property(_get_output_data_types, _set_output_data_types)
+
+    def _get_path(self):
+        return self.__path
+
+    def _set_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("path must be str")
+        self.__path = value
+
+    path = property(_get_path, _set_path)
+
+    def _get_parallel_inference_config(self):
+        return self.__parallel_inference_config
+
+    def _set_parallel_inference_config(self, value):
+        if not isinstance(value, ParallelInferenceConfig):
+            raise TypeError("parallelInferenceConfig must be ParallelInferenceConfig")
+        self.__parallel_inference_config = value
+
+    parallel_inference_config = property(
+        _get_parallel_inference_config, _set_parallel_inference_config
+    )
+
+    def _get_normalization_config(self):
+        return self.__normalization_config
+
+    def _set_normalization_config(self, value):
+        if not isinstance(value, NormalizationConfig):
+            raise TypeError("normalizationConfig must be NormalizationConfig")
+        self.__normalization_config = value
+
+    normalization_config = property(
+        _get_normalization_config, _set_normalization_config
+    )
+
+    def _get_evaluator_factory_name(self):
+        return self.__evaluator_factory_name
+
+    def _set_evaluator_factory_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("evaluatorFactoryName must be str")
+        self.__evaluator_factory_name = value
+
+    evaluator_factory_name = property(
+        _get_evaluator_factory_name, _set_evaluator_factory_name
+    )
+
+    def _get_inference_executioner_factory_class_name(self):
+        return self.__inference_executioner_factory_class_name
+
+    def _set_inference_executioner_factory_class_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("inferenceExecutionerFactoryClassName must be str")
+        self.__inference_executioner_factory_class_name = value
+
+    inference_executioner_factory_class_name = property(
+        _get_inference_executioner_factory_class_name,
+        _set_inference_executioner_factory_class_name,
+    )
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__input_schemas is not None:
+            d["inputSchemas"] = (
+                self.__input_schemas.as_dict()
+                if hasattr(self.__input_schemas, "as_dict")
+                else self.__input_schemas
+            )
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
+            ]
+        if self.__output_names is not None:
+            d["outputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        if self.__input_column_names is not None:
+            d["inputColumnNames"] = (
+                self.__input_column_names.as_dict()
+                if hasattr(self.__input_column_names, "as_dict")
+                else self.__input_column_names
+            )
+        if self.__output_column_names is not None:
+            d["outputColumnNames"] = (
+                self.__output_column_names.as_dict()
+                if hasattr(self.__output_column_names, "as_dict")
+                else self.__output_column_names
+            )
+        if self.__input_data_types is not None:
+            d["inputDataTypes"] = (
+                self.__input_data_types.as_dict()
+                if hasattr(self.__input_data_types, "as_dict")
+                else self.__input_data_types
+            )
+        if self.__output_data_types is not None:
+            d["outputDataTypes"] = (
+                self.__output_data_types.as_dict()
+                if hasattr(self.__output_data_types, "as_dict")
+                else self.__output_data_types
+            )
+        if self.__path is not None:
+            d["path"] = (
+                self.__path.as_dict()
+                if hasattr(self.__path, "as_dict")
+                else self.__path
+            )
+        if self.__parallel_inference_config is not None:
+            d["parallelInferenceConfig"] = (
+                self.__parallel_inference_config.as_dict()
+                if hasattr(self.__parallel_inference_config, "as_dict")
+                else self.__parallel_inference_config
+            )
+        if self.__normalization_config is not None:
+            d["normalizationConfig"] = (
+                self.__normalization_config.as_dict()
+                if hasattr(self.__normalization_config, "as_dict")
+                else self.__normalization_config
+            )
+        if self.__evaluator_factory_name is not None:
+            d["evaluatorFactoryName"] = (
+                self.__evaluator_factory_name.as_dict()
+                if hasattr(self.__evaluator_factory_name, "as_dict")
+                else self.__evaluator_factory_name
+            )
+        if self.__inference_executioner_factory_class_name is not None:
+            d["inferenceExecutionerFactoryClassName"] = (
+                self.__inference_executioner_factory_class_name.as_dict()
+                if hasattr(self.__inference_executioner_factory_class_name, "as_dict")
+                else self.__inference_executioner_factory_class_name
+            )
+        return d
+
+
+class SameDiffStep(PipelineStep):
+
+    _types_map = {
+        "inputSchemas": {"type": dict, "subtype": None},
+        "outputSchemas": {"type": dict, "subtype": None},
+        "inputNames": {"type": list, "subtype": str},
+        "outputNames": {"type": list, "subtype": str},
+        "inputColumnNames": {"type": dict, "subtype": None},
+        "outputColumnNames": {"type": dict, "subtype": None},
+        "inputDataTypes": {"type": dict, "subtype": None},
+        "outputDataTypes": {"type": dict, "subtype": None},
+        "path": {"type": str, "subtype": None},
+        "parallelInferenceConfig": {"type": ParallelInferenceConfig, "subtype": None},
+        "normalizationConfig": {"type": NormalizationConfig, "subtype": None},
+        "inferenceExecutionerFactoryClassName": {"type": str, "subtype": None},
+    }
+    _formats_map = {
+        "inputNames": "table",
+        "outputNames": "table",
+    }
+
+    def __init__(
+        self,
+        input_schemas=None,
+        output_schemas=None,
+        input_names=None,
+        output_names=None,
+        input_column_names=None,
+        output_column_names=None,
+        input_data_types=None,
+        output_data_types=None,
+        path=None,
+        parallel_inference_config=None,
+        normalization_config=None,
+        inference_executioner_factory_class_name=None,
+    ):
+        self.__input_schemas = input_schemas
+        self.__output_schemas = output_schemas
+        self.__input_names = input_names
+        self.__output_names = output_names
+        self.__input_column_names = input_column_names
+        self.__output_column_names = output_column_names
+        self.__input_data_types = input_data_types
+        self.__output_data_types = output_data_types
+        self.__path = path
+        self.__parallel_inference_config = parallel_inference_config
+        self.__normalization_config = normalization_config
+        self.__inference_executioner_factory_class_name = (
+            inference_executioner_factory_class_name
+        )
+
+    def _get_input_schemas(self):
+        return self.__input_schemas
+
+    def _set_input_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputSchemas must be type")
+        self.__input_schemas = value
+
+    input_schemas = property(_get_input_schemas, _set_input_schemas)
+
+    def _get_output_schemas(self):
+        return self.__output_schemas
+
+    def _set_output_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
+
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
+
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
+    def _get_output_names(self):
+        return self.__output_names
+
+    def _set_output_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("outputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("outputNames list valeus must be str")
+        self.__output_names = value
+
+    output_names = property(_get_output_names, _set_output_names)
+
+    def _get_input_column_names(self):
+        return self.__input_column_names
+
+    def _set_input_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputColumnNames must be type")
+        self.__input_column_names = value
+
+    input_column_names = property(_get_input_column_names, _set_input_column_names)
+
+    def _get_output_column_names(self):
+        return self.__output_column_names
+
+    def _set_output_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputColumnNames must be type")
+        self.__output_column_names = value
+
+    output_column_names = property(_get_output_column_names, _set_output_column_names)
+
+    def _get_input_data_types(self):
+        return self.__input_data_types
+
+    def _set_input_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputDataTypes must be type")
+        self.__input_data_types = value
+
+    input_data_types = property(_get_input_data_types, _set_input_data_types)
+
+    def _get_output_data_types(self):
+        return self.__output_data_types
+
+    def _set_output_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputDataTypes must be type")
+        self.__output_data_types = value
+
+    output_data_types = property(_get_output_data_types, _set_output_data_types)
+
+    def _get_path(self):
+        return self.__path
+
+    def _set_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("path must be str")
+        self.__path = value
+
+    path = property(_get_path, _set_path)
+
+    def _get_parallel_inference_config(self):
+        return self.__parallel_inference_config
+
+    def _set_parallel_inference_config(self, value):
+        if not isinstance(value, ParallelInferenceConfig):
+            raise TypeError("parallelInferenceConfig must be ParallelInferenceConfig")
+        self.__parallel_inference_config = value
+
+    parallel_inference_config = property(
+        _get_parallel_inference_config, _set_parallel_inference_config
+    )
+
+    def _get_normalization_config(self):
+        return self.__normalization_config
+
+    def _set_normalization_config(self, value):
+        if not isinstance(value, NormalizationConfig):
+            raise TypeError("normalizationConfig must be NormalizationConfig")
+        self.__normalization_config = value
+
+    normalization_config = property(
+        _get_normalization_config, _set_normalization_config
+    )
+
+    def _get_inference_executioner_factory_class_name(self):
+        return self.__inference_executioner_factory_class_name
+
+    def _set_inference_executioner_factory_class_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("inferenceExecutionerFactoryClassName must be str")
+        self.__inference_executioner_factory_class_name = value
+
+    inference_executioner_factory_class_name = property(
+        _get_inference_executioner_factory_class_name,
+        _set_inference_executioner_factory_class_name,
+    )
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__input_schemas is not None:
+            d["inputSchemas"] = (
+                self.__input_schemas.as_dict()
+                if hasattr(self.__input_schemas, "as_dict")
+                else self.__input_schemas
+            )
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
+            ]
+        if self.__output_names is not None:
+            d["outputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        if self.__input_column_names is not None:
+            d["inputColumnNames"] = (
+                self.__input_column_names.as_dict()
+                if hasattr(self.__input_column_names, "as_dict")
+                else self.__input_column_names
+            )
+        if self.__output_column_names is not None:
+            d["outputColumnNames"] = (
+                self.__output_column_names.as_dict()
+                if hasattr(self.__output_column_names, "as_dict")
+                else self.__output_column_names
+            )
+        if self.__input_data_types is not None:
+            d["inputDataTypes"] = (
+                self.__input_data_types.as_dict()
+                if hasattr(self.__input_data_types, "as_dict")
+                else self.__input_data_types
+            )
+        if self.__output_data_types is not None:
+            d["outputDataTypes"] = (
+                self.__output_data_types.as_dict()
+                if hasattr(self.__output_data_types, "as_dict")
+                else self.__output_data_types
+            )
+        if self.__path is not None:
+            d["path"] = (
+                self.__path.as_dict()
+                if hasattr(self.__path, "as_dict")
+                else self.__path
+            )
+        if self.__parallel_inference_config is not None:
+            d["parallelInferenceConfig"] = (
+                self.__parallel_inference_config.as_dict()
+                if hasattr(self.__parallel_inference_config, "as_dict")
+                else self.__parallel_inference_config
+            )
+        if self.__normalization_config is not None:
+            d["normalizationConfig"] = (
+                self.__normalization_config.as_dict()
+                if hasattr(self.__normalization_config, "as_dict")
+                else self.__normalization_config
+            )
+        if self.__inference_executioner_factory_class_name is not None:
+            d["inferenceExecutionerFactoryClassName"] = (
+                self.__inference_executioner_factory_class_name.as_dict()
+                if hasattr(self.__inference_executioner_factory_class_name, "as_dict")
+                else self.__inference_executioner_factory_class_name
+            )
+        return d
+
+
+class TensorFlowStep(PipelineStep):
+
+    _types_map = {
+        "inputSchemas": {"type": dict, "subtype": None},
+        "outputSchemas": {"type": dict, "subtype": None},
+        "inputNames": {"type": list, "subtype": str},
+        "outputNames": {"type": list, "subtype": str},
+        "inputColumnNames": {"type": dict, "subtype": None},
+        "outputColumnNames": {"type": dict, "subtype": None},
+        "inputDataTypes": {"type": dict, "subtype": None},
+        "outputDataTypes": {"type": dict, "subtype": None},
+        "path": {"type": str, "subtype": None},
+        "parallelInferenceConfig": {"type": ParallelInferenceConfig, "subtype": None},
+        "normalizationConfig": {"type": NormalizationConfig, "subtype": None},
+        "configProtoPath": {"type": str, "subtype": None},
+        "savedModelConfig": {"type": SavedModelConfig, "subtype": None},
+        "inferenceExecutionerFactoryClassName": {"type": str, "subtype": None},
+    }
+    _formats_map = {
+        "inputNames": "table",
+        "outputNames": "table",
+    }
+
+    def __init__(
+        self,
+        input_schemas=None,
+        output_schemas=None,
+        input_names=None,
+        output_names=None,
+        input_column_names=None,
+        output_column_names=None,
+        input_data_types=None,
+        output_data_types=None,
+        path=None,
+        parallel_inference_config=None,
+        normalization_config=None,
+        config_proto_path=None,
+        saved_model_config=None,
+        inference_executioner_factory_class_name=None,
+    ):
+        self.__input_schemas = input_schemas
+        self.__output_schemas = output_schemas
+        self.__input_names = input_names
+        self.__output_names = output_names
+        self.__input_column_names = input_column_names
+        self.__output_column_names = output_column_names
+        self.__input_data_types = input_data_types
+        self.__output_data_types = output_data_types
+        self.__path = path
+        self.__parallel_inference_config = parallel_inference_config
+        self.__normalization_config = normalization_config
+        self.__config_proto_path = config_proto_path
+        self.__saved_model_config = saved_model_config
+        self.__inference_executioner_factory_class_name = (
+            inference_executioner_factory_class_name
+        )
+
+    def _get_input_schemas(self):
+        return self.__input_schemas
+
+    def _set_input_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputSchemas must be type")
+        self.__input_schemas = value
+
+    input_schemas = property(_get_input_schemas, _set_input_schemas)
+
+    def _get_output_schemas(self):
+        return self.__output_schemas
+
+    def _set_output_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
+
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
+
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
+    def _get_output_names(self):
+        return self.__output_names
+
+    def _set_output_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("outputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("outputNames list valeus must be str")
+        self.__output_names = value
+
+    output_names = property(_get_output_names, _set_output_names)
+
+    def _get_input_column_names(self):
+        return self.__input_column_names
+
+    def _set_input_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputColumnNames must be type")
+        self.__input_column_names = value
+
+    input_column_names = property(_get_input_column_names, _set_input_column_names)
+
+    def _get_output_column_names(self):
+        return self.__output_column_names
+
+    def _set_output_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputColumnNames must be type")
+        self.__output_column_names = value
+
+    output_column_names = property(_get_output_column_names, _set_output_column_names)
+
+    def _get_input_data_types(self):
+        return self.__input_data_types
+
+    def _set_input_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputDataTypes must be type")
+        self.__input_data_types = value
+
+    input_data_types = property(_get_input_data_types, _set_input_data_types)
+
+    def _get_output_data_types(self):
+        return self.__output_data_types
+
+    def _set_output_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputDataTypes must be type")
+        self.__output_data_types = value
+
+    output_data_types = property(_get_output_data_types, _set_output_data_types)
+
+    def _get_path(self):
+        return self.__path
+
+    def _set_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("path must be str")
+        self.__path = value
+
+    path = property(_get_path, _set_path)
+
+    def _get_parallel_inference_config(self):
+        return self.__parallel_inference_config
+
+    def _set_parallel_inference_config(self, value):
+        if not isinstance(value, ParallelInferenceConfig):
+            raise TypeError("parallelInferenceConfig must be ParallelInferenceConfig")
+        self.__parallel_inference_config = value
+
+    parallel_inference_config = property(
+        _get_parallel_inference_config, _set_parallel_inference_config
+    )
+
+    def _get_normalization_config(self):
+        return self.__normalization_config
+
+    def _set_normalization_config(self, value):
+        if not isinstance(value, NormalizationConfig):
+            raise TypeError("normalizationConfig must be NormalizationConfig")
+        self.__normalization_config = value
+
+    normalization_config = property(
+        _get_normalization_config, _set_normalization_config
+    )
+
+    def _get_config_proto_path(self):
+        return self.__config_proto_path
+
+    def _set_config_proto_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("configProtoPath must be str")
+        self.__config_proto_path = value
+
+    config_proto_path = property(_get_config_proto_path, _set_config_proto_path)
+
+    def _get_saved_model_config(self):
+        return self.__saved_model_config
+
+    def _set_saved_model_config(self, value):
+        if not isinstance(value, SavedModelConfig):
+            raise TypeError("savedModelConfig must be SavedModelConfig")
+        self.__saved_model_config = value
+
+    saved_model_config = property(_get_saved_model_config, _set_saved_model_config)
+
+    def _get_inference_executioner_factory_class_name(self):
+        return self.__inference_executioner_factory_class_name
+
+    def _set_inference_executioner_factory_class_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("inferenceExecutionerFactoryClassName must be str")
+        self.__inference_executioner_factory_class_name = value
+
+    inference_executioner_factory_class_name = property(
+        _get_inference_executioner_factory_class_name,
+        _set_inference_executioner_factory_class_name,
+    )
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__input_schemas is not None:
+            d["inputSchemas"] = (
+                self.__input_schemas.as_dict()
+                if hasattr(self.__input_schemas, "as_dict")
+                else self.__input_schemas
+            )
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
+            ]
+        if self.__output_names is not None:
+            d["outputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        if self.__input_column_names is not None:
+            d["inputColumnNames"] = (
+                self.__input_column_names.as_dict()
+                if hasattr(self.__input_column_names, "as_dict")
+                else self.__input_column_names
+            )
+        if self.__output_column_names is not None:
+            d["outputColumnNames"] = (
+                self.__output_column_names.as_dict()
+                if hasattr(self.__output_column_names, "as_dict")
+                else self.__output_column_names
+            )
+        if self.__input_data_types is not None:
+            d["inputDataTypes"] = (
+                self.__input_data_types.as_dict()
+                if hasattr(self.__input_data_types, "as_dict")
+                else self.__input_data_types
+            )
+        if self.__output_data_types is not None:
+            d["outputDataTypes"] = (
+                self.__output_data_types.as_dict()
+                if hasattr(self.__output_data_types, "as_dict")
+                else self.__output_data_types
+            )
+        if self.__path is not None:
+            d["path"] = (
+                self.__path.as_dict()
+                if hasattr(self.__path, "as_dict")
+                else self.__path
+            )
+        if self.__parallel_inference_config is not None:
+            d["parallelInferenceConfig"] = (
+                self.__parallel_inference_config.as_dict()
+                if hasattr(self.__parallel_inference_config, "as_dict")
+                else self.__parallel_inference_config
+            )
+        if self.__normalization_config is not None:
+            d["normalizationConfig"] = (
+                self.__normalization_config.as_dict()
+                if hasattr(self.__normalization_config, "as_dict")
+                else self.__normalization_config
+            )
+        if self.__config_proto_path is not None:
+            d["configProtoPath"] = (
+                self.__config_proto_path.as_dict()
+                if hasattr(self.__config_proto_path, "as_dict")
+                else self.__config_proto_path
+            )
+        if self.__saved_model_config is not None:
+            d["savedModelConfig"] = (
+                self.__saved_model_config.as_dict()
+                if hasattr(self.__saved_model_config, "as_dict")
+                else self.__saved_model_config
+            )
+        if self.__inference_executioner_factory_class_name is not None:
+            d["inferenceExecutionerFactoryClassName"] = (
+                self.__inference_executioner_factory_class_name.as_dict()
+                if hasattr(self.__inference_executioner_factory_class_name, "as_dict")
+                else self.__inference_executioner_factory_class_name
+            )
+        return d
+
+
+class OnnxStep(PipelineStep):
+
+    _types_map = {
+        "inputSchemas": {"type": dict, "subtype": None},
+        "outputSchemas": {"type": dict, "subtype": None},
+        "inputNames": {"type": list, "subtype": str},
+        "outputNames": {"type": list, "subtype": str},
+        "inputColumnNames": {"type": dict, "subtype": None},
+        "outputColumnNames": {"type": dict, "subtype": None},
+        "inputDataTypes": {"type": dict, "subtype": None},
+        "outputDataTypes": {"type": dict, "subtype": None},
+        "path": {"type": str, "subtype": None},
+        "parallelInferenceConfig": {"type": ParallelInferenceConfig, "subtype": None},
+        "normalizationConfig": {"type": NormalizationConfig, "subtype": None},
+        "inferenceExecutionerFactoryClassName": {"type": str, "subtype": None},
+    }
+    _formats_map = {
+        "inputNames": "table",
+        "outputNames": "table",
+    }
+
+    def __init__(
+        self,
+        input_schemas=None,
+        output_schemas=None,
+        input_names=None,
+        output_names=None,
+        input_column_names=None,
+        output_column_names=None,
+        input_data_types=None,
+        output_data_types=None,
+        path=None,
+        parallel_inference_config=None,
+        normalization_config=None,
+        inference_executioner_factory_class_name=None,
+    ):
+        self.__input_schemas = input_schemas
+        self.__output_schemas = output_schemas
+        self.__input_names = input_names
+        self.__output_names = output_names
+        self.__input_column_names = input_column_names
+        self.__output_column_names = output_column_names
+        self.__input_data_types = input_data_types
+        self.__output_data_types = output_data_types
+        self.__path = path
+        self.__parallel_inference_config = parallel_inference_config
+        self.__normalization_config = normalization_config
+        self.__inference_executioner_factory_class_name = (
+            inference_executioner_factory_class_name
+        )
+
+    def _get_input_schemas(self):
+        return self.__input_schemas
+
+    def _set_input_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputSchemas must be type")
+        self.__input_schemas = value
+
+    input_schemas = property(_get_input_schemas, _set_input_schemas)
+
+    def _get_output_schemas(self):
+        return self.__output_schemas
+
+    def _set_output_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
+
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
+
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
+    def _get_output_names(self):
+        return self.__output_names
+
+    def _set_output_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("outputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("outputNames list valeus must be str")
+        self.__output_names = value
+
+    output_names = property(_get_output_names, _set_output_names)
+
+    def _get_input_column_names(self):
+        return self.__input_column_names
+
+    def _set_input_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputColumnNames must be type")
+        self.__input_column_names = value
+
+    input_column_names = property(_get_input_column_names, _set_input_column_names)
+
+    def _get_output_column_names(self):
+        return self.__output_column_names
+
+    def _set_output_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputColumnNames must be type")
+        self.__output_column_names = value
+
+    output_column_names = property(_get_output_column_names, _set_output_column_names)
+
+    def _get_input_data_types(self):
+        return self.__input_data_types
+
+    def _set_input_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputDataTypes must be type")
+        self.__input_data_types = value
+
+    input_data_types = property(_get_input_data_types, _set_input_data_types)
+
+    def _get_output_data_types(self):
+        return self.__output_data_types
+
+    def _set_output_data_types(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputDataTypes must be type")
+        self.__output_data_types = value
+
+    output_data_types = property(_get_output_data_types, _set_output_data_types)
+
+    def _get_path(self):
+        return self.__path
+
+    def _set_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("path must be str")
+        self.__path = value
+
+    path = property(_get_path, _set_path)
+
+    def _get_parallel_inference_config(self):
+        return self.__parallel_inference_config
+
+    def _set_parallel_inference_config(self, value):
+        if not isinstance(value, ParallelInferenceConfig):
+            raise TypeError("parallelInferenceConfig must be ParallelInferenceConfig")
+        self.__parallel_inference_config = value
+
+    parallel_inference_config = property(
+        _get_parallel_inference_config, _set_parallel_inference_config
+    )
+
+    def _get_normalization_config(self):
+        return self.__normalization_config
+
+    def _set_normalization_config(self, value):
+        if not isinstance(value, NormalizationConfig):
+            raise TypeError("normalizationConfig must be NormalizationConfig")
+        self.__normalization_config = value
+
+    normalization_config = property(
+        _get_normalization_config, _set_normalization_config
+    )
+
+    def _get_inference_executioner_factory_class_name(self):
+        return self.__inference_executioner_factory_class_name
+
+    def _set_inference_executioner_factory_class_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("inferenceExecutionerFactoryClassName must be str")
+        self.__inference_executioner_factory_class_name = value
+
+    inference_executioner_factory_class_name = property(
+        _get_inference_executioner_factory_class_name,
+        _set_inference_executioner_factory_class_name,
+    )
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__input_schemas is not None:
+            d["inputSchemas"] = (
+                self.__input_schemas.as_dict()
+                if hasattr(self.__input_schemas, "as_dict")
+                else self.__input_schemas
+            )
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
+            ]
+        if self.__output_names is not None:
+            d["outputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        if self.__input_column_names is not None:
+            d["inputColumnNames"] = (
+                self.__input_column_names.as_dict()
+                if hasattr(self.__input_column_names, "as_dict")
+                else self.__input_column_names
+            )
+        if self.__output_column_names is not None:
+            d["outputColumnNames"] = (
+                self.__output_column_names.as_dict()
+                if hasattr(self.__output_column_names, "as_dict")
+                else self.__output_column_names
+            )
+        if self.__input_data_types is not None:
+            d["inputDataTypes"] = (
+                self.__input_data_types.as_dict()
+                if hasattr(self.__input_data_types, "as_dict")
+                else self.__input_data_types
+            )
+        if self.__output_data_types is not None:
+            d["outputDataTypes"] = (
+                self.__output_data_types.as_dict()
+                if hasattr(self.__output_data_types, "as_dict")
+                else self.__output_data_types
+            )
+        if self.__path is not None:
+            d["path"] = (
+                self.__path.as_dict()
+                if hasattr(self.__path, "as_dict")
+                else self.__path
+            )
+        if self.__parallel_inference_config is not None:
+            d["parallelInferenceConfig"] = (
+                self.__parallel_inference_config.as_dict()
+                if hasattr(self.__parallel_inference_config, "as_dict")
+                else self.__parallel_inference_config
+            )
+        if self.__normalization_config is not None:
+            d["normalizationConfig"] = (
+                self.__normalization_config.as_dict()
+                if hasattr(self.__normalization_config, "as_dict")
+                else self.__normalization_config
+            )
+        if self.__inference_executioner_factory_class_name is not None:
+            d["inferenceExecutionerFactoryClassName"] = (
+                self.__inference_executioner_factory_class_name.as_dict()
+                if hasattr(self.__inference_executioner_factory_class_name, "as_dict")
+                else self.__inference_executioner_factory_class_name
             )
         return d
 
@@ -3226,5 +4656,191 @@ class InferenceConfiguration(object):
                 self.__mem_map_config.as_dict()
                 if hasattr(self.__mem_map_config, "as_dict")
                 else self.__mem_map_config
+            )
+        return d
+
+
+class WordPieceTokenizerStep(PipelineStep):
+
+    _types_map = {
+        "inputSchemas": {"type": dict, "subtype": None},
+        "outputSchemas": {"type": dict, "subtype": None},
+        "inputNames": {"type": list, "subtype": str},
+        "outputNames": {"type": list, "subtype": str},
+        "inputColumnNames": {"type": dict, "subtype": None},
+        "outputColumnNames": {"type": dict, "subtype": None},
+        "vocabPath": {"type": str, "subtype": None},
+        "sentenceMaxLen": {"type": int, "subtype": None},
+    }
+    _formats_map = {
+        "inputNames": "table",
+        "outputNames": "table",
+    }
+
+    def __init__(
+        self,
+        input_schemas=None,
+        output_schemas=None,
+        input_names=None,
+        output_names=None,
+        input_column_names=None,
+        output_column_names=None,
+        vocab_path=None,
+        sentence_max_len=None,
+    ):
+        self.__input_schemas = input_schemas
+        self.__output_schemas = output_schemas
+        self.__input_names = input_names
+        self.__output_names = output_names
+        self.__input_column_names = input_column_names
+        self.__output_column_names = output_column_names
+        self.__vocab_path = vocab_path
+        self.__sentence_max_len = sentence_max_len
+
+    def _get_input_schemas(self):
+        return self.__input_schemas
+
+    def _set_input_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputSchemas must be type")
+        self.__input_schemas = value
+
+    input_schemas = property(_get_input_schemas, _set_input_schemas)
+
+    def _get_output_schemas(self):
+        return self.__output_schemas
+
+    def _set_output_schemas(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputSchemas must be type")
+        self.__output_schemas = value
+
+    output_schemas = property(_get_output_schemas, _set_output_schemas)
+
+    def _get_input_names(self):
+        return self.__input_names
+
+    def _set_input_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("inputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("inputNames list valeus must be str")
+        self.__input_names = value
+
+    input_names = property(_get_input_names, _set_input_names)
+
+    def _get_output_names(self):
+        return self.__output_names
+
+    def _set_output_names(self, value):
+        if not isinstance(value, list) and not isinstance(value, ListWrapper):
+            raise TypeError("outputNames must be list")
+        if not all(isinstance(i, str) for i in value):
+            raise TypeError("outputNames list valeus must be str")
+        self.__output_names = value
+
+    output_names = property(_get_output_names, _set_output_names)
+
+    def _get_input_column_names(self):
+        return self.__input_column_names
+
+    def _set_input_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("inputColumnNames must be type")
+        self.__input_column_names = value
+
+    input_column_names = property(_get_input_column_names, _set_input_column_names)
+
+    def _get_output_column_names(self):
+        return self.__output_column_names
+
+    def _set_output_column_names(self, value):
+        if (
+            not isinstance(value, dict)
+            and not isinstance(value, DictWrapper)
+            and not isinstance(value, DictWrapper)
+        ):
+            raise TypeError("outputColumnNames must be type")
+        self.__output_column_names = value
+
+    output_column_names = property(_get_output_column_names, _set_output_column_names)
+
+    def _get_vocab_path(self):
+        return self.__vocab_path
+
+    def _set_vocab_path(self, value):
+        if not isinstance(value, str):
+            raise TypeError("vocabPath must be str")
+        self.__vocab_path = value
+
+    vocab_path = property(_get_vocab_path, _set_vocab_path)
+
+    def _get_sentence_max_len(self):
+        return self.__sentence_max_len
+
+    def _set_sentence_max_len(self, value):
+        if not isinstance(value, int):
+            raise TypeError("sentenceMaxLen must be int")
+        self.__sentence_max_len = value
+
+    sentence_max_len = property(_get_sentence_max_len, _set_sentence_max_len)
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__input_schemas is not None:
+            d["inputSchemas"] = (
+                self.__input_schemas.as_dict()
+                if hasattr(self.__input_schemas, "as_dict")
+                else self.__input_schemas
+            )
+        if self.__output_schemas is not None:
+            d["outputSchemas"] = (
+                self.__output_schemas.as_dict()
+                if hasattr(self.__output_schemas, "as_dict")
+                else self.__output_schemas
+            )
+        if self.__input_names is not None:
+            d["inputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__input_names
+            ]
+        if self.__output_names is not None:
+            d["outputNames"] = [
+                p.as_dict() if hasattr(p, "as_dict") else p for p in self.__output_names
+            ]
+        if self.__input_column_names is not None:
+            d["inputColumnNames"] = (
+                self.__input_column_names.as_dict()
+                if hasattr(self.__input_column_names, "as_dict")
+                else self.__input_column_names
+            )
+        if self.__output_column_names is not None:
+            d["outputColumnNames"] = (
+                self.__output_column_names.as_dict()
+                if hasattr(self.__output_column_names, "as_dict")
+                else self.__output_column_names
+            )
+        if self.__vocab_path is not None:
+            d["vocabPath"] = (
+                self.__vocab_path.as_dict()
+                if hasattr(self.__vocab_path, "as_dict")
+                else self.__vocab_path
+            )
+        if self.__sentence_max_len is not None:
+            d["sentenceMaxLen"] = (
+                self.__sentence_max_len.as_dict()
+                if hasattr(self.__sentence_max_len, "as_dict")
+                else self.__sentence_max_len
             )
         return d
