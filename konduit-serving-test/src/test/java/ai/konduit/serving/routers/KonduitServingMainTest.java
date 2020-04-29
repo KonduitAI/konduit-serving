@@ -20,30 +20,23 @@
  *
  */
 
-package ai.konduit.serving.configprovider;
+package ai.konduit.serving.routers;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.input.conversion.BatchInputParser;
-import ai.konduit.serving.model.DL4JConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
+import ai.konduit.serving.deploy.DeployKonduitServing;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.Dl4jStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.util.PortUtils;
 import ai.konduit.serving.util.SchemaTypeUtils;
-import ai.konduit.serving.verticles.inference.InferenceVerticle;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.FileUtils;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -52,78 +45,59 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 
 @RunWith(VertxUnitRunner.class)
 public class KonduitServingMainTest {
 
-    public static String CONFIG_FILE_PATH_KEY = "configFilePathKey";
-
     @Rule
     public Timeout rule = Timeout.seconds(240);
 
-    @ClassRule
-    public static TemporaryFolder folder = new TemporaryFolder();
-
-    @BeforeClass
-    public static void beforeClass(TestContext testContext) throws Exception {
-        JsonObject config = getConfig();
-        File jsonConfigPath = folder.newFile("config.json");
-        FileUtils.write(jsonConfigPath, config.encodePrettily(), StandardCharsets.UTF_8);
-
-        testContext.put(CONFIG_FILE_PATH_KEY, jsonConfigPath.getAbsolutePath());
-    }
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
-    public void testSuccess(TestContext testContext) {
+    public void testSuccess(TestContext testContext) throws Exception {
         Async async = testContext.async();
-        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                .configStoreType("file").ha(false)
-                .multiThreaded(false)
-                .verticleClassName(InferenceVerticle.class.getName())
-                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
-                .build();
 
-        KonduitServingMain.builder()
-                .eventHandler(handler -> {
+        DeployKonduitServing.deployInference(getConfig(false),
+                handler -> {
                     if (handler.succeeded()) {
                         async.complete();
                     } else {
                         testContext.fail("Failure event called instead of a success event");
                     }
-                })
-                .build()
-                .runMain(args.toArgs());
+                });
     }
 
     @Test
-    public void testFailure(TestContext testContext) {
+    public void testFailure(TestContext testContext) throws Exception {
         Async async = testContext.async();
 
-        KonduitServingMainArgs args = KonduitServingMainArgs.builder()
-                .configStoreType("file").ha(false)
-                .multiThreaded(false)
-                .verticleClassName(BatchInputParser.class.getName()) // Invalid verticle class name
-                .configPath(testContext.get(CONFIG_FILE_PATH_KEY))
-                .build();
-
-        KonduitServingMain.builder()
-                .eventHandler(handler -> {
+        DeployKonduitServing.deployInference(getConfig(true),
+                handler -> {
                     if(handler.succeeded()) {
                         testContext.fail("Success event called instead of a failure event");
                     } else {
-                        testContext.assertTrue(handler.cause() instanceof ClassCastException);
+                        testContext.assertTrue(handler.cause() instanceof IllegalStateException);
                         async.complete();
                     }
-                })
-                .build()
-                .runMain(args.toArgs());
+                });
     }
 
-    public static JsonObject getConfig() throws Exception {
-        Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
+    /**
+     * Returns an inference configuration
+     * @param fail If true, the network file won't be trained and saved on the file path.
+     *             This is useful for deliberately failing the deployment for {@link KonduitServingMainTest#testFailure(TestContext)}
+     * @return An {@link InferenceConfiguration} object.
+     * @throws Exception throws if there's an exception training a test network.
+     */
+    public InferenceConfiguration getConfig(boolean fail) throws Exception {
         File modelSave = folder.newFile("model.zip");
-        ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
+
+        if(!fail) {
+            Pair<MultiLayerNetwork, DataNormalization> multiLayerNetwork = TrainUtils.getTrainedNetwork();
+            ModelSerializer.writeModel(multiLayerNetwork.getFirst(), modelSave, false);
+        }
 
         Schema.Builder schemaBuilder = new Schema.Builder();
         schemaBuilder.addColumnDouble("petal_length")
@@ -142,27 +116,18 @@ public class KonduitServingMainTest {
                 .httpPort(PortUtils.getAvailablePort())
                 .build();
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder().modelLoadingPath(modelSave.getAbsolutePath())
-                                .modelType(ModelConfig.ModelType.DL4J)
-                                .build()
-                ).build();
-
-        ModelStep modelPipelineStep = ModelStep.builder()
+        Dl4jStep modelPipelineStep = Dl4jStep.builder()
                 .inputName("default")
                 .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
                 .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
                 .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
-                .modelConfig(modelConfig)
+                .path(modelSave.getAbsolutePath())
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .build();
 
-        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+        return InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .step(modelPipelineStep)
                 .build();
-
-        return new JsonObject(inferenceConfiguration.toJson());
     }
 }

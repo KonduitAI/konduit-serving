@@ -22,10 +22,10 @@ import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.MultiLabelMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import ai.konduit.serving.metrics.MetricType;
-import ai.konduit.serving.metrics.MultiLabelMetrics;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.step.*;
+import ai.konduit.serving.pipeline.step.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
@@ -144,10 +144,10 @@ public class ConfigJsonCoverageTrackingTests {
         InferenceConfiguration conf = InferenceConfiguration.builder()
                 .step(PythonStep.builder()
                         .pythonConfig("x", PythonConfig.builder().pythonCode("import numpy as np\nreturn np.ones(1)").build())
-                        .inputNames(Arrays.asList("x"))
-                        .outputNames(Arrays.asList("z"))
+                        .inputNames(Collections.singletonList("x"))
+                        .outputNames(Collections.singletonList("z"))
                         .build())
-                .step(ModelStep.builder().modelConfig(DL4JConfig.builder().modelConfigType(ModelConfigType.dl4j("/my/model/path.bin")).build()).build())
+                .step(Dl4jStep.builder().path("/my/model/path.bin").build())
                 .servingConfig(ServingConfig.builder().httpPort(12345).logTimings(true).build())
                 .build();
 
@@ -227,9 +227,12 @@ public class ConfigJsonCoverageTrackingTests {
         ServingConfig servingConfig = ServingConfig.builder()
                 .metricsConfigurations(Arrays.asList(NoOpMetricsConfig.builder().build(),
                         ClassificationMetricsConfig
-                                .builder().classificationLabels(Arrays.asList("0")).build(),
+                                .builder().classificationLabels(Collections.singletonList("0")).build(),
                         RegressionMetricsConfig
-                                .builder().regressionColumnLabels(Arrays.asList("0")).sampleTypes(Arrays.asList(RegressionMetricsConfig.SampleType.MAX)).build()))
+                                .builder()
+                                .regressionColumnLabels(Collections.singletonList("0"))
+                                .sampleTypes(Collections.singletonList(RegressionMetricsConfig.SampleType.MAX))
+                                .build()))
                 .build();
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
@@ -240,17 +243,14 @@ public class ConfigJsonCoverageTrackingTests {
         testConfigSerDe(NoOpMetricsConfig
                 .builder().build());
         testConfigSerDe(MultiLabelMetricsConfig
-                .builder().labels(Arrays.asList("0")).build());
+                .builder().labels(Collections.singletonList("0")).build());
         testConfigSerDe(ClassificationMetricsConfig
-                .builder().classificationLabels(Arrays.asList("0")).build());
+                .builder().classificationLabels(Collections.singletonList("0")).build());
         testConfigSerDe(RegressionMetricsConfig
-                .builder().regressionColumnLabels(Arrays.asList("0")).sampleTypes(Arrays.asList(RegressionMetricsConfig.SampleType.MAX)).build());
-    }
-
-    @Test
-    public void testModelStep(){
-        testConfigSerDe(ModelStep.builder().modelConfig(DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.dl4j("/my/path/here")).build()).build());
+                .builder()
+                .regressionColumnLabels(Collections.singletonList("0"))
+                .sampleTypes(Collections.singletonList(RegressionMetricsConfig.SampleType.MAX))
+                .build());
     }
 
     @Test
@@ -266,57 +266,38 @@ public class ConfigJsonCoverageTrackingTests {
 
     @Test
     public void testOnnxConfig(){
-        OnnxConfig d = OnnxConfig.builder()
-                .modelConfigType(ModelConfigType.onnx("/Some/Path/Here"))
-                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
-                        .inputDataType("in", TensorDataType.FLOAT)
-                        .outputDataType("out", TensorDataType.FLOAT)
-                        .build())
-                .build();
-
-        testConfigSerDe(d);
+        testConfigSerDe(OnnxStep.builder().path("/Some/Path/Here").build());
     }
 
     @Test
     public void testDL4JConfig(){
-        DL4JConfig d = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.dl4j("/Some/Path/Here"))
-                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
-                        .inputDataType("in", TensorDataType.FLOAT)
-                        .outputDataType("out", TensorDataType.FLOAT)
-                        .build())
-                .build();
-
-        testConfigSerDe(d);
+        testConfigSerDe(Dl4jStep.builder().path("/Some/Path/Here").build());
     }
 
     @Test
     public void testKerasConfig(){
-        testConfigSerDe(KerasConfig.builder().modelConfigType(ModelConfigType.keras("/path/to/model.kdf5"))
-                .tensorDataTypesConfig(TensorDataTypesConfig.builder().inputDataType("x",TensorDataType.DOUBLE).build())
-                .build());
+        testConfigSerDe(KerasStep.builder().path("/path/to/model.kdf5").build());
     }
 
     @Test
     public void testPmmlConfig(){
-        testConfigSerDe(PmmlConfig.defaultConfig());
-        testConfigSerDe(PmmlConfig.builder().evaluatorFactoryName("my.factory.class").build());
+        testConfigSerDe(PmmlStep.builder().build());
+        testConfigSerDe(PmmlStep.builder().evaluatorFactoryName("my.factory.class").build());
     }
 
     @Test
     public void testSameDiffConfig(){
-        testConfigSerDe(SameDiffConfig.builder().modelConfigType(ModelConfigType.sameDiff("/my/model/path.fb")).build());
+        testConfigSerDe(SameDiffStep.builder().path("/my/model/path.fb").build());
     }
 
     @Test
     public void testTensorFlowConfig(){
-        testConfigSerDe(TensorFlowConfig.builder().build());
+        testConfigSerDe(TensorFlowStep.builder().build());
     }
 
     @Test
     public void testModelConfigType(){
-        testConfigSerDe(ModelConfigType.keras("/path/to/keras.hdf5"));
-        testConfigSerDe(ModelConfigType.tensorFlow("/path/to/tensorflow.pb"));
+        testConfigSerDe(KerasStep.builder().path("/path/to/keras.hdf5").build());
     }
 
     @Test

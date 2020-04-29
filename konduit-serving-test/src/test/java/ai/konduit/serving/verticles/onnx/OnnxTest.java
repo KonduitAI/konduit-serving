@@ -25,10 +25,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.TestUtils;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.model.OnnxConfig;
-import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.OnnxStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import com.jayway.restassured.response.Response;
@@ -48,18 +45,15 @@ import org.nd4j.linalg.api.buffer.DataBuffer;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.net.URL;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.Collections;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -88,18 +82,10 @@ public class OnnxTest extends BaseVerticleTest {
                 .httpPort(port)
                 .build();
 
-        OnnxConfig modelConfig = OnnxConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder()
-                                .modelType(ModelConfig.ModelType.ONNX)
-                                .modelLoadingPath(model.getAbsolutePath())
-                                .build()
-                ).build();
-
-        ModelStep modelPipelineConfig = ModelStep.builder()
-                .modelConfig(modelConfig)
-                .inputNames(Arrays.asList("data_0"))
-                .outputNames(Arrays.asList("squeezenet0_flatten0_reshape0"))
+        OnnxStep modelPipelineConfig = OnnxStep.builder()
+                .path(model.getAbsolutePath())
+                .inputNames(Collections.singletonList("data_0"))
+                .outputNames(Collections.singletonList("squeezenet0_flatten0_reshape0"))
                 .build();
 
 
@@ -141,7 +127,7 @@ public class OnnxTest extends BaseVerticleTest {
 
             INDArray bodyResult = Nd4j.createNpyFromByteArray(response.getBody().asByteArray());
 
-            assert Math.abs(bodyResult.getFloat(0) - 1.99018) < 1e-4;
+            assertEquals(1.99018, bodyResult.getFloat(0), 1e-4);
 
             assertArrayEquals(new long[]{1, 1000}, bodyResult.shape());
         }

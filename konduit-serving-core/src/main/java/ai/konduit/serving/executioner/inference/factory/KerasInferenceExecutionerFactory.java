@@ -26,12 +26,12 @@ import ai.konduit.serving.config.ParallelInferenceConfig;
 import ai.konduit.serving.executioner.inference.InitializedInferenceExecutionerConfig;
 import ai.konduit.serving.executioner.inference.MultiComputationGraphInferenceExecutioner;
 import ai.konduit.serving.executioner.inference.MultiLayerNetworkInferenceExecutioner;
-import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.loader.ModelGuesser;
 import ai.konduit.serving.model.loader.ModelLoader;
 import ai.konduit.serving.model.loader.dl4j.cg.ComputationGraphModelLoader;
 import ai.konduit.serving.model.loader.dl4j.mln.MultiLayerNetworkModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.KerasStep;
 import lombok.extern.slf4j.Slf4j;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 
@@ -46,11 +46,11 @@ public class KerasInferenceExecutionerFactory implements InferenceExecutionerFac
     @Override
     public InitializedInferenceExecutionerConfig create(ModelStep modelPipelineStepConfig) throws Exception {
         ModelLoader kerasLoader;
-        ModelConfig inferenceConfiguration = modelPipelineStepConfig.getModelConfig();
+        KerasStep kerasStep = (KerasStep) modelPipelineStepConfig;
         ParallelInferenceConfig parallelInferenceConfig = modelPipelineStepConfig.getParallelInferenceConfig();
-        if (ModelGuesser.isKerasComputationGraphFile(new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath()))) {
+        if (ModelGuesser.isKerasComputationGraphFile(new File(kerasStep.getPath()))) {
             MultiComputationGraphInferenceExecutioner inferenceExecutioner = new MultiComputationGraphInferenceExecutioner();
-            kerasLoader = new ComputationGraphModelLoader(new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath()));
+            kerasLoader = new ComputationGraphModelLoader(new File(kerasStep.getPath()));
             ComputationGraph model = (ComputationGraph) kerasLoader.loadModel();
             int numInputs = model.getNumInputArrays();
             int numOutputs = model.getNumOutputArrays();
@@ -64,7 +64,7 @@ public class KerasInferenceExecutionerFactory implements InferenceExecutionerFac
             return new InitializedInferenceExecutionerConfig(inferenceExecutioner, inputNames, outputNames);
         } else {
             MultiLayerNetworkInferenceExecutioner inferenceExecutioner = new MultiLayerNetworkInferenceExecutioner();
-            kerasLoader = new MultiLayerNetworkModelLoader(new File(inferenceConfiguration.getModelConfigType().getModelLoadingPath()));
+            kerasLoader = new MultiLayerNetworkModelLoader(new File(kerasStep.getPath()));
             List<String> inputNames = Collections.singletonList("default");
             List<String> outputNames = Collections.singletonList("default");
             inferenceExecutioner.initialize(kerasLoader, parallelInferenceConfig);

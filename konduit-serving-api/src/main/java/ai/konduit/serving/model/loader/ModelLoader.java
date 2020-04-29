@@ -33,7 +33,6 @@ import io.vertx.core.buffer.Buffer;
  */
 public interface ModelLoader<T> {
 
-
     /**
      * Save a model as a buffer
      *
@@ -50,5 +49,4 @@ public interface ModelLoader<T> {
      * @throws Exception if an error occurs loading the model
      */
     T loadModel() throws Exception;
-
 }

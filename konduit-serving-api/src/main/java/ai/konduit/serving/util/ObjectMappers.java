@@ -27,11 +27,9 @@ import org.nd4j.shade.jackson.annotation.JsonAutoDetect;
 import org.nd4j.shade.jackson.annotation.JsonInclude;
 import org.nd4j.shade.jackson.annotation.PropertyAccessor;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
-import org.nd4j.shade.jackson.databind.DeserializationFeature;
-import org.nd4j.shade.jackson.databind.MapperFeature;
-import org.nd4j.shade.jackson.databind.ObjectMapper;
-import org.nd4j.shade.jackson.databind.SerializationFeature;
+import org.nd4j.shade.jackson.databind.*;
 import org.nd4j.shade.jackson.dataformat.yaml.YAMLFactory;
+import org.nd4j.shade.jackson.dataformat.yaml.YAMLGenerator;
 import org.nd4j.shade.jackson.datatype.joda.JodaModule;
 
 import java.io.IOException;
@@ -42,11 +40,13 @@ import java.io.IOException;
 public class ObjectMappers {
 
     private static final ObjectMapper jsonMapper = configureMapper(new ObjectMapper());
-    private static final ObjectMapper yamlMapper = configureMapper(new ObjectMapper(new YAMLFactory()));
+    private static final ObjectMapper yamlMapper = configureMapper(new ObjectMapper(new YAMLFactory()
+            .disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)  // For preventing YAML from adding `!<TYPE>` with polymorphic objects
+                                                                // and use Jackson's type information mechanism.
+    ));
 
     private ObjectMappers() {
     }
-
 
     /**
      * Get a single object mapper for use with reading and writing JSON
@@ -76,9 +76,11 @@ public class ObjectMappers {
         ret.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         ret.setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
         ret.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        if(ret.getFactory() instanceof YAMLFactory) {
+            ret.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        }
         return ret;
     }
-
 
     /**
      * Convert the specified object to a YAML String, throwing an unchecked exception (RuntimeException) if conversion fails

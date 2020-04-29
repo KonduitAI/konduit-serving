@@ -24,7 +24,7 @@ package ai.konduit.serving.verticles;
 
 /**
  * This package contains {@link io.vertx.core.Verticle} implementations meant to be standalone servers.
- * These classes can be invoked from the command line via {@link ai.konduit.serving.configprovider.KonduitServingMain}
+ * These classes can be invoked from the command line via {@link ai.konduit.serving.launcher.KonduitServingLauncher}
  * <p>
  * All verticles in this package implement the same idea of some form of scoring of arbitrary
  * input over a network. The verticles have the same building blocks for the following workflow:

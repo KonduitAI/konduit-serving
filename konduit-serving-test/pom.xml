@@ -26,6 +26,12 @@
         </profile>
         <profile>
             <id>gpu</id>
+            <activation>
+                <property>
+                    <name>chip</name>
+                    <value>gpu</value>
+                </property>
+            </activation>
             <dependencies>
                 <dependency>
                     <groupId>ai.konduit.serving</groupId>
@@ -167,6 +173,54 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <!--
+                The plugin below is used for creating a maven property "konduit.test.class.path"
+                that will contain the classpath value. This was needed because the tests run sometimes have different
+                value for the system property "java.class.path" than the actual classpath.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <id>build-classpath</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>build-classpath</goal>
+                        </goals>
+                        <configuration>
+                            <outputProperty>konduit.test.class.path</outputProperty>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--
+                This plugin is used for creating a system property that can be used for tests. The property
+                "konduit.test.class.path" will contain the value of the classpath which was build from parsing
+                the whole project's classpath.
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>set-system-properties</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>konduit.test.class.path</name>
+                                    <value>${konduit.test.class.path}</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

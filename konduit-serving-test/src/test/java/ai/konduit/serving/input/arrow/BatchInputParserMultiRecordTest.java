@@ -32,7 +32,6 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.FileUtils;
 import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
 import org.datavec.api.split.FileSplit;
 import org.datavec.api.split.partition.NumberOfRecordsPartitioner;
@@ -84,7 +83,6 @@ public class BatchInputParserMultiRecordTest extends BaseVerticleTest {
         FileSplit fileSplit = new FileSplit(tmpFile);
         arrowRecordWriter.initialize(fileSplit, new NumberOfRecordsPartitioner());
         arrowRecordWriter.writeBatch(writables);
-        byte[] arrowBytes = FileUtils.readFileToByteArray(tmpFile);
 
         given().port(port)
                 .multiPart("input1", tmpFile)

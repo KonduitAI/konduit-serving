@@ -5,14 +5,15 @@ serving:
   extra_start_args: -Xmx8g
   jar_path: konduit.jar
 steps:
-  python_step:
-    type: PYTHON
-    python_path: .
-    python_code: "first+=2; second = first"
-    python_inputs:
-      first: NDARRAY
-    python_outputs:
-      second: NDARRAY
+  - type: PYTHON
+    python_configs:
+      default:
+        python_path: .
+        python_code: "first+=2; second = first"
+        python_inputs:
+          first: NDARRAY
+        python_outputs:
+          second: NDARRAY
 client:
   input_names:
     - default

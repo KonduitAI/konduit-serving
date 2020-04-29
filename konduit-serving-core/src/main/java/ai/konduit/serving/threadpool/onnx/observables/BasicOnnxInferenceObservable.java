@@ -44,12 +44,10 @@ public class BasicOnnxInferenceObservable extends Observable implements OnnxObse
     private long id;
     private List<Map<String, INDArray>> output;
 
-
     public BasicOnnxInferenceObservable(List<Map<String, INDArray>> inputs) {
         super();
         this.input = inputs;
     }
-
 
     @Override
     public List<Map<String, INDArray>> getInputBatches() {

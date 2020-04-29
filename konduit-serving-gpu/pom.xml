@@ -20,7 +20,6 @@
         <cuda.javacpp.version>${cuda.version}-${javacpp.date}-${javacpp.version}</cuda.javacpp.version>
     </properties>
 
-
     <profiles>
         <profile>
             <id>arm</id>
@@ -50,7 +49,6 @@
                     <artifactId>cuda</artifactId>
                     <version>${cuda.javacpp.version}</version>
                 </dependency>
-
                 <dependency>
                     <groupId>org.nd4j</groupId>
                     <artifactId>nd4j-cuda-${cuda.version}-platform</artifactId>
@@ -66,7 +64,6 @@
                         </exclusion>
                     </exclusions>
                 </dependency>
-
                 <dependency>
                     <groupId>org.bytedeco</groupId>
                     <artifactId>tensorflow-platform-gpu</artifactId>

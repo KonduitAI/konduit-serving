@@ -54,7 +54,5 @@ public class PipelineSerializationTests {
                 .step(imageLoadingStepConfig)
                 .build();
         System.out.println(config.toJson());
-
     }
-
 }

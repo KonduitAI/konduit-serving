@@ -24,19 +24,27 @@ package ai.konduit.serving.verticles.inference;
 
 
 import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.configprovider.MemMapRouteDefiner;
-import ai.konduit.serving.configprovider.PipelineRouteDefiner;
 import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.routers.MemMapRouteDefiner;
+import ai.konduit.serving.routers.PipelineRouteDefiner;
+import ai.konduit.serving.settings.DirectoryFetcher;
+import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
-import io.vertx.core.Context;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.bytedeco.systems.global.linux;
+import org.bytedeco.systems.global.macosx;
+import org.bytedeco.systems.global.windows;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -71,26 +79,31 @@ public class InferenceVerticle extends BaseRoutableVerticle {
     }
 
     @Override
-    public void init(Vertx vertx, Context context) {
-        super.init(vertx, context);
-
-        inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
-        pipelineRouteDefiner = new PipelineRouteDefiner();
-        this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
-        //define the memory map endpoints if the user specifies the memory map configuration
-        if (inferenceConfiguration.getMemMapConfig() != null) {
-            this.router = new MemMapRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
-        } else {
-            this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
-
-            // Checking if the configuration runners can be created without problems or not
-            for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
-                pipelineStep.createRunner();
-        }
-    }
-
-    @Override
     protected void setupWebServer(Promise<Void> startPromise) {
+        try {
+            inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
+
+            pipelineRouteDefiner = new PipelineRouteDefiner();
+            this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
+            //define the memory map endpoints if the user specifies the memory map configuration
+            if (inferenceConfiguration.getMemMapConfig() != null) {
+                this.router = new MemMapRouteDefiner().defineRoutes(vertx, inferenceConfiguration);
+            } else {
+                this.router = pipelineRouteDefiner.defineRoutes(vertx, inferenceConfiguration);
+
+                // Checking if the configuration runners can be created without problems or not
+                for (PipelineStep pipelineStep : inferenceConfiguration.getSteps())
+                    pipelineStep.createRunner();
+            }
+        } catch (Exception exception) {
+            startPromise.fail(exception);
+            return;
+        }
+
+        if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
+            LogUtils.setFileAppenderIfNeeded();
+        }
+
         String portEnvValue = System.getenv(VerticleConstants.KONDUIT_SERVING_PORT);
         if (portEnvValue != null) {
             try {
@@ -125,7 +138,16 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                         try {
                             ((ContextInternal) context).getDeployment().deploymentOptions().setConfig(new JsonObject(inferenceConfiguration.toJson()));
 
-                            log.info("Inference server is listening on host: \"{}\"", inferenceConfiguration.getServingConfig().getListenHost());
+                            int pid = getPid();
+
+                            if(pid != -1) {
+                                saveInspectionDataIfRequired(pid);
+
+                                // Periodically checks for configuration updates and save them.
+                                vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
+                            }
+
+                            log.info("Inference server is listening on host: '{}'", inferenceConfiguration.getServingConfig().getListenHost());
                             log.info("Inference server started on port {} with {} pipeline steps", port, nSteps);
                             startPromise.complete();
                         } catch (Exception exception) {
@@ -133,5 +155,38 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                         }
                     }
                 });
+    }
+
+    public static int getPid() throws UnsatisfiedLinkError {
+        if (SystemUtils.IS_OS_WINDOWS) {
+            return windows.GetCurrentProcessId();
+        } else if (SystemUtils.IS_OS_MAC) {
+            return macosx.getpid();
+        } else if (SystemUtils.IS_OS_LINUX){
+            return linux.getpid();
+        } else {
+            return -1;
+        }
+    }
+
+    private void saveInspectionDataIfRequired(int pid) {
+        try {
+            File processConfigFile = new File(DirectoryFetcher.getServersDataDir(), pid + ".data");
+            String inferenceConfigurationJson = ((ContextInternal) context).getDeployment()
+                    .deploymentOptions().getConfig().encodePrettily();
+
+            if(processConfigFile.exists()) {
+                if(!FileUtils.readFileToString(processConfigFile, StandardCharsets.UTF_8).contains(inferenceConfigurationJson)) {
+                    FileUtils.writeStringToFile(processConfigFile, inferenceConfigurationJson, StandardCharsets.UTF_8);
+                }
+            } else {
+                FileUtils.writeStringToFile(processConfigFile, inferenceConfigurationJson, StandardCharsets.UTF_8);
+                log.info("Writing inspection data at '{}' with configuration: \n{}", processConfigFile.getAbsolutePath(),
+                        inferenceConfiguration.toJson());
+            }
+            processConfigFile.deleteOnExit();
+        } catch (IOException exception) {
+            log.error("Unable to save konduit server inspection information", exception);
+        }
     }
 }

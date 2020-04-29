@@ -26,6 +26,7 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
+import io.micrometer.core.lang.NonNull;
 import org.bytedeco.cuda.nvml.nvmlDevice_st;
 import org.bytedeco.cuda.nvml.nvmlMemory_t;
 import org.bytedeco.cuda.nvml.nvmlProcessInfo_t;
@@ -52,16 +53,16 @@ public class GpuMetrics implements MeterBinder {
 
 
     @Override
-    public void bindTo(MeterRegistry registry) {
+    public void bindTo(@NonNull MeterRegistry registry) {
         checkReturn(nvmlInit_v2());
 
         int[] resultArr = new int[1];
         checkReturn(nvmlSystemGetCudaDriverVersion(resultArr));
 
-        StringBuffer baseName = new StringBuffer();
+        StringBuilder baseName = new StringBuilder();
         baseName.append("pipeline.cuda.device.");
 
-        int deviceCount = 0;
+        int deviceCount;
         checkReturn(nvmlDeviceGetCount_v2(resultArr));
         deviceCount = resultArr[0];
 
@@ -69,12 +70,12 @@ public class GpuMetrics implements MeterBinder {
             nvmlDevice_st device = new nvmlDevice_st();
             nvmlDeviceGetHandleByIndex_v2(i, device);
 
-            StringBuffer deviceStats = new StringBuffer();
+            StringBuilder deviceStats = new StringBuilder();
             deviceStats.append(baseName);
             //device index
             deviceStats.append(resultArr[0]);
 
-            /**
+            /*
              * Note that the result array first entry has to be zero here.
              * This will cause nvml to return the number of running graphics processes
              * and nothing more.
@@ -99,22 +100,22 @@ public class GpuMetrics implements MeterBinder {
                     .baseUnit(deviceStats.toString())
                     .register(registry);
 
-            /**
+            /*
              * From docs
              * unsigned int  gpu
              * Percent of time over the past sample period during which one or more kernels was executing on the GPU.
              * unsigned int  memory
              * Percent of time over the past sample period during which global (device) memory was being read or written.
              */
-            nvmlUtilization_t utilization_t = new nvmlUtilization_t();
-            checkReturn(nvmlDeviceGetUtilizationRates(device, utilization_t));
-            final int percentMemoryUsed = utilization_t.memory();
+            nvmlUtilization_t nvmlUtilizationT = new nvmlUtilization_t();
+            checkReturn(nvmlDeviceGetUtilizationRates(device, nvmlUtilizationT));
+            final int percentMemoryUsed = nvmlUtilizationT.memory();
             Gauge.builder(".percent.memory.used", () -> percentMemoryUsed)
                     .tags(tags)
                     .description("Percent memory used for device by index")
                     .baseUnit(deviceStats.toString())
                     .register(registry);
-            final int percentKernelExecuted = utilization_t.gpu();
+            final int percentKernelExecuted = nvmlUtilizationT.gpu();
             Gauge.builder(".percent.kernel.executed", () -> percentKernelExecuted)
                     .tags(tags)
                     .description("Percent time kernel was being executed on gpu")
@@ -128,13 +129,16 @@ public class GpuMetrics implements MeterBinder {
                     .description("Device memory used in bytes")
                     .baseUnit(deviceStats.toString())
                     .register(registry);
-            // free needs a Pointer and has void return type now
-//            final long deviceMemoryFreeInBytes = memory.free();
-//            Gauge.builder(".memory.free",() -> deviceMemoryFreeInBytes)
-//                    .tags(tags)
-//                    .description("Device memory free in bytes")
-//                    .baseUnit(deviceStats.toString())
-//                    .register(registry);
+            /*
+                //free needs a Pointer and has void return type now
+                final long deviceMemoryFreeInBytes = memory.free();
+                Gauge.builder(".memory.free",() -> deviceMemoryFreeInBytes)
+                        .tags(tags)
+                        .description("Device memory free in bytes")
+                        .baseUnit(deviceStats.toString())
+                        .register(registry);
+             */
+
             checkReturn(nvmlDeviceGetTemperature(device,NVML_TEMPERATURE_GPU,resultArr));
             final int tempC = resultArr[0];
             Gauge.builder(".temp.celsius",() -> tempC)

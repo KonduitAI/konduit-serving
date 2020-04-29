@@ -30,7 +30,10 @@ import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.util.ObjectMappers;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.schema.Schema;
@@ -50,10 +53,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
+@Data
 public class PythonStep extends BasePipelineStep<PythonStep> {
 
-    @Getter
-    @Setter
     @Singular
     private Map<String, PythonConfig> pythonConfigs;
 

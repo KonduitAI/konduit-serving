@@ -2,19 +2,14 @@ package ai.konduit.serving.orchestration;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.configprovider.KonduitServingNodeConfigurer;
 import com.jayway.restassured.response.Response;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-
-import java.io.File;
-import java.nio.charset.StandardCharsets;
 
 import static com.jayway.restassured.RestAssured.given;
 
@@ -39,9 +34,6 @@ public class KonduitOrchestrationMainTest {
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .build();
-        File tmpFile = new File(testDir.newFolder(), "file.json");
-        FileUtils.writeStringToFile(tmpFile, inferenceConfiguration.toJson(), StandardCharsets.UTF_8);
-        tmpFile.deleteOnExit();
         /*
          * Need to work out what a "node" is: eg, what happens when you deploy 2 instances on vertx?
          * What happens when you have 2 separate verticles?
@@ -49,11 +41,8 @@ public class KonduitOrchestrationMainTest {
          * What should "nodes" return?
          */
 
-        KonduitServingNodeConfigurer configurer = KonduitServingNodeConfigurer.builder()
-                .configPath(tmpFile.getAbsolutePath())
-                .build();
-        KonduitOrchestrationMain.builder()
-                .eventHandler(handler -> {
+        DeployKonduitOrchestration.deployInferenceClustered(inferenceConfiguration,
+                handler -> {
                     if(handler.succeeded()) {
                         try {
                             Response response = given().port(port)
@@ -71,9 +60,7 @@ public class KonduitOrchestrationMainTest {
                     } else {
                         testContext.fail("Orchestration main server failed to start.");
                     }
-                })
-                .build()
-                .runMain(configurer);
+                });
     }
 
     public int getRandomPort() throws java.io.IOException {
