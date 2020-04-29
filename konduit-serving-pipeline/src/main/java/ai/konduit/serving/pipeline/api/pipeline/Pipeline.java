@@ -17,9 +17,11 @@
 package ai.konduit.serving.pipeline.api.pipeline;
 
 import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 
 import java.io.Closeable;
+import java.io.Serializable;
 
 /**
  * A Pipeline object represents the configuration of a machine learning pipeline - including zero or more machine learning
@@ -31,7 +33,7 @@ import java.io.Closeable;
  * perhaps including conditional operations/branching
  *
  */
-public interface Pipeline extends Closeable {
+public interface Pipeline extends TextConfig, Serializable {
 
     /**
      * Instantiate an executor capable of executing this pipeline

@@ -34,7 +34,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 //Note: For JSON subtypes, we can't use the typical Jackson annotations, as the classes implementing the PipelineStep
 //      interface won't generally be defined in konduit-serving-pipeline module - hence can't be referenced here
 //     In practice this probably means we'll use a registration type approach via JsonSubTypesMapping
-public interface PipelineStep extends Serializable, TextConfig {
+public interface PipelineStep extends TextConfig, Serializable {
 
 
 
