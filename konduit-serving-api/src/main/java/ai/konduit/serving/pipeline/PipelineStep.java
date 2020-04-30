@@ -24,6 +24,8 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  * verticle along with a {@link ai.konduit.serving.config.ServingConfig}.
  *
  * @author Adam Gibson
+ *
+ * @deprecated To be replaced by {@link PipelineStep}
  */
 
 @JsonSubTypes({
@@ -57,6 +59,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = WordPieceTokenizerStep.class, name = "WordPieceTokenizerStep")
 })
 @JsonTypeInfo(use = NAME, property = "type")
+@Deprecated
 public interface PipelineStep<T extends PipelineStep> extends Serializable, TextConfig {
 
     /**
