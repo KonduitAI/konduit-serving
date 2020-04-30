@@ -233,11 +233,11 @@
                             <protocVersion>3.8.0</protocVersion>
                             <extension>.proto</extension>
                             <inputDirectories>
-                                <include>src/main/protobuf</include>
+                                <include>src/main/java/ai/konduit/serving/data/protobuf</include>
                             </inputDirectories>
                             <addSources>main</addSources>
                             <cleanOutputFolder>false</cleanOutputFolder>
-                            <outputDirectory>src/main/java/generated</outputDirectory>
+                            <outputDirectory>src/main/java/ai/konduit/serving/data</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
