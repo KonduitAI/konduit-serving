@@ -27,18 +27,18 @@ import lombok.Builder;
 import org.apache.commons.lang3.ArrayUtils;
 
 @AllArgsConstructor
-public class BytesValue implements Value<Byte[]> {
+public class BytesValue implements Value<byte[]> {
 
     private byte[] value;
 
     @Override
-    public Byte[] get() {
-        return ArrayUtils.toObject(value);
+    public byte[] get() {
+        return this.value;
     }
 
     @Override
-    public void set(Byte[] values) {
-        value = ArrayUtils.toPrimitive(values);
+    public void set(byte[] values) {
+        this.value = values;
     }
 
     @Override

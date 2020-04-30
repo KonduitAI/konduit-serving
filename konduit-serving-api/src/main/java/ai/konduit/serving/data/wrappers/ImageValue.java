@@ -20,11 +20,10 @@
  */
 package ai.konduit.serving.data.wrappers;
 
+import ai.konduit.serving.data.Image;
 import ai.konduit.serving.data.Value;
 import ai.konduit.serving.data.ValueType;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import org.datavec.image.data.Image;
 
 @AllArgsConstructor
 public class ImageValue implements Value<Image> {

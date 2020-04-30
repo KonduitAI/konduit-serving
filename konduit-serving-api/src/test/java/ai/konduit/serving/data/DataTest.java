@@ -20,9 +20,10 @@
  */
 package ai.konduit.serving.data;
 
-import jdk.nashorn.internal.scripts.JD;
-import org.datavec.image.data.Image;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -37,8 +38,11 @@ public class DataTest {
     private final String KEY = "stringData";
     private final String VALUE = "Some string data";
 
+    @Rule
+    public TemporaryFolder dir = new TemporaryFolder();
+
     @Test
-    public void testStringData() throws ValueNotFoundException {
+    public void testStringData() {
 
         Data container = JData.makeData(KEY, VALUE);
         String value = container.getString(KEY);
@@ -52,35 +56,35 @@ public class DataTest {
     }
 
     @Test(expected = ValueNotFoundException.class)
-    public void testAbsentData() throws ValueNotFoundException {
+    public void testAbsentData() {
         Data container = JData.makeData(KEY, VALUE);
         String value = container.getString("no_data_for_this_key");
         assertEquals(VALUE, value);
     }
 
     @Test
-    public void testBooleanData() throws ValueNotFoundException {
+    public void testBooleanData() {
         boolean value = true;
         Data container = JData.makeData(KEY, value);
         assertEquals(true, container.getBoolean(KEY));
     }
 
     @Test
-    public void testBytesData() throws ValueNotFoundException {
+    public void testBytesData() {
         byte[] input = Nd4j.rand(2, 512).data().asBytes();
         Data container = JData.makeData(KEY, input);
         assertArrayEquals(input, container.getBytes(KEY));
     }
 
     @Test
-    public void testDoubleData() throws ValueNotFoundException {
+    public void testDoubleData() {
         Double input = 1.0;
         Data container = JData.makeData(KEY, input);
         assertEquals(input, container.getDouble(KEY), 1e-4);
     }
 
     @Test
-    public void testImageData() throws ValueNotFoundException {
+    public void testImageData() {
         INDArray image = Nd4j.create(1,10,10,20);
         Image input = new Image(image, 1,1,1);
         Data container = JData.makeData(KEY, input);
@@ -88,14 +92,14 @@ public class DataTest {
     }
 
     @Test
-    public void testINDArrayData() throws ValueNotFoundException {
+    public void testINDArrayData() {
         INDArray input = Nd4j.rand(10,100, 1024);
         Data container = JData.makeData(KEY, input);
         assertEquals(input, container.getNDArray(KEY));
     }
 
     @Test
-    public void testIntData() throws ValueNotFoundException {
+    public void testIntData() {
         long data = 100;
         Data container = JData.makeData(KEY, data);
         assertEquals(data, container.getLong(KEY));
@@ -112,6 +116,7 @@ public class DataTest {
         Data layeredContainer = JData.makeData("upperLevel", ndContainer);
     }
 
+    @Ignore
     @Test
     public void testSerde() {
         Data someData = JData.makeData(KEY, Long.valueOf(200));
@@ -121,15 +126,16 @@ public class DataTest {
 
     @Test
     public void testBuilderVSFactory() {
-        Data built = new JData.DataBuilder().
-                withBooleanData("key1", true).
-                withStringData("key2","null").
+        JData built = new JData.DataBuilder().
+                add("key1", true).
+                add("key2","null").
                 builld();
 
-        Data made = JData.makeData("key1", true);
+        // Normally don't need this cast. Just for asserts below and is subject to change.
+        JData made = (JData)JData.makeData("key1", true);
         made.put("key2", "null");
 
-        Data madeFromEmpty = JData.empty();
+        JData madeFromEmpty = (JData) JData.empty();
         madeFromEmpty.put("key1", true);
         madeFromEmpty.put("key2", "null");
 

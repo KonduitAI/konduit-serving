@@ -20,16 +20,13 @@
  */
 package ai.konduit.serving.data;
 
-import org.datavec.image.data.Image;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import javax.json.JsonValue;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Map;
 
 public interface Data {
 
@@ -51,7 +48,7 @@ public interface Data {
     double getDouble(String key) throws ValueNotFoundException;
     Image getImage(String key) throws ValueNotFoundException;
     long getLong(String key) throws ValueNotFoundException;
-    List<JsonValue.ValueType> getList(String key, DataType type);
+    List<ValueType> getList(String key, DataType type);
     Data getData(String key);
 
     void put(String key, String data);
@@ -74,11 +71,6 @@ public interface Data {
 
 
     void write(OutputStream toStream);
-
-    byte[] asBytes();
-
-    // Get implementation data
-    Map<String, Value> getDataMap();
 
     static Data fromJson(String key) {
         return null;

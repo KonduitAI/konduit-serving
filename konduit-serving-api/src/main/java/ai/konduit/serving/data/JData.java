@@ -21,32 +21,28 @@
 package ai.konduit.serving.data;
 
 import ai.konduit.serving.data.wrappers.*;
-import ai.konduit.serving.util.ObjectMappers;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
-import org.datavec.image.data.Image;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import javax.json.JsonValue;
 import java.io.*;
 import java.util.*;
 
 @Slf4j
 public class JData implements Data {
 
-    private Map<String, Value> dataMap = new HashMap<>();
+    private Map<String, Value> dataMap = new LinkedHashMap<>();
     private Data metaData;
 
-    @Override
     public Map<String, Value> getDataMap() {
         return dataMap;
     }
 
     @Override
     public String toJson() {
-        return ObjectMappers.toJson(dataMap);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -67,16 +63,20 @@ public class JData implements Data {
         return retVal;
     }
 
-    private Value valueIfFound(String key) throws ValueNotFoundException {
+    private Value valueIfFound(String key, ValueType type) {
         Value data = dataMap.get(key);
         if (data == null)
-            throw new ValueNotFoundException();
+            throw new ValueNotFoundException(String.format("Value not found for key %s", key));
+        if (data.type() != type)
+            throw new IllegalStateException(String.format("Value has wrong type for key %s", key));
         return data;
     }
 
     @Override
-    public ValueType type(String key) throws ValueNotFoundException {
-        Value<?> data = valueIfFound(key);
+    public ValueType type(String key) {
+        Value data = dataMap.get(key);
+        if (data == null)
+            throw new ValueNotFoundException(String.format("Value not found for key %s", key));
         return data.type();
     }
 
@@ -86,49 +86,49 @@ public class JData implements Data {
     }
 
     @Override
-    public INDArray getNDArray(String key) throws ValueNotFoundException {
-        Value<INDArray> data = valueIfFound(key);
+    public INDArray getNDArray(String key) {
+        Value<INDArray> data = valueIfFound(key, ValueType.NDARRAY);
         return data.get();
     }
 
     @Override
-    public String getString(String key) throws ValueNotFoundException {
-        Value<String> data = valueIfFound(key);
+    public String getString(String key) {
+        Value<String> data = valueIfFound(key, ValueType.STRING);
         return data.get();
     }
 
     @Override
-    public boolean getBoolean(String key) throws ValueNotFoundException {
-        Value<Boolean> data = valueIfFound(key);
+    public boolean getBoolean(String key) {
+        Value<Boolean> data = valueIfFound(key, ValueType.BOOLEAN);
         return data.get();
     }
 
     @Override
-    public byte[] getBytes(String key) throws ValueNotFoundException {
-        Value<Byte[]> data = valueIfFound(key);
-        return ArrayUtils.toPrimitive(data.get());
-    }
-
-    @Override
-    public double getDouble(String key) throws ValueNotFoundException {
-        Value<Double> data = valueIfFound(key);
+    public byte[] getBytes(String key) {
+        Value<byte[]> data = valueIfFound(key, ValueType.BYTES);
         return data.get();
     }
 
     @Override
-    public Image getImage(String key) throws ValueNotFoundException {
-        Value<Image> data = valueIfFound(key);
+    public double getDouble(String key) {
+        Value<Double> data = valueIfFound(key, ValueType.DOUBLE);
         return data.get();
     }
 
     @Override
-    public long getLong(String key) throws ValueNotFoundException {
-        Value<Long> data = valueIfFound(key);
+    public Image getImage(String key) {
+        Value<Image> data = valueIfFound(key, ValueType.IMAGE);
         return data.get();
     }
 
     @Override
-    public List<JsonValue.ValueType> getList(String key, DataType type) {
+    public long getLong(String key) {
+        Value<Long> data = valueIfFound(key, ValueType.INT64);
+        return data.get();
+    }
+
+    @Override
+    public List<ValueType> getList(String key, DataType type) {
         return null;
     }
 
@@ -175,7 +175,8 @@ public class JData implements Data {
 
     @Override
     public void put(String key, Data data) {
-        this.dataMap.putAll(data.getDataMap());
+        // TODO: must avoid cast and redesign method
+        this.dataMap.putAll(((JData)data).getDataMap());
     }
 
     @Override
@@ -196,47 +197,20 @@ public class JData implements Data {
     @Override
     public void save(File toFile) {
 
-        try (OutputStream stream = new BufferedOutputStream(new FileOutputStream(toFile))) {
-            write(stream);
-        } catch (Exception e) {
-            log.error("Error saving Data object to file",e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     public static Data fromFile(File fromFile) {
-        Data retVal = JData.empty();
-        try (ObjectInputStream osi = new ObjectInputStream(new FileInputStream(fromFile))) {
-            retVal = (JData)osi.readObject();
-
-        } catch (Exception e) {
-            log.error("Error saving Data object to file",e);
-        }
-        return retVal;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void write(OutputStream toStream) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(toStream)) {
-            oos.writeObject(this.dataMap);
-            if (hasMetaData())
-                oos.writeObject(metaData.getDataMap());
-        } catch (IOException e) {
-            log.error("Error serializing Data", e);
-        }
+        throw new UnsupportedOperationException();
     }
 
-    @Override
     public byte[] asBytes() {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             ObjectOutput out = new ObjectOutputStream(bos)) {
-            out.writeObject(this.dataMap);
-            if (hasMetaData())
-                out.writeObject(metaData.getDataMap());
-            return bos.toByteArray();
-        } catch (IOException e) {
-            log.error("Failed to convert Data to bytes[]", e);
-        }
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     private static Data instance = null;
@@ -291,37 +265,37 @@ public class JData implements Data {
             instance = new JData();
         }
 
-        public DataBuilder withStringData(String key, String data) {
+        public DataBuilder add(String key, String data) {
             instance.put(key, data);
             return this;
         }
 
-        public DataBuilder withBooleanData(String key, Boolean data) {
+        public DataBuilder add(String key, Boolean data) {
             instance.put(key, data);
             return this;
         }
 
-        public DataBuilder withBytesData(String key, byte[] data) {
+        public DataBuilder add(String key, byte[] data) {
             instance.put(key, data);
             return this;
         }
 
-        public DataBuilder withDoubleData(String key, Double data) {
+        public DataBuilder add(String key, Double data) {
             instance.put(key, data);
             return this;
         }
 
-        public DataBuilder withImageData(String key, Image data) {
+        public DataBuilder add(String key, Image data) {
             instance.put(key, data);
             return this;
         }
 
-        public DataBuilder withNDArrayData(String key, INDArray data) {
+        public DataBuilder add(String key, INDArray data) {
             instance.put(key, data);
             return this;
         }
 
-        public DataBuilder withIntValue(String key, Long data) {
+        public DataBuilder add(String key, Long data) {
             instance.put(key, data);
             return this;
         }

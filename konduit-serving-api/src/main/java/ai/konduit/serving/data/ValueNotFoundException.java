@@ -21,5 +21,16 @@
 
 package ai.konduit.serving.data;
 
-public class ValueNotFoundException extends Exception {
+public class ValueNotFoundException extends RuntimeException {
+    public ValueNotFoundException(String message) {
+        super(message);
+    }
+
+    public ValueNotFoundException(Throwable cause) {
+        super(cause);
+    }
+
+    public ValueNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
