@@ -27,7 +27,7 @@ import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.dmg.pmml.FieldName;
-import org.nd4j.linalg.primitives.Pair;
+import org.nd4j.common.primitives.Pair;
 
 import java.util.List;
 import java.util.Map;

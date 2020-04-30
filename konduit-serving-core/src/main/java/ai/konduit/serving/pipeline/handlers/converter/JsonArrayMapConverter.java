@@ -38,10 +38,10 @@ import org.datavec.arrow.ArrowConverter;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.datavec.local.transforms.LocalTransformExecutor;
 import org.dmg.pmml.FieldName;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.primitives.Pair;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

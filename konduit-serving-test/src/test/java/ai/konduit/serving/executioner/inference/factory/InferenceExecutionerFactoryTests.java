@@ -38,9 +38,9 @@ import org.deeplearning4j.util.ModelSerializer;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.nd4j.common.io.ClassPathResource;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
-import org.nd4j.linalg.io.ClassPathResource;
-import org.nd4j.linalg.primitives.Pair;
 import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 
 import java.io.File;

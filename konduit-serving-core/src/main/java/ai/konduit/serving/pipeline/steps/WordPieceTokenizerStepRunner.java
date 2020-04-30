@@ -30,7 +30,7 @@ import org.deeplearning4j.iterator.BertIterator;
 import org.deeplearning4j.iterator.LabeledSentenceProvider;
 import org.deeplearning4j.iterator.provider.CollectionLabeledSentenceProvider;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.BertWordPieceTokenizerFactory;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.datavec.api.writable.Text;
 import org.nd4j.linalg.dataset.api.MultiDataSet;
 

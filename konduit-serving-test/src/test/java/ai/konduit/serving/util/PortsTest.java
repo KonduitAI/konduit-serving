@@ -38,8 +38,8 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
-import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
 import java.net.BindException;

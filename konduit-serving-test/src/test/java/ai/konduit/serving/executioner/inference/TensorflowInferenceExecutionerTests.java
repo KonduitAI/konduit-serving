@@ -28,9 +28,9 @@ import org.deeplearning4j.parallelism.inference.InferenceMode;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 
 import javax.annotation.concurrent.NotThreadSafe;

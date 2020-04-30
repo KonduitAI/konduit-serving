@@ -40,7 +40,7 @@ import org.junit.*;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.Timeout;
-import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.common.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;

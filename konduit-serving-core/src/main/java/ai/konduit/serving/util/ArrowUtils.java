@@ -49,13 +49,13 @@ import org.datavec.arrow.ArrowConverter;
 import org.datavec.arrow.recordreader.ArrowRecord;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.datavec.arrow.recordreader.ArrowWritableRecordTimeSeriesBatch;
+import org.nd4j.common.io.ReflectionUtils;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.buffer.DataBuffer;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.exception.ND4JIllegalArgumentException;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.io.ReflectionUtils;
-import org.nd4j.linalg.primitives.Pair;
 import org.nd4j.serde.binary.BinarySerde;
 
 import java.io.File;

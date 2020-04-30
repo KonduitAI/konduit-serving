@@ -35,8 +35,8 @@ import org.hamcrest.Matchers;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.Timeout;
+import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.io.ClassPathResource;
 import org.nd4j.shade.guava.collect.Streams;
 
 import javax.annotation.concurrent.NotThreadSafe;
