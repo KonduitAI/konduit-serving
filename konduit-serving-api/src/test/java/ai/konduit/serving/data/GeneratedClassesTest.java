@@ -6,7 +6,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class GeneratedClassesTest {
-    @Test
+    /*@Test
     public void testsDataSchemeBuilder() {
         Data.DataScheme innerScheme = Data.DataScheme.newBuilder().
                 setKey("inner").
@@ -20,6 +20,6 @@ public class GeneratedClassesTest {
         assertEquals("inner", innerScheme.getKey());
         assertEquals("inner", scheme.getMetaData().getKey());
         assertEquals("keygen", scheme.getKey());
-    }
+    }*/
 
 }
