@@ -17,6 +17,7 @@
 package ai.konduit.serving.pipeline.util;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.nd4j.shade.jackson.annotation.JsonAutoDetect;
 import org.nd4j.shade.jackson.annotation.JsonInclude;
 import org.nd4j.shade.jackson.annotation.PropertyAccessor;
@@ -31,12 +32,13 @@ import java.io.IOException;
 /**
  * A simple object mapper holder for using one single {@link ObjectMapper} across the whole project.
  */
+@Slf4j
 public class ObjectMappers {
 
     private static final ObjectMapper jsonMapper = configureMapper(new ObjectMapper());
     private static final ObjectMapper yamlMapper = configureMapper(new ObjectMapper(new YAMLFactory()
             .disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)  // For preventing YAML from adding `!<TYPE>` with polymorphic objects
-                                                                // and use Jackson's type information mechanism.
+            // and use Jackson's type information mechanism.
     ));
 
     private ObjectMappers() {
@@ -70,7 +72,7 @@ public class ObjectMappers {
         ret.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         ret.setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
         ret.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        if(ret.getFactory() instanceof YAMLFactory) {
+        if (ret.getFactory() instanceof YAMLFactory) {
             ret.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         }
         return ret;

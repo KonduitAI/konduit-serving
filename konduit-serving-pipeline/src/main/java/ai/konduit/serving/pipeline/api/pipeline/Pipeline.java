@@ -20,7 +20,6 @@ import ai.konduit.serving.pipeline.api.Data;
 import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 
-import java.io.Closeable;
 import java.io.Serializable;
 
 /**
@@ -28,10 +27,9 @@ import java.io.Serializable;
  * models, and zero or more ETL steps, etc.<br>
  * Fundamentally, a Pipeline is a {@link Data} -> {@link Data} transformation, that is built out of any number of
  * {@link PipelineStep} operations internally.
- *
+ * <p>
  * A Pipeline may be a simple sequence of {@link PipelineStep}s or may be a more complex directed acyclic graph of steps,
  * perhaps including conditional operations/branching
- *
  */
 public interface Pipeline extends TextConfig, Serializable {
 

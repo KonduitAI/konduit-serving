@@ -16,9 +16,22 @@
 package ai.konduit.serving.pipeline.api.serde;
 
 import java.util.List;
+import java.util.ServiceLoader;
 
+/**
+ * JsonSubTypesMapping is an interface implemented by a class in each module.
+ *
+ * Used via {@link ServiceLoader} or OSGi to determine at what objects JSON can be deserialized to, based on the currently
+ * available Konduit Serving module.
+ *
+ * See {@link JsonSubType} for more details
+ *
+ */
 public interface JsonSubTypesMapping {
 
+    /**
+     * @return A list of JsonSubType objects that represent the classes that the JSON data can be deserialized to using this module
+     */
     List<JsonSubType> getSubTypesMapping();
 
 }

@@ -17,15 +17,16 @@ package ai.konduit.serving.pipeline.api.serde;
 
 import ai.konduit.serving.pipeline.api.TextConfig;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 /**
- * JsonSubType represents a human-readable JSON/YAML subtype mapping
+ * JsonSubType represents a human-readable JSON/YAML subtype mapping.<br>
  * Essentially, {@code JsonSubType("X", MyXClass, SomeConfigInterface)} means that the JSON represented by a wrapper
  * class "X" should be deserialized to the implementation class "MyXClass" which implements the configuration
  * interface "SomeConfigInterface"
  *
- * i.e., the folowing JSON
+ * i.e., the folowing JSON:
  * <pre>
  *     "X" : {
  *         (some config fields here)
@@ -35,10 +36,22 @@ import lombok.Data;
  */
 @AllArgsConstructor
 @Data
+@Builder
 public class JsonSubType {
 
+    /**
+     * The name of the type as it appears in the JSON or YAML configuration
+     */
     private String name;
+
+    /**
+     * The class that the "name" data should be deserialized to
+     */
     private Class<?> subtype;
+
+    /**
+     * The interface that the subtype class implements - i.e., "subtype" implements "configInterface"
+     */
     private Class<? extends TextConfig> configInterface;
 
 }

@@ -17,6 +17,7 @@ package ai.konduit.serving.pipeline.api.pipeline;
 
 import ai.konduit.serving.pipeline.api.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import org.slf4j.Logger;
 
 import java.util.List;
 
@@ -26,8 +27,14 @@ import java.util.List;
  */
 public interface PipelineExecutor {
 
+    /**
+     * Gen the underlying pipeline that this executor will execute
+     */
     Pipeline getPipeline();
 
+    /**
+     * Get the runners that this PipelineStepExecuter will use to execute the pipeline steps
+     */
     List<PipelineStepRunner> getRunners();
 
     /**
@@ -36,7 +43,7 @@ public interface PipelineExecutor {
     Data exec(Data data);
 
     /**
-     * Execute the pipeline on the specified Data instances
+     * Execute the pipeline on all of the specified Data instances
      */
     default Data[] exec(Data... data) {
         Data[] out = new Data[data.length];
@@ -48,12 +55,23 @@ public interface PipelineExecutor {
 
     /**
      * Close the pipeline executor.
-     * This means cleaning up any used resources such as memory, resources, etc.
+     * This means cleaning up any used resources such as memory, database connections, etc.
      * This method will be called when a pipeline needs to be finalized.
+     * In practice the call is usually routed to {@link PipelineStepRunner#close()} for each of the {@link PipelineStepRunner}s
+     * returned by {@link #getRunners()}
      */
-    default void close(){
-        for(PipelineStepRunner r : getRunners()){
-            r.close();
+    default void close() {
+        for (PipelineStepRunner r : getRunners()) {
+            try {
+                r.close();
+            } catch (Throwable t) {
+                getLogger().error("Error closing PipelineStepRunner", t);
+            }
         }
     }
+
+    /**
+     * Get the logger used by this PipelineExecutor
+     */
+    Logger getLogger();
 }

@@ -34,6 +34,9 @@ public interface PipelineStepRunner extends Closeable {
      */
     void close();
 
+    /**
+     * @return The pipeline step (configuration) that this PipelineStepRunner will execute
+     */
     PipelineStep getPipelineStep();
 
     /**
@@ -42,7 +45,7 @@ public interface PipelineStepRunner extends Closeable {
     Data exec(Data data);
 
     /**
-     * Execute the pipeline on the specified Data instances
+     * Execute the pipeline on all of the specified Data instances
      */
     default Data[] exec(Data... data) {
         Data[] out = new Data[data.length];
