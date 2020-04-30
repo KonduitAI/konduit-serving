@@ -1,0 +1,28 @@
+
+syntax = "proto3";
+
+package generated;
+
+message DataScheme {
+    string key = 1;
+    DataScheme metaData = 2;
+    oneof value {
+        string sValue = 3;
+        bytes bValue = 4;
+        int64 iValue = 5;
+        bool boolValue = 6;
+    }
+    ValueType type = 7;
+
+    enum ValueType {
+        NDARRAY = 0;
+        STRING = 1;
+        BYTES = 2;
+        IMAGE = 3;
+        DOUBLE = 4;
+        INT64 = 5;
+        BOOLEAN = 6;
+        DATA = 7;
+        LIST = 8;
+    }
+}
