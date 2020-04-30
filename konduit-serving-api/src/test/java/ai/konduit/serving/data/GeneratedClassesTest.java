@@ -1,6 +1,5 @@
 package ai.konduit.serving.data;
 
-import generated.Data;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
