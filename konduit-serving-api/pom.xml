@@ -58,6 +58,11 @@
                     <groupId>junit</groupId>
                     <artifactId>junit</artifactId>
                 </dependency>
+                <dependency>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                    <version>3.8.0</version>
+                </dependency>
             </dependencies>
         </profile>
     </profiles>
@@ -211,4 +216,32 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.os72</groupId>
+                <artifactId>protoc-jar-maven-plugin</artifactId>
+                <version>3.8.0</version>
+                <executions>
+                    <execution>
+                        <id>tensorflow</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <protocVersion>3.8.0</protocVersion>
+                            <extension>.proto</extension>
+                            <inputDirectories>
+                                <include>src/main/java/ai/konduit/serving/data/protobuf</include>
+                            </inputDirectories>
+                            <addSources>main</addSources>
+                            <cleanOutputFolder>false</cleanOutputFolder>
+                            <outputDirectory>src/main/java/ai/konduit/serving/data</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
