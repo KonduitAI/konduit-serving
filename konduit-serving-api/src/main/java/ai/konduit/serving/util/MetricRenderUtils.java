@@ -22,7 +22,7 @@
 package ai.konduit.serving.util;
 
 import ai.konduit.serving.config.metrics.ColumnDistribution;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 
 /**
  * Util class for anything related to {@link ai.konduit.serving.config.metrics.MetricsRenderer}

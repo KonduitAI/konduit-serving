@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.memory.MemoryWorkspace;
 import org.nd4j.linalg.api.memory.conf.WorkspaceConfiguration;
 import org.nd4j.linalg.api.memory.enums.LearningPolicy;

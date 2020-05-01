@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.tensorflow.TF_Graph;
 import org.bytedeco.tensorflow.TF_Status;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.tensorflow.conversion.TensorDataType;
 import org.nd4j.tensorflow.conversion.TensorflowConversion;
 import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;

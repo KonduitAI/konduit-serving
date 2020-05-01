@@ -27,7 +27,7 @@ import ai.konduit.serving.pipeline.step.model.Dl4jStep;
 import lombok.extern.slf4j.Slf4j;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.util.DL4JModelValidator;
-import org.nd4j.validation.ValidationResult;
+import org.nd4j.common.validation.ValidationResult;
 
 import java.io.File;
 import java.util.Collections;

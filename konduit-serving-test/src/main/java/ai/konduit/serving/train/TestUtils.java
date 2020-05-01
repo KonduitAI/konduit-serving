@@ -28,8 +28,8 @@ import org.deeplearning4j.util.ModelSerializer;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.rules.TemporaryFolder;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
-import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
 import java.util.regex.Matcher;

@@ -59,7 +59,7 @@ import org.datavec.arrow.recordreader.ArrowRecord;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.deeplearning4j.zoo.util.Labels;
 import org.nd4j.arrow.ArrowSerde;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.serde.binary.BinarySerde;

@@ -33,7 +33,7 @@ import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.api.writable.WritableType;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
