@@ -20,10 +20,8 @@
  */
 package ai.konduit.serving.pipeline.api;
 
-import ai.konduit.serving.pipeline.impl.data.Image;
-import ai.konduit.serving.pipeline.impl.data.NDArray;
-import ai.konduit.serving.pipeline.impl.data.ValueNotFoundException;
-import ai.konduit.serving.pipeline.impl.data.ValueType;
+import ai.konduit.serving.pipeline.impl.data.*;
+import lombok.NonNull;
 
 import java.io.File;
 import java.io.InputStream;
@@ -90,4 +88,8 @@ public interface Data {
         return null;
     }
 
+
+    static Data singleton(@NonNull String key, @NonNull Object value){
+        return JData.singleton(key, value);
+    }
 }

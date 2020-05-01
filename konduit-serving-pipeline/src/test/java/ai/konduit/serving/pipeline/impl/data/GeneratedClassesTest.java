@@ -1,4 +1,4 @@
-package ai.konduit.serving.data;
+package ai.konduit.serving.pipeline.impl.data;
 
 import org.junit.Test;
 

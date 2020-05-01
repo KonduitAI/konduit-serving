@@ -18,18 +18,13 @@
  *
  *
  */
-package ai.konduit.serving.data;
+package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.Data;
-import ai.konduit.serving.pipeline.impl.data.Image;
-import ai.konduit.serving.pipeline.impl.data.JData;
-import ai.konduit.serving.pipeline.impl.data.ValueNotFoundException;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -48,7 +43,7 @@ public class DataTest {
     @Test
     public void testStringData() {
 
-        Data container = JData.makeData(KEY, VALUE);
+        Data container = JData.singleton(KEY, VALUE);
         String value = container.getString(KEY);
         assertEquals(VALUE, value);
     }
@@ -56,12 +51,12 @@ public class DataTest {
     @Test(expected = IllegalStateException.class)
     public void testNoData() {
         BigDecimal notSupportedValue = BigDecimal.ONE;
-        Data container = JData.makeData(KEY, notSupportedValue);
+        Data container = JData.singleton(KEY, notSupportedValue);
     }
 
     @Test(expected = ValueNotFoundException.class)
     public void testAbsentData() {
-        Data container = JData.makeData(KEY, VALUE);
+        Data container = JData.singleton(KEY, VALUE);
         String value = container.getString("no_data_for_this_key");
         assertEquals(VALUE, value);
     }
@@ -69,61 +64,63 @@ public class DataTest {
     @Test
     public void testBooleanData() {
         boolean value = true;
-        Data container = JData.makeData(KEY, value);
+        Data container = JData.singleton(KEY, value);
         assertEquals(true, container.getBoolean(KEY));
     }
 
     @Test
     public void testBytesData() {
-        byte[] input = Nd4j.rand(2, 512).data().asBytes();
-        Data container = JData.makeData(KEY, input);
+        byte[] input = new byte[]{1,2,3,4,5};
+        Data container = JData.singleton(KEY, input);
         assertArrayEquals(input, container.getBytes(KEY));
     }
 
     @Test
     public void testDoubleData() {
         Double input = 1.0;
-        Data container = JData.makeData(KEY, input);
+        Data container = JData.singleton(KEY, input);
         assertEquals(input, container.getDouble(KEY), 1e-4);
     }
 
+    /*
     @Test
     public void testImageData() {
         INDArray image = Nd4j.create(1,10,10,20);
         Image input = new Image(image, 1,1,1);
         Data container = JData.makeData(KEY, input);
         assertEquals(input, container.getImage(KEY));
-    }
+    }*/
 
+    /*
     @Test
     public void testINDArrayData() {
         INDArray input = Nd4j.rand(10,100, 1024);
         Data container = JData.makeData(KEY, input);
         assertEquals(input, container.getNDArray(KEY));
-    }
+    }*/
 
     @Test
     public void testIntData() {
         long data = 100;
-        Data container = JData.makeData(KEY, data);
+        Data container = JData.singleton(KEY, data);
         assertEquals(data, container.getLong(KEY));
     }
 
     @Test
     public void testEmbeddedData() {
-        Data stringContainer = JData.makeData("stringData", "test");
-        Data booleanContainer = JData.makeData("boolData", false);
+        Data stringContainer = JData.singleton("stringData", "test");
+        Data booleanContainer = JData.singleton("boolData", false);
         booleanContainer.put("level1", stringContainer);
-        Data ndContainer = JData.makeData("ndData", Nd4j.rand(1,19));
+        Data ndContainer = JData.singleton("bytesData", new byte[10]);
         ndContainer.put("level2", booleanContainer);
 
-        Data layeredContainer = JData.makeData("upperLevel", ndContainer);
+        Data layeredContainer = JData.singleton("upperLevel", ndContainer);
     }
 
     @Ignore
     @Test
     public void testSerde() {
-        Data someData = JData.makeData(KEY, Long.valueOf(200));
+        Data someData = JData.singleton(KEY, Long.valueOf(200));
         someData.save(new File("temp"));
         Data restoredData = JData.fromFile(new File("temp"));
     }
@@ -136,7 +133,7 @@ public class DataTest {
                 builld();
 
         // Normally don't need this cast. Just for asserts below and is subject to change.
-        JData made = (JData)JData.makeData("key1", true);
+        JData made = (JData)JData.singleton("key1", true);
         made.put("key2", "null");
 
         JData madeFromEmpty = (JData) JData.empty();

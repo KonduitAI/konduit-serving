@@ -218,8 +218,7 @@ public class JData implements Data {
         Data retVal = new JData();
         return retVal;
     }
-
-    static Data makeData(@NonNull String key, @NonNull Object data) {
+    public static Data singleton(@NonNull String key, @NonNull Object data) {
         if (instance == null) {
             instance = new JData();
         }
