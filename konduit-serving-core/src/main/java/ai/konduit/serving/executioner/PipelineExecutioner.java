@@ -82,8 +82,10 @@ import java.util.zip.ZipOutputStream;
  * the user.
  *
  * @author Adam Gibson
+ * @deprecated To be replaced by {@link ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor} - see https://github.com/KonduitAI/konduit-serving/issues/298
  */
 @Slf4j
+@Deprecated
 public class PipelineExecutioner implements Closeable {
 
     protected List<String> inputNames;
