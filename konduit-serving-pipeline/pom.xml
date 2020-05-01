@@ -13,6 +13,12 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-common</artifactId>
+            <version>${nd4j.version}</version>
+        </dependency>
+
         <!-- TODO - do we replace this with non-shaded Jackson? May need OSGi to avoid dependency conflicts however -->
         <dependency>
             <groupId>org.nd4j</groupId>

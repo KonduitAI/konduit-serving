@@ -18,29 +18,29 @@
  *
  *
  */
-package ai.konduit.serving.data.wrappers;
+package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-import ai.konduit.serving.data.Image;
-import ai.konduit.serving.data.Value;
-import ai.konduit.serving.data.ValueType;
+import ai.konduit.serving.pipeline.impl.data.Value;
+import ai.konduit.serving.pipeline.impl.data.ValueType;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class ImageValue implements Value<Image> {
-    private Image image;
+public class BooleanValue implements Value<Boolean> {
+
+    private boolean value;
 
     @Override
     public ValueType type() {
-        return ValueType.IMAGE;
+        return ValueType.BOOLEAN;
     }
 
     @Override
-    public Image get() {
-        return image;
+    public Boolean get() {
+        return value;
     }
 
     @Override
-    public void set(Image value) {
-        this.image = value;
+    public void set(Boolean value) {
+        this.value = value;
     }
 }

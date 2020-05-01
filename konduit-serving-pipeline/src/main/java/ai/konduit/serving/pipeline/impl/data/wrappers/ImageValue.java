@@ -18,29 +18,29 @@
  *
  *
  */
-package ai.konduit.serving.data.wrappers;
+package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-import ai.konduit.serving.data.Value;
-import ai.konduit.serving.data.ValueType;
+import ai.konduit.serving.pipeline.impl.data.Image;
+import ai.konduit.serving.pipeline.impl.data.Value;
+import ai.konduit.serving.pipeline.impl.data.ValueType;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 
 @AllArgsConstructor
-public class IntValue implements Value<Long> {
-    private long value;
+public class ImageValue implements Value<Image> {
+    private Image image;
 
     @Override
     public ValueType type() {
-        return ValueType.INT64;
+        return ValueType.IMAGE;
     }
 
     @Override
-    public Long get() {
-        return value;
+    public Image get() {
+        return image;
     }
 
     @Override
-    public void set(Long value) {
-        this.value = value;
+    public void set(Image value) {
+        this.image = value;
     }
 }

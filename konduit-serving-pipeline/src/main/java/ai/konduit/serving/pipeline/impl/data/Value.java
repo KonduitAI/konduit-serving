@@ -18,30 +18,13 @@
  *
  *
  */
-package ai.konduit.serving.data.wrappers;
+package ai.konduit.serving.pipeline.impl.data;
 
-import ai.konduit.serving.data.Value;
-import ai.konduit.serving.data.ValueType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+public interface Value<T> {
 
-@AllArgsConstructor
-public class BooleanValue implements Value<Boolean> {
+    ValueType type();
 
-    private boolean value;
+    T get();
 
-    @Override
-    public ValueType type() {
-        return ValueType.BOOLEAN;
-    }
-
-    @Override
-    public Boolean get() {
-        return value;
-    }
-
-    @Override
-    public void set(Boolean value) {
-        this.value = value;
-    }
+    void set(T value);
 }

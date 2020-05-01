@@ -34,11 +34,11 @@ import java.io.Serializable;
 public interface Pipeline extends TextConfig, Serializable {
 
     /**
-     * Instantiate an executor capable of executing this pipeline
+     * Return (or instantiate if necessary) the executor for executing this pipeline
      *
      * @return An instantiated pipeline executor for this pipeline
      */
-    PipelineExecutor createExecutor();
+    PipelineExecutor executor();
 
 
 }

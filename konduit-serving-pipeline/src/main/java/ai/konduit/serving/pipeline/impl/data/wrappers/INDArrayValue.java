@@ -18,24 +18,23 @@
  *
  *
  */
-package ai.konduit.serving.data.wrappers;
+package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-import ai.konduit.serving.data.Value;
-import ai.konduit.serving.data.ValueType;
+import ai.konduit.serving.pipeline.impl.data.Value;
+import ai.konduit.serving.pipeline.impl.data.ValueType;
 import lombok.AllArgsConstructor;
-import org.nd4j.linalg.api.ndarray.INDArray;
 
 @AllArgsConstructor
-public class INDArrayValue implements Value<INDArray> {
-    private INDArray value;
+public class INDArrayValue implements Value<Object> {
+    private Object value;
 
     @Override
-    public INDArray get() {
+    public Object get() {
         return value;
     }
 
     @Override
-    public void set(INDArray value) {
+    public void set(Object value) {
         this.value = value;
     }
 

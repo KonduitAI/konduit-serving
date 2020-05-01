@@ -18,31 +18,16 @@
  *
  *
  */
-package ai.konduit.serving.data.wrappers;
+package ai.konduit.serving.pipeline.impl.data;
 
-import ai.konduit.serving.data.Value;
-import ai.konduit.serving.data.ValueType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import org.apache.commons.lang3.ArrayUtils;
-
-@AllArgsConstructor
-public class BytesValue implements Value<byte[]> {
-
-    private byte[] value;
-
-    @Override
-    public byte[] get() {
-        return this.value;
-    }
-
-    @Override
-    public void set(byte[] values) {
-        this.value = values;
-    }
-
-    @Override
-    public ValueType type() {
-        return ValueType.BYTES;
-    }
+public enum ValueType {
+    NDARRAY,
+    STRING,
+    BYTES,
+    IMAGE,
+    DOUBLE,
+    INT64,
+    BOOLEAN,
+    DATA,
+    LIST
 }

@@ -20,6 +20,10 @@
  */
 package ai.konduit.serving.data;
 
+import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.impl.data.Image;
+import ai.konduit.serving.pipeline.impl.data.JData;
+import ai.konduit.serving.pipeline.impl.data.ValueNotFoundException;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;

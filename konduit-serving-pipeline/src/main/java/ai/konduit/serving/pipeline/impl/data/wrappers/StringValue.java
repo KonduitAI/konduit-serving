@@ -18,10 +18,10 @@
  *
  *
  */
-package ai.konduit.serving.data.wrappers;
+package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-import ai.konduit.serving.data.Value;
-import ai.konduit.serving.data.ValueType;
+import ai.konduit.serving.pipeline.impl.data.Value;
+import ai.konduit.serving.pipeline.impl.data.ValueType;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

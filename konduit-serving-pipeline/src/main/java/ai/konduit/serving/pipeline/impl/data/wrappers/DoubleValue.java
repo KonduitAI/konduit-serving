@@ -18,19 +18,29 @@
  *
  *
  */
+package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-package ai.konduit.serving.data;
+import ai.konduit.serving.pipeline.impl.data.Value;
+import ai.konduit.serving.pipeline.impl.data.ValueType;
+import lombok.AllArgsConstructor;
 
-public class ValueNotFoundException extends RuntimeException {
-    public ValueNotFoundException(String message) {
-        super(message);
+@AllArgsConstructor
+public class DoubleValue implements Value<Double> {
+
+    private double value;
+
+    @Override
+    public ValueType type() {
+        return ValueType.DOUBLE;
     }
 
-    public ValueNotFoundException(Throwable cause) {
-        super(cause);
+    @Override
+    public Double get() {
+        return value;
     }
 
-    public ValueNotFoundException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public void set(Double value) {
+        this.value = value;
     }
 }

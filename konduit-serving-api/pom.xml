@@ -242,7 +242,7 @@
                             </inputDirectories>
                             <addSources>main</addSources>
                             <cleanOutputFolder>false</cleanOutputFolder>
-                            <outputDirectory>src/main/java/ai/konduit/serving/data</outputDirectory>
+                            <outputDirectory>../konduit-serving-pipeline/src/main/java/ai/konduit/serving/pipeline/impl/data</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

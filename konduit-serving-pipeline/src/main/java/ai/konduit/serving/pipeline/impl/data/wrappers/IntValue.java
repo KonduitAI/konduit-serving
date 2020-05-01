@@ -18,13 +18,28 @@
  *
  *
  */
-package ai.konduit.serving.data;
+package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-public interface Value<T> {
+import ai.konduit.serving.pipeline.impl.data.Value;
+import ai.konduit.serving.pipeline.impl.data.ValueType;
+import lombok.AllArgsConstructor;
 
-    ValueType type();
+@AllArgsConstructor
+public class IntValue implements Value<Long> {
+    private long value;
 
-    T get();
+    @Override
+    public ValueType type() {
+        return ValueType.INT64;
+    }
 
-    void set(T value);
+    @Override
+    public Long get() {
+        return value;
+    }
+
+    @Override
+    public void set(Long value) {
+        this.value = value;
+    }
 }

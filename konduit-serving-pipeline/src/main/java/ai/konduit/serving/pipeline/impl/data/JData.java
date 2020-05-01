@@ -18,14 +18,13 @@
  *
  *
  */
-package ai.konduit.serving.data;
+package ai.konduit.serving.pipeline.impl.data;
 
-import ai.konduit.serving.data.wrappers.*;
+import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.impl.data.wrappers.*;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
-import org.nd4j.linalg.api.buffer.DataType;
-import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.*;
 import java.util.*;
@@ -86,8 +85,8 @@ public class JData implements Data {
     }
 
     @Override
-    public INDArray getNDArray(String key) {
-        Value<INDArray> data = valueIfFound(key, ValueType.NDARRAY);
+    public NDArray getNDArray(String key) {
+        Value<NDArray> data = valueIfFound(key, ValueType.NDARRAY);
         return data.get();
     }
 
@@ -128,7 +127,7 @@ public class JData implements Data {
     }
 
     @Override
-    public List<ValueType> getList(String key, DataType type) {
+    public List<Object> getList(String key, ValueType type) {
         return null;
     }
 
@@ -144,7 +143,7 @@ public class JData implements Data {
     }
 
     @Override
-    public void put(String key, INDArray data) {
+    public void put(String key, NDArray data) {
         dataMap.put(key, new INDArrayValue(data));
     }
 
@@ -220,15 +219,12 @@ public class JData implements Data {
         return retVal;
     }
 
-    static Data makeData(String key, Object data) {
+    static Data makeData(@NonNull String key, @NonNull Object data) {
         if (instance == null) {
             instance = new JData();
         }
         if (data instanceof String) {
             instance.put(key, (String)data);
-        }
-        else if (data instanceof INDArray) {
-            instance.put(key, (INDArray)data);
         }
         else if (data instanceof Boolean) {
             instance.put(key, (Boolean)data);
@@ -252,8 +248,11 @@ public class JData implements Data {
         else if (data instanceof Data) {
             instance.put(key, (Data)data);
         }
+//        else if (data instanceof Object) {
+//            instance.put(key, (Object)data);
+//        }
         else {
-            throw new IllegalStateException("Trying to put data of not supported type");
+            throw new IllegalStateException("Trying to put data of not supported type: " + data.getClass());
         }
         return instance;
     }
@@ -286,11 +285,6 @@ public class JData implements Data {
         }
 
         public DataBuilder add(String key, Image data) {
-            instance.put(key, data);
-            return this;
-        }
-
-        public DataBuilder add(String key, INDArray data) {
             instance.put(key, data);
             return this;
         }
