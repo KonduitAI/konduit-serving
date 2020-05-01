@@ -9,6 +9,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import ai.konduit.serving.pipeline.registry.Factories;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.nd4j.common.base.Preconditions;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class SequencePipelineExecutor implements PipelineExecutor {
 
         List<PipelineStepRunnerFactory> factories = Factories.getStepRunnerFactories();
 
+
         for(PipelineStep ps : steps){
             PipelineStepRunnerFactory f = null;
             for(PipelineStepRunnerFactory psrf : factories){
@@ -42,6 +44,20 @@ public class SequencePipelineExecutor implements PipelineExecutor {
                     log.info("PipelineStepRunnerFactory {} used to run step {}", psrf.getClass().getName(), ps.getClass().getName());
                 }
             }
+
+            if(f == null){
+                StringBuilder msg = new StringBuilder("Unable to execute pipeline step of type " + ps.getClass().getName() + ": No PipelineStepRunnerFactory instances"
+                        + " are available that can execute this pipeline.\nThis likely means a required dependency is missing for executing this pipeline." +
+                        "\nAvailable executor factories:");
+                if(factories.isEmpty()){
+                    msg.append(" <None>");
+                }
+                for(PipelineStepRunnerFactory psrf : factories){
+                    msg.append("  ").append(psrf.getClass().getName());
+                }
+                throw new IllegalStateException(msg.toString());
+            }
+
             runners.add(f.create(ps));
         }
     }

@@ -85,6 +85,13 @@ public class JData implements Data {
     }
 
     @Override
+    public Object get(String key) throws ValueNotFoundException {
+        if(!dataMap.containsKey(key))
+            throw new ValueNotFoundException("Value not found for key " + key);
+        return dataMap.get(key).get();
+    }
+
+    @Override
     public NDArray getNDArray(String key) {
         Value<NDArray> data = valueIfFound(key, ValueType.NDARRAY);
         return data.get();

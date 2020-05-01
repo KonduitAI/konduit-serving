@@ -41,6 +41,7 @@ public interface Data {
     ValueType listType(String key);
 
     // Getters
+    Object get(String key) throws ValueNotFoundException;
     NDArray getNDArray(String key) throws ValueNotFoundException;
     String getString(String key) throws ValueNotFoundException;
     boolean getBoolean(String key) throws ValueNotFoundException;

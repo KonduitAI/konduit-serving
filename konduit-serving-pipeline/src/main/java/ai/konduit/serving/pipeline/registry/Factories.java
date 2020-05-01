@@ -1,6 +1,7 @@
 package ai.konduit.serving.pipeline.registry;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -31,6 +32,12 @@ public class Factories {
 
         stepRunnerFactories = f;
         log.info("Loaded {} PipelineStepRunnerFactory instances", f.size());
+    }
+
+    public static void registerStepRunnerFactory(@NonNull PipelineStepRunnerFactory f){
+        if(stepRunnerFactories == null)
+            initStepRunnerFactories();
+        stepRunnerFactories.add(f);
     }
 
 }
