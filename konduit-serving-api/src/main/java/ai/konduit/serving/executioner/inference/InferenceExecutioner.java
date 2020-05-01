@@ -42,7 +42,9 @@ import ai.konduit.serving.model.loader.ModelLoader;
  * @param <CONFIG_TYPE>       the configuration for the thread pool
  * @param <MODEL_TYPE>        the model type to use for inference
  * @author Adam Gibson
+ * @deprecated To be refactored / replaced - https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 public interface InferenceExecutioner<MODEL_LOADER_TYPE extends ModelLoader<MODEL_TYPE>, INPUT_TYPE, OUTPUT_TYPE, CONFIG_TYPE, MODEL_TYPE> {
 
 

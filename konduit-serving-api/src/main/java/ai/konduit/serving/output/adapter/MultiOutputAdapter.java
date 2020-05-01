@@ -35,7 +35,9 @@ import java.util.Map;
  * json object representing the domain to be interpreted.
  *
  * @author Adam Gibson
+ * @deprecated To be removed - see https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 public interface MultiOutputAdapter<T> {
 
     /**

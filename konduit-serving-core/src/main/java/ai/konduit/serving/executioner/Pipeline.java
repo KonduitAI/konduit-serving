@@ -39,8 +39,11 @@ import java.util.List;
  * is just runs a sequence
  * of {@link PipelineStepRunner}
  * created from a set of {@link BasePipelineStep}
+ *
+ * @deprecated To be replaced by {@link ai.konduit.serving.pipeline.api.pipeline.Pipeline} - see https://github.com/KonduitAI/konduit-serving/issues/298
  */
 @Builder
+@Deprecated
 public class Pipeline {
 
     @Singular
