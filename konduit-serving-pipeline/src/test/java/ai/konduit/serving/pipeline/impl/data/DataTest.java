@@ -130,7 +130,7 @@ public class DataTest {
         JData built = new JData.DataBuilder().
                 add("key1", true).
                 add("key2","null").
-                builld();
+                build();
 
         // Normally don't need this cast. Just for asserts below and is subject to change.
         JData made = (JData)JData.singleton("key1", true);

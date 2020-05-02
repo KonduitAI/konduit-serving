@@ -26,6 +26,7 @@ import lombok.NonNull;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.List;
 
 public interface Data {
@@ -41,6 +42,15 @@ public interface Data {
     ValueType type(String key) throws ValueNotFoundException;
 
     ValueType listType(String key);
+
+    boolean has(String key);
+    default boolean hasAll(Collection<? extends String> keys){
+        for(String s : keys){
+            if(!has(s))
+                return false;
+        }
+        return true;
+    }
 
     // Getters
     Object get(String key) throws ValueNotFoundException;

@@ -90,6 +90,11 @@ public class JData implements Data {
     }
 
     @Override
+    public boolean has(String key) {
+        return dataMap.containsKey(key);
+    }
+
+    @Override
     public Object get(String key) throws ValueNotFoundException {
         if(!dataMap.containsKey(key))
             throw new ValueNotFoundException("Value not found for key " + key);
@@ -224,16 +229,12 @@ public class JData implements Data {
         throw new UnsupportedOperationException();
     }
 
-    private static Data instance = null;
-
     public static Data empty() {
         Data retVal = new JData();
         return retVal;
     }
     public static Data singleton(@NonNull String key, @NonNull Object data) {
-        if (instance == null) {
-            instance = new JData();
-        }
+        Data instance = new JData();
         if (data instanceof String) {
             instance.put(key, (String)data);
         }
@@ -268,6 +269,10 @@ public class JData implements Data {
             throw new IllegalStateException("Trying to put data of not supported type: " + data.getClass());
         }
         return instance;
+    }
+
+    public static DataBuilder builder(){
+        return new DataBuilder();
     }
 
     public static class DataBuilder {
@@ -307,7 +312,12 @@ public class JData implements Data {
             return this;
         }
 
-        public JData builld() {
+        public DataBuilder add(String key, NDArray data){
+            instance.put(key, data);
+            return this;
+        }
+
+        public JData build() {
             return instance;
         }
     }

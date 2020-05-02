@@ -11,6 +11,7 @@ import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,10 +33,8 @@ public class TestDL4JModelStep {
     public TemporaryFolder testDir = new TemporaryFolder();
 
     @Test
-    public void testSimple() throws Exception {
-
-        File netFile = createIrisMLN();
-
+    public void testSimpleMLN() throws Exception {
+        File netFile = createIrisMLNFile();
 
         Pipeline p = SequencePipeline.builder()
                 .add(DL4JModelPipelineStep.builder()
@@ -59,7 +58,45 @@ public class TestDL4JModelStep {
         assertEquals(exp, actual);
     }
 
-    public File createIrisMLN() throws Exception {
+    @Test
+    public void testSimpleCompGraph() throws Exception {
+        File netFile = createIrisCGFile();
+
+        Pipeline p = SequencePipeline.builder()
+                .add(DL4JModelPipelineStep.builder()
+                        .modelUri(netFile.toURI().toString())
+                        .build())
+                .build();
+
+        PipelineExecutor e = p.executor();
+
+
+        INDArray arr = Nd4j.rand(DataType.FLOAT, 3, 4);
+        INDArray exp = predictFromFileCG(netFile, arr)[0];
+
+        Data d = Data.singleton("in", new NDArray(arr));
+
+        Data out = e.exec(d);
+        INDArray actual = (INDArray) out.getNDArray("default").getArrayValue();         //TODO FIX TYPE/CASTING
+
+        assertEquals(exp, actual);
+    }
+
+    public File createIrisMLNFile() throws Exception {
+        File dir = testDir.newFolder();
+        File netFile = new File(dir, "testMLN.zip");
+        createIrisMLN().save(netFile);
+        return netFile;
+    }
+
+    public File createIrisCGFile() throws Exception {
+        File dir = testDir.newFolder();
+        File netFile = new File(dir, "testMLN.zip");
+        createIrisMLN().toComputationGraph().save(netFile);
+        return netFile;
+    }
+
+    public MultiLayerNetwork createIrisMLN(){
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .updater(new Adam(0.01))
                 .list()
@@ -71,11 +108,7 @@ public class TestDL4JModelStep {
         MultiLayerNetwork net = new MultiLayerNetwork(conf);
         net.init();
 
-        File dir = testDir.newFolder();
-        File netFile = new File(dir, "testMLN.zip");
-        net.save(netFile);
-
-        return netFile;
+        return net;
     }
 
     public INDArray predictFromFile(File f, INDArray in) throws Exception {
@@ -83,5 +116,8 @@ public class TestDL4JModelStep {
         return net.output(in);
     }
 
-
+    public INDArray[] predictFromFileCG(File f, INDArray in) throws Exception {
+        ComputationGraph net = ComputationGraph.load(f, false);
+        return net.output(in);
+    }
 }
