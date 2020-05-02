@@ -40,6 +40,11 @@
         <module>konduit-serving-orchestration</module>
         <module>konduit-serving-tfjava</module>
         <module>konduit-serving-pipeline</module>
+<<<<<<< Updated upstream
+=======
+        <module>konduit-serving-models</module>
+        <module>konduit-serving-io</module>
+>>>>>>> Stashed changes
     </modules>
 
     <name>konduit-serving</name>
