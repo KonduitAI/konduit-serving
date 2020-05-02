@@ -37,9 +37,9 @@ import io.vertx.core.json.JsonObject;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.primitives.Pair;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;

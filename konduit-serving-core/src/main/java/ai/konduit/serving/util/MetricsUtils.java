@@ -28,7 +28,7 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
-import org.nd4j.linalg.primitives.Pair;
+import org.nd4j.common.primitives.Pair;
 
 /**
  * Utility class for dealing with {@link io.vertx.micrometer.impl.MicrometerMetrics}

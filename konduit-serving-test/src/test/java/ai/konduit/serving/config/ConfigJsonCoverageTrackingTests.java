@@ -33,7 +33,7 @@ import org.deeplearning4j.parallelism.inference.InferenceMode;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Method;

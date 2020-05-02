@@ -29,7 +29,7 @@ import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.Writable;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.dmg.pmml.FieldName;
-import org.nd4j.linalg.primitives.Pair;
+import org.nd4j.common.primitives.Pair;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

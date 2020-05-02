@@ -51,7 +51,9 @@ import java.util.Map;
  * for running python scripts or machine learning models.
  *
  * @author Adam Gibson
+ * @deprecated To be replaced by {@link ai.konduit.serving.pipeline.api.step.PipelineStepRunner} - see https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 public interface PipelineStepRunner extends Closeable {
 
     /**

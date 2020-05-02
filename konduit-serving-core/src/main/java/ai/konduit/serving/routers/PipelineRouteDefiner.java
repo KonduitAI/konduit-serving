@@ -70,9 +70,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpHeaders;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.io.ClassPathResource;
 import org.slf4j.Logger;
 
 import java.io.IOException;

@@ -26,6 +26,8 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
  * verticle along with a {@link ai.konduit.serving.config.ServingConfig}.
  *
  * @author Adam Gibson
+ *
+ * @deprecated To be replaced by {@link PipelineStep}
  */
 
 @JsonSubTypes({
@@ -60,8 +62,8 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 })
 @JsonTypeInfo(use = NAME, property = "type")
 @XmlRootElement
-@io.swagger.v3.oas.annotations.media.Schema(description = "Pipeline Step", 
-        discriminatorProperty = "type", 
+@io.swagger.v3.oas.annotations.media.Schema(description = "Pipeline Step",
+        discriminatorProperty = "type",
         discriminatorMapping = {
                 @DiscriminatorMapping(schema = PmmlStep.class, value = "PMML"),
                 @DiscriminatorMapping(schema = PmmlStep.class, value = "PmmlConfig"),
@@ -93,6 +95,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
                 @DiscriminatorMapping(schema = WordPieceTokenizerStep.class, value = "WordPieceTokenizerStep")
         }
 )
+@Deprecated
 public interface PipelineStep<T extends PipelineStep> extends Serializable, TextConfig {
 
     /**

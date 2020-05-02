@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.records.Record;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.writable.*;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.serde.json.JsonMappers;

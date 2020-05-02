@@ -27,8 +27,8 @@ import ai.konduit.serving.config.metrics.MetricsRenderer;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
-import org.deeplearning4j.perf.listener.DeviceMetric;
-import org.deeplearning4j.perf.listener.HardwareMetric;
+import org.deeplearning4j.core.listener.DeviceMetric;
+import org.deeplearning4j.core.listener.HardwareMetric;
 import oshi.json.SystemInfo;
 
 import java.util.Map;

@@ -35,7 +35,7 @@ import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 
 import java.util.List;
 

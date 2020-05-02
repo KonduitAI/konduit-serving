@@ -30,7 +30,9 @@ import org.nd4j.linalg.compression.CompressionDescriptor;
 /**
  * Possible data types for tensors. Comes with conversions from TensorFlow
  * and Python and between ND4J types.
+ * @deprecated To be removed - see https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 public enum TensorDataType {
     INVALID,
     FLOAT,

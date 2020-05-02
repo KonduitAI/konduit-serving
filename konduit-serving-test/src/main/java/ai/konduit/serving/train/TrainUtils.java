@@ -107,12 +107,12 @@ public class TrainUtils {
         return schemaBuilder.build();
     }
 
-    public static synchronized org.nd4j.linalg.primitives.Pair<org.deeplearning4j.nn.multilayer.MultiLayerNetwork, org.nd4j.linalg.dataset.api.preprocessor.DataNormalization> getTrainedNetwork() throws Exception {
+    public static synchronized org.nd4j.common.primitives.Pair<org.deeplearning4j.nn.multilayer.MultiLayerNetwork, org.nd4j.linalg.dataset.api.preprocessor.DataNormalization> getTrainedNetwork() throws Exception {
         //First: get the dataset using the record reader. CSVRecordReader handles loading/parsing
         int numLinesToSkip = 0;
         char delimiter = ',';
         org.datavec.api.records.reader.RecordReader recordReader = new org.datavec.api.records.reader.impl.csv.CSVRecordReader(numLinesToSkip, delimiter);
-        recordReader.initialize(new org.datavec.api.split.FileSplit(new org.nd4j.linalg.io.ClassPathResource("iris.txt").getFile()));
+        recordReader.initialize(new org.datavec.api.split.FileSplit(new org.nd4j.common.io.ClassPathResource("iris.txt").getFile()));
 
         //Second: the RecordReaderDataSetIterator handles conversion to DataSet objects, ready for use in neural network
         int labelIndex = 4;     //5 values in each row of the iris.txt CSV: 4 input features followed by an integer label (class) index. Labels are the 5th value (index 4) in each row
@@ -164,7 +164,7 @@ public class TrainUtils {
             model.fit(trainingData);
         }
 
-        return org.nd4j.linalg.primitives.Pair.of(model, normalizer);
+        return org.nd4j.common.primitives.Pair.of(model, normalizer);
 
     }
 
