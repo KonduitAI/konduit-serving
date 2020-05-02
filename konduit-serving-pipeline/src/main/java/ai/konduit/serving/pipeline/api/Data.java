@@ -30,6 +30,8 @@ import java.util.List;
 
 public interface Data {
 
+    int size();
+
     String toJson();
 
     List<String> keys();

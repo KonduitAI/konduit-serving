@@ -40,6 +40,11 @@ public class JData implements Data {
     }
 
     @Override
+    public int size() {
+        return dataMap.size();
+    }
+
+    @Override
     public String toJson() {
         throw new UnsupportedOperationException();
     }
@@ -253,6 +258,8 @@ public class JData implements Data {
         }
         else if (data instanceof Data) {
             instance.put(key, (Data)data);
+        } else if(data instanceof NDArray){
+            instance.put(key, (NDArray)data);
         }
 //        else if (data instanceof Object) {
 //            instance.put(key, (Object)data);
