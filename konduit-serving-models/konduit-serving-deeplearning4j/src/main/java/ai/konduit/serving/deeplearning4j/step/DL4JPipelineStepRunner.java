@@ -46,7 +46,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
     public DL4JPipelineStepRunner(DL4JModelPipelineStep step) {
         this.step = step;
 
-        //TODO DON'T ASSUME MultiLayerNetwork OR LOCAL FILE URI!
+        //TODO DON'T ASSUME LOCAL FILE URI!
 
         String uri = step.getModelUri();
         Preconditions.checkState(uri != null && !uri.isEmpty(), "No model URI was provided (model URI was null or empty)");

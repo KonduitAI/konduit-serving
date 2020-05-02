@@ -160,9 +160,6 @@ public class ObjectMappers {
         while(iterator.hasNext()){
             JsonSubTypesMapping m = iterator.next();
             List<JsonSubType> l = m.getSubTypesMapping();
-//            for(JsonSubType s : l){
-//                System.out.println(s);
-//            }
             out.addAll(l);
         }
 

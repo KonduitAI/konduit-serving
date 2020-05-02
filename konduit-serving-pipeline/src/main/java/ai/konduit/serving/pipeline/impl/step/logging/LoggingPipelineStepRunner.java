@@ -86,21 +86,24 @@ public class LoggingPipelineStepRunner implements PipelineStepRunner {
             }
         }
 
+        String s = sb.toString();
+
+        //TODO Is there a cleaner way to do this?
         switch (logLevel){
             case ERROR:
-                log.error(sb.toString());
+                log.error(s);
                 break;
             case WARN:
-                log.warn(sb.toString());
+                log.warn(s);
                 break;
             case INFO:
-                log.info(sb.toString());
+                log.info(s);
                 break;
             case DEBUG:
-                log.debug(sb.toString());
+                log.debug(s);
                 break;
             case TRACE:
-                log.trace(sb.toString());
+                log.trace(s);
                 break;
         }
 

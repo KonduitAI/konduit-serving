@@ -21,6 +21,11 @@ import lombok.Data;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 import org.slf4j.event.Level;
 
+/**
+ * LoggingPipelineStep simply logs the input Data keys (and optionally values) and returns the input data unchanged
+ *
+ * @author Alex Black
+ */
 @Data
 @Builder
 public class LoggingPipelineStep implements PipelineStep {

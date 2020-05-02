@@ -25,6 +25,9 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * SequencePipeline is a simple stack of pipeline steps - the output of one is fed into the next
+ */
 @Data
 public class SequencePipeline implements Pipeline {
 

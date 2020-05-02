@@ -23,6 +23,11 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.Map;
 
+/**
+ * A pipeline with a graph structure - possibly including conditional operations, etc
+ *
+ * TODO THIS IS A PLACEHOLDER
+ */
 @Data
 public class GraphPipeline implements Pipeline {
     private Map<String, PipelineStep> steps;

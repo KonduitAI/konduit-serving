@@ -18,6 +18,9 @@ package ai.konduit.serving.pipeline.impl.data;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * TODO: This is currently a placeholder that needs to be properly implemented!
+ */
 @AllArgsConstructor
 @Data
 public class NDArray {
