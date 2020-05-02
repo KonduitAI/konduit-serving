@@ -16,8 +16,12 @@
 package ai.konduit.serving.pipeline.api.step;
 
 import ai.konduit.serving.pipeline.api.TextConfig;
+import org.nd4j.shade.jackson.annotation.JsonSubTypes;
+import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
 import java.io.Serializable;
+
+import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
 /**
  * A PipelineStep defines the configuration for one component of a Pipeline. Note that no execution-related
@@ -30,6 +34,7 @@ import java.io.Serializable;
 //Note: For JSON subtypes, we can't use the typical Jackson annotations, as the classes implementing the PipelineStep
 //      interface won't generally be defined in konduit-serving-pipeline module - hence can't be referenced here
 //     In practice this means we'll use a registration type approach via JsonSubTypesMapping
+@JsonTypeInfo(use = NAME, property = "type")
 public interface PipelineStep extends TextConfig, Serializable {
 
 

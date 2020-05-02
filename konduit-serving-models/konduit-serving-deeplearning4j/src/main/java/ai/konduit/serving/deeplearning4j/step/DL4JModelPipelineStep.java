@@ -5,6 +5,7 @@ import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -18,6 +19,13 @@ public class DL4JModelPipelineStep extends BaseModelPipelineStep<DL4JConfigurati
 
     public DL4JModelPipelineStep(String modelUri, DL4JConfiguration config) {
         super(modelUri, config);
+    }
+
+    public DL4JModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("config") DL4JConfiguration config,
+                                 @JsonProperty("inputNames") List<String> inputNames, @JsonProperty("outputNames") List<String> outputNames){
+        super(modelUri, config);
+        this.inputNames = inputNames;
+        this.outputNames = outputNames;
     }
 
 

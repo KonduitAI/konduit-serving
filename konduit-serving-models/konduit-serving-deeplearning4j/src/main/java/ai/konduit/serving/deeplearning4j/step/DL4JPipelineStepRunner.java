@@ -25,8 +25,8 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
 
     private DL4JModelPipelineStep step;
-    private MultiLayerNetwork net;
-    private ComputationGraph graph;
+    private final MultiLayerNetwork net;
+    private final ComputationGraph graph;
 
     public DL4JPipelineStepRunner(DL4JModelPipelineStep step) {
         this.step = step;
@@ -48,12 +48,14 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
         if (isMLN) {
             try {
                 net = MultiLayerNetwork.load(f, false);
+                graph = null;
             } catch (IOException e) {
                 throw new ModelLoadingException("Failed to load Deeplearning4J MultiLayerNetwork from URI " + step.getModelUri(), e);
             }
         } else {
             try {
                 graph = ComputationGraph.load(f, false);
+                net = null;
             } catch (IOException e) {
                 throw new ModelLoadingException("Failed to load Deeplearning4J ComputationGraph from URI " + step.getModelUri(), e);
             }
@@ -82,7 +84,10 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
         if (net != null) {
             INDArray arr = getOnlyArray(data);
-            INDArray out = net.output(arr);
+            INDArray out;
+            synchronized (net) {
+                out = net.output(arr);
+            }
 
             String outName = step.getOutputNames() == null || step.getOutputNames().isEmpty() ? DEFAULT_OUT_NAME_SINGLE : step.getOutputNames().get(0);
 
@@ -115,7 +120,10 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
                     }
                 }
             }
-            INDArray[] out = graph.output(input);
+            INDArray[] out;
+            synchronized (graph) {
+                out = graph.output(input);
+            }
 
             //Work out output names
             List<String> outNames;

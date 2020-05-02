@@ -56,6 +56,19 @@ public class TestDL4JModelStep {
         INDArray actual = (INDArray) out.getNDArray("default").getArrayValue();         //TODO FIX TYPE
 
         assertEquals(exp, actual);
+
+
+        String json = p.toJson();
+        System.out.println(json);
+        Pipeline pJson = Pipeline.fromJson(json);
+        INDArray outJson = (INDArray) pJson.executor().exec(d).getNDArray("default").getArrayValue();
+        assertEquals(exp, outJson);
+
+        String yaml = p.toYaml();
+        System.out.println(yaml);
+        Pipeline pYaml = Pipeline.fromYaml(yaml);
+        INDArray outYaml = (INDArray) pYaml.executor().exec(d).getNDArray("default").getArrayValue();
+        assertEquals(exp, outYaml);
     }
 
     @Test
@@ -80,6 +93,16 @@ public class TestDL4JModelStep {
         INDArray actual = (INDArray) out.getNDArray("default").getArrayValue();         //TODO FIX TYPE/CASTING
 
         assertEquals(exp, actual);
+
+        String json = p.toJson();
+        Pipeline pJson = Pipeline.fromJson(json);
+        INDArray outJson = (INDArray) pJson.executor().exec(d).getNDArray("default").getArrayValue();
+        assertEquals(exp, outJson);
+
+        String yaml = p.toYaml();
+        Pipeline pYaml = Pipeline.fromYaml(yaml);
+        INDArray outYaml = (INDArray) pYaml.executor().exec(d).getNDArray("default").getArrayValue();
+        assertEquals(exp, outYaml);
     }
 
     public File createIrisMLNFile() throws Exception {

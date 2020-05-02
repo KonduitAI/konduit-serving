@@ -19,8 +19,16 @@ package ai.konduit.serving.pipeline.api.pipeline;
 import ai.konduit.serving.pipeline.api.Data;
 import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
+import lombok.NonNull;
+import org.nd4j.shade.jackson.annotation.JsonSubTypes;
+import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
 import java.io.Serializable;
+import java.nio.channels.Pipe;
+
+import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.CLASS;
+import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
 /**
  * A Pipeline object represents the configuration of a machine learning pipeline - including zero or more machine learning
@@ -31,6 +39,7 @@ import java.io.Serializable;
  * A Pipeline may be a simple sequence of {@link PipelineStep}s or may be a more complex directed acyclic graph of steps,
  * perhaps including conditional operations/branching
  */
+@JsonTypeInfo(use = CLASS, property = "@class")        //TODO FIX THIS - SHOULD BE LIST -> SequencePipeline; Map -> GraphPipeline
 public interface Pipeline extends TextConfig, Serializable {
 
     /**
@@ -40,5 +49,13 @@ public interface Pipeline extends TextConfig, Serializable {
      */
     PipelineExecutor executor();
 
+
+    static Pipeline fromJson(@NonNull String json){
+        return ObjectMappers.fromJson(json, Pipeline.class);
+    }
+
+    static Pipeline fromYaml(@NonNull String yaml){
+        return ObjectMappers.fromYaml(yaml, Pipeline.class);
+    }
 
 }
