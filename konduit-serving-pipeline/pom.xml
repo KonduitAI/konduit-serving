@@ -11,7 +11,20 @@
 
     <artifactId>konduit-serving-pipeline</artifactId>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
     <dependencies>
+
+        <!-- TODO - remove this to avoid version issues? We only really use it for a small number of utils... Preconditions for example -->
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-common</artifactId>
+            <version>${nd4j.version}</version>
+        </dependency>
 
         <!-- TODO - do we replace this with non-shaded Jackson? May need OSGi to avoid dependency conflicts however -->
         <dependency>
@@ -31,6 +44,22 @@
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+
 
 </project>

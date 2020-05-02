@@ -46,6 +46,6 @@ public interface PipelineStepRunnerFactory {
      * @param pipelineStep The pipeline step to execute
      * @return The instantiated PipelineStepRunner
      */
-    PipelineStepRunner getRunnerFor(PipelineStep pipelineStep);
+    PipelineStepRunner create(PipelineStep pipelineStep);
 
 }

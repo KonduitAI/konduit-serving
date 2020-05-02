@@ -19,6 +19,10 @@ package ai.konduit.serving.pipeline.api.pipeline;
 import ai.konduit.serving.pipeline.api.Data;
 import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.impl.pipeline.serde.PipelineDeserializer;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
+import lombok.NonNull;
+import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.Serializable;
 
@@ -31,14 +35,23 @@ import java.io.Serializable;
  * A Pipeline may be a simple sequence of {@link PipelineStep}s or may be a more complex directed acyclic graph of steps,
  * perhaps including conditional operations/branching
  */
+@JsonDeserialize(using = PipelineDeserializer.class)
 public interface Pipeline extends TextConfig, Serializable {
 
     /**
-     * Instantiate an executor capable of executing this pipeline
+     * Return (or instantiate if necessary) the executor for executing this pipeline
      *
      * @return An instantiated pipeline executor for this pipeline
      */
-    PipelineExecutor createExecutor();
+    PipelineExecutor executor();
 
+
+    static Pipeline fromJson(@NonNull String json){
+        return ObjectMappers.fromJson(json, Pipeline.class);
+    }
+
+    static Pipeline fromYaml(@NonNull String yaml){
+        return ObjectMappers.fromYaml(yaml, Pipeline.class);
+    }
 
 }
