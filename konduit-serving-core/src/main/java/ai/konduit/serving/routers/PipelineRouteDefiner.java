@@ -352,7 +352,6 @@ public class PipelineRouteDefiner {
         Preconditions.checkNotNull(inferenceConfiguration.getServingConfig(), "Please define a serving configuration.");
         generalHandler(inferenceConfiguration, router, log);
 
-
         router.post().handler(BodyHandler.create()
                 .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
                 .setDeleteUploadedFilesOnEnd(true)

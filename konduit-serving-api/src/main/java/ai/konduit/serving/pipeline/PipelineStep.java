@@ -7,10 +7,12 @@ import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.config.TextConfig;
 import ai.konduit.serving.pipeline.step.*;
 import ai.konduit.serving.pipeline.step.model.*;
+import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -57,6 +59,40 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = WordPieceTokenizerStep.class, name = "WordPieceTokenizerStep")
 })
 @JsonTypeInfo(use = NAME, property = "type")
+@XmlRootElement
+@io.swagger.v3.oas.annotations.media.Schema(description = "Pipeline Step", 
+        discriminatorProperty = "type", 
+        discriminatorMapping = {
+                @DiscriminatorMapping(schema = PmmlStep.class, value = "PMML"),
+                @DiscriminatorMapping(schema = PmmlStep.class, value = "PmmlConfig"),
+                @DiscriminatorMapping(schema = SameDiffStep.class, value = "SAMEDIFF"),
+                @DiscriminatorMapping(schema = SameDiffStep.class, value = "SameDiffConfig"),
+                @DiscriminatorMapping(schema = TensorFlowStep.class, value = "TENSORFLOW"),
+                @DiscriminatorMapping(schema = TensorFlowStep.class, value = "TensorFlowConfig"),
+                @DiscriminatorMapping(schema = OnnxStep.class, value = "ONNX"),
+                @DiscriminatorMapping(schema = OnnxStep.class, value = "OnnxConfig"),
+                @DiscriminatorMapping(schema = KerasStep.class, value = "KERAS"),
+                @DiscriminatorMapping(schema = KerasStep.class, value = "KerasConfig"),
+                @DiscriminatorMapping(schema = Dl4jStep.class, value= "DL4J"),
+                @DiscriminatorMapping(schema = Dl4jStep.class, value= "DL4JConfig"),
+                @DiscriminatorMapping(schema = PythonStep.class, value = "PYTHON"),
+                @DiscriminatorMapping(schema = PythonStep.class, value = "PythonStep"),
+                @DiscriminatorMapping(schema = PmmlStep.class, value = "PMML"),
+                @DiscriminatorMapping(schema = PmmlStep.class, value = "PmmlStep"),
+                @DiscriminatorMapping(schema = TransformProcessStep.class, value = "TRANSFORM"),
+                @DiscriminatorMapping(schema = TransformProcessStep.class, value = "TransformProcessStep"),
+                @DiscriminatorMapping(schema = CustomPipelineStep.class, value = "CUSTOM"),
+                @DiscriminatorMapping(schema = CustomPipelineStep.class, value = "CustomPipelineStep"),
+                @DiscriminatorMapping(schema = ImageLoadingStep.class, value = "IMAGE"),
+                @DiscriminatorMapping(schema = ImageLoadingStep.class, value = "ImageLoadingStep"),
+                @DiscriminatorMapping(schema = JsonExpanderTransformStep.class, value = "JSON_EXPANDER"),
+                @DiscriminatorMapping(schema = JsonExpanderTransformStep.class, value = "JsonExpanderTransformStep"),
+                @DiscriminatorMapping(schema = ArrayConcatenationStep.class, value = "ARRAY_CONCAT"),
+                @DiscriminatorMapping(schema = ArrayConcatenationStep.class, value = "ArrayConcatenationStep"),
+                @DiscriminatorMapping(schema = WordPieceTokenizerStep.class, value = "WORDPIECE_TOKENIZER"),
+                @DiscriminatorMapping(schema = WordPieceTokenizerStep.class, value = "WordPieceTokenizerStep")
+        }
+)
 public interface PipelineStep<T extends PipelineStep> extends Serializable, TextConfig {
 
     /**

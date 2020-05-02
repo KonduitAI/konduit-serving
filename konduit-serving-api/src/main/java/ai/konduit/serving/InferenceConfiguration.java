@@ -34,6 +34,7 @@ import ai.konduit.serving.util.ObjectMappers;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.nd4j.shade.jackson.annotation.JsonAlias;
+import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
 import org.nd4j.shade.jackson.annotation.JsonSetter;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -48,6 +49,7 @@ import java.util.Map;
 @Builder
 @XmlRootElement
 @Schema
+@JsonIgnoreProperties("client")
 public class InferenceConfiguration implements Serializable, TextConfig {
 
     @Singular
