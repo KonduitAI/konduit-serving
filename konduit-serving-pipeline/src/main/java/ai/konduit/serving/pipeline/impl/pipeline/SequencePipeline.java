@@ -3,12 +3,14 @@ package ai.konduit.serving.pipeline.impl.pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import lombok.Data;
 import lombok.Getter;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 public class SequencePipeline implements Pipeline {
 
     @Getter
@@ -39,6 +41,5 @@ public class SequencePipeline implements Pipeline {
         public SequencePipeline build(){
             return new SequencePipeline(steps);
         }
-
     }
 }

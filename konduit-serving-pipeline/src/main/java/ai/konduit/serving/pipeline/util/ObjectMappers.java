@@ -71,7 +71,6 @@ public class ObjectMappers {
     }
 
     private static ObjectMapper configureMapper(ObjectMapper ret) {
-        ret.registerModule(new JodaModule());
         ret.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ret.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         ret.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
@@ -161,9 +160,9 @@ public class ObjectMappers {
         while(iterator.hasNext()){
             JsonSubTypesMapping m = iterator.next();
             List<JsonSubType> l = m.getSubTypesMapping();
-            for(JsonSubType s : l){
-                System.out.println(s);
-            }
+//            for(JsonSubType s : l){
+//                System.out.println(s);
+//            }
             out.addAll(l);
         }
 
