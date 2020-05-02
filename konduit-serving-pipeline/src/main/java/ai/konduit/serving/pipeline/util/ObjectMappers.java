@@ -73,7 +73,7 @@ public class ObjectMappers {
     private static ObjectMapper configureMapper(ObjectMapper ret) {
         ret.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ret.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        ret.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
+        ret.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);         //Use order in which fields are defined in classes
         ret.enable(SerializationFeature.INDENT_OUTPUT);
         ret.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         ret.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);

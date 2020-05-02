@@ -24,6 +24,7 @@ import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 import java.io.File;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
@@ -34,75 +35,87 @@ public class TestDL4JModelStep {
 
     @Test
     public void testSimpleMLN() throws Exception {
-        File netFile = createIrisMLNFile();
 
-        Pipeline p = SequencePipeline.builder()
-                .add(DL4JModelPipelineStep.builder()
-                        .modelUri(netFile.toURI().toString())
-                        .build())
-                .build();
+        for(boolean withNamesDefined : new boolean[]{false, true}) {
 
+            File netFile = createIrisMLNFile();
 
-
-        PipelineExecutor e = p.executor();
-
-
-        INDArray arr = Nd4j.rand(DataType.FLOAT, 3, 4);
-        INDArray exp = predictFromFile(netFile, arr);
-
-        Data d = Data.singleton("in", new NDArray(arr));
-
-        Data out = e.exec(d);
-        INDArray actual = (INDArray) out.getNDArray("default").getArrayValue();         //TODO FIX TYPE
-
-        assertEquals(exp, actual);
+            Pipeline p = SequencePipeline.builder()
+                    .add(DL4JModelPipelineStep.builder()
+                            .modelUri(netFile.toURI().toString())
+                            .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
+                            .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
+                            .build())
+                    .build();
 
 
-        String json = p.toJson();
-        System.out.println(json);
-        Pipeline pJson = Pipeline.fromJson(json);
-        INDArray outJson = (INDArray) pJson.executor().exec(d).getNDArray("default").getArrayValue();
-        assertEquals(exp, outJson);
+            PipelineExecutor e = p.executor();
+            String outName = withNamesDefined ? "myPrediction" : "default";
 
-        String yaml = p.toYaml();
-        System.out.println(yaml);
-        Pipeline pYaml = Pipeline.fromYaml(yaml);
-        INDArray outYaml = (INDArray) pYaml.executor().exec(d).getNDArray("default").getArrayValue();
-        assertEquals(exp, outYaml);
+
+            INDArray arr = Nd4j.rand(DataType.FLOAT, 3, 4);
+            INDArray exp = predictFromFile(netFile, arr);
+
+            Data d = Data.singleton("in", new NDArray(arr));
+
+            Data out = e.exec(d);
+            INDArray actual = (INDArray) out.getNDArray(outName).getArrayValue();         //TODO FIX TYPE
+
+            assertEquals(exp, actual);
+
+            String json = p.toJson();
+            System.out.println(json);
+            Pipeline pJson = Pipeline.fromJson(json);
+            INDArray outJson = (INDArray) pJson.executor().exec(d).getNDArray(outName).getArrayValue();
+            assertEquals(exp, outJson);
+
+            String yaml = p.toYaml();
+            System.out.println(yaml);
+            Pipeline pYaml = Pipeline.fromYaml(yaml);
+            INDArray outYaml = (INDArray) pYaml.executor().exec(d).getNDArray(outName).getArrayValue();
+            assertEquals(exp, outYaml);
+        }
     }
 
     @Test
     public void testSimpleCompGraph() throws Exception {
-        File netFile = createIrisCGFile();
 
-        Pipeline p = SequencePipeline.builder()
-                .add(DL4JModelPipelineStep.builder()
-                        .modelUri(netFile.toURI().toString())
-                        .build())
-                .build();
+        for(boolean withNamesDefined : new boolean[]{false, true}) {
+            File netFile = createIrisCGFile();
 
-        PipelineExecutor e = p.executor();
+            Pipeline p = SequencePipeline.builder()
+                    .add(DL4JModelPipelineStep.builder()
+                            .modelUri(netFile.toURI().toString())
+                            .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
+                            .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
+                            .build())
+                    .build();
+
+            PipelineExecutor e = p.executor();
+            String outName = withNamesDefined ? "myPrediction" : "default";
 
 
-        INDArray arr = Nd4j.rand(DataType.FLOAT, 3, 4);
-        INDArray exp = predictFromFileCG(netFile, arr)[0];
+            INDArray arr = Nd4j.rand(DataType.FLOAT, 3, 4);
+            INDArray exp = predictFromFileCG(netFile, arr)[0];
 
-        Data d = Data.singleton("in", new NDArray(arr));
+            Data d = Data.singleton("in", new NDArray(arr));
 
-        Data out = e.exec(d);
-        INDArray actual = (INDArray) out.getNDArray("default").getArrayValue();         //TODO FIX TYPE/CASTING
+            Data out = e.exec(d);
+            INDArray actual = (INDArray) out.getNDArray(outName).getArrayValue();         //TODO FIX TYPE/CASTING
 
-        assertEquals(exp, actual);
+            assertEquals(exp, actual);
 
-        String json = p.toJson();
-        Pipeline pJson = Pipeline.fromJson(json);
-        INDArray outJson = (INDArray) pJson.executor().exec(d).getNDArray("default").getArrayValue();
-        assertEquals(exp, outJson);
 
-        String yaml = p.toYaml();
-        Pipeline pYaml = Pipeline.fromYaml(yaml);
-        INDArray outYaml = (INDArray) pYaml.executor().exec(d).getNDArray("default").getArrayValue();
-        assertEquals(exp, outYaml);
+            String json = p.toJson();
+            Pipeline pJson = Pipeline.fromJson(json);
+            INDArray outJson = (INDArray) pJson.executor().exec(d).getNDArray(outName).getArrayValue();
+            assertEquals(exp, outJson);
+
+            String yaml = p.toYaml();
+            Pipeline pYaml = Pipeline.fromYaml(yaml);
+            INDArray outYaml = (INDArray) pYaml.executor().exec(d).getNDArray(outName).getArrayValue();
+            assertEquals(exp, outYaml);
+        }
     }
 
     public File createIrisMLNFile() throws Exception {
