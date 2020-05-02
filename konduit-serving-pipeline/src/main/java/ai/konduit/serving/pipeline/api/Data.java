@@ -100,4 +100,8 @@ public interface Data {
     static Data singleton(@NonNull String key, @NonNull Object value){
         return JData.singleton(key, value);
     }
+
+    static Data empty(){
+        return new JData();
+    }
 }

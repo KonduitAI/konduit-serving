@@ -60,6 +60,8 @@ public class SequencePipelineExecutor implements PipelineExecutor {
                 }
             }
 
+            runners.add(f.create(ps));
+
             if(f == null){
                 StringBuilder msg = new StringBuilder("Unable to execute pipeline step of type " + ps.getClass().getName() + ": No PipelineStepRunnerFactory instances"
                         + " are available that can execute this pipeline step.\nThis likely means a required dependency is missing for executing this pipeline." +
@@ -67,8 +69,13 @@ public class SequencePipelineExecutor implements PipelineExecutor {
                 if(factories.isEmpty()){
                     msg.append(" <None>");
                 }
+                boolean first = true;
                 for(PipelineStepRunnerFactory psrf : factories){
+                    if(!first)
+                        msg.append("\n");
                     msg.append("  ").append(psrf.getClass().getName());
+
+                    first = false;
                 }
                 throw new IllegalStateException(msg.toString());
             }

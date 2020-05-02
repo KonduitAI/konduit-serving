@@ -41,6 +41,7 @@
         <module>konduit-serving-tfjava</module>
         <module>konduit-serving-pipeline</module>
         <module>konduit-serving-models</module>
+        <module>konduit-serving-io</module>
     </modules>
 
     <name>konduit-serving</name>
