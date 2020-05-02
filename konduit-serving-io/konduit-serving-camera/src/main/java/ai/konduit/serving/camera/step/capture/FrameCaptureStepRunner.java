@@ -22,10 +22,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.impl.data.Image;
 import lombok.extern.slf4j.Slf4j;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.bytedeco.javacv.VideoInputFrameGrabber;
+import org.bytedeco.javacv.*;
 
 @Slf4j
 public class FrameCaptureStepRunner implements PipelineStepRunner {
@@ -72,7 +69,8 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
     }
 
     protected void init(){
-        grabber = new VideoInputFrameGrabber(step.getCamera());
+//        grabber = new VideoInputFrameGrabber(step.getCamera());
+        grabber = new OpenCVFrameGrabber(step.getCamera());
         converter = new OpenCVFrameConverter.ToIplImage();
 
         //TODO NEED TO CONFIGURE - RESOLUTION ETC
@@ -81,6 +79,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
 
         try {
             grabber.start();
+            Thread.sleep(500);      //TODO is this necessary? Better way?
         } catch (Throwable t){
             log.error("Failed to start video frame grabber with stape {}", step);
             throw new RuntimeException("Failed to start video frame grabber", t);
