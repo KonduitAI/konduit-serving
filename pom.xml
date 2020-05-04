@@ -107,7 +107,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <jpmml.version>1.4.1</jpmml.version>
+        <jpmml.version>1.4.15</jpmml.version>
         <vertx-stack.version>3.9.0</vertx-stack.version>
         <lombok.version>1.18.2</lombok.version>
         <jackson.version>2.10.0</jackson.version>
@@ -155,10 +155,26 @@
         <javax-validation-api.version>2.0.1.Final</javax-validation-api.version>
         <swagger-core.version>2.1.1</swagger-core.version>
         <fastutil.version>8.1.1</fastutil.version>
+        <org.eclipse.persistence.moxy.version>2.7.6</org.eclipse.persistence.moxy.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.jpmml</groupId>
+                <artifactId>pmml-model</artifactId>
+                <version>${jpmml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jpmml</groupId>
+                <artifactId>pmml-model-metro</artifactId>
+                <version>${jpmml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.persistence</groupId>
+                <artifactId>org.eclipse.persistence.moxy</artifactId>
+                <version>${org.eclipse.persistence.moxy.version}</version>
+            </dependency>
             <dependency>
                 <groupId>it.unimi.dsi</groupId>
                 <artifactId>fastutil</artifactId>

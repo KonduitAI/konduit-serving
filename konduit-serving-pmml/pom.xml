@@ -35,7 +35,6 @@
 
     <name>konduit-serving-pmml</name>
 
-
     <licenses>
         <license>
             <name>GNU Affero General Public License (AGPL) version 3.0</name>
@@ -43,7 +42,6 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
 
     <dependencies>
         <dependency>
