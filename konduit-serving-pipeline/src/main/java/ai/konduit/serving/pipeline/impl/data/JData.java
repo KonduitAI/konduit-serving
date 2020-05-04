@@ -227,6 +227,9 @@ public class JData implements Data {
             if (item.getTypeValue() == generated.Data.DataScheme.ValueType.BOOLEAN.ordinal()) {
                 retData.put(entry.getKey(), item.getBoolValue());
             }
+            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.INT64.ordinal()) {
+                retData.put(entry.getKey(), item.getIValue());
+            }
         }
         return retData;
     }
@@ -246,11 +249,19 @@ public class JData implements Data {
             if (value.type().equals(ValueType.STRING)) {
                 item = generated.Data.DataScheme.newBuilder().
                         setSValue((String)nextItem.getValue().get()).
+                        setTypeValue(ValueType.STRING.ordinal()).
                         build();
             }
             else if (value.type().equals(ValueType.BOOLEAN)) {
                 item = generated.Data.DataScheme.newBuilder().
                         setBoolValue((Boolean)nextItem.getValue().get()).
+                        setTypeValue(ValueType.BOOLEAN.ordinal()).
+                        build();
+            }
+            else if (value.type().equals(ValueType.INT64)) {
+                item = generated.Data.DataScheme.newBuilder().
+                        setIValue((Long)nextItem.getValue().get()).
+                        setTypeValue(ValueType.INT64.ordinal()).
                         build();
             }
             if (item == null) {

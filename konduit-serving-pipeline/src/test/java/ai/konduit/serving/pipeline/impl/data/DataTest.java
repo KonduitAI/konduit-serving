@@ -129,7 +129,7 @@ public class DataTest {
         } catch (IOException e) {
             log.error("IOException in DataTest.testSerde()", e);
         }
-        assertEquals(someData.getData(KEY), restoredData.getData(KEY));
+        assertEquals(someData.get(KEY), restoredData.get(KEY));
     }
 
     @Test
