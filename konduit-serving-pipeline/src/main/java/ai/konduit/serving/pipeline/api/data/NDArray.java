@@ -32,6 +32,10 @@ public interface NDArray {
 
     <T> T getAs(Class<T> type);
 
+    boolean canGetAs(NDArrayFormat<?> format);
+
+    boolean canGetAs(Class<?> type);
+
     static NDArray create(@NonNull Object from){
         NDArrayFactory f = NDArrayFactoryRegistry.getFactoryFor(from);
         Preconditions.checkState(f != null, "Unable to create NDArray from object of %s - no NDArrayFactory instances" +

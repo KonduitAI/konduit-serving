@@ -46,4 +46,16 @@ public class BaseNDArray<T> implements NDArray {
         Preconditions.checkState(converter != null, "No converter found for converting from %s to %s", array.getClass(), type);
         return converter.convert(this, type);
     }
+
+    @Override
+    public boolean canGetAs(NDArrayFormat<?> format) {
+        NDArrayConverter converter = NDArrayConverterRegistry.getConverterFor(this, format);
+        return converter != null;
+    }
+
+    @Override
+    public boolean canGetAs(Class<?> type) {
+        NDArrayConverter converter = NDArrayConverterRegistry.getConverterFor(this, type);
+        return converter != null;
+    }
 }
