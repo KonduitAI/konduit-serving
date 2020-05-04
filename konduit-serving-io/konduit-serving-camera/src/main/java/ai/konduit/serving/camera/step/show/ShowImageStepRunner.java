@@ -70,7 +70,7 @@ public class ShowImageStepRunner implements PipelineStepRunner {
         return data;
     }
 
-    protected void init(){
+    protected synchronized void init(){
         canvas = new CanvasFrame(step.getDisplayName());
         canvas.setCanvasSize(step.getWidth(), step.getHeight());
         initialized = true;

@@ -69,7 +69,6 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
     }
 
     protected void init(){
-//        grabber = new VideoInputFrameGrabber(step.getCamera());
         grabber = new OpenCVFrameGrabber(step.getCamera());
         converter = new OpenCVFrameConverter.ToIplImage();
 
@@ -79,7 +78,6 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
 
         try {
             grabber.start();
-            Thread.sleep(500);      //TODO is this necessary? Better way?
         } catch (Throwable t){
             log.error("Failed to start video frame grabber with stape {}", step);
             throw new RuntimeException("Failed to start video frame grabber", t);
