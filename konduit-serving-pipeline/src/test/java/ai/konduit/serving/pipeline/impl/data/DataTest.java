@@ -15,6 +15,8 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data;
 
+import ai.konduit.serving.pipeline.impl.data.wrappers.IntValue;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
 import lombok.extern.slf4j.Slf4j;
 import ai.konduit.serving.pipeline.api.Data;
 import org.junit.Ignore;
@@ -130,6 +132,25 @@ public class DataTest {
             log.error("IOException in DataTest.testSerde()", e);
         }
         assertEquals(someData.get(KEY), restoredData.get(KEY));
+    }
+
+    @Test
+    public void testConvertToBytes() {
+        JData someData = (JData) JData.singleton(KEY, Long.valueOf(200));
+        byte[] output = someData.asBytes();
+        assert(output != null);
+    }
+
+    @Test
+    public void testConvertToJson() {
+        Data someData = (JData) JData.singleton(KEY, Long.valueOf(200));
+        String jsonStr = someData.toJson();
+
+        String expected = "{\n" +
+                "  \"iValue\": \"200\",\n" +
+                "  \"type\": \"INT64\"\n" +
+                "}";
+        assertEquals(expected, jsonStr);
     }
 
     @Test

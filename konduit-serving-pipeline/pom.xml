@@ -15,6 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <protobuf.version>3.8.0</protobuf.version>
     </properties>
 
     <dependencies>
@@ -62,7 +63,13 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.8.0</version>
+            <version>${protobuf.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>${protobuf.version}</version>
         </dependency>
     </dependencies>
 
@@ -71,7 +78,7 @@
             <plugin>
                 <groupId>com.github.os72</groupId>
                 <artifactId>protoc-jar-maven-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>${protobuf.version}</version>
                 <executions>
                     <execution>
                         <id>protobuf</id>
@@ -80,7 +87,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <protocVersion>3.8.0</protocVersion>
+                            <protocVersion>${protobuf.version}</protocVersion>
                             <extension>.proto</extension>
                             <inputDirectories>
                                 <include>src/main/java/ai/konduit/serving/pipeline/api/protobuf</include>

@@ -17,10 +17,13 @@ package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.Data;
 import ai.konduit.serving.pipeline.impl.data.wrappers.*;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -42,7 +45,17 @@ public class JData implements Data {
 
     @Override
     public String toJson() {
-        throw new UnsupportedOperationException();
+        StringBuilder jsonString = new StringBuilder();
+        try {
+            Map<String, generated.Data.DataScheme> newItemsMap = javaMapToPbMap();
+            for (String key : newItemsMap.keySet()) {
+                jsonString.append(JsonFormat.printer().print(newItemsMap.get(key)));
+            }
+
+        } catch (InvalidProtocolBufferException e) {
+            log.error("Failed toJson conversion",e);
+        }
+        return jsonString.toString();
     }
 
     @Override
@@ -234,9 +247,7 @@ public class JData implements Data {
         return retData;
     }
 
-    @Override
-    public void write(OutputStream toStream) throws IOException {
-
+    private Map<String, generated.Data.DataScheme> javaMapToPbMap() {
         Map<String, generated.Data.DataScheme> newItemsMap = new HashMap<>();
         Iterator<Map.Entry<String, Value>> iterator = dataMap.entrySet().iterator();
 
@@ -248,19 +259,17 @@ public class JData implements Data {
 
             if (value.type().equals(ValueType.STRING)) {
                 item = generated.Data.DataScheme.newBuilder().
-                        setSValue((String)nextItem.getValue().get()).
+                        setSValue((String) nextItem.getValue().get()).
                         setTypeValue(ValueType.STRING.ordinal()).
                         build();
-            }
-            else if (value.type().equals(ValueType.BOOLEAN)) {
+            } else if (value.type().equals(ValueType.BOOLEAN)) {
                 item = generated.Data.DataScheme.newBuilder().
-                        setBoolValue((Boolean)nextItem.getValue().get()).
+                        setBoolValue((Boolean) nextItem.getValue().get()).
                         setTypeValue(ValueType.BOOLEAN.ordinal()).
                         build();
-            }
-            else if (value.type().equals(ValueType.INT64)) {
+            } else if (value.type().equals(ValueType.INT64)) {
                 item = generated.Data.DataScheme.newBuilder().
-                        setIValue((Long)nextItem.getValue().get()).
+                        setIValue((Long) nextItem.getValue().get()).
                         setTypeValue(ValueType.INT64.ordinal()).
                         build();
             }
@@ -269,6 +278,13 @@ public class JData implements Data {
             }
             newItemsMap.put(nextItem.getKey(), item);
         }
+        return newItemsMap;
+    }
+
+    @Override
+    public void write(OutputStream toStream) throws IOException {
+
+        Map<String, generated.Data.DataScheme> newItemsMap = javaMapToPbMap();
 
         generated.Data.DataMap pbDataMap = generated.Data.DataMap.newBuilder().
                 putAllMapItems(newItemsMap).
@@ -277,7 +293,13 @@ public class JData implements Data {
     }
 
     public byte[] asBytes() {
-        throw new UnsupportedOperationException();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            write(baos);
+        } catch (IOException e) {
+            log.error("Failed write to ByteArrayOutputStream", e);
+        }
+        return baos.toByteArray();
     }
 
     public static Data empty() {
