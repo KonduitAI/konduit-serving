@@ -16,10 +16,30 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.api.format;
+package ai.konduit.serving.pipeline.registry;
 
-public interface NDArrayFormat<T> {
+import ai.konduit.serving.pipeline.api.format.ImageFactory;
+import lombok.NonNull;
 
-    Class<T> formatType();
+import java.util.List;
 
+public class ImageFactoryRegistry extends BaseFactoryRegistry<ImageFactory> {
+
+    private static final ImageFactoryRegistry INSTANCE = new ImageFactoryRegistry();
+
+    protected ImageFactoryRegistry(){
+        super(ImageFactory.class);
+    }
+
+    public static int numFactories(){
+        return INSTANCE.registryNumFactories();
+    }
+
+    public static List<ImageFactory> getFactories(){
+        return INSTANCE.registryGetFactories();
+    }
+
+    public static ImageFactory getFactoryFor(@NonNull Object o){
+        return INSTANCE.registryGetFactoryFor(o);
+    }
 }

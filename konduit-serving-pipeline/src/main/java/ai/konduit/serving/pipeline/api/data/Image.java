@@ -19,7 +19,7 @@
 package ai.konduit.serving.pipeline.api.data;
 
 import ai.konduit.serving.pipeline.api.format.ImageFormat;
-import ai.konduit.serving.pipeline.registry.ImageRegistry;
+import ai.konduit.serving.pipeline.registry.ImageFactoryRegistry;
 
 public interface Image {
 
@@ -32,7 +32,7 @@ public interface Image {
     }
 
     static boolean canCreateFrom(Object from){
-        return ImageRegistry.getFactoryFor(from) != null;
+        return ImageFactoryRegistry.getFactoryFor(from) != null;
     }
 
 }

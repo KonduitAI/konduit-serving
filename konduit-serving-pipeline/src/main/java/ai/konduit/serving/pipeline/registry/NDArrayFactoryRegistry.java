@@ -18,29 +18,28 @@
 
 package ai.konduit.serving.pipeline.registry;
 
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.format.ImageFactory;
+import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
 import lombok.NonNull;
 
 import java.util.List;
 
-public class ImageRegistry extends BaseRegistry<ImageFactory> {
+public class NDArrayFactoryRegistry extends BaseFactoryRegistry<NDArrayFactory> {
 
-    private static final ImageRegistry INSTANCE = new ImageRegistry();
+    private static final NDArrayFactoryRegistry INSTANCE = new NDArrayFactoryRegistry();
 
-    protected ImageRegistry(){
-        super(ImageFactory.class);
+    protected NDArrayFactoryRegistry(){
+        super(NDArrayFactory.class);
     }
 
     public static int numFactories(){
         return INSTANCE.registryNumFactories();
     }
 
-    public static List<ImageFactory> getFactories(){
+    public static List<NDArrayFactory> getFactories(){
         return INSTANCE.registryGetFactories();
     }
 
-    public static ImageFactory getFactoryFor(@NonNull Object o){
+    public static NDArrayFactory getFactoryFor(@NonNull Object o){
         return INSTANCE.registryGetFactoryFor(o);
     }
 }

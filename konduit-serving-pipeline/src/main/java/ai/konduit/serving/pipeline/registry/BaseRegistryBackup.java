@@ -19,12 +19,11 @@
 package ai.konduit.serving.pipeline.registry;
 
 import ai.konduit.serving.pipeline.api.format.FormatFactory;
-import ai.konduit.serving.pipeline.api.format.ImageFactory;
 import lombok.NonNull;
 
 import java.util.*;
 
-public abstract class  BaseRegistry<T extends FormatFactory> {
+public abstract class BaseRegistryBackup<T extends FormatFactory> {
 
     protected Class<T> factoryClass;
     protected List<T> factories;
@@ -32,7 +31,7 @@ public abstract class  BaseRegistry<T extends FormatFactory> {
 
     //Intentionally package private (no/default access modifier)
 
-    BaseRegistry(Class<T> factoryClass){
+    BaseRegistryBackup(Class<T> factoryClass){
         this.factoryClass = factoryClass;
     }
 

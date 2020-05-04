@@ -25,6 +25,10 @@ public interface NDArrayConverter {
 
     boolean canConvert(NDArray from, NDArrayFormat to);
 
-    NDArray convert(NDArray from, NDArrayFormat to);
+    boolean canConvert(NDArray from, Class<?> to);
+
+    <T> T convert(NDArray from, NDArrayFormat<T> to);
+
+    <T> T convert(NDArray from, Class<T> to);
 
 }

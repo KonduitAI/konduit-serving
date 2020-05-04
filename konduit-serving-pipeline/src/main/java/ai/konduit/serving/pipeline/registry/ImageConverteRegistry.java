@@ -18,28 +18,44 @@
 
 package ai.konduit.serving.pipeline.registry;
 
-import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
+import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.api.format.ImageConverter;
+import ai.konduit.serving.pipeline.api.format.ImageFormat;
 import lombok.NonNull;
+import org.nd4j.common.primitives.Pair;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
-public class NDArrayRegistry extends BaseRegistry<NDArrayFactory> {
+public class ImageConverteRegistry extends AbstractRegistry<ImageConverter> {
 
-    private static final NDArrayRegistry INSTANCE = new NDArrayRegistry();
+    private static final ImageConverteRegistry INSTANCE = new ImageConverteRegistry();
 
-    protected NDArrayRegistry(){
-        super(NDArrayFactory.class);
+    protected ImageConverteRegistry(){
+        super(ImageConverter.class);
     }
 
     public static int numFactories(){
         return INSTANCE.registryNumFactories();
     }
 
-    public static List<NDArrayFactory> getFactories(){
+    public static List<ImageConverter> getFactories(){
         return INSTANCE.registryGetFactories();
     }
 
-    public static NDArrayFactory getFactoryFor(@NonNull Object o){
+    public static ImageConverter getFactoryFor(@NonNull Object o){
         return INSTANCE.registryGetFactoryFor(o);
+    }
+
+    @Override
+    public boolean acceptFactory(ImageConverter factory, Object o) {
+        Pair<Image, ImageFormat> p = (Pair<Image, ImageFormat>) o;
+        return factory.canConvert(p.getFirst(), p.getSecond());
+    }
+
+    @Override
+    public Set<Class<?>> supportedForFactory(ImageConverter factory) {
+        return Collections.emptySet();
     }
 }

@@ -16,10 +16,18 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.api.format;
+package ai.konduit.serving.pipeline.impl.format;
 
-public interface NDArrayFormat<T> {
+import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
 
-    Class<T> formatType();
+public class JavaNDArrayFormats {
+
+    public static final NDArrayFormat<float[]> float1d = () -> float[].class;
+
+    public static final NDArrayFormat<float[][]> float2d = () -> float[][].class;
+
+    public static final NDArrayFormat<float[][][]> float3d = () -> float[][][].class;
+
+    public static final NDArrayFormat<float[][][]> float4d = () -> float[][][].class;
 
 }

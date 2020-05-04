@@ -20,7 +20,7 @@ package ai.konduit.serving.pipeline.api.data;
 
 import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
 import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
-import ai.konduit.serving.pipeline.registry.NDArrayRegistry;
+import ai.konduit.serving.pipeline.registry.NDArrayFactoryRegistry;
 import lombok.NonNull;
 import org.nd4j.common.base.Preconditions;
 
@@ -30,15 +30,18 @@ public interface NDArray {
 
     <T> T getAs(NDArrayFormat<T> format);
 
+    <T> T getAs(Class<T> type);
+
     static NDArray create(@NonNull Object from){
-        NDArrayFactory f = NDArrayRegistry.getFactoryFor(from);
-        Preconditions.checkState(f != null, "Unable to create NDArray from object of %s", from);
+        NDArrayFactory f = NDArrayFactoryRegistry.getFactoryFor(from);
+        Preconditions.checkState(f != null, "Unable to create NDArray from object of %s - no NDArrayFactory instances" +
+                " are available that can convert this type to Konduit Serving NDArray", from.getClass());
 
         return f.create(from);
     }
 
     static boolean canCreateFrom(@NonNull Object from){
-        return NDArrayRegistry.getFactoryFor(from) != null;
+        return NDArrayFactoryRegistry.getFactoryFor(from) != null;
     }
 
 }

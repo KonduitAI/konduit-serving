@@ -16,10 +16,27 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.api.format;
+package ai.konduit.serving.pipeline.registry;
 
-public interface NDArrayFormat<T> {
+import ai.konduit.serving.pipeline.api.format.FormatFactory;
+import ai.konduit.serving.pipeline.api.format.ImageFactory;
+import lombok.NonNull;
 
-    Class<T> formatType();
+import java.util.*;
 
+public abstract class BaseFactoryRegistry<T extends FormatFactory> extends AbstractRegistry<T> {
+
+    //Intentionally package private (no/default access modifier)
+
+    BaseFactoryRegistry(Class<T> factoryClass){
+        super(factoryClass);
+    }
+
+    public boolean acceptFactory(T factory, Object o){
+        return factory.canCreateFrom(o);
+    }
+
+    public Set<Class<?>> supportedForFactory(T factory){
+        return factory.supportedTypes();
+    }
 }
