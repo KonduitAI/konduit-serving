@@ -18,7 +18,35 @@
 
 package ai.konduit.serving.pipeline.impl.data.java;
 
-public class JavaNDArray {
+import ai.konduit.serving.pipeline.api.data.BaseNDArray;
+import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
+
+public class JavaNDArrays {
+
+    public static class Float1Array extends BaseNDArray<float[]>{
+        public Float1Array(float[] array) {
+            super(array);
+        }
+    }
+
+    public static class Float2Array extends BaseNDArray<float[][]>{
+        public Float2Array(float[][] array) {
+            super(array);
+        }
+    }
+
+    public static class Float3Array extends BaseNDArray<float[][][]>{
+        public Float3Array(float[][][] array) {
+            super(array);
+        }
+    }
+
+    public static class Float4Array extends BaseNDArray<float[][][][]>{
+        public Float4Array(float[][][][] array) {
+            super(array);
+        }
+    }
 
 
 }

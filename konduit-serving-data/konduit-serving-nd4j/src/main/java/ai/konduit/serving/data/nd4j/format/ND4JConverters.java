@@ -138,16 +138,17 @@ public class ND4JConverters  {
         @Override
         public <U> U convert(NDArray from, Class<U> to) {
             Preconditions.checkState(canConvert(from, to), "Unable to convert NDArray to %s", to);
-            U t = (U) from.get();
-            return (U)NDArray.create(convert((T)t));
+            T t = (T) from.get();
+            INDArray out = convert(t);
+            return (U)out;
         }
 
         @Override
-        public NDArray convert(NDArray from, NDArrayFormat to) {
+        public <U> U convert(NDArray from, NDArrayFormat<U> to) {
             Preconditions.checkState(canConvert(from, to), "Unable to convert to format: %s", to);
             T t = (T) from.get();
             INDArray arr = convert(t);
-            return NDArray.create(arr);
+            return (U)arr;
         }
 
         public abstract INDArray convert(T from);

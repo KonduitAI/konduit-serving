@@ -16,47 +16,42 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.nd4j.format;
+package ai.konduit.serving.pipeline.impl.data.java;
 
-import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
-import org.nd4j.common.base.Preconditions;
-import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class ND4JNDArrayFactory implements NDArrayFactory {
+public class JavaNDArrayFactory implements NDArrayFactory {
     @Override
     public Set<Class<?>> supportedTypes() {
-        Set<Class<?>> s = new HashSet<>();
-        s.add(INDArray.class);
-
-        //TODO do we want to allow creating INDArray from float[], float[][] etc?
-        // Probably not, given we can convert behind the scenes easily if needed...
-
-        return s;
+        Set<Class<?>> set = new HashSet<>();
+        set.add(float[].class);
+        set.add(float[][].class);
+        set.add(float[][][].class);
+        set.add(float[][][][].class);
+        return set;
     }
 
     @Override
     public boolean canCreateFrom(Object o) {
-        return o instanceof INDArray;
+        return supportedTypes().contains(o.getClass()); //TODO don't create set on every check
     }
 
     @Override
     public NDArray create(Object o) {
-        Preconditions.checkState(canCreateFrom(o), "Unable to create ND4J NDArray from object of %s", o.getClass());
-
-        INDArray a;
-        if(o instanceof INDArray){
-            a = (INDArray)o;
+        if(o instanceof float[]){
+            return new JavaNDArrays.Float1Array((float[]) o);
+        } else if(o instanceof float[][]){
+            return new JavaNDArrays.Float2Array((float[][]) o);
+        } else if(o instanceof float[][][]){
+            return new JavaNDArrays.Float3Array((float[][][]) o);
+        } else if(o instanceof float[][][][]){
+            return new JavaNDArrays.Float4Array((float[][][][]) o);
         } else {
-            throw new IllegalStateException();
+            throw new RuntimeException("Unable to create NDArray from object: " + o.getClass());
         }
-
-        //TODO add all the other java types!
-
-        return new ND4JNDArray(a);
     }
 }

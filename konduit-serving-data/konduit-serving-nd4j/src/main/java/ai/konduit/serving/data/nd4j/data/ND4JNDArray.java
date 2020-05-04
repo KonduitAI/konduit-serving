@@ -18,34 +18,11 @@
 
 package ai.konduit.serving.data.nd4j.data;
 
-import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.api.format.NDArrayConverter;
-import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
-import ai.konduit.serving.pipeline.registry.NDArrayConverterRegistry;
-import lombok.AllArgsConstructor;
-import org.nd4j.common.base.Preconditions;
+import ai.konduit.serving.pipeline.api.data.BaseNDArray;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-@AllArgsConstructor
-public class ND4JNDArray implements NDArray {
-
-    private INDArray array;
-
-    @Override
-    public INDArray get() {
-        return array;
-    }
-
-    @Override
-    public <T> T getAs(NDArrayFormat<T> format) {
-        return NDArrayConverterRegistry.getConverterFor(this, format).convert(this, format);
-    }
-
-    @Override
-    public <T> T getAs(Class<T> type) {
-        //TODO check to avoid NPE
-        NDArrayConverter converter = NDArrayConverterRegistry.getConverterFor(this, type);
-        Preconditions.checkState(converter != null, "No converter found for converting from %s to %s", INDArray.class, type);
-        return converter.convert(this, type);
+public class ND4JNDArray extends BaseNDArray<INDArray> {
+    public ND4JNDArray(INDArray array) {
+        super(array);
     }
 }
