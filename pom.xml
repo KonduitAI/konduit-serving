@@ -135,7 +135,7 @@
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
         <hdf5.version>1.12.0</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
-        <jna.version>5.3.1</jna.version>
+        <jna.version>5.5.0</jna.version>
         <cuda.version>10.2</cuda.version>
         <cuda.javacpp.version>${cuda.version}-${javacpp.version}</cuda.javacpp.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
@@ -156,10 +156,53 @@
         <swagger-core.version>2.1.1</swagger-core.version>
         <fastutil.version>8.1.1</fastutil.version>
         <org.eclipse.persistence.moxy.version>2.7.6</org.eclipse.persistence.moxy.version>
+
+        <openapi-generator.version>5.0.0-SNAPSHOT</openapi-generator.version>
+        <jsr305.version>3.0.2</jsr305.version>
+        <jackson-coreutils.version>1.8</jackson-coreutils.version>
+        <httpclient.version>4.5.3</httpclient.version>
+        <slf4j-ext.version>1.7.28</slf4j-ext.version>
+        <joda-time.version>2.9.9</joda-time.version>
+        <commons-io.version>2.5</commons-io.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>${jsr305.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.fge</groupId>
+                <artifactId>jackson-coreutils</artifactId>
+                <version>${jackson-coreutils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>${jna.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-ext</artifactId>
+                <version>${slf4j-ext.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda-time.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.jpmml</groupId>
                 <artifactId>pmml-model</artifactId>
@@ -772,28 +815,6 @@
                         <autoReleaseAfterClose>false</autoReleaseAfterClose>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>io.swagger.core.v3</groupId>
-                    <artifactId>swagger-maven-plugin</artifactId>
-                    <version>${swagger-core.version}</version>
-                    <configuration>
-                        <outputFileName>openapi</outputFileName>
-                        <outputPath>${project.build.directory}/konduit-openapi</outputPath>
-                        <outputFormat>YAML</outputFormat>
-                        <resourcePackages>
-                            <package>ai.konduit.serving</package>
-                        </resourcePackages>
-                        <prettyPrint>true</prettyPrint>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>compile</phase>
-                            <goals>
-                                <goal>resolve</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -817,6 +838,12 @@
     </repositories>
 
     <profiles>
+        <profile>
+            <id>clients</id>
+            <modules>
+                <module>konduit-serving-clients</module>
+            </modules>
+        </profile>
         <profile>
             <id>jetson-nano</id>
             <modules>

@@ -62,7 +62,7 @@ import lombok.extern.slf4j.Slf4j;
                 @Tag(name = "convert", description = "Tag for grouping converter operations"),
                 @Tag(name = "memmap", description = "Tag for grouping memory mapping operations")
         },
-        externalDocs = @ExternalDocumentation(description = "Online documentation", url = "https://serving.oss.konduit.ai")
+        externalDocs = @ExternalDocumentation(description = "Online documentation", url = "https://serving.konduit.ai")
 )
 public abstract class BaseRoutableVerticle extends AbstractVerticle implements Routable {
 

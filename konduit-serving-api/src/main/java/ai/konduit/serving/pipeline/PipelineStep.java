@@ -173,25 +173,40 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * Getter for the input column names
      * @return input column names
      */
-    Map<String,List<String>> getInputColumnNames();
+    @io.swagger.v3.oas.annotations.media.Schema(
+            title = "Name of the input columns/headers",
+            description = "The keys inside this map/dictionary are the one of the values " +
+                    "contained within `inputNames` and the values are the corresponding " +
+                    "columns/headers (in case of columnar data). This can be ignore if the datatype " +
+                    "associated with the input name keys is not columnar data."
+    )
+    Map<String, List<String>> getInputColumnNames();
 
     /**
      * Getter for the output column names
      * @return output column names
      */
-    Map<String,List<String>> getOutputColumnNames();
+    @io.swagger.v3.oas.annotations.media.Schema(
+            title = "Name of the output columns/labels/headers",
+            description = "The keys inside this map/dictionary are the one of the values " +
+                    "contained within `outputNames` and the values are the corresponding " +
+                    "columns/labels/headers (in case of columnar data). This can also contain the " +
+                    "labels when the output from the pipeline is a classification among a set of objects. " +
+                    "This can be ignored if the output data is not columnar or isn't a classification."
+    )
+    Map<String, List<String>> getOutputColumnNames();
 
     /**
      * Getter for the input schema
      * @return the input schema
      */
-    Map<String,List<SchemaType>> getInputSchemas();
+    Map<String, List<SchemaType>> getInputSchemas();
 
     /**
      * Getter for the output schema
      * @return the output schema
      */
-    Map<String,List<SchemaType>> getOutputSchemas();
+    Map<String, List<SchemaType>> getOutputSchemas();
 
     /**
      * Getter for the output names for the current pipeline step

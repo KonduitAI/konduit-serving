@@ -25,6 +25,8 @@ import ai.konduit.serving.config.TextConfig;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.RegressionMetricsConfig;
 import io.micrometer.core.instrument.binder.MeterBinder;
+import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
@@ -45,7 +47,23 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = NoOpMetricsConfig.class, name = "NoOpMetricsConfig"),
         @JsonSubTypes.Type(value = ClassificationMetricsConfig.class, name = "ClassificationMetricsConfig"),
 })
-@JsonTypeInfo(use = NAME, include = PROPERTY)
+@JsonTypeInfo(use = NAME, property = "type")
+@Schema(
+        discriminatorProperty = "type",
+        subTypes = {
+                RegressionMetricsConfig.class,
+                NoOpMetricsConfig.class,
+                ClassificationMetricsConfig.class
+        },
+        discriminatorMapping = {
+                @DiscriminatorMapping(schema = RegressionMetricsConfig.class, value = "REGRESSION"),
+                @DiscriminatorMapping(schema = RegressionMetricsConfig.class, value = "RegressionMetricsConfig"),
+                @DiscriminatorMapping(schema = NoOpMetricsConfig.class, value = "NOOP"),
+                @DiscriminatorMapping(schema = NoOpMetricsConfig.class, value = "NoOpMetricsConfig"),
+                @DiscriminatorMapping(schema = ClassificationMetricsConfig.class, value = "CLASSIFICATION"),
+                @DiscriminatorMapping(schema = ClassificationMetricsConfig.class, value = "ClassificationMetricsConfig")
+        }
+)
 public interface MetricsConfig extends TextConfig {
 
     /**
