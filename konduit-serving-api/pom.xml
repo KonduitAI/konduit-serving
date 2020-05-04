@@ -68,6 +68,11 @@
     </profiles>
     <dependencies>
         <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-pipeline</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
             <version>${micrometer.version}</version>
@@ -237,7 +242,7 @@
                             </inputDirectories>
                             <addSources>main</addSources>
                             <cleanOutputFolder>false</cleanOutputFolder>
-                            <outputDirectory>src/main/java</outputDirectory>
+                            <outputDirectory>../konduit-serving-pipeline/src/main/java/ai/konduit/serving/pipeline/impl/data</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

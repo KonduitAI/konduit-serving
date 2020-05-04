@@ -24,7 +24,7 @@ package ai.konduit.serving.config;
 
 import ai.konduit.serving.model.PythonConfig;
 import org.junit.Test;
-import org.nd4j.jackson.objectmapper.holder.ObjectMapperHolder;
+import org.nd4j.common.holder.ObjectMapperHolder;
 
 public class ConfigSerializationTests {
 

@@ -28,7 +28,7 @@ import org.datavec.api.records.Record;
 import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.writable.Writable;
 import org.datavec.local.transforms.LocalTransformExecutor;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 
 import java.util.Arrays;
 import java.util.List;

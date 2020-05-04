@@ -27,9 +27,15 @@ package ai.konduit.serving.config;
  * outputs available to the server.
  *
  * @author Adam Gibson
+ * @deprecated To be removed - https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 public class Output {
 
+    /**
+     * @deprecated To be removed - https://github.com/KonduitAI/konduit-serving/issues/298
+     */
+    @Deprecated
     public enum DataFormat {
         NUMPY,
         JSON,
@@ -50,7 +56,9 @@ public class Output {
      * Various {@link ai.konduit.serving.pipeline.PipelineStep}s have
      * different expected {@link PredictionType}s
      * when they are the final output.
+     * @deprecated To be refactored - https://github.com/KonduitAI/konduit-serving/issues/298
      */
+    @Deprecated
     public enum PredictionType {
         CLASSIFICATION,
         YOLO,

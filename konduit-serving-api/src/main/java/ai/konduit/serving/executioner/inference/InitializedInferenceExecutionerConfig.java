@@ -29,10 +29,14 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * @deprecated To be removed/refactored - https://github.com/KonduitAI/konduit-serving/issues/298
+ */
 @Data
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor
+@Deprecated
 public class InitializedInferenceExecutionerConfig {
     private InferenceExecutioner inferenceExecutioner;
     private List<String> inputNames, outputNames;

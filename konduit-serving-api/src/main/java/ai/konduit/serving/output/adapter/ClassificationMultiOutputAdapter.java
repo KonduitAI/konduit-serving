@@ -25,7 +25,7 @@ package ai.konduit.serving.output.adapter;
 import ai.konduit.serving.output.types.BatchOutput;
 import io.vertx.ext.web.RoutingContext;
 import org.datavec.api.transform.schema.Schema;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.util.Arrays;

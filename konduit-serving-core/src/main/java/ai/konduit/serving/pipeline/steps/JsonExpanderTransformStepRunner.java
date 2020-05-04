@@ -30,7 +30,7 @@ import io.vertx.core.json.JsonObject;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.Text;
 import org.datavec.api.writable.Writable;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;

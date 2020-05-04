@@ -59,7 +59,7 @@ import org.datavec.arrow.recordreader.ArrowRecord;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.deeplearning4j.zoo.util.Labels;
 import org.nd4j.arrow.ArrowSerde;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.serde.binary.BinarySerde;
@@ -82,8 +82,10 @@ import java.util.zip.ZipOutputStream;
  * the user.
  *
  * @author Adam Gibson
+ * @deprecated To be replaced by {@link ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor} - see https://github.com/KonduitAI/konduit-serving/issues/298
  */
 @Slf4j
+@Deprecated
 public class PipelineExecutioner implements Closeable {
 
     protected List<String> inputNames;

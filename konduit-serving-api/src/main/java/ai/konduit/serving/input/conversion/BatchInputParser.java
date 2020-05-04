@@ -34,9 +34,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.Writable;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.primitives.Pair;
 
 import java.io.IOException;
 import java.util.*;

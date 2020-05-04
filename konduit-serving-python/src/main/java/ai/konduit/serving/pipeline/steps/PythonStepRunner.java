@@ -36,7 +36,7 @@ import org.datavec.python.PythonTransform;
 import org.datavec.python.PythonTransform.PythonTransformBuilder;
 import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;

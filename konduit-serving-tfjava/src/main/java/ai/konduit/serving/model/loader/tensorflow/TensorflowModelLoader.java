@@ -30,7 +30,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
 import org.apache.commons.io.FileUtils;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.tensorflow.conversion.TensorDataType;
 import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 

@@ -31,7 +31,7 @@ import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.transform.schema.Schema;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
