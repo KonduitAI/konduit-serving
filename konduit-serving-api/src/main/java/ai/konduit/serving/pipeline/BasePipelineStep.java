@@ -23,6 +23,7 @@ package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.config.SchemaType;
+import ai.konduit.serving.pipeline.step.*;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -49,6 +50,13 @@ import java.util.*;
 @SuperBuilder
 @EqualsAndHashCode(callSuper = false)
 @Slf4j
+@io.swagger.v3.oas.annotations.media.Schema(
+        subTypes = {
+                PythonStep.class, TransformProcessStep.class, ImageLoadingStep.class,
+                JsonExpanderTransformStep.class, ArrayConcatenationStep.class,
+                WordPieceTokenizerStep.class, CustomPipelineStep.class, ModelStep.class
+        }
+)
 public abstract class BasePipelineStep<T extends BasePipelineStep<T>> implements PipelineStep<T> {
 
     @Singular

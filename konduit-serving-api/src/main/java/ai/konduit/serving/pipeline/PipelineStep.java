@@ -8,6 +8,7 @@ import ai.konduit.serving.config.TextConfig;
 import ai.konduit.serving.pipeline.step.*;
 import ai.konduit.serving.pipeline.step.model.*;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
+import onnx.Onnx;
 import org.datavec.api.transform.schema.Schema;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
@@ -63,6 +64,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @JsonTypeInfo(use = NAME, property = "type")
 @XmlRootElement
 @io.swagger.v3.oas.annotations.media.Schema(description = "Pipeline Step",
+        subTypes = { BasePipelineStep.class },
         discriminatorProperty = "type",
         discriminatorMapping = {
                 @DiscriminatorMapping(schema = PmmlStep.class, value = "PMML"),
@@ -214,6 +216,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
+    @io.swagger.v3.oas.annotations.media.Schema(hidden = true)
     T setInput(String inputName, String[] columnNames, List<SchemaType> types)
             throws Exception;
 
@@ -225,6 +228,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
+    @io.swagger.v3.oas.annotations.media.Schema(hidden = true)
     T setInput(String inputName, Schema inputSchema) throws Exception;
 
     /**
@@ -237,6 +241,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
+    @io.swagger.v3.oas.annotations.media.Schema(hidden = true)
     T setOutput(String outputName, String[] columnNames, List<SchemaType> types)
             throws Exception;
 
@@ -248,6 +253,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
+    @io.swagger.v3.oas.annotations.media.Schema(hidden = true)
     T setOutput(String outputName, Schema outputSchema) throws Exception;
 
     /**
@@ -259,6 +265,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
+    @io.swagger.v3.oas.annotations.media.Schema(hidden = true)
     default T setInput(String[] columnNames, List<SchemaType> types) throws Exception {
         return setInput("default", columnNames, types);
     }
@@ -273,6 +280,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
+    @io.swagger.v3.oas.annotations.media.Schema(hidden = true)
     default T setOutput(String[] columnNames, List<SchemaType> types) throws Exception {
         return setOutput("default", columnNames, types);
     }
@@ -285,6 +293,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
+    @io.swagger.v3.oas.annotations.media.Schema(hidden = true)
     default T setInput(Schema inputSchema) throws Exception {
         return setInput("default", inputSchema);
     }
@@ -297,6 +306,7 @@ public interface PipelineStep<T extends PipelineStep> extends Serializable, Text
      * @return this pipeline step
      * @throws Exception key error
      */
+    @io.swagger.v3.oas.annotations.media.Schema(hidden = true)
     default T setOutput(Schema outputSchema) throws Exception {
         return setOutput("default", outputSchema);
     }

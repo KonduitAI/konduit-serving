@@ -31,7 +31,9 @@ import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.output.types.ClassifierOutput;
 import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.config.NormalizationConfig;
+import ai.konduit.serving.pipeline.step.model.*;
 import ai.konduit.serving.util.ObjectMappers;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonAlias;
@@ -71,6 +73,10 @@ import java.util.Map;
 @SuperBuilder
 @JsonIgnoreProperties({"map", "empty"})
 @EqualsAndHashCode(callSuper = true)
+@Schema(subTypes = {
+        PmmlStep.class, SameDiffStep.class, TensorFlowStep.class,
+        OnnxStep.class, KerasStep.class, Dl4jStep.class
+})
 public abstract class ModelStep extends BasePipelineStep<ModelStep> {
 
     @Singular
