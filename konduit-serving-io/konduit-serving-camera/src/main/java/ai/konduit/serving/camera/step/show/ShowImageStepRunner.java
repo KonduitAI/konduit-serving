@@ -18,10 +18,10 @@
 
 package ai.konduit.serving.camera.step.show;
 
-import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
-import ai.konduit.serving.pipeline.impl.data.Image;
 import ai.konduit.serving.pipeline.impl.data.ValueType;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
@@ -60,7 +60,7 @@ public class ShowImageStepRunner implements PipelineStepRunner {
                 name, data.keys());
 
         Image i = data.getImage(name);
-        Frame f = (Frame)i.getImage();          //TODO fix image types / API
+        Frame f = (Frame)i.get();          //TODO NO CAST
 
         if(!initialized)
             init();

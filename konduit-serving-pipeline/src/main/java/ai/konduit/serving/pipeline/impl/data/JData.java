@@ -15,7 +15,9 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data;
 
-import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.impl.data.wrappers.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

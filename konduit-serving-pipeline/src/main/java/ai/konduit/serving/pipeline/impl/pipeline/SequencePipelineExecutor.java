@@ -15,13 +15,13 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.pipeline;
 
-import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
-import ai.konduit.serving.pipeline.registry.Factories;
+import ai.konduit.serving.pipeline.registry.PipelineRegistry;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.common.base.Preconditions;
@@ -43,7 +43,7 @@ public class SequencePipelineExecutor implements PipelineExecutor {
         runners = new ArrayList<>();
         List<PipelineStep> steps = p.getSteps();
 
-        List<PipelineStepRunnerFactory> factories = Factories.getStepRunnerFactories();
+        List<PipelineStepRunnerFactory> factories = PipelineRegistry.getStepRunnerFactories();
 
 
         for(PipelineStep ps : steps){

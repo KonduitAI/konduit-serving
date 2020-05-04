@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data;
 
-import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.api.data.Data;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;

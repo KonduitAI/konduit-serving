@@ -2,7 +2,7 @@ package ai.konduit.serving.camera;
 
 import ai.konduit.serving.camera.step.capture.FrameCapturePipelineStep;
 import ai.konduit.serving.camera.step.show.ShowImagePipelineStep;
-import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;

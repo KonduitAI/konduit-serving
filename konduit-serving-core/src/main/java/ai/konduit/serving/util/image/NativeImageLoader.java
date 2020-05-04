@@ -307,6 +307,11 @@ public class NativeImageLoader extends BaseImageLoader {
     }
 
     @Override
+    public INDArray asMatrix(File f, boolean nchw) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public INDArray asMatrix(InputStream is) throws IOException {
         Mat mat = streamToMat(is);
         INDArray a;
@@ -326,6 +331,11 @@ public class NativeImageLoader extends BaseImageLoader {
             image.deallocate();
         }
         return a;
+    }
+
+    @Override
+    public INDArray asMatrix(InputStream inputStream, boolean nchw) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -386,6 +396,11 @@ public class NativeImageLoader extends BaseImageLoader {
     }
 
     @Override
+    public Image asImageMatrix(File f, boolean nchw) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Image asImageMatrix(InputStream is) throws IOException {
         Mat mat = streamToMat(is);
         Mat image = imdecode(mat, IMREAD_ANYDEPTH | IMREAD_ANYCOLOR);
@@ -402,6 +417,11 @@ public class NativeImageLoader extends BaseImageLoader {
 
         image.deallocate();
         return i;
+    }
+
+    @Override
+    public Image asImageMatrix(InputStream inputStream, boolean nchw) throws IOException {
+        return null;
     }
 
     /**

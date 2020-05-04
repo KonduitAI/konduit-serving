@@ -17,10 +17,10 @@
  */
 package ai.konduit.serving.camera.step.capture;
 
-import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
-import ai.konduit.serving.pipeline.impl.data.Image;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacv.*;
 
@@ -61,7 +61,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
 
         try {
             Frame frame = grabber.grab();
-            Image i = new Image(frame);         //TODO Image format is yet to be determined!
+            Image i = Image.create(frame);         //TODO Image format is yet to be determined!
             return Data.singleton(step.getOutputKey(), i);
         } catch (Throwable t){
             throw new RuntimeException("Error getting frame", t);
