@@ -26,3 +26,7 @@ message DataScheme {
         LIST = 8;
     }
 }
+
+message DataMap {
+    repeated DataScheme items = 1;
+}

@@ -200,13 +200,23 @@ public class JData implements Data {
         throw new UnsupportedOperationException();
     }
 
-    public static Data fromFile(File fromFile) {
-        throw new UnsupportedOperationException();
+    public static Data fromFile(File fromFile) throws IOException {
+        val builder = generated.Data.DataMap.newBuilder().mergeFrom(new FileInputStream(fromFile));
+        generated.Data.DataMap dataMap = builder.build();
+        JData retData = new JData();
+        for (int i = 0; i < dataMap.getItemsCount(); ++i) {
+            generated.Data.DataScheme item = dataMap.getItems(i);
+            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.STRING.ordinal()) {
+                retData.put(item.getKey(), item.getSValue());
+            }
+        }
+        return retData;
     }
 
     @Override
-    public void write(OutputStream toStream) {
-        throw new UnsupportedOperationException();
+    public void write(OutputStream toStream) throws IOException {
+        generated.Data.DataMap pbDataMap = generated.Data.DataMap.newBuilder().build();
+        pbDataMap.writeTo(toStream);
     }
 
     public byte[] asBytes() {

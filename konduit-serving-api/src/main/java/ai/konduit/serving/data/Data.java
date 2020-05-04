@@ -24,6 +24,7 @@ import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -70,7 +71,7 @@ public interface Data {
     void save(File toFile);
 
 
-    void write(OutputStream toStream);
+    void write(OutputStream toStream) throws IOException;
 
     static Data fromJson(String key) {
         return null;

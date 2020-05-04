@@ -20,6 +20,7 @@
  */
 package ai.konduit.serving.data;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,11 +29,13 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+@Slf4j
 public class DataTest {
 
     private final String KEY = "stringData";
@@ -121,7 +124,11 @@ public class DataTest {
     public void testSerde() {
         Data someData = JData.makeData(KEY, Long.valueOf(200));
         someData.save(new File("temp"));
-        Data restoredData = JData.fromFile(new File("temp"));
+        try {
+            Data restoredData = JData.fromFile(new File("temp"));
+        } catch (IOException e) {
+            log.error("IOException in DataTest.testSerde()", e);
+        }
     }
 
     @Test
