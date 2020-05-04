@@ -18,10 +18,7 @@ package ai.konduit.serving.pipeline.api;
 import ai.konduit.serving.pipeline.impl.data.*;
 import lombok.NonNull;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Collection;
 import java.util.List;
 
@@ -76,7 +73,7 @@ public interface Data {
     void setMetaData(Data data);
 
     // Serialization routines
-    void save(File toFile);
+    void save(File toFile) throws IOException;
 
 
     void write(OutputStream toStream) throws IOException;

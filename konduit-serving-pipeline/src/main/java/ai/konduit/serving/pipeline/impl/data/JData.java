@@ -207,22 +207,25 @@ public class JData implements Data {
     }
 
     @Override
-    public void save(File toFile) {
-
-        throw new UnsupportedOperationException();
+    public void save(File toFile) throws IOException {
+        write(new FileOutputStream(toFile));
     }
 
     public static Data fromFile(File fromFile) throws IOException {
         generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder().mergeFrom(new FileInputStream(fromFile));
         generated.Data.DataMap dataMap = builder.build();
         JData retData = new JData();
-        for (int i = 0; i < dataMap.getItemsCount(); ++i) {
-            generated.Data.DataScheme item = dataMap.getItems(i);
+        Map<String, generated.Data.DataScheme> schemeMap = dataMap.getMapItemsMap();
+        Iterator<Map.Entry<String, generated.Data.DataScheme>> iterator =
+                schemeMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, generated.Data.DataScheme> entry = iterator.next();
+            generated.Data.DataScheme item = entry.getValue();
             if (item.getTypeValue() == generated.Data.DataScheme.ValueType.STRING.ordinal()) {
-                retData.put(item.getKey(), item.getSValue());
+                retData.put(entry.getKey(), item.getSValue());
             }
             if (item.getTypeValue() == generated.Data.DataScheme.ValueType.BOOLEAN.ordinal()) {
-                retData.put(item.getKey(), item.getBoolValue());
+                retData.put(entry.getKey(), item.getBoolValue());
             }
         }
         return retData;
@@ -230,7 +233,35 @@ public class JData implements Data {
 
     @Override
     public void write(OutputStream toStream) throws IOException {
-        generated.Data.DataMap pbDataMap = generated.Data.DataMap.newBuilder().build();
+
+        Map<String, generated.Data.DataScheme> newItemsMap = new HashMap<>();
+        Iterator<Map.Entry<String, Value>> iterator = dataMap.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<String, Value> nextItem = iterator.next();
+            Value value = nextItem.getValue();
+
+            generated.Data.DataScheme item = null;
+
+            if (value.type().equals(ValueType.STRING)) {
+                item = generated.Data.DataScheme.newBuilder().
+                        setSValue((String)nextItem.getValue().get()).
+                        build();
+            }
+            else if (value.type().equals(ValueType.BOOLEAN)) {
+                item = generated.Data.DataScheme.newBuilder().
+                        setBoolValue((Boolean)nextItem.getValue().get()).
+                        build();
+            }
+            if (item == null) {
+                throw new IllegalStateException("JData.write failed");
+            }
+            newItemsMap.put(nextItem.getKey(), item);
+        }
+
+        generated.Data.DataMap pbDataMap = generated.Data.DataMap.newBuilder().
+                putAllMapItems(newItemsMap).
+                build();
         pbDataMap.writeTo(toStream);
     }
 

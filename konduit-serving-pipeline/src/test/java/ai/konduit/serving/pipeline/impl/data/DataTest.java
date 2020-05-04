@@ -115,16 +115,21 @@ public class DataTest {
         Data layeredContainer = JData.singleton("upperLevel", ndContainer);
     }
 
-    @Ignore
     @Test
     public void testSerde() {
         Data someData = JData.singleton(KEY, Long.valueOf(200));
-        someData.save(new File("temp"));
         try {
-            Data restoredData = JData.fromFile(new File("temp"));
+            someData.save(new File("temp"));
         } catch (IOException e) {
             log.error("IOException in DataTest.testSerde()", e);
         }
+        Data restoredData = null;
+        try {
+            restoredData = JData.fromFile(new File("temp"));
+        } catch (IOException e) {
+            log.error("IOException in DataTest.testSerde()", e);
+        }
+        assertEquals(someData.getData(KEY), restoredData.getData(KEY));
     }
 
     @Test

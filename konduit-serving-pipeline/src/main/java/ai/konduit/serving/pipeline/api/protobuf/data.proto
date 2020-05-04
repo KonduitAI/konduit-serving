@@ -4,7 +4,6 @@ syntax = "proto3";
 package generated;
 
 message DataScheme {
-    string key = 1;
     DataScheme metaData = 2;
     oneof value {
         string sValue = 3;
@@ -28,5 +27,6 @@ message DataScheme {
 }
 
 message DataMap {
-    repeated DataScheme items = 1;
+    map<string, DataScheme> mapItems = 1;
 }
+
