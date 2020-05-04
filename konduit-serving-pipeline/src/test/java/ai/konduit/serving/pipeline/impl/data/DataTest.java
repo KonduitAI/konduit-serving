@@ -27,6 +27,8 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -151,6 +153,13 @@ public class DataTest {
                 "  \"type\": \"INT64\"\n" +
                 "}";
         assertEquals(expected, jsonStr);
+    }
+
+    @Test
+    public void testLists() {
+        Data someData = (JData) JData.singleton(KEY, Collections.singletonList(Long.valueOf(200)));
+        List<?> someList = someData.getList(KEY);
+        assertEquals(1, someList.size());
     }
 
     @Test

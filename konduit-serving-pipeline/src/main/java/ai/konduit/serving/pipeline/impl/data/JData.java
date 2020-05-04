@@ -153,8 +153,9 @@ public class JData implements Data {
     }
 
     @Override
-    public List<Object> getList(String key, ValueType type) {
-        return null;
+    public List<Object> getList(String key) {
+        Value<List<Object>> data = valueIfFound(key, ValueType.LIST);
+        return data.get();
     }
 
     @Override
@@ -202,6 +203,11 @@ public class JData implements Data {
     public void put(String key, Data data) {
         // TODO: must avoid cast and redesign method
         this.dataMap.putAll(((JData)data).getDataMap());
+    }
+
+    @Override
+    public void put(String key, List<?> data) {
+        dataMap.put(key, new ListValue(data));
     }
 
     @Override
@@ -334,6 +340,9 @@ public class JData implements Data {
             instance.put(key, (Data)data);
         } else if(data instanceof NDArray){
             instance.put(key, (NDArray)data);
+        }
+        else if (data instanceof List) {
+            instance.put(key,(List)data);
         }
 //        else if (data instanceof Object) {
 //            instance.put(key, (Object)data);
