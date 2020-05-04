@@ -19,6 +19,7 @@ import ai.konduit.serving.pipeline.api.Data;
 import ai.konduit.serving.pipeline.impl.data.wrappers.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.*;
@@ -212,13 +213,16 @@ public class JData implements Data {
     }
 
     public static Data fromFile(File fromFile) throws IOException {
-        val builder = generated.Data.DataMap.newBuilder().mergeFrom(new FileInputStream(fromFile));
+        generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder().mergeFrom(new FileInputStream(fromFile));
         generated.Data.DataMap dataMap = builder.build();
         JData retData = new JData();
         for (int i = 0; i < dataMap.getItemsCount(); ++i) {
             generated.Data.DataScheme item = dataMap.getItems(i);
             if (item.getTypeValue() == generated.Data.DataScheme.ValueType.STRING.ordinal()) {
                 retData.put(item.getKey(), item.getSValue());
+            }
+            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.BOOLEAN.ordinal()) {
+                retData.put(item.getKey(), item.getBoolValue());
             }
         }
         return retData;
