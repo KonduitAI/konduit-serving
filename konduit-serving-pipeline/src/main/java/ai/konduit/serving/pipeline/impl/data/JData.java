@@ -258,6 +258,12 @@ public class JData implements Data {
         return pbMapToJavaData(dataMap);
     }
 
+    public static Data fromStream(InputStream stream) throws IOException {
+        generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder().mergeFrom(stream);
+        generated.Data.DataMap dataMap = builder.build();
+        return pbMapToJavaData(dataMap);
+    }
+
     private static Data pbMapToJavaData(generated.Data.DataMap dataMap) {
         JData retData = new JData();
         Map<String, generated.Data.DataScheme> schemeMap = dataMap.getMapItemsMap();
@@ -385,6 +391,19 @@ public class JData implements Data {
             log.error("Failed write to ByteArrayOutputStream", e);
         }
         return baos.toByteArray();
+    }
+
+    public static Data fromBytes(byte[] input) {
+        Data retVal = empty();
+        generated.Data.DataMap.Builder builder = null;
+        try {
+            builder = generated.Data.DataMap.newBuilder().mergeFrom(input);
+        } catch (InvalidProtocolBufferException e) {
+            log.error("Error converting bytes array to data",e);
+        }
+        generated.Data.DataMap dataMap = builder.build();
+        retVal = pbMapToJavaData(dataMap);
+        return retVal;
     }
 
     public static Data fromJson(String jsonString) {

@@ -88,18 +88,17 @@ public interface Data {
         return JData.fromJson(jsonString);
     }
 
-    static Data fromFile(File file) throws FileNotFoundException {
+    static Data fromFile(File file) throws IOException {
         return fromStream(new FileInputStream(file));
     }
 
-    static Data fromStream(InputStream fromStream) {
-        return null;
+    static Data fromStream(InputStream fromStream) throws IOException {
+        return JData.fromStream(fromStream);
     }
 
-    static Data fromBytes(InputStream fromStream) {
-        return null;
+    static Data fromBytes(byte[] input) throws IOException {
+        return JData.fromBytes(input);
     }
-
 
     static Data singleton(@NonNull String key, @NonNull Object value){
         return JData.singleton(key, value);

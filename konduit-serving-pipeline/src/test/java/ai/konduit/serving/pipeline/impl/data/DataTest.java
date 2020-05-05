@@ -25,6 +25,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static ai.konduit.serving.pipeline.impl.data.JData.empty;
 import static ai.konduit.serving.pipeline.impl.data.JData.fromJson;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -266,5 +269,34 @@ public class DataTest {
 
         String actualJsonStr = someDataFromJson.toJson();
         assertEquals(jsonString, actualJsonStr);
+        assertEquals(someData.get(KEY), someDataFromJson.get(KEY));
+    }
+
+    @Test
+    public void testBytesSerde() {
+        JData someData = (JData)Data.singleton(KEY, "testString");
+        byte[] someBytes = someData.asBytes();
+        JData restoredData = null;
+        try {
+            restoredData = (JData) Data.fromBytes(someBytes);
+        } catch (IOException e) {
+            log.error("JData.testBytesSerde");
+        }
+        assertEquals(someData.get(KEY), restoredData.get(KEY));
+    }
+
+    @Test
+    public void testStreamsSerde() {
+        JData someData = (JData)Data.singleton(KEY, "testString");
+        Data restored = empty();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            someData.write(baos);
+            restored = Data.fromStream(new ByteArrayInputStream(baos.toByteArray()));
+        } catch (IOException e) {
+            log.error("testStreamsSerde failed", e);
+        }
+        assertEquals(someData.get(KEY), restored.get(KEY));
     }
 }
