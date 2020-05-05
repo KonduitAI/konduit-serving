@@ -212,7 +212,22 @@ public class JData implements Data {
     }
 
     @Override
-    public void put(String key, List<Object> data) {
+    public void putListString(String key, List<String> data) {
+        dataMap.put(key, new ListValue(data));
+    }
+
+    @Override
+    public void putListInt64(String key, List<Long> data) {
+        dataMap.put(key, new ListValue(data));
+    }
+
+    @Override
+    public void putListBoolean(String key, List<Boolean> data) {
+        dataMap.put(key, new ListValue(data));
+    }
+
+    @Override
+    public void putListDouble(String key, List<Double> data) {
         dataMap.put(key, new ListValue(data));
     }
 
@@ -350,14 +365,32 @@ public class JData implements Data {
         } else if(data instanceof NDArray){
             instance.put(key, (NDArray)data);
         }
-        else if (data instanceof List) {
-            instance.put(key,(List)data);
-        }
 //        else if (data instanceof Object) {
 //            instance.put(key, (Object)data);
 //        }
         else {
             throw new IllegalStateException("Trying to put data of not supported type: " + data.getClass());
+        }
+        return instance;
+    }
+
+    public static Data singletonList(@NonNull String key, @NonNull List<?> data,
+                                     @NonNull ValueType valueType) {
+        Data instance = new JData();
+        if (valueType.equals(ValueType.STRING)) {
+            instance.putListString(key, (List<String>)data);
+        }
+        else if (valueType.equals(ValueType.BOOLEAN)) {
+            instance.putListBoolean(key, (List<Boolean>) data);
+        }
+        else if (valueType.equals(ValueType.DOUBLE)) {
+            instance.putListDouble(key, (List<Double>) data);
+        }
+        else if (valueType.equals(ValueType.INT64)) {
+            instance.putListInt64(key, (List<Long>) data);
+        }
+        else {
+            throw new IllegalStateException("Trying to put list data of not supported type: " + data.getClass());
         }
         return instance;
     }
@@ -408,8 +441,23 @@ public class JData implements Data {
             return this;
         }
 
-        public DataBuilder add(String key, List<Object> data) {
-            instance.put(key, data);
+        public DataBuilder addListString(String key, List<String> data) {
+            instance.putListString(key, data);
+            return this;
+        }
+
+        public DataBuilder addListInt64(String key, List<Long> data) {
+            instance.putListInt64(key, data);
+            return this;
+        }
+
+        public DataBuilder addListBoolean(String key, List<Boolean> data) {
+            instance.putListBoolean(key, data);
+            return this;
+        }
+
+        public DataBuilder addListDouble(String key, List<Double> data) {
+            instance.putListDouble(key, data);
             return this;
         }
 

@@ -66,7 +66,10 @@ public interface Data {
     void put(String key, double data);
     void put(String key, boolean data);
 
-    void put(String key, List<Object> data);
+    void putListString(String key, List<String> data);
+    void putListInt64(String key, List<Long> data);
+    void putListBoolean(String key, List<Boolean> data);
+    void putListDouble(String key, List<Double> data);
     //void put(String key, Data data);
 
     void put(String key, Data data);
@@ -100,5 +103,9 @@ public interface Data {
 
     static Data singleton(@NonNull String key, @NonNull Object value){
         return JData.singleton(key, value);
+    }
+
+    static Data singletonList(@NonNull String key, @NonNull List<?> value, @NonNull ValueType valueType){
+        return JData.singletonList(key, value, valueType);
     }
 }

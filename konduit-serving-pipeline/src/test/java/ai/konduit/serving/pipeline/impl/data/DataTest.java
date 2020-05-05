@@ -159,7 +159,7 @@ public class DataTest {
 
     @Test
     public void testLists() {
-        Data someData = (JData) JData.singleton(KEY, Collections.singletonList(Long.valueOf(200)));
+        Data someData = (JData) JData.singletonList(KEY, Collections.singletonList(Long.valueOf(200)), ValueType.INT64);
         List<?> someList = someData.getList(KEY, ValueType.INT64);
         assertEquals(1, someList.size());
         assertEquals(200L, someList.get(0));
@@ -168,7 +168,7 @@ public class DataTest {
         strings.add("one");
         strings.add("two");
         strings.add("three");
-        Data listOfStrings = JData.singleton(KEY, strings);
+        Data listOfStrings = JData.singletonList(KEY, strings, ValueType.STRING);
         List<?> actual = listOfStrings.getList(KEY, ValueType.STRING);
         assertEquals(strings, actual);
     }
@@ -177,18 +177,49 @@ public class DataTest {
     public void testsNumericLists() {
         final long LIST_SIZE = 6;
 
-        List<Object> numbers = Lists.newArrayList();
+        List<Long> numbers = Lists.newArrayList();
         for (long i = 0; i < LIST_SIZE; ++i) {
             numbers.add(i);
         }
         Data listOfNumbers = new JData.DataBuilder().
-                add(KEY, numbers).
+                addListInt64(KEY, numbers).
                 build();
 
         List<?> actual = listOfNumbers.getList(KEY);
         assertEquals(numbers, actual);
         for (int i = 0 ; i < LIST_SIZE; ++i) {
             assertEquals(numbers.get(i), actual.get(i));
+        }
+    }
+
+    @Test
+    public void testBooleanList() {
+        final long LIST_SIZE = 6;
+
+        List<Boolean> data = Lists.newArrayList();
+        for (int i = 0; i < LIST_SIZE; ++i) {
+            data.add(i % 2 == 0);
+        }
+        Data listOfBoolean = Data.singletonList(KEY, data, ValueType.BOOLEAN);
+        List<?> actual = listOfBoolean.getList(KEY);
+        for (int i = 0 ; i < LIST_SIZE; ++i) {
+            assertEquals(data.get(i), actual.get(i));
+        }
+    }
+
+    @Test
+    public void testDoubleLists() {
+        final long LIST_SIZE = 6;
+
+        List<Double> data = Lists.newArrayList();
+        for (int i = 0; i < LIST_SIZE; ++i) {
+            data.add(Double.valueOf(i));
+        }
+
+        Data listOfDouble = new JData.DataBuilder().addListDouble(KEY, data).build();
+        List<?> actual = listOfDouble.getList(KEY);
+        for (int i = 0 ; i < LIST_SIZE; ++i) {
+            assertEquals(data.get(i), actual.get(i));
         }
     }
 
