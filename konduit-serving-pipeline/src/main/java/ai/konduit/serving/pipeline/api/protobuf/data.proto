@@ -10,8 +10,10 @@ message DataScheme {
         bytes bValue = 4;
         int64 iValue = 5;
         bool boolValue = 6;
+        double doubleValue = 7;
+        List listValue = 8;
     }
-    ValueType type = 7;
+    ValueType type = 9;
 
     enum ValueType {
         NDARRAY = 0;
@@ -25,6 +27,34 @@ message DataScheme {
         LIST = 8;
     }
 }
+
+message StringList {
+    repeated string list = 1;
+}
+message Int64List  {
+    repeated int64 list = 1;
+}
+message BooleanList {
+    repeated bool list = 1;
+}
+message DoubleList {
+    repeated double list = 1;
+}
+message List {
+    oneof list {
+	   StringList sList = 1;
+	   Int64List iList = 2;
+	   BooleanList bList = 3;
+	   DoubleList dList = 4;
+	}
+}
+
+//message List {
+    //repeated string listStrings = 1;
+    //repeated int64 listInts = 2;
+    //repeated bool listBools = 3;
+    //repeated double listDoubles = 4;
+//}
 
 message DataMap {
     map<string, DataScheme> mapItems = 1;

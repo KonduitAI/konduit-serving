@@ -153,6 +153,12 @@ public class JData implements Data {
     }
 
     @Override
+    public List<Object> getList(String key, ValueType type) {
+        Value<List<Object>> data = valueIfFound(key, ValueType.LIST);
+        return data.get();
+    }
+
+    @Override
     public List<Object> getList(String key) {
         Value<List<Object>> data = valueIfFound(key, ValueType.LIST);
         return data.get();
@@ -206,7 +212,7 @@ public class JData implements Data {
     }
 
     @Override
-    public void put(String key, List<?> data) {
+    public void put(String key, List<Object> data) {
         dataMap.put(key, new ListValue(data));
     }
 
@@ -248,6 +254,9 @@ public class JData implements Data {
             }
             if (item.getTypeValue() == generated.Data.DataScheme.ValueType.INT64.ordinal()) {
                 retData.put(entry.getKey(), item.getIValue());
+            }
+            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.DOUBLE.ordinal()) {
+
             }
         }
         return retData;
@@ -395,6 +404,11 @@ public class JData implements Data {
         }
 
         public DataBuilder add(String key, NDArray data){
+            instance.put(key, data);
+            return this;
+        }
+
+        public DataBuilder add(String key, List<Object> data) {
             instance.put(key, data);
             return this;
         }

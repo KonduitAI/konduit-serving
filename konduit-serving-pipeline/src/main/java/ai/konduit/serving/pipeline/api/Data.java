@@ -54,7 +54,8 @@ public interface Data {
     double getDouble(String key) throws ValueNotFoundException;
     Image getImage(String key) throws ValueNotFoundException;
     long getLong(String key) throws ValueNotFoundException;
-    List<Object> getList(String key);                   //TODO type
+    List<Object> getList(String key, ValueType type);
+    List<Object> getList(String key);
     Data getData(String key);
 
     void put(String key, String data);
@@ -64,7 +65,8 @@ public interface Data {
     void put(String key, long data);
     void put(String key, double data);
     void put(String key, boolean data);
-    void put(String key, List<?> data);
+
+    void put(String key, List<Object> data);
     //void put(String key, Data data);
 
     void put(String key, Data data);

@@ -19,6 +19,7 @@ import ai.konduit.serving.pipeline.impl.data.wrappers.IntValue;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import lombok.extern.slf4j.Slf4j;
 import ai.konduit.serving.pipeline.api.Data;
+import org.apache.commons.compress.utils.Lists;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -158,8 +160,36 @@ public class DataTest {
     @Test
     public void testLists() {
         Data someData = (JData) JData.singleton(KEY, Collections.singletonList(Long.valueOf(200)));
-        List<?> someList = someData.getList(KEY);
+        List<?> someList = someData.getList(KEY, ValueType.INT64);
         assertEquals(1, someList.size());
+        assertEquals(200L, someList.get(0));
+
+        List<String> strings = new ArrayList<>();
+        strings.add("one");
+        strings.add("two");
+        strings.add("three");
+        Data listOfStrings = JData.singleton(KEY, strings);
+        List<?> actual = listOfStrings.getList(KEY, ValueType.STRING);
+        assertEquals(strings, actual);
+    }
+
+    @Test
+    public void testsNumericLists() {
+        final long LIST_SIZE = 6;
+
+        List<Object> numbers = Lists.newArrayList();
+        for (long i = 0; i < LIST_SIZE; ++i) {
+            numbers.add(i);
+        }
+        Data listOfNumbers = new JData.DataBuilder().
+                add(KEY, numbers).
+                build();
+
+        List<?> actual = listOfNumbers.getList(KEY);
+        assertEquals(numbers, actual);
+        for (int i = 0 ; i < LIST_SIZE; ++i) {
+            assertEquals(numbers.get(i), actual.get(i));
+        }
     }
 
     @Test
