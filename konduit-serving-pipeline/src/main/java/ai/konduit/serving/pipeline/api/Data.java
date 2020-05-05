@@ -84,13 +84,13 @@ public interface Data {
 
     void write(OutputStream toStream) throws IOException;
 
-    static Data fromJson(String key) {
-        return null;
+    static Data fromJson(String jsonString) {
+        return JData.fromJson(jsonString);
     }
 
-    /*static Data fromFile(File file) {
-        return null;
-    }*/
+    static Data fromFile(File file) throws FileNotFoundException {
+        return fromStream(new FileInputStream(file));
+    }
 
     static Data fromStream(InputStream fromStream) {
         return null;

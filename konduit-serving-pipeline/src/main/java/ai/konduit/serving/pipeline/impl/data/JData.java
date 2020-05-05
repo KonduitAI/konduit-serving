@@ -47,10 +47,8 @@ public class JData implements Data {
     public String toJson() {
         StringBuilder jsonString = new StringBuilder();
         try {
-            Map<String, generated.Data.DataScheme> newItemsMap = javaMapToPbMap();
-            for (String key : newItemsMap.keySet()) {
-                jsonString.append(JsonFormat.printer().print(newItemsMap.get(key)));
-            }
+            generated.Data.DataMap pbDataMap = javaObjectToPbMessage();
+            jsonString.append(JsonFormat.printer().print(pbDataMap));
 
         } catch (InvalidProtocolBufferException e) {
             log.error("Failed toJson conversion",e);
@@ -257,6 +255,10 @@ public class JData implements Data {
     public static Data fromFile(File fromFile) throws IOException {
         generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder().mergeFrom(new FileInputStream(fromFile));
         generated.Data.DataMap dataMap = builder.build();
+        return pbMapToJavaData(dataMap);
+    }
+
+    private static Data pbMapToJavaData(generated.Data.DataMap dataMap) {
         JData retData = new JData();
         Map<String, generated.Data.DataScheme> schemeMap = dataMap.getMapItemsMap();
         Iterator<Map.Entry<String, generated.Data.DataScheme>> iterator =
@@ -333,6 +335,48 @@ public class JData implements Data {
         pbDataMap.writeTo(toStream);
     }
 
+    private generated.Data.DataMap javaObjectToPbMessage() {
+        Map<String, generated.Data.DataScheme> pbItemsMap = new HashMap<>();
+        Iterator<Map.Entry<String, Value>> iterator = dataMap.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<String, Value> nextItem = iterator.next();
+            Value value = nextItem.getValue();
+
+            generated.Data.DataScheme item = null;
+
+            if (value.type().equals(ValueType.STRING)) {
+                item = generated.Data.DataScheme.newBuilder().
+                        setSValue((String) nextItem.getValue().get()).
+                        setTypeValue(ValueType.STRING.ordinal()).
+                        build();
+            } else if (value.type().equals(ValueType.BOOLEAN)) {
+                item = generated.Data.DataScheme.newBuilder().
+                        setBoolValue((Boolean) nextItem.getValue().get()).
+                        setTypeValue(ValueType.BOOLEAN.ordinal()).
+                        build();
+            } else if (value.type().equals(ValueType.INT64)) {
+                item = generated.Data.DataScheme.newBuilder().
+                        setIValue((Long) nextItem.getValue().get()).
+                        setTypeValue(ValueType.INT64.ordinal()).
+                        build();
+            } else if (value.type().equals(ValueType.DOUBLE)) {
+                item = generated.Data.DataScheme.newBuilder().
+                        setIValue((Long) nextItem.getValue().get()).
+                        setTypeValue(ValueType.DOUBLE.ordinal()).
+                        build();
+            }
+            if (item == null) {
+                throw new IllegalStateException("JData.write failed");
+            }
+            pbItemsMap.put(nextItem.getKey(), item);
+        }
+        generated.Data.DataMap pbDataMap = generated.Data.DataMap.newBuilder().
+                putAllMapItems(pbItemsMap).
+                build();
+        return pbDataMap;
+    }
+
     public byte[] asBytes() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -341,6 +385,19 @@ public class JData implements Data {
             log.error("Failed write to ByteArrayOutputStream", e);
         }
         return baos.toByteArray();
+    }
+
+    public static Data fromJson(String jsonString) {
+        Data retVal = empty();
+        try {
+            generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder();
+            JsonFormat.parser().merge(jsonString, builder);
+            generated.Data.DataMap dataMap = builder.build();
+            retVal = pbMapToJavaData(dataMap);
+        } catch (InvalidProtocolBufferException e) {
+            log.error("Failed toJson conversion",e);
+        }
+        return retVal;
     }
 
     public static Data empty() {

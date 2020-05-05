@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static ai.konduit.serving.pipeline.impl.data.JData.fromJson;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -149,11 +150,15 @@ public class DataTest {
     public void testConvertToJson() {
         Data someData = (JData) JData.singleton(KEY, Long.valueOf(200));
         String jsonStr = someData.toJson();
-
         String expected = "{\n" +
-                "  \"iValue\": \"200\",\n" +
-                "  \"type\": \"INT64\"\n" +
+                "  \"mapItems\": {\n" +
+                "    \"stringData\": {\n" +
+                "      \"iValue\": \"200\",\n" +
+                "      \"type\": \"INT64\"\n" +
+                "    }\n" +
+                "  }\n" +
                 "}";
+
         assertEquals(expected, jsonStr);
     }
 
@@ -250,5 +255,16 @@ public class DataTest {
 
         assertEquals(built.getDataMap().get("key1").get(), madeFromEmpty.getDataMap().get("key1").get());
         assertEquals(built.getDataMap().get("key2").get(), madeFromEmpty.getDataMap().get("key2").get());
+    }
+
+    @Test
+    public void testJsonConversion() {
+        Data someData = Data.singleton(KEY, "test");
+        String jsonString = someData.toJson();
+
+        Data someDataFromJson = Data.fromJson(jsonString);
+
+        String actualJsonStr = someDataFromJson.toJson();
+        assertEquals(jsonString, actualJsonStr);
     }
 }
