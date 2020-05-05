@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.api.step;
 
-import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.api.data.Data;
 
 import java.io.Closeable;
 
