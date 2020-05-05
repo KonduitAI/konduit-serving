@@ -16,10 +16,10 @@
 package ai.konduit.serving.deeplearning4j;
 
 import ai.konduit.serving.deeplearning4j.step.DL4JModelPipelineStep;
-import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
-import ai.konduit.serving.pipeline.impl.data.NDArray;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -71,23 +71,23 @@ public class TestDL4JModelStep {
             INDArray arr = Nd4j.rand(DataType.FLOAT, 3, 4);
             INDArray exp = predictFromFile(netFile, arr);
 
-            Data d = Data.singleton("in", new NDArray(arr));
+            Data d = Data.singleton("in", NDArray.create(arr));
 
             Data out = e.exec(d);
-            INDArray actual = (INDArray) out.getNDArray(outName).getArrayValue();         //TODO FIX TYPE
+            INDArray actual = (INDArray) out.getNDArray(outName).get();         //TODO NO CAST
 
             assertEquals(exp, actual);
 
             String json = p.toJson();
             System.out.println(json);
             Pipeline pJson = Pipeline.fromJson(json);
-            INDArray outJson = (INDArray) pJson.executor().exec(d).getNDArray(outName).getArrayValue();
+            INDArray outJson = (INDArray) pJson.executor().exec(d).getNDArray(outName).get();           //TODO NO CAST
             assertEquals(exp, outJson);
 
             String yaml = p.toYaml();
             System.out.println(yaml);
             Pipeline pYaml = Pipeline.fromYaml(yaml);
-            INDArray outYaml = (INDArray) pYaml.executor().exec(d).getNDArray(outName).getArrayValue();
+            INDArray outYaml = (INDArray) pYaml.executor().exec(d).getNDArray(outName).get();           //TODO NO CAST
             assertEquals(exp, outYaml);
         }
     }
@@ -113,22 +113,22 @@ public class TestDL4JModelStep {
             INDArray arr = Nd4j.rand(DataType.FLOAT, 3, 4);
             INDArray exp = predictFromFileCG(netFile, arr)[0];
 
-            Data d = Data.singleton("in", new NDArray(arr));
+            Data d = Data.singleton("in", NDArray.create(arr));                 //TODO NO CAST
 
             Data out = e.exec(d);
-            INDArray actual = (INDArray) out.getNDArray(outName).getArrayValue();         //TODO FIX TYPE/CASTING
+            INDArray actual = (INDArray) out.getNDArray(outName).get();         //TODO NO CAST
 
             assertEquals(exp, actual);
 
 
             String json = p.toJson();
             Pipeline pJson = Pipeline.fromJson(json);
-            INDArray outJson = (INDArray) pJson.executor().exec(d).getNDArray(outName).getArrayValue();
+            INDArray outJson = (INDArray) pJson.executor().exec(d).getNDArray(outName).get();           //TODO NO CAST
             assertEquals(exp, outJson);
 
             String yaml = p.toYaml();
             Pipeline pYaml = Pipeline.fromYaml(yaml);
-            INDArray outYaml = (INDArray) pYaml.executor().exec(d).getNDArray(outName).getArrayValue();
+            INDArray outYaml = (INDArray) pYaml.executor().exec(d).getNDArray(outName).get();           //TODO NO CAST
             assertEquals(exp, outYaml);
         }
     }

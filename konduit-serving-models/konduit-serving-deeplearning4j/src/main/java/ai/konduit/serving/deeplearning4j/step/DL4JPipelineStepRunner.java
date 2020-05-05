@@ -15,12 +15,12 @@
  ******************************************************************************/
 package ai.konduit.serving.deeplearning4j.step;
 
-import ai.konduit.serving.pipeline.api.Data;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.exception.ModelLoadingException;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.impl.data.JData;
-import ai.konduit.serving.pipeline.impl.data.NDArray;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.DL4JModelValidator;
@@ -106,7 +106,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
             String outName = step.getOutputNames() == null || step.getOutputNames().isEmpty() ? DEFAULT_OUT_NAME_SINGLE : step.getOutputNames().get(0);
 
-            return Data.singleton(outName, new NDArray(out));
+            return Data.singleton(outName, NDArray.create(out));
         } else {
             INDArray[] input;
             if (numInputs == 1) {
@@ -117,7 +117,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
                     input = new INDArray[numInputs];
                     int i = 0;
                     for (String s : step.getInputNames()) {
-                        input[i++] = (INDArray) data.getNDArray(s).getArrayValue();      //TODO FIX NDARRAY
+                        input[i++] = (INDArray) data.getNDArray(s).get();      //TODO FIX NDARRAY
                     }
                 } else {
                     //Configuration does not have names specified
@@ -127,7 +127,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
                         input = new INDArray[numInputs];
                         int i = 0;
                         for (String s : networkInputs) {
-                            input[i++] = (INDArray) data.getNDArray(s).getArrayValue();      //TODO FIX NDARRAY
+                            input[i++] = (INDArray) data.getNDArray(s).get();      //TODO FIX NDARRAY
                         }
                     } else {
                         throw new IllegalStateException("Network has " + numInputs + " inputs, but no Data input names were specified." +
@@ -157,7 +157,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
             JData.DataBuilder b = JData.builder();
             for (int i = 0; i < out.length; i++) {
-                b.add(outNames.get(i), new NDArray(out[i]));
+                b.add(outNames.get(i), NDArray.create(out[i]));
             }
             return b.build();
         }
@@ -169,7 +169,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
         String key = data.keys().get(0);
         NDArray array = data.getNDArray(key);
 
-        INDArray out = (INDArray) array.getArrayValue();
+        INDArray out = (INDArray) array.get();          //TOOD NO CAST
         return out;
     }
 }

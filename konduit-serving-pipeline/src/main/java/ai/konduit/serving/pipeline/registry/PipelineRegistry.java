@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 @Slf4j
-public class Factories {
+public class PipelineRegistry {
 
     private static List<PipelineStepRunnerFactory> stepRunnerFactories;
 
