@@ -169,6 +169,8 @@ public class DataTest {
         strings.add("two");
         strings.add("three");
         Data listOfStrings = JData.singletonList(KEY, strings, ValueType.STRING);
+        assertEquals(ValueType.LIST, listOfStrings.listType(KEY));
+
         List<?> actual = listOfStrings.getList(KEY, ValueType.STRING);
         assertEquals(strings, actual);
     }
@@ -184,6 +186,7 @@ public class DataTest {
         Data listOfNumbers = new JData.DataBuilder().
                 addListInt64(KEY, numbers).
                 build();
+        assertEquals(ValueType.LIST, listOfNumbers.listType(KEY));
 
         List<?> actual = listOfNumbers.getList(KEY);
         assertEquals(numbers, actual);
@@ -201,6 +204,8 @@ public class DataTest {
             data.add(i % 2 == 0);
         }
         Data listOfBoolean = Data.singletonList(KEY, data, ValueType.BOOLEAN);
+        assertEquals(ValueType.LIST, listOfBoolean.listType(KEY));
+
         List<?> actual = listOfBoolean.getList(KEY);
         for (int i = 0 ; i < LIST_SIZE; ++i) {
             assertEquals(data.get(i), actual.get(i));
@@ -217,6 +222,8 @@ public class DataTest {
         }
 
         Data listOfDouble = new JData.DataBuilder().addListDouble(KEY, data).build();
+        assertEquals(ValueType.LIST, listOfDouble.listType(KEY));
+
         List<?> actual = listOfDouble.getList(KEY);
         for (int i = 0 ; i < LIST_SIZE; ++i) {
             assertEquals(data.get(i), actual.get(i));

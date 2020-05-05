@@ -95,7 +95,10 @@ public class JData implements Data {
 
     @Override
     public ValueType listType(String key) {
-        return null;
+        Value data = dataMap.get(key);
+        if (data == null || !(data instanceof ListValue))
+            throw new ValueNotFoundException(String.format("Value not found for key %s", key));
+        return data.type();
     }
 
     @Override
@@ -271,7 +274,10 @@ public class JData implements Data {
                 retData.put(entry.getKey(), item.getIValue());
             }
             if (item.getTypeValue() == generated.Data.DataScheme.ValueType.DOUBLE.ordinal()) {
-
+                retData.put(entry.getKey(), item.getDoubleValue());
+            }
+            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.LIST.ordinal()) {
+                // TODO
             }
         }
         return retData;
@@ -301,6 +307,11 @@ public class JData implements Data {
                 item = generated.Data.DataScheme.newBuilder().
                         setIValue((Long) nextItem.getValue().get()).
                         setTypeValue(ValueType.INT64.ordinal()).
+                        build();
+            } else if (value.type().equals(ValueType.DOUBLE)) {
+                item = generated.Data.DataScheme.newBuilder().
+                        setIValue((Long) nextItem.getValue().get()).
+                        setTypeValue(ValueType.DOUBLE.ordinal()).
                         build();
             }
             if (item == null) {
