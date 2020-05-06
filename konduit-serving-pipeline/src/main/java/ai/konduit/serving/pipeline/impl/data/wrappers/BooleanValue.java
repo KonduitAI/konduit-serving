@@ -15,27 +15,10 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-import ai.konduit.serving.pipeline.impl.data.Value;
 import ai.konduit.serving.pipeline.impl.data.ValueType;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
-public class BooleanValue implements Value<Boolean> {
-
-    private boolean value;
-
-    @Override
-    public ValueType type() {
-        return ValueType.BOOLEAN;
-    }
-
-    @Override
-    public Boolean get() {
-        return value;
-    }
-
-    @Override
-    public void set(Boolean value) {
-        this.value = value;
+public class BooleanValue extends BaseValue<Boolean> {
+    public BooleanValue(Boolean value) {
+        super(ValueType.BOOLEAN, value);
     }
 }
