@@ -83,7 +83,7 @@ public class JData implements Data {
         Value data = dataMap.get(key);
         if (data == null || !(data instanceof ListValue))
             throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
-        return data.type();
+        return ((ListValue)data).elementType();
     }
 
     @Override
@@ -199,7 +199,7 @@ public class JData implements Data {
 
     @Override
     public void putListInt64(String key, List<Long> data) {
-        dataMap.put(key, new ListValue(data, ValueType.DATA));
+        dataMap.put(key, new ListValue(data, ValueType.INT64));
     }
 
     @Override

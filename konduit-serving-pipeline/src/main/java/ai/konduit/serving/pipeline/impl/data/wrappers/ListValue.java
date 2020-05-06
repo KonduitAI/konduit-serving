@@ -12,11 +12,6 @@ public class ListValue<T> implements Value<List<T>> {
     private List<T> values;
     private ValueType elementType;
 
-    /*public ListValue(List<T> data, ValueType elementType) {
-        this.values = data;
-        this.elementType = elementType;
-    }*/
-
     @Override
     public ValueType type() {
         return ValueType.LIST;

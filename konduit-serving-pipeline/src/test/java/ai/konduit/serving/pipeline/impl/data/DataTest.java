@@ -149,16 +149,62 @@ public class DataTest {
         List<?> someList = someData.getList(KEY, ValueType.INT64);
         assertEquals(1, someList.size());
         assertEquals(200L, someList.get(0));
+        assertEquals(ValueType.INT64, someData.listType(KEY));
 
         List<String> strings = new ArrayList<>();
         strings.add("one");
         strings.add("two");
         strings.add("three");
         Data listOfStrings = JData.singletonList(KEY, strings, ValueType.STRING);
-        assertEquals(ValueType.LIST, listOfStrings.listType(KEY));
+        assertEquals(ValueType.LIST, listOfStrings.type(KEY));
+        assertEquals(ValueType.STRING, listOfStrings.listType(KEY));
 
         List<?> actual = listOfStrings.getList(KEY, ValueType.STRING);
         assertEquals(strings, actual);
+    }
+
+    @Test
+    public void testListOfLists() {
+        List<Long> innerData = new ArrayList<>();
+        for (long i = 0; i < 6; ++i) {
+            innerData.add(i);
+        }
+        List<List<Long>> data = new ArrayList<>();
+        data.add(innerData);
+
+        Data listOfLists = Data.singletonList(KEY, data, ValueType.INT64);
+        List<?> actual = listOfLists.getList(KEY, ValueType.LIST);
+        assertEquals(1, actual.size());
+        assertEquals(6, ((List<Long>)actual.get(0)).size());
+        for (long i = 0; i < 6; ++i) {
+            assertEquals(i, (long)((List<Long>)actual.get(0)).get((int)i));
+        }
+        assertEquals(ValueType.INT64, listOfLists.listType(KEY));
+
+        List<Long> innerBigData = new ArrayList<>();
+        for (long i = 0; i < 100; ++i) {
+            innerBigData.add(i);
+        }
+        data.add(innerBigData);
+        Data listOfTwoLists = Data.singletonList(KEY, data, ValueType.INT64);
+        assertEquals(ValueType.LIST, listOfTwoLists.type(KEY));
+        assertEquals(ValueType.INT64, listOfTwoLists.listType(KEY));
+
+        List<?> bigData = listOfTwoLists.getList(KEY, ValueType.INT64);
+        assertEquals(2,bigData.size());
+        assertEquals(6, ((List<?>)bigData.get(0)).size());
+        assertEquals(100, ((List<?>)bigData.get(1)).size() );
+    }
+
+    @Test
+    public void testWrongValueTypeForList() {
+        List<String> strings = new ArrayList<>();
+        strings.add("one");
+        strings.add("two");
+        strings.add("three");
+        // TODO: Value type check for lists is missing.
+        Data brokenList = Data.singletonList(KEY, strings, ValueType.BOOLEAN);
+        assertEquals(ValueType.BOOLEAN, brokenList.listType(KEY));
     }
 
     @Test
@@ -172,7 +218,7 @@ public class DataTest {
         Data listOfNumbers = new JData.DataBuilder().
                 addListInt64(KEY, numbers).
                 build();
-        assertEquals(ValueType.LIST, listOfNumbers.listType(KEY));
+        assertEquals(ValueType.INT64, listOfNumbers.listType(KEY));
 
         List<?> actual = listOfNumbers.getList(KEY, ValueType.INT64);
         assertEquals(numbers, actual);
@@ -190,7 +236,7 @@ public class DataTest {
             data.add(i % 2 == 0);
         }
         Data listOfBoolean = Data.singletonList(KEY, data, ValueType.BOOLEAN);
-        assertEquals(ValueType.LIST, listOfBoolean.listType(KEY));
+        assertEquals(ValueType.BOOLEAN, listOfBoolean.listType(KEY));
 
         List<?> actual = listOfBoolean.getList(KEY, ValueType.BOOLEAN);
         for (int i = 0 ; i < LIST_SIZE; ++i) {
@@ -208,7 +254,7 @@ public class DataTest {
         }
 
         Data listOfDouble = new JData.DataBuilder().addListDouble(KEY, data).build();
-        assertEquals(ValueType.LIST, listOfDouble.listType(KEY));
+        assertEquals(ValueType.DOUBLE, listOfDouble.listType(KEY));
 
         List<?> actual = listOfDouble.getList(KEY, ValueType.DOUBLE);
         for (int i = 0 ; i < LIST_SIZE; ++i) {
