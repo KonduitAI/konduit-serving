@@ -228,11 +228,6 @@ public class JData implements Data {
     }
 
     @Override
-    public void putListList(String key, List<List<?>> data) {
-        dataMap.put(key, new ListValue(data, ValueType.LIST));
-    }
-
-    @Override
     public boolean hasMetaData() {
         return metaData != null;
     }

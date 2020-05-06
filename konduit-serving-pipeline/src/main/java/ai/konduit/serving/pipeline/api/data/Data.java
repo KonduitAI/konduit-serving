@@ -89,9 +89,6 @@ public interface Data {
     void putListData(String key, List<Data> data);
     void putListImage(String key, List<Image> data);
     void putListNDArray(String key, List<NDArray> data);
-    void putListList(String key, List<List<?>> data);
-    //void put(String key, Data data);
-
     void put(String key, Data data);
 
     boolean hasMetaData();
