@@ -356,6 +356,7 @@ The full set of protected keys can be found on the Data interface. They include:
 * @NDArrayDataBase64
 * @Metadata
 
+In practice, Data JSON serialization/deserialization is implemneted in the DataJsonSerializer and DataJsonDeserializer classes. 
 
 
 ## Adding a New Module
@@ -386,6 +387,9 @@ See for example: konduit-serving-deeplearning4j
 *Third*: If a new Image or NDArray format is to be added, all of the following are required:
 - Add a new class for holding the Image/NDArray (extending BaseNDArray/BaseImage should suffice)
 - Add NDArrayConverter / ImageConverter implementations to convert between different Image/NDArray formats (see for example NDArrayConverter in konduit-serving-nd4j)
+    - For NDArray: the main (strictly required) one is conversion to/from SerializedNDArray - this is necessary for JSON
+      and protobuf serialization/deserialization, and will be used as the intermediate format for conversion between arbitrary
+      types that don't have direct (1 step) conversion enabled (i.e., X -> SerializedNDArray -> Y for any X and Y).
 - Add an NDArrayFactory / ImageFactory (used within NDArray.create(Object) / Image.create(Object))
 - Add a `resources/META-INF/services/ai.konduit.serving.pipeline.api.format.NDArrayConverter` (or `.ImageConverter`) file
   listing the fully-qualified class name of all of the new NDArrayConverter/ImageConverter implementations you added

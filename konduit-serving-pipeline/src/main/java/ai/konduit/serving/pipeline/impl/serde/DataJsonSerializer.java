@@ -29,14 +29,24 @@ import org.nd4j.shade.jackson.databind.JsonSerializer;
 import org.nd4j.shade.jackson.databind.ObjectMapper;
 import org.nd4j.shade.jackson.databind.SerializerProvider;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * Custom JSON serialization for Data instances.
+ * <p>
+ * This is used for ALL Data implementations - and encodes the canonical JSON format that Konduit Serving will use everywhere
+ * <p>
+ * Note that the JSON (and YAML) format is considered part of the public API, hence for optimal usability we are using
+ * a custom JSON serializer to precisely control the format.<br>
+ * Other JSON options exist (using standard Jackson serializers/deserializers, or Protobuf's JSON format) but a manual approach
+ * provides full control over the exact format
+ *
+ * @author Alex Black
+ */
 public class DataJsonSerializer extends JsonSerializer<Data> {
-    public static final String LIST_FIELD_NAME = "list";
 
     @Override
     public void serialize(Data data, JsonGenerator jg, SerializerProvider sp) throws IOException {
@@ -46,11 +56,11 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
 
         List<String> l = data.keys();
 
-        for(String s : l){
+        for (String s : l) {
             ValueType vt = data.type(s);
             jg.writeFieldName(s);
 
-            switch (vt){
+            switch (vt) {
                 case NDARRAY:
                     NDArray n = data.getNDArray(s);
                     writeNDArray(jg, n);
@@ -91,7 +101,7 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
             }
         }
 
-        if(data.getMetaData() != null){
+        if (data.getMetaData() != null) {
             Data md = data.getMetaData();
             jg.writeFieldName(Data.RESERVED_KEY_METADATA);
             writeNestedData(jg, md);
@@ -100,21 +110,13 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
         jg.writeEndObject();
     }
 
-    private void writeNestedData(JsonGenerator jg, Data data) throws IOException{
+    private void writeNestedData(JsonGenerator jg, Data data) throws IOException {
         ObjectMapper om = (ObjectMapper) jg.getCodec();
         String dataStr = om.writeValueAsString(data);
         jg.writeRawValue(dataStr);
     }
 
     private void writeBytes(JsonGenerator jg, byte[] bytes) throws IOException {
-        //For bytes: write as follows
-        /*
-        "myBytes" : {
-            "bytesFormat": "ARRAY" (or "BASE64")
-            bytes = ... ([1,2,3] or "<some base64 string>"
-        }
-         */
-
         //TODO add option to do raw bytes array - [0, 1, 2, ...] style
         jg.writeStartObject();
         jg.writeFieldName(Data.RESERVED_KEY_BYTES_BASE64);
@@ -135,7 +137,7 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
         throw new UnsupportedOperationException("Not yet implemented: writing image JSON");
     }
 
-    private void writeNDArray(JsonGenerator jg, NDArray n) throws IOException{
+    private void writeNDArray(JsonGenerator jg, NDArray n) throws IOException {
         jg.writeStartObject();
 
         SerializedNDArray sn = n.getAs(SerializedNDArray.class);
@@ -148,12 +150,12 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
 
         ByteBuffer bb = sn.getBuffer();
         byte[] array;
-        if(bb.hasArray()){
+        if (bb.hasArray()) {
             array = bb.array();
         } else {
             int size = bb.remaining();
             array = new byte[size];
-            for( int i=0; i<size; i++ ){
+            for (int i = 0; i < size; i++) {
                 array[i] = bb.get(i);
             }
         }
@@ -168,53 +170,53 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
         int n = list.size();
         jg.writeStartArray(n);
 
-        int i=0;
-        switch (listType){
+        int i = 0;
+        switch (listType) {
             case NDARRAY:
                 break;
             case STRING:
-                for(String s : (List<String>)list){             //TODO avoid unsafe cast?
+                for (String s : (List<String>) list) {             //TODO avoid unsafe cast?
                     jg.writeString(s);
                 }
                 break;
             case BYTES:
-                for(byte[] bytes : (List<byte[]>)list) {
+                for (byte[] bytes : (List<byte[]>) list) {
                     writeBytes(jg, bytes);
                 }
                 break;
             case IMAGE:
-                for(Image img : (List<Image>)list){
+                for (Image img : (List<Image>) list) {
                     writeImage(jg, img);
                 }
                 break;
             case DOUBLE:
-                List<Double> dList = (List<Double>)list;        //TODO checks for unsafe cast?
+                List<Double> dList = (List<Double>) list;        //TODO checks for unsafe cast?
                 double[] dArr = new double[dList.size()];
-                for(Double d : dList){
+                for (Double d : dList) {
                     dArr[i++] = d;
                 }
                 jg.writeArray(dArr, 0, dArr.length);
                 break;
             case INT64:
-                List<Long> lList = (List<Long>)list;
+                List<Long> lList = (List<Long>) list;
                 long[] lArr = new long[lList.size()];
-                for(Long l : lList){
+                for (Long l : lList) {
                     lArr[i++] = l;
                 }
                 jg.writeArray(lArr, 0, lArr.length);
                 break;
             case BOOLEAN:
-                List<Boolean> bList = (List<Boolean>)list;
+                List<Boolean> bList = (List<Boolean>) list;
                 jg.writeStartArray(bList.size());
-                for(Boolean b : bList ){
+                for (Boolean b : bList) {
                     jg.writeBoolean(b);
                 }
                 jg.writeEndArray();
                 break;
             case DATA:
-                List<Data> dataList = (List<Data>)list;
+                List<Data> dataList = (List<Data>) list;
                 jg.writeStartArray(dataList.size());
-                for(Data d : dataList){
+                for (Data d : dataList) {
                     writeNestedData(jg, d);
                 }
                 jg.writeEndArray();

@@ -35,6 +35,12 @@ import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.Iterator;
 
+/**
+ * Custom JSON deserializer for Data instances<br>
+ * See {@link DataJsonSerializer} for further details
+ *
+ * @author Alex Black
+ */
 public class DataJsonDeserializer extends JsonDeserializer<Data> {
     @Override
     public Data deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
@@ -42,15 +48,15 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
         return deserialize(jp, n);
     }
 
-    public Data deserialize(JsonParser jp, JsonNode n){
+    public Data deserialize(JsonParser jp, JsonNode n) {
         JData d = new JData();
 
         Iterator<String> names = n.fieldNames();
-        while(names.hasNext()){
+        while (names.hasNext()) {
             String s = names.next();
             JsonNode n2 = n.get(s);
 
-            if(Data.RESERVED_KEY_METADATA.equalsIgnoreCase(s)) {
+            if (Data.RESERVED_KEY_METADATA.equalsIgnoreCase(s)) {
                 Data meta = deserialize(jp, n2);
                 d.setMetaData(meta);
             } else {
@@ -88,12 +94,12 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                             b[i] = (byte) bVal;
                         }
                         d.put(s, b);
-                    } else if(n2.has(Data.RESERVED_KEY_NDARRAY_TYPE)){
+                    } else if (n2.has(Data.RESERVED_KEY_NDARRAY_TYPE)) {
                         //NDArray
                         NDArrayType type = NDArrayType.valueOf(n2.get(Data.RESERVED_KEY_NDARRAY_TYPE).textValue());
                         ArrayNode shapeNode = (ArrayNode) n2.get(Data.RESERVED_KEY_NDARRAY_SHAPE);
                         long[] shape = new long[shapeNode.size()];
-                        for( int i=0; i<shape.length; i++ )
+                        for (int i = 0; i < shape.length; i++)
                             shape[i] = shapeNode.get(i).asLong();
                         String base64 = n2.get(Data.RESERVED_KEY_NDARRAY_DATA_BASE64).textValue();
                         byte[] bytes = Base64.getDecoder().decode(base64);
