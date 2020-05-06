@@ -19,15 +19,10 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.impl.data.wrappers.*;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.util.JsonFormat;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
-import java.io.*;
 import java.util.*;
 
 @Slf4j
@@ -43,19 +38,6 @@ public class JData implements Data {
     @Override
     public int size() {
         return dataMap.size();
-    }
-
-    @Override
-    public String toJson() {
-        StringBuilder jsonString = new StringBuilder();
-        try {
-            generated.Data.DataMap pbDataMap = javaObjectToPbMessage();
-            jsonString.append(JsonFormat.printer().print(pbDataMap));
-
-        } catch (InvalidProtocolBufferException e) {
-            log.error("Failed toJson conversion",e);
-        }
-        return jsonString.toString();
     }
 
     @Override
@@ -162,15 +144,9 @@ public class JData implements Data {
     }
 
     @Override
-    public List<Object> getList(String key) {
-        Value<List<Object>> data = valueIfFound(key, ValueType.LIST);
-        return data.get();
-    }
-
-    @Override
     public Data getData(String key) {
-        Data data = (Data)dataMap.get(key);
-        return data;
+        Value<Data> data = valueIfFound(key, ValueType.DATA);
+        return data.get();
     }
 
     @Override
@@ -180,7 +156,7 @@ public class JData implements Data {
 
     @Override
     public void put(String key, NDArray data) {
-        dataMap.put(key, new INDArrayValue(data));
+        dataMap.put(key, new NDArrayValue(data));
     }
 
     @Override
@@ -210,8 +186,7 @@ public class JData implements Data {
 
     @Override
     public void put(String key, Data data) {
-        // TODO: must avoid cast and redesign method
-        this.dataMap.putAll(((JData)data).getDataMap());
+        this.dataMap.put(key, new DataValue(data));
     }
 
     @Override
@@ -250,176 +225,12 @@ public class JData implements Data {
     }
 
     @Override
-    public void save(File toFile) throws IOException {
-        write(new FileOutputStream(toFile));
+    public boolean equals(Object o){
+        if(!(o instanceof Data))
+            return false;
+        return Data.equals(this, (Data)o);
     }
 
-    public static Data fromFile(File fromFile) throws IOException {
-        generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder().mergeFrom(new FileInputStream(fromFile));
-        generated.Data.DataMap dataMap = builder.build();
-        return pbMapToJavaData(dataMap);
-    }
-
-    public static Data fromStream(InputStream stream) throws IOException {
-        generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder().mergeFrom(stream);
-        generated.Data.DataMap dataMap = builder.build();
-        return pbMapToJavaData(dataMap);
-    }
-
-    private static Data pbMapToJavaData(generated.Data.DataMap dataMap) {
-        JData retData = new JData();
-        Map<String, generated.Data.DataScheme> schemeMap = dataMap.getMapItemsMap();
-        Iterator<Map.Entry<String, generated.Data.DataScheme>> iterator =
-                schemeMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, generated.Data.DataScheme> entry = iterator.next();
-            generated.Data.DataScheme item = entry.getValue();
-            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.STRING.ordinal()) {
-                retData.put(entry.getKey(), item.getSValue());
-            }
-            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.BOOLEAN.ordinal()) {
-                retData.put(entry.getKey(), item.getBoolValue());
-            }
-            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.INT64.ordinal()) {
-                retData.put(entry.getKey(), item.getIValue());
-            }
-            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.DOUBLE.ordinal()) {
-                retData.put(entry.getKey(), item.getDoubleValue());
-            }
-            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.LIST.ordinal()) {
-                // TODO
-            }
-        }
-        return retData;
-    }
-
-    private Map<String, generated.Data.DataScheme> javaMapToPbMap() {
-        Map<String, generated.Data.DataScheme> newItemsMap = new HashMap<>();
-        Iterator<Map.Entry<String, Value>> iterator = dataMap.entrySet().iterator();
-
-        while (iterator.hasNext()) {
-            Map.Entry<String, Value> nextItem = iterator.next();
-            Value value = nextItem.getValue();
-
-            generated.Data.DataScheme item = null;
-
-            if (value.type().equals(ValueType.STRING)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setSValue((String) nextItem.getValue().get()).
-                        setTypeValue(ValueType.STRING.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.BOOLEAN)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setBoolValue((Boolean) nextItem.getValue().get()).
-                        setTypeValue(ValueType.BOOLEAN.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.INT64)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setIValue((Long) nextItem.getValue().get()).
-                        setTypeValue(ValueType.INT64.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.DOUBLE)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setIValue((Long) nextItem.getValue().get()).
-                        setTypeValue(ValueType.DOUBLE.ordinal()).
-                        build();
-            }
-            if (item == null) {
-                throw new IllegalStateException("JData.write failed");
-            }
-            newItemsMap.put(nextItem.getKey(), item);
-        }
-        return newItemsMap;
-    }
-
-    @Override
-    public void write(OutputStream toStream) throws IOException {
-
-        Map<String, generated.Data.DataScheme> newItemsMap = javaMapToPbMap();
-
-        generated.Data.DataMap pbDataMap = generated.Data.DataMap.newBuilder().
-                putAllMapItems(newItemsMap).
-                build();
-        pbDataMap.writeTo(toStream);
-    }
-
-    private generated.Data.DataMap javaObjectToPbMessage() {
-        Map<String, generated.Data.DataScheme> pbItemsMap = new HashMap<>();
-        Iterator<Map.Entry<String, Value>> iterator = dataMap.entrySet().iterator();
-
-        while (iterator.hasNext()) {
-            Map.Entry<String, Value> nextItem = iterator.next();
-            Value value = nextItem.getValue();
-
-            generated.Data.DataScheme item = null;
-
-            if (value.type().equals(ValueType.STRING)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setSValue((String) nextItem.getValue().get()).
-                        setTypeValue(ValueType.STRING.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.BOOLEAN)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setBoolValue((Boolean) nextItem.getValue().get()).
-                        setTypeValue(ValueType.BOOLEAN.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.INT64)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setIValue((Long) nextItem.getValue().get()).
-                        setTypeValue(ValueType.INT64.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.DOUBLE)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setIValue((Long) nextItem.getValue().get()).
-                        setTypeValue(ValueType.DOUBLE.ordinal()).
-                        build();
-            }
-            if (item == null) {
-                throw new IllegalStateException("JData.write failed");
-            }
-            pbItemsMap.put(nextItem.getKey(), item);
-        }
-        generated.Data.DataMap pbDataMap = generated.Data.DataMap.newBuilder().
-                putAllMapItems(pbItemsMap).
-                build();
-        return pbDataMap;
-    }
-
-    public byte[] asBytes() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            write(baos);
-        } catch (IOException e) {
-            log.error("Failed write to ByteArrayOutputStream", e);
-        }
-        return baos.toByteArray();
-    }
-
-    public static Data fromBytes(byte[] input) {
-        Data retVal = empty();
-        generated.Data.DataMap.Builder builder = null;
-        try {
-            builder = generated.Data.DataMap.newBuilder().mergeFrom(input);
-        } catch (InvalidProtocolBufferException e) {
-            log.error("Error converting bytes array to data",e);
-        }
-        generated.Data.DataMap dataMap = builder.build();
-        retVal = pbMapToJavaData(dataMap);
-        return retVal;
-    }
-
-    public static Data fromJson(String jsonString) {
-        Data retVal = empty();
-        try {
-            generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder();
-            JsonFormat.parser().merge(jsonString, builder);
-            generated.Data.DataMap dataMap = builder.build();
-            retVal = pbMapToJavaData(dataMap);
-        } catch (InvalidProtocolBufferException e) {
-            log.error("Failed toJson conversion",e);
-        }
-        return retVal;
-    }
 
     public static Data empty() {
         Data retVal = new JData();

@@ -35,7 +35,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static ai.konduit.serving.pipeline.impl.data.JData.empty;
-import static ai.konduit.serving.pipeline.impl.data.JData.fromJson;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -126,25 +125,15 @@ public class DataTest {
     }
 
     @Test
-    public void testSerde() {
+    public void testSerde() throws IOException {
         Data someData = JData.singleton(KEY, Long.valueOf(200));
-        try {
-            someData.save(new File("temp"));
-        } catch (IOException e) {
-            log.error("IOException in DataTest.testSerde()", e);
-        }
-        Data restoredData = null;
-        try {
-            restoredData = JData.fromFile(new File("temp"));
-        } catch (IOException e) {
-            log.error("IOException in DataTest.testSerde()", e);
-        }
-        assertEquals(someData.get(KEY), restoredData.get(KEY));
+        someData.save(new File("temp"));
+        Data restoredData = Data.fromFile(new File("temp"));
     }
 
     @Test
     public void testConvertToBytes() {
-        JData someData = (JData) JData.singleton(KEY, Long.valueOf(200));
+        Data someData = Data.singleton(KEY, Long.valueOf(200));
         byte[] output = someData.asBytes();
         assert(output != null);
     }
@@ -196,7 +185,7 @@ public class DataTest {
                 build();
         assertEquals(ValueType.LIST, listOfNumbers.listType(KEY));
 
-        List<?> actual = listOfNumbers.getList(KEY);
+        List<?> actual = listOfNumbers.getList(KEY, ValueType.INT64);
         assertEquals(numbers, actual);
         for (int i = 0 ; i < LIST_SIZE; ++i) {
             assertEquals(numbers.get(i), actual.get(i));
@@ -214,7 +203,7 @@ public class DataTest {
         Data listOfBoolean = Data.singletonList(KEY, data, ValueType.BOOLEAN);
         assertEquals(ValueType.LIST, listOfBoolean.listType(KEY));
 
-        List<?> actual = listOfBoolean.getList(KEY);
+        List<?> actual = listOfBoolean.getList(KEY, ValueType.BOOLEAN);
         for (int i = 0 ; i < LIST_SIZE; ++i) {
             assertEquals(data.get(i), actual.get(i));
         }
@@ -232,7 +221,7 @@ public class DataTest {
         Data listOfDouble = new JData.DataBuilder().addListDouble(KEY, data).build();
         assertEquals(ValueType.LIST, listOfDouble.listType(KEY));
 
-        List<?> actual = listOfDouble.getList(KEY);
+        List<?> actual = listOfDouble.getList(KEY, ValueType.DOUBLE);
         for (int i = 0 ; i < LIST_SIZE; ++i) {
             assertEquals(data.get(i), actual.get(i));
         }
@@ -276,26 +265,20 @@ public class DataTest {
     public void testBytesSerde() {
         JData someData = (JData)Data.singleton(KEY, "testString");
         byte[] someBytes = someData.asBytes();
-        JData restoredData = null;
-        try {
-            restoredData = (JData) Data.fromBytes(someBytes);
-        } catch (IOException e) {
-            log.error("JData.testBytesSerde");
-        }
+        JData restoredData = (JData) Data.fromBytes(someBytes);
         assertEquals(someData.get(KEY), restoredData.get(KEY));
     }
 
     @Test
-    public void testStreamsSerde() {
+    public void testStreamsSerde() throws IOException {
         JData someData = (JData)Data.singleton(KEY, "testString");
         Data restored = empty();
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             someData.write(baos);
-            restored = Data.fromStream(new ByteArrayInputStream(baos.toByteArray()));
-        } catch (IOException e) {
-            log.error("testStreamsSerde failed", e);
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray())) {
+                restored = Data.fromStream(bais);
+            }
         }
         assertEquals(someData.get(KEY), restored.get(KEY));
     }

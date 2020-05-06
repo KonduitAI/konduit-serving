@@ -15,30 +15,10 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-import ai.konduit.serving.pipeline.impl.data.Value;
 import ai.konduit.serving.pipeline.impl.data.ValueType;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
-public class StringValue implements Value<String> {
-    private String value;
-
-    public void setValue(Object input) {
-        value = (String)input;
-    }
-
-    @Override
-    public String get() {
-        return value;
-    }
-
-    @Override
-    public void set(String value) {
-        this.value = value;
-    }
-
-    @Override
-    public ValueType type() {
-        return ValueType.STRING;
+public class StringValue extends BaseValue<String> {
+    public StringValue(String value) {
+        super(ValueType.STRING, value);
     }
 }
