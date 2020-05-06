@@ -15,27 +15,11 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-import ai.konduit.serving.pipeline.impl.data.Value;
 import ai.konduit.serving.pipeline.impl.data.ValueType;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
-public class DoubleValue implements Value<Double> {
+public class DoubleValue extends BaseValue<Double> {
 
-    private double value;
-
-    @Override
-    public ValueType type() {
-        return ValueType.DOUBLE;
-    }
-
-    @Override
-    public Double get() {
-        return value;
-    }
-
-    @Override
-    public void set(Double value) {
-        this.value = value;
+    public DoubleValue(Double value) {
+        super(ValueType.DOUBLE, value);
     }
 }

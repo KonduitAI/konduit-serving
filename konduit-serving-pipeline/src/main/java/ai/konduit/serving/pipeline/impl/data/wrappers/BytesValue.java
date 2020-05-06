@@ -15,27 +15,10 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-import ai.konduit.serving.pipeline.impl.data.Value;
 import ai.konduit.serving.pipeline.impl.data.ValueType;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
-public class BytesValue implements Value<byte[]> {
-
-    private byte[] value;
-
-    @Override
-    public byte[] get() {
-        return this.value;
-    }
-
-    @Override
-    public void set(byte[] values) {
-        this.value = values;
-    }
-
-    @Override
-    public ValueType type() {
-        return ValueType.BYTES;
+public class BytesValue extends BaseValue<byte[]> {
+    public BytesValue(byte[] value) {
+        super(ValueType.BYTES, value);
     }
 }

@@ -15,26 +15,13 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data.wrappers;
 
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.impl.data.Value;
 import ai.konduit.serving.pipeline.impl.data.ValueType;
 import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
-public class INDArrayValue implements Value<Object> {
-    private Object value;
-
-    @Override
-    public Object get() {
-        return value;
-    }
-
-    @Override
-    public void set(Object value) {
-        this.value = value;
-    }
-
-    @Override
-    public ValueType type() {
-        return ValueType.NDARRAY;
+public class NDArrayValue extends BaseValue<NDArray> {
+    public NDArrayValue(NDArray value) {
+        super(ValueType.NDARRAY, value);
     }
 }

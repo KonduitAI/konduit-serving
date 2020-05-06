@@ -16,26 +16,11 @@
 package ai.konduit.serving.pipeline.impl.data.wrappers;
 
 import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.impl.data.Value;
 import ai.konduit.serving.pipeline.impl.data.ValueType;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
-public class ImageValue implements Value<Image> {
-    private Image image;
+public class ImageValue extends BaseValue<Image> {
 
-    @Override
-    public ValueType type() {
-        return ValueType.IMAGE;
-    }
-
-    @Override
-    public Image get() {
-        return image;
-    }
-
-    @Override
-    public void set(Image value) {
-        this.image = value;
+    public ImageValue(Image value) {
+        super(ValueType.IMAGE, value);
     }
 }

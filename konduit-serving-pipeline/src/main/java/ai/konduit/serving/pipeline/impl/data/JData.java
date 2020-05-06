@@ -23,7 +23,6 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.*;
 import java.util.*;
 
 @Slf4j
@@ -39,11 +38,6 @@ public class JData implements Data {
     @Override
     public int size() {
         return dataMap.size();
-    }
-
-    @Override
-    public String toJson() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -147,8 +141,8 @@ public class JData implements Data {
 
     @Override
     public Data getData(String key) {
-        Data data = (Data)dataMap.get(key);
-        return data;
+        Value<Data> data = valueIfFound(key, ValueType.DATA);
+        return data.get();
     }
 
     @Override
@@ -158,7 +152,7 @@ public class JData implements Data {
 
     @Override
     public void put(String key, NDArray data) {
-        dataMap.put(key, new INDArrayValue(data));
+        dataMap.put(key, new NDArrayValue(data));
     }
 
     @Override
@@ -188,8 +182,7 @@ public class JData implements Data {
 
     @Override
     public void put(String key, Data data) {
-        // TODO: must avoid cast and redesign method
-        this.dataMap.putAll(((JData)data).getDataMap());
+        this.dataMap.put(key, new DataValue(data));
     }
 
     @Override
@@ -208,23 +201,12 @@ public class JData implements Data {
     }
 
     @Override
-    public void save(File toFile) {
-
-        throw new UnsupportedOperationException();
+    public boolean equals(Object o){
+        if(!(o instanceof Data))
+            return false;
+        return Data.equals(this, (Data)o);
     }
 
-    public static Data fromFile(File fromFile) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void write(OutputStream toStream) {
-        throw new UnsupportedOperationException();
-    }
-
-    public byte[] asBytes() {
-        throw new UnsupportedOperationException();
-    }
 
     public static Data empty() {
         Data retVal = new JData();

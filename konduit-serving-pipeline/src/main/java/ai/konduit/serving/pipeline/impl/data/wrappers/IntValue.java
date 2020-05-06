@@ -15,26 +15,11 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-import ai.konduit.serving.pipeline.impl.data.Value;
 import ai.konduit.serving.pipeline.impl.data.ValueType;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
-public class IntValue implements Value<Long> {
-    private long value;
+public class IntValue extends BaseValue<Long> {
 
-    @Override
-    public ValueType type() {
-        return ValueType.INT64;
-    }
-
-    @Override
-    public Long get() {
-        return value;
-    }
-
-    @Override
-    public void set(Long value) {
-        this.value = value;
+    public IntValue(Long value) {
+        super(ValueType.INT64, value);
     }
 }
