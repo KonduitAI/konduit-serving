@@ -18,6 +18,7 @@
 package ai.konduit.serving.pipeline.api.data;
 
 import ai.konduit.serving.pipeline.impl.data.*;
+import ai.konduit.serving.pipeline.impl.format.SerializedNDArray;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonDeserializer;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonSerializer;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
@@ -36,6 +37,22 @@ import java.util.List;
 @JsonSerialize(using = DataJsonSerializer.class)
 @JsonDeserialize(using = DataJsonDeserializer.class)
 public interface Data {
+
+    String RESERVED_KEY_BYTES_BASE64 = "@BytesBase64";
+    String RESERVED_KEY_BYTES_ARRAY = "@BytesArray";
+    String RESERVED_KEY_IMAGE_FORMAT = "@ImageFormat";
+    String RESERVED_KEY_IMAGE_DATA = "@ImageData";
+    String RESERVED_KEY_NDARRAY_SHAPE = "@NDArrayShape";
+    String RESERVED_KEY_NDARRAY_TYPE = "@NDArrayType";
+    String RESERVED_KEY_NDARRAY_DATA_BASE64 = "@NDArrayDataBase64";
+    String RESERVED_KEY_NDARRAY_DATA_ARRAY = "@NDArrayDataBase64";
+    String RESERVED_KEY_METADATA = "@Metadata";
+
+    static List<String> reservedKeywords(){
+        return Arrays.asList(RESERVED_KEY_BYTES_BASE64, RESERVED_KEY_BYTES_ARRAY, RESERVED_KEY_IMAGE_FORMAT,
+                RESERVED_KEY_IMAGE_DATA, RESERVED_KEY_NDARRAY_SHAPE, RESERVED_KEY_NDARRAY_TYPE, RESERVED_KEY_NDARRAY_DATA_BASE64,
+                RESERVED_KEY_NDARRAY_DATA_ARRAY, RESERVED_KEY_METADATA);
+    }
 
     int size();
 
@@ -92,7 +109,7 @@ public interface Data {
     void setMetaData(Data data);
 
     // Serialization routines
-    default void save(File toFile){
+    default void save(File toFile){;
         throw new UnsupportedOperationException();
     }
 
@@ -154,12 +171,20 @@ public interface Data {
         for(String s : k1){
             ValueType vt = d1.type(s);
             switch (vt){
-                case NDARRAY:
                 case LIST:
                 case IMAGE:
                 default:
                     //TODO
                     throw new UnsupportedOperationException(vt + " equality not yet implemented");
+                case NDARRAY:
+                    //TODO this is inefficient - but robust...
+                    NDArray a1 = d1.getNDArray(s);
+                    NDArray a2 = d2.getNDArray(s);
+                    SerializedNDArray sa1 = a1.getAs(SerializedNDArray.class);
+                    SerializedNDArray sa2 = a2.getAs(SerializedNDArray.class);
+                    if(!sa1.equals(sa2))
+                        return false;
+                    break;
                 case STRING:
                     if(!d1.getString(s).equals(d2.getString(s)))
                         return false;
@@ -199,5 +224,14 @@ public interface Data {
         }
 
         return true;
+    }
+
+    static void assertNotReservedKey(@NonNull String s){
+        for(String kwd : reservedKeywords()){
+            if(kwd.equalsIgnoreCase(s)){
+                throw new IllegalStateException("Cannot use key \"" + kwd + "\" in a Data instance: This key is reserved" +
+                        " for internal use only");
+            }
+        }
     }
 }

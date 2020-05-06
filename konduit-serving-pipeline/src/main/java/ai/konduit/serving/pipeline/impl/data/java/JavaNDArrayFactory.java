@@ -20,6 +20,7 @@ package ai.konduit.serving.pipeline.impl.data.java;
 
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
+import ai.konduit.serving.pipeline.impl.format.SerializedNDArray;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,6 +33,8 @@ public class JavaNDArrayFactory implements NDArrayFactory {
         set.add(float[][].class);
         set.add(float[][][].class);
         set.add(float[][][][].class);
+        set.add(float[][][][][].class);
+        set.add(SerializedNDArray.class);
         return set;
     }
 
@@ -48,8 +51,12 @@ public class JavaNDArrayFactory implements NDArrayFactory {
             return new JavaNDArrays.Float2Array((float[][]) o);
         } else if(o instanceof float[][][]){
             return new JavaNDArrays.Float3Array((float[][][]) o);
-        } else if(o instanceof float[][][][]){
+        } else if(o instanceof float[][][][]) {
             return new JavaNDArrays.Float4Array((float[][][][]) o);
+        } else if(o instanceof float[][][][][]) {
+            return new JavaNDArrays.Float5Array((float[][][][][]) o);
+        } else if(o instanceof SerializedNDArray){
+            return new JavaNDArrays.SNDArray((SerializedNDArray) o);
         } else {
             throw new RuntimeException("Unable to create NDArray from object: " + o.getClass());
         }

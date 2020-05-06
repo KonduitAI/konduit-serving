@@ -77,7 +77,7 @@ public class JData implements Data {
 
     @Override
     public ValueType listType(String key) {
-        return null;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
@@ -136,7 +136,7 @@ public class JData implements Data {
 
     @Override
     public List<Object> getList(String key, ValueType type) {
-        return null;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
@@ -147,41 +147,49 @@ public class JData implements Data {
 
     @Override
     public void put(String key, String data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new StringValue(data));
     }
 
     @Override
     public void put(String key, NDArray data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new NDArrayValue(data));
     }
 
     @Override
     public void put(String key, byte[] data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new BytesValue(data));
     }
 
     @Override
     public void put(String key, Image data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new ImageValue(data));
     }
 
     @Override
     public void put(String key, long data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new IntValue(data));
     }
 
     @Override
     public void put(String key, double data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new DoubleValue(data));
     }
 
     @Override
     public void put(String key, boolean data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new BooleanValue(data));
     }
 
     @Override
     public void put(String key, Data data) {
+        Data.assertNotReservedKey(key);
         this.dataMap.put(key, new DataValue(data));
     }
 
