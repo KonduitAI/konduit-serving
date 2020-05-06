@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class DataJsonTest {
 
@@ -75,11 +76,10 @@ public class DataJsonTest {
             }
 
             String s = d.toJson();
+            System.out.println(s);
 
             Data d2 = Data.fromJson(s);
             assertEquals(d, d2);
-
-            System.out.println(s);
         }
     }
 
@@ -100,7 +100,7 @@ public class DataJsonTest {
         assertEquals(dInner, dInnerJson);
     }
 
-    @Ignore     //NO WAY TO PUT LISTS INTO DATA YET
+    @Ignore     //TODO NO WAY TO PUT LISTS INTO DATA YET - WIP TO BE MERGED SOON
     @Test
     public void testList(){
 
@@ -131,4 +131,24 @@ public class DataJsonTest {
 
     }
 
+
+    @Test
+    public void testJsonMetaData(){
+        Data d = Data.singleton("myKey", "myValue");
+        Data meta = JData.builder()
+                .add("someMeta", "someValue")
+                .add("otherMeta", 10.0)
+                .build();
+
+        d.setMetaData(meta);
+
+
+        String json = d.toJson();
+        System.out.println(json);
+        Data d2 = Data.fromJson(json);
+        assertEquals(d, d2);
+
+        Data meta2 = d2.getMetaData();
+        assertEquals(meta ,meta2);
+    }
 }

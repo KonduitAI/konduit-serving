@@ -19,10 +19,9 @@
 package ai.konduit.serving.pipeline.impl.serde;
 
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.impl.data.ValueType;
-import ai.konduit.serving.pipeline.util.ObjectMappers;
 import org.nd4j.shade.jackson.core.JsonGenerator;
-import org.nd4j.shade.jackson.core.JsonProcessingException;
 import org.nd4j.shade.jackson.databind.JsonSerializer;
 import org.nd4j.shade.jackson.databind.ObjectMapper;
 import org.nd4j.shade.jackson.databind.SerializerProvider;
@@ -32,6 +31,8 @@ import java.util.Base64;
 import java.util.List;
 
 public class DataJsonSerializer extends JsonSerializer<Data> {
+    public static final String LIST_FIELD_NAME = "list";
+
     @Override
     public void serialize(Data data, JsonGenerator jg, SerializerProvider sp) throws IOException {
         //TODO do we serialize in any particular order?
@@ -42,59 +43,40 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
 
         for(String s : l){
             ValueType vt = data.type(s);
+            jg.writeFieldName(s);
 
             switch (vt){
                 case NDARRAY:
                     break;
                 case STRING:
                     String str = data.getString(s);
-                    jg.writeFieldName(s);
                     jg.writeString(str);
                     break;
                 case BYTES:
-                    byte[] bytes = data.getBytes(s);
-                    //For bytes: write as follows
-                    /*
-                    "myBytes" : {
-                        "bytesFormat": "ARRAY" (or "BASE64")
-                        bytes = ... ([1,2,3] or "<some base64 string>"
-                    }
-                     */
-
-                    //TODO add option to do raw bytes array - [0, 1, 2, ...] style
-
-                    jg.writeFieldName(s);
-                    jg.writeStartObject();
-                    jg.writeFieldName("format");
-                    jg.writeString("BASE64");
-                    String base64 = Base64.getEncoder().encodeToString(bytes);
-                    jg.writeFieldName("bytes");
-                    jg.writeString(base64);
-                    jg.writeEndObject();
+                    writeBytes(jg, data.getBytes(s));
                     break;
                 case IMAGE:
+                    writeImage(jg, data.getImage(s));
                     break;
                 case DOUBLE:
-                    writeDouble(jg, s, data.getDouble(s));
+                    writeDouble(jg, data.getDouble(s));
                     break;
                 case INT64:
-                    writeLong(jg, s, data.getLong(s));
+                    writeLong(jg, data.getLong(s));
                     break;
                 case BOOLEAN:
                     boolean b = data.getBoolean(s);
-                    jg.writeFieldName(s);
                     jg.writeBoolean(b);
                     break;
                 case DATA:
-                    //TODO Fix formatting: it doesn't correctly indent...
                     Data d = data.getData(s);
-                    jg.writeFieldName(s);
-                    ObjectMapper om = (ObjectMapper) jg.getCodec();
-                    String dataStr = om.writeValueAsString(d);
-                    jg.writeRawValue(dataStr);
+                    writeNestedData(jg, d);
                     break;
                 case LIST:
-                    jg.writeFieldName(s);
+                    /*
+                    Format:
+                    "myList" : ["x", "y", "z"]
+                     */
                     ValueType listVt = data.listType(s);
                     List<?> list = data.getList(s, listVt);
                     writeList(jg, list, listVt);
@@ -102,17 +84,48 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
             }
         }
 
+        if(data.getMetaData() != null){
+            Data md = data.getMetaData();
+            jg.writeFieldName(Data.RESERVED_KEY_METADATA);
+            writeNestedData(jg, md);
+        }
+
         jg.writeEndObject();
     }
 
-    private void writeDouble(JsonGenerator jg, String s, double d) throws IOException {
-        jg.writeFieldName(s);
+    private void writeNestedData(JsonGenerator jg, Data data) throws IOException{
+        ObjectMapper om = (ObjectMapper) jg.getCodec();
+        String dataStr = om.writeValueAsString(data);
+        jg.writeRawValue(dataStr);
+    }
+
+    private void writeBytes(JsonGenerator jg, byte[] bytes) throws IOException {
+        //For bytes: write as follows
+        /*
+        "myBytes" : {
+            "bytesFormat": "ARRAY" (or "BASE64")
+            bytes = ... ([1,2,3] or "<some base64 string>"
+        }
+         */
+
+        //TODO add option to do raw bytes array - [0, 1, 2, ...] style
+        jg.writeStartObject();
+        jg.writeFieldName(Data.RESERVED_KEY_BYTES_BASE64);
+        String base64 = Base64.getEncoder().encodeToString(bytes);
+        jg.writeString(base64);
+        jg.writeEndObject();
+    }
+
+    private void writeDouble(JsonGenerator jg, double d) throws IOException {
         jg.writeNumber(d);
     }
 
-    private void writeLong(JsonGenerator jg, String s, long l) throws IOException {
-        jg.writeFieldName(s);
+    private void writeLong(JsonGenerator jg, long l) throws IOException {
         jg.writeNumber(l);
+    }
+
+    private void writeImage(JsonGenerator jg, Image i) throws IOException {
+
     }
 
     private void writeList(JsonGenerator jg, List<?> list, ValueType listType) throws IOException {
@@ -124,10 +137,19 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
             case NDARRAY:
                 break;
             case STRING:
+                for(String s : (List<String>)list){             //TODO avoid unsafe cast?
+                    jg.writeString(s);
+                }
                 break;
             case BYTES:
+                for(byte[] bytes : (List<byte[]>)list) {
+                    writeBytes(jg, bytes);
+                }
                 break;
             case IMAGE:
+                for(Image img : (List<Image>)list){
+                    writeImage(jg, img);
+                }
                 break;
             case DOUBLE:
                 List<Double> dList = (List<Double>)list;        //TODO checks for unsafe cast?
@@ -138,13 +160,40 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
                 jg.writeArray(dArr, 0, dArr.length);
                 break;
             case INT64:
+                List<Long> lList = (List<Long>)list;
+                long[] lArr = new long[lList.size()];
+                for(Long l : lList){
+                    lArr[i++] = l;
+                }
+                jg.writeArray(lArr, 0, lArr.length);
                 break;
             case BOOLEAN:
+                List<Boolean> bList = (List<Boolean>)list;
+                jg.writeStartArray(bList.size());
+                for(Boolean b : bList ){
+                    jg.writeBoolean(b);
+                }
+                jg.writeEndArray();
                 break;
             case DATA:
+                List<Data> dataList = (List<Data>)list;
+                jg.writeStartArray(dataList.size());
+                for(Data d : dataList){
+                    writeNestedData(jg, d);
+                }
+                jg.writeEndArray();
                 break;
             case LIST:
-                break;
+                //List of lists...
+                throw new IllegalStateException("Not yet implemented: Nested lists JSON serialization");
+//                List<List<?>> listList = (List<List<?>>)list;
+//                jg.writeStartArray(listList.size());
+//                for(List<?> l : listList){
+//                    ValueType vt = null;    //TODO design problem...
+////                    writeList();
+//                }
+            default:
+                throw new IllegalStateException("Not yet implemented: list type serialization for values " + listType);
         }
 
         jg.writeEndArray();

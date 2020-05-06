@@ -37,6 +37,13 @@ import java.util.List;
 @JsonDeserialize(using = DataJsonDeserializer.class)
 public interface Data {
 
+    String RESERVED_KEY_BYTES_BASE64 = "@BytesBase64";
+    String RESERVED_KEY_BYTES_ARRAY = "@BytesArray";
+    String RESERVED_KEY_IMAGE_FORMAT = "@ImageFormat";
+    String RESERVED_KEY_IMAGE_DATA = "@ImageData";
+    String RESERVED_KEY_METADATA = "@Metadata";
+
+
     int size();
 
     default String toJson(){
@@ -92,7 +99,7 @@ public interface Data {
     void setMetaData(Data data);
 
     // Serialization routines
-    default void save(File toFile){
+    default void save(File toFile){;
         throw new UnsupportedOperationException();
     }
 
@@ -199,5 +206,25 @@ public interface Data {
         }
 
         return true;
+    }
+
+    static void assertNotReservedKey(@NonNull String s){
+        String reserved = null;
+        if(RESERVED_KEY_BYTES_BASE64.equalsIgnoreCase(s)){
+            reserved = RESERVED_KEY_BYTES_BASE64;
+        } else if(RESERVED_KEY_BYTES_ARRAY.equalsIgnoreCase(s)){
+            reserved = RESERVED_KEY_BYTES_ARRAY;
+        } else if(RESERVED_KEY_IMAGE_FORMAT.equalsIgnoreCase(s)){
+            reserved = RESERVED_KEY_IMAGE_FORMAT;
+        } else if(RESERVED_KEY_IMAGE_DATA.equalsIgnoreCase(s)){
+            reserved = RESERVED_KEY_IMAGE_DATA;
+        } else if(RESERVED_KEY_METADATA.equalsIgnoreCase(s)){
+            reserved = RESERVED_KEY_METADATA;
+        }
+
+        if(reserved != null){
+            throw new IllegalStateException("Cannot use key \"" + reserved + "\" in a Data instance: This key is reserved" +
+                    " for internal use only");
+        }
     }
 }
