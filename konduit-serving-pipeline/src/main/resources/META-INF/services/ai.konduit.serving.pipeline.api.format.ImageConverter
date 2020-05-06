@@ -17,3 +17,5 @@
 #
 
 ai.konduit.serving.pipeline.impl.format.JavaImageConverters$IdentityConverter
+ai.konduit.serving.pipeline.impl.format.JavaImageConverters$PngToBufferedImageConverter
+ai.konduit.serving.pipeline.impl.format.JavaImageConverters$BufferedImageToPngConverter

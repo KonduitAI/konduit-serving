@@ -16,11 +16,21 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.data.image;
+package ai.konduit.serving.pipeline.api.exception;
 
-public class PngImage extends BaseImage<Png> {
+public class DataConversionException extends RuntimeException {
+    public DataConversionException() {
+    }
 
-    public PngImage(Png image) {
-        super(image);
+    public DataConversionException(String message) {
+        super(message);
+    }
+
+    public DataConversionException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public DataConversionException(Throwable cause) {
+        super(cause);
     }
 }

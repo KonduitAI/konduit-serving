@@ -26,10 +26,9 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 
 import static org.junit.Assert.*;
 
@@ -64,9 +63,42 @@ public class ImageTests {
         assertEquals(d, dJson);
 
 
-        //TODO BufferedImage
+        //PNG -> BufferedImage
+        BufferedImage bi = i.getAs(BufferedImage.class);
+        BufferedImage biExp = ImageIO.read(f);
+        boolean eq = bufferedImagesEqual(biExp, bi);
+        assertTrue("BufferedImage instances should be equal", eq);
 
+        //BufferedImage creation, Data, JSON and BufferedImage -> PNG
+        Image i2 = Image.create(bi);
+        Data d2 = Data.singleton("myImage", i2);
+        String json2 = d2.toJson();
+        Data d2Json = Data.fromJson(json2);
 
+        assertEquals(d2, d2Json);
+
+        Png png2 = d2Json.getImage("myImage").getAs(Png.class);
+        //assertEquals(p, png2);        //TODO - this fails - but that doesn't necessarily mean it's a different image given byte[]
+        BufferedImage biFromPng = ImageIO.read(new ByteArrayInputStream(png2.getBytes()));
+        boolean eq2 = bufferedImagesEqual(bi, biFromPng);
+        assertTrue("Images differ after consersion to/from PNG", eq2);
+    }
+
+    protected static boolean bufferedImagesEqual(BufferedImage img1, BufferedImage img2) {
+        if (img1.getHeight() != img2.getHeight() || img1.getWidth() != img2.getWidth()) {
+            return false;
+        }
+        int w = img1.getWidth();
+        int h = img1.getHeight();
+
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+                if (img1.getRGB(i,j) != img2.getRGB(i,j)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 }

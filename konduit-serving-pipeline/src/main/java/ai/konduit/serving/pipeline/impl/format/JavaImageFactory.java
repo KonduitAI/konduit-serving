@@ -21,6 +21,7 @@ package ai.konduit.serving.pipeline.impl.format;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.exception.DataLoadingException;
 import ai.konduit.serving.pipeline.api.format.ImageFactory;
+import ai.konduit.serving.pipeline.impl.data.image.BImage;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.image.PngImage;
 
@@ -72,7 +73,7 @@ public class JavaImageFactory implements ImageFactory {
         } else if(o instanceof Png){
             return new PngImage((Png) o);
         } else if(o instanceof BufferedImage){
-            throw new UnsupportedOperationException("Not yet implemented");
+            return new BImage((BufferedImage) o);
         } else {
             throw new UnsupportedOperationException("Unable to create Image from object of type: " + o.getClass());
         }

@@ -18,9 +18,10 @@
 
 package ai.konduit.serving.pipeline.impl.data.image;
 
-public class PngImage extends BaseImage<Png> {
+import java.awt.image.BufferedImage;
 
-    public PngImage(Png image) {
+public class BImage extends BaseImage<BufferedImage> {
+    public BImage(BufferedImage image) {
         super(image);
     }
 }
