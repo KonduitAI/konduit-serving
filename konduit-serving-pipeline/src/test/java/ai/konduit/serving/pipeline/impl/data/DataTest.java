@@ -117,7 +117,7 @@ public class DataTest {
     public void testSerde() {
         Data someData = JData.singleton(KEY, Long.valueOf(200));
         someData.save(new File("temp"));
-        Data restoredData = JData.fromFile(new File("temp"));
+        Data restoredData = Data.fromFile(new File("temp"));
     }
 
     @Test
