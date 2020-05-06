@@ -17,6 +17,7 @@
  */
 package ai.konduit.serving.camera.step.capture;
 
+import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -55,7 +56,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
     }
 
     @Override
-    public synchronized Data exec(Data data) {
+    public synchronized Data exec(Context ctx, Data data) {
         if(!initialized)
             init();
 

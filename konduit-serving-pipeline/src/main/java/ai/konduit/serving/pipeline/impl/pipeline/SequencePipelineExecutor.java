@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.pipeline;
 
+import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
@@ -97,10 +98,10 @@ public class SequencePipelineExecutor implements PipelineExecutor {
     }
 
     @Override
-    public Data exec(Data data) {
+    public Data exec(Context ctx, Data data) {
         Data current = data;
         for(PipelineStepRunner psr : runners){
-            current = psr.exec(current);
+            current = psr.exec(ctx, current);
         }
         return current;
     }

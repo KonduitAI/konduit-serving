@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.camera.step.show;
 
+import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -51,7 +52,7 @@ public class ShowImageStepRunner implements PipelineStepRunner {
     }
 
     @Override
-    public synchronized Data exec(Data data) {
+    public synchronized Data exec(Context ctx, Data data) {
         String name = step.getImageName();
         if(name == null)
             name = tryInferName(data);

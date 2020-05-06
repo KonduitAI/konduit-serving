@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.deeplearning4j.step;
 
+import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.exception.ModelLoadingException;
@@ -89,7 +90,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
     }
 
     @Override
-    public Data exec(Data data) {
+    public Data exec(Context ctx, Data data) {
 
         //First: Get array
         //TODO HANDLE DIFFERENT NAMES (Not hardcoded)

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.util;
 
+import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
@@ -63,7 +64,7 @@ public class CallbackPipelineStep implements PipelineStep {
         }
 
         @Override
-        public Data exec(Data data) {
+        public Data exec(Context ctx, Data data) {
             step.consumer.accept(data);
             return data;
         }
