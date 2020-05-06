@@ -20,6 +20,7 @@ package ai.konduit.serving.pipeline.api.data;
 
 import ai.konduit.serving.pipeline.api.format.NDArrayConverter;
 import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
+import ai.konduit.serving.pipeline.impl.format.SerializedNDArray;
 import ai.konduit.serving.pipeline.registry.NDArrayConverterRegistry;
 import lombok.AllArgsConstructor;
 import org.nd4j.common.base.Preconditions;
@@ -57,5 +58,19 @@ public class BaseNDArray<T> implements NDArray {
     public boolean canGetAs(Class<?> type) {
         NDArrayConverter converter = NDArrayConverterRegistry.getConverterFor(this, type);
         return converter != null;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(!(o instanceof NDArray))
+            return false;
+
+        NDArray o2 = (NDArray)o;
+
+        //TODO is there a more efficient approach?
+        SerializedNDArray thisArr = getAs(SerializedNDArray.class);
+        SerializedNDArray other = o2.getAs(SerializedNDArray.class);
+
+        return thisArr.equals(other);
     }
 }

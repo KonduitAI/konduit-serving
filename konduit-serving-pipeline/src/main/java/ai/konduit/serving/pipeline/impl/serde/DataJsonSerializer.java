@@ -20,13 +20,18 @@ package ai.konduit.serving.pipeline.impl.serde;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.ValueType;
+import ai.konduit.serving.pipeline.impl.format.SerializedNDArray;
 import org.nd4j.shade.jackson.core.JsonGenerator;
 import org.nd4j.shade.jackson.databind.JsonSerializer;
 import org.nd4j.shade.jackson.databind.ObjectMapper;
 import org.nd4j.shade.jackson.databind.SerializerProvider;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.List;
 
@@ -47,6 +52,8 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
 
             switch (vt){
                 case NDARRAY:
+                    NDArray n = data.getNDArray(s);
+                    writeNDArray(jg, n);
                     break;
                 case STRING:
                     String str = data.getString(s);
@@ -125,7 +132,36 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
     }
 
     private void writeImage(JsonGenerator jg, Image i) throws IOException {
+        throw new UnsupportedOperationException("Not yet implemented: writing image JSON");
+    }
 
+    private void writeNDArray(JsonGenerator jg, NDArray n) throws IOException{
+        jg.writeStartObject();
+
+        SerializedNDArray sn = n.getAs(SerializedNDArray.class);
+        NDArrayType type = sn.getType();
+        long[] shape = sn.getShape();
+        jg.writeFieldName(Data.RESERVED_KEY_NDARRAY_TYPE);
+        jg.writeString(type.toString());
+        jg.writeFieldName(Data.RESERVED_KEY_NDARRAY_SHAPE);
+        jg.writeArray(shape, 0, shape.length);
+
+        ByteBuffer bb = sn.getBuffer();
+        byte[] array;
+        if(bb.hasArray()){
+            array = bb.array();
+        } else {
+            int size = bb.remaining();
+            array = new byte[size];
+            for( int i=0; i<size; i++ ){
+                array[i] = bb.get(i);
+            }
+        }
+
+        String base64 = Base64.getEncoder().encodeToString(array);
+        jg.writeFieldName(Data.RESERVED_KEY_NDARRAY_DATA_ARRAY);
+        jg.writeString(base64);
+        jg.writeEndObject();
     }
 
     private void writeList(JsonGenerator jg, List<?> list, ValueType listType) throws IOException {

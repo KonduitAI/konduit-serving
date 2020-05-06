@@ -233,6 +233,22 @@ Alternatively, PNG is lossless - but it's size can be significantly larger for '
 that will frequently be fed into a neural network.
 
 
+For JSON serialization, we convert all arrays to SerializedNDArray - that simply stores the type, shape, and the data
+as a C order ByteBuffer. Then we can serialize in a simple NDArray format that (for most of the "standard" datatypes)
+should be supportable nearly anywhere, without extra dependencies.
+For things like ND4J, the ByteBuffer can point to off-heap memory so should be zero-copy under most circumstances. 
+Internally, we basically do:
+```java
+NDArray myArr = NDArray.create(new float[]{1,2,3});
+SerializedNDArray sArr = myArr.getAs(SerializedNDArray.class);
+long[] shape = sArr.getShape();
+NDArrayType type = sArr.getType();
+ByteBuffer bb = sArr.getBuffer();
+```
+All modules that define an NDArray type should implement conversion to SerializedNDArray, so we can do JSON and Protobuf
+serialization from any format - in a standardized form.
+
+
 ## JSON Serialization / Deserialization
 
 JSON ser/de was discussed earlier. This section is about JSON ser/de for the various configuration classes in Java, such
@@ -278,6 +294,69 @@ context (which we will be supporting in the future).
  
 
 At runtime, the JSON subtypes are loaded (and registered with Jackson) in the ObjectMappers class.
+
+As for the actual JSON format - this is basically as follows (taken from DataJsonTest.testBasic):
+```
+ ----- NDARRAY -----
+{
+  "myKey" : {
+    "@NDArrayType" : "FLOAT",
+    "@NDArrayShape" : [ 3 ],
+    "@NDArrayDataBase64" : "AAAAAD+AAABAAAAA"
+  }
+}
+ ----- STRING -----
+{
+  "myKey" : "myString"
+}
+ ----- BYTES -----
+{
+  "myKey" : {
+    "@BytesBase64" : "AAEC"
+  }
+}
+ ----- DOUBLE -----
+{
+  "myKey" : 1.0
+}
+ ----- INT64 -----
+{
+  "myKey" : 1
+}
+ ----- BOOLEAN -----
+{
+  "myKey" : true
+}
+ ----- DATA -----
+{
+  "myKey" : {
+      "myInnerKey" : "myInnerValue"
+    }
+}
+```
+
+Note that strings, bytes, double, int64 and boolean are basically as you would expect.  
+The format for nested Data instances is identical to the non-nested ones.  
+List formats (not shown above) will use JSON arrays - so it'll look like `"myKey" : ["some", "list", "values"]`  
+Bytes, is a special case - it's an object with a special protected key: `@BytesBase64`. Currently (and by default) we
+will encode `byte[]` objects as base64 format for space efficiency; later we will allow "array style" byte[] encoding
+(i.e., `"@BytesArray" : [1,2,3]`). Users are not allowed to add anything to a Data instance with these protected keys.
+
+NDArray is a special case also: it in a JSON object with type/shape/data keys. Currently data is base64 encoded, but
+we may allow a "1d buffer array" format in the future also.
+
+The full set of protected keys can be found on the Data interface. They include:
+* @BytesBase64
+* @BytesArray
+* @ImageFormat
+* @ImageData
+* @NDArrayShape
+* @NDArrayType
+* @NDArrayDataBase64
+* @NDArrayDataBase64
+* @Metadata
+
+
 
 ## Adding a New Module
 

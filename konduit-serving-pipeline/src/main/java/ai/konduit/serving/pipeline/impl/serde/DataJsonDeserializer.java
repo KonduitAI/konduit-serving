@@ -19,7 +19,10 @@
 package ai.konduit.serving.pipeline.impl.serde;
 
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.JData;
+import ai.konduit.serving.pipeline.impl.format.SerializedNDArray;
 import org.nd4j.shade.jackson.core.JsonParser;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 import org.nd4j.shade.jackson.databind.DeserializationContext;
@@ -28,6 +31,7 @@ import org.nd4j.shade.jackson.databind.JsonNode;
 import org.nd4j.shade.jackson.databind.node.ArrayNode;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.Iterator;
 
@@ -84,6 +88,18 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                             b[i] = (byte) bVal;
                         }
                         d.put(s, b);
+                    } else if(n2.has(Data.RESERVED_KEY_NDARRAY_TYPE)){
+                        //NDArray
+                        NDArrayType type = NDArrayType.valueOf(n2.get(Data.RESERVED_KEY_NDARRAY_TYPE).textValue());
+                        ArrayNode shapeNode = (ArrayNode) n2.get(Data.RESERVED_KEY_NDARRAY_SHAPE);
+                        long[] shape = new long[shapeNode.size()];
+                        for( int i=0; i<shape.length; i++ )
+                            shape[i] = shapeNode.get(i).asLong();
+                        String base64 = n2.get(Data.RESERVED_KEY_NDARRAY_DATA_BASE64).textValue();
+                        byte[] bytes = Base64.getDecoder().decode(base64);
+                        ByteBuffer bb = ByteBuffer.wrap(bytes);
+                        SerializedNDArray ndArray = new SerializedNDArray(type, shape, bb);
+                        d.put(s, NDArray.create(ndArray));
                     } else if (n2.has(Data.RESERVED_KEY_IMAGE_DATA)) {
                         //Image
                         throw new UnsupportedOperationException("Image deserialization not yet implemented");

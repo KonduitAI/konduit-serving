@@ -35,7 +35,7 @@ public class DataJsonTest {
     public void testBasic(){
 
         for(ValueType vt : ValueType.values()){
-            if(vt == ValueType.IMAGE || vt == ValueType.LIST || vt == ValueType.NDARRAY){
+            if(vt == ValueType.IMAGE || vt == ValueType.LIST ){     //TODO NO WAY TO PUT LISTS INTO DATA YET - WIP TO BE MERGED SOON
                 System.out.println("SKIPPING: " + vt);
                 continue;
             }
