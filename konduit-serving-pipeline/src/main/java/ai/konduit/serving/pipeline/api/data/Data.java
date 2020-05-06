@@ -86,6 +86,10 @@ public interface Data {
     void putListInt64(String key, List<Long> data);
     void putListBoolean(String key, List<Boolean> data);
     void putListDouble(String key, List<Double> data);
+    void putListData(String key, List<Data> data);
+    void putListImage(String key, List<Image> data);
+    void putListNDArray(String key, List<NDArray> data);
+    void putListList(String key, List<List<?>> data);
     //void put(String key, Data data);
 
     void put(String key, Data data);
@@ -96,17 +100,19 @@ public interface Data {
 
     // Serialization routines
     default void save(File toFile) throws IOException {
-        throw new UnsupportedOperationException("Not yet implemented");
+        this.toProtoData().save(toFile);
     }
 
 
     default void write(OutputStream toStream) throws IOException {
-        throw new UnsupportedOperationException("Not yet implemented");
+        this.toProtoData().write(toStream);
     }
 
     default byte[] asBytes() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return this.toProtoData().asBytes();
     }
+
+    ProtoData toProtoData();
 
     static Data fromJson(String json) {
         try {
@@ -117,15 +123,15 @@ public interface Data {
     }
 
     static Data fromBytes(byte[] input) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return new ProtoData(input);
     }
 
-    static Data fromFile(File f){
-        throw new UnsupportedOperationException("Not yet implemented");
+    static Data fromFile(File f) throws IOException {
+        return new ProtoData(f);
     }
 
-    static Data fromStream(InputStream stream) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    static Data fromStream(InputStream stream) throws IOException {
+        return new ProtoData(stream);
     }
 
     static Data singleton(@NonNull String key, @NonNull Object value){

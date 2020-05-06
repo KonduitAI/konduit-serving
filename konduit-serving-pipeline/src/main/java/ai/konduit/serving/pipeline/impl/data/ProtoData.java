@@ -20,7 +20,9 @@ package ai.konduit.serving.pipeline.impl.data;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.impl.data.helpers.ProtobufUtils;
 import com.google.protobuf.InvalidProtocolBufferException;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -32,6 +34,29 @@ import java.util.Map;
 @Slf4j
 public class ProtoData extends JData {
 
+    public ProtoData(@NonNull InputStream stream) throws IOException {
+        this(fromStream(stream));
+    }
+
+    public ProtoData(@NonNull byte[] input) {
+        this(fromBytes(input));
+    }
+
+    public ProtoData(@NonNull File file) throws IOException {
+        save(file);
+    }
+
+    public ProtoData(@NonNull Data data) {
+        if(data instanceof JData){
+            getDataMap().putAll(((JData)data).getDataMap());
+        }
+    }
+
+    @Override
+    public ProtoData toProtoData() {
+        return this;
+    }
+
     @Override
     public void save(File toFile) throws IOException {
         write(new FileOutputStream(toFile));
@@ -40,10 +65,11 @@ public class ProtoData extends JData {
     @Override
     public void write(OutputStream toStream) throws IOException {
 
-        Map<String, generated.Data.DataScheme> newItemsMap = javaMapToPbMap();
+        generated.Data.DataMap newItemsMap =
+                ProtobufUtils.convertJavaToProtobufData(getDataMap());
 
         generated.Data.DataMap pbDataMap = generated.Data.DataMap.newBuilder().
-                putAllMapItems(newItemsMap).
+                putAllMapItems(newItemsMap.getMapItemsMap()).
                 build();
         pbDataMap.writeTo(toStream);
     }
@@ -51,122 +77,15 @@ public class ProtoData extends JData {
     public static Data fromFile(File fromFile) throws IOException {
         generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder().mergeFrom(new FileInputStream(fromFile));
         generated.Data.DataMap dataMap = builder.build();
-        return pbMapToJavaData(dataMap);
+        return ProtobufUtils.convertProtobufToData(dataMap);
     }
 
     public static Data fromStream(InputStream stream) throws IOException {
         generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder().mergeFrom(stream);
         generated.Data.DataMap dataMap = builder.build();
-        return pbMapToJavaData(dataMap);
+        return ProtobufUtils.convertProtobufToData(dataMap);
     }
 
-    private static Data pbMapToJavaData(generated.Data.DataMap dataMap) {
-        JData retData = new JData();
-        Map<String, generated.Data.DataScheme> schemeMap = dataMap.getMapItemsMap();
-        Iterator<Map.Entry<String, generated.Data.DataScheme>> iterator =
-                schemeMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, generated.Data.DataScheme> entry = iterator.next();
-            generated.Data.DataScheme item = entry.getValue();
-            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.STRING.ordinal()) {
-                retData.put(entry.getKey(), item.getSValue());
-            }
-            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.BOOLEAN.ordinal()) {
-                retData.put(entry.getKey(), item.getBoolValue());
-            }
-            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.INT64.ordinal()) {
-                retData.put(entry.getKey(), item.getIValue());
-            }
-            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.DOUBLE.ordinal()) {
-                retData.put(entry.getKey(), item.getDoubleValue());
-            }
-            if (item.getTypeValue() == generated.Data.DataScheme.ValueType.LIST.ordinal()) {
-                // TODO
-            }
-        }
-        return retData;
-    }
-
-    private Map<String, generated.Data.DataScheme> javaMapToPbMap() {
-        Map<String, generated.Data.DataScheme> newItemsMap = Collections.emptyMap();
-        Iterator<Map.Entry<String, Value>> iterator = getDataMap().entrySet().iterator();
-
-        while (iterator.hasNext()) {
-            Map.Entry<String, Value> nextItem = iterator.next();
-            Value value = nextItem.getValue();
-
-            generated.Data.DataScheme item = null;
-
-            if (value.type().equals(ValueType.STRING)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setSValue((String) nextItem.getValue().get()).
-                        setTypeValue(ValueType.STRING.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.BOOLEAN)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setBoolValue((Boolean) nextItem.getValue().get()).
-                        setTypeValue(ValueType.BOOLEAN.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.INT64)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setIValue((Long) nextItem.getValue().get()).
-                        setTypeValue(ValueType.INT64.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.DOUBLE)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setIValue((Long) nextItem.getValue().get()).
-                        setTypeValue(ValueType.DOUBLE.ordinal()).
-                        build();
-            }
-            if (item == null) {
-                throw new IllegalStateException("JData.write failed");
-            }
-            newItemsMap.put(nextItem.getKey(), item);
-        }
-        return newItemsMap;
-    }
-
-    private generated.Data.DataMap javaObjectToPbMessage() {
-        Map<String, generated.Data.DataScheme> pbItemsMap = Collections.emptyMap();
-        Iterator<Map.Entry<String, Value>> iterator = getDataMap().entrySet().iterator();
-
-        while (iterator.hasNext()) {
-            Map.Entry<String, Value> nextItem = iterator.next();
-            Value value = nextItem.getValue();
-
-            generated.Data.DataScheme item = null;
-
-            if (value.type().equals(ValueType.STRING)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setSValue((String) nextItem.getValue().get()).
-                        setTypeValue(ValueType.STRING.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.BOOLEAN)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setBoolValue((Boolean) nextItem.getValue().get()).
-                        setTypeValue(ValueType.BOOLEAN.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.INT64)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setIValue((Long) nextItem.getValue().get()).
-                        setTypeValue(ValueType.INT64.ordinal()).
-                        build();
-            } else if (value.type().equals(ValueType.DOUBLE)) {
-                item = generated.Data.DataScheme.newBuilder().
-                        setIValue((Long) nextItem.getValue().get()).
-                        setTypeValue(ValueType.DOUBLE.ordinal()).
-                        build();
-            }
-            if (item == null) {
-                throw new IllegalStateException("JData.write failed");
-            }
-            pbItemsMap.put(nextItem.getKey(), item);
-        }
-        generated.Data.DataMap pbDataMap = generated.Data.DataMap.newBuilder().
-                putAllMapItems(pbItemsMap).
-                build();
-        return pbDataMap;
-    }
 
     public byte[] asBytes() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -187,7 +106,7 @@ public class ProtoData extends JData {
             log.error("Error converting bytes array to data",e);
         }
         generated.Data.DataMap dataMap = builder.build();
-        retVal = pbMapToJavaData(dataMap);
+        retVal = ProtobufUtils.convertProtobufToData(dataMap);
         return retVal;
     }
 

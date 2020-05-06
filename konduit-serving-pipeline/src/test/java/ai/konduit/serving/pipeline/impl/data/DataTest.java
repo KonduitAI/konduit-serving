@@ -45,7 +45,7 @@ public class DataTest {
     private final String VALUE = "Some string data";
 
     @Rule
-    public TemporaryFolder dir = new TemporaryFolder();
+    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Test
     public void testStringData() {
@@ -127,31 +127,20 @@ public class DataTest {
     @Test
     public void testSerde() throws IOException {
         Data someData = JData.singleton(KEY, Long.valueOf(200));
-        someData.save(new File("temp"));
-        Data restoredData = Data.fromFile(new File("temp"));
+        File testFile = testDir.newFile();
+        someData.save(testFile);
+        Data restoredData = Data.fromFile(testFile);
     }
 
     @Test
     public void testConvertToBytes() {
-        Data someData = Data.singleton(KEY, Long.valueOf(200));
-        byte[] output = someData.asBytes();
+        Data longData = Data.singleton(KEY, Long.valueOf(200));
+        byte[] output = longData.asBytes();
         assert(output != null);
-    }
 
-    @Test
-    public void testConvertToJson() {
-        Data someData = (JData) JData.singleton(KEY, Long.valueOf(200));
-        String jsonStr = someData.toJson();
-        String expected = "{\n" +
-                "  \"mapItems\": {\n" +
-                "    \"stringData\": {\n" +
-                "      \"iValue\": \"200\",\n" +
-                "      \"type\": \"INT64\"\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
-
-        assertEquals(expected, jsonStr);
+        /*Data intData = Data.singleton(KEY, Integer.valueOf(20));
+        output = intData.asBytes();
+        assert(output != null);*/
     }
 
     @Test

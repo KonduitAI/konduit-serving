@@ -10,11 +10,19 @@ import java.util.List;
 public class ListValue<T> implements Value<List<T>> {
 
     private List<T> values;
+    private ValueType elementType;
+
+    /*public ListValue(List<T> data, ValueType elementType) {
+        this.values = data;
+        this.elementType = elementType;
+    }*/
 
     @Override
     public ValueType type() {
         return ValueType.LIST;
     }
+
+    public ValueType elementType() { return elementType; }
 
     @Override
     public List<T> get() {
@@ -23,6 +31,11 @@ public class ListValue<T> implements Value<List<T>> {
 
     @Override
     public void set(List<T> value) {
+        throw new IllegalStateException("Use set(List<T>,ValueType) for lists");
+    }
+
+    // @Override
+    public void set(List<T> value, ValueType elementType) {
         this.values = values;
     }
 }

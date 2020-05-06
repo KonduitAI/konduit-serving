@@ -31,6 +31,9 @@ public class JData implements Data {
     private Map<String, Value> dataMap = new LinkedHashMap<>();
     private Data metaData;
 
+    private static final String VALUE_NOT_FOUND_TEXT = "Value not found for key %s";
+    private static final String VALUE_HAS_WRONG_TYPE_TEXT = "Value has wrong type for key %s";
+
     public Map<String, Value> getDataMap() {
         return dataMap;
     }
@@ -61,9 +64,9 @@ public class JData implements Data {
     private Value valueIfFound(String key, ValueType type) {
         Value data = dataMap.get(key);
         if (data == null)
-            throw new ValueNotFoundException(String.format("Value not found for key %s", key));
+            throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
         if (data.type() != type)
-            throw new IllegalStateException(String.format("Value has wrong type for key %s", key));
+            throw new IllegalStateException(String.format(VALUE_HAS_WRONG_TYPE_TEXT, key));
         return data;
     }
 
@@ -71,7 +74,7 @@ public class JData implements Data {
     public ValueType type(String key) {
         Value data = dataMap.get(key);
         if (data == null)
-            throw new ValueNotFoundException(String.format("Value not found for key %s", key));
+            throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
         return data.type();
     }
 
@@ -79,7 +82,7 @@ public class JData implements Data {
     public ValueType listType(String key) {
         Value data = dataMap.get(key);
         if (data == null || !(data instanceof ListValue))
-            throw new ValueNotFoundException(String.format("Value not found for key %s", key));
+            throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
         return data.type();
     }
 
@@ -91,7 +94,7 @@ public class JData implements Data {
     @Override
     public Object get(String key) throws ValueNotFoundException {
         if(!dataMap.containsKey(key))
-            throw new ValueNotFoundException("Value not found for key " + key);
+            throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
         return dataMap.get(key).get();
     }
 
@@ -191,22 +194,42 @@ public class JData implements Data {
 
     @Override
     public void putListString(String key, List<String> data) {
-        dataMap.put(key, new ListValue(data));
+        dataMap.put(key, new ListValue(data, ValueType.STRING));
     }
 
     @Override
     public void putListInt64(String key, List<Long> data) {
-        dataMap.put(key, new ListValue(data));
+        dataMap.put(key, new ListValue(data, ValueType.DATA));
     }
 
     @Override
     public void putListBoolean(String key, List<Boolean> data) {
-        dataMap.put(key, new ListValue(data));
+        dataMap.put(key, new ListValue(data, ValueType.BOOLEAN));
     }
 
     @Override
     public void putListDouble(String key, List<Double> data) {
-        dataMap.put(key, new ListValue(data));
+        dataMap.put(key, new ListValue(data, ValueType.DOUBLE));
+    }
+
+    @Override
+    public void putListData(String key, List<Data> data) {
+        dataMap.put(key, new ListValue(data, ValueType.DATA));
+    }
+
+    @Override
+    public void putListImage(String key, List<Image> data) {
+        dataMap.put(key, new ListValue(data, ValueType.IMAGE));
+    }
+
+    @Override
+    public void putListNDArray(String key, List<NDArray> data) {
+        dataMap.put(key, new ListValue(data, ValueType.NDARRAY));
+    }
+
+    @Override
+    public void putListList(String key, List<List<?>> data) {
+        dataMap.put(key, new ListValue(data, ValueType.LIST));
     }
 
     @Override
@@ -222,6 +245,11 @@ public class JData implements Data {
     @Override
     public void setMetaData(Data data) {
         this.metaData = data;
+    }
+
+    @Override
+    public ProtoData toProtoData() {
+        return new ProtoData(this);
     }
 
     @Override
