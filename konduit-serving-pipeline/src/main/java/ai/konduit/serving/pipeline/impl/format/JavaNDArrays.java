@@ -16,12 +16,10 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.data.java;
+package ai.konduit.serving.pipeline.impl.format;
 
-import ai.konduit.serving.pipeline.api.data.BaseNDArray;
-import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
-import ai.konduit.serving.pipeline.impl.format.SerializedNDArray;
+import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 
 public class JavaNDArrays {
 

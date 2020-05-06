@@ -16,7 +16,13 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.data.java;
+package ai.konduit.serving.pipeline.impl.data.image;
 
-public class JavaImage {
+import java.io.File;
+
+public class PngImage extends BaseImage<Png> {
+
+    public PngImage(Png image) {
+        super(image);
+    }
 }

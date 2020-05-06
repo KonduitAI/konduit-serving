@@ -17,4 +17,4 @@
 #
 
 
-ai.konduit.serving.pipeline.impl.format.JavaNDArrayFactory
+ai.konduit.serving.pipeline.impl.format.JavaImageFactory

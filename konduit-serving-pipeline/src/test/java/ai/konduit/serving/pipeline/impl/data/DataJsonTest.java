@@ -20,6 +20,7 @@ package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 import org.junit.Ignore;
 import org.junit.Test;
 

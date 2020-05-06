@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.data.nd4j.data;
 
-import ai.konduit.serving.pipeline.api.data.BaseNDArray;
+import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class ND4JNDArray extends BaseNDArray<INDArray> {

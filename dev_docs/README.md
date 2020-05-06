@@ -390,6 +390,10 @@ See for example: konduit-serving-deeplearning4j
     - For NDArray: the main (strictly required) one is conversion to/from SerializedNDArray - this is necessary for JSON
       and protobuf serialization/deserialization, and will be used as the intermediate format for conversion between arbitrary
       types that don't have direct (1 step) conversion enabled (i.e., X -> SerializedNDArray -> Y for any X and Y).
+    - For Image: the main (strictly required) one is conversion to/from Png (i.e., `ai.konduit.serving.pipeline.impl.data.image.Png`)
+      as this is used as the default format for both JSON and 
+      The reason: PNG is a compressed lossless image format, unlike some alternatives such as JGP. It does have a size overhead
+      for natural images vs. JPG, but in practice for deep learning we typically don't have very large input/output images.
 - Add an NDArrayFactory / ImageFactory (used within NDArray.create(Object) / Image.create(Object))
 - Add a `resources/META-INF/services/ai.konduit.serving.pipeline.api.format.NDArrayConverter` (or `.ImageConverter`) file
   listing the fully-qualified class name of all of the new NDArrayConverter/ImageConverter implementations you added

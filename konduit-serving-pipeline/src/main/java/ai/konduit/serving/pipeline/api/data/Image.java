@@ -18,8 +18,11 @@
 
 package ai.konduit.serving.pipeline.api.data;
 
+import ai.konduit.serving.pipeline.api.format.ImageFactory;
 import ai.konduit.serving.pipeline.api.format.ImageFormat;
 import ai.konduit.serving.pipeline.registry.ImageFactoryRegistry;
+import lombok.NonNull;
+import org.nd4j.common.base.Preconditions;
 
 public interface Image {
 
@@ -27,11 +30,22 @@ public interface Image {
 
     <T> T getAs(ImageFormat<T> format);
 
-    static Image create(Object from){
-        throw new UnsupportedOperationException("Not yet implemented");
+    <T> T getAs(Class<T> type);
+
+    boolean canGetAs(ImageFormat<?> format);
+
+    boolean canGetAs(Class<?> type);
+
+    //TODO how will this work for PNG, JPG etc files?
+    static Image create(@NonNull Object from){
+        ImageFactory f = ImageFactoryRegistry.getFactoryFor(from);
+        Preconditions.checkState(f != null, "Unable to create Image from object of %s - no ImageFactory instances" +
+                " are available that can convert this type to Konduit Serving Image", from.getClass());
+
+        return f.create(from);
     }
 
-    static boolean canCreateFrom(Object from){
+    static boolean canCreateFrom(@NonNull Object from){
         return ImageFactoryRegistry.getFactoryFor(from) != null;
     }
 

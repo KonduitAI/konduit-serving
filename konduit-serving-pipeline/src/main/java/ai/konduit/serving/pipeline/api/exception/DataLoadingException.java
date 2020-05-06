@@ -16,17 +16,22 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.api.format;
+package ai.konduit.serving.pipeline.api.exception;
 
-import ai.konduit.serving.pipeline.api.data.Image;
+public class DataLoadingException extends RuntimeException {
 
-public interface ImageConverter {
+    public DataLoadingException() {
+    }
 
-    boolean canConvert(Image from, ImageFormat<?> to);
+    public DataLoadingException(String message) {
+        super(message);
+    }
 
-    boolean canConvert(Image from, Class<?> to);
+    public DataLoadingException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    <T> T convert(Image from, ImageFormat<T> to);
-
-    <T> T convert(Image from, Class<T> to);
+    public DataLoadingException(Throwable cause) {
+        super(cause);
+    }
 }

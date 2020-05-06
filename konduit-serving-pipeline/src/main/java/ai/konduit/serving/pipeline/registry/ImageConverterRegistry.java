@@ -19,8 +19,11 @@
 package ai.konduit.serving.pipeline.registry;
 
 import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.format.ImageConverter;
 import ai.konduit.serving.pipeline.api.format.ImageFormat;
+import ai.konduit.serving.pipeline.api.format.ImageConverter;
+import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
 import lombok.NonNull;
 import org.nd4j.common.primitives.Pair;
 
@@ -28,11 +31,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class ImageConverteRegistry extends AbstractRegistry<ImageConverter> {
+public class ImageConverterRegistry extends AbstractRegistry<ImageConverter> {
 
-    private static final ImageConverteRegistry INSTANCE = new ImageConverteRegistry();
+    private static final ImageConverterRegistry INSTANCE = new ImageConverterRegistry();
 
-    protected ImageConverteRegistry(){
+    protected ImageConverterRegistry(){
         super(ImageConverter.class);
     }
 
@@ -57,5 +60,41 @@ public class ImageConverteRegistry extends AbstractRegistry<ImageConverter> {
     @Override
     public Set<Class<?>> supportedForFactory(ImageConverter factory) {
         return Collections.emptySet();
+    }
+
+    public static ImageConverter getConverterFor(Image img, Class<?> type ){
+        return INSTANCE.getConverterForClass(img, type);
+    }
+
+    public static ImageConverter getConverterFor(Image img, ImageFormat<?> type ){
+        return INSTANCE.getConverterForType(img, type);
+    }
+
+    public ImageConverter getConverterForClass(Image img, Class<?> type ){
+        if(factories == null)
+            init();
+
+        if(factoriesMap.containsKey(type)){
+            return factoriesMap.get(type).get(0);       //TODO multiple converters
+        }
+
+        for(ImageConverter c : factories){
+            if(c.canConvert(img, type)){
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public ImageConverter getConverterForType(Image img, ImageFormat<?> type ){
+        if(factories == null)
+            init();
+
+        for(ImageConverter c : factories){
+            if(c.canConvert(img, type)){
+                return c;
+            }
+        }
+        return null;
     }
 }

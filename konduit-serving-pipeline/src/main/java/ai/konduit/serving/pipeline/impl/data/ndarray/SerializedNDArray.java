@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.format;
+package ai.konduit.serving.pipeline.impl.data.ndarray;
 
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import lombok.AllArgsConstructor;

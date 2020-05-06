@@ -16,17 +16,17 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.api.data;
+package ai.konduit.serving.pipeline.impl.data.ndarray;
 
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.format.NDArrayConverter;
 import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
-import ai.konduit.serving.pipeline.impl.format.SerializedNDArray;
 import ai.konduit.serving.pipeline.registry.NDArrayConverterRegistry;
 import lombok.AllArgsConstructor;
 import org.nd4j.common.base.Preconditions;
 
 @AllArgsConstructor
-public class BaseNDArray<T> implements NDArray {
+public abstract class BaseNDArray<T> implements NDArray {
 
     private final T array;
 
@@ -42,7 +42,6 @@ public class BaseNDArray<T> implements NDArray {
 
     @Override
     public <T> T getAs(Class<T> type) {
-        //TODO check to avoid NPE
         NDArrayConverter converter = NDArrayConverterRegistry.getConverterFor(this, type);
         Preconditions.checkState(converter != null, "No converter found for converting from %s to %s", array.getClass(), type);
         return converter.convert(this, type);

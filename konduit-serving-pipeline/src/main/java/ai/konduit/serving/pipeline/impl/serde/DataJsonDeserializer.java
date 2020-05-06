@@ -19,10 +19,12 @@
 package ai.konduit.serving.pipeline.impl.serde;
 
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.JData;
-import ai.konduit.serving.pipeline.impl.format.SerializedNDArray;
+import ai.konduit.serving.pipeline.impl.data.image.Png;
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import org.nd4j.shade.jackson.core.JsonParser;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 import org.nd4j.shade.jackson.databind.DeserializationContext;
@@ -108,7 +110,14 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                         d.put(s, NDArray.create(ndArray));
                     } else if (n2.has(Data.RESERVED_KEY_IMAGE_DATA)) {
                         //Image
-                        throw new UnsupportedOperationException("Image deserialization not yet implemented");
+                        String format = n2.get(Data.RESERVED_KEY_IMAGE_FORMAT).textValue();
+                        if(!"PNG".equalsIgnoreCase(format)){
+                            throw new UnsupportedOperationException("Deserialization of formats other than PNG not yet implemented");
+                        }
+                        String base64Data = n2.get(Data.RESERVED_KEY_IMAGE_DATA).textValue();
+                        byte[] bytes = Base64.getDecoder().decode(base64Data);
+                        Png png = new Png(bytes);
+                        d.put(s, Image.create(png));
                     } else {
                         //Must be data
                         Data dInner = deserialize(jp, n2);

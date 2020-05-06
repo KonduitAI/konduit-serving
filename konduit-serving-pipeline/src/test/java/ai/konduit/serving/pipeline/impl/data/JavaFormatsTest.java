@@ -20,12 +20,10 @@ package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.impl.format.SerializedNDArray;
-import org.junit.Ignore;
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

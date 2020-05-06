@@ -23,7 +23,7 @@ import ai.konduit.serving.pipeline.api.data.NDArray;
 
 public interface NDArrayConverter {
 
-    boolean canConvert(NDArray from, NDArrayFormat to);
+    boolean canConvert(NDArray from, NDArrayFormat<?> to);
 
     boolean canConvert(NDArray from, Class<?> to);
 

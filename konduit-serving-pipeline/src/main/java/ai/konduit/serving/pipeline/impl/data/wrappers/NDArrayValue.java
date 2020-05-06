@@ -16,9 +16,7 @@
 package ai.konduit.serving.pipeline.impl.data.wrappers;
 
 import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.impl.data.Value;
-import ai.konduit.serving.pipeline.impl.data.ValueType;
-import lombok.AllArgsConstructor;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 
 public class NDArrayValue extends BaseValue<NDArray> {
     public NDArrayValue(NDArray value) {
