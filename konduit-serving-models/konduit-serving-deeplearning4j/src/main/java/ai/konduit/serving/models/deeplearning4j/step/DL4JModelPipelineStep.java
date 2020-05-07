@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ******************************************************************************/
-package ai.konduit.serving.deeplearning4j.step;
+package ai.konduit.serving.models.deeplearning4j.step;
 
-import ai.konduit.serving.deeplearning4j.DL4JConfiguration;
+import ai.konduit.serving.models.deeplearning4j.DL4JConfiguration;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

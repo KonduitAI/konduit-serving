@@ -13,7 +13,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ******************************************************************************/
-package ai.konduit.serving.deeplearning4j.step;
+package ai.konduit.serving.models.deeplearning4j.step;
 
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;

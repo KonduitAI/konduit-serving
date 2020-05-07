@@ -14,4 +14,4 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################################
 
-ai.konduit.serving.deeplearning4j.serde.DL4JJsonSubTypesMapping
+ai.konduit.serving.models.deeplearning4j.serde.DL4JJsonSubTypesMapping

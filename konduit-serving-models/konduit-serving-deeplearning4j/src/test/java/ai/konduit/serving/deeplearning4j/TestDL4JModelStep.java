@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.deeplearning4j;
 
-import ai.konduit.serving.deeplearning4j.step.DL4JModelPipelineStep;
+import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;

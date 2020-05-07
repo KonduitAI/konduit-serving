@@ -79,9 +79,18 @@ public class ImageTests {
 
         Png png2 = d2Json.getImage("myImage").getAs(Png.class);
         //assertEquals(p, png2);        //TODO - this fails - but that doesn't necessarily mean it's a different image given byte[]
-        BufferedImage biFromPng = ImageIO.read(new ByteArrayInputStream(png2.getBytes()));
-        boolean eq2 = bufferedImagesEqual(bi, biFromPng);
-        assertTrue("Images differ after consersion to/from PNG", eq2);
+        boolean eq2 = equalPngs(p, png2);
+        assertTrue("Images differ after conversion to/from PNG", eq2);
+    }
+
+    protected static boolean equalPngs(Png png1, Png png2){
+        try {
+            BufferedImage bi1 = ImageIO.read(new ByteArrayInputStream(png1.getBytes()));
+            BufferedImage bi2 = ImageIO.read(new ByteArrayInputStream(png2.getBytes()));
+            return bufferedImagesEqual(bi1, bi2);
+        } catch (Throwable t){
+            throw new RuntimeException(t);
+        }
     }
 
     protected static boolean bufferedImagesEqual(BufferedImage img1, BufferedImage img2) {

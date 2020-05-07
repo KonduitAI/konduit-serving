@@ -353,7 +353,6 @@ The full set of protected keys can be found on the Data interface. They include:
 * @NDArrayShape
 * @NDArrayType
 * @NDArrayDataBase64
-* @NDArrayDataBase64
 * @Metadata
 
 In practice, Data JSON serialization/deserialization is implemneted in the DataJsonSerializer and DataJsonDeserializer classes. 
@@ -402,6 +401,15 @@ See for example: konduit-serving-deeplearning4j
   the fully qualified class name of the NDArrayFactory / ImageFactory that you added
 
 See for example: konduit-serving-nd4j
+
+
+A note on naming packages for new modules: The packages (that directly contain classe) should be unique, and are based on
+the  module name.
+For example, the kondit-serving-nd4j module (under konduit-serving-data) has classes in `ai.konduit.serving.data.nd4j`.
+Similarly, konduit-serving-deeplearning4j (under konduit-serving-models) has classes in `ai.konduit.serving.models.deeplearning4j`.
+It's fine to have sub-packages (i.e., any X in `ai.konduit.serving.data.nd4j.X` is fine) but we cannot have classes
+in the same package - i.e., modules X and Y can't both define classes directly in the same namespace.
+The reason is to avoid split packages issues for OSGi and Java 9 Modules. We will likely use OSGi extensively in the future.
 
  
 

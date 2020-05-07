@@ -13,10 +13,10 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ******************************************************************************/
-package ai.konduit.serving.deeplearning4j.serde;
+package ai.konduit.serving.models.deeplearning4j.serde;
 
-import ai.konduit.serving.deeplearning4j.DL4JConfiguration;
-import ai.konduit.serving.deeplearning4j.step.DL4JModelPipelineStep;
+import ai.konduit.serving.models.deeplearning4j.DL4JConfiguration;
+import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
 import ai.konduit.serving.pipeline.api.Configuration;
 import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.serde.JsonSubTypesMapping;

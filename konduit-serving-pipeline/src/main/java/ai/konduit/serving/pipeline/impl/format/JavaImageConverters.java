@@ -63,8 +63,9 @@ public class JavaImageConverters {
     }
 
     @AllArgsConstructor
-    protected static abstract class BaseConverter implements ImageConverter {
-        protected Class<?> format;
+    public static abstract class BaseConverter implements ImageConverter {
+        protected Class<?> cFrom;
+        protected Class<?> cTo;
 
         @Override
         public boolean canConvert(Image from, ImageFormat<?> to) {
@@ -73,7 +74,7 @@ public class JavaImageConverters {
 
         @Override
         public boolean canConvert(Image from, Class<?> to) {
-            return to.isAssignableFrom(format);
+            return cFrom.isAssignableFrom(from.get().getClass()) && cTo.isAssignableFrom(to);
         }
 
         @Override
@@ -83,7 +84,7 @@ public class JavaImageConverters {
 
         @Override
         public <T> T convert(Image from, Class<T> to) {
-            Preconditions.checkState(canConvert(from, to));
+            Preconditions.checkState(canConvert(from, to), "Unable to convert image to format %s", to);
             return doConversion(from, to);
         }
 
@@ -93,7 +94,7 @@ public class JavaImageConverters {
     public static class PngToBufferedImageConverter extends BaseConverter {
 
         public PngToBufferedImageConverter() {
-            super(BufferedImage.class);
+            super(Png.class, BufferedImage.class);
         }
 
         @Override
@@ -111,7 +112,7 @@ public class JavaImageConverters {
 
     public static class BufferedImageToPngConverter extends BaseConverter {
         public BufferedImageToPngConverter() {
-            super(Png.class);
+            super(BufferedImage.class, Png.class);
         }
 
         @Override
