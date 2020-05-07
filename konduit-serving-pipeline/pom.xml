@@ -94,7 +94,7 @@
                             </inputDirectories>
                             <addSources>main</addSources>
                             <cleanOutputFolder>false</cleanOutputFolder>
-                            <outputDirectory>src/main/java/ai/konduit/serving/pipeline/impl/data</outputDirectory>
+                            <outputDirectory>src/main/java</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
