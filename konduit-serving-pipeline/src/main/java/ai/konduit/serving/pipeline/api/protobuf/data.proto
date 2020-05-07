@@ -1,7 +1,9 @@
 
 syntax = "proto3";
 
-package generated;
+package ai.konduit.serving;
+option java_package = "ai.konduit.serving.pipeline.impl.data.protobuf";
+option java_outer_classname = "DataProtoMessage";
 
 message DataScheme {
     DataScheme metaData = 2;

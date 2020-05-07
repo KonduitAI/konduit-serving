@@ -44,6 +44,9 @@ public class ProtoData extends JData {
         if(data instanceof JData){
             getDataMap().putAll(((JData)data).getDataMap());
         }
+        else {
+            throw new UnsupportedOperationException("ProtoData(Data data) constructor not supported");
+        }
     }
 
     @Override
@@ -53,7 +56,9 @@ public class ProtoData extends JData {
 
     @Override
     public void save(File toFile) throws IOException {
-        write(new FileOutputStream(toFile));
+        try (OutputStream os = new BufferedOutputStream(new FileOutputStream(toFile))) {
+            write(os);
+        }
     }
 
     @Override
@@ -69,12 +74,13 @@ public class ProtoData extends JData {
     }
 
     public static Data fromFile(File fromFile) throws IOException {
-        generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder().mergeFrom(new FileInputStream(fromFile));
-        generated.Data.DataMap dataMap = builder.build();
-        return ProtobufUtils.convertProtobufToData(dataMap);
+        try (InputStream is = new FileInputStream(fromFile)) {
+            return fromStream(is);
+        }
     }
 
     public static Data fromStream(InputStream stream) throws IOException {
+        // mergeFrom performs stream buffering internally
         generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder().mergeFrom(stream);
         generated.Data.DataMap dataMap = builder.build();
         return ProtobufUtils.convertProtobufToData(dataMap);

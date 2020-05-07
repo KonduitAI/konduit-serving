@@ -310,25 +310,25 @@ public class JData implements Data {
     public static Data singletonList(@NonNull String key, @NonNull List<?> data,
                                      @NonNull ValueType valueType) {
         Data instance = new JData();
-        if (valueType.equals(ValueType.STRING)) {
+        if (valueType == ValueType.STRING) {
             instance.putListString(key, (List<String>)data);
         }
-        else if (valueType.equals(ValueType.BOOLEAN)) {
+        else if (valueType == ValueType.BOOLEAN) {
             instance.putListBoolean(key, (List<Boolean>) data);
         }
-        else if (valueType.equals(ValueType.DOUBLE)) {
+        else if (valueType == ValueType.DOUBLE) {
             instance.putListDouble(key, (List<Double>) data);
         }
-        else if (valueType.equals(ValueType.INT64)) {
+        else if (valueType == ValueType.INT64) {
             instance.putListInt64(key, (List<Long>) data);
         }
-        else if (valueType.equals(ValueType.IMAGE)) {
+        else if (valueType == ValueType.IMAGE) {
             instance.putListImage(key, (List<Image>) data);
         }
-        else if (valueType.equals(ValueType.NDARRAY)) {
+        else if (valueType == ValueType.NDARRAY) {
             instance.putListNDArray(key, (List<NDArray>) data);
         }
-        else if (valueType.equals(ValueType.DATA)) {
+        else if (valueType == ValueType.DATA) {
             instance.putListData(key, (List<Data>) data);
         }
         else {
