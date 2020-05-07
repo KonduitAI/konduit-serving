@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.convert;
 
+import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -25,18 +26,6 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 public class ImageConvertConfig {
-    public enum NDFormat {
-        CHANNELS_FIRST,
-        CHANNELS_LAST
-    }
-
-    public enum NDDepth {
-        RGB, RGBA, BGR, BGRA, GRAYSCALE
-    }
-
-    public enum AspectRatioHandling {
-        CENTER_CROP, PAD, STRETCH
-    }
 
     private Integer height;
     private Integer width;
