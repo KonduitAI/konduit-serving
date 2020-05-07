@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.step.logging;
 
+import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
@@ -52,7 +53,7 @@ public class LoggingPipelineStepRunner implements PipelineStepRunner {
     }
 
     @Override
-    public Data exec(Data data) {
+    public Data exec(Context ctx, Data data) {
         Level logLevel = step.getLogLevel();
         LoggingPipelineStep.Log toLog = step.getLog();
         boolean keysOnly = toLog == LoggingPipelineStep.Log.KEYS;

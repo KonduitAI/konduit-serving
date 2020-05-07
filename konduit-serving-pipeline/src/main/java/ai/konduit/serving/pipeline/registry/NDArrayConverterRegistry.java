@@ -18,10 +18,12 @@
 
 package ai.konduit.serving.pipeline.registry;
 
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.api.format.NDArrayConverter;
-import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
-import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
+import ai.konduit.serving.pipeline.api.format.*;
+import ai.konduit.serving.pipeline.impl.data.image.Png;
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.nd4j.common.primitives.Pair;
 
@@ -81,6 +83,17 @@ public class NDArrayConverterRegistry extends AbstractRegistry<NDArrayConverter>
                 return c;
             }
         }
+
+        //No factory is available. Try to fall back on X -> SerializedNDArray -> Y
+        if(type != SerializedNDArray.class){
+            NDArrayConverter c1 = getConverterForClass(arr, SerializedNDArray.class);
+            if(c1 != null){
+                NDArray arr2 = NDArray.create(c1.convert(arr, SerializedNDArray.class));            //TODO this is ugly - we throw this result away!
+                NDArrayConverter c2 = getConverterForClass(arr2, type);
+                return new TwoStepNDArrayConverter(arr.get().getClass(), type, c1, c2);
+            }
+        }
+
         return null;
     }
 
@@ -94,5 +107,38 @@ public class NDArrayConverterRegistry extends AbstractRegistry<NDArrayConverter>
             }
         }
         return null;
+    }
+
+    public static void addConverter(NDArrayConverter f){
+        INSTANCE.addFactoryInstance(f);
+    }
+
+    @AllArgsConstructor
+    private static class TwoStepNDArrayConverter implements NDArrayConverter {
+        private Class<?> cFrom;
+        private Class<?> cTo;
+        private NDArrayConverter c1;
+        private NDArrayConverter c2;
+
+        @Override
+        public boolean canConvert(NDArray from, NDArrayFormat<?> to) {
+            return false;
+        }
+
+        @Override
+        public boolean canConvert(NDArray from, Class<?> to) {
+            return cFrom.isAssignableFrom(from.get().getClass()) && to.isAssignableFrom(cTo);
+        }
+
+        @Override
+        public <T> T convert(NDArray from, NDArrayFormat<T> to) {
+            throw new UnsupportedOperationException("Not supported");
+        }
+
+        @Override
+        public <T> T convert(NDArray from, Class<T> to) {
+            NDArray sArr = NDArray.create(c1.convert(from, SerializedNDArray.class));
+            return (T) c2.convert(sArr, cTo);
+        }
     }
 }

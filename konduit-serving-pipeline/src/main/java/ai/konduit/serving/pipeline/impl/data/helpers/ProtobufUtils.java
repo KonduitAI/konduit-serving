@@ -20,7 +20,7 @@ package ai.konduit.serving.pipeline.impl.data.helpers;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import ai.konduit.serving.pipeline.impl.data.Value;
-import ai.konduit.serving.pipeline.impl.data.ValueType;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 
 import java.util.Collections;
 import java.util.HashMap;

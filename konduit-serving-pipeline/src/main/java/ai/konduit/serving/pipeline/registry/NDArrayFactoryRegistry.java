@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.registry;
 
+import ai.konduit.serving.pipeline.api.format.ImageFactory;
 import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
 import lombok.NonNull;
 
@@ -41,5 +42,9 @@ public class NDArrayFactoryRegistry extends BaseFactoryRegistry<NDArrayFactory> 
 
     public static NDArrayFactory getFactoryFor(@NonNull Object o){
         return INSTANCE.registryGetFactoryFor(o);
+    }
+
+    public static void addFactory(NDArrayFactory f){
+        INSTANCE.addFactoryInstance(f);
     }
 }

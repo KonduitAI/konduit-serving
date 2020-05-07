@@ -17,6 +17,7 @@
  */
 package ai.konduit.serving.camera.step.capture;
 
+import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -55,13 +56,13 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
     }
 
     @Override
-    public synchronized Data exec(Data data) {
+    public synchronized Data exec(Context ctx, Data data) {
         if(!initialized)
             init();
 
         try {
             Frame frame = grabber.grab();
-            Image i = Image.create(frame);         //TODO Image format is yet to be determined!
+            Image i = Image.create(frame);
             return Data.singleton(step.getOutputKey(), i);
         } catch (Throwable t){
             throw new RuntimeException("Error getting frame", t);

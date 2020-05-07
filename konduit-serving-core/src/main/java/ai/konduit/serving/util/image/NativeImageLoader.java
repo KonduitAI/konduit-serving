@@ -306,10 +306,10 @@ public class NativeImageLoader extends BaseImageLoader {
         }
     }
 
-//    @Override
-//    public INDArray asMatrix(File f, boolean nchw) throws IOException {
-//        throw new UnsupportedOperationException();
-//    }
+    @Override
+    public INDArray asMatrix(File f, boolean nchw) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public INDArray asMatrix(InputStream is) throws IOException {
@@ -333,10 +333,10 @@ public class NativeImageLoader extends BaseImageLoader {
         return a;
     }
 
-//    @Override
-//    public INDArray asMatrix(InputStream inputStream, boolean nchw) throws IOException {
-//        throw new UnsupportedOperationException();
-//    }
+    @Override
+    public INDArray asMatrix(InputStream inputStream, boolean nchw) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Read the stream to the buffer, and return the number of bytes read
@@ -395,10 +395,10 @@ public class NativeImageLoader extends BaseImageLoader {
         }
     }
 
-//    @Override
-//    public Image asImageMatrix(File f, boolean nchw) throws IOException {
-//        throw new UnsupportedOperationException();
-//    }
+    @Override
+    public Image asImageMatrix(File f, boolean nchw) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public Image asImageMatrix(InputStream is) throws IOException {
@@ -419,10 +419,10 @@ public class NativeImageLoader extends BaseImageLoader {
         return i;
     }
 
-//    @Override
-//    public Image asImageMatrix(InputStream inputStream, boolean nchw) throws IOException {
-//        throw new UnsupportedOperationException();
-//    }
+    @Override
+    public Image asImageMatrix(InputStream inputStream, boolean nchw) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Calls {@link AndroidNativeImageLoader#asMatrix(org.opencv.core.Mat)} or

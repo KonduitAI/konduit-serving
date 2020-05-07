@@ -19,14 +19,18 @@
 package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.nd4j.common.resources.Resources;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class DataJsonTest {
 
@@ -34,7 +38,7 @@ public class DataJsonTest {
     public void testBasic(){
 
         for(ValueType vt : ValueType.values()){
-            if(vt == ValueType.IMAGE || vt == ValueType.LIST || vt == ValueType.NDARRAY){
+            if(vt == ValueType.LIST ){     //TODO NO WAY TO PUT LISTS INTO DATA YET - WIP TO BE MERGED SOON
                 System.out.println("SKIPPING: " + vt);
                 continue;
             }
@@ -53,7 +57,7 @@ public class DataJsonTest {
                     d = Data.singleton("myKey", new byte[]{0,1,2});
                     break;
                 case IMAGE:
-                    d = null;
+                    d = Data.singleton("myKey", Image.create(Resources.asFile("data/5_32x32.png")));
                     break;
                 case DOUBLE:
                     d = Data.singleton("myKey", 1.0);
@@ -75,11 +79,10 @@ public class DataJsonTest {
             }
 
             String s = d.toJson();
+            System.out.println(s);
 
             Data d2 = Data.fromJson(s);
             assertEquals(d, d2);
-
-            System.out.println(s);
         }
     }
 
@@ -100,7 +103,7 @@ public class DataJsonTest {
         assertEquals(dInner, dInnerJson);
     }
 
-    @Ignore     //NO WAY TO PUT LISTS INTO DATA YET
+    @Ignore     //TODO NO WAY TO PUT LISTS INTO DATA YET - WIP TO BE MERGED SOON
     @Test
     public void testList(){
 
@@ -131,4 +134,24 @@ public class DataJsonTest {
 
     }
 
+
+    @Test
+    public void testJsonMetaData(){
+        Data d = Data.singleton("myKey", "myValue");
+        Data meta = JData.builder()
+                .add("someMeta", "someValue")
+                .add("otherMeta", 10.0)
+                .build();
+
+        d.setMetaData(meta);
+
+
+        String json = d.toJson();
+        System.out.println(json);
+        Data d2 = Data.fromJson(json);
+        assertEquals(d, d2);
+
+        Data meta2 = d2.getMetaData();
+        assertEquals(meta ,meta2);
+    }
 }

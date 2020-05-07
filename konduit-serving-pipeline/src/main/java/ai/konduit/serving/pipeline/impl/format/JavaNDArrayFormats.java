@@ -28,6 +28,6 @@ public class JavaNDArrayFormats {
 
     public static final NDArrayFormat<float[][][]> float3d = () -> float[][][].class;
 
-    public static final NDArrayFormat<float[][][]> float4d = () -> float[][][].class;
+    public static final NDArrayFormat<float[][][][]> float4d = () -> float[][][][].class;
 
 }

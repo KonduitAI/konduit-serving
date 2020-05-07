@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data.wrappers;
 
-import ai.konduit.serving.pipeline.impl.data.ValueType;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 
 public class BooleanValue extends BaseValue<Boolean> {
     public BooleanValue(Boolean value) {

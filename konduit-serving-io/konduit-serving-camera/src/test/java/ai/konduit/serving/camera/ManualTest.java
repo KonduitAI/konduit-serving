@@ -42,7 +42,7 @@ public class ManualTest {
 
 
         for( int i=0; i<100; i++ ) {
-            exec.exec(in);
+            exec.exec(null, in);
             Thread.sleep(100);
         }
 

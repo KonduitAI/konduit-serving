@@ -18,11 +18,12 @@
 
 package ai.konduit.serving.camera.step.show;
 
+import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
-import ai.konduit.serving.pipeline.impl.data.ValueType;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
 import org.nd4j.common.base.Preconditions;
@@ -51,7 +52,7 @@ public class ShowImageStepRunner implements PipelineStepRunner {
     }
 
     @Override
-    public synchronized Data exec(Data data) {
+    public synchronized Data exec(Context ctx, Data data) {
         String name = step.getImageName();
         if(name == null)
             name = tryInferName(data);
@@ -60,7 +61,7 @@ public class ShowImageStepRunner implements PipelineStepRunner {
                 name, data.keys());
 
         Image i = data.getImage(name);
-        Frame f = (Frame)i.get();          //TODO NO CAST
+        Frame f = i.getAs(Frame.class);
 
         if(!initialized)
             init();

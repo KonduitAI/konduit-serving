@@ -18,6 +18,7 @@
 package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.exception.DataLoadingException;
 import ai.konduit.serving.pipeline.impl.data.helpers.ProtobufUtils;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.NonNull;
@@ -92,7 +93,9 @@ public class ProtoData extends JData {
         try {
             write(baos);
         } catch (IOException e) {
-            log.error("Failed write to ByteArrayOutputStream", e);
+            String errorText = "Failed write to ByteArrayOutputStream";
+            log.error(errorText, e);
+            throw new DataLoadingException(errorText);
         }
         return baos.toByteArray();
     }
@@ -103,7 +106,9 @@ public class ProtoData extends JData {
         try {
             builder = generated.Data.DataMap.newBuilder().mergeFrom(input);
         } catch (InvalidProtocolBufferException e) {
-            log.error("Error converting bytes array to data",e);
+            String errorText = "Error converting bytes array to data";
+            log.error(errorText,e);
+            throw new DataLoadingException(errorText);
         }
         generated.Data.DataMap dataMap = builder.build();
         retVal = ProtobufUtils.convertProtobufToData(dataMap);

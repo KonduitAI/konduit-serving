@@ -22,8 +22,11 @@ import ai.konduit.serving.pipeline.api.data.Image;
 
 public interface ImageConverter {
 
-    boolean canConvert(Image from, ImageFormat to);
+    boolean canConvert(Image from, ImageFormat<?> to);
 
-    Image convert(Image from, ImageFormat to);
+    boolean canConvert(Image from, Class<?> to);
 
+    <T> T convert(Image from, ImageFormat<T> to);
+
+    <T> T convert(Image from, Class<T> to);
 }
