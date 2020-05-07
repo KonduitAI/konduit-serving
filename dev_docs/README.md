@@ -249,6 +249,20 @@ ByteBuffer bb = sArr.getBuffer();
 All modules that define an NDArray type should implement conversion to SerializedNDArray, so we can do JSON and Protobuf
 serialization from any format - in a standardized form.
 
+As of 07/05/2020 supported formats for images include:
+* Png
+* BufferedImage
+* JavaCV Mat    (konduit-serving-javacv)
+* JavaCV Frame  (konduit-serving-javacv)
+* OpenCV Mat    (konduit-serving-javacv)
+More formats will be added in the future.
+
+As of 07/05/2020 supported NDArray formats include:
+* SerializedNDArray (Konduit Serving serialization/interchange format)
+* float[], float[][], float[][][], float[][][][], float[][][][][]
+* INDArray      (konduit-serving-nd4j)
+The full set of Java primitive array types (1d to 5d int[], double[], byte[] etc is planned to be added)
+
 
 ## JSON Serialization / Deserialization
 
@@ -400,9 +414,12 @@ See for example: konduit-serving-deeplearning4j
       and protobuf serialization/deserialization, and will be used as the intermediate format for conversion between arbitrary
       types that don't have direct (1 step) conversion enabled (i.e., X -> SerializedNDArray -> Y for any X and Y).
     - For Image: the main (strictly required) one is conversion to/from Png (i.e., `ai.konduit.serving.pipeline.impl.data.image.Png`)
-      as this is used as the default format for both JSON and 
-      The reason: PNG is a compressed lossless image format, unlike some alternatives such as JGP. It does have a size overhead
-      for natural images vs. JPG, but in practice for deep learning we typically don't have very large input/output images.
+      as this is used as the default format for both JSON and Protobuf serialization - and also used as the intermediate
+      format for conversion between arbitrary image formats that don't have direct (1 step) conversion available (i.e., X
+      -> Png -> Y for any X and Y).
+      The reason PNG was chosen: PNG is a compressed lossless image format, unlike some alternatives such as jpeg. It does
+      have a size overhead for natural images vs. jpeg, but in practice for deep learning we typically don't have very large
+      input/output images so this is a secondary concern.
 - Add an NDArrayFactory / ImageFactory (used within NDArray.create(Object) / Image.create(Object))
 - Add a `resources/META-INF/services/ai.konduit.serving.pipeline.api.format.NDArrayConverter` (or `.ImageConverter`) file
   listing the fully-qualified class name of all of the new NDArrayConverter/ImageConverter implementations you added
