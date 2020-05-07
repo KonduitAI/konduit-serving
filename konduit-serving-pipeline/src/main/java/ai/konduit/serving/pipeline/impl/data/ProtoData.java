@@ -18,18 +18,12 @@
 package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.impl.data.helpers.ProtobufUtils;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 public class ProtoData extends JData {
