@@ -16,10 +16,19 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.data.image;
+package ai.konduit.serving.data.image.data;
 
-public class PngImage extends BaseImage<Png> {
-    public PngImage(Png image) {
+import ai.konduit.serving.data.image.util.OpenCVUtil;
+import ai.konduit.serving.pipeline.impl.data.image.BaseImage;
+import org.opencv.core.Mat;
+
+public class OpenCVMatImage extends BaseImage<Mat> {
+
+    static {
+        OpenCVUtil.ensureOpenCVLoaded();
+    }
+
+    public OpenCVMatImage(Mat image) {
         super(image);
     }
 

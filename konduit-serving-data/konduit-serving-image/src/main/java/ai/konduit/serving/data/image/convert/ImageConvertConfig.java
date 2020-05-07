@@ -16,20 +16,33 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.data.image;
+package ai.konduit.serving.data.image.convert;
 
-public class PngImage extends BaseImage<Png> {
-    public PngImage(Png image) {
-        super(image);
+import ai.konduit.serving.pipeline.api.data.NDArrayType;
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+@Data
+@Accessors(fluent = true)
+public class ImageConvertConfig {
+    public enum NDFormat {
+        CHANNELS_FIRST,
+        CHANNELS_LAST
     }
 
-    @Override
-    public int height() {
-        return image.height();
+    public enum NDDepth {
+        RGB, RGBA, BGR, BGRA, GRAYSCALE
     }
 
-    @Override
-    public int width() {
-        return image.width();
+    public enum AspectRatioHandling {
+        CENTER_CROP, PAD, STRETCH
     }
+
+    private Integer height;
+    private Integer width;
+    private NDArrayType dataType = NDArrayType.FLOAT;
+    private boolean includeMinibatchDim = true;
+    private AspectRatioHandling aspectRatioHandling = AspectRatioHandling.CENTER_CROP;
+
+
 }

@@ -16,20 +16,32 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.data.image;
+package ai.konduit.serving.data.image.util;
 
-public class PngImage extends BaseImage<Png> {
-    public PngImage(Png image) {
-        super(image);
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.opencv.opencv_java;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public class OpenCVUtil {
+
+    private OpenCVUtil(){ }
+
+
+    private static final AtomicBoolean opencvLoaded = new AtomicBoolean();
+
+    /**
+     *
+     */
+    public static synchronized void ensureOpenCVLoaded(){
+        if(opencvLoaded.get())
+            return;
+
+        /*
+        Call Loader.load(opencv_java.class) before using the API in the org.opencv namespace.
+         */
+        Loader.load(opencv_java.class);
+
     }
 
-    @Override
-    public int height() {
-        return image.height();
-    }
-
-    @Override
-    public int width() {
-        return image.width();
-    }
 }

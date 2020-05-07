@@ -16,20 +16,23 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.data.image;
+package ai.konduit.serving.data.image.data;
 
-public class PngImage extends BaseImage<Png> {
-    public PngImage(Png image) {
+import ai.konduit.serving.pipeline.impl.data.image.BaseImage;
+import org.bytedeco.javacv.Frame;
+
+public class FrameImage extends BaseImage<Frame> {
+    public FrameImage(Frame image) {
         super(image);
     }
 
     @Override
     public int height() {
-        return image.height();
+        return image.imageHeight;
     }
 
     @Override
     public int width() {
-        return image.width();
+        return image.imageWidth;
     }
 }
