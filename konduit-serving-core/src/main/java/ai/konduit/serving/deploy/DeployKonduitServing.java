@@ -30,12 +30,15 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DeployKonduitServing {
 
     static {

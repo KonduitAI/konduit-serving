@@ -1,10 +1,10 @@
 import os
 
 USER_PATH = os.path.expanduser("~")
-KONDUIT_BASE_DIR = os.path.join(USER_PATH, ".konduit")
-KONDUIT_DIR = os.path.join(KONDUIT_BASE_DIR, "konduit-serving")
+KONDUIT_BASE_DIR = os.path.join(USER_PATH, ".konduit-serving")
+KONDUIT_JAR_DIR = os.path.join(KONDUIT_BASE_DIR, "jar")
 
-jar = os.getenv("KONDUIT_JAR_PATH", os.path.join(KONDUIT_DIR, "konduit.jar"))
+jar = os.getenv("KONDUIT_JAR_PATH", os.path.join(KONDUIT_JAR_DIR, "konduit.jar"))
 
 try:
     import pydl4j

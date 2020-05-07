@@ -27,7 +27,7 @@ public class ManualTest {
                         .width(w)
                         .height(h)
                         .outputKey("myImage")
-                    .build())
+                        .build())
                 .add(ShowImagePipelineStep.builder()
                         .displayName("Image Viewer")
                         .width(w)

@@ -3,10 +3,9 @@ import pytest
 from konduit import (
     ParallelInferenceConfig,
     ServingConfig,
-    TensorFlowConfig,
-    ModelConfigType,
+    TensorFlowStep,
+    InferenceConfiguration
 )
-from konduit import TensorDataTypesConfig, ModelStep, InferenceConfiguration
 from konduit.client import Client
 from konduit.server import Server
 from konduit.utils import is_port_in_use
@@ -14,6 +13,7 @@ from konduit.utils import is_port_in_use
 
 @pytest.mark.integration
 def test_server_start():
+    server_id = "tensorflow_server"
     input_names = ["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"]
     output_names = ["loss/Softmax"]
     parallel_inference_config = ParallelInferenceConfig(workers=1)
@@ -22,19 +22,13 @@ def test_server_start():
         log_timings=True,
     )
 
-    tensorflow_config = TensorFlowConfig(
+    model_pipeline_step = TensorFlowStep(
         path="bert_mrpc_frozen.pb",
-        tensor_data_types_config=TensorDataTypesConfig(
-            input_data_types={
-                "IteratorGetNext:0": "INT32",
-                "IteratorGetNext:1": "INT32",
-                "IteratorGetNext:4": "INT32",
-            }
-        ),
-    )
-
-    model_pipeline_step = ModelStep(
-        model_config=tensorflow_config,
+        input_data_types={
+            input_names[0]: "INT32",
+            input_names[1]: "INT32",
+            input_names[2]: "INT32",
+        },
         parallel_inference_config=parallel_inference_config,
         input_names=input_names,
         output_names=output_names,
@@ -45,14 +39,14 @@ def test_server_start():
     )
 
     server = Server(
-        inference_config=inference, extra_start_args="-Xmx8g", jar_path="konduit.jar"
+        inference_config=inference, extra_start_args="-Xmx8g"
     )
-    _, port, started = server.start()
+    _, port, started = server.start(server_id)
 
     data_input = {
-        "IteratorGetNext:0": np.load("../data/input-0.npy"),
-        "IteratorGetNext:1": np.load("../data/input-1.npy"),
-        "IteratorGetNext:4": np.load("../data/input-4.npy"),
+        input_names[0]: np.load("../data/input-0.npy"),
+        input_names[1]: np.load("../data/input-1.npy"),
+        input_names[2]: np.load("../data/input-4.npy"),
     }
 
     assert started  # will be true if the server was started
@@ -63,9 +57,7 @@ def test_server_start():
     try:
         predicted = client.predict(data_input)
         print(predicted)
-        server.stop()
     except Exception as e:
         print(e)
-        server.stop()
-
-test_server_start()
+    finally:
+        server.stop(server_id)

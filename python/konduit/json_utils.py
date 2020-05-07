@@ -52,7 +52,7 @@ def _ensure_serializable(input_config):
 def config_to_dict_with_type(inference_config):
     """
     Converts an inference configuration to a Python dictionary
-    with '@type' key.
+    with 'type' key.
 
     :param inference_config: InferenceConfig object
     :return: Python dict
@@ -60,19 +60,19 @@ def config_to_dict_with_type(inference_config):
     has_as_dict_attribute(inference_config)
     _ensure_serializable(inference_config)
     input_dict = inference_config.as_dict()
-    input_dict["@type"] = inference_config.__class__.__name__
+    input_dict["type"] = inference_config.__class__.__name__
     return input_dict
 
 
 def empty_type_dict(input_object):
     """Generates an otherwise empty Python dict with the correct
-    "@type" key from Java.
+    "type" key from Java.
 
     :param input_class: arbitrary instance of a Python class
     :return:
     """
     d = dict()
-    d["@type"] = input_object.__class__.__name__
+    d["type"] = input_object.__class__.__name__
     return d
 
 

@@ -18,10 +18,8 @@ def test_json_compare():
         http_port=1300, output_data_format="NUMPY"
     )
 
-    tensorflow_config = TensorFlowConfig(path="model.pb")
-
-    model_pipeline_step = ModelStep(
-        model_config=tensorflow_config,
+    model_pipeline_step = TensorFlowStep(
+        path="model.pb",
         parallel_inference_config=parallel_inference_config,
         input_names=["IteratorGetNext:0", "IteratorGetNext:1", "IteratorGetNext:4"],
         output_names=["loss/Softmax"],
