@@ -15,12 +15,9 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data;
 
-import ai.konduit.serving.pipeline.impl.data.wrappers.IntValue;
-import ai.konduit.serving.pipeline.util.ObjectMappers;
-import lombok.extern.slf4j.Slf4j;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.data.Data;
 import org.apache.commons.compress.utils.Lists;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;

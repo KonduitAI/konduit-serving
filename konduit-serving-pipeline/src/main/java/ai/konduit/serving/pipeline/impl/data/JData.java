@@ -155,76 +155,91 @@ public class JData implements Data {
 
     @Override
     public void put(String key, String data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new StringValue(data));
     }
 
     @Override
     public void put(String key, NDArray data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new NDArrayValue(data));
     }
 
     @Override
     public void put(String key, byte[] data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new BytesValue(data));
     }
 
     @Override
     public void put(String key, Image data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new ImageValue(data));
     }
 
     @Override
     public void put(String key, long data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new IntValue(data));
     }
 
     @Override
     public void put(String key, double data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new DoubleValue(data));
     }
 
     @Override
     public void put(String key, boolean data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new BooleanValue(data));
     }
 
     @Override
     public void put(String key, Data data) {
+        Data.assertNotReservedKey(key);
         this.dataMap.put(key, new DataValue(data));
     }
 
     @Override
     public void putListString(String key, List<String> data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, ValueType.STRING));
     }
 
     @Override
     public void putListInt64(String key, List<Long> data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, ValueType.INT64));
     }
 
     @Override
     public void putListBoolean(String key, List<Boolean> data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, ValueType.BOOLEAN));
     }
 
     @Override
     public void putListDouble(String key, List<Double> data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, ValueType.DOUBLE));
     }
 
     @Override
     public void putListData(String key, List<Data> data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, ValueType.DATA));
     }
 
     @Override
     public void putListImage(String key, List<Image> data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, ValueType.IMAGE));
     }
 
     @Override
     public void putListNDArray(String key, List<NDArray> data) {
+        Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, ValueType.NDARRAY));
     }
 
