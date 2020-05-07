@@ -19,10 +19,12 @@
 package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.nd4j.common.resources.Resources;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +38,7 @@ public class DataJsonTest {
     public void testBasic(){
 
         for(ValueType vt : ValueType.values()){
-            if(vt == ValueType.IMAGE || vt == ValueType.LIST ){     //TODO NO WAY TO PUT LISTS INTO DATA YET - WIP TO BE MERGED SOON
+            if(vt == ValueType.LIST ){     //TODO NO WAY TO PUT LISTS INTO DATA YET - WIP TO BE MERGED SOON
                 System.out.println("SKIPPING: " + vt);
                 continue;
             }
@@ -55,7 +57,7 @@ public class DataJsonTest {
                     d = Data.singleton("myKey", new byte[]{0,1,2});
                     break;
                 case IMAGE:
-                    d = null;
+                    d = Data.singleton("myKey", Image.create(Resources.asFile("data/5_32x32.png")));
                     break;
                 case DOUBLE:
                     d = Data.singleton("myKey", 1.0);

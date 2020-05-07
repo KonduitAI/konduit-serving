@@ -62,7 +62,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
 
         try {
             Frame frame = grabber.grab();
-            Image i = Image.create(frame);         //TODO Image format is yet to be determined!
+            Image i = Image.create(frame);
             return Data.singleton(step.getOutputKey(), i);
         } catch (Throwable t){
             throw new RuntimeException("Error getting frame", t);

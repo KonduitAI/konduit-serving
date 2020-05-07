@@ -61,7 +61,7 @@ public class ShowImageStepRunner implements PipelineStepRunner {
                 name, data.keys());
 
         Image i = data.getImage(name);
-        Frame f = (Frame)i.get();          //TODO NO CAST
+        Frame f = i.getAs(Frame.class);
 
         if(!initialized)
             init();
