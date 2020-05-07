@@ -18,15 +18,20 @@
 package ai.konduit.serving.pipeline.impl.data.helpers;
 
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.format.ImageConverter;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import ai.konduit.serving.pipeline.impl.data.Value;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage;
+import ai.konduit.serving.pipeline.impl.format.JavaImageConverters;
+import com.google.protobuf.ByteString;
+import org.apache.commons.lang3.ArrayUtils;
 
 public class ProtobufUtils {
 
@@ -60,6 +65,35 @@ public class ProtobufUtils {
                 item = DataProtoMessage.DataScheme.newBuilder().
                         setIValue((Long) nextItem.getValue().get()).
                         setTypeValue(ValueType.DOUBLE.ordinal()).
+                        build();
+            }
+            else if (value.type().equals(ValueType.IMAGE)) {
+                Image image = (Image) nextItem.getValue().get();
+                byte[] imageBytes = new JavaImageConverters.IdentityConverter().convert(image, byte[].class);
+                DataProtoMessage.Image pbImage = DataProtoMessage.Image.newBuilder().
+                        addData(ByteString.copyFrom(imageBytes)).
+                        build();
+
+                item = DataProtoMessage.DataScheme.newBuilder().setImValue(pbImage).build();
+            }
+            else if (value.type().equals(ValueType.NDARRAY)) {
+                NDArray ndArray = (NDArray)nextItem.getValue().get();
+                SerializedNDArray sn = ndArray.getAs(SerializedNDArray.class);
+
+                byte[] bufferBytes = new byte[sn.getBuffer().remaining()];
+                sn.getBuffer().get(bufferBytes);
+                ByteString byteString = ByteString.copyFrom(bufferBytes);
+                List<ByteString> byteStringList = new ArrayList<>();
+                byteStringList.add(byteString);
+
+                DataProtoMessage.NDArray pbNDArray = DataProtoMessage.NDArray.newBuilder().
+                        addAllShape(Arrays.asList(ArrayUtils.toObject(sn.getShape()))).
+                        addAllArray(byteStringList).
+                        //addAllType(sn.getType()).
+                        build();
+
+                item = DataProtoMessage.DataScheme.newBuilder().
+                        setNdValue(pbNDArray).
                         build();
             }
             if (item == null) {

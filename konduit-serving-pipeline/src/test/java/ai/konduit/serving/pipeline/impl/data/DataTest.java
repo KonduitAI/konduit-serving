@@ -15,12 +15,15 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data;
 
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.impl.data.image.Png;
 import org.apache.commons.compress.utils.Lists;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.nd4j.common.resources.Resources;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -329,5 +332,21 @@ public class DataTest {
             }
         }
         assertEquals(someData.get(KEY), restored.get(KEY));
+    }
+
+    @Test
+    public void testImageData() {
+        File f = Resources.asFile("data/5_32x32.png");
+        Image i = Image.create(f);
+
+        Data imageData = Data.singleton(KEY, i);
+
+        Png p = i.getAs(Png.class);
+        byte[] origBytes = p.getBytes();
+
+        Png p2 = ((Image)imageData.get(KEY)).getAs(Png.class);
+        byte[] actualBytes = p2.getBytes();
+
+        assertEquals(origBytes, actualBytes);
     }
 }

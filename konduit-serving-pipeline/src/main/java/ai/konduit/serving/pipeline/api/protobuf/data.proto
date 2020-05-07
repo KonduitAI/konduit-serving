@@ -14,8 +14,10 @@ message DataScheme {
         bool boolValue = 6;
         double doubleValue = 7;
         List listValue = 8;
+        NDArray ndValue = 9;
+        Image imValue = 10;
     }
-    ValueType type = 9;
+    ValueType type = 11;
 
     enum ValueType {
         NDARRAY = 0;
@@ -49,6 +51,16 @@ message List {
 	   BooleanList bList = 3;
 	   DoubleList dList = 4;
 	}
+}
+
+message Image {
+    repeated bytes data = 1;
+}
+
+message NDArray {
+    repeated int64 shape = 1;
+    repeated string type = 2;
+    repeated bytes array = 3;
 }
 
 //message List {
