@@ -19,7 +19,7 @@
 package ai.konduit.serving.pipeline.impl.data.wrappers;
 
 import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.impl.data.ValueType;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 
 public class DataValue extends BaseValue<Data> {
     public DataValue(Data value) {

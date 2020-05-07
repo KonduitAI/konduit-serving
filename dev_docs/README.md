@@ -29,7 +29,8 @@ The list below briefly describes those implemented so far (as of 05/05/2020)- th
 * konduit-serving-models: Parent module for each of the model types
     * konduit-serving-deeplearning4j: Deeplearning4j models.
 * konduit-serving-data: Parent module for data and datatypes
-    * konduit-serving-nd4j: Mainly NDArray integration/functionality for ND4J 
+    * konduit-serving-nd4j: Mainly NDArray integration/functionality for ND4J
+    * konduit-serving-javacv: Image conversion functionality for JavaCV 
 * konduit-serving-io: Parent module for I/O functionality - sensors, cameras, etc - and maybe later things like HDFS, S3, etc
     * konduit-serving-camera: Steps related to capturing data from device-connected cameras (WIP)
 
@@ -248,6 +249,20 @@ ByteBuffer bb = sArr.getBuffer();
 All modules that define an NDArray type should implement conversion to SerializedNDArray, so we can do JSON and Protobuf
 serialization from any format - in a standardized form.
 
+As of 07/05/2020 supported formats for images include:
+* Png
+* BufferedImage
+* JavaCV Mat    (konduit-serving-javacv)
+* JavaCV Frame  (konduit-serving-javacv)
+* OpenCV Mat    (konduit-serving-javacv)
+More formats will be added in the future.
+
+As of 07/05/2020 supported NDArray formats include:
+* SerializedNDArray (Konduit Serving serialization/interchange format)
+* float[], float[][], float[][][], float[][][][], float[][][][][]
+* INDArray      (konduit-serving-nd4j)
+The full set of Java primitive array types (1d to 5d int[], double[], byte[] etc is planned to be added)
+
 
 ## JSON Serialization / Deserialization
 
@@ -315,6 +330,13 @@ As for the actual JSON format - this is basically as follows (taken from DataJso
     "@BytesBase64" : "AAEC"
   }
 }
+ ----- IMAGE -----
+{
+  "myKey" : {
+    "@ImageFormat" : "PNG",
+    "@ImageData" : "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAPcSURBVFhH7VfZK3VRFF/XNRSZyTyHyAOSUqZHpRCRPCjlzZM/QH3/AU+G4oHyJK9KmQohJSKZZxkjmcf1rbWce13Hce5xP3Vfvl/92ufss4ffXnuttfcxAQASnYKkpCRwUZ6dhv8CnC7gn5zQZDIB4nv39PR08PHxAX9/fzg+PoalpSUoKyt7dzQXF5ienoaZmRk4Pz+X9gz+ZkgAD8ATeXt7ywReXl7CqKgoeHl5gcfHR5ksODgYQkNDYXFxEQYHB6G5uRliY2NljJaWFmhra4O1tTV5Z9gVwCt0dXWFyspKmYgHS0tLg7i4OAgLC4OEhASl5QeOjo5gYWEBrq+vIScnR6yxvr4Ora2tMD8/Dzc3N0pLAwI8PDwgIiICNjc3lZrPeHt7E7KFGFx2dnZCf3+/iL+/vxdBt7e3cHBwIG1swQIYLECTNKCUr6+vtAMfsH2nVeHw8LDyhtjQ0PBlnO9IAtBMD3+ImqDxpFxZWZFV9PX1wcPDAyQnJ0vJe52RkQE9PT3Q0dEhfjE3Nwerq6vSzx4CAwOl/KJMTV9fX0xMTMSAgACsqqrCra0t3N7extraWmsbs9mM0dHR0ta2rx7ZAobywNXVlfjBxcUFnJ6eioP5+flBamqq0gKAtgX29vak7U9gOBGxszGWl5clxHh76urqrGZ0FLo+oAX2BV5lSEgIZGdnW8OKTC8Wsgg1AsM+oCZHR2FhIVKMIzkjjoyMYFdXF1I2RApdpBDU7Kcm+wCV2h/t0dPTE0tLSyX0LOju7sbc3FwRodVHzX8SYCGlZ5yYmFAkIFIWRPINaw7R468IYLKI4uJi3NnZERGHh4fY3t6u2daWvybAQjrxRABjf38fKUw121loOA/ogT25uroaGhsbgRKR1N3d3cHu7q6ErD04dB/ggyYyMlJOu7y8PMjKyoKgoCCIiYkBNzc3SVRDQ0NQXl6u9NAGWUDKL6bRI+93QUEBNjU14eTkJD49PSlGR6QjGzc2NpBOQ0OHEm+BIQtQnpejmW89vOKKigrIzMyUegYnJ07Ds7OzMDAwAJQX4OzsTL7pwa4FOJTItJiSkoJFRUVIg+Pz87OyXkS6CSFlQhwdHcWamhrNMfRoNwro1oNjY2N4eXmpTPkBFjI1NYX5+fmafY1QUwBPyolkfHwcyZuV6T6DLpxYX1//qZ8j1BRQUlIiq7YF7Sf29vZKvueJw8PDJRWr+/6Umk5Ig4tzcElmlpDjsKLsJifdycmJIQczAp7HoTzwW2ABTv0zEgtziHH2UoM/quv534D/E9T4rp6SFLi7uytv7yCXkusbb218fDz8Bd+qYeQWjEzlAAAAAElFTkSuQmCC"
+  }
+}
  ----- DOUBLE -----
 {
   "myKey" : 1.0
@@ -330,8 +352,8 @@ As for the actual JSON format - this is basically as follows (taken from DataJso
  ----- DATA -----
 {
   "myKey" : {
-      "myInnerKey" : "myInnerValue"
-    }
+    "myInnerKey" : "myInnerValue"
+  }
 }
 ```
 
@@ -341,6 +363,8 @@ List formats (not shown above) will use JSON arrays - so it'll look like `"myKey
 Bytes, is a special case - it's an object with a special protected key: `@BytesBase64`. Currently (and by default) we
 will encode `byte[]` objects as base64 format for space efficiency; later we will allow "array style" byte[] encoding
 (i.e., `"@BytesArray" : [1,2,3]`). Users are not allowed to add anything to a Data instance with these protected keys.
+
+Image data is stored by default in PNG format, base64 encoded (this will be configurable eventually).
 
 NDArray is a special case also: it in a JSON object with type/shape/data keys. Currently data is base64 encoded, but
 we may allow a "1d buffer array" format in the future also.
@@ -352,7 +376,6 @@ The full set of protected keys can be found on the Data interface. They include:
 * @ImageData
 * @NDArrayShape
 * @NDArrayType
-* @NDArrayDataBase64
 * @NDArrayDataBase64
 * @Metadata
 
@@ -390,6 +413,13 @@ See for example: konduit-serving-deeplearning4j
     - For NDArray: the main (strictly required) one is conversion to/from SerializedNDArray - this is necessary for JSON
       and protobuf serialization/deserialization, and will be used as the intermediate format for conversion between arbitrary
       types that don't have direct (1 step) conversion enabled (i.e., X -> SerializedNDArray -> Y for any X and Y).
+    - For Image: the main (strictly required) one is conversion to/from Png (i.e., `ai.konduit.serving.pipeline.impl.data.image.Png`)
+      as this is used as the default format for both JSON and Protobuf serialization - and also used as the intermediate
+      format for conversion between arbitrary image formats that don't have direct (1 step) conversion available (i.e., X
+      -> Png -> Y for any X and Y).
+      The reason PNG was chosen: PNG is a compressed lossless image format, unlike some alternatives such as jpeg. It does
+      have a size overhead for natural images vs. jpeg, but in practice for deep learning we typically don't have very large
+      input/output images so this is a secondary concern.
 - Add an NDArrayFactory / ImageFactory (used within NDArray.create(Object) / Image.create(Object))
 - Add a `resources/META-INF/services/ai.konduit.serving.pipeline.api.format.NDArrayConverter` (or `.ImageConverter`) file
   listing the fully-qualified class name of all of the new NDArrayConverter/ImageConverter implementations you added
@@ -398,6 +428,15 @@ See for example: konduit-serving-deeplearning4j
   the fully qualified class name of the NDArrayFactory / ImageFactory that you added
 
 See for example: konduit-serving-nd4j
+
+
+A note on naming packages for new modules: The packages (that directly contain classe) should be unique, and are based on
+the  module name.
+For example, the kondit-serving-nd4j module (under konduit-serving-data) has classes in `ai.konduit.serving.data.nd4j`.
+Similarly, konduit-serving-deeplearning4j (under konduit-serving-models) has classes in `ai.konduit.serving.models.deeplearning4j`.
+It's fine to have sub-packages (i.e., any X in `ai.konduit.serving.data.nd4j.X` is fine) but we cannot have classes
+in the same package - i.e., modules X and Y can't both define classes directly in the same namespace.
+The reason is to avoid split packages issues for OSGi and Java 9 Modules. We will likely use OSGi extensively in the future.
 
  
 

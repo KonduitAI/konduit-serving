@@ -18,7 +18,8 @@
 package ai.konduit.serving.pipeline.api.data;
 
 import ai.konduit.serving.pipeline.impl.data.*;
-import ai.konduit.serving.pipeline.impl.format.SerializedNDArray;
+import ai.konduit.serving.pipeline.impl.data.image.Png;
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonDeserializer;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonSerializer;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
@@ -172,10 +173,19 @@ public interface Data {
             ValueType vt = d1.type(s);
             switch (vt){
                 case LIST:
-                case IMAGE:
                 default:
                     //TODO
                     throw new UnsupportedOperationException(vt + " equality not yet implemented");
+                case IMAGE:
+                    Png png1 = d1.getImage(s).getAs(Png.class);
+                    Png png2 = d1.getImage(s).getAs(Png.class);
+
+                    byte[] pngBytes1 = png1.getBytes();
+                    byte[] pngBytes2 = png2.getBytes();
+
+                    if(!Arrays.equals(pngBytes1, pngBytes2))
+                        return false;
+                    break;
                 case NDARRAY:
                     //TODO this is inefficient - but robust...
                     NDArray a1 = d1.getNDArray(s);

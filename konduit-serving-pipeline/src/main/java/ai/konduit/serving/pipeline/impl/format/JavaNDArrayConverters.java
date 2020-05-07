@@ -20,6 +20,7 @@ package ai.konduit.serving.pipeline.impl.format;
 
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.api.format.NDArrayConverter;
 import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
 import lombok.AllArgsConstructor;
@@ -37,7 +38,7 @@ public class JavaNDArrayConverters {
 
 
         @Override
-        public boolean canConvert(NDArray from, NDArrayFormat to) {
+        public boolean canConvert(NDArray from, NDArrayFormat<?> to) {
             return false;
         }
 

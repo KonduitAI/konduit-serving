@@ -13,14 +13,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>javacv-platform</artifactId>
-            <version>${javacpp.version}</version>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-pipeline</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-pipeline</artifactId>
+            <artifactId>konduit-serving-javacv</artifactId>
             <version>${project.version}</version>
         </dependency>
 

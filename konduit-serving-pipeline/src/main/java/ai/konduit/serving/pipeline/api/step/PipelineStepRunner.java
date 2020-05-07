@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.api.step;
 
+import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 
 import java.io.Closeable;
@@ -42,15 +43,15 @@ public interface PipelineStepRunner extends Closeable {
     /**
      * Execute the pipeline on the specified Data instance
      */
-    Data exec(Data data);
+    Data exec(Context ctx, Data data);
 
     /**
      * Execute the pipeline on all of the specified Data instances
      */
-    default Data[] exec(Data... data) {
+    default Data[] exec(Context ctx, Data... data) {
         Data[] out = new Data[data.length];
         for (int i = 0; i < data.length; i++) {
-            out[i] = exec(data[i]);
+            out[i] = exec(ctx, data[i]);
         }
         return out;
     }

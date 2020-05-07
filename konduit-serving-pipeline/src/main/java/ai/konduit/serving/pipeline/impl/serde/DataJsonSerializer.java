@@ -22,8 +22,9 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
-import ai.konduit.serving.pipeline.impl.data.ValueType;
-import ai.konduit.serving.pipeline.impl.format.SerializedNDArray;
+import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.impl.data.image.Png;
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import org.nd4j.shade.jackson.core.JsonGenerator;
 import org.nd4j.shade.jackson.databind.JsonSerializer;
 import org.nd4j.shade.jackson.databind.ObjectMapper;
@@ -134,7 +135,15 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
     }
 
     private void writeImage(JsonGenerator jg, Image i) throws IOException {
-        throw new UnsupportedOperationException("Not yet implemented: writing image JSON");
+        Png png = i.getAs(Png.class);
+        byte[] imgData = png.getBytes();
+        jg.writeStartObject();
+        jg.writeFieldName(Data.RESERVED_KEY_IMAGE_FORMAT);
+        jg.writeString("PNG");      //TODO No magic constant
+        jg.writeFieldName(Data.RESERVED_KEY_IMAGE_DATA);
+        String base64 = Base64.getEncoder().encodeToString(imgData);
+        jg.writeString(base64);
+        jg.writeEndObject();
     }
 
     private void writeNDArray(JsonGenerator jg, NDArray n) throws IOException {

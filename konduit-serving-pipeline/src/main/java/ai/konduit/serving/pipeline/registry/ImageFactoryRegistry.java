@@ -42,4 +42,8 @@ public class ImageFactoryRegistry extends BaseFactoryRegistry<ImageFactory> {
     public static ImageFactory getFactoryFor(@NonNull Object o){
         return INSTANCE.registryGetFactoryFor(o);
     }
+
+    public static void addFactory(ImageFactory f){
+        INSTANCE.addFactoryInstance(f);
+    }
 }

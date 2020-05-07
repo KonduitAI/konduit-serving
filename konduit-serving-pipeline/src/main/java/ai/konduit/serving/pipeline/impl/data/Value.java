@@ -15,6 +15,8 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data;
 
+import ai.konduit.serving.pipeline.api.data.ValueType;
+
 public interface Value<T> {
 
     ValueType type();
