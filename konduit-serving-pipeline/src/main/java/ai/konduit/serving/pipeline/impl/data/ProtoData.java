@@ -37,7 +37,7 @@ public class ProtoData extends JData {
     }
 
     public ProtoData(@NonNull File file) throws IOException {
-        save(file);
+        this(fromFile(file));
     }
 
     public ProtoData(@NonNull Data data) {

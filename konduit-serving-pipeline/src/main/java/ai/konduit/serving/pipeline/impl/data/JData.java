@@ -267,8 +267,14 @@ public class JData implements Data {
         else if (data instanceof Boolean) {
             instance.put(key, (Boolean)data);
         }
+        else if (data instanceof  Integer) {
+            instance.put(key, ((Integer) data).longValue());
+        }
         else if (data instanceof Long) {
             instance.put(key, (Long)data);
+        }
+        else if (data instanceof Float) {
+            instance.put(key, ((Float) data).doubleValue());
         }
         else if (data instanceof Double) {
             instance.put(key, (Double)data);

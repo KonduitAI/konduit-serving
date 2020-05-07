@@ -38,7 +38,7 @@ import static ai.konduit.serving.pipeline.impl.data.JData.empty;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-@Slf4j
+
 public class DataTest {
 
     private final String KEY = "stringData";
@@ -89,8 +89,7 @@ public class DataTest {
         assertEquals(input, container.getDouble(KEY), 1e-4);
     }
 
-    /*
-    @Test
+    /*@Test
     public void testImageData() {
         INDArray image = Nd4j.create(1,10,10,20);
         Image input = new Image(image, 1,1,1);
@@ -127,9 +126,11 @@ public class DataTest {
     @Test
     public void testSerde() throws IOException {
         Data someData = JData.singleton(KEY, Long.valueOf(200));
+        ProtoData protoData = someData.toProtoData();
         File testFile = testDir.newFile();
-        someData.save(testFile);
+        protoData.save(testFile);
         Data restoredData = Data.fromFile(testFile);
+        assertEquals(protoData.get(KEY), restoredData.get(KEY));
     }
 
     @Test
@@ -142,6 +143,21 @@ public class DataTest {
         output = intData.asBytes();
         assert(output != null);*/
     }
+
+    @Test
+    public void testInt32Conversion() {
+        Data intData = Data.singleton(KEY, Integer.valueOf(200));
+        Data longData = Data.singleton(KEY, Long.valueOf(200L));
+        assertEquals(intData.get(KEY), longData.get(KEY));
+    }
+
+    @Test
+    public void testFloatConversion() {
+        Data floatData = Data.singleton(KEY, Float.valueOf(200));
+        Data doubleData = Data.singleton(KEY, Double.valueOf(200.0));
+        assertEquals(floatData.get(KEY), doubleData.get(KEY));
+    }
+
 
     @Test
     public void testLists() {
