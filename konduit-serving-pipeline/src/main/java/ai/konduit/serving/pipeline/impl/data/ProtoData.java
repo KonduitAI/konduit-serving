@@ -23,7 +23,7 @@ import ai.konduit.serving.pipeline.impl.data.helpers.ProtobufUtils;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-
+import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage;
 import java.io.*;
 
 @Slf4j
@@ -65,10 +65,10 @@ public class ProtoData extends JData {
     @Override
     public void write(OutputStream toStream) throws IOException {
 
-        generated.Data.DataMap newItemsMap =
+        DataProtoMessage.DataMap newItemsMap =
                 ProtobufUtils.convertJavaToProtobufData(getDataMap());
 
-        generated.Data.DataMap pbDataMap = generated.Data.DataMap.newBuilder().
+        DataProtoMessage.DataMap pbDataMap = DataProtoMessage.DataMap.newBuilder().
                 putAllMapItems(newItemsMap.getMapItemsMap()).
                 build();
         pbDataMap.writeTo(toStream);
@@ -82,8 +82,8 @@ public class ProtoData extends JData {
 
     public static Data fromStream(InputStream stream) throws IOException {
         // mergeFrom performs stream buffering internally
-        generated.Data.DataMap.Builder builder = generated.Data.DataMap.newBuilder().mergeFrom(stream);
-        generated.Data.DataMap dataMap = builder.build();
+        DataProtoMessage.DataMap.Builder builder = DataProtoMessage.DataMap.newBuilder().mergeFrom(stream);
+        DataProtoMessage.DataMap dataMap = builder.build();
         return ProtobufUtils.convertProtobufToData(dataMap);
     }
 
@@ -102,15 +102,15 @@ public class ProtoData extends JData {
 
     public static Data fromBytes(byte[] input) {
         Data retVal = empty();
-        generated.Data.DataMap.Builder builder = null;
+        DataProtoMessage.DataMap.Builder builder = null;
         try {
-            builder = generated.Data.DataMap.newBuilder().mergeFrom(input);
+            builder = DataProtoMessage.DataMap.newBuilder().mergeFrom(input);
         } catch (InvalidProtocolBufferException e) {
             String errorText = "Error converting bytes array to data";
             log.error(errorText,e);
             throw new DataLoadingException(errorText);
         }
-        generated.Data.DataMap dataMap = builder.build();
+        DataProtoMessage.DataMap dataMap = builder.build();
         retVal = ProtobufUtils.convertProtobufToData(dataMap);
         return retVal;
     }

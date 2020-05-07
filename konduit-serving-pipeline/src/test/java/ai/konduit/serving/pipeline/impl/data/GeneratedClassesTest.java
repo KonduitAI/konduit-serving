@@ -2,7 +2,6 @@ package ai.konduit.serving.data;
 
 import org.junit.Test;
 
-import generated.Data;
 import static org.junit.Assert.assertEquals;
 
 public class GeneratedClassesTest {
