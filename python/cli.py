@@ -88,8 +88,11 @@ def git_clone_konduit(use_https=True, tag=DEFAULT_KONDUIT_TAG):
         if not os.listdir(KONDUIT_SOURCE_DIR):
             subprocess.call(["git", "clone", repo, KONDUIT_SOURCE_DIR],
                             shell=sys.platform.startswith("win"))
+        # Pulling in changes if needed
+        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "fetch", "--all"])
         subprocess.call(["git", "checkout", tag], cwd=KONDUIT_SOURCE_DIR,
                         shell=sys.platform.startswith("win"))
+        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "pull"])
     except Exception as e:
         raise RuntimeError(">>> Could not clone konduit-serving repository and switch to commit hash {}"
                            "Make sure to have git installed. Type 'konduit-init --help' for help .\n"
@@ -104,14 +107,6 @@ def build_jar(operating_sys, spin, chip):
 
     if operating_sys is None:
         operating_sys = get_platform()
-
-    # Pulling in changes if needed
-    try:
-        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "pull"])
-        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "fetch", "--all"])
-    except Exception as e:
-        raise RuntimeError(">>> Could not fetch and pull changes from konduit-serving repository. Make sure to have "
-                           "git installed. Type " + "konduit-init --help for help resolving this.\n", e)
 
     # Building the uber-jar file
     try:
