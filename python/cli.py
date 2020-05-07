@@ -157,7 +157,7 @@ def get_jar_url(platform, version, spin, chip):
                                          chip=chip)
 
 
-git_tags = set(get_git_tags()).difference(INCOMPATIBLE_COMPILATION_TAGS)
+git_tags = list(set(get_git_tags()).difference(INCOMPATIBLE_COMPILATION_TAGS))
 if len(git_tags) == 0:
     git_tags = [DEFAULT_KONDUIT_TAG]
 DEFAULT_KONDUIT_TAG = git_tags[0]  # Assuming the first one in the response is the most recent one
