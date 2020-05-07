@@ -20,10 +20,10 @@ package ai.konduit.serving.pipeline.registry;
 
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.format.*;
 import ai.konduit.serving.pipeline.api.format.ImageConverter;
-import ai.konduit.serving.pipeline.api.format.ImageFormat;
-import ai.konduit.serving.pipeline.api.format.ImageConverter;
-import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
+import ai.konduit.serving.pipeline.impl.data.image.Png;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.nd4j.common.primitives.Pair;
 
@@ -75,7 +75,7 @@ public class ImageConverterRegistry extends AbstractRegistry<ImageConverter> {
             init();
 
         if(factoriesMap.containsKey(type)){
-            return factoriesMap.get(type).get(0);       //TODO multiple converters
+            return factoriesMap.get(type).get(0);       //TODO multiple converters available
         }
 
         for(ImageConverter c : factories){
@@ -83,6 +83,17 @@ public class ImageConverterRegistry extends AbstractRegistry<ImageConverter> {
                 return c;
             }
         }
+
+        //No factory is available. Try to fall back on X -> PNG -> Y
+        if(type != Png.class){
+            ImageConverter c1 = getConverterForClass(img, Png.class);
+            if(c1 != null){
+                Image i2 = Image.create(c1.convert(img, Png.class));            //TODO this is ugly - we throw this result away!
+                ImageConverter c2 = getConverterForClass(i2, type);
+                return new TwoStepImageConverter(img.get().getClass(), type, c1, c2);
+            }
+        }
+
         return null;
     }
 
@@ -96,5 +107,38 @@ public class ImageConverterRegistry extends AbstractRegistry<ImageConverter> {
             }
         }
         return null;
+    }
+
+    public static void addConverter(ImageConverter f){
+        INSTANCE.addFactoryInstance(f);
+    }
+
+    @AllArgsConstructor
+    private static class TwoStepImageConverter implements ImageConverter {
+        private Class<?> cFrom;
+        private Class<?> cTo;
+        private ImageConverter c1;
+        private ImageConverter c2;
+
+        @Override
+        public boolean canConvert(Image from, ImageFormat<?> to) {
+            return false;
+        }
+
+        @Override
+        public boolean canConvert(Image from, Class<?> to) {
+            return cFrom.isAssignableFrom(from.get().getClass()) && to.isAssignableFrom(cTo);
+        }
+
+        @Override
+        public <T> T convert(Image from, ImageFormat<T> to) {
+            throw new UnsupportedOperationException("Not supported");
+        }
+
+        @Override
+        public <T> T convert(Image from, Class<T> to) {
+            Image png = Image.create(c1.convert(from, Png.class));
+            return (T) c2.convert(png, cTo);
+        }
     }
 }

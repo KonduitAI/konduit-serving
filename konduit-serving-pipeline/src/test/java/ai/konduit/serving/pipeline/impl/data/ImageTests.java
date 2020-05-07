@@ -20,15 +20,25 @@ package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.api.format.ImageConverter;
+import ai.konduit.serving.pipeline.api.format.ImageFactory;
+import ai.konduit.serving.pipeline.impl.data.image.BaseImage;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.image.PngImage;
+import ai.konduit.serving.pipeline.impl.format.JavaImageConverters;
+import ai.konduit.serving.pipeline.registry.ImageConverterRegistry;
+import ai.konduit.serving.pipeline.registry.ImageFactoryRegistry;
+import lombok.AllArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.common.resources.Resources;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Collections;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -109,5 +119,98 @@ public class ImageTests {
         }
         return true;
     }
+
+
+
+    @Test
+    public void test2StepConversion(){
+        //The idea: We add some new module with a new image format, X
+        //In that module, we implement only conversion of X->PNG and PNG->X
+        //What if we want to do X->Y?
+        //ImageConverterRegistry will try to do X->PNG->Y - as PNG is something all image types should implement
+        // conversions to/from for
+
+        File f = Resources.asFile("data/5_32x32.png");
+        System.out.println(f.getAbsolutePath());
+
+        Image i = Image.create(f);
+        assertTrue(i instanceof PngImage);
+        assertTrue(i.get() instanceof Png);
+        Png p = (Png) i.get();
+
+
+
+        ImageFactoryRegistry.addFactory(new TestImageFactory());
+        ImageConverterRegistry.addConverter(new TIToPng());
+        ImageConverterRegistry.addConverter(new PngToTI());
+        Image img = Image.create(new TestImageObject(p));
+
+        //TestImage -> PNG -> BufferedImage
+        BufferedImage bi = img.getAs(BufferedImage.class);
+        BufferedImage exp = i.getAs(BufferedImage.class);
+        assertTrue(bufferedImagesEqual(exp, bi));
+
+        //BufferedImage -> PNG -> TestImage
+        Image i2 = Image.create(exp);
+        TestImageObject out = i2.getAs(TestImageObject.class);
+        assertTrue(equalPngs(p, out.getPng()));
+
+    }
+
+    @AllArgsConstructor
+    @lombok.Data
+    public static class TestImageObject {
+        private Png png;
+    }
+
+    public static class TestImage extends BaseImage<TestImageObject> {
+        public TestImage(TestImageObject image) {
+            super(image);
+        }
+    }
+
+    public  static class TestImageFactory implements ImageFactory {
+
+        @Override
+        public Set<Class<?>> supportedTypes() {
+            return Collections.singleton(TestImageObject.class);
+        }
+
+        @Override
+        public boolean canCreateFrom(Object o) {
+            return o instanceof TestImageObject;
+        }
+
+        @Override
+        public Image create(Object o) {
+            Preconditions.checkState(canCreateFrom(o));
+            return new TestImage((TestImageObject)o);
+        }
+    }
+
+    public static class TIToPng extends JavaImageConverters.BaseConverter {
+        public TIToPng() {
+            super(TestImageObject.class, Png.class);
+        }
+
+        @Override
+        protected <T> T doConversion(Image from, Class<T> to) {
+            TestImageObject o = (TestImageObject) from.get();
+            return (T) o.png;
+        }
+    }
+
+    public static class PngToTI extends JavaImageConverters.BaseConverter {
+        public PngToTI() {
+            super(Png.class, TestImageObject.class);
+        }
+
+        @Override
+        protected <T> T doConversion(Image from, Class<T> to) {
+            Png o = (Png) from.get();
+            return (T) new TestImageObject(o);
+        }
+    }
+
 
 }

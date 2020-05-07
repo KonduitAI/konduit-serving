@@ -91,4 +91,10 @@ public abstract class AbstractRegistry<T> {
         factoriesMap = m;
         factories = l;
     }
+
+    public void addFactoryInstance(T factory){
+        if(factories == null)
+            init();
+        this.factories.add(factory);
+    }
 }
