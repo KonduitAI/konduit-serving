@@ -285,8 +285,12 @@ public class JData implements Data {
         }
         else if (data instanceof Data) {
             instance.put(key, (Data)data);
-        } else if(data instanceof NDArray){
+        }
+        else if(data instanceof NDArray){
             instance.put(key, (NDArray)data);
+        }
+        else if (data instanceof Image) {
+            instance.put(key, (Image)data);
         }
 //        else if (data instanceof Object) {
 //            instance.put(key, (Object)data);
@@ -311,6 +315,15 @@ public class JData implements Data {
         }
         else if (valueType.equals(ValueType.INT64)) {
             instance.putListInt64(key, (List<Long>) data);
+        }
+        else if (valueType.equals(ValueType.IMAGE)) {
+            instance.putListImage(key, (List<Image>) data);
+        }
+        else if (valueType.equals(ValueType.NDARRAY)) {
+            instance.putListNDArray(key, (List<NDArray>) data);
+        }
+        else if (valueType.equals(ValueType.DATA)) {
+            instance.putListData(key, (List<Data>) data);
         }
         else {
             throw new IllegalStateException("Trying to put list data of not supported type: " + data.getClass());
@@ -381,6 +394,21 @@ public class JData implements Data {
 
         public DataBuilder addListDouble(String key, List<Double> data) {
             instance.putListDouble(key, data);
+            return this;
+        }
+
+        public DataBuilder addListImage(String key, List<Image> data) {
+            instance.putListImage(key, data);
+            return this;
+        }
+
+        public DataBuilder addListData(String key, List<Data> data) {
+            instance.putListData(key, data);
+            return this;
+        }
+
+        public DataBuilder addListNDArray(String key, List<NDArray> data) {
+            instance.putListNDArray(key, data);
             return this;
         }
 
