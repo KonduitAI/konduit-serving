@@ -19,8 +19,18 @@
 package ai.konduit.serving.pipeline.api.data;
 
 public enum NDArrayType {
-
-    FLOAT
-
-
+    DOUBLE,
+    FLOAT,
+    FLOAT16,
+    BFLOAT16,
+    INT64,
+    INT32,
+    INT16,
+    INT8,
+    UINT64,
+    UINT32,
+    UINT16,
+    UINT8,
+    BOOL,
+    UTF8
 }

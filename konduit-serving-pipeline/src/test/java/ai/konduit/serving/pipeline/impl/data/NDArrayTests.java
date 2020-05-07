@@ -77,6 +77,16 @@ public class NDArrayTests {
         public TestNDArray(TestNDArrayObject o) {
             super(o);
         }
+
+        @Override
+        public NDArrayType type() {
+            return NDArrayType.FLOAT;
+        }
+
+        @Override
+        public long[] shape() {
+            return new long[0];
+        }
     }
 
     public  static class TestNDArrayFactory implements NDArrayFactory {
