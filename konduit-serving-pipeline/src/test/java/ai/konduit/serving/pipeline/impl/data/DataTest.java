@@ -16,9 +16,11 @@
 package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import org.apache.commons.compress.utils.Lists;
 import org.junit.Rule;
 import org.junit.Test;
@@ -348,5 +350,30 @@ public class DataTest {
         byte[] actualBytes = p2.getBytes();
 
         assertEquals(origBytes, actualBytes);
+    }
+
+    @Test
+    public void testImageSerde() throws IOException {
+        File f = Resources.asFile("data/5_32x32.png");
+        Image i = Image.create(f);
+
+        Data imageData = Data.singleton(KEY, i);
+        File serFile = testDir.newFile();
+        imageData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(imageData.get(KEY), restoredData.get(KEY));
+    }
+
+    @Test
+    public void testNDArraySerde() throws IOException {
+        float[] rawData = {1, 3, 6, 7, 8, 10, 4, 3, 2, 4};
+        long[] shape = {1, 10};
+        NDArray ndArray = NDArray.create(rawData);
+        //SerializedNDArray serializedNDArray = ndArray.getAs(SerializedNDArray.class);
+        Data ndData = Data.singleton(KEY, ndArray);
+        File serFile = testDir.newFile();
+        ndData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(ndData.get(KEY), restoredData.get(KEY));
     }
 }

@@ -25,6 +25,7 @@ import ai.konduit.serving.pipeline.impl.data.Value;
 import java.nio.ByteBuffer;
 import java.util.*;
 
+import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage;
 import ai.konduit.serving.pipeline.impl.format.JavaImageConverters;
@@ -67,12 +68,17 @@ public class ProtobufUtils {
             }
             else if (value.type().equals(ValueType.IMAGE)) {
                 Image image = (Image) nextItem.getValue().get();
-                byte[] imageBytes = new JavaImageConverters.IdentityConverter().convert(image, byte[].class);
+                Png p = image.getAs(Png.class);
+                byte[] imageBytes = p.getBytes();
+                //byte[] imageBytes = new JavaImageConverters.IdentityConverter().convert(image, byte[].class);
                 DataProtoMessage.Image pbImage = DataProtoMessage.Image.newBuilder().
                         addData(ByteString.copyFrom(imageBytes)).
                         build();
 
-                item = DataProtoMessage.DataScheme.newBuilder().setImValue(pbImage).build();
+                item = DataProtoMessage.DataScheme.newBuilder().
+                        setImValue(pbImage).
+                        setTypeValue(ValueType.IMAGE.ordinal()).
+                        build();
             }
             else if (value.type().equals(ValueType.NDARRAY)) {
                 NDArray ndArray = (NDArray)nextItem.getValue().get();
@@ -93,6 +99,7 @@ public class ProtobufUtils {
 
                 item = DataProtoMessage.DataScheme.newBuilder().
                         setNdValue(pbNDArray).
+                        setTypeValue(ValueType.NDARRAY.ordinal()).
                         build();
             }
             if (item == null) {
@@ -133,7 +140,9 @@ public class ProtobufUtils {
                 DataProtoMessage.Image pbImage = item.getImValue();
                 List<ByteString> pbData = pbImage.getDataList();
                 byte[] data = pbData.get(0).toByteArray();
-                retData.put(entry.getKey(), Image.create(data));
+                // TODO: obviously should be working for different formats
+                Png png = new Png(data);
+                retData.put(entry.getKey(), Image.create(png));
             }
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.NDARRAY.ordinal()) {
                 DataProtoMessage.NDArray pbArray = item.getNdValue();
@@ -149,6 +158,7 @@ public class ProtobufUtils {
                 ByteBuffer bb = ByteBuffer.wrap(bytes);
                 // TODO: fix ndarray type
                 SerializedNDArray ndArray = new SerializedNDArray(NDArrayType.FLOAT, aShapes, bb);
+                retData.put(entry.getKey(), NDArray.create(ndArray));
             }
         }
         return retData;
