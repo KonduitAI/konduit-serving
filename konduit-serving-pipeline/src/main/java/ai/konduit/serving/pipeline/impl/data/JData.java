@@ -32,6 +32,9 @@ public class JData implements Data {
     private Map<String, Value> dataMap = new LinkedHashMap<>();
     private Data metaData;
 
+    private static final String VALUE_NOT_FOUND_TEXT = "Value not found for key %s";
+    private static final String VALUE_HAS_WRONG_TYPE_TEXT = "Value has wrong type for key %s";
+
     public Map<String, Value> getDataMap() {
         return dataMap;
     }
@@ -62,9 +65,9 @@ public class JData implements Data {
     private Value valueIfFound(String key, ValueType type) {
         Value data = dataMap.get(key);
         if (data == null)
-            throw new ValueNotFoundException(String.format("Value not found for key %s", key));
+            throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
         if (data.type() != type)
-            throw new IllegalStateException(String.format("Value has wrong type for key %s", key));
+            throw new IllegalStateException(String.format(VALUE_HAS_WRONG_TYPE_TEXT, key));
         return data;
     }
 
@@ -72,13 +75,16 @@ public class JData implements Data {
     public ValueType type(String key) {
         Value data = dataMap.get(key);
         if (data == null)
-            throw new ValueNotFoundException(String.format("Value not found for key %s", key));
+            throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
         return data.type();
     }
 
     @Override
     public ValueType listType(String key) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        Value data = dataMap.get(key);
+        if (data == null || !(data instanceof ListValue))
+            throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
+        return ((ListValue)data).elementType();
     }
 
     @Override
@@ -89,7 +95,7 @@ public class JData implements Data {
     @Override
     public Object get(String key) throws ValueNotFoundException {
         if(!dataMap.containsKey(key))
-            throw new ValueNotFoundException("Value not found for key " + key);
+            throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
         return dataMap.get(key).get();
     }
 
@@ -137,7 +143,8 @@ public class JData implements Data {
 
     @Override
     public List<Object> getList(String key, ValueType type) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        Value<List<Object>> data = valueIfFound(key, ValueType.LIST);
+        return data.get();
     }
 
     @Override
@@ -195,6 +202,48 @@ public class JData implements Data {
     }
 
     @Override
+    public void putListString(String key, List<String> data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new ListValue(data, ValueType.STRING));
+    }
+
+    @Override
+    public void putListInt64(String key, List<Long> data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new ListValue(data, ValueType.INT64));
+    }
+
+    @Override
+    public void putListBoolean(String key, List<Boolean> data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new ListValue(data, ValueType.BOOLEAN));
+    }
+
+    @Override
+    public void putListDouble(String key, List<Double> data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new ListValue(data, ValueType.DOUBLE));
+    }
+
+    @Override
+    public void putListData(String key, List<Data> data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new ListValue(data, ValueType.DATA));
+    }
+
+    @Override
+    public void putListImage(String key, List<Image> data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new ListValue(data, ValueType.IMAGE));
+    }
+
+    @Override
+    public void putListNDArray(String key, List<NDArray> data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new ListValue(data, ValueType.NDARRAY));
+    }
+
+    @Override
     public boolean hasMetaData() {
         return metaData != null;
     }
@@ -207,6 +256,11 @@ public class JData implements Data {
     @Override
     public void setMetaData(Data data) {
         this.metaData = data;
+    }
+
+    @Override
+    public ProtoData toProtoData() {
+        return new ProtoData(this);
     }
 
     @Override
@@ -229,8 +283,14 @@ public class JData implements Data {
         else if (data instanceof Boolean) {
             instance.put(key, (Boolean)data);
         }
+        else if (data instanceof  Integer) {
+            instance.put(key, ((Integer) data).longValue());
+        }
         else if (data instanceof Long) {
             instance.put(key, (Long)data);
+        }
+        else if (data instanceof Float) {
+            instance.put(key, ((Float) data).doubleValue());
         }
         else if (data instanceof Double) {
             instance.put(key, (Double)data);
@@ -247,14 +307,48 @@ public class JData implements Data {
         }
         else if (data instanceof Data) {
             instance.put(key, (Data)data);
-        } else if(data instanceof NDArray){
+        }
+        else if(data instanceof NDArray){
             instance.put(key, (NDArray)data);
+        }
+        else if (data instanceof Image) {
+            instance.put(key, (Image)data);
         }
 //        else if (data instanceof Object) {
 //            instance.put(key, (Object)data);
 //        }
         else {
             throw new IllegalStateException("Trying to put data of not supported type: " + data.getClass());
+        }
+        return instance;
+    }
+
+    public static Data singletonList(@NonNull String key, @NonNull List<?> data,
+                                     @NonNull ValueType valueType) {
+        Data instance = new JData();
+        if (valueType == ValueType.STRING) {
+            instance.putListString(key, (List<String>)data);
+        }
+        else if (valueType == ValueType.BOOLEAN) {
+            instance.putListBoolean(key, (List<Boolean>) data);
+        }
+        else if (valueType == ValueType.DOUBLE) {
+            instance.putListDouble(key, (List<Double>) data);
+        }
+        else if (valueType == ValueType.INT64) {
+            instance.putListInt64(key, (List<Long>) data);
+        }
+        else if (valueType == ValueType.IMAGE) {
+            instance.putListImage(key, (List<Image>) data);
+        }
+        else if (valueType == ValueType.NDARRAY) {
+            instance.putListNDArray(key, (List<NDArray>) data);
+        }
+        else if (valueType == ValueType.DATA) {
+            instance.putListData(key, (List<Data>) data);
+        }
+        else {
+            throw new IllegalStateException("Trying to put list data of not supported type: " + data.getClass());
         }
         return instance;
     }
@@ -302,6 +396,41 @@ public class JData implements Data {
 
         public DataBuilder add(String key, NDArray data){
             instance.put(key, data);
+            return this;
+        }
+
+        public DataBuilder addListString(String key, List<String> data) {
+            instance.putListString(key, data);
+            return this;
+        }
+
+        public DataBuilder addListInt64(String key, List<Long> data) {
+            instance.putListInt64(key, data);
+            return this;
+        }
+
+        public DataBuilder addListBoolean(String key, List<Boolean> data) {
+            instance.putListBoolean(key, data);
+            return this;
+        }
+
+        public DataBuilder addListDouble(String key, List<Double> data) {
+            instance.putListDouble(key, data);
+            return this;
+        }
+
+        public DataBuilder addListImage(String key, List<Image> data) {
+            instance.putListImage(key, data);
+            return this;
+        }
+
+        public DataBuilder addListData(String key, List<Data> data) {
+            instance.putListData(key, data);
+            return this;
+        }
+
+        public DataBuilder addListNDArray(String key, List<NDArray> data) {
+            instance.putListNDArray(key, data);
             return this;
         }
 

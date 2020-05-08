@@ -28,9 +28,7 @@ import org.nd4j.shade.jackson.core.JsonProcessingException;
 import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -101,8 +99,14 @@ public interface Data {
     void put(String key, long data);
     void put(String key, double data);
     void put(String key, boolean data);
-    //void put(String key, Data data);
 
+    void putListString(String key, List<String> data);
+    void putListInt64(String key, List<Long> data);
+    void putListBoolean(String key, List<Boolean> data);
+    void putListDouble(String key, List<Double> data);
+    void putListData(String key, List<Data> data);
+    void putListImage(String key, List<Image> data);
+    void putListNDArray(String key, List<NDArray> data);
     void put(String key, Data data);
 
     boolean hasMetaData();
@@ -110,14 +114,20 @@ public interface Data {
     void setMetaData(Data data);
 
     // Serialization routines
-    default void save(File toFile){;
-        throw new UnsupportedOperationException();
+    default void save(File toFile) throws IOException {
+        this.toProtoData().save(toFile);
     }
 
 
-    default void write(OutputStream toStream){
-        throw new UnsupportedOperationException();
+    default void write(OutputStream toStream) throws IOException {
+        this.toProtoData().write(toStream);
     }
+
+    default byte[] asBytes() {
+        return this.toProtoData().asBytes();
+    }
+
+    ProtoData toProtoData();
 
     static Data fromJson(String json) {
         try {
@@ -127,25 +137,24 @@ public interface Data {
         }
     }
 
-    /*static Data fromFile(File file) {
-        return null;
-    }*/
-
-    static Data fromStream(InputStream fromStream) {
-        return null;
+    static Data fromBytes(byte[] input) {
+        return new ProtoData(input);
     }
 
-    static Data fromBytes(InputStream fromStream) {
-        return null;
+    static Data fromFile(File f) throws IOException {
+        return new ProtoData(f);
     }
 
-    static Data fromFile(File f){
-        throw new UnsupportedOperationException("Not yet implemented");
+    static Data fromStream(InputStream stream) throws IOException {
+        return new ProtoData(stream);
     }
-
 
     static Data singleton(@NonNull String key, @NonNull Object value){
         return JData.singleton(key, value);
+    }
+
+    static Data singletonList(@NonNull String key, @NonNull List<?> value, @NonNull ValueType valueType){
+        return JData.singletonList(key, value, valueType);
     }
 
     static Data empty(){
@@ -172,7 +181,6 @@ public interface Data {
         for(String s : k1){
             ValueType vt = d1.type(s);
             switch (vt){
-                case LIST:
                 default:
                     //TODO
                     throw new UnsupportedOperationException(vt + " equality not yet implemented");
