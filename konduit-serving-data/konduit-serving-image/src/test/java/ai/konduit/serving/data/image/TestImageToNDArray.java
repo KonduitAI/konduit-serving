@@ -1,6 +1,6 @@
 package ai.konduit.serving.data.image;
 
-import ai.konduit.serving.data.image.convert.Im2NDArrayConfig;
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.convert.config.NDChannels;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
@@ -12,7 +12,6 @@ import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -31,7 +30,7 @@ public class TestImageToNDArray {
 
         Pipeline p = SequencePipeline.builder()
                 .add(ImageToNDArrayStep.builder()
-                        .config(Im2NDArrayConfig.builder()
+                        .config(ImageToNDArrayConfig.builder()
                                 .height(128)
                                 .width(128)
                         .build())
@@ -71,7 +70,7 @@ public class TestImageToNDArray {
 
                         Pipeline p = SequencePipeline.builder()
                                 .add(ImageToNDArrayStep.builder()
-                                        .config(Im2NDArrayConfig.builder()
+                                        .config(ImageToNDArrayConfig.builder()
                                                 .height(h)
                                                 .width(w)
                                                 .channels(rgb ? NDChannels.RGB : NDChannels.BGR)
@@ -160,6 +159,10 @@ public class TestImageToNDArray {
                                 }
                             }
                         }
+
+                        String json = p.toJson();
+                        Pipeline pJson = Pipeline.fromJson(json);
+                        assertEquals(p, pJson);
                     }
                 }
             }
@@ -169,7 +172,6 @@ public class TestImageToNDArray {
 
     @Test
     public void testDataTypes(){
-
         //Test image -> Float16, Float32, Float64, int8, int16, int32, int64, uint8, unt16, uint32, uint64
         for(NDArrayType t : new NDArrayType[]{NDArrayType.FLOAT, NDArrayType.DOUBLE,
                 NDArrayType.INT8, NDArrayType.INT16, NDArrayType.INT32, NDArrayType.INT64,
@@ -193,7 +195,7 @@ public class TestImageToNDArray {
                             System.out.println(t + " - " + color + " - rgb=" + rgb + " - " + f);
                             Pipeline p = SequencePipeline.builder()
                                     .add(ImageToNDArrayStep.builder()
-                                            .config(Im2NDArrayConfig.builder()
+                                            .config(ImageToNDArrayConfig.builder()
                                                     .height(h)
                                                     .width(w)
                                                     .channels(rgb ? NDChannels.RGB : NDChannels.BGR)
@@ -223,6 +225,11 @@ public class TestImageToNDArray {
                             assertArrayEquals(expShape, arr.shape());
 
                             assertEquals(t, n.type());
+
+
+                            String json = p.toJson();
+                            Pipeline pJson = Pipeline.fromJson(json);
+                            assertEquals(p, pJson);
                         }
                     }
                 }

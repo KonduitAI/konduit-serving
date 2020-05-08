@@ -16,7 +16,6 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.nd4j.common.base.Preconditions;
 
 import java.nio.*;
-import java.util.Arrays;
 import java.util.function.IntToDoubleFunction;
 
 import static org.bytedeco.opencv.global.opencv_imgproc.resize;
@@ -26,7 +25,7 @@ public class ImageToNDArray {
     private ImageToNDArray() {
     }
 
-    public static NDArray convert(Image image, Im2NDArrayConfig config) {
+    public static NDArray convert(Image image, ImageToNDArrayConfig config) {
 
         Integer outH = config.height();
         Integer outW = config.width();
@@ -105,7 +104,7 @@ public class ImageToNDArray {
         return image.apply(crop);
     }
 
-    protected static Mat convertColor(Mat m, Im2NDArrayConfig config) {
+    protected static Mat convertColor(Mat m, ImageToNDArrayConfig config) {
         int ch = config.channels().numChannels();
         if (ch != 3) {
             throw new UnsupportedOperationException("Not yet implemented: Channels != 3 support");
@@ -116,7 +115,7 @@ public class ImageToNDArray {
         return m;
     }
 
-    protected static ByteBuffer toFloatBuffer(Mat m, Im2NDArrayConfig config) {
+    protected static ByteBuffer toFloatBuffer(Mat m, ImageToNDArrayConfig config) {
         Preconditions.checkState(config.channels() == NDChannels.RGB || config.channels() == NDChannels.BGR,
                 "Only RGB and BGR conversion implement so far");
 

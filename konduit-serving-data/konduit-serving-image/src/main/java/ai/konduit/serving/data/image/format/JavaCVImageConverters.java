@@ -83,7 +83,7 @@ public class JavaCVImageConverters {
             Frame f = (Frame) from.get();
             Mat m = converter.convert(f);
             org.opencv.core.Mat m2 = new org.opencv.core.Mat(m.address());
-            return (T)m2;
+            return (T)m2.clone();   //Clone so we're not (potentially unsafely) referring to address that might get freed
         }
     }
 
@@ -111,7 +111,7 @@ public class JavaCVImageConverters {
         protected <T> T doConversion(Image from, Class<T> to) {
             Mat m = (Mat) from.get();
             org.opencv.core.Mat m2 = new org.opencv.core.Mat(m.address());
-            return (T) m2;
+            return (T) m2.clone();  //Clone so we're not (potentially unsafely) referring to address that might get freed
         }
     }
 
@@ -125,7 +125,7 @@ public class JavaCVImageConverters {
         protected <T> T doConversion(Image from, Class<T> to) {
             org.opencv.core.Mat m = (org.opencv.core.Mat) from.get();
             Mat m2 = new Mat((Pointer)null){{address = m.getNativeObjAddr();}};
-            return (T)m2.clone();
+            return (T)m2.clone();   //Clone so we're not (potentially unsafely) referring to address that might get freed
         }
     }
 
