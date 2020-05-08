@@ -101,11 +101,20 @@ public final class DataProtoMessage {
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder getImValueOrBuilder();
 
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType type = 11;</code>
+     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+     */
+    int getListTypeValue();
+    /**
+     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getListType();
+
+    /**
+     * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
      */
     int getTypeValue();
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType type = 11;</code>
+     * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getType();
 
@@ -124,6 +133,7 @@ public final class DataProtoMessage {
       super(builder);
     }
     private DataScheme() {
+      listType_ = 0;
       type_ = 0;
     }
 
@@ -239,6 +249,12 @@ public final class DataProtoMessage {
               break;
             }
             case 88: {
+              int rawValue = input.readEnum();
+
+              listType_ = rawValue;
+              break;
+            }
+            case 96: {
               int rawValue = input.readEnum();
 
               type_ = rawValue;
@@ -673,16 +689,33 @@ public final class DataProtoMessage {
       return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.getDefaultInstance();
     }
 
-    public static final int TYPE_FIELD_NUMBER = 11;
+    public static final int LISTTYPE_FIELD_NUMBER = 11;
+    private int listType_;
+    /**
+     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+     */
+    public int getListTypeValue() {
+      return listType_;
+    }
+    /**
+     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getListType() {
+      @SuppressWarnings("deprecation")
+      ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.valueOf(listType_);
+      return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.UNRECOGNIZED : result;
+    }
+
+    public static final int TYPE_FIELD_NUMBER = 12;
     private int type_;
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType type = 11;</code>
+     * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
      */
     public int getTypeValue() {
       return type_;
     }
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType type = 11;</code>
+     * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
      */
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getType() {
       @SuppressWarnings("deprecation")
@@ -735,8 +768,11 @@ public final class DataProtoMessage {
       if (valueCase_ == 10) {
         output.writeMessage(10, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image) value_);
       }
+      if (listType_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.NDARRAY.getNumber()) {
+        output.writeEnum(11, listType_);
+      }
       if (type_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.NDARRAY.getNumber()) {
-        output.writeEnum(11, type_);
+        output.writeEnum(12, type_);
       }
       unknownFields.writeTo(output);
     }
@@ -786,9 +822,13 @@ public final class DataProtoMessage {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image) value_);
       }
+      if (listType_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.NDARRAY.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(11, listType_);
+      }
       if (type_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.NDARRAY.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(11, type_);
+          .computeEnumSize(12, type_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -810,6 +850,7 @@ public final class DataProtoMessage {
         if (!getMetaData()
             .equals(other.getMetaData())) return false;
       }
+      if (listType_ != other.listType_) return false;
       if (type_ != other.type_) return false;
       if (!getValueCase().equals(other.getValueCase())) return false;
       switch (valueCase_) {
@@ -864,6 +905,8 @@ public final class DataProtoMessage {
         hash = (37 * hash) + METADATA_FIELD_NUMBER;
         hash = (53 * hash) + getMetaData().hashCode();
       }
+      hash = (37 * hash) + LISTTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + listType_;
       hash = (37 * hash) + TYPE_FIELD_NUMBER;
       hash = (53 * hash) + type_;
       switch (valueCase_) {
@@ -1044,6 +1087,8 @@ public final class DataProtoMessage {
           metaData_ = null;
           metaDataBuilder_ = null;
         }
+        listType_ = 0;
+
         type_ = 0;
 
         valueCase_ = 0;
@@ -1115,6 +1160,7 @@ public final class DataProtoMessage {
             result.value_ = imValueBuilder_.build();
           }
         }
+        result.listType_ = listType_;
         result.type_ = type_;
         result.valueCase_ = valueCase_;
         onBuilt();
@@ -1167,6 +1213,9 @@ public final class DataProtoMessage {
         if (other == ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance()) return this;
         if (other.hasMetaData()) {
           mergeMetaData(other.getMetaData());
+        }
+        if (other.listType_ != 0) {
+          setListTypeValue(other.getListTypeValue());
         }
         if (other.type_ != 0) {
           setTypeValue(other.getTypeValue());
@@ -1982,15 +2031,60 @@ public final class DataProtoMessage {
         return imValueBuilder_;
       }
 
+      private int listType_ = 0;
+      /**
+       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+       */
+      public int getListTypeValue() {
+        return listType_;
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+       */
+      public Builder setListTypeValue(int value) {
+        listType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getListType() {
+        @SuppressWarnings("deprecation")
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.valueOf(listType_);
+        return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+       */
+      public Builder setListType(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        listType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+       */
+      public Builder clearListType() {
+        
+        listType_ = 0;
+        onChanged();
+        return this;
+      }
+
       private int type_ = 0;
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType type = 11;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
        */
       public int getTypeValue() {
         return type_;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType type = 11;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
        */
       public Builder setTypeValue(int value) {
         type_ = value;
@@ -1998,7 +2092,7 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType type = 11;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
        */
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getType() {
         @SuppressWarnings("deprecation")
@@ -2006,7 +2100,7 @@ public final class DataProtoMessage {
         return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.UNRECOGNIZED : result;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType type = 11;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
        */
       public Builder setType(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType value) {
         if (value == null) {
@@ -2018,7 +2112,7 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType type = 11;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
        */
       public Builder clearType() {
         
@@ -4465,6 +4559,1582 @@ public final class DataProtoMessage {
 
   }
 
+  public interface ImageListOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ai.konduit.serving.ImageList)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+     */
+    java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image> 
+        getListList();
+    /**
+     * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image getList(int index);
+    /**
+     * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+     */
+    int getListCount();
+    /**
+     * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+     */
+    java.util.List<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder> 
+        getListOrBuilderList();
+    /**
+     * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder getListOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code ai.konduit.serving.ImageList}
+   */
+  public  static final class ImageList extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:ai.konduit.serving.ImageList)
+      ImageListOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ImageList.newBuilder() to construct.
+    private ImageList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ImageList() {
+      list_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ImageList();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ImageList(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                list_ = new java.util.ArrayList<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              list_.add(
+                  input.readMessage(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.parser(), extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          list_ = java.util.Collections.unmodifiableList(list_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_ImageList_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_ImageList_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.class, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.Builder.class);
+    }
+
+    public static final int LIST_FIELD_NUMBER = 1;
+    private java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image> list_;
+    /**
+     * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+     */
+    public java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image> getListList() {
+      return list_;
+    }
+    /**
+     * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+     */
+    public java.util.List<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder> 
+        getListOrBuilderList() {
+      return list_;
+    }
+    /**
+     * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+     */
+    public int getListCount() {
+      return list_.size();
+    }
+    /**
+     * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image getList(int index) {
+      return list_.get(index);
+    }
+    /**
+     * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder getListOrBuilder(
+        int index) {
+      return list_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < list_.size(); i++) {
+        output.writeMessage(1, list_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < list_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, list_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList)) {
+        return super.equals(obj);
+      }
+      ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList other = (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) obj;
+
+      if (!getListList()
+          .equals(other.getListList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getListCount() > 0) {
+        hash = (37 * hash) + LIST_FIELD_NUMBER;
+        hash = (53 * hash) + getListList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code ai.konduit.serving.ImageList}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ai.konduit.serving.ImageList)
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageListOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_ImageList_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_ImageList_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.class, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.Builder.class);
+      }
+
+      // Construct using ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getListFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (listBuilder_ == null) {
+          list_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          listBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_ImageList_descriptor;
+      }
+
+      @java.lang.Override
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList getDefaultInstanceForType() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList build() {
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList buildPartial() {
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList result = new ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList(this);
+        int from_bitField0_ = bitField0_;
+        if (listBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            list_ = java.util.Collections.unmodifiableList(list_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.list_ = list_;
+        } else {
+          result.list_ = listBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) {
+          return mergeFrom((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList other) {
+        if (other == ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.getDefaultInstance()) return this;
+        if (listBuilder_ == null) {
+          if (!other.list_.isEmpty()) {
+            if (list_.isEmpty()) {
+              list_ = other.list_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureListIsMutable();
+              list_.addAll(other.list_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.list_.isEmpty()) {
+            if (listBuilder_.isEmpty()) {
+              listBuilder_.dispose();
+              listBuilder_ = null;
+              list_ = other.list_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              listBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getListFieldBuilder() : null;
+            } else {
+              listBuilder_.addAllMessages(other.list_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image> list_ =
+        java.util.Collections.emptyList();
+      private void ensureListIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          list_ = new java.util.ArrayList<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image>(list_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder> listBuilder_;
+
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image> getListList() {
+        if (listBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(list_);
+        } else {
+          return listBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public int getListCount() {
+        if (listBuilder_ == null) {
+          return list_.size();
+        } else {
+          return listBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image getList(int index) {
+        if (listBuilder_ == null) {
+          return list_.get(index);
+        } else {
+          return listBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public Builder setList(
+          int index, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image value) {
+        if (listBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureListIsMutable();
+          list_.set(index, value);
+          onChanged();
+        } else {
+          listBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public Builder setList(
+          int index, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder builderForValue) {
+        if (listBuilder_ == null) {
+          ensureListIsMutable();
+          list_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          listBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public Builder addList(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image value) {
+        if (listBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureListIsMutable();
+          list_.add(value);
+          onChanged();
+        } else {
+          listBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public Builder addList(
+          int index, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image value) {
+        if (listBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureListIsMutable();
+          list_.add(index, value);
+          onChanged();
+        } else {
+          listBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public Builder addList(
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder builderForValue) {
+        if (listBuilder_ == null) {
+          ensureListIsMutable();
+          list_.add(builderForValue.build());
+          onChanged();
+        } else {
+          listBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public Builder addList(
+          int index, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder builderForValue) {
+        if (listBuilder_ == null) {
+          ensureListIsMutable();
+          list_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          listBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public Builder addAllList(
+          java.lang.Iterable<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image> values) {
+        if (listBuilder_ == null) {
+          ensureListIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, list_);
+          onChanged();
+        } else {
+          listBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public Builder clearList() {
+        if (listBuilder_ == null) {
+          list_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          listBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public Builder removeList(int index) {
+        if (listBuilder_ == null) {
+          ensureListIsMutable();
+          list_.remove(index);
+          onChanged();
+        } else {
+          listBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder getListBuilder(
+          int index) {
+        return getListFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder getListOrBuilder(
+          int index) {
+        if (listBuilder_ == null) {
+          return list_.get(index);  } else {
+          return listBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public java.util.List<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder> 
+           getListOrBuilderList() {
+        if (listBuilder_ != null) {
+          return listBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(list_);
+        }
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder addListBuilder() {
+        return getListFieldBuilder().addBuilder(
+            ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder addListBuilder(
+          int index) {
+        return getListFieldBuilder().addBuilder(
+            index, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.Image list = 1;</code>
+       */
+      public java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder> 
+           getListBuilderList() {
+        return getListFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder> 
+          getListFieldBuilder() {
+        if (listBuilder_ == null) {
+          listBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder>(
+                  list_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          list_ = null;
+        }
+        return listBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:ai.konduit.serving.ImageList)
+    }
+
+    // @@protoc_insertion_point(class_scope:ai.konduit.serving.ImageList)
+    private static final ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList();
+    }
+
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ImageList>
+        PARSER = new com.google.protobuf.AbstractParser<ImageList>() {
+      @java.lang.Override
+      public ImageList parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ImageList(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ImageList> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ImageList> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface NDArrayListOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ai.konduit.serving.NDArrayList)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+     */
+    java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray> 
+        getListList();
+    /**
+     * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray getList(int index);
+    /**
+     * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+     */
+    int getListCount();
+    /**
+     * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+     */
+    java.util.List<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder> 
+        getListOrBuilderList();
+    /**
+     * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder getListOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code ai.konduit.serving.NDArrayList}
+   */
+  public  static final class NDArrayList extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:ai.konduit.serving.NDArrayList)
+      NDArrayListOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use NDArrayList.newBuilder() to construct.
+    private NDArrayList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private NDArrayList() {
+      list_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NDArrayList();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private NDArrayList(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                list_ = new java.util.ArrayList<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              list_.add(
+                  input.readMessage(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.parser(), extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          list_ = java.util.Collections.unmodifiableList(list_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_NDArrayList_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_NDArrayList_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.class, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.Builder.class);
+    }
+
+    public static final int LIST_FIELD_NUMBER = 1;
+    private java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray> list_;
+    /**
+     * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+     */
+    public java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray> getListList() {
+      return list_;
+    }
+    /**
+     * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+     */
+    public java.util.List<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder> 
+        getListOrBuilderList() {
+      return list_;
+    }
+    /**
+     * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+     */
+    public int getListCount() {
+      return list_.size();
+    }
+    /**
+     * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray getList(int index) {
+      return list_.get(index);
+    }
+    /**
+     * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder getListOrBuilder(
+        int index) {
+      return list_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < list_.size(); i++) {
+        output.writeMessage(1, list_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < list_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, list_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList)) {
+        return super.equals(obj);
+      }
+      ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList other = (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) obj;
+
+      if (!getListList()
+          .equals(other.getListList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getListCount() > 0) {
+        hash = (37 * hash) + LIST_FIELD_NUMBER;
+        hash = (53 * hash) + getListList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code ai.konduit.serving.NDArrayList}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ai.konduit.serving.NDArrayList)
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayListOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_NDArrayList_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_NDArrayList_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.class, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.Builder.class);
+      }
+
+      // Construct using ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getListFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (listBuilder_ == null) {
+          list_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          listBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_NDArrayList_descriptor;
+      }
+
+      @java.lang.Override
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList getDefaultInstanceForType() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList build() {
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList buildPartial() {
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList result = new ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList(this);
+        int from_bitField0_ = bitField0_;
+        if (listBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            list_ = java.util.Collections.unmodifiableList(list_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.list_ = list_;
+        } else {
+          result.list_ = listBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) {
+          return mergeFrom((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList other) {
+        if (other == ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.getDefaultInstance()) return this;
+        if (listBuilder_ == null) {
+          if (!other.list_.isEmpty()) {
+            if (list_.isEmpty()) {
+              list_ = other.list_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureListIsMutable();
+              list_.addAll(other.list_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.list_.isEmpty()) {
+            if (listBuilder_.isEmpty()) {
+              listBuilder_.dispose();
+              listBuilder_ = null;
+              list_ = other.list_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              listBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getListFieldBuilder() : null;
+            } else {
+              listBuilder_.addAllMessages(other.list_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray> list_ =
+        java.util.Collections.emptyList();
+      private void ensureListIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          list_ = new java.util.ArrayList<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray>(list_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder> listBuilder_;
+
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray> getListList() {
+        if (listBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(list_);
+        } else {
+          return listBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public int getListCount() {
+        if (listBuilder_ == null) {
+          return list_.size();
+        } else {
+          return listBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray getList(int index) {
+        if (listBuilder_ == null) {
+          return list_.get(index);
+        } else {
+          return listBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public Builder setList(
+          int index, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray value) {
+        if (listBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureListIsMutable();
+          list_.set(index, value);
+          onChanged();
+        } else {
+          listBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public Builder setList(
+          int index, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.Builder builderForValue) {
+        if (listBuilder_ == null) {
+          ensureListIsMutable();
+          list_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          listBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public Builder addList(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray value) {
+        if (listBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureListIsMutable();
+          list_.add(value);
+          onChanged();
+        } else {
+          listBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public Builder addList(
+          int index, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray value) {
+        if (listBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureListIsMutable();
+          list_.add(index, value);
+          onChanged();
+        } else {
+          listBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public Builder addList(
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.Builder builderForValue) {
+        if (listBuilder_ == null) {
+          ensureListIsMutable();
+          list_.add(builderForValue.build());
+          onChanged();
+        } else {
+          listBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public Builder addList(
+          int index, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.Builder builderForValue) {
+        if (listBuilder_ == null) {
+          ensureListIsMutable();
+          list_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          listBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public Builder addAllList(
+          java.lang.Iterable<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray> values) {
+        if (listBuilder_ == null) {
+          ensureListIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, list_);
+          onChanged();
+        } else {
+          listBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public Builder clearList() {
+        if (listBuilder_ == null) {
+          list_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          listBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public Builder removeList(int index) {
+        if (listBuilder_ == null) {
+          ensureListIsMutable();
+          list_.remove(index);
+          onChanged();
+        } else {
+          listBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.Builder getListBuilder(
+          int index) {
+        return getListFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder getListOrBuilder(
+          int index) {
+        if (listBuilder_ == null) {
+          return list_.get(index);  } else {
+          return listBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public java.util.List<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder> 
+           getListOrBuilderList() {
+        if (listBuilder_ != null) {
+          return listBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(list_);
+        }
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.Builder addListBuilder() {
+        return getListFieldBuilder().addBuilder(
+            ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.Builder addListBuilder(
+          int index) {
+        return getListFieldBuilder().addBuilder(
+            index, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
+       */
+      public java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.Builder> 
+           getListBuilderList() {
+        return getListFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder> 
+          getListFieldBuilder() {
+        if (listBuilder_ == null) {
+          listBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder>(
+                  list_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          list_ = null;
+        }
+        return listBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:ai.konduit.serving.NDArrayList)
+    }
+
+    // @@protoc_insertion_point(class_scope:ai.konduit.serving.NDArrayList)
+    private static final ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList();
+    }
+
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<NDArrayList>
+        PARSER = new com.google.protobuf.AbstractParser<NDArrayList>() {
+      @java.lang.Override
+      public NDArrayList parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new NDArrayList(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<NDArrayList> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<NDArrayList> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface ListOrBuilder extends
       // @@protoc_insertion_point(interface_extends:ai.konduit.serving.List)
       com.google.protobuf.MessageOrBuilder {
@@ -4520,6 +6190,32 @@ public final class DataProtoMessage {
      * <code>.ai.konduit.serving.DoubleList dList = 4;</code>
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleListOrBuilder getDListOrBuilder();
+
+    /**
+     * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+     */
+    boolean hasImList();
+    /**
+     * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList getImList();
+    /**
+     * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageListOrBuilder getImListOrBuilder();
+
+    /**
+     * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+     */
+    boolean hasNdList();
+    /**
+     * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList getNdList();
+    /**
+     * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayListOrBuilder getNdListOrBuilder();
 
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.List.ListCase getListCase();
   }
@@ -4624,6 +6320,34 @@ public final class DataProtoMessage {
               listCase_ = 4;
               break;
             }
+            case 42: {
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.Builder subBuilder = null;
+              if (listCase_ == 5) {
+                subBuilder = ((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_).toBuilder();
+              }
+              list_ =
+                  input.readMessage(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_);
+                list_ = subBuilder.buildPartial();
+              }
+              listCase_ = 5;
+              break;
+            }
+            case 50: {
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.Builder subBuilder = null;
+              if (listCase_ == 6) {
+                subBuilder = ((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_).toBuilder();
+              }
+              list_ =
+                  input.readMessage(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_);
+                list_ = subBuilder.buildPartial();
+              }
+              listCase_ = 6;
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -4664,6 +6388,8 @@ public final class DataProtoMessage {
       ILIST(2),
       BLIST(3),
       DLIST(4),
+      IMLIST(5),
+      NDLIST(6),
       LIST_NOT_SET(0);
       private final int value;
       private ListCase(int value) {
@@ -4683,6 +6409,8 @@ public final class DataProtoMessage {
           case 2: return ILIST;
           case 3: return BLIST;
           case 4: return DLIST;
+          case 5: return IMLIST;
+          case 6: return NDLIST;
           case 0: return LIST_NOT_SET;
           default: return null;
         }
@@ -4802,6 +6530,58 @@ public final class DataProtoMessage {
       return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleList.getDefaultInstance();
     }
 
+    public static final int IMLIST_FIELD_NUMBER = 5;
+    /**
+     * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+     */
+    public boolean hasImList() {
+      return listCase_ == 5;
+    }
+    /**
+     * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList getImList() {
+      if (listCase_ == 5) {
+         return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_;
+      }
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.getDefaultInstance();
+    }
+    /**
+     * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageListOrBuilder getImListOrBuilder() {
+      if (listCase_ == 5) {
+         return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_;
+      }
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.getDefaultInstance();
+    }
+
+    public static final int NDLIST_FIELD_NUMBER = 6;
+    /**
+     * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+     */
+    public boolean hasNdList() {
+      return listCase_ == 6;
+    }
+    /**
+     * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList getNdList() {
+      if (listCase_ == 6) {
+         return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_;
+      }
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.getDefaultInstance();
+    }
+    /**
+     * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayListOrBuilder getNdListOrBuilder() {
+      if (listCase_ == 6) {
+         return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_;
+      }
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -4828,6 +6608,12 @@ public final class DataProtoMessage {
       if (listCase_ == 4) {
         output.writeMessage(4, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleList) list_);
       }
+      if (listCase_ == 5) {
+        output.writeMessage(5, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_);
+      }
+      if (listCase_ == 6) {
+        output.writeMessage(6, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -4852,6 +6638,14 @@ public final class DataProtoMessage {
       if (listCase_ == 4) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleList) list_);
+      }
+      if (listCase_ == 5) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_);
+      }
+      if (listCase_ == 6) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4886,6 +6680,14 @@ public final class DataProtoMessage {
           if (!getDList()
               .equals(other.getDList())) return false;
           break;
+        case 5:
+          if (!getImList()
+              .equals(other.getImList())) return false;
+          break;
+        case 6:
+          if (!getNdList()
+              .equals(other.getNdList())) return false;
+          break;
         case 0:
         default:
       }
@@ -4916,6 +6718,14 @@ public final class DataProtoMessage {
         case 4:
           hash = (37 * hash) + DLIST_FIELD_NUMBER;
           hash = (53 * hash) + getDList().hashCode();
+          break;
+        case 5:
+          hash = (37 * hash) + IMLIST_FIELD_NUMBER;
+          hash = (53 * hash) + getImList().hashCode();
+          break;
+        case 6:
+          hash = (37 * hash) + NDLIST_FIELD_NUMBER;
+          hash = (53 * hash) + getNdList().hashCode();
           break;
         case 0:
         default:
@@ -5109,6 +6919,20 @@ public final class DataProtoMessage {
             result.list_ = dListBuilder_.build();
           }
         }
+        if (listCase_ == 5) {
+          if (imListBuilder_ == null) {
+            result.list_ = list_;
+          } else {
+            result.list_ = imListBuilder_.build();
+          }
+        }
+        if (listCase_ == 6) {
+          if (ndListBuilder_ == null) {
+            result.list_ = list_;
+          } else {
+            result.list_ = ndListBuilder_.build();
+          }
+        }
         result.listCase_ = listCase_;
         onBuilt();
         return result;
@@ -5173,6 +6997,14 @@ public final class DataProtoMessage {
           }
           case DLIST: {
             mergeDList(other.getDList());
+            break;
+          }
+          case IMLIST: {
+            mergeImList(other.getImList());
+            break;
+          }
+          case NDLIST: {
+            mergeNdList(other.getNdList());
             break;
           }
           case LIST_NOT_SET: {
@@ -5765,6 +7597,278 @@ public final class DataProtoMessage {
         listCase_ = 4;
         onChanged();;
         return dListBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageListOrBuilder> imListBuilder_;
+      /**
+       * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+       */
+      public boolean hasImList() {
+        return listCase_ == 5;
+      }
+      /**
+       * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList getImList() {
+        if (imListBuilder_ == null) {
+          if (listCase_ == 5) {
+            return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_;
+          }
+          return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.getDefaultInstance();
+        } else {
+          if (listCase_ == 5) {
+            return imListBuilder_.getMessage();
+          }
+          return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+       */
+      public Builder setImList(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList value) {
+        if (imListBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          list_ = value;
+          onChanged();
+        } else {
+          imListBuilder_.setMessage(value);
+        }
+        listCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+       */
+      public Builder setImList(
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.Builder builderForValue) {
+        if (imListBuilder_ == null) {
+          list_ = builderForValue.build();
+          onChanged();
+        } else {
+          imListBuilder_.setMessage(builderForValue.build());
+        }
+        listCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+       */
+      public Builder mergeImList(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList value) {
+        if (imListBuilder_ == null) {
+          if (listCase_ == 5 &&
+              list_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.getDefaultInstance()) {
+            list_ = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.newBuilder((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            list_ = value;
+          }
+          onChanged();
+        } else {
+          if (listCase_ == 5) {
+            imListBuilder_.mergeFrom(value);
+          }
+          imListBuilder_.setMessage(value);
+        }
+        listCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+       */
+      public Builder clearImList() {
+        if (imListBuilder_ == null) {
+          if (listCase_ == 5) {
+            listCase_ = 0;
+            list_ = null;
+            onChanged();
+          }
+        } else {
+          if (listCase_ == 5) {
+            listCase_ = 0;
+            list_ = null;
+          }
+          imListBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.Builder getImListBuilder() {
+        return getImListFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageListOrBuilder getImListOrBuilder() {
+        if ((listCase_ == 5) && (imListBuilder_ != null)) {
+          return imListBuilder_.getMessageOrBuilder();
+        } else {
+          if (listCase_ == 5) {
+            return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_;
+          }
+          return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageListOrBuilder> 
+          getImListFieldBuilder() {
+        if (imListBuilder_ == null) {
+          if (!(listCase_ == 5)) {
+            list_ = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.getDefaultInstance();
+          }
+          imListBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageListOrBuilder>(
+                  (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_,
+                  getParentForChildren(),
+                  isClean());
+          list_ = null;
+        }
+        listCase_ = 5;
+        onChanged();;
+        return imListBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayListOrBuilder> ndListBuilder_;
+      /**
+       * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+       */
+      public boolean hasNdList() {
+        return listCase_ == 6;
+      }
+      /**
+       * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList getNdList() {
+        if (ndListBuilder_ == null) {
+          if (listCase_ == 6) {
+            return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_;
+          }
+          return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.getDefaultInstance();
+        } else {
+          if (listCase_ == 6) {
+            return ndListBuilder_.getMessage();
+          }
+          return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+       */
+      public Builder setNdList(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList value) {
+        if (ndListBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          list_ = value;
+          onChanged();
+        } else {
+          ndListBuilder_.setMessage(value);
+        }
+        listCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+       */
+      public Builder setNdList(
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.Builder builderForValue) {
+        if (ndListBuilder_ == null) {
+          list_ = builderForValue.build();
+          onChanged();
+        } else {
+          ndListBuilder_.setMessage(builderForValue.build());
+        }
+        listCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+       */
+      public Builder mergeNdList(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList value) {
+        if (ndListBuilder_ == null) {
+          if (listCase_ == 6 &&
+              list_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.getDefaultInstance()) {
+            list_ = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.newBuilder((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            list_ = value;
+          }
+          onChanged();
+        } else {
+          if (listCase_ == 6) {
+            ndListBuilder_.mergeFrom(value);
+          }
+          ndListBuilder_.setMessage(value);
+        }
+        listCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+       */
+      public Builder clearNdList() {
+        if (ndListBuilder_ == null) {
+          if (listCase_ == 6) {
+            listCase_ = 0;
+            list_ = null;
+            onChanged();
+          }
+        } else {
+          if (listCase_ == 6) {
+            listCase_ = 0;
+            list_ = null;
+          }
+          ndListBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.Builder getNdListBuilder() {
+        return getNdListFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayListOrBuilder getNdListOrBuilder() {
+        if ((listCase_ == 6) && (ndListBuilder_ != null)) {
+          return ndListBuilder_.getMessageOrBuilder();
+        } else {
+          if (listCase_ == 6) {
+            return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_;
+          }
+          return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayListOrBuilder> 
+          getNdListFieldBuilder() {
+        if (ndListBuilder_ == null) {
+          if (!(listCase_ == 6)) {
+            list_ = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.getDefaultInstance();
+          }
+          ndListBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayListOrBuilder>(
+                  (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_,
+                  getParentForChildren(),
+                  isClean());
+          list_ = null;
+        }
+        listCase_ = 6;
+        onChanged();;
+        return ndListBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -8081,6 +10185,16 @@ public final class DataProtoMessage {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ai_konduit_serving_DoubleList_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_ai_konduit_serving_ImageList_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_ai_konduit_serving_ImageList_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_ai_konduit_serving_NDArrayList_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_ai_konduit_serving_NDArrayList_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_ai_konduit_serving_List_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -8114,7 +10228,7 @@ public final class DataProtoMessage {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\ndata.proto\022\022ai.konduit.serving\"\342\003\n\nDat" +
+      "\n\ndata.proto\022\022ai.konduit.serving\"\236\004\n\nDat" +
       "aScheme\0220\n\010metaData\030\002 \001(\0132\036.ai.konduit.s" +
       "erving.DataScheme\022\020\n\006sValue\030\003 \001(\tH\000\022\020\n\006b" +
       "Value\030\004 \001(\014H\000\022\020\n\006iValue\030\005 \001(\003H\000\022\023\n\tboolV" +
@@ -8122,29 +10236,36 @@ public final class DataProtoMessage {
       "istValue\030\010 \001(\0132\030.ai.konduit.serving.List" +
       "H\000\022.\n\007ndValue\030\t \001(\0132\033.ai.konduit.serving" +
       ".NDArrayH\000\022,\n\007imValue\030\n \001(\0132\031.ai.konduit" +
-      ".serving.ImageH\000\0226\n\004type\030\013 \001(\0162(.ai.kond" +
-      "uit.serving.DataScheme.ValueType\"r\n\tValu" +
-      "eType\022\013\n\007NDARRAY\020\000\022\n\n\006STRING\020\001\022\t\n\005BYTES\020" +
-      "\002\022\t\n\005IMAGE\020\003\022\n\n\006DOUBLE\020\004\022\t\n\005INT64\020\005\022\013\n\007B" +
-      "OOLEAN\020\006\022\010\n\004DATA\020\007\022\010\n\004LIST\020\010B\007\n\005value\"\032\n" +
-      "\nStringList\022\014\n\004list\030\001 \003(\t\"\031\n\tInt64List\022\014" +
-      "\n\004list\030\001 \003(\003\"\033\n\013BooleanList\022\014\n\004list\030\001 \003(" +
-      "\010\"\032\n\nDoubleList\022\014\n\004list\030\001 \003(\001\"\322\001\n\004List\022/" +
-      "\n\005sList\030\001 \001(\0132\036.ai.konduit.serving.Strin" +
-      "gListH\000\022.\n\005iList\030\002 \001(\0132\035.ai.konduit.serv" +
-      "ing.Int64ListH\000\0220\n\005bList\030\003 \001(\0132\037.ai.kond" +
-      "uit.serving.BooleanListH\000\022/\n\005dList\030\004 \001(\013" +
-      "2\036.ai.konduit.serving.DoubleListH\000B\006\n\004li" +
-      "st\"\025\n\005Image\022\014\n\004data\030\001 \003(\014\"t\n\007NDArray\022\r\n\005" +
-      "shape\030\001 \003(\003\022\r\n\005array\030\003 \003(\014\0223\n\004type\030\002 \001(\016" +
-      "2%.ai.konduit.serving.NDArray.ValueType\"" +
-      "\026\n\tValueType\022\t\n\005FLOAT\020\000\"\227\001\n\007DataMap\022;\n\010m" +
-      "apItems\030\001 \003(\0132).ai.konduit.serving.DataM" +
-      "ap.MapItemsEntry\032O\n\rMapItemsEntry\022\013\n\003key" +
-      "\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.ai.konduit.servi" +
-      "ng.DataScheme:\0028\001BB\n.ai.konduit.serving." +
-      "pipeline.impl.data.protobufB\020DataProtoMe" +
-      "ssageb\006proto3"
+      ".serving.ImageH\000\022:\n\010listType\030\013 \001(\0162(.ai." +
+      "konduit.serving.DataScheme.ValueType\0226\n\004" +
+      "type\030\014 \001(\0162(.ai.konduit.serving.DataSche" +
+      "me.ValueType\"r\n\tValueType\022\013\n\007NDARRAY\020\000\022\n" +
+      "\n\006STRING\020\001\022\t\n\005BYTES\020\002\022\t\n\005IMAGE\020\003\022\n\n\006DOUB" +
+      "LE\020\004\022\t\n\005INT64\020\005\022\013\n\007BOOLEAN\020\006\022\010\n\004DATA\020\007\022\010" +
+      "\n\004LIST\020\010B\007\n\005value\"\032\n\nStringList\022\014\n\004list\030" +
+      "\001 \003(\t\"\031\n\tInt64List\022\014\n\004list\030\001 \003(\003\"\033\n\013Bool" +
+      "eanList\022\014\n\004list\030\001 \003(\010\"\032\n\nDoubleList\022\014\n\004l" +
+      "ist\030\001 \003(\001\"4\n\tImageList\022\'\n\004list\030\001 \003(\0132\031.a" +
+      "i.konduit.serving.Image\"8\n\013NDArrayList\022)" +
+      "\n\004list\030\001 \003(\0132\033.ai.konduit.serving.NDArra" +
+      "y\"\266\002\n\004List\022/\n\005sList\030\001 \001(\0132\036.ai.konduit.s" +
+      "erving.StringListH\000\022.\n\005iList\030\002 \001(\0132\035.ai." +
+      "konduit.serving.Int64ListH\000\0220\n\005bList\030\003 \001" +
+      "(\0132\037.ai.konduit.serving.BooleanListH\000\022/\n" +
+      "\005dList\030\004 \001(\0132\036.ai.konduit.serving.Double" +
+      "ListH\000\022/\n\006imList\030\005 \001(\0132\035.ai.konduit.serv" +
+      "ing.ImageListH\000\0221\n\006ndList\030\006 \001(\0132\037.ai.kon" +
+      "duit.serving.NDArrayListH\000B\006\n\004list\"\025\n\005Im" +
+      "age\022\014\n\004data\030\001 \003(\014\"t\n\007NDArray\022\r\n\005shape\030\001 " +
+      "\003(\003\022\r\n\005array\030\003 \003(\014\0223\n\004type\030\002 \001(\0162%.ai.ko" +
+      "nduit.serving.NDArray.ValueType\"\026\n\tValue" +
+      "Type\022\t\n\005FLOAT\020\000\"\227\001\n\007DataMap\022;\n\010mapItems\030" +
+      "\001 \003(\0132).ai.konduit.serving.DataMap.MapIt" +
+      "emsEntry\032O\n\rMapItemsEntry\022\013\n\003key\030\001 \001(\t\022-" +
+      "\n\005value\030\002 \001(\0132\036.ai.konduit.serving.DataS" +
+      "cheme:\0028\001BB\n.ai.konduit.serving.pipeline" +
+      ".impl.data.protobufB\020DataProtoMessageb\006p" +
+      "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -8155,7 +10276,7 @@ public final class DataProtoMessage {
     internal_static_ai_konduit_serving_DataScheme_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_DataScheme_descriptor,
-        new java.lang.String[] { "MetaData", "SValue", "BValue", "IValue", "BoolValue", "DoubleValue", "ListValue", "NdValue", "ImValue", "Type", "Value", });
+        new java.lang.String[] { "MetaData", "SValue", "BValue", "IValue", "BoolValue", "DoubleValue", "ListValue", "NdValue", "ImValue", "ListType", "Type", "Value", });
     internal_static_ai_konduit_serving_StringList_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_ai_konduit_serving_StringList_fieldAccessorTable = new
@@ -8180,26 +10301,38 @@ public final class DataProtoMessage {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_DoubleList_descriptor,
         new java.lang.String[] { "List", });
-    internal_static_ai_konduit_serving_List_descriptor =
+    internal_static_ai_konduit_serving_ImageList_descriptor =
       getDescriptor().getMessageTypes().get(5);
+    internal_static_ai_konduit_serving_ImageList_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ai_konduit_serving_ImageList_descriptor,
+        new java.lang.String[] { "List", });
+    internal_static_ai_konduit_serving_NDArrayList_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_ai_konduit_serving_NDArrayList_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ai_konduit_serving_NDArrayList_descriptor,
+        new java.lang.String[] { "List", });
+    internal_static_ai_konduit_serving_List_descriptor =
+      getDescriptor().getMessageTypes().get(7);
     internal_static_ai_konduit_serving_List_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_List_descriptor,
-        new java.lang.String[] { "SList", "IList", "BList", "DList", "List", });
+        new java.lang.String[] { "SList", "IList", "BList", "DList", "ImList", "NdList", "List", });
     internal_static_ai_konduit_serving_Image_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_ai_konduit_serving_Image_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_Image_descriptor,
         new java.lang.String[] { "Data", });
     internal_static_ai_konduit_serving_NDArray_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_ai_konduit_serving_NDArray_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_NDArray_descriptor,
         new java.lang.String[] { "Shape", "Array", "Type", });
     internal_static_ai_konduit_serving_DataMap_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_ai_konduit_serving_DataMap_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_DataMap_descriptor,

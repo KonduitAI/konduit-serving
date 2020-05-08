@@ -17,7 +17,8 @@ message DataScheme {
         NDArray ndValue = 9;
         Image imValue = 10;
     }
-    ValueType type = 11;
+    ValueType listType = 11;
+    ValueType type = 12;
 
     enum ValueType {
         NDARRAY = 0;
@@ -44,12 +45,20 @@ message BooleanList {
 message DoubleList {
     repeated double list = 1;
 }
+message ImageList {
+    repeated Image list = 1;
+}
+message NDArrayList {
+    repeated NDArray list = 1;
+}
 message List {
     oneof list {
 	   StringList sList = 1;
 	   Int64List iList = 2;
 	   BooleanList bList = 3;
 	   DoubleList dList = 4;
+	   ImageList imList = 5;
+	   NDArrayList ndList = 6;
 	}
 }
 
