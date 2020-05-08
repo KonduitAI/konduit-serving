@@ -1,0 +1,80 @@
+
+syntax = "proto3";
+
+package ai.konduit.serving;
+option java_package = "ai.konduit.serving.pipeline.impl.data.protobuf";
+option java_outer_classname = "DataProtoMessage";
+
+message DataScheme {
+    DataScheme metaData = 2;
+    oneof value {
+        string sValue = 3;
+        bytes bValue = 4;
+        int64 iValue = 5;
+        bool boolValue = 6;
+        double doubleValue = 7;
+        List listValue = 8;
+        NDArray ndValue = 9;
+        Image imValue = 10;
+    }
+    ValueType type = 11;
+
+    enum ValueType {
+        NDARRAY = 0;
+        STRING = 1;
+        BYTES = 2;
+        IMAGE = 3;
+        DOUBLE = 4;
+        INT64 = 5;
+        BOOLEAN = 6;
+        DATA = 7;
+        LIST = 8;
+    }
+}
+
+message StringList {
+    repeated string list = 1;
+}
+message Int64List  {
+    repeated int64 list = 1;
+}
+message BooleanList {
+    repeated bool list = 1;
+}
+message DoubleList {
+    repeated double list = 1;
+}
+message List {
+    oneof list {
+	   StringList sList = 1;
+	   Int64List iList = 2;
+	   BooleanList bList = 3;
+	   DoubleList dList = 4;
+	}
+}
+
+message Image {
+    repeated bytes data = 1;
+}
+
+message NDArray {
+    repeated int64 shape = 1;
+    repeated bytes array = 3;
+    ValueType type = 2;
+
+    enum ValueType {
+        FLOAT = 0;
+    }
+}
+
+//message List {
+    //repeated string listStrings = 1;
+    //repeated int64 listInts = 2;
+    //repeated bool listBools = 3;
+    //repeated double listDoubles = 4;
+//}
+
+message DataMap {
+    map<string, DataScheme> mapItems = 1;
+}
+
