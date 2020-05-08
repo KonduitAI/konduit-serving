@@ -179,9 +179,11 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
         int n = list.size();
         jg.writeStartArray(n);
 
-        int i = 0;
         switch (listType) {
             case NDARRAY:
+                for(NDArray arr : (List<NDArray>) list){
+                    writeNDArray(jg, arr);
+                }
                 break;
             case STRING:
                 for (String s : (List<String>) list) {             //TODO avoid unsafe cast?
@@ -200,35 +202,27 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
                 break;
             case DOUBLE:
                 List<Double> dList = (List<Double>) list;        //TODO checks for unsafe cast?
-                double[] dArr = new double[dList.size()];
-                for (Double d : dList) {
-                    dArr[i++] = d;
+                for(Double d : dList){
+                    writeDouble(jg, d);
                 }
-                jg.writeArray(dArr, 0, dArr.length);
                 break;
             case INT64:
                 List<Long> lList = (List<Long>) list;
-                long[] lArr = new long[lList.size()];
-                for (Long l : lList) {
-                    lArr[i++] = l;
+                for(Long l : lList){
+                    writeLong(jg, l);
                 }
-                jg.writeArray(lArr, 0, lArr.length);
                 break;
             case BOOLEAN:
                 List<Boolean> bList = (List<Boolean>) list;
-                jg.writeStartArray(bList.size());
                 for (Boolean b : bList) {
                     jg.writeBoolean(b);
                 }
-                jg.writeEndArray();
                 break;
             case DATA:
                 List<Data> dataList = (List<Data>) list;
-                jg.writeStartArray(dataList.size());
                 for (Data d : dataList) {
                     writeNestedData(jg, d);
                 }
-                jg.writeEndArray();
                 break;
             case LIST:
                 //List of lists...

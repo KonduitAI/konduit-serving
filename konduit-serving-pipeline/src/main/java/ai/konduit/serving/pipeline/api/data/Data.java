@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonDeserializer;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonSerializer;
+import ai.konduit.serving.pipeline.util.DataUtils;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import lombok.NonNull;
 import org.nd4j.common.base.Preconditions;
@@ -104,6 +105,7 @@ public interface Data {
     void putListString(String key, List<String> data);
     void putListInt64(String key, List<Long> data);
     void putListBoolean(String key, List<Boolean> data);
+    void putListBytes(String key, List<byte[]> data);
     void putListDouble(String key, List<Double> data);
     void putListData(String key, List<Data> data);
     void putListImage(String key, List<Image> data);
@@ -162,6 +164,14 @@ public interface Data {
         return new JData();
     }
 
+    static String toString(Data d){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Data(");
+        sb.append(d.keys().toString());
+        sb.append(")");
+        return sb.toString();
+    }
+
     static boolean equals(@NonNull Data d1, @NonNull Data d2){
 
         if(d1.size() != d2.size())
@@ -185,6 +195,16 @@ public interface Data {
                 default:
                     //TODO
                     throw new UnsupportedOperationException(vt + " equality not yet implemented");
+                case LIST:
+                    //TODO will this be robust for equality of any objects? Probably not...
+                    ValueType l1Type = d1.listType(s);
+                    ValueType l2Type = d2.listType(s);
+                    List<?> list1 = d1.getList(s, l1Type);
+                    List<?> list2 = d2.getList(s, l2Type);
+                    if(!DataUtils.listEquals(list1, list2, l1Type, l2Type))
+                        return false;
+
+                    break;
                 case IMAGE:
                     Png png1 = d1.getImage(s).getAs(Png.class);
                     Png png2 = d1.getImage(s).getAs(Png.class);
@@ -244,6 +264,8 @@ public interface Data {
 
         return true;
     }
+
+
 
     static void assertNotReservedKey(@NonNull String s){
         for(String kwd : reservedKeywords()){
