@@ -34,7 +34,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class ProtobufUtils {
 
-    public static DataProtoMessage.DataMap convertJavaToProtobufData(Map<String,Value> dataMap) {
+    public static DataProtoMessage.DataMap serialize(Map<String,Value> dataMap) {
 
         Map<String, DataProtoMessage.DataScheme> pbItemsMap = new HashMap<>();
         Iterator<Map.Entry<String, Value>> iterator = dataMap.entrySet().iterator();
@@ -202,7 +202,7 @@ public class ProtobufUtils {
         return pbDataMap;
     }
 
-    public static Data convertProtobufToData(DataProtoMessage.DataMap dataMap) {
+    public static Data deserialize(DataProtoMessage.DataMap dataMap) {
         JData retData = new JData();
         Map<String, DataProtoMessage.DataScheme> schemeMap = dataMap.getMapItemsMap();
         Iterator<Map.Entry<String, DataProtoMessage.DataScheme>> iterator =

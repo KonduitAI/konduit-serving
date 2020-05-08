@@ -66,12 +66,16 @@ public class ProtoData extends JData {
     public void write(OutputStream toStream) throws IOException {
 
         DataProtoMessage.DataMap newItemsMap =
-                ProtobufUtils.convertJavaToProtobufData(getDataMap());
+                ProtobufUtils.serialize(getDataMap());
 
         DataProtoMessage.DataMap pbDataMap = DataProtoMessage.DataMap.newBuilder().
                 putAllMapItems(newItemsMap.getMapItemsMap()).
                 build();
         pbDataMap.writeTo(toStream);
+
+        /*if (hasMetaData()) {
+            getMetaData().write(toStream);
+        }*/
     }
 
     public static Data fromFile(File fromFile) throws IOException {
@@ -84,7 +88,7 @@ public class ProtoData extends JData {
         // mergeFrom performs stream buffering internally
         DataProtoMessage.DataMap.Builder builder = DataProtoMessage.DataMap.newBuilder().mergeFrom(stream);
         DataProtoMessage.DataMap dataMap = builder.build();
-        return ProtobufUtils.convertProtobufToData(dataMap);
+        return ProtobufUtils.deserialize(dataMap);
     }
 
 
@@ -111,7 +115,7 @@ public class ProtoData extends JData {
             throw new DataLoadingException(errorText);
         }
         DataProtoMessage.DataMap dataMap = builder.build();
-        retVal = ProtobufUtils.convertProtobufToData(dataMap);
+        retVal = ProtobufUtils.deserialize(dataMap);
         return retVal;
     }
 

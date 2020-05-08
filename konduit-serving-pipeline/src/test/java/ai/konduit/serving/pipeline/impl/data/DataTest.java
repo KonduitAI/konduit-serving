@@ -472,4 +472,30 @@ public class DataTest {
 
     }
 
+    @Test
+    public void testDataSerde() throws IOException {
+        List<Long> rawData = new ArrayList<>();
+        for (long l = 0; l < 10000; ++l) {
+            rawData.add(l);
+        }
+        List<String> strings = new ArrayList<>();
+        strings.add("one");
+        strings.add("two");
+        strings.add("three");
+        strings.add("four");
+
+        Data intData = Data.singletonList(KEY, rawData, ValueType.INT64);
+        Data withMetaData = Data.singletonList("meta", strings, ValueType.STRING);
+        withMetaData.setMetaData(intData);
+
+        File serFile = testDir.newFile();
+        withMetaData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+
+        //assertEquals(intData, withMetaData.getMetaData());
+        assertEquals(null, intData.getMetaData());
+        assertEquals(withMetaData.getMetaData(),
+                    restoredData.getMetaData());
+
+    }
 }
