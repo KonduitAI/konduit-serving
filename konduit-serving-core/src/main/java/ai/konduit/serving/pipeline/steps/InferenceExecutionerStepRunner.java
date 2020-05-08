@@ -33,11 +33,11 @@ import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
 import org.datavec.api.writable.WritableType;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -45,8 +45,8 @@ import java.util.List;
  * is run as part of a pipeline step.
  * <p>
  * For the kinds of {@link InferenceExecutioner}
- * that can be run as part of a pipeline, please reference
- * the {@link ai.konduit.serving.model.ModelConfigType}
+ * that can be run as part of a pipeline, please reference to
+ * the {@link ai.konduit.serving.model.ModelConfig}
  * which contains all of the available types.
  * <p>
  * This pipeline step is used for executing standalone models
@@ -62,33 +62,9 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
         super(pipelineStep);
         ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
         InferenceExecutionerFactory inferenceExecutionerFactory;
+
         try {
-            Preconditions.checkNotNull(modelPipelineStepConfig.getModelConfig().getModelConfigType(), "No model state was specified!");
-            Preconditions.checkNotNull(modelPipelineStepConfig.getModelConfig().getModelConfigType().getModelType(), "No model type was specified!");
-
-            switch (modelPipelineStepConfig.getModelConfig().getModelConfigType().getModelType()) {
-                case SAMEDIFF:
-                    inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.SameDiffInferenceExecutionerFactory").newInstance();
-                    break;
-                case TENSORFLOW:
-                    inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.TensorflowInferenceExecutionerFactory").newInstance();
-                    break;
-                case DL4J:
-                    inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.Dl4jInferenceExecutionerFactory").newInstance();
-                    break;
-                case PMML:
-                    inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.PmmlInferenceExecutionerFactory").newInstance();
-                    break;
-                case ONNX:
-                    inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.OnnxInferenceExecutionerFactory").newInstance();
-                    break;
-                case KERAS:
-                    inferenceExecutionerFactory = (InferenceExecutionerFactory) Class.forName("ai.konduit.serving.executioner.inference.factory.KerasInferenceExecutionerFactory").newInstance();
-                    break;
-                default:
-                    throw new IllegalStateException("No model type specified!");
-
-            }
+            inferenceExecutionerFactory = modelPipelineStepConfig.createExecutionerFactory() ;
 
             Preconditions.checkNotNull(modelPipelineStepConfig, "NO pipeline configuration found!");
             Preconditions.checkNotNull(modelPipelineStepConfig.getParallelInferenceConfig(), "No parallel inference configuration found!");
@@ -99,8 +75,6 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-
-
     }
 
     @Override
@@ -136,7 +110,7 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
 
             return new Record[]{
                     new org.datavec.api.records.impl.Record(
-                            Arrays.asList(new NDArrayWritable(arr))
+                            Collections.singletonList(new NDArrayWritable(arr))
                             , null
                     )};
         }
@@ -144,8 +118,8 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
 
     private boolean allNdArray(Record[] records) {
         boolean isAllNdArrays = true;
-        for (int i = 0; i < records.length; i++) {
-            if (records[i].getRecord().size() != 1 && records[i].getRecord().get(0).getType() != WritableType.NDArray) {
+        for (Record record : records) {
+            if (record.getRecord().size() != 1 && record.getRecord().get(0).getType() != WritableType.NDArray) {
                 isAllNdArrays = false;
                 break;
             }

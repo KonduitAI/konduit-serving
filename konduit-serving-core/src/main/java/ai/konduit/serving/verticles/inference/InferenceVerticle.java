@@ -28,7 +28,7 @@ import ai.konduit.serving.executioner.PipelineExecutioner;
 import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.routers.MemMapRouteDefiner;
 import ai.konduit.serving.routers.PipelineRouteDefiner;
-import ai.konduit.serving.settings.Fetcher;
+import ai.konduit.serving.settings.DirectoryFetcher;
 import ai.konduit.serving.util.LogUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
 import ai.konduit.serving.verticles.base.BaseRoutableVerticle;
@@ -171,7 +171,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
 
     private void saveInspectionDataIfRequired(int pid) {
         try {
-            File processConfigFile = new File(Fetcher.getServersDataDir(), pid + ".data");
+            File processConfigFile = new File(DirectoryFetcher.getServersDataDir(), pid + ".data");
             String inferenceConfigurationJson = ((ContextInternal) context).getDeployment()
                     .deploymentOptions().getConfig().encodePrettily();
 

@@ -30,7 +30,7 @@ import org.dmg.pmml.PMML;
 import org.jpmml.xgboost.FeatureMap;
 import org.jpmml.xgboost.Learner;
 import org.jpmml.xgboost.XGBoostUtil;
-import org.nd4j.util.ArchiveUtils;
+import org.nd4j.common.util.ArchiveUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -24,7 +24,10 @@ package ai.konduit.serving.config;
 
 /**
  * Type of an input or output of a pipeline step.
+ *
+ * @deprecated To be removed - https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 public enum SchemaType {
     String,
     Integer,

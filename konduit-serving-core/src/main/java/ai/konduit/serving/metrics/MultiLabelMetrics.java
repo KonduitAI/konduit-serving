@@ -31,9 +31,9 @@ import io.micrometer.core.instrument.Tag;
 import lombok.Getter;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.NDArrayWritable;
+import org.nd4j.common.primitives.AtomicDouble;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.primitives.AtomicDouble;
 
 import java.util.ArrayList;
 import java.util.Arrays;

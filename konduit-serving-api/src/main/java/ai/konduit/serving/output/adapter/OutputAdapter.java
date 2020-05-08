@@ -37,7 +37,9 @@ import java.util.Map;
  *
  * @param <T> the type to convert to
  * @author Adam Gibson
+ * @deprecated To be removed - see https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 public interface OutputAdapter<T extends BatchOutput> {
 
     /**

@@ -1,0 +1,9 @@
+
+syntax = "proto3";
+
+package proto;
+
+message DataScheme {
+    string key = 1;
+    DataScheme metaData = 2;
+}

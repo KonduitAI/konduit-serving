@@ -111,7 +111,7 @@ public class StopCommand extends DefaultCommand {
         try {
             int result = new ProcessBuilder(cmd).start().waitFor();
             out.println("Application '" + id + "' terminated with status " + result);
-            if (!redeploy) {
+            if (!redeploy && result != 0) {
                 // We leave the application using the same exit code.
                 ExecUtils.exit(result);
             }

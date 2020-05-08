@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="konduit",
-    version="0.1.4",
+    version="0.1.5",
     packages=find_packages(),
     install_requires=[
         "requests>=2.22.0",
@@ -14,8 +14,9 @@ setup(
         "Cython",
         "pydl4j",
         "pydatavec",
-        "click",
         "pyyaml",
+        "click",
+        "packaging"
     ],
     py_modules=["konduit", "cli"],
     extras_require={
@@ -23,13 +24,13 @@ setup(
         "codegen": ["jsonschema2popo"],
         "dev": ["black", "pre-commit"],
     },
-    entry_points={"console_scripts": ["konduit=cli:cli"]},
+    entry_points={"console_scripts": ["konduit=cli:cli", "konduit-init=cli:init"]},
     include_package_data=True,
     license="Apache",
     description="konduit: Enterprise Runtime for Machine Learning Models",
     long_description="konduit: Enterprise Runtime for Machine Learning Models",
-    author="Max Pumperla",
-    author_email="max@skymind.global",
+    author="Max Pumperla, Shams Ul Azeem",
+    author_email="max@konduit.ai, shams@konduit.ai",
     url="https://github.com/KonduitAI/konduit-serving",
     classifiers=[
         "Development Status :: 3 - Alpha",

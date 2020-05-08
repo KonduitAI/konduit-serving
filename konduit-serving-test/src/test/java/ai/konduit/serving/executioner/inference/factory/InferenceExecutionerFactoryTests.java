@@ -22,12 +22,15 @@
 
 package ai.konduit.serving.executioner.inference.factory;
 
-import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.executioner.inference.*;
 import ai.konduit.serving.model.*;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowGraphHolder;
 import ai.konduit.serving.model.loader.tensorflow.TensorflowModelLoader;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.Dl4jStep;
+import ai.konduit.serving.pipeline.step.model.KerasStep;
+import ai.konduit.serving.pipeline.step.model.SameDiffStep;
+import ai.konduit.serving.pipeline.step.model.TensorFlowStep;
 import ai.konduit.serving.train.TrainUtils;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -35,9 +38,9 @@ import org.deeplearning4j.util.ModelSerializer;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.nd4j.common.io.ClassPathResource;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
-import org.nd4j.linalg.io.ClassPathResource;
-import org.nd4j.linalg.primitives.Pair;
 import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 
 import java.io.File;
@@ -53,16 +56,12 @@ public class InferenceExecutionerFactoryTests {
     public void testTensorflow() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/tensorflow/frozen_model.pb");
         TensorflowInferenceExecutionerFactory tensorflowInferenceExecutionerFactory = new TensorflowInferenceExecutionerFactory();
-        TensorFlowConfig tensorFlowConfig = TensorFlowConfig.builder()
-                .modelConfigType(ModelConfigType.tensorFlow(classPathResource.getFile().getAbsolutePath()))
-                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
-                        .inputDataType("default", TensorDataType.INT32).build())
-                .configProtoPath(classPathResource.getFile().getAbsolutePath()).build();
 
-        ModelStep modelPipelineStep = ModelStep.builder()
+        TensorFlowStep modelPipelineStep = TensorFlowStep.builder()
                 .inputName("default")
                 .outputName("output")
-                .modelConfig(tensorFlowConfig)
+                .path(classPathResource.getFile().getAbsolutePath())
+                .inputDataType("default", TensorDataType.INT32)
                 .build();
 
         TensorflowModelLoader tensorflowModelLoader = TensorflowModelLoader.createFromConfig(modelPipelineStep);
@@ -94,18 +93,11 @@ public class InferenceExecutionerFactoryTests {
     @Test
     public void testKerasSequential() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/keras/bidirectional_lstm_tensorflow_1.h5");
-        ModelConfig modelConfig = KerasConfig.builder()
-                .modelConfigType(ModelConfigType.keras(classPathResource.getFile().getAbsolutePath()))
-                .build();
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(1139)
-                .build();
-
-        ModelStep modelPipelineStep = ModelStep.builder()
+        KerasStep modelPipelineStep = KerasStep.builder()
                 .inputName("default")
                 .outputName("output")
-                .modelConfig(modelConfig)
+                .path(classPathResource.getFile().getAbsolutePath())
                 .build();
 
         KerasInferenceExecutionerFactory factory = new KerasInferenceExecutionerFactory();
@@ -121,16 +113,12 @@ public class InferenceExecutionerFactoryTests {
     public void testSameDiff() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("inference/tensorflow/frozen_model.pb");
         SameDiffInferenceExecutionerFactory tensorflowInferenceExecutionerFactory = new SameDiffInferenceExecutionerFactory();
-        SameDiffConfig tensorFlowConfig = SameDiffConfig.builder()
-                .modelConfigType(ModelConfigType.sameDiff(classPathResource.getFile().getAbsolutePath()))
-                .tensorDataTypesConfig(TensorDataTypesConfig.builder()
-                        .inputDataType("default", TensorDataType.INT32).build())
-                .build();
 
-        ModelStep modelPipelineStep = ModelStep.builder()
+        ModelStep modelPipelineStep = SameDiffStep.builder()
                 .inputName("default")
                 .outputName("output")
-                .modelConfig(tensorFlowConfig)
+                .path(classPathResource.getFile().getAbsolutePath())
+                .inputDataType("default", TensorDataType.INT32)
                 .build();
 
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = tensorflowInferenceExecutionerFactory.create(modelPipelineStep);
@@ -150,14 +138,11 @@ public class InferenceExecutionerFactoryTests {
         File tmpZip = new File(dir, "dl4j_mln_model.zip");
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
-                .build();
 
-        ModelStep modelPipelineStep = ModelStep.builder()
+        ModelStep modelPipelineStep = Dl4jStep.builder()
                 .inputName("default")
                 .outputName("output")
-                .modelConfig(modelConfig)
+                .path(tmpZip.getAbsolutePath())
                 .build();
 
         Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();
@@ -177,14 +162,10 @@ public class InferenceExecutionerFactoryTests {
         tmpZip.deleteOnExit();
         ModelSerializer.writeModel(save, tmpZip, true);
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.dl4j(tmpZip.getAbsolutePath()))
-                .build();
-
-        ModelStep modelPipelineStep = ModelStep.builder()
+        ModelStep modelPipelineStep = Dl4jStep.builder()
                 .inputName("default")
                 .outputName("output")
-                .modelConfig(modelConfig)
+                .path(tmpZip.getAbsolutePath())
                 .build();
 
         Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();

@@ -36,9 +36,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.memory.MemoryWorkspace;
 import org.nd4j.linalg.api.memory.conf.WorkspaceConfiguration;
+import org.nd4j.linalg.api.memory.enums.LearningPolicy;
 import org.nd4j.linalg.api.memory.enums.LocationPolicy;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -146,11 +147,11 @@ public class MemMapRouteDefiner {
         mmap = WorkspaceConfiguration.builder()
                 .initialSize(initialSize)
                 .policyLocation(LocationPolicy.MMAP)
+                .policyLearning(LearningPolicy.NONE)
                 .tempFilePath(tempFile.getAbsolutePath())
                 .build();
 
         PipelineRouteDefiner.generalHandler(inferenceConfiguration, router, log);
-
 
         setRouteLinks(router, vertx);
 
@@ -217,7 +218,6 @@ public class MemMapRouteDefiner {
                 });
     }
 
-
     private void writeArrayJson(INDArray write, io.vertx.ext.web.RoutingContext ctx) {
         ctx.response().putHeader(CONTENT_TYPE, APPLICATION_JSON);
         ctx.response().setChunked(false);
@@ -259,9 +259,7 @@ public class MemMapRouteDefiner {
         ctx.response().putHeader(CONTENT_TYPE, "application/octet-stream");
         ctx.response().setChunked(false);
         ctx.response().end(writeBuffer);
-
     }
-
 
     private INDArray getArrayFromContextRange(RoutingContext ctx) {
         ctx.response().setStatusCode(200);

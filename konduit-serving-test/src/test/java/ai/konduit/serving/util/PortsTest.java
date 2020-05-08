@@ -19,10 +19,8 @@ package ai.konduit.serving.util;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.deploy.DeployKonduitServing;
-import ai.konduit.serving.model.DL4JConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.Dl4jStep;
 import ai.konduit.serving.train.TrainUtils;
 import ai.konduit.serving.verticles.VerticleConstants;
 import io.vertx.ext.unit.Async;
@@ -40,8 +38,8 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
-import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
 import java.net.BindException;
@@ -246,19 +244,12 @@ public class PortsTest {
                 .httpPort(port)
                 .build();
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder().modelLoadingPath(testContext.get(SAVED_MODEL_PATH))
-                                .modelType(ModelConfig.ModelType.DL4J)
-                                .build()
-                ).build();
-
-        ModelStep modelPipelineStep = ModelStep.builder()
+        Dl4jStep modelPipelineStep = Dl4jStep.builder()
                 .inputName("default")
                 .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
                 .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
                 .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
-                .modelConfig(modelConfig)
+                .path(testContext.get(SAVED_MODEL_PATH))
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .build();
 

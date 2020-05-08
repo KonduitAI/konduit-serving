@@ -28,7 +28,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.onnxruntime.AllocatorWithDefaultOptions;
 import org.bytedeco.onnxruntime.Session;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.util.LinkedHashMap;
@@ -66,7 +66,6 @@ public class OnnxInferenceExecutioner implements
         }
     }
 
-
     @Override
     public void initialize(ModelLoader<Session> model, ParallelInferenceConfig config) {
         this.modelLoader = model;
@@ -85,7 +84,6 @@ public class OnnxInferenceExecutioner implements
         Preconditions.checkState(input.length == this.model.GetInputCount(), "Number of inputs %s did not equal number of model inputs %s!", input.length, model.GetInputCount());
         synchronized (this.model) {
             try (AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions()) {
-
                 Map<String, INDArray> inputs = new LinkedHashMap<>(input.length);
 
                 for (int i = 0; i < this.model.GetInputCount(); i++) {

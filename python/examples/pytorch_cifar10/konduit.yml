@@ -4,7 +4,7 @@ serving:
   log_timings: True
 steps:
   image_loading_step:
-    type: IMAGE_LOADING
+    type: IMAGE
     image_processing_initial_layout: NCHW # I'm sending images, why is this necessary....
     image_processing_required_layout: NCHW
     input_column_names: # Why do we need to define this three times?

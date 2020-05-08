@@ -18,7 +18,7 @@ package ai.konduit.serving.logs;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.deploy.DeployKonduitServing;
-import ai.konduit.serving.settings.Fetcher;
+import ai.konduit.serving.settings.DirectoryFetcher;
 import ai.konduit.serving.settings.constants.Constants;
 import ai.konduit.serving.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.settings.constants.PropertiesConstants;
@@ -37,7 +37,7 @@ import org.junit.*;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.common.io.ClassPathResource;
 
 import java.awt.*;
 import java.io.File;
@@ -77,10 +77,10 @@ public class LogsEndpointTest {
 
         // Delete previous logs if they exist
         try {
-            FileUtils.forceDelete(new File(Fetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE));
+            FileUtils.forceDelete(new File(DirectoryFetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE));
         } catch (IOException ignore) {}
 
-        mBaseLogDir = Fetcher.getEndpointLogsDir().getAbsolutePath();
+        mBaseLogDir = DirectoryFetcher.getEndpointLogsDir().getAbsolutePath();
 
         Handler<AsyncResult<InferenceConfiguration>> eventHandler = handler -> {
             if(handler.succeeded()) {
@@ -163,7 +163,7 @@ public class LogsEndpointTest {
         DeployKonduitServing.deployInference(getConfig(testContext),
                 handler -> {
                     if(handler.succeeded()) {
-                        testContext.assertTrue(new File(Fetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE).exists());
+                        testContext.assertTrue(new File(DirectoryFetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE).exists());
 
                         RequestSpecification requestSpecification = given().port(handler.result().getServingConfig().getHttpPort());
 

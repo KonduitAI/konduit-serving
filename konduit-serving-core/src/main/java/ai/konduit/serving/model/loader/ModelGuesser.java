@@ -25,11 +25,11 @@ package ai.konduit.serving.model.loader;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.deeplearning4j.core.util.ModelGuesserException;
 import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.modelimport.keras.Hdf5Archive;
 import org.deeplearning4j.nn.modelimport.keras.KerasModelImport;
 import org.deeplearning4j.nn.modelimport.keras.config.KerasModelConfiguration;
-import org.deeplearning4j.util.ModelGuesserException;
 import org.deeplearning4j.util.ModelSerializer;
 import org.json.JSONObject;
 import org.nd4j.linalg.dataset.api.preprocessor.Normalizer;

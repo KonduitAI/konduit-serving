@@ -25,10 +25,9 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.TestUtils;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.model.OnnxConfig;
-import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.output.types.NDArrayOutput;
+import ai.konduit.serving.pipeline.step.model.OnnxStep;
+import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.util.image.NativeImageLoader;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -41,23 +40,21 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.datavec.image.data.Image;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.*;
 
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
@@ -82,24 +79,15 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
         }
 
         ServingConfig servingConfig = ServingConfig.builder()
-                .outputDataFormat(Output.DataFormat.NUMPY)
+                .outputDataFormat(Output.DataFormat.JSON)
                 .httpPort(port)
                 .build();
 
-        OnnxConfig modelConfig = OnnxConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder()
-                                .modelType(ModelConfig.ModelType.ONNX)
-                                .modelLoadingPath(model.getAbsolutePath())
-                                .build()
-                ).build();
-
-        ModelStep modelPipelineConfig = ModelStep.builder()
-                .modelConfig(modelConfig)
-                .inputNames(Arrays.asList("input"))
+        OnnxStep modelPipelineConfig = OnnxStep.builder()
+                .path(model.getAbsolutePath())
+                .inputNames(Collections.singletonList("input"))
                 .outputNames(Arrays.asList("scores", "boxes"))
                 .build();
-
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
@@ -107,16 +95,6 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
                 .build();
 
         return new JsonObject(inferenceConfiguration.toJson());
-    }
-
-    byte[] toPrimitives(Byte[] oBytes) {
-        byte[] bytes = new byte[oBytes.length];
-
-        for (int i = 0; i < oBytes.length; i++) {
-            bytes[i] = oBytes[i];
-        }
-
-        return bytes;
     }
 
     @Test
@@ -144,40 +122,17 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
 
         assertEquals("Response failed", 200, response.getStatusCode());
 
-        File outputFile = temporary.newFile();
-        FileUtils.writeByteArrayToFile(outputFile, response.asByteArray());
-        java.util.zip.ZipFile zipFile = new java.util.zip.ZipFile(outputFile);
+        JsonObject output = new JsonObject(response.asString());
 
-        java.util.zip.ZipInputStream zs = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(response.asByteArray()));
+        assertTrue(output.containsKey("scores"));
+        assertTrue(output.containsKey("boxes"));
 
+        INDArray scores = ObjectMappers.fromJson(output.getJsonObject("scores").encode(), NDArrayOutput.class).getNdArray();
+        assertEquals(0.9539676, scores.getFloat(0), 1e-6);
+        assertArrayEquals(new long[]{1, 8840}, scores.shape());
 
-        java.util.zip.ZipEntry entry = zs.getNextEntry();
-
-        assertEquals(entry.getName(), "scores");
-
-        java.io.InputStream entryStream = zipFile.getInputStream(entry);
-
-        byte[] bytes = com.google.common.io.ByteStreams.toByteArray(entryStream);
-
-        java.util.zip.ZipEntry entry2 = zs.getNextEntry();
-
-        assertEquals(entry2.getName(), "boxes");
-
-        java.io.InputStream entryStream2 = zipFile.getInputStream(entry2);
-        byte[] bytes2 = com.google.common.io.ByteStreams.toByteArray(entryStream2);
-
-        INDArray bodyResult = Nd4j.createNpyFromByteArray(bytes);
-        assert Math.abs(bodyResult.getFloat(0) - 0.9539676) < 1e-6;
-        assertArrayEquals(new long[]{1, 8840}, bodyResult.shape());
-
-        INDArray bodyResult2 = Nd4j.createNpyFromByteArray(bytes2);
-        assert Math.abs(bodyResult2.getFloat(0) - 0.002913665) < 1e-6;
-        assertArrayEquals(new long[]{1, 17680}, bodyResult2.shape());
+        INDArray boxes = ObjectMappers.fromJson(output.getJsonObject("boxes").encode(), NDArrayOutput.class).getNdArray();
+        assertEquals(0.002913665, boxes.getFloat(0), 1e-6);
+        assertArrayEquals(new long[]{1, 17680}, boxes.shape());
     }
-
-    @After
-    public void after(TestContext context) {
-        super.after(context);
-    }
-
 }

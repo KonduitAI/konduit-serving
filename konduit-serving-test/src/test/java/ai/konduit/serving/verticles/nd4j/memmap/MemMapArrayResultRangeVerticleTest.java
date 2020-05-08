@@ -24,7 +24,6 @@ package ai.konduit.serving.verticles.nd4j.memmap;
 
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.unit.Async;
@@ -52,7 +51,6 @@ public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verti
         };
     }
 
-
     @Test(timeout = 60000)
     public void testArrayResultRange(TestContext context) {
         HttpClient httpClient = vertx.createHttpClient();
@@ -60,7 +58,7 @@ public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verti
         jsonArray.add(0);
         Async async = context.async();
 
-        HttpClientRequest req = httpClient.post(port, "localhost", "/array/range/0/2/numpy")
+        httpClient.post(port, "localhost", "/array/range/0/2/numpy")
                 .handler(handler -> {
                     handler.bodyHandler(body -> {
                         byte[] npyArray = body.getBytes();
@@ -71,20 +69,16 @@ public class MemMapArrayResultRangeVerticleTest extends ai.konduit.serving.verti
                         context.assertEquals(assertion, arrFromNumpy);
                         System.out.println(arrFromNumpy);
                         async.complete();
-
                     });
 
                     handler.exceptionHandler(exception -> {
                         if (exception.getCause() != null)
                             context.fail(exception.getCause());
                     });
-
                 }).putHeader("Content-Type", "application/json")
                 .putHeader("Content-Length", String.valueOf(0))
                 .write("");
 
         async.await();
     }
-
-
 }

@@ -18,10 +18,8 @@ package ai.konduit.serving.train;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.model.DL4JConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.Dl4jStep;
 import ai.konduit.serving.util.SchemaTypeUtils;
 import lombok.AllArgsConstructor;
 import org.datavec.api.transform.schema.Schema;
@@ -30,8 +28,8 @@ import org.deeplearning4j.util.ModelSerializer;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.rules.TemporaryFolder;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
-import org.nd4j.linalg.primitives.Pair;
 
 import java.io.File;
 import java.util.regex.Matcher;
@@ -131,19 +129,12 @@ public class TestUtils {
                 .createLoggingEndpoints(true)
                 .build();
 
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(
-                        ModelConfigType.builder().modelLoadingPath(modelSave.getAbsolutePath())
-                                .modelType(ModelConfig.ModelType.DL4J)
-                                .build()
-                ).build();
-
-        ModelStep modelPipelineStep = ModelStep.builder()
+        Dl4jStep modelPipelineStep = Dl4jStep.builder()
                 .inputName("default")
                 .inputColumnName("default", SchemaTypeUtils.columnNames(inputSchema))
                 .inputSchema("default", SchemaTypeUtils.typesForSchema(inputSchema))
                 .outputSchema("default", SchemaTypeUtils.typesForSchema(outputSchema))
-                .modelConfig(modelConfig)
+                .path(modelSave.getAbsolutePath())
                 .outputColumnName("default", SchemaTypeUtils.columnNames(outputSchema))
                 .build();
 

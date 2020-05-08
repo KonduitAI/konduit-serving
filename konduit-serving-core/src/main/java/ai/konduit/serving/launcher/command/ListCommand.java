@@ -21,7 +21,7 @@ package ai.konduit.serving.launcher.command;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.launcher.LauncherUtils;
-import ai.konduit.serving.settings.Fetcher;
+import ai.konduit.serving.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
@@ -119,7 +119,7 @@ public class ListCommand extends DefaultCommand {
         String status = "starting";
 
         try {
-            configuration = FileUtils.readFileToString(new File(Fetcher.getServersDataDir(), pid + ".data"), StandardCharsets.UTF_8);
+            configuration = FileUtils.readFileToString(new File(DirectoryFetcher.getServersDataDir(), pid + ".data"), StandardCharsets.UTF_8);
             ServingConfig servingConfig = InferenceConfiguration.fromJson(configuration).getServingConfig();
             hostAndPort = String.format("%s:%s", servingConfig.getListenHost(), servingConfig.getHttpPort());
             status = "started";

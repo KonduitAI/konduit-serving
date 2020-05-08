@@ -35,8 +35,8 @@ import org.apache.commons.io.IOUtils;
 import org.datavec.image.data.Image;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;

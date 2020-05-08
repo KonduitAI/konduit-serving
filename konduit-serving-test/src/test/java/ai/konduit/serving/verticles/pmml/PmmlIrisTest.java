@@ -26,9 +26,7 @@ import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.SchemaType;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.model.ModelConfigType;
-import ai.konduit.serving.model.PmmlConfig;
-import ai.konduit.serving.pipeline.step.PmmlStep;
+import ai.konduit.serving.pipeline.step.model.PmmlStep;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
 import io.vertx.core.AbstractVerticle;
@@ -38,11 +36,12 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.deeplearning4j.datasets.base.IrisUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
-import org.nd4j.linalg.io.ClassPathResource;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Arrays;
@@ -63,7 +62,7 @@ public class PmmlIrisTest extends BaseVerticleTest {
 
     @Test
     public void testInferenceResult(TestContext context) throws Exception {
-        List<DataSet> dataSets = org.deeplearning4j.base.IrisUtils.loadIris(0, 1);
+        List<DataSet> dataSets = IrisUtils.loadIris(0, 1);
         INDArray input = dataSets.get(0).getFeatures();
         Buffer inputBuffer = convertBatchOutput(input, Output.DataFormat.JSON);
         String extract = given().port(port)
@@ -89,17 +88,13 @@ public class PmmlIrisTest extends BaseVerticleTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        PmmlConfig pmmlConfig = PmmlConfig.builder()
-                .modelConfigType(ModelConfigType.pmml(new ClassPathResource("/inference/iris/classification/IrisTree.xml").getFile().getAbsolutePath()))
-                .build();
-
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .outputDataFormat(ai.konduit.serving.config.Output.DataFormat.JSON)
                 .build();
 
         PmmlStep pmmlPipelineStep = PmmlStep.builder()
-                .modelConfig(pmmlConfig)
+                .path(new ClassPathResource("/inference/iris/classification/IrisTree.xml").getFile().getAbsolutePath())
                 .inputName("default")
                 .inputColumnName("default", Arrays.asList(
                         "sepal_length",

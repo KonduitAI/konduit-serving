@@ -23,9 +23,7 @@ def test_server_start():
     )
 
     tensorflow_config = TensorFlowConfig(
-        model_config_type=ModelConfigType(
-            model_type="TENSORFLOW", model_loading_path="bert_mrpc_frozen.pb"
-        ),
+        path="bert_mrpc_frozen.pb",
         tensor_data_types_config=TensorDataTypesConfig(
             input_data_types={
                 "IteratorGetNext:0": "INT32",

@@ -28,7 +28,9 @@ package ai.konduit.serving.config;
  * for the server.
  *
  * @author Adam gibson
+ * @deprecated To be removed - https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 public class Input {
 
     public enum DataFormat {

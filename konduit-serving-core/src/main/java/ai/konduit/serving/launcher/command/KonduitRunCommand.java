@@ -18,15 +18,19 @@
 
 package ai.konduit.serving.launcher.command;
 
+import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.util.LogUtils;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.RunCommand;
+import io.vertx.core.json.JsonObject;
 import org.nd4j.shade.guava.base.Strings;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Collections;
+import java.util.Scanner;
 
 import static ai.konduit.serving.launcher.KonduitServingLauncher.*;
 
@@ -80,8 +84,6 @@ public class KonduitRunCommand extends RunCommand {
         }
 
         super.run();
-
-        log.info("Starting konduit server with an id of '{}'", serverId);
     }
 
     private String getServerId() {
@@ -91,6 +93,41 @@ public class KonduitRunCommand extends RunCommand {
             return lastSegment.replace("-Dserving.id=", "").trim();
         } else {
             return null;
+        }
+    }
+
+    @Override
+    protected JsonObject getJsonFromFileOrString(String jsonOrYamlFileOrString, String argName) {
+        if (jsonOrYamlFileOrString != null) {
+            try (Scanner scanner = new Scanner(new File(jsonOrYamlFileOrString), "UTF-8").useDelimiter("\\A")) {
+                return readConfiguration(scanner.next());
+            } catch (FileNotFoundException e) {
+                return readConfiguration(jsonOrYamlFileOrString);
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Parse the given configuration yaml/json string to {@link JsonObject}. The
+     * configuration should be parsable to {@link InferenceConfiguration}.
+     *
+     * @param configurationString given configuration string
+     * @return Read configuration to JsonObject. Returns null on failure.
+     */
+    private JsonObject readConfiguration(String configurationString) {
+        try {
+            return InferenceConfiguration.fromJson(configurationString).toJsonObject();
+        } catch (Exception jsonProcessingErrors) {
+            try {
+                return InferenceConfiguration.fromYaml(configurationString).toJsonObject();
+            } catch (Exception yamlProcessingErrors) {
+                log.error("Given configuration: {} does not contain a valid JSON/YAML object", configurationString);
+                log.error("\n\nErrors while processing as a json string:", jsonProcessingErrors);
+                log.error("\n\nErrors while processing as a yaml string:", yamlProcessingErrors);
+                return null;
+            }
         }
     }
 }

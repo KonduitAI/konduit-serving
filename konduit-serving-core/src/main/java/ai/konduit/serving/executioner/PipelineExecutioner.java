@@ -27,9 +27,7 @@ import ai.konduit.serving.config.Input;
 import ai.konduit.serving.config.Output;
 import ai.konduit.serving.config.Output.PredictionType;
 import ai.konduit.serving.input.conversion.ConverterArgs;
-import ai.konduit.serving.model.ModelConfig;
 import ai.konduit.serving.model.TensorDataType;
-import ai.konduit.serving.model.TensorDataTypesConfig;
 import ai.konduit.serving.output.adapter.*;
 import ai.konduit.serving.output.types.BatchOutput;
 import ai.konduit.serving.output.types.NDArrayOutput;
@@ -38,6 +36,7 @@ import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.handlers.converter.JsonArrayMapConverter;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.PmmlStep;
 import ai.konduit.serving.util.ArrowUtils;
 import ai.konduit.serving.util.JsonSerdeUtils;
 import ai.konduit.serving.util.ObjectMappers;
@@ -60,7 +59,7 @@ import org.datavec.arrow.recordreader.ArrowRecord;
 import org.datavec.arrow.recordreader.ArrowWritableRecordBatch;
 import org.deeplearning4j.zoo.util.Labels;
 import org.nd4j.arrow.ArrowSerde;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.serde.binary.BinarySerde;
@@ -83,26 +82,31 @@ import java.util.zip.ZipOutputStream;
  * the user.
  *
  * @author Adam Gibson
+ * @deprecated To be replaced by {@link ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor} - see https://github.com/KonduitAI/konduit-serving/issues/298
  */
 @Slf4j
+@Deprecated
 public class PipelineExecutioner implements Closeable {
 
+    protected List<String> inputNames;
+    protected List<String> outputNames;
+    public Map<String, TensorDataType> inputDataTypes;
+    public Map<String, TensorDataType> outputDataTypes;
 
-    protected List<String> inputNames, outputNames;
-    protected Map<String, TensorDataType> inputDataTypes, outputDataTypes;
     @Getter
     protected Map<String, ConverterArgs> args;
     @Getter
-    protected Labels yoloLabels, ssdLabels;
+    protected Labels yoloLabels;
+    @Getter
+    protected Labels ssdLabels;
     //the output type for the response: default json
     @Getter
     protected InferenceConfiguration config;
     @Getter
     private Pipeline pipeline;
-    private TensorDataTypesConfig tensorDataTypesConfig;
     private Schema inputSchema = null;
     private Schema outputSchema = null;
-    private ModelConfig modelConfig = null;
+    private ModelStep modelStep = null;
     private ObjectDetectionConfig objectDetectionConfig = null;
     @Getter
     private static JsonArrayMapConverter mapConverter = new JsonArrayMapConverter();
@@ -139,16 +143,13 @@ public class PipelineExecutioner implements Closeable {
 
             }
             out.flush();
-            out.close();
 
             return Buffer.buffer(baos.toByteArray());
-
         } catch (IOException e) {
             log.error("Unable to zip buffer", e);
         }
 
         return null;
-
     }
 
     /**
@@ -275,10 +276,9 @@ public class PipelineExecutioner implements Closeable {
 
             // Specific PipelineStep types require special treatment.
             if (pipelineStep instanceof ModelStep) {
-                ModelStep modelPipelineStepConfig = (ModelStep) pipelineStep;
-                modelConfig = modelPipelineStepConfig.getModelConfig();
-                tensorDataTypesConfig = modelConfig.getTensorDataTypesConfig();
+                modelStep = (ModelStep) pipelineStep;
             }
+
             if (pipelineStep instanceof ImageLoadingStep) {
                 ImageLoadingStep imageLoadingStepConfig = (ImageLoadingStep) pipelineStep;
                 objectDetectionConfig = imageLoadingStepConfig.getObjectDetectionConfig();
@@ -287,12 +287,11 @@ public class PipelineExecutioner implements Closeable {
 
         initDataTypes();
 
-        if (modelConfig != null && modelConfig.getModelConfigType().getModelType() != ModelConfig.ModelType.PMML
+        if (modelStep != null && !(modelStep instanceof PmmlStep)
                 && (inputNames == null || inputNames.isEmpty())) {
             throw new IllegalStateException(
                     "No inputs defined! Please specify input names for your verticle via the model configuration.");
         }
-
     }
 
     public List<String> inputNames() {
@@ -595,7 +594,7 @@ public class PipelineExecutioner implements Closeable {
      * @param input the input object
      * @param transformProcess the {@link TransformProcess} to use
      * @param conversionSchema The {@link Schema} to use
-     * @return
+     * @return the DataVec type input records.
      */
     public static Record[] createInput(Object input,TransformProcess transformProcess,Schema conversionSchema) {
         Preconditions.checkNotNull(input, "Input data was null!");
@@ -609,7 +608,7 @@ public class PipelineExecutioner implements Closeable {
             }
 
             JsonArray jsonArray = new JsonArray(inputJson);
-            ArrowWritableRecordBatch convert = null;
+            ArrowWritableRecordBatch convert;
             try {
                 convert = mapConverter.convert(conversionSchema, jsonArray, transformProcess);
             } catch (Exception e) {
@@ -737,22 +736,20 @@ public class PipelineExecutioner implements Closeable {
         } catch (Exception e) {
             ctx.fail(e);
         }
-
     }
 
     private void initDataTypes() {
-        if (tensorDataTypesConfig != null && tensorDataTypesConfig.getInputDataTypes() != null) {
-            Map<String, TensorDataType> types = tensorDataTypesConfig.getInputDataTypes();
+        if (modelStep != null && modelStep.getInputDataTypes() != null) {
+            Map<String, TensorDataType> types = modelStep.getInputDataTypes();
             if (types != null && types.size() >= 1 && inputDataTypes == null)
                 inputDataTypes = initDataTypes(inputNames, types, "default");
         }
 
-        if (tensorDataTypesConfig != null && tensorDataTypesConfig.getOutputDataTypes() != null) {
-            Map<String, TensorDataType> types = tensorDataTypesConfig.getOutputDataTypes();
+        if (modelStep != null && modelStep.getOutputDataTypes() != null) {
+            Map<String, TensorDataType> types = modelStep.getOutputDataTypes();
             if (types != null && types.size() >= 1 && outputDataTypes == null)
                 outputDataTypes = initDataTypes(outputNames, types, "output");
         }
-
     }
 
     private Map<String, TensorDataType> initDataTypes(List<String> namesValidation,

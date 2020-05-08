@@ -35,7 +35,7 @@ import org.jpmml.evaluator.*;
 import org.jpmml.evaluator.Value;
 import org.jpmml.evaluator.clustering.ClusterAffinityDistribution;
 import org.jpmml.evaluator.support_vector_machine.DistanceDistribution;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 

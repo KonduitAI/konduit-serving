@@ -19,7 +19,7 @@
 package ai.konduit.serving.launcher.command;
 
 import ai.konduit.serving.launcher.LauncherUtils;
-import ai.konduit.serving.settings.Fetcher;
+import ai.konduit.serving.settings.DirectoryFetcher;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Argument;
 import io.vertx.core.cli.annotations.Description;
@@ -43,7 +43,7 @@ import java.io.File;
         "--------------")
 public class InspectCommand extends DefaultCommand {
 
-    String id;
+    private String id;
 
     @Argument(index = 0, argName = "server-id")
     @Description("Konduit server id")
@@ -56,7 +56,7 @@ public class InspectCommand extends DefaultCommand {
         if(LauncherUtils.isProcessExists(id)) {
             try {
                 out.format("\nKonduit server with the id '%s' is initialized with the following configuration: \n\n%s\n\n", id,
-                        FileUtils.readFileToString(new File(Fetcher.getServersDataDir(), LauncherUtils.getPidFromServerId(id) + ".data"), StandardCharsets.UTF_8));
+                        FileUtils.readFileToString(new File(DirectoryFetcher.getServersDataDir(), LauncherUtils.getPidFromServerId(id) + ".data"), StandardCharsets.UTF_8));
             } catch (Exception exception) {
                 log.error("Failed to read configuration file", exception);
             }

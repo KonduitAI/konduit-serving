@@ -45,7 +45,18 @@ public class DeployKonduitServing {
     }
 
     public static void deployInference(DeploymentOptions deploymentOptions, Handler<AsyncResult<InferenceConfiguration>> eventHandler) {
-        deployInference(new VertxOptions().setMaxEventLoopExecuteTime(120).setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS),
+        MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
+                .setMicrometerRegistry(new PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
+                .setPrometheusOptions(new VertxPrometheusOptions()
+                        .setEnabled(true));
+
+        log.info("Setup micro meter options.");
+        BackendRegistries.setupBackend(micrometerMetricsOptions);
+
+        deployInference(new VertxOptions()
+                        .setMaxEventLoopExecuteTime(120)
+                        .setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS)
+                        .setMetricsOptions(micrometerMetricsOptions),
                 deploymentOptions, eventHandler);
     }
 

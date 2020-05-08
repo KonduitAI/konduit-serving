@@ -24,12 +24,13 @@ package ai.konduit.serving.config;
 
 import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.metrics.MetricType;
-import ai.konduit.serving.settings.Fetcher;
+import ai.konduit.serving.settings.DirectoryFetcher;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -43,6 +44,12 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({
+        "extraStartArgs",
+        "extraJarArgs",
+        "jarPath",
+        "configPath"
+})
 public class ServingConfig implements Serializable, TextConfig {
 
     @Builder.Default
@@ -55,7 +62,7 @@ public class ServingConfig implements Serializable, TextConfig {
     private Output.DataFormat outputDataFormat = Output.DataFormat.JSON;
 
     @Builder.Default
-    private String uploadsDirectory = Fetcher.getFileUploadsDir().getAbsolutePath();
+    private String uploadsDirectory = DirectoryFetcher.getFileUploadsDir().getAbsolutePath();
 
     @Builder.Default
     private boolean logTimings = false;

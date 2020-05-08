@@ -29,7 +29,7 @@ import ai.konduit.serving.util.ImagePermuter;
 import io.vertx.core.buffer.Buffer;
 import org.datavec.api.writable.NDArrayWritable;
 import org.datavec.api.writable.Writable;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.serde.binary.BinarySerde;
 

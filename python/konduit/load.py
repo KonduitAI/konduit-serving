@@ -3,6 +3,7 @@ import logging
 import os
 import yaml
 
+from .inference import *
 from .client import Client
 from .server import Server
 from .utils import to_unix_path, update_dict_with_unix_paths
@@ -193,8 +194,10 @@ def get_step(step_config):
         step = get_python_step(step_config)
     elif step_type in MODEL_TYPES:
         step = get_model_step(step_config, step_type)
-    elif step_type == 'IMAGE_LOADING':
+    elif step_type == 'IMAGE':
         step = get_image_load_step(step_config)
+    elif step_type == "WORDPIECE_TOKENIZER":
+        step = get_wordpiece_tokenizer_step(step_config)
     else:
         raise Exception("Step type of type " + step_type + " currently not supported.")
     return step
@@ -206,9 +209,13 @@ def get_python_step(step_config):
     :param step_config: python dictionary with properties to create a PipelineStep
     :return: konduit.inference.PythonStep instance.
     """
-    python_config = PythonConfig(**step_config)
-    step = PythonStep().step(python_config)
-    return step
+
+    python_step = PythonStep()
+    for key, python_config in step_config:
+        python_step.step(key, PythonConfig(**python_config))
+
+    return python_step
+
 
 def get_image_load_step(step_config):
     """Get a ImageLoadingStep from a configuration object
@@ -220,6 +227,16 @@ def get_image_load_step(step_config):
     return step
 
 
+def get_wordpiece_tokenizer_step(step_config):
+    """Get a BertStep from a configuration object
+
+    :param step_config: python dictionary with properties to create the BertStep
+    :return: konduit.inference.BertStep instance.
+    """
+    step = WordPieceTokenizerStep(**step_config)
+    return step
+
+
 def get_model_step(step_config, step_type):
     """Get a ModelStep from a configuration object
 
@@ -227,67 +244,28 @@ def get_model_step(step_config, step_type):
     :param step_type: type of the step (TENSORFLOW, KERAS, DL4J, PMML or SAMEDIFF)
     :return: konduit.inference.ModelStep instance.
     """
-    model_config_type = ModelConfigType(
-        model_type=step_type,
-        model_loading_path=pop_data(step_config, "model_loading_path"),
-    )
+
     if (
         step_type == "TENSORFLOW"
     ):  # TF has to extra properties, all others are identical
-        model_config = TensorFlowConfig(
-            model_config_type=model_config_type,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
+        model_step = TensorFlowStep(**step_config)
     elif (
             step_type == "KERAS"
     ):  # TF has to extra properties, all others are identical
-        model_config = KerasConfig(
-            model_config_type=model_config_type,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
+        model_step = KerasStep(**step_config)
     elif (
             step_type == "DL4J"
     ):  # TF has to extra properties, all others are identical
-        model_config = DL4JConfig(
-            model_config_type=model_config_type,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
+        model_step = Dl4jStep(**step_config)
     elif (
             step_type == "SAMEDIFF"
     ):  # TF has to extra properties, all others are identical
-        model_config = SameDiffConfig(
-            model_config_type=model_config_type,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
+        model_step = SameDiffStep(**step_config)
     elif (
             step_type == "PMML"
     ):  # TF has to extra properties, all others are identical
-        model_config = PmmlConfig(
-            model_config_type=model_config_type,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
+        model_step = PmmlStep(**step_config)
     else:
-        model_config = ModelConfig(
-            model_config_type=model_config_type,
-            tensor_data_types_config=get_tensor_data_types(step_config),
-        )
-    step_config["model_config"] = model_config
-    step_config = extract_parallel_inference(step_config)
-    step = ModelStep(**step_config)
-    return step
+        model_step = ModelStep(**step_config)
 
-
-def get_tensor_data_types(step_config):
-    input_data_types = pop_data(step_config, "input_data_types")
-    output_data_types = pop_data(step_config, "output_data_types")
-    return TensorDataTypesConfig(
-        input_data_types=input_data_types, output_data_types=output_data_types
-    )
-
-
-def extract_parallel_inference(step_config):
-    pi_config = pop_data(step_config, "parallel_inference_config")
-    if pi_config:
-        pic = ParallelInferenceConfig(**pi_config)
-        step_config["parallel_inference_config"] = pic
-    return step_config
+    return model_step

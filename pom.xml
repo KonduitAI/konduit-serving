@@ -39,6 +39,10 @@
         <module>konduit-serving-distro-bom</module>
         <module>konduit-serving-orchestration</module>
         <module>konduit-serving-tfjava</module>
+        <module>konduit-serving-pipeline</module>
+        <module>konduit-serving-models</module>
+        <module>konduit-serving-io</module>
+        <module>konduit-serving-data</module>
     </modules>
 
     <name>konduit-serving</name>
@@ -148,10 +152,16 @@
         <sysout-over-slf4j.version>1.0.2</sysout-over-slf4j.version>
         <guava.version>20.0</guava.version>
         <maven-git-commit-plugin.version>2.2.2</maven-git-commit-plugin.version>
+        <fastutil.version>8.1.1</fastutil.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>it.unimi.dsi</groupId>
+                <artifactId>fastutil</artifactId>
+                <version>${fastutil.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -823,6 +833,12 @@
         </profile>
         <profile>
             <id>gpu</id>
+            <activation>
+                <property>
+                    <name>chip</name>
+                    <value>gpu</value>
+                </property>
+            </activation>
             <modules>
                 <module>konduit-serving-gpu</module>
             </modules>

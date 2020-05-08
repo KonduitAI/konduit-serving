@@ -32,9 +32,9 @@ import org.datavec.api.writable.Writable;
 import org.datavec.image.data.ImageWritable;
 import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.transform.ImageTransformProcess;
-import org.nd4j.base.Preconditions;
+import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.primitives.Pair;
 
 import java.io.IOException;
 import java.util.List;

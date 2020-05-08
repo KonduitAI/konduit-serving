@@ -24,12 +24,9 @@ package ai.konduit.serving.verticles.ndarray;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.model.DL4JConfig;
-import ai.konduit.serving.model.ModelConfig;
-import ai.konduit.serving.model.ModelConfigType;
 import ai.konduit.serving.output.types.ClassifierOutput;
-import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.model.Dl4jStep;
 import ai.konduit.serving.util.ObjectMappers;
 import ai.konduit.serving.verticles.BaseVerticleTest;
 import ai.konduit.serving.verticles.inference.InferenceVerticle;
@@ -40,9 +37,9 @@ import io.vertx.core.json.JsonObject;
 import org.datavec.api.transform.schema.Schema;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.primitives.Pair;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.File;
@@ -92,24 +89,23 @@ public abstract class BaseDl4JVerticalTest extends BaseVerticleTest {
         outputSchemaBuilder.addColumnDouble("virginica");
         Schema outputSchema = outputSchemaBuilder.build();
 
-
         Nd4j.getRandom().setSeed(42);
-
-        ModelConfig modelConfig = DL4JConfig.builder()
-                .modelConfigType(ModelConfigType.dl4j(modelSave.getAbsolutePath()))
-                .build();
 
         ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
                 .build();
 
-        PipelineStep modelPipelineStep = new ModelStep(modelConfig)
-                .setInput(inputSchema).setOutput(outputSchema);
+        ModelStep modelPipelineStep = Dl4jStep.builder()
+                .path(modelSave.getAbsolutePath())
+                .build()
+                .setInput(inputSchema)
+                .setOutput(outputSchema);
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .step(modelPipelineStep)
                 .build();
+
         return new JsonObject(inferenceConfiguration.toJson());
     }
 

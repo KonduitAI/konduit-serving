@@ -25,12 +25,20 @@ package ai.konduit.serving;
 import ai.konduit.serving.config.MemMapConfig;
 import ai.konduit.serving.config.ServingConfig;
 import ai.konduit.serving.config.TextConfig;
+import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.model.TensorDataType;
 import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.step.ModelStep;
+import ai.konduit.serving.pipeline.step.PythonStep;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.*;
+import org.nd4j.shade.jackson.annotation.JsonAlias;
+import org.nd4j.shade.jackson.annotation.JsonSetter;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -40,11 +48,47 @@ public class InferenceConfiguration implements Serializable, TextConfig {
 
     @Singular
     private List<PipelineStep> steps;
+
+    @JsonAlias({"serving"})
     private ServingConfig servingConfig;
+
     private MemMapConfig memMapConfig;
 
+    @JsonSetter("steps")
+    public void stepSetup(List<PipelineStep> steps) throws Exception {
+        for(PipelineStep step : steps) {
+            if(step instanceof PythonStep) {
+                PythonStep pythonStep = (PythonStep) step;
+                Map<String, PythonConfig> pythonConfigs = pythonStep.getPythonConfigs();
+
+                if (pythonConfigs != null) {
+                    for (String key : pythonConfigs.keySet()) {
+                        if (pythonStep.getInputNames() == null || !pythonStep.getInputNames().contains(key))
+                            pythonStep.step(key, pythonConfigs.get(key));
+                    }
+                }
+            }
+
+            if(step instanceof ModelStep) {
+                ModelStep modelStep = (ModelStep) step;
+                Map<String, TensorDataType> inputDataTypes = modelStep.getInputDataTypes();
+                Map<String, TensorDataType> outputDataTypes = modelStep.getOutputDataTypes();
+
+                if(inputDataTypes != null && !inputDataTypes.isEmpty()) {
+                    modelStep.setInputNames(new ArrayList<>(inputDataTypes.keySet()));
+                }
+
+                if(outputDataTypes != null && !outputDataTypes.isEmpty()) {
+                    modelStep.setOutputNames(new ArrayList<>(outputDataTypes.keySet()));
+                }
+            }
+        }
+
+        this.steps = steps;
+    }
+
     /**
-     * Create a configuration from  a yaml string
+     * Create a configuration from a yaml string
      *
      * @param yaml the yaml to create from
      * @return the initialized object from the yaml content

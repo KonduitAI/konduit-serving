@@ -126,6 +126,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-pipeline</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>systems-platform</artifactId>
             <version>${javacpp.version}</version>
@@ -169,7 +175,6 @@
             <artifactId>vertx-health-check</artifactId>
             <version>${vertx-stack.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.arrow</groupId>
             <artifactId>arrow-vector</artifactId>
@@ -268,7 +273,6 @@
             <artifactId>deeplearning4j-modelimport</artifactId>
             <version>${datavec.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -283,8 +287,12 @@
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-arrow</artifactId>
+       </dependency>
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-nlp</artifactId>
+            <version>${dl4j.version}</version>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -296,12 +304,5 @@
             <artifactId>sysout-over-slf4j</artifactId>
             <version>${sysout-over-slf4j.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.fusesource.jansi</groupId>
-            <artifactId>jansi</artifactId>
-            <version>1.18</version>
-        </dependency>
     </dependencies>
-
-
 </project>

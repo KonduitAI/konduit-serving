@@ -18,11 +18,7 @@ def test_json_compare():
         http_port=1300, output_data_format="NUMPY"
     )
 
-    tensorflow_config = TensorFlowConfig(
-        model_config_type=ModelConfigType(
-            model_type="TENSORFLOW", model_loading_path="model.pb"
-        )
-    )
+    tensorflow_config = TensorFlowConfig(path="model.pb")
 
     model_pipeline_step = ModelStep(
         model_config=tensorflow_config,

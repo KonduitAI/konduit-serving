@@ -8,10 +8,8 @@ import re
 os_choices = [
     "windows-x86_64",
     "linux-x86_64",
-    "linux-x86_64-gpu",
     "macosx-x86_64",
     "linux-armhf",
-    "windows-x86_64-gpu",
 ]
 
 
@@ -23,9 +21,7 @@ def get_platform():
     elif sys.platform.startswith("linux"):
         return "linux-x86_64"
     else:
-        raise Exception(
-            "Please specify '--os'. Possible values are: " + os_choices.__str__()
-        )
+        raise RuntimeError("Please specify '--os'. Possible values are: " + os_choices.__str__())
 
 
 if __name__ == "__main__":
@@ -40,7 +36,6 @@ if __name__ == "__main__":
         "--os",
         type=str,
         default=get_platform(),
-        choices=os_choices,
         help="the javacpp.platform to use: Possible values are: " + os_choices.__str__(),
     )
 
@@ -52,6 +47,14 @@ if __name__ == "__main__":
         help="whether to bundle Python, PMML, both or neither. Python bundling is"
         + "not encouraged with ARM, and PMML bundling is not encouraged if agpl"
         + "license is an issue.",
+    )
+
+    parser.add_argument(
+        "--chip",
+        type=str,
+        default="cpu",
+        choices=["cpu", "gpu", "arm"],
+        help="Specifies the chip architecture which could be cpu, gpu (CUDA) or arm."
     )
 
     parser.add_argument(
@@ -74,24 +77,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    platform = args.os.replace("-gpu", "")
-    command = [
-        args.source + os.sep + "mvnw",
-        "-Puberjar,tensorflow",
-        "clean",
-        "install",
-        "-Dmaven.test.skip=true",
-        "-Djavacpp.platform=" + platform,
-    ]
+    command = [args.source + os.sep + "mvnw", "-Puberjar,tensorflow", "clean", "install", "-Dmaven.test.skip=true",
+               "-Djavacpp.platform=" + args.os, "-Dchip={}".format(args.chip)]
 
-    if "arm" in args.os:
-        arch = "arm"
-    elif "gpu" in args.os:
-        arch = "gpu"
-    else:
-        arch = "cpu"
-
-    command.append("-Dchip={}".format(arch))
+    if args.chip == "gpu":
+        command.append("-Pgpu,intel")
 
     if args.spin == "all" or args.spin == "python":
         command.append("-Ppython")
@@ -113,30 +103,18 @@ if __name__ == "__main__":
     subprocess.call(command, shell=sys.platform.startswith("win"), cwd=args.source)
 
     # Copy the jar file to the path specified by the "target" argument
-    if arch != "gpu":
-        copyfile(
-            os.path.join(
-                args.source,
-                "konduit-serving-uberjar",
-                "target",
-                "konduit-serving-uberjar-{}-{}-{}-{}.jar".format(
-                    version[0], args.spin, args.os, arch
-                ),
+
+    copyfile(
+        os.path.join(
+            args.source,
+            "konduit-serving-uberjar",
+            "target",
+            "konduit-serving-uberjar-{}-{}-{}-{}.jar".format(
+                version[0], args.spin, args.os, args.chip
             ),
-            os.path.join(args.source, args.target),
-        )
-    else:
-        copyfile(
-            os.path.join(
-                args.source,
-                "konduit-serving-uberjar",
-                "target",
-                "konduit-serving-uberjar-{}-{}-{}.jar".format(
-                    version[0], args.spin, args.os
-                ),
-            ),
-            os.path.join(args.source, args.target),
-        )
+        ),
+        os.path.join(args.source, args.target),
+    )
 
     # Copy the built jar file to the "python/tests" folder if it exists.
     if os.path.isdir(os.path.join(args.source, "python", "tests")):
