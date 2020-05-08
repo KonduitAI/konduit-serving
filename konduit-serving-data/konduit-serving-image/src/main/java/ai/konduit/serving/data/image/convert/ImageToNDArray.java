@@ -15,9 +15,9 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.nd4j.common.base.Preconditions;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
+import java.nio.*;
 import java.util.Arrays;
+import java.util.function.IntToDoubleFunction;
 
 import static org.bytedeco.opencv.global.opencv_imgproc.resize;
 
@@ -65,6 +65,9 @@ public class ImageToNDArray {
 
         ByteBuffer bb = toFloatBuffer(m, config);
 
+        if(config.dataType() != NDArrayType.FLOAT)
+            bb = cast(bb, NDArrayType.FLOAT, config.dataType());
+
 //        float[] temp = new float[100];
 //        bb.asFloatBuffer().get(temp);
 //        System.out.println(Arrays.toString(temp));
@@ -78,7 +81,7 @@ public class ImageToNDArray {
             shape = config.includeMinibatchDim() ? new long[]{1, outH, outW, ch} : new long[]{outH, outW, ch};
         }
 
-        SerializedNDArray arr = new SerializedNDArray(NDArrayType.FLOAT, shape, bb);
+        SerializedNDArray arr = new SerializedNDArray(config.dataType(), shape, bb);
 
         return NDArray.create(arr);
     }
@@ -117,9 +120,7 @@ public class ImageToNDArray {
         Preconditions.checkState(config.channels() == NDChannels.RGB || config.channels() == NDChannels.BGR,
                 "Only RGB and BGR conversion implement so far");
 
-
         boolean direct = !Loader.getPlatform().startsWith("android");
-        Indexer mIdx = m.createIndexer(direct);
 
         //By default, Mat stores values in channels first format - CHW
         int h = m.rows();
@@ -185,8 +186,111 @@ public class ImageToNDArray {
             throw new RuntimeException("Not yet implemented: " + imgIdx.getClass());
         }
 
-
         return bb;
+    }
+
+    //TODO This isn't the most efficient or eregant approach, but it should work OK for images
+    protected static ByteBuffer cast(ByteBuffer from, NDArrayType fromType, NDArrayType toType){
+        if(fromType == toType)
+            return from;
+
+        boolean direct = !Loader.getPlatform().startsWith("android");
+
+
+        IntToDoubleFunction f;
+
+        int length;
+        switch (fromType){
+            case DOUBLE:
+                DoubleBuffer db = from.asDoubleBuffer();
+                length = db.limit();
+                f = db::get;
+                break;
+            case FLOAT:
+                FloatBuffer fb = from.asFloatBuffer();
+                length = fb.limit();
+                f = fb::get;
+                break;
+            case INT64:
+                LongBuffer lb = from.asLongBuffer();
+                length = lb.limit();
+                f = i -> (double)lb.get();
+                break;
+            case INT32:
+                IntBuffer ib = from.asIntBuffer();
+                length = ib.limit();
+                f = ib::get;
+                break;
+            case INT16:
+                ShortBuffer sb = from.asShortBuffer();
+                length = sb.limit();
+                f = sb::get;
+                break;
+            case INT8:
+                length = from.limit();
+                f = from::get;
+                break;
+            case FLOAT16:
+            case BFLOAT16:
+            case UINT64:
+            case UINT32:
+            case UINT16:
+            case UINT8:
+            case BOOL:
+            case UTF8:
+            default:
+                throw new UnsupportedOperationException("Conversion to " + fromType + " not supported or not yet implemented");
+        }
+
+        int bytesLength = toType.width() * length;
+        ByteBuffer bb = direct ? ByteBuffer.allocateDirect(bytesLength) : ByteBuffer.allocate(bytesLength);
+
+        switch (toType){
+            case DOUBLE:
+                DoubleBuffer db = bb.asDoubleBuffer();
+                for( int i=0; i<length; i++ )
+                    db.put(f.applyAsDouble(i));
+                break;
+            case FLOAT:
+                FloatBuffer fb = bb.asFloatBuffer();
+                for( int i=0; i<length; i++ )
+                    fb.put((float)f.applyAsDouble(i));
+                break;
+            case INT64:
+                LongBuffer lb = bb.asLongBuffer();
+                for( int i=0; i<length; i++ )
+                    lb.put((long)f.applyAsDouble(i));
+                break;
+            case INT32:
+                IntBuffer ib = bb.asIntBuffer();
+                for( int i=0; i<length; i++ )
+                    ib.put((int)f.applyAsDouble(i));
+                break;
+            case INT16:
+                ShortBuffer sb = from.asShortBuffer();
+                for( int i=0; i<length; i++ )
+                    sb.put((short)f.applyAsDouble(i));
+                break;
+            case INT8:
+                for( int i=0; i<length; i++ )
+                    bb.put((byte)f.applyAsDouble(i));
+                break;
+            case FLOAT16:
+            case BFLOAT16:
+            case UINT64:
+            case UINT32:
+            case UINT16:
+            case UINT8:
+            case BOOL:
+            case UTF8:
+            default:
+                throw new UnsupportedOperationException("Conversion to " + fromType + " to " + toType + " not supported or not yet implemented");
+        }
+        return bb;
+    }
+
+    private static abstract class DoubleGetter {
+        public abstract double get(int idx);
     }
 
 }
