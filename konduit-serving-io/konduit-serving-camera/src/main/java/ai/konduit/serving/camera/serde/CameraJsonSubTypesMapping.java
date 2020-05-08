@@ -1,7 +1,6 @@
 package ai.konduit.serving.camera.serde;
 
 import ai.konduit.serving.camera.step.capture.FrameCapturePipelineStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.serde.JsonSubTypesMapping;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
