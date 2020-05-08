@@ -2,6 +2,133 @@ import enum
 from konduit.json_utils import empty_type_dict, DictWrapper, ListWrapper
 
 
+class ColumnDistribution(object):
+
+    _normalizerType_enum = enum.Enum(
+        "_normalizerType_enum",
+        "STANDARDIZE MIN_MAX IMAGE_MIN_MAX IMAGE_VGG16 MULTI_STANDARDIZE MULTI_MIN_MAX MULTI_HYBRID CUSTOM",
+        module=__name__,
+    )
+    _types_map = {
+        "mean": {"type": float, "subtype": None},
+        "min": {"type": float, "subtype": None},
+        "max": {"type": float, "subtype": None},
+        "standardDeviation": {"type": float, "subtype": None},
+        "normalizerType": {"type": str, "subtype": None},
+    }
+    _formats_map = {}
+
+    def __init__(
+        self,
+        mean=None,
+        min=None,
+        max=None,
+        standard_deviation=None,
+        normalizer_type=None,
+    ):
+        self.__mean = mean
+        self.__min = min
+        self.__max = max
+        self.__standard_deviation = standard_deviation
+        self.__normalizer_type = normalizer_type
+
+    def _get_mean(self):
+        return self.__mean
+
+    def _set_mean(self, value):
+        if not isinstance(value, float):
+            raise TypeError("mean must be float")
+        self.__mean = value
+
+    mean = property(_get_mean, _set_mean)
+
+    def _get_min(self):
+        return self.__min
+
+    def _set_min(self, value):
+        if not isinstance(value, float):
+            raise TypeError("min must be float")
+        self.__min = value
+
+    min = property(_get_min, _set_min)
+
+    def _get_max(self):
+        return self.__max
+
+    def _set_max(self, value):
+        if not isinstance(value, float):
+            raise TypeError("max must be float")
+        self.__max = value
+
+    max = property(_get_max, _set_max)
+
+    def _get_standard_deviation(self):
+        return self.__standard_deviation
+
+    def _set_standard_deviation(self, value):
+        if not isinstance(value, float):
+            raise TypeError("standardDeviation must be float")
+        self.__standard_deviation = value
+
+    standard_deviation = property(_get_standard_deviation, _set_standard_deviation)
+
+    def _get_normalizer_type(self):
+        return self.__normalizer_type
+
+    def _set_normalizer_type(self, value):
+        if not isinstance(value, str):
+            raise TypeError("normalizerType must be str")
+        if value in self._normalizerType_enum.__members__:
+            self.__type = value
+        else:
+            raise ValueError("Value {} not in _normalizerType_enum list".format(value))
+
+    normalizer_type = property(_get_normalizer_type, _set_normalizer_type)
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        if self.__mean is not None:
+            d["mean"] = (
+                self.__mean.as_dict()
+                if hasattr(self.__mean, "as_dict")
+                else self.__mean
+            )
+        if self.__min is not None:
+            d["min"] = (
+                self.__min.as_dict() if hasattr(self.__min, "as_dict") else self.__min
+            )
+        if self.__max is not None:
+            d["max"] = (
+                self.__max.as_dict() if hasattr(self.__max, "as_dict") else self.__max
+            )
+        if self.__standard_deviation is not None:
+            d["standardDeviation"] = (
+                self.__standard_deviation.as_dict()
+                if hasattr(self.__standard_deviation, "as_dict")
+                else self.__standard_deviation
+            )
+        if self.__normalizer_type is not None:
+            d["normalizerType"] = (
+                self.__normalizer_type.as_dict()
+                if hasattr(self.__normalizer_type, "as_dict")
+                else self.__normalizer_type
+            )
+        return d
+
+
+class MetricsConfig(object):
+
+    _types_map = {}
+    _formats_map = {}
+
+    def __init__(self):
+        pass
+
+    def as_dict(self):
+        d = empty_type_dict(self)
+        return d
+
+
 class MultiLabelMetricsConfig(object):
 
     _types_map = {
@@ -888,11 +1015,11 @@ class ServingConfig(object):
     def __init__(
         self,
         http_port=None,
-        listen_host=None,
+        listen_host="localhost",
         output_data_format="NUMPY",
         uploads_directory="file-uploads/",
-        log_timings=None,
-        create_logging_endpoints=None,
+        log_timings=False,
+        create_logging_endpoints=False,
         metrics_configurations=None,
         metric_types=None,
     ):

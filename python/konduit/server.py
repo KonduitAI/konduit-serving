@@ -1,11 +1,13 @@
 import json
 import logging
+import sys
 import os
 import re
 import requests
 import signal
 import subprocess
-from konduit import KONDUIT_DIR
+import uuid
+from konduit import KONDUIT_JAR_DIR
 from konduit.base_inference import PipelineStep
 from konduit.client import Client
 from konduit.inference import InferenceConfiguration
@@ -56,7 +58,7 @@ class Server(object):
         self.port = -1
         if jar_path is None:
             jar_path = os.getenv(
-                "KONDUIT_JAR_PATH", os.path.join(KONDUIT_DIR, "konduit.jar")
+                "KONDUIT_JAR_PATH", os.path.join(KONDUIT_JAR_DIR, "konduit.jar")
             )
 
         if inference_config:
@@ -90,6 +92,8 @@ class Server(object):
         else:
             self.extra_jar_args = extra_jar_args
 
+        self.server_id = uuid.uuid4().hex[:8]
+
     def get_client(self,
                    input_data_format=None,
                    prediction_type=None,
@@ -108,8 +112,11 @@ class Server(object):
 
         port = self.port
         host = serving_config._get_listen_host()
-        if not host.startswith("http://"):
-            host = "http://" + host
+        if not host:
+            host = "http://localhost"
+        else:
+            if not host.startswith("http://"):
+                host = "http://" + host
 
         if not input_data_format:
             input_data_format = "NUMPY"
@@ -130,24 +137,16 @@ class Server(object):
             output_names=output_names,
         )
 
-    def start(self, kill_existing_server=True):
+    def start(self, server_id=None):
         """Start the Konduit server
 
-        :param kill_existing_server: whether to kill any previously started server if it wasn't stop.
+        :param server_id the server will be started with this id.
         """
-        if kill_existing_server:
-            if os.path.exists(self.pid_file_path):
-                with open(self.pid_file_path, "rb") as pid_file:
-                    pid = int(pid_file.readline().strip())
-                    try:
-                        stop_server_by_pid(pid)
-                    except OSError:
-                        logging.debug(
-                            "Attempt to kill existing process by pid: '{}' failed. The process might not "
-                            "exist. ".format(pid)
-                        )
 
-                os.remove(self.pid_file_path)
+        if not server_id:
+            server_id = self.server_id
+        else:
+            self.server_id = server_id
 
         json_config = config_to_dict_with_type(self.config)
         with open(self.config_path, "w") as f:
@@ -155,7 +154,7 @@ class Server(object):
             logging.info("Wrote config.json to path " + abs_path)
             json.dump(json_config, f)
 
-        args = self._process_extra_args(abs_path)
+        args = self._process_extra_args(abs_path, server_id)
         process = subprocess.Popen(args=args, stdout=subprocess.PIPE)
         self.process = process
 
@@ -201,23 +200,33 @@ class Server(object):
 
         return process, port, started
 
-    def stop(self):
+    def stop(self, server_id=None):
         """Stop the server"""
-        if self.process is None:
-            if os.path.exists(self.config_path):
-                os.remove(self.config_path)
-            raise Exception("Server is not started!")
+        if not server_id:
+            server_id = self.server_id
         else:
-            if os.path.exists(self.config_path):
-                os.remove(self.config_path)
-            self.process.kill()
+            self.server_id = server_id
 
-    def _process_extra_args(self, absolute_path):
+        command = self.get_command("stop " + server_id)
+        logging.info("Running with args\n" + " ".join(command))
+        subprocess.call(command, shell=sys.platform.startswith("win"))
+
+    def _process_extra_args(self, absolute_path, server_id):
         """Process submitted extra arguments list.
 
         :param absolute_path: absolute path of the configuration file
         :return: concatenated string arguments
         """
+        args = self.get_command("serve -c " + absolute_path)
+
+        if server_id:
+            args.append("-id")
+            args.append(server_id)
+
+        logging.info("Running with args\n" + " ".join(args))
+        return args
+
+    def get_command(self, command):
         classpath = [self.jar_path]
         classpath.extend(self.extra_jar_args)
 
@@ -227,12 +236,7 @@ class Server(object):
             args.extend(self.extra_start_args)
         args.append("-cp")
         args.append(os.pathsep.join(classpath))
-        args.append("ai.konduit.serving.configprovider.KonduitServingMain")
-        args.append("--pidFile")
-        args.append(os.path.abspath(self.pid_file_path))
-        args.append("--configPath")
-        args.append(absolute_path)
-        args.append("--verticleClassName")
-        args.append("ai.konduit.serving.verticles.inference.InferenceVerticle")
-        logging.info("Running with args\n" + " ".join(args))
+        args.append("ai.konduit.serving.launcher.KonduitServingLauncher")
+        if command:
+            args.extend(command.strip().split(" "))
         return args

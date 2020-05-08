@@ -6,7 +6,7 @@ from konduit.json_utils import *
 @pytest.mark.unit
 def test_empty_dict_type():
     d1 = empty_type_dict(InferenceConfiguration())
-    d2 = {"@type": "InferenceConfiguration"}
+    d2 = {"type": "InferenceConfiguration"}
     assert d1 == d2
 
 

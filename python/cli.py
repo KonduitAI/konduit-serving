@@ -4,6 +4,7 @@ import requests
 import subprocess
 import click
 from packaging.version import parse
+from hurry.filesize import size
 
 USER_PATH = os.path.expanduser("~")
 KONDUIT_BASE_DIR = os.path.join(USER_PATH, ".konduit-serving")
@@ -11,10 +12,11 @@ KONDUIT_SOURCE_DIR = os.path.join(KONDUIT_BASE_DIR, "source")
 KONDUIT_JAR_DIR = os.path.join(KONDUIT_BASE_DIR, "jar")
 KONDUIT_JAR_PATH = os.path.join(KONDUIT_JAR_DIR, "konduit.jar")
 
+INCOMPATIBLE_COMPILATION_TAGS = ["cli_base", "cli_base_2", "cli_base_3", "cli_base_4"]
 DOWNLOAD_TAG = "cli_base"
 
 LAST_COMPATIBLE_KONDUIT_VERSION = "0.1.0-SNAPSHOT"
-DEFAULT_KONDUIT_TAG = "cli_base_2"
+DEFAULT_KONDUIT_TAG = "cli_base_4"
 KONDUIT_JAR_URL_FORMAT = "https://github.com/KonduitAI/konduit-serving/releases/download/" \
                        "{tag}/konduit-serving-uberjar-{version}-{spin}-{platform}-{chip}.jar"
 
@@ -54,7 +56,7 @@ def download_if_required(url, save_path):
         print("The required CLI binary has already been downloaded.")
         return
     else:
-        print("Downloading command line binaries")
+        print("Downloading command line binaries from " + url)
 
     with open(save_path, 'wb') as f:
         if total is None:
@@ -66,7 +68,8 @@ def download_if_required(url, save_path):
                 downloaded += len(data)
                 f.write(data)
                 done = int(50 * downloaded / total)
-                sys.stdout.write('\r[{}{}]'.format('█' * done, '.' * (50 - done)))
+                sys.stdout.write('\r[{}{}]'.format('█' * done, '.' * (50 - done)) +
+                                 (" ({}/{})".format(size(downloaded), size(total))))
                 sys.stdout.flush()
     sys.stdout.write('\n')
 
@@ -85,8 +88,11 @@ def git_clone_konduit(use_https=True, tag=DEFAULT_KONDUIT_TAG):
         if not os.listdir(KONDUIT_SOURCE_DIR):
             subprocess.call(["git", "clone", repo, KONDUIT_SOURCE_DIR],
                             shell=sys.platform.startswith("win"))
+        # Pulling in changes if needed
+        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "fetch", "--all"])
         subprocess.call(["git", "checkout", tag], cwd=KONDUIT_SOURCE_DIR,
                         shell=sys.platform.startswith("win"))
+        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "pull"])
     except Exception as e:
         raise RuntimeError(">>> Could not clone konduit-serving repository and switch to commit hash {}"
                            "Make sure to have git installed. Type 'konduit-init --help' for help .\n"
@@ -101,14 +107,6 @@ def build_jar(operating_sys, spin, chip):
 
     if operating_sys is None:
         operating_sys = get_platform()
-
-    # Pulling in changes if needed
-    try:
-        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "pull"])
-        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "fetch", "--all"])
-    except Exception as e:
-        raise RuntimeError(">>> Could not fetch and pull changes from konduit-serving repository. Make sure to have "
-                           "git installed. Type " + "konduit-init --help for help resolving this.\n", e)
 
     # Building the uber-jar file
     try:
@@ -154,7 +152,9 @@ def get_jar_url(platform, version, spin, chip):
                                          chip=chip)
 
 
-git_tags = get_git_tags()
+git_tags = list(set(get_git_tags()).difference(INCOMPATIBLE_COMPILATION_TAGS))
+if len(git_tags) == 0:
+    git_tags = [DEFAULT_KONDUIT_TAG]
 DEFAULT_KONDUIT_TAG = git_tags[0]  # Assuming the first one in the response is the most recent one
 
 

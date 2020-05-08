@@ -132,7 +132,7 @@ def server_from_file(file_path, start_server=False, use_yaml=True):
 
     step_data = data.get("steps", None)
     steps = []
-    for step_config in step_data.values():
+    for step_config in step_data:
         steps.append(get_step(step_config))
 
     server = Server(
@@ -211,8 +211,8 @@ def get_python_step(step_config):
     """
 
     python_step = PythonStep()
-    for key, python_config in step_config:
-        python_step.step(key, PythonConfig(**python_config))
+    for key, config in step_config["python_configs"].items():
+        python_step.step(python_config=PythonConfig(**config), input_name=key)
 
     return python_step
 
