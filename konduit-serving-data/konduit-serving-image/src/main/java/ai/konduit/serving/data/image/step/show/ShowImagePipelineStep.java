@@ -16,22 +16,33 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.camera.step.show;
+package ai.konduit.serving.data.image.step.show;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
-import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
-import org.nd4j.common.base.Preconditions;
+import lombok.Builder;
+import lombok.Data;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
-public class ShowImageStepRunnerFactory implements PipelineStepRunnerFactory {
-    @Override
-    public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof ShowImagePipelineStep;
+@Data
+@Builder
+public class ShowImagePipelineStep implements PipelineStep {
+
+    @Builder.Default
+    private String imageName = "image";
+    @Builder.Default
+    private String displayName = "Image";
+    @Builder.Default
+    private int width = 1280;
+    @Builder.Default
+    private int height = 720;
+
+    public ShowImagePipelineStep(@JsonProperty("imageName") String imageName, @JsonProperty("displayName") String displayName,
+                                 @JsonProperty("width") int width, @JsonProperty("height") int height){
+        this.imageName = imageName;
+        this.displayName = displayName;
+        this.width = width;
+        this.height = height;
     }
 
-    @Override
-    public PipelineStepRunner create(PipelineStep pipelineStep) {
-        Preconditions.checkState(canRun(pipelineStep), "Unable to run pipeline of type %s", pipelineStep);
-        return new ShowImageStepRunner((ShowImagePipelineStep) pipelineStep);
-    }
+
 }

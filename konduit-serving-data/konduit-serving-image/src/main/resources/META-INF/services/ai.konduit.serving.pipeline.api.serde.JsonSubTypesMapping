@@ -14,4 +14,4 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################################
 
-ai.konduit.serving.camera.step.capture.FrameCaptureStepRunnerFactory
+ai.konduit.serving.data.image.serde.ImageJsonSubTypesMapping

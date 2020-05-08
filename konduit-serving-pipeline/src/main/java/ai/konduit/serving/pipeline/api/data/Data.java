@@ -24,6 +24,7 @@ import ai.konduit.serving.pipeline.impl.serde.DataJsonDeserializer;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonSerializer;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import lombok.NonNull;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
@@ -250,6 +251,42 @@ public interface Data {
                 throw new IllegalStateException("Cannot use key \"" + kwd + "\" in a Data instance: This key is reserved" +
                         " for internal use only");
             }
+        }
+    }
+
+
+    default void copyFrom(@NonNull String key, @NonNull Data from){
+        Preconditions.checkState(from.has(key), "Key %s does not exist in provided Data instance");
+        ValueType vt = from.type(key);
+        switch (vt){
+            case NDARRAY:
+                put(key, getNDArray(key));
+                return;
+            case STRING:
+                put(key, getString(key));
+                return;
+            case BYTES:
+                put(key, getBytes(key));
+                return;
+            case IMAGE:
+                put(key, getImage(key));
+                return;
+            case DOUBLE:
+                put(key, getDouble(key));
+                return;
+            case INT64:
+                put(key, getLong(key));
+                return;
+            case BOOLEAN:
+                put(key, getBoolean(key));
+                return;
+            case DATA:
+                put(key, getData(key));
+                return;
+            case LIST:
+                throw new UnsupportedOperationException("List copyFrom not yet implemented");
+            default:
+                throw new UnsupportedOperationException("Not supported: " + vt);
         }
     }
 }

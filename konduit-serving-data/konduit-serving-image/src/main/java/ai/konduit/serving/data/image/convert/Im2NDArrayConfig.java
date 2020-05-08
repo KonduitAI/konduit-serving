@@ -16,33 +16,28 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.camera.step.show;
+package ai.konduit.serving.data.image.convert;
 
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
+import ai.konduit.serving.data.image.convert.config.NDChannels;
+import ai.konduit.serving.data.image.convert.config.NDFormat;
+import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import lombok.Builder;
 import lombok.Data;
-import org.nd4j.shade.jackson.annotation.JsonProperty;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(fluent = true)
 @Builder
-public class ShowImagePipelineStep implements PipelineStep {
+public class Im2NDArrayConfig {
 
-    @Builder.Default
-    private String imageName = "image";
-    @Builder.Default
-    private String displayName = "Image";
-    @Builder.Default
-    private int width = 1280;
-    @Builder.Default
-    private int height = 720;
-
-    public ShowImagePipelineStep(@JsonProperty("imageName") String imageName, @JsonProperty("displayName") String displayName,
-                                 @JsonProperty("width") int width, @JsonProperty("height") int height){
-        this.imageName = imageName;
-        this.displayName = displayName;
-        this.width = width;
-        this.height = height;
-    }
+    private Integer height;
+    private Integer width;
+    @Builder.Default private NDArrayType dataType = NDArrayType.FLOAT;
+    @Builder.Default private boolean includeMinibatchDim = true;
+    @Builder.Default private AspectRatioHandling aspectRatioHandling = AspectRatioHandling.CENTER_CROP;
+    @Builder.Default private NDFormat format = NDFormat.CHANNELS_FIRST;
+    @Builder.Default private NDChannels channels = NDChannels.RGB;
 
 
 }

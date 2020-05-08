@@ -16,22 +16,22 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.convert;
+package ai.konduit.serving.data.image.step.show;
 
-import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
-import ai.konduit.serving.pipeline.api.data.NDArrayType;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import org.nd4j.common.base.Preconditions;
 
-@Data
-@Accessors(fluent = true)
-public class ImageConvertConfig {
+public class ShowImageStepRunnerFactory implements PipelineStepRunnerFactory {
+    @Override
+    public boolean canRun(PipelineStep pipelineStep) {
+        return pipelineStep instanceof ShowImagePipelineStep;
+    }
 
-    private Integer height;
-    private Integer width;
-    private NDArrayType dataType = NDArrayType.FLOAT;
-    private boolean includeMinibatchDim = true;
-    private AspectRatioHandling aspectRatioHandling = AspectRatioHandling.CENTER_CROP;
-
-
+    @Override
+    public PipelineStepRunner create(PipelineStep pipelineStep) {
+        Preconditions.checkState(canRun(pipelineStep), "Unable to run pipeline of type %s", pipelineStep);
+        return new ShowImageStepRunner((ShowImagePipelineStep) pipelineStep);
+    }
 }
