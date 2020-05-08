@@ -89,6 +89,7 @@ if __name__ == "__main__":
         command.append("-Ppmml")
 
     command.append("-Dspin.version={}".format(args.spin))
+    command.append("-Denforcer.skip=true")
 
     with open(os.path.join(args.source, "pom.xml"), "r") as pom:
         content = pom.read()
