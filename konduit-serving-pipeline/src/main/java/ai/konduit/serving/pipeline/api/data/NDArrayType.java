@@ -18,6 +18,9 @@
 
 package ai.konduit.serving.pipeline.api.data;
 
+/**
+ * The data type of an {@link NDArray}
+ */
 public enum NDArrayType {
     DOUBLE,
     FLOAT,

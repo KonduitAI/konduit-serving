@@ -1,7 +1,7 @@
 package ai.konduit.serving.data.image.convert;
 
 import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
-import ai.konduit.serving.data.image.convert.config.NDChannels;
+import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -20,11 +20,25 @@ import java.util.function.IntToDoubleFunction;
 
 import static org.bytedeco.opencv.global.opencv_imgproc.resize;
 
+/**
+ * Utility method for converting Image objects to NDArrays.
+ * See {@link ImageToNDArrayConfig} for more details
+ *
+ * @author Alex Black
+ */
 public class ImageToNDArray {
 
     private ImageToNDArray() {
     }
 
+    /**
+     * Convert the provided image to a NDArray, according to the specified configuration<br>
+     * See {@link ImageToNDArrayConfig} for more details
+     *
+     * @param image  Image to convert
+     * @param config Configuration to use
+     * @return The Image converted to an NDArray
+     */
     public static NDArray convert(Image image, ImageToNDArrayConfig config) {
 
         Integer outH = config.height();
@@ -64,14 +78,10 @@ public class ImageToNDArray {
 
         ByteBuffer bb = toFloatBuffer(m, config);
 
-        if(config.dataType() != NDArrayType.FLOAT)
+        if (config.dataType() != NDArrayType.FLOAT) //TODO there are likely more efficient ways than this!
             bb = cast(bb, NDArrayType.FLOAT, config.dataType());
 
-//        float[] temp = new float[100];
-//        bb.asFloatBuffer().get(temp);
-//        System.out.println(Arrays.toString(temp));
-
-        int ch = config.channels().numChannels();
+        int ch = config.channelLayout().numChannels();
 
         long[] shape;
         if (config.format() == NDFormat.CHANNELS_FIRST) {
@@ -105,18 +115,18 @@ public class ImageToNDArray {
     }
 
     protected static Mat convertColor(Mat m, ImageToNDArrayConfig config) {
-        int ch = config.channels().numChannels();
+        int ch = config.channelLayout().numChannels();
         if (ch != 3) {
             throw new UnsupportedOperationException("Not yet implemented: Channels != 3 support");
         }
 
-        //TODO
+        //TODO - Actually convert color!
 
         return m;
     }
 
     protected static ByteBuffer toFloatBuffer(Mat m, ImageToNDArrayConfig config) {
-        Preconditions.checkState(config.channels() == NDChannels.RGB || config.channels() == NDChannels.BGR,
+        Preconditions.checkState(config.channelLayout() == NDChannelLayout.RGB || config.channelLayout() == NDChannelLayout.BGR,
                 "Only RGB and BGR conversion implement so far");
 
         boolean direct = !Loader.getPlatform().startsWith("android");
@@ -132,17 +142,17 @@ public class ImageToNDArray {
         ByteBuffer bb = direct ? ByteBuffer.allocateDirect(lengthBytes) : ByteBuffer.allocate(lengthBytes);
         FloatBuffer fb = bb.asFloatBuffer();
 
-        boolean rgb = config.channels() == NDChannels.RGB;
+        boolean rgb = config.channelLayout() == NDChannelLayout.RGB;
 
         Indexer imgIdx = m.createIndexer(direct);
         if (imgIdx instanceof UByteIndexer) {
             UByteIndexer ubIdx = (UByteIndexer) imgIdx;
 
             if (config.format() == NDFormat.CHANNELS_FIRST) {
-                if(rgb){
+                if (rgb) {
                     //Mat is HWC in BGR, we want (N)CHW in RGB format
-                    int[] rgbToBgr = {2,1,0};
-                    for( int c = 0; c<3; c++ ){
+                    int[] rgbToBgr = {2, 1, 0};
+                    for (int c = 0; c < 3; c++) {
                         for (int y = 0; y < h; y++) {
                             for (int x = 0; x < w; x++) {
                                 int idxBGR = (ch * w * y) + (ch * x) + rgbToBgr[c];
@@ -153,7 +163,7 @@ public class ImageToNDArray {
                     }
                 } else {
                     //Mat is HWC in BGR, we want (N)CHW in BGR format
-                    for( int c = 0; c<3; c++ ){
+                    for (int c = 0; c < 3; c++) {
                         for (int y = 0; y < h; y++) {
                             for (int x = 0; x < w; x++) {
                                 int idxBGR = (ch * w * y) + (ch * x) + c;
@@ -168,8 +178,8 @@ public class ImageToNDArray {
                     //Mat is HWC in BGR, we want (N)HWC in RGB format
                     for (int i = 0; i < lengthElements; i += 3) {
                         int b = ubIdx.get(i);
-                        int g = ubIdx.get(i+1);
-                        int r = ubIdx.get(i+2);
+                        int g = ubIdx.get(i + 1);
+                        int r = ubIdx.get(i + 2);
                         fb.put(r);
                         fb.put(g);
                         fb.put(b);
@@ -188,9 +198,9 @@ public class ImageToNDArray {
         return bb;
     }
 
-    //TODO This isn't the most efficient or eregant approach, but it should work OK for images
-    protected static ByteBuffer cast(ByteBuffer from, NDArrayType fromType, NDArrayType toType){
-        if(fromType == toType)
+    //TODO This isn't the most efficient or elegant approach, but it should work OK for images
+    protected static ByteBuffer cast(ByteBuffer from, NDArrayType fromType, NDArrayType toType) {
+        if (fromType == toType)
             return from;
 
         boolean direct = !Loader.getPlatform().startsWith("android");
@@ -199,7 +209,7 @@ public class ImageToNDArray {
         IntToDoubleFunction f;
 
         int length;
-        switch (fromType){
+        switch (fromType) {
             case DOUBLE:
                 DoubleBuffer db = from.asDoubleBuffer();
                 length = db.limit();
@@ -213,7 +223,7 @@ public class ImageToNDArray {
             case INT64:
                 LongBuffer lb = from.asLongBuffer();
                 length = lb.limit();
-                f = i -> (double)lb.get();
+                f = i -> (double) lb.get();
                 break;
             case INT32:
                 IntBuffer ib = from.asIntBuffer();
@@ -244,35 +254,35 @@ public class ImageToNDArray {
         int bytesLength = toType.width() * length;
         ByteBuffer bb = direct ? ByteBuffer.allocateDirect(bytesLength) : ByteBuffer.allocate(bytesLength);
 
-        switch (toType){
+        switch (toType) {
             case DOUBLE:
                 DoubleBuffer db = bb.asDoubleBuffer();
-                for( int i=0; i<length; i++ )
+                for (int i = 0; i < length; i++)
                     db.put(f.applyAsDouble(i));
                 break;
             case FLOAT:
                 FloatBuffer fb = bb.asFloatBuffer();
-                for( int i=0; i<length; i++ )
-                    fb.put((float)f.applyAsDouble(i));
+                for (int i = 0; i < length; i++)
+                    fb.put((float) f.applyAsDouble(i));
                 break;
             case INT64:
                 LongBuffer lb = bb.asLongBuffer();
-                for( int i=0; i<length; i++ )
-                    lb.put((long)f.applyAsDouble(i));
+                for (int i = 0; i < length; i++)
+                    lb.put((long) f.applyAsDouble(i));
                 break;
             case INT32:
                 IntBuffer ib = bb.asIntBuffer();
-                for( int i=0; i<length; i++ )
-                    ib.put((int)f.applyAsDouble(i));
+                for (int i = 0; i < length; i++)
+                    ib.put((int) f.applyAsDouble(i));
                 break;
             case INT16:
                 ShortBuffer sb = from.asShortBuffer();
-                for( int i=0; i<length; i++ )
-                    sb.put((short)f.applyAsDouble(i));
+                for (int i = 0; i < length; i++)
+                    sb.put((short) f.applyAsDouble(i));
                 break;
             case INT8:
-                for( int i=0; i<length; i++ )
-                    bb.put((byte)f.applyAsDouble(i));
+                for (int i = 0; i < length; i++)
+                    bb.put((byte) f.applyAsDouble(i));
                 break;
             case FLOAT16:
             case BFLOAT16:
@@ -287,9 +297,4 @@ public class ImageToNDArray {
         }
         return bb;
     }
-
-    private static abstract class DoubleGetter {
-        public abstract double get(int idx);
-    }
-
 }

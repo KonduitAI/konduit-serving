@@ -1,7 +1,7 @@
 package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
-import ai.konduit.serving.data.image.convert.config.NDChannels;
+import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.pipeline.api.data.*;
@@ -73,7 +73,7 @@ public class TestImageToNDArray {
                                         .config(ImageToNDArrayConfig.builder()
                                                 .height(h)
                                                 .width(w)
-                                                .channels(rgb ? NDChannels.RGB : NDChannels.BGR)
+                                                .channelLayout(rgb ? NDChannelLayout.RGB : NDChannelLayout.BGR)
                                                 .format(f)
                                                 .includeMinibatchDim(leadingDim)
                                                 .build())
@@ -198,7 +198,7 @@ public class TestImageToNDArray {
                                             .config(ImageToNDArrayConfig.builder()
                                                     .height(h)
                                                     .width(w)
-                                                    .channels(rgb ? NDChannels.RGB : NDChannels.BGR)
+                                                    .channelLayout(rgb ? NDChannelLayout.RGB : NDChannelLayout.BGR)
                                                     .format(f)
                                                     .includeMinibatchDim(leadingDim)
                                                     .dataType(t)
