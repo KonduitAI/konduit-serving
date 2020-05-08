@@ -18,34 +18,70 @@
 
 package ai.konduit.serving.pipeline.impl.data.image;
 
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.exception.DataLoadingException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-@Data
 @AllArgsConstructor
 public class Png {
 
+    @Getter
     private ByteBuffer pngFileBytes;
+    private Integer height;
+    private Integer width;
 
-    public Png(File file){
+    public Png(File file) {
+        this(file, null, null);
+    }
+
+    public Png(File file, Integer height, Integer width){
         try {
             pngFileBytes = ByteBuffer.wrap(FileUtils.readFileToByteArray(file));
         } catch (IOException e){
             throw new DataLoadingException("Unable to load PNG image from file " + file.getAbsolutePath());
         }
+        this.height = height;
+        this.width = width;
     }
 
     public Png(byte[] bytes){
-        this.pngFileBytes = ByteBuffer.wrap(bytes);
+        this(bytes, null, null);
     }
+
+    public Png(byte[] bytes, Integer height, Integer width){
+        this.pngFileBytes = ByteBuffer.wrap(bytes);
+        this.height = height;
+        this.width = width;
+    }
+
+    public int height(){
+        initHW();
+        return height;
+    }
+
+    public int width(){
+        initHW();
+        return width;
+    }
+
+    protected void initHW(){
+        if(height != null && width != null)
+            return;
+        BufferedImage bi = Image.create(this).getAs(BufferedImage.class);
+        height = bi.getHeight();
+        width = bi.getWidth();
+    }
+
 
     public byte[] getBytes(){
         if(pngFileBytes.hasArray()){

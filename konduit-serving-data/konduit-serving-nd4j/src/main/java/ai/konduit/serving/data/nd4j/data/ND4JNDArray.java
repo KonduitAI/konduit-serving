@@ -18,11 +18,23 @@
 
 package ai.konduit.serving.data.nd4j.data;
 
+import ai.konduit.serving.data.nd4j.util.ND4JUtil;
+import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class ND4JNDArray extends BaseNDArray<INDArray> {
     public ND4JNDArray(INDArray array) {
         super(array);
+    }
+
+    @Override
+    public NDArrayType type() {
+        return ND4JUtil.convertType(array.dataType());
+    }
+
+    @Override
+    public long[] shape() {
+        return array.shape();
     }
 }

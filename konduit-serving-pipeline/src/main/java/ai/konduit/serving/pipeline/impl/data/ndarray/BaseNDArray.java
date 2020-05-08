@@ -28,7 +28,7 @@ import org.nd4j.common.base.Preconditions;
 @AllArgsConstructor
 public abstract class BaseNDArray<T> implements NDArray {
 
-    private final T array;
+    protected final T array;
 
     @Override
     public Object get() {

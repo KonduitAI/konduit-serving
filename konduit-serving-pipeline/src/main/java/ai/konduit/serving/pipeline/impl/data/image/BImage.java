@@ -24,4 +24,14 @@ public class BImage extends BaseImage<BufferedImage> {
     public BImage(BufferedImage image) {
         super(image);
     }
+
+    @Override
+    public int height() {
+        return image.getHeight();
+    }
+
+    @Override
+    public int width() {
+        return image.getWidth();
+    }
 }

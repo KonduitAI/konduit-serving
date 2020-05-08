@@ -26,6 +26,10 @@ import org.nd4j.common.base.Preconditions;
 
 public interface NDArray {
 
+    NDArrayType type();
+
+    long[] shape();
+
     Object get();
 
     <T> T getAs(NDArrayFormat<T> format);

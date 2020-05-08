@@ -15,4 +15,3 @@
 ################################################################################
 
 ai.konduit.serving.camera.step.capture.FrameCaptureStepRunnerFactory
-ai.konduit.serving.camera.step.show.ShowImageStepRunnerFactory

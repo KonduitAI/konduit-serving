@@ -26,6 +26,10 @@ import org.nd4j.common.base.Preconditions;
 
 public interface Image {
 
+    int height();
+
+    int width();
+
     Object get();
 
     <T> T getAs(ImageFormat<T> format);

@@ -167,6 +167,16 @@ public class ImageTests {
         public TestImage(TestImageObject image) {
             super(image);
         }
+
+        @Override
+        public int height() {
+            return 0;
+        }
+
+        @Override
+        public int width() {
+            return 0;
+        }
     }
 
     public  static class TestImageFactory implements ImageFactory {

@@ -6,11 +6,16 @@ import lombok.AllArgsConstructor;
 
 import java.util.List;
 
-@AllArgsConstructor
+//@AllArgsConstructor
 public class ListValue<T> implements Value<List<T>> {
 
     private List<T> values;
     private ValueType elementType;
+
+    public ListValue(List<T> values, ValueType elementType){
+        this.values = values;
+        this.elementType = elementType;
+    }
 
     @Override
     public ValueType type() {
@@ -31,6 +36,7 @@ public class ListValue<T> implements Value<List<T>> {
 
     // @Override
     public void set(List<T> value, ValueType elementType) {
-        this.values = values;
+        this.values = value;
+        this.elementType = elementType;
     }
 }

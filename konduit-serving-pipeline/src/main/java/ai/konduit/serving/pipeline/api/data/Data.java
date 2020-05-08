@@ -22,8 +22,10 @@ import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonDeserializer;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonSerializer;
+import ai.konduit.serving.pipeline.util.DataUtils;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import lombok.NonNull;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
@@ -103,6 +105,7 @@ public interface Data {
     void putListString(String key, List<String> data);
     void putListInt64(String key, List<Long> data);
     void putListBoolean(String key, List<Boolean> data);
+    void putListBytes(String key, List<byte[]> data);
     void putListDouble(String key, List<Double> data);
     void putListData(String key, List<Data> data);
     void putListImage(String key, List<Image> data);
@@ -161,6 +164,14 @@ public interface Data {
         return new JData();
     }
 
+    static String toString(Data d){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Data(");
+        sb.append(d.keys().toString());
+        sb.append(")");
+        return sb.toString();
+    }
+
     static boolean equals(@NonNull Data d1, @NonNull Data d2){
 
         if(d1.size() != d2.size())
@@ -184,6 +195,16 @@ public interface Data {
                 default:
                     //TODO
                     throw new UnsupportedOperationException(vt + " equality not yet implemented");
+                case LIST:
+                    //TODO will this be robust for equality of any objects? Probably not...
+                    ValueType l1Type = d1.listType(s);
+                    ValueType l2Type = d2.listType(s);
+                    List<?> list1 = d1.getList(s, l1Type);
+                    List<?> list2 = d2.getList(s, l2Type);
+                    if(!DataUtils.listEquals(list1, list2, l1Type, l2Type))
+                        return false;
+
+                    break;
                 case IMAGE:
                     Png png1 = d1.getImage(s).getAs(Png.class);
                     Png png2 = d1.getImage(s).getAs(Png.class);
@@ -244,12 +265,50 @@ public interface Data {
         return true;
     }
 
+
+
     static void assertNotReservedKey(@NonNull String s){
         for(String kwd : reservedKeywords()){
             if(kwd.equalsIgnoreCase(s)){
                 throw new IllegalStateException("Cannot use key \"" + kwd + "\" in a Data instance: This key is reserved" +
                         " for internal use only");
             }
+        }
+    }
+
+
+    default void copyFrom(@NonNull String key, @NonNull Data from){
+        Preconditions.checkState(from.has(key), "Key %s does not exist in provided Data instance");
+        ValueType vt = from.type(key);
+        switch (vt){
+            case NDARRAY:
+                put(key, getNDArray(key));
+                return;
+            case STRING:
+                put(key, getString(key));
+                return;
+            case BYTES:
+                put(key, getBytes(key));
+                return;
+            case IMAGE:
+                put(key, getImage(key));
+                return;
+            case DOUBLE:
+                put(key, getDouble(key));
+                return;
+            case INT64:
+                put(key, getLong(key));
+                return;
+            case BOOLEAN:
+                put(key, getBoolean(key));
+                return;
+            case DATA:
+                put(key, getData(key));
+                return;
+            case LIST:
+                throw new UnsupportedOperationException("List copyFrom not yet implemented");
+            default:
+                throw new UnsupportedOperationException("Not supported: " + vt);
         }
     }
 }
