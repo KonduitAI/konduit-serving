@@ -19,13 +19,12 @@
 package ai.konduit.serving.data.image.format;
 
 import ai.konduit.serving.data.image.data.FrameImage;
-import ai.konduit.serving.data.image.data.OpenCVMatImage;
 import ai.konduit.serving.data.image.data.MatImage;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.format.ImageFactory;
 import org.bytedeco.javacv.Frame;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.nd4j.common.base.Preconditions;
-import org.opencv.core.Mat;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,7 +36,6 @@ public class JavaCVImageFactory implements ImageFactory {
     static {
         SUPPORTED_TYPES.add(Frame.class);
         SUPPORTED_TYPES.add(Mat.class);
-        SUPPORTED_TYPES.add(org.bytedeco.opencv.opencv_core.Mat.class);
     }
 
     @Override
@@ -57,9 +55,7 @@ public class JavaCVImageFactory implements ImageFactory {
         if(o instanceof Frame){
             return new FrameImage((Frame) o);
         } else if(o instanceof Mat){
-            return new OpenCVMatImage((Mat)o);
-        } else if(o instanceof org.bytedeco.opencv.opencv_core.Mat){
-            return new MatImage((org.bytedeco.opencv.opencv_core.Mat) o);
+            return new MatImage((Mat) o);
         } else {
             throw new IllegalStateException("Unable to create image from format " + o.getClass());
         }

@@ -24,7 +24,6 @@ import ai.konduit.serving.pipeline.api.exception.DataConversionException;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.format.JavaImageConverters;
 import ai.konduit.serving.pipeline.util.FileUtils;
-import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -68,64 +67,6 @@ public class JavaCVImageConverters {
             Mat m = (Mat) from.get();
             Frame f = converter.convert(m);
             return (T)f;
-        }
-    }
-
-    public static class FrameToOpenCVMatConverter extends JavaImageConverters.BaseConverter {
-        protected OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
-
-        public FrameToOpenCVMatConverter() {
-            super(Frame.class, org.opencv.core.Mat.class);
-        }
-
-        @Override
-        protected <T> T doConversion(Image from, Class<T> to) {
-            Frame f = (Frame) from.get();
-            Mat m = converter.convert(f);
-            org.opencv.core.Mat m2 = new org.opencv.core.Mat(m.address());
-            return (T)m2.clone();   //Clone so we're not (potentially unsafely) referring to address that might get freed
-        }
-    }
-
-    public static class OpenCVMatToFrameConverter extends JavaImageConverters.BaseConverter {
-        protected OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
-
-        public OpenCVMatToFrameConverter() {
-            super(org.opencv.core.Mat.class, Frame.class);
-        }
-
-        @Override
-        protected <T> T doConversion(Image from, Class<T> to) {
-            org.opencv.core.Mat m = (org.opencv.core.Mat) from.get();
-            Frame f = converter.convert(m);
-            return (T)f;
-        }
-    }
-
-    public static class MatToOpenCVMatConverter extends JavaImageConverters.BaseConverter {
-        public MatToOpenCVMatConverter() {
-            super(Mat.class, org.opencv.core.Mat.class);
-        }
-
-        @Override
-        protected <T> T doConversion(Image from, Class<T> to) {
-            Mat m = (Mat) from.get();
-            org.opencv.core.Mat m2 = new org.opencv.core.Mat(m.address());
-            return (T) m2.clone();  //Clone so we're not (potentially unsafely) referring to address that might get freed
-        }
-    }
-
-    public static class OpenCVMatToMatConverter extends JavaImageConverters.BaseConverter {
-
-        public OpenCVMatToMatConverter() {
-            super(org.opencv.core.Mat.class, Mat.class);
-        }
-
-        @Override
-        protected <T> T doConversion(Image from, Class<T> to) {
-            org.opencv.core.Mat m = (org.opencv.core.Mat) from.get();
-            Mat m2 = new Mat((Pointer)null){{address = m.getNativeObjAddr();}};
-            return (T)m2.clone();   //Clone so we're not (potentially unsafely) referring to address that might get freed
         }
     }
 
@@ -202,34 +143,6 @@ public class JavaCVImageConverters {
             Png p = (Png)from.get();
             Mat m = Image.create(p).getAs(Mat.class);
             return (T) Image.create(m).getAs(Frame.class);
-        }
-    }
-
-    public static class OpenCVMatToPng extends JavaImageConverters.BaseConverter {
-        public OpenCVMatToPng() {
-            super(org.opencv.core.Mat.class, Png.class);
-        }
-
-        @Override
-        protected <T> T doConversion(Image from, Class<T> to) {
-            //org.opencv.core.Mat -> Mat -> Png. Is there a more efficient way?
-            org.opencv.core.Mat m = (org.opencv.core.Mat) from.get();
-            Mat m2 = Image.create(m).getAs(Mat.class);
-            return (T) Image.create(m2).getAs(Png.class);
-        }
-    }
-
-    public static class PngToOpenCVMat extends JavaImageConverters.BaseConverter {
-        public PngToOpenCVMat() {
-            super(Png.class, org.opencv.core.Mat.class);
-        }
-
-        @Override
-        protected <T> T doConversion(Image from, Class<T> to) {
-            //Png -> Mat -> org.opencv.core.Mat. Is there a more efficient way?
-            Png p = (Png)from.get();
-            Mat m = Image.create(p).getAs(Mat.class);
-            return (T) Image.create(m).getAs(org.opencv.core.Mat.class);
         }
     }
 }

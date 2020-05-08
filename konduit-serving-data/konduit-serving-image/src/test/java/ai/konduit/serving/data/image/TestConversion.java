@@ -59,55 +59,38 @@ public class TestConversion {
         OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
         Mat mat = org.bytedeco.opencv.global.opencv_imgcodecs.imread(f.getAbsolutePath());
         Frame frame = converter.convert(mat);
-        org.opencv.core.Mat opencvMat = new org.opencv.core.Mat(mat.address());
 
         Image iMat = checkSize(Image.create(mat));
         Image iFrame = checkSize(Image.create(frame));
-        Image iCVMat = checkSize(Image.create(opencvMat));
 
         //To Mat:
         Mat m1 = iMat.getAs(Mat.class);
         Mat m2 = iFrame.getAs(Mat.class);
-        Mat m3 = iCVMat.getAs(Mat.class);
         assertTrue(equalMats(m1, m2));
-        assertTrue(equalMats(m1, m3));
 
         //To Frame:
         Frame f1 = iMat.getAs(Frame.class);
         Frame f2 = iFrame.getAs(Frame.class);
-        Frame f3 = iCVMat.getAs(Frame.class);
         assertTrue(equalFrames(f1, f2));
-        assertTrue(equalFrames(f1, f3));
-
-        //To OpenCVMat:
-        org.opencv.core.Mat om1 = iMat.getAs(org.opencv.core.Mat.class);
-        org.opencv.core.Mat om2 = iFrame.getAs(org.opencv.core.Mat.class);
-        org.opencv.core.Mat om3 = iCVMat.getAs(org.opencv.core.Mat.class);
-        assertTrue(equalOpenCvMats(om1, om2));
-        assertTrue(equalOpenCvMats(om1, om3));
 
 
 
         //To PNG:
         Png p1 = iMat.getAs(Png.class);
         Png p2 = iFrame.getAs(Png.class);
-        Png p3 = iCVMat.getAs(Png.class);
         assertTrue(equalPngs(p1, p2));
-        assertTrue(equalPngs(p1, p3));
 
         //From PNG:
         Image png = checkSize(Image.create(p1));
         Mat pm = png.getAs(Mat.class);
         Frame pf = png.getAs(Frame.class);
-        org.opencv.core.Mat pcvm = png.getAs(org.opencv.core.Mat.class);
         assertTrue(equalMats(mat, pm));
         assertTrue(equalFrames(frame, pf));
-        assertTrue(equalOpenCvMats(opencvMat, pcvm));
 
 
 
         //Test Data
-        for(Image i : new Image[]{iMat, iFrame, iCVMat}){
+        for(Image i : new Image[]{iMat, iFrame}){
             Data d = Data.singleton("myImage", i);
             String json = d.toJson();
             Data dJson = Data.fromJson(json);
@@ -131,12 +114,6 @@ public class TestConversion {
     protected static boolean equalFrames(Frame f1, Frame f2){
         Png p1 = Image.create(f1).getAs(Png.class);
         Png p2 = Image.create(f2).getAs(Png.class);
-        return equalPngs(p1, p2);
-    }
-
-    protected static boolean equalOpenCvMats(org.opencv.core.Mat m1, org.opencv.core.Mat m2){
-        Png p1 = Image.create(m1).getAs(Png.class);
-        Png p2 = Image.create(m2).getAs(Png.class);
         return equalPngs(p1, p2);
     }
 
