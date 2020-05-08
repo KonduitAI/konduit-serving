@@ -59,8 +59,12 @@ message Image {
 
 message NDArray {
     repeated int64 shape = 1;
-    repeated string type = 2;
     repeated bytes array = 3;
+    ValueType type = 2;
+
+    enum ValueType {
+        FLOAT = 0;
+    }
 }
 
 //message List {

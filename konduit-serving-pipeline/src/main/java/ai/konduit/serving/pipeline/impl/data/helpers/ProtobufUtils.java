@@ -17,14 +17,12 @@
  */
 package ai.konduit.serving.pipeline.impl.data.helpers;
 
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.format.ImageConverter;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import ai.konduit.serving.pipeline.impl.data.Value;
-import ai.konduit.serving.pipeline.api.data.ValueType;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
@@ -86,10 +84,11 @@ public class ProtobufUtils {
                 List<ByteString> byteStringList = new ArrayList<>();
                 byteStringList.add(byteString);
 
+                // TODO: setType must be fixed when anoter ndarray types are supported.
                 DataProtoMessage.NDArray pbNDArray = DataProtoMessage.NDArray.newBuilder().
                         addAllShape(Arrays.asList(ArrayUtils.toObject(sn.getShape()))).
                         addAllArray(byteStringList).
-                        //addAllType(sn.getType()).
+                        setType(DataProtoMessage.NDArray.ValueType.FLOAT).
                         build();
 
                 item = DataProtoMessage.DataScheme.newBuilder().
@@ -128,7 +127,28 @@ public class ProtobufUtils {
                 retData.put(entry.getKey(), item.getDoubleValue());
             }
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.LIST.ordinal()) {
-                // TODO
+                // TODO: complete me
+            }
+            if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.IMAGE.ordinal()) {
+                DataProtoMessage.Image pbImage = item.getImValue();
+                List<ByteString> pbData = pbImage.getDataList();
+                byte[] data = pbData.get(0).toByteArray();
+                retData.put(entry.getKey(), Image.create(data));
+            }
+            if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.NDARRAY.ordinal()) {
+                DataProtoMessage.NDArray pbArray = item.getNdValue();
+                List<Long> shapes = pbArray.getShapeList();
+                long[] aShapes = new long[shapes.size()];
+                for (int i = 0; i < shapes.size(); ++i) {
+                    aShapes[i] = shapes.get(i);
+                }
+
+                List<ByteString> data = pbArray.getArrayList();
+                DataProtoMessage.NDArray.ValueType type = pbArray.getType();
+                byte[] bytes = data.get(0).toByteArray();
+                ByteBuffer bb = ByteBuffer.wrap(bytes);
+                // TODO: fix ndarray type
+                SerializedNDArray ndArray = new SerializedNDArray(NDArrayType.FLOAT, aShapes, bb);
             }
         }
         return retData;
