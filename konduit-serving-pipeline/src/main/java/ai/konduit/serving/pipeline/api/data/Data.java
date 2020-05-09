@@ -106,6 +106,16 @@ public interface Data {
     List<Object> getList(String key, ValueType type);                   //TODO type
     Data getData(String key);
 
+    List<String> getListString(String key);
+    List<Long> getListInt64(String key);
+    List<Boolean> getListBoolean(String key);
+    List<byte[]> getListBytes(String key);
+    List<Double> getListDouble(String key);
+    List<List<?>> getListData(String key);
+    List<Image> getListImage(String key);
+    List<NDArray> getListNDArray(String key);
+    List<BoundingBox> getListBoundingBox(String key);
+
     void put(String key, String data);
     void put(String key, NDArray data);
     void put(String key, byte[] data);
