@@ -22,6 +22,7 @@ import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
 import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
+import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
@@ -33,6 +34,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.common.util.ArrayUtil;
 
 import java.nio.*;
@@ -60,6 +62,18 @@ public class ImageToNDArray {
      * @return The Image converted to an NDArray
      */
     public static NDArray convert(Image image, ImageToNDArrayConfig config) {
+        return convert(image, config, false).getFirst();
+    }
+
+    public static Pair<NDArray,BoundingBox> convertWithMetadata(Image image, ImageToNDArrayConfig config) {
+        return convert(image, config, true);
+    }
+
+    protected static Pair<NDArray,BoundingBox> convert(Image image, ImageToNDArrayConfig config, boolean withMeta) {
+
+        int imgH = image.height();
+        int imgW = image.width();
+        BoundingBox bbMeta = null;
 
         Integer outH = config.height();
         Integer outW = config.width();
@@ -75,7 +89,8 @@ public class ImageToNDArray {
         if (!correctSize) {
             AspectRatioHandling h = config.aspectRatioHandling();
             if (h == AspectRatioHandling.CENTER_CROP) {
-                Mat cropped = centerCrop(m); //new Mat(m, crop);
+                Pair<Mat,BoundingBox> p = centerCrop(m, outH, outW, withMeta); //new Mat(m, crop);;
+                Mat cropped = p.getFirst();
                 if (cropped.cols() == outW && cropped.rows() == outH) {
                     m = cropped;
                 } else {
@@ -83,14 +98,26 @@ public class ImageToNDArray {
                     org.bytedeco.opencv.global.opencv_imgproc.resize(cropped, resized, new Size(outW, outH));
                     m = resized;
                 }
+
+                if(withMeta){
+                    bbMeta = p.getSecond();
+                }
             } else if (h == AspectRatioHandling.PAD) {
                 throw new UnsupportedOperationException("Not yet implemented");
             } else if (h == AspectRatioHandling.STRETCH) {
                 Mat resized = new Mat();
                 org.bytedeco.opencv.global.opencv_imgproc.resize(m, resized, new Size(outW, outH));
                 m = resized;
+
+                if(withMeta){
+                    bbMeta = BoundingBox.createXY(0.0, 1.0, 0.0, 1.0);
+                }
             } else {
                 throw new UnsupportedOperationException("Not supported image conversion: " + h);
+            }
+        } else {
+            if(withMeta){
+                bbMeta = BoundingBox.createXY(0.0, 1.0, 0.0, 1.0);
             }
         }
 
@@ -112,26 +139,58 @@ public class ImageToNDArray {
 
         SerializedNDArray arr = new SerializedNDArray(config.dataType(), shape, bb);
 
-        return NDArray.create(arr);
+        return new Pair<>(NDArray.create(arr), bbMeta);
     }
 
-    protected static Mat centerCrop(Mat image) {
+    protected static Pair<Mat,BoundingBox> centerCrop(Mat image, int outH, int outW, boolean withBB) {
         int imgH = image.rows();
         int imgW = image.cols();
 
-        int x = 0;
-        int y = 0;
-        int newHW;
-        int cropSize = Math.abs(imgH - imgW) / 2;
-        if (imgH > imgW) {
-            newHW = imgW;
-            y = cropSize;
+        double aspectIn = image.cols() / (double)image.rows();
+        double aspectOut = outW / (double)outH;
+
+
+        int croppedW;
+        int croppedH;
+        int x0;
+        int x1;
+        int y0;
+        int y1;
+        if(aspectIn == aspectOut){
+            //No crop necessary
+            return new Pair<>(image, BoundingBox.createXY(0.0, 1.0, 0.0, 1.0));
+        } else if(aspectIn > aspectOut){
+            //Need to crop from width dimension
+            croppedW = (int)(aspectOut * image.rows());
+            croppedH = imgH;
+            int delta = imgW - croppedW;
+            x0 = delta / 2;
+            x1 = imgW - (delta/2);
+            y0 = 0;
+            y1 = imgH;
         } else {
-            x = cropSize;
-            newHW = imgH;
+            //Need to crop from the height dimension
+            croppedW = imgW;
+            croppedH = (int)(image.rows() / aspectOut);
+            int delta = imgH - croppedH;
+            x0 = 0;
+            x1 = imgW;
+            y0 = delta / 2;
+            y1 = imgH - (delta/2);
         }
-        Rect crop = new Rect(x, y, newHW, newHW);
-        return image.apply(crop);
+
+        Rect crop = new Rect(x0, y0, croppedW, croppedH);
+        BoundingBox bb = null;
+        if(withBB){
+            double dx1 = x0 / (double)imgW;
+            double dx2 = x1 / (double)imgW;
+            double dy1 = y0 / (double)imgH;
+            double dy2 = y1 / (double)imgH;
+            bb = BoundingBox.createXY(dx1, dx2, dy1, dy2);
+        }
+
+        Mat out = image.apply(crop);
+        return new Pair<>(out, bb);
     }
 
     protected static Mat convertColor(Mat m, ImageToNDArrayConfig config) {

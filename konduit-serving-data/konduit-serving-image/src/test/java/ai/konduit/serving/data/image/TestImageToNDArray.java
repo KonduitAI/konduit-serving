@@ -5,18 +5,21 @@ import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
+import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStepRunner;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.junit.Test;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.common.resources.Resources;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -449,6 +452,121 @@ public class TestImageToNDArray {
                 }
             }
         }
+    }
+
+    @Test
+    public void testMetaData(){
+
+        int inH = 32;
+        int inW = 48;
+
+        int r = 255;
+        int g = 128;
+        int b = 32;
+        BufferedImage bi = createConstantImageRgb(inH, inW, r, g, b);
+
+        Data in = Data.singleton("image", Image.create(bi));
+
+        List<Pair<Integer,Integer>> outHWVals = Arrays.asList(Pair.of(32, 48), Pair.of(32,32), Pair.of(32,16), Pair.of(16, 32));
+
+        for(Pair<Integer,Integer> outHW : outHWVals){
+
+
+            int oH = outHW.getFirst();
+            int oW = outHW.getSecond();
+
+            Pipeline p = SequencePipeline.builder()
+                    .add(ImageToNDArrayStep.builder()
+                            .metadata(true)
+                            .metadataKey("Metakey")
+                            .outputNames(Arrays.asList("myNDArray"))
+                            .config(ImageToNDArrayConfig.builder()
+                                    .height(oH)
+                                    .width(oW)
+                                    .includeMinibatchDim(false)
+                                    .dataType(NDArrayType.FLOAT)
+                                    .build())
+                            .build())
+                    .build();
+
+            PipelineExecutor exec = p.executor();
+
+            Data out = exec.exec(null, in);
+
+            Data meta = out.getMetaData();
+            assertNotNull(meta);
+            assertTrue(meta.has("Metakey"));
+
+            Data d = meta.getData("Metakey");
+            assertTrue(d.has(ImageToNDArrayStep.META_INNAME_KEY));
+            assertTrue(d.has(ImageToNDArrayStep.META_OUTNAME_KEY));
+            assertTrue(d.has(ImageToNDArrayStep.META_CROP_REGION));
+            assertTrue(d.has(ImageToNDArrayStep.META_IMG_H));
+            assertTrue(d.has(ImageToNDArrayStep.META_IMG_W));
+
+            assertEquals(inH, d.getLong(ImageToNDArrayStep.META_IMG_H));
+            assertEquals(inW, d.getLong(ImageToNDArrayStep.META_IMG_W));
+            assertEquals("myNDArray", d.getString(ImageToNDArrayStep.META_OUTNAME_KEY));
+            assertEquals("image", d.getString(ImageToNDArrayStep.META_INNAME_KEY));
+
+            BoundingBox bb = d.getBoundingBox(ImageToNDArrayStep.META_CROP_REGION);
+//            System.out.println(bb);
+
+            //Check crop region
+            double eX1;
+            double eX2;
+            double eY1;
+            double eY2;
+
+            double aspectImage = inW / (double)inH;
+            double aspectNDArray = oW / (double)oH;
+
+            if(oW == inW && aspectImage == aspectNDArray){
+                eX1 = 0.0;
+                eX2 = 1.0;
+            } else {
+                if(aspectImage > aspectNDArray){
+                    //Crop from width dimension
+                    int croppedImgW = (int)(aspectNDArray * inH);
+                    int delta = inW - croppedImgW;
+                    eX1 = (delta / 2) / (double)inW;
+                    eX2 = (inW - delta / 2) / (double)inW;
+                } else {
+                    //Crop from height dimension
+                    eX1 = 0.0;
+                    eX2 = 1.0;
+                }
+            }
+
+            if(oH == inH && aspectImage == aspectNDArray){
+                eY1 = 0.0;
+                eY2 = 1.0;
+            } else {
+                if(aspectImage > aspectNDArray){
+                    //Crop from width dimension
+                    eY1 = 0.0;
+                    eY2 = 1.0;
+                } else {
+                    //Crop from height dimension
+                    int croppedImgH = (int)(inH / aspectNDArray);
+                    double delta = inH - croppedImgH;
+                    eY1 = (delta / 2) / (double)inH;
+                    eY2 = (inH - delta / 2) / (double)inH;
+                }
+            }
+
+            double pX1 = eX1 * inW;
+            double pX2 = eX2 * inW;
+            double pY1 = eY1 * inH;
+            double pY2 = eY2 * inH;
+
+            assertEquals(eX1, bb.x1(), 1e-6);
+            assertEquals(eX2, bb.x2(), 1e-6);
+            assertEquals(eY1, bb.y1(), 1e-6);
+            assertEquals(eY2, bb.y2(), 1e-6);
+        }
+
+
     }
 
 
