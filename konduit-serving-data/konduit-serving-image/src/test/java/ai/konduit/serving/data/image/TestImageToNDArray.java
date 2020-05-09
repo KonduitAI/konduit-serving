@@ -1,6 +1,7 @@
 package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
@@ -56,113 +57,121 @@ public class TestImageToNDArray {
         int h = 32;
         int w = 28; //Intentionally different for this test
 
-        for(String color : new String[]{"red", "green", "blue"}){
-            int[][][] rgbArr = singleColorRGB(h, w, color);
-            BufferedImage bi = toBufferedImage(rgbArr);
-            Image i = Image.create(bi);
+        for(boolean scaleNorm : new boolean[]{false, true}) {
 
-            Data d = Data.singleton("image", i);
+            for (String color : new String[]{"red", "green", "blue"}) {
+                int[][][] rgbArr = singleColorRGB(h, w, color);
+                BufferedImage bi = toBufferedImage(rgbArr);
+                Image i = Image.create(bi);
 
-            for(boolean rgb : new boolean[]{true, false}){
-                for(NDFormat f : NDFormat.values()) {           //Channels first or channels last
-                    for (boolean leadingDim : new boolean[]{false, true}) {
-                        System.out.println(color + " - rgb=" + rgb + " - " + f);
+                Data d = Data.singleton("image", i);
 
-                        Pipeline p = SequencePipeline.builder()
-                                .add(ImageToNDArrayStep.builder()
-                                        .config(ImageToNDArrayConfig.builder()
-                                                .height(h)
-                                                .width(w)
-                                                .channelLayout(rgb ? NDChannelLayout.RGB : NDChannelLayout.BGR)
-                                                .format(f)
-                                                .includeMinibatchDim(leadingDim)
-                                                .build())
-                                        .build())
-                                .build();
+                for (boolean rgb : new boolean[]{true, false}) {
+                    for (NDFormat f : NDFormat.values()) {           //Channels first or channels last
+                        for (boolean leadingDim : new boolean[]{false, true}) {
+                            System.out.println(color + " - rgb=" + rgb + " - " + f + " - scaleNorm = " + scaleNorm);
 
-                        PipelineExecutor exec = p.executor();
+                            Pipeline p = SequencePipeline.builder()
+                                    .add(ImageToNDArrayStep.builder()
+                                            .config(ImageToNDArrayConfig.builder()
+                                                    .height(h)
+                                                    .width(w)
+                                                    .channelLayout(rgb ? NDChannelLayout.RGB : NDChannelLayout.BGR)
+                                                    .format(f)
+                                                    .includeMinibatchDim(leadingDim)
+                                                    .normalization(new ImageNormalization(scaleNorm ? ImageNormalization.Type.SCALE : ImageNormalization.Type.NONE))
+                                                    .build())
+                                            .build())
+                                    .build();
 
-                        Data out = exec.exec(null, d);
+                            PipelineExecutor exec = p.executor();
 
-                        assertTrue(out.has("image"));
-                        assertEquals(ValueType.NDARRAY, out.type("image"));
-                        NDArray arr = out.getNDArray("image");
-                        assertEquals(NDArrayType.FLOAT, arr.type());
+                            Data out = exec.exec(null, d);
 
-                        long[] expShape;
-                        if(f == NDFormat.CHANNELS_FIRST){
-                            expShape = leadingDim ? new long[]{1, 3, h, w} : new long[]{3, h, w};
-                        } else {
-                            expShape = leadingDim ? new long[]{1, h, w, 3} : new long[]{h, w, 3};
-                        }
+                            assertTrue(out.has("image"));
+                            assertEquals(ValueType.NDARRAY, out.type("image"));
+                            NDArray arr = out.getNDArray("image");
+                            assertEquals(NDArrayType.FLOAT, arr.type());
 
-                        assertArrayEquals(expShape, arr.shape());
-
-                        //Check actual values:
-                        float[][][] fArr;
-                        if(leadingDim){
-                            fArr = arr.getAs(float[][][][].class)[0];
-                        } else {
-                            fArr = arr.getAs(float[][][].class);
-                        }
-                        int cDim = (f == NDFormat.CHANNELS_FIRST) ? 0 : 2;
-                        int idx255 = -1;
-                        if(rgb){
-                            switch (color){
-                                case "red":
-                                    idx255 = 0;
-                                    break;
-                                case "green":
-                                    idx255 = 1;
-                                    break;
-                                case "blue":
-                                    idx255 = 2;
+                            long[] expShape;
+                            if (f == NDFormat.CHANNELS_FIRST) {
+                                expShape = leadingDim ? new long[]{1, 3, h, w} : new long[]{3, h, w};
+                            } else {
+                                expShape = leadingDim ? new long[]{1, h, w, 3} : new long[]{h, w, 3};
                             }
-                        } else {
-                            //BGR
-                            switch (color){
-                                case "red":
-                                    idx255 = 2;
-                                    break;
-                                case "green":
-                                    idx255 = 1;
-                                    break;
-                                case "blue":
-                                    idx255 = 0;
-                            }
-                        }
 
-                        if(f == NDFormat.CHANNELS_FIRST){
-                            //CHW
-                            for (int y = 0; y < h; y++) {
-                                for (int x = 0; x < w; x++) {
-                                    for( int c = 0; c<3; c++ ){
-                                        if(c == idx255){
-                                            assertEquals(255, fArr[c][y][x], 0.0f);
-                                        } else {
-                                            assertEquals(0, fArr[c][y][x], 0.0f);
+                            assertArrayEquals(expShape, arr.shape());
+
+                            //Check actual values:
+                            float[][][] fArr;
+                            if (leadingDim) {
+                                fArr = arr.getAs(float[][][][].class)[0];
+                            } else {
+                                fArr = arr.getAs(float[][][].class);
+                            }
+                            int cDim = (f == NDFormat.CHANNELS_FIRST) ? 0 : 2;
+                            int idx255 = -1;
+                            if (rgb) {
+                                switch (color) {
+                                    case "red":
+                                        idx255 = 0;
+                                        break;
+                                    case "green":
+                                        idx255 = 1;
+                                        break;
+                                    case "blue":
+                                        idx255 = 2;
+                                }
+                            } else {
+                                //BGR
+                                switch (color) {
+                                    case "red":
+                                        idx255 = 2;
+                                        break;
+                                    case "green":
+                                        idx255 = 1;
+                                        break;
+                                    case "blue":
+                                        idx255 = 0;
+                                }
+                            }
+
+                            float maxExp = scaleNorm ? 1.0f : 255.0f;
+                            if (f == NDFormat.CHANNELS_FIRST) {
+                                //CHW
+                                for (int y = 0; y < h; y++) {
+                                    for (int x = 0; x < w; x++) {
+                                        for (int c = 0; c < 3; c++) {
+                                            if (c == idx255) {
+                                                assertEquals(maxExp, fArr[c][y][x], 0.0f);
+                                            } else {
+                                                assertEquals(0, fArr[c][y][x], 0.0f);
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                //HWC
+                                for (int y = 0; y < h; y++) {
+                                    for (int x = 0; x < w; x++) {
+                                        for (int c = 0; c < 3; c++) {
+                                            if (c == idx255) {
+                                                assertEquals(maxExp, fArr[y][x][c], 0.0f);
+                                            } else {
+                                                assertEquals(0, fArr[y][x][c], 0.0f);
+                                            }
                                         }
                                     }
                                 }
                             }
-                        } else {
-                            //HWC
-                            for (int y = 0; y < h; y++) {
-                                for (int x = 0; x < w; x++) {
-                                    for( int c = 0; c<3; c++ ){
-                                        if(c == idx255){
-                                            assertEquals(255, fArr[y][x][c], 0.0f);
-                                        } else {
-                                            assertEquals(0, fArr[y][x][c], 0.0f);
-                                        }
-                                    }
-                                }
-                            }
-                        }
 
-                        String json = p.toJson();
-                        Pipeline pJson = Pipeline.fromJson(json);
-                        assertEquals(p, pJson);
+                            String json = p.toJson();
+                            Pipeline pJson = Pipeline.fromJson(json);
+                            assertEquals(p, pJson);
+
+                            Data outPJson = pJson.executor().exec(null, d);
+                            assertEquals(out, outPJson);
+                        }
                     }
                 }
             }
@@ -230,6 +239,9 @@ public class TestImageToNDArray {
                             String json = p.toJson();
                             Pipeline pJson = Pipeline.fromJson(json);
                             assertEquals(p, pJson);
+
+                            Data outPJson = pJson.executor().exec(null, d);
+                            assertEquals(out, outPJson);
                         }
                     }
                 }
