@@ -45,6 +45,23 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.4.1</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/gen/clients</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-maven-plugin</artifactId>
                 <version>${swagger-core.version}</version>
@@ -59,7 +76,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>compile</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>resolve</goal>
                         </goals>
@@ -84,7 +101,7 @@
                             <configOptions>
                                 <sourceFolder>src/gen/java/main</sourceFolder>
                             </configOptions>
-                            <output>${project.build.directory}/generated-sources/openapi/python</output>
+                            <output>src/gen/clients/python</output>
                         </configuration>
                     </execution>
                     <execution>
@@ -99,7 +116,7 @@
                             <configOptions>
                                 <sourceFolder>src/gen/java/main</sourceFolder>
                             </configOptions>
-                            <output>${project.build.directory}/generated-sources/openapi/java</output>
+                            <output>src/gen/clients/java</output>
                         </configuration>
                     </execution>
                     <execution>
@@ -114,7 +131,7 @@
                             <configOptions>
                                 <sourceFolder>src/gen/java/main</sourceFolder>
                             </configOptions>
-                            <output>${project.build.directory}/generated-sources/openapi/csharp</output>
+                            <output>src/gen/clients/csharp</output>
                         </configuration>
                     </execution>
                 </executions>
