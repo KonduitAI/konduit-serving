@@ -18,6 +18,7 @@ package ai.konduit.serving.pipeline.api;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @AllArgsConstructor

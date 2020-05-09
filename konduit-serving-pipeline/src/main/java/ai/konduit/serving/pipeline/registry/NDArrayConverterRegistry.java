@@ -85,7 +85,7 @@ public class NDArrayConverterRegistry extends AbstractRegistry<NDArrayConverter>
         }
 
         //No factory is available. Try to fall back on X -> SerializedNDArray -> Y
-        if(type != SerializedNDArray.class){
+        if(type != SerializedNDArray.class && !(arr.get() instanceof SerializedNDArray)){
             NDArrayConverter c1 = getConverterForClass(arr, SerializedNDArray.class);
             if(c1 != null){
                 NDArray arr2 = NDArray.create(c1.convert(arr, SerializedNDArray.class));            //TODO this is ugly - we throw this result away!

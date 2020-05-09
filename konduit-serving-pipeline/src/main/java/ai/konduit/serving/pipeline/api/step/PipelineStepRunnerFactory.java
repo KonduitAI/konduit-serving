@@ -35,17 +35,17 @@ public interface PipelineStepRunnerFactory {
      * Returns true if the PipelineRunnerFactory is able to create a PipelineStepRunner for this particular
      * type of pipeline step
      *
-     * @param pipelineStep The pipeline step to check if this PipelineRunnerFactory can execute
+     * @param step The pipeline step to check if this PipelineRunnerFactory can execute
      * @return True if the pipeline step can be executed by the type of runners that this factory creates
      */
-    boolean canRun(PipelineStep pipelineStep);
+    boolean canRun(PipelineStep step);
 
     /**
      * Returns a {@link PipelineStepRunner} that can be used to execute the given PipelineStep
      *
-     * @param pipelineStep The pipeline step to execute
+     * @param step The pipeline step to execute
      * @return The instantiated PipelineStepRunner
      */
-    PipelineStepRunner create(PipelineStep pipelineStep);
+    PipelineStepRunner create(PipelineStep step);
 
 }

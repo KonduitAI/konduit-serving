@@ -128,5 +128,4 @@ public class JavaImageConverters {
             return (T) new Png(bytes);
         }
     }
-
 }
