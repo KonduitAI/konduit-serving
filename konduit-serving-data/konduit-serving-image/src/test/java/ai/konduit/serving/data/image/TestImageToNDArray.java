@@ -15,6 +15,8 @@ import org.nd4j.common.resources.Resources;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 
@@ -296,6 +298,165 @@ public class TestImageToNDArray {
         }
 
         return bi;
+    }
+
+    public BufferedImage createConstantImageRgb(int h, int w, int red, int green, int blue){
+        BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+
+        for( int i=0; i<h; i++){
+            for( int j=0; j<w; j++ ){
+                int rgb = red << 16 | green << 8 | blue;
+                bi.setRGB(j, i, rgb);
+            }
+        }
+
+        return bi;
+    }
+
+
+    @Test
+    public void testImageNormalizationRgbBgr(){
+        //Test image normalization - RGB and BGR
+
+        int r = 255;
+        int g = 128;
+        int b = 32;
+        BufferedImage bi = createConstantImageRgb(32, 32, r, g, b);
+
+        double[] meanRgb = {128, 200, 50};
+        double[] stdRgb = {180, 140, 100};
+
+        Data in = Data.singleton("image", Image.create(bi));
+
+        for(ImageNormalization.Type normType : ImageNormalization.Type.values()){
+            float expR, expG, expB;
+            switch (normType){
+                case NONE:
+                    expR = r;
+                    expG = g;
+                    expB = b;
+                    break;
+                case SCALE:
+                    expR = r / 255f;
+                    expG = g / 255f;
+                    expB = b / 255f;
+                    break;
+                case SUBTRACT_MEAN:
+                    expR = r - (float)meanRgb[0];
+                    expG = g - (float)meanRgb[1];
+                    expB = b - (float)meanRgb[2];
+                    break;
+                case STANDARDIZE:
+                    expR = (r - (float)meanRgb[0]) / (float)stdRgb[0];
+                    expG = (g - (float)meanRgb[1]) / (float)stdRgb[1];
+                    expB = (b - (float)meanRgb[2]) / (float)stdRgb[2];
+                    break;
+                case INCEPTION:
+                    expR = ((r / 255f) - 0.5f) * 2.0f;
+                    expG = ((g / 255f) - 0.5f) * 2.0f;
+                    expB = ((b / 255f) - 0.5f) * 2.0f;
+                    break;
+                case VGG_SUBTRACT_MEAN:
+                    double[] vggmean = ImageNormalization.getVggMeanRgb();
+                    expR = r - (float)vggmean[0];
+                    expG = g - (float)vggmean[1];
+                    expB = b - (float)vggmean[2];
+                    break;
+                default:
+                    throw new RuntimeException();
+            }
+
+            boolean needsMean = normType == ImageNormalization.Type.SUBTRACT_MEAN || normType == ImageNormalization.Type.STANDARDIZE;
+            boolean needsStd = normType == ImageNormalization.Type.STANDARDIZE;
+
+            ImageNormalization norm = new ImageNormalization()
+                    .type(normType)
+                    .meanRgb(needsMean ? meanRgb : null)
+                    .stdRgb(needsStd ? stdRgb : null);
+
+
+            for(boolean rgb : new boolean[]{true, false}) {
+                for(NDFormat f : NDFormat.values()) {
+
+
+                    Pipeline p = SequencePipeline.builder()
+                            .add(ImageToNDArrayStep.builder()
+                                    .outputNames(Collections.singletonList("im2ndarray"))
+                                    .config(ImageToNDArrayConfig.builder()
+                                            .normalization(norm)
+                                            .height(32)
+                                            .width(32)
+                                            .channelLayout(rgb ? NDChannelLayout.RGB : NDChannelLayout.BGR)
+                                            .format(f)
+                                            .includeMinibatchDim(false)
+                                            .dataType(NDArrayType.FLOAT)
+                                            .build())
+                                    .build())
+                            .build();
+
+                    PipelineExecutor exec = p.executor();
+                    Data out = exec.exec(null, in);
+
+                    NDArray arr = out.getNDArray("im2ndarray");
+                    assertEquals(NDArrayType.FLOAT, arr.type());
+
+                    float[][][] fArr = arr.getAs(float[][][].class);
+
+
+                    if(f == NDFormat.CHANNELS_FIRST){
+                        //CHW
+                        for( int c = 0; c<3; c++){
+                            float e;
+                            if(rgb) {
+                                if(c == 0) e = expR;
+                                else if(c == 1) e = expG;
+                                else e = expB;
+                            } else {
+                                if(c == 0) e = expB;
+                                else if(c == 1) e = expG;
+                                else e = expR;
+                            }
+
+                            for( int y=0; y<32; y++){
+                                for( int x=0; x<32; x++ ){
+                                    float a = fArr[c][y][x];
+                                    assertEquals(e, a, 1e-4f);
+                                }
+                            }
+                        }
+                    } else {
+                        //HWC
+                        for( int y=0; y<32; y++){
+                            for( int x=0; x<32; x++ ){
+                                for( int c = 0; c<3; c++){
+                                    float e;
+                                    if(rgb) {
+                                        if(c == 0) e = expR;
+                                        else if(c == 1) e = expG;
+                                        else e = expB;
+                                    } else {
+                                        if(c == 0) e = expB;
+                                        else if(c == 1) e = expG;
+                                        else e = expR;
+                                    }
+
+                                    float a = fArr[y][x][c];
+                                    assertEquals(e, a, 1e-4f);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    @Test
+    public void testImageNormalizationNonRgb(){
+        //Test image normalization - RGBA, BGRA, GRAYSCALE
+
+        System.out.println("***** NON-RGB NORMALIZATION NOT YET IMPLEMENTED *****");
     }
 
 }
