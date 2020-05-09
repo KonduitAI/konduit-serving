@@ -9,6 +9,7 @@ import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;
+import org.nd4j.common.base.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,20 +42,32 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
          */
 
         List<String> toConvert = step.getKeys();
+        List<String> outNames = step.getOutputNames();
+        boolean inferOutNames = (outNames == null) || outNames.isEmpty();
+        if(inferOutNames)
+            outNames = new ArrayList<>();
+
         if(toConvert == null){
             toConvert = new ArrayList<>();
             for(String s : data.keys()){
                 if(data.type(s) == ValueType.IMAGE){
                     toConvert.add(s);
+
+                    if(inferOutNames)
+                        outNames.add(s);
                 }
             }
         }
 
+        Preconditions.checkState(toConvert.size() == outNames.size(), "Got (or inferred) a difference number of input images key" +
+                " vs. output names: inputToConvert=%s, outputNames=%s", toConvert, outNames);
+
         Data d = Data.empty();
+        int idx = 0;
         for(String s : toConvert){
             Image i = data.getImage(s);
             NDArray array = ImageToNDArray.convert(i, step.getConfig());
-            d.put(s, array);
+            d.put(outNames.get(idx++), array);
         }
 
         if(step.isKeepOtherValues()) {

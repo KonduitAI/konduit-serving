@@ -16,13 +16,16 @@ public class ImageToNDArrayStep implements PipelineStep {
 
     private ImageToNDArrayConfig config;
     private List<String> keys;
+    private List<String> outputNames;
     @Builder.Default
     private boolean keepOtherValues = true;
 
     public ImageToNDArrayStep(@JsonProperty("config") ImageToNDArrayConfig config, @JsonProperty("keys") List<String> keys,
+                              @JsonProperty("outputNames") List<String> outputNames,
                               @JsonProperty("keepOtherValues") boolean keepOtherValues){
         this.config = config;
         this.keys = keys;
+        this.outputNames = outputNames;
         this.keepOtherValues = keepOtherValues;
     }
 

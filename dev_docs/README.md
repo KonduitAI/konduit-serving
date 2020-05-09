@@ -30,7 +30,7 @@ The list below briefly describes those implemented so far (as of 05/05/2020)- th
     * konduit-serving-deeplearning4j: Deeplearning4j models.
 * konduit-serving-data: Parent module for data and datatypes
     * konduit-serving-nd4j: Mainly NDArray integration/functionality for ND4J
-    * konduit-serving-javacv: Image conversion functionality for JavaCV 
+    * konduit-serving-image: Image conversion functionality using JavaCV; also Image -> NDArray functionality 
 * konduit-serving-io: Parent module for I/O functionality - sensors, cameras, etc - and maybe later things like HDFS, S3, etc
     * konduit-serving-camera: Steps related to capturing data from device-connected cameras (WIP)
 
@@ -262,6 +262,25 @@ As of 07/05/2020 supported NDArray formats include:
 * float[], float[][], float[][][], float[][][][], float[][][][][]
 * INDArray      (konduit-serving-nd4j)
 The full set of Java primitive array types (1d to 5d int[], double[], byte[] etc is planned to be added)
+
+
+### Image to NDArray
+
+At some point, if we want to make predictions based on an Image, we need to convert it to an NDArray, and likely normalize it.
+
+There are two main classes (both in )
+* ImageToNDArrayStep - Image -> NDArray as a pipeline step 
+* ImageToNDArray utility class
+
+Both of these take an ImageToNDArrayConfig to specify the format, which allows configuration of:
+* The output NDArray height/width
+* The output NDArray datatype (i.e., float, double, etc)
+* Whether a leading dimension (of size 1) should be included or not - i.e., [c,h,w] or [1,c,h,w] (or similar for channels last) 
+* How to handle the situation where image aspect ratio doesn't match the output NDArray aspect ratio
+* Whether to use channels first or channels last for the NDArray
+* The chanels layout - RGB, BGR, etc
+* The normalization to apply (build in methods: none, scale 0-1, subtract mean, standardize, inception or VGG)
+
 
 
 ## JSON Serialization / Deserialization

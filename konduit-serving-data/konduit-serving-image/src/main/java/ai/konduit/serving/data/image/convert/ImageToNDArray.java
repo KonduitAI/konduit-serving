@@ -1,6 +1,7 @@
 package ai.konduit.serving.data.image.convert;
 
 import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
+import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -14,6 +15,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.util.ArrayUtil;
 
 import java.nio.*;
 import java.util.function.IntToDoubleFunction;
@@ -125,6 +127,10 @@ public class ImageToNDArray {
         return m;
     }
 
+    public interface FloatNormalizer {
+        float normalize(float f, int channel);
+    }
+
     protected static ByteBuffer toFloatBuffer(Mat m, ImageToNDArrayConfig config) {
         Preconditions.checkState(config.channelLayout() == NDChannelLayout.RGB || config.channelLayout() == NDChannelLayout.BGR,
                 "Only RGB and BGR conversion implement so far");
@@ -144,6 +150,51 @@ public class ImageToNDArray {
 
         boolean rgb = config.channelLayout() == NDChannelLayout.RGB;
 
+        FloatNormalizer f;
+        ImageNormalization n = config.normalization();
+        if(n == null || n.type() == ImageNormalization.Type.NONE){
+            f = (x,c) -> x;     //No-op
+        } else {
+            switch (config.normalization().type()){
+                case SCALE:
+                    float scale = n.maxValue() == null ? 255.0f : n.maxValue().floatValue();
+                    f = (x,c) -> (x / scale);
+                    break;
+                case SUBTRACT_MEAN:
+                    //TODO support grayscale
+                    Preconditions.checkState(n.meanRgb() != null, "Error during normalization: Normalization type is set to " +
+                            "SUBTRACT_MEAN but not meanRgb array is provided");
+                    double[] mrgb = n.meanRgb();
+                    float[] channelMeans = rgb ? ArrayUtil.toFloats(mrgb) : new float[]{(float) mrgb[2], (float) mrgb[1], (float) mrgb[0]};
+                    f = (x,c) -> (x - channelMeans[c]);
+                    break;
+                case STANDARDIZE:
+                    Preconditions.checkState(n.meanRgb() != null, "Error during normalization: Normalization type is set to " +
+                            "STANDARDIZE but not meanRgb array is provided");
+                    Preconditions.checkState(n.stdRgb() != null, "Error during normalization: Normalization type is set to " +
+                            "STANDARDIZE but not stdRgb array is provided");
+                    double[] mrgb2 = n.meanRgb();
+                    double[] stdrgb = n.stdRgb();
+                    float[] channelMeans2 = rgb ? ArrayUtil.toFloats(mrgb2) : new float[]{(float) mrgb2[2], (float) mrgb2[1], (float) mrgb2[0]};
+                    float[] channelStd = rgb ? ArrayUtil.toFloats(stdrgb) : new float[]{(float) stdrgb[2], (float) stdrgb[1], (float) stdrgb[0]};
+                    f = (x,c) -> ( (x-channelMeans2[c]) / channelStd[c]);
+                    break;
+                case INCEPTION:
+                    float scale2 = n.maxValue() == null ? 255.0f : n.maxValue().floatValue();
+                    f = (x,c) -> ( ((x/scale2) - 0.5f) * 2.0f );
+                    break;
+                case VGG_SUBTRACT_MEAN:
+                    double[] mrgbVgg = ImageNormalization.getVggMeanRgb();
+                    float[] channelMeansVGG = rgb ? ArrayUtil.toFloats(mrgbVgg) : new float[]{(float) mrgbVgg[2], (float) mrgbVgg[1], (float) mrgbVgg[0]};
+                    f = (x,c) -> (x - channelMeansVGG[c]);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unsupported image normalization type: " + config.normalization().type());
+            }
+        }
+
+
+
         Indexer imgIdx = m.createIndexer(direct);
         if (imgIdx instanceof UByteIndexer) {
             UByteIndexer ubIdx = (UByteIndexer) imgIdx;
@@ -157,7 +208,8 @@ public class ImageToNDArray {
                             for (int x = 0; x < w; x++) {
                                 int idxBGR = (ch * w * y) + (ch * x) + rgbToBgr[c];
                                 int v = ubIdx.get(idxBGR);
-                                fb.put(v);
+                                float normalized = f.normalize(v, c);
+                                fb.put(normalized);
                             }
                         }
                     }
@@ -168,7 +220,8 @@ public class ImageToNDArray {
                             for (int x = 0; x < w; x++) {
                                 int idxBGR = (ch * w * y) + (ch * x) + c;
                                 int v = ubIdx.get(idxBGR);
-                                fb.put(v);
+                                float normalized = f.normalize(v, c);
+                                fb.put(normalized);
                             }
                         }
                     }
@@ -180,14 +233,15 @@ public class ImageToNDArray {
                         int b = ubIdx.get(i);
                         int g = ubIdx.get(i + 1);
                         int r = ubIdx.get(i + 2);
-                        fb.put(r);
-                        fb.put(g);
-                        fb.put(b);
+                        fb.put(f.normalize(r, 0));
+                        fb.put(f.normalize(g, 1));
+                        fb.put(f.normalize(b, 2));
                     }
                 } else {
                     //Mat is HWC in BGR, we want (N)HWC in BGR format
                     for (int i = 0; i < lengthElements; i++) {
-                        fb.put(ubIdx.get(i));
+                        float normalized = f.normalize(ubIdx.get(i), i % 3);
+                        fb.put(normalized);
                     }
                 }
             }
