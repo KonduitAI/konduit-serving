@@ -18,10 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.data;
 
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.data.*;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
 
@@ -68,6 +65,10 @@ public class DataJsonTest {
                     break;
                 case LIST:
                     d = Data.singletonList("myKey", Arrays.asList("some", "list", "values"), ValueType.STRING);
+                    break;
+                case BOUNDING_BOX:
+                    d = Data.singleton("myKey", BoundingBox.create(0.5, 0.4, 0.9, 1.0));
+                    d.put("myKey2", BoundingBox.createXY(0.1, 1, 0.2, 0.9, "label", 0.7));
                     break;
                 default:
                     throw new RuntimeException();
@@ -142,6 +143,11 @@ public class DataJsonTest {
                 case DATA:
                     List<Data> dataList = Arrays.asList(Data.singleton("key", "value"), Data.singletonList("key", Arrays.asList("string", "list"), ValueType.STRING));
                     d = Data.singletonList("key", dataList, ValueType.DATA);
+                    break;
+                case BOUNDING_BOX:
+                    List<BoundingBox> bbList = Arrays.asList(BoundingBox.createXY(0.2, 0.4, 0.7, 0.9, "myLabel", 0.8),
+                            BoundingBox.create(0.4, 0.5, 0.3, 0.1, "otherlabel", 0.99));
+                    d = Data.singletonList("key", bbList, ValueType.BOUNDING_BOX);
                     break;
                 default:
                     throw new RuntimeException();

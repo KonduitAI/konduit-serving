@@ -15,10 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data;
 
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.impl.data.wrappers.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +30,7 @@ public class JData implements Data {
     private Data metaData;
 
     private static final String VALUE_NOT_FOUND_TEXT = "Value not found for key %s";
-    private static final String VALUE_HAS_WRONG_TYPE_TEXT = "Value has wrong type for key %s";
+    private static final String VALUE_HAS_WRONG_TYPE_TEXT = "Value has wrong type for key %s: requested type %s, actual type %s";
 
     public Map<String, Value> getDataMap() {
         return dataMap;
@@ -67,7 +64,7 @@ public class JData implements Data {
         if (data == null)
             throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
         if (data.type() != type)
-            throw new IllegalStateException(String.format(VALUE_HAS_WRONG_TYPE_TEXT, key));
+            throw new IllegalStateException(String.format(VALUE_HAS_WRONG_TYPE_TEXT, key, type, data.type()));
         return data;
     }
 
@@ -142,6 +139,12 @@ public class JData implements Data {
     }
 
     @Override
+    public BoundingBox getBoundingBox(String key) throws ValueNotFoundException {
+        Value<BoundingBox> data = valueIfFound(key, ValueType.BOUNDING_BOX);
+        return data.get();
+    }
+
+    @Override
     public List<Object> getList(String key, ValueType type) {
         Value<List<Object>> data = valueIfFound(key, ValueType.LIST);
         return data.get();
@@ -196,6 +199,12 @@ public class JData implements Data {
     }
 
     @Override
+    public void put(String key, BoundingBox data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new BBoxValue(data));
+    }
+
+    @Override
     public void put(String key, Data data) {
         Data.assertNotReservedKey(key);
         this.dataMap.put(key, new DataValue(data));
@@ -247,6 +256,11 @@ public class JData implements Data {
     public void putListNDArray(String key, List<NDArray> data) {
         Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, ValueType.NDARRAY));
+    }
+
+    @Override
+    public void putListBoundingBox(String key, List<BoundingBox> data) {
+        dataMap.put(key, new ListValue(data, ValueType.BOUNDING_BOX));
     }
 
     public void putList(String key, List<?> data, ValueType vt){
@@ -329,6 +343,8 @@ public class JData implements Data {
         }
         else if (data instanceof Image) {
             instance.put(key, (Image)data);
+        } else if(data instanceof BoundingBox){
+            instance.put(key, (BoundingBox)data);
         }
 //        else if (data instanceof Object) {
 //            instance.put(key, (Object)data);
@@ -358,11 +374,13 @@ public class JData implements Data {
             instance.putListData(key, (List<Data>) data);
         } else if (valueType == ValueType.BYTES) {
             instance.putListBytes(key, (List<byte[]>) data);
+        } else if(valueType == ValueType.BOUNDING_BOX){
+            instance.putListBoundingBox(key, (List<BoundingBox>)data);
         } else if (valueType == ValueType.LIST) {
             //TODO don't use JData - use Data interface
             instance.putList(key, data, valueType);
         } else {
-            throw new IllegalStateException("Trying to put list data of not supported type: " + data.getClass());
+            throw new IllegalStateException("Trying to put list data of not supported type: " + valueType);
         }
         return instance;
     }

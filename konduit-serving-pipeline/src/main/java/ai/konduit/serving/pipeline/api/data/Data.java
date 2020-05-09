@@ -48,11 +48,22 @@ public interface Data {
     String RESERVED_KEY_NDARRAY_DATA_BASE64 = "@NDArrayDataBase64";
     String RESERVED_KEY_NDARRAY_DATA_ARRAY = "@NDArrayDataBase64";
     String RESERVED_KEY_METADATA = "@Metadata";
+    String RESERVED_KEY_BB_X1 = "@x1";
+    String RESERVED_KEY_BB_X2 = "@x2";
+    String RESERVED_KEY_BB_Y1 = "@y1";
+    String RESERVED_KEY_BB_Y2 = "@y2";
+    String RESERVED_KEY_BB_CX = "@cx";
+    String RESERVED_KEY_BB_CY = "@cy";
+    String RESERVED_KEY_BB_H = "@h";
+    String RESERVED_KEY_BB_W = "@w";
+
 
     static List<String> reservedKeywords(){
         return Arrays.asList(RESERVED_KEY_BYTES_BASE64, RESERVED_KEY_BYTES_ARRAY, RESERVED_KEY_IMAGE_FORMAT,
                 RESERVED_KEY_IMAGE_DATA, RESERVED_KEY_NDARRAY_SHAPE, RESERVED_KEY_NDARRAY_TYPE, RESERVED_KEY_NDARRAY_DATA_BASE64,
-                RESERVED_KEY_NDARRAY_DATA_ARRAY, RESERVED_KEY_METADATA);
+                RESERVED_KEY_NDARRAY_DATA_ARRAY, RESERVED_KEY_METADATA,
+                RESERVED_KEY_BB_X1, RESERVED_KEY_BB_X2, RESERVED_KEY_BB_Y1, RESERVED_KEY_BB_Y2,
+                RESERVED_KEY_BB_CX, RESERVED_KEY_BB_CY, RESERVED_KEY_BB_H, RESERVED_KEY_BB_W);
     }
 
     int size();
@@ -91,6 +102,7 @@ public interface Data {
     double getDouble(String key) throws ValueNotFoundException;
     Image getImage(String key) throws ValueNotFoundException;
     long getLong(String key) throws ValueNotFoundException;
+    BoundingBox getBoundingBox(String key) throws ValueNotFoundException;
     List<Object> getList(String key, ValueType type);                   //TODO type
     Data getData(String key);
 
@@ -101,6 +113,7 @@ public interface Data {
     void put(String key, long data);
     void put(String key, double data);
     void put(String key, boolean data);
+    void put(String key, BoundingBox data);
 
     void putListString(String key, List<String> data);
     void putListInt64(String key, List<Long> data);
@@ -110,6 +123,7 @@ public interface Data {
     void putListData(String key, List<Data> data);
     void putListImage(String key, List<Image> data);
     void putListNDArray(String key, List<NDArray> data);
+    void putListBoundingBox(String key, List<BoundingBox> data);
     void put(String key, Data data);
 
     boolean hasMetaData();
@@ -258,7 +272,13 @@ public interface Data {
                     Data d2a = d2.getData(s);
                     if(!equals(d1a, d2a))
                         return false;
-
+                    break;
+                case BOUNDING_BOX:
+                    BoundingBox bb1 = d1.getBoundingBox(s);
+                    BoundingBox bb2 = d2.getBoundingBox(s);
+                    if(!BoundingBox.equals(bb1, bb2))
+                        return false;
+                    break;
             }
         }
 

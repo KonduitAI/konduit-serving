@@ -25,6 +25,7 @@ public enum ValueType {
     DOUBLE,
     INT64,
     BOOLEAN,
+    BOUNDING_BOX,
     DATA,
     LIST
 }

@@ -90,6 +90,8 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                     } else if (n2.has(Data.RESERVED_KEY_IMAGE_DATA)) {
                         //Image
                         d.put(s, deserializeImage(n2));
+                    } else if(n2.has(Data.RESERVED_KEY_BB_CY) || n2.has(Data.RESERVED_KEY_BB_X1)){
+                        d.put(s, deserializeBB(n2));
                     } else {
                         //Must be data
                         Data dInner = deserialize(jp, n2);
@@ -128,6 +130,37 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
         byte[] bytes = Base64.getDecoder().decode(base64Data);
         Png png = new Png(bytes);
         return Image.create(png);
+    }
+
+    protected BoundingBox deserializeBB(JsonNode n2){
+        String label = null;
+        Double prob = null;
+        if(n2.has("label") ){
+            label = n2.get("label").textValue();
+        } else if(n2.has("@label")){
+            label = n2.get("@label").textValue();
+        }
+
+        if(n2.has("probability")){
+            prob = n2.get("probability").doubleValue();
+        } else if(n2.has("@probability")){
+            prob = n2.get("@probability").doubleValue();
+        }
+
+
+        if(n2.has(Data.RESERVED_KEY_BB_CX)){
+            double cx = n2.get(Data.RESERVED_KEY_BB_CX).doubleValue();
+            double cy = n2.get(Data.RESERVED_KEY_BB_CY).doubleValue();
+            double h = n2.get(Data.RESERVED_KEY_BB_H).doubleValue();
+            double w = n2.get(Data.RESERVED_KEY_BB_W).doubleValue();
+            return BoundingBox.create(cx, cy, h, w, label, prob);
+        } else {
+            double x1 = n2.get(Data.RESERVED_KEY_BB_X1).doubleValue();
+            double x2 = n2.get(Data.RESERVED_KEY_BB_X2).doubleValue();
+            double y1 = n2.get(Data.RESERVED_KEY_BB_Y1).doubleValue();
+            double y2 = n2.get(Data.RESERVED_KEY_BB_Y2).doubleValue();
+            return BoundingBox.createXY(x1, x2, y1, y2, label, prob);
+        }
     }
 
     protected byte[] deserializeBytes(JsonNode n2){
@@ -210,6 +243,11 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                     list.add(deserializeList(jp, n.get(i)));
                 }
                 break;
+            case BOUNDING_BOX:
+                for( int i=0; i<size; i++ ){
+                    list.add(deserializeBB(n.get(i)));
+                }
+                break;
             default:
                 throw new IllegalStateException("Unable to deserialize list with values of type: " + listType);
         }
@@ -239,6 +277,8 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
             } else if (n.has(Data.RESERVED_KEY_IMAGE_DATA)) {
                 //Image
                 return ValueType.IMAGE;
+            } else if(n.has(Data.RESERVED_KEY_BB_CX) || n.has(Data.RESERVED_KEY_BB_X1)){
+                return ValueType.BOUNDING_BOX;
             } else {
                 //Must be data
                 return ValueType.DATA;
