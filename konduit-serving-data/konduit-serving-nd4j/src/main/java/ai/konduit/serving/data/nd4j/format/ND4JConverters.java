@@ -20,6 +20,7 @@ package ai.konduit.serving.data.nd4j.format;
 
 import ai.konduit.serving.data.nd4j.util.ND4JUtil;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.api.format.NDArrayConverter;
 import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
@@ -29,9 +30,11 @@ import org.nd4j.common.util.ArrayUtil;
 import org.nd4j.linalg.api.buffer.DataBuffer;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.shape.Shape;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 public class ND4JConverters  {
@@ -215,20 +218,53 @@ public class ND4JConverters  {
 
         public INDArray convert(SerializedNDArray from){
             FloatBuffer fb = from.getBuffer().asFloatBuffer();
-            float a1 = fb.get(0);
-            float a2 = fb.get(1);
-
             DataType dt = ND4JUtil.typeNDArrayTypeToNd4j(from.getType());
             long[] shape = from.getShape();
             long length = ArrayUtil.prodLong(shape);
             DataBuffer db = Nd4j.createBuffer(from.getBuffer(), dt, (int)length, 0);
-            float f1 = db.getFloat(0);
-            float f2 = db.getFloat(1);
             INDArray arr = Nd4j.create(db, shape);
-
             return arr;
         }
     }
 
 
+    @AllArgsConstructor
+    public static class Nd4jToSerializedConverter implements NDArrayConverter {
+        @Override
+        public boolean canConvert(NDArray from, NDArrayFormat to) {
+            return canConvert(from, to.formatType());
+        }
+
+        @Override
+        public boolean canConvert(NDArray from, Class<?> to) {
+            return INDArray.class.isAssignableFrom(from.get().getClass()) && SerializedNDArray.class.isAssignableFrom(to);
+        }
+
+        @Override
+        public <U> U convert(NDArray from, Class<U> to) {
+            Preconditions.checkState(canConvert(from, to), "Unable to convert SerializedNDArray to %s", to);
+            INDArray f = (INDArray) from.get();
+            SerializedNDArray t = convert(f);
+            return (U)t;
+        }
+
+        @Override
+        public <U> U convert(NDArray from, NDArrayFormat<U> to) {
+            Preconditions.checkState(canConvert(from, to), "Unable to convert to format: %s", to);
+            INDArray f = (INDArray) from.get();
+            SerializedNDArray t = convert(f);
+            return (U)t;
+        }
+
+        public SerializedNDArray convert(INDArray from){
+            if(from.isView() || from.ordering() != 'c' || !Shape.hasDefaultStridesForShape(from))
+                from = from.dup('c');
+
+            NDArrayType type = ND4JUtil.typeNd4jToNDArrayType(from.dataType());
+            long[] shape = from.shape();
+            ByteBuffer bb = from.data().asNio();
+
+            return new SerializedNDArray(type, shape, bb);
+        }
+    }
 }

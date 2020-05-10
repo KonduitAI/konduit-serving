@@ -63,6 +63,10 @@ public class SerializedNDArrayConversionTest {
 
             if(exp != null)
                 assertEquals(exp, ia);
+
+            NDArray arr3 = NDArray.create(ia);
+            SerializedNDArray s2 = arr3.getAs(SerializedNDArray.class);
+            assertEquals(sa, s2);
         }
     }
 }
