@@ -6,6 +6,7 @@ import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStepRunner;
+import ai.konduit.serving.data.nd4j.util.ND4JUtil;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -14,6 +15,8 @@ import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.junit.Test;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.common.resources.Resources;
+import org.nd4j.linalg.api.buffer.DataType;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -569,6 +572,67 @@ public class TestImageToNDArray {
 
     }
 
+    @Test
+    public void testTypes(){
+
+        int oH = 128;
+        int oW = 128;
+
+        File f = Resources.asFile("data/mona_lisa.png");
+
+        Pipeline p = SequencePipeline.builder()
+                .add(ImageToNDArrayStep.builder()
+                        .metadata(false)
+                        .config(ImageToNDArrayConfig.builder()
+                                .height(oH)
+                                .width(oW)
+                                .includeMinibatchDim(false)
+                                .dataType(NDArrayType.FLOAT)
+                                .normalization(null)
+                                .build())
+                        .build())
+                .build();
+
+        Data in = Data.singleton("image", Image.create(f));
+        Data out = p.executor().exec(null, in);
+
+        INDArray expFloat = out.getNDArray("image").getAs(INDArray.class);
+
+
+
+        for(NDArrayType t : NDArrayType.values()){
+            if(t == NDArrayType.BOOL || t == NDArrayType.UTF8)
+                continue;
+
+            //Looks like ND4J bug: TODO LOG ISSUE
+            if(t == NDArrayType.BFLOAT16 || t == NDArrayType.UINT64 || t == NDArrayType.UINT32 || t == NDArrayType.UINT16)
+                continue;
+
+            System.out.println("===== " + t + " =====");
+
+            DataType ndt = ND4JUtil.typeNDArrayTypeToNd4j(t);
+            INDArray exp = expFloat.castTo(ndt);
+
+            Pipeline p2 = SequencePipeline.builder()
+                    .add(ImageToNDArrayStep.builder()
+                            .metadata(false)
+                            .config(ImageToNDArrayConfig.builder()
+                                    .height(oH)
+                                    .width(oW)
+                                    .includeMinibatchDim(false)
+                                    .dataType(t)
+                                    .normalization(null)
+                                    .build())
+                            .build())
+                    .build();
+
+            Data out2 = p2.executor().exec(null, in);
+            INDArray act = out2.getNDArray("image").getAs(INDArray.class);
+
+            assertEquals(exp, act);
+        }
+    }
+
 
     @Test
     public void testImageNormalizationNonRgb(){
@@ -576,5 +640,8 @@ public class TestImageToNDArray {
 
         System.out.println("***** NON-RGB NORMALIZATION NOT YET IMPLEMENTED *****");
     }
+
+
+
 
 }

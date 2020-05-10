@@ -217,11 +217,14 @@ public class ND4JConverters  {
         }
 
         public INDArray convert(SerializedNDArray from){
-            FloatBuffer fb = from.getBuffer().asFloatBuffer();
             DataType dt = ND4JUtil.typeNDArrayTypeToNd4j(from.getType());
             long[] shape = from.getShape();
             long length = ArrayUtil.prodLong(shape);
-            DataBuffer db = Nd4j.createBuffer(from.getBuffer(), dt, (int)length, 0);
+
+            ByteBuffer bb = from.getBuffer();
+            bb.rewind();
+
+            DataBuffer db = Nd4j.createBuffer(bb, dt, (int)length, 0);
             INDArray arr = Nd4j.create(db, shape);
             return arr;
         }

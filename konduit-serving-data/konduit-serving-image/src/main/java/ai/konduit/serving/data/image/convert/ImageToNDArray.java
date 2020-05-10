@@ -28,8 +28,7 @@ import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import org.bytedeco.javacpp.Loader;
-import org.bytedeco.javacpp.indexer.Indexer;
-import org.bytedeco.javacpp.indexer.UByteIndexer;
+import org.bytedeco.javacpp.indexer.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
@@ -212,6 +211,9 @@ public class ImageToNDArray {
         Preconditions.checkState(config.channelLayout() == NDChannelLayout.RGB || config.channelLayout() == NDChannelLayout.BGR,
                 "Only RGB and BGR conversion implement so far");
 
+        Preconditions.checkState(config.dataType() != NDArrayType.BOOL && config.dataType() != NDArrayType.UTF8,
+                "%s datatype is not supported for ImageToNDArray", config.dataType());
+
         boolean direct = !Loader.getPlatform().startsWith("android");
 
         //By default, Mat stores values in channels first format - CHW
@@ -222,7 +224,7 @@ public class ImageToNDArray {
         int lengthElements = h * w * ch;
         int lengthBytes = lengthElements * 4;
 
-        ByteBuffer bb = direct ? ByteBuffer.allocateDirect(lengthBytes) : ByteBuffer.allocate(lengthBytes);
+        ByteBuffer bb = direct ? ByteBuffer.allocateDirect(lengthBytes).order(ByteOrder.LITTLE_ENDIAN) : ByteBuffer.allocate(lengthBytes).order(ByteOrder.LITTLE_ENDIAN);
         FloatBuffer fb = bb.asFloatBuffer();
 
         boolean rgb = config.channelLayout() == NDChannelLayout.RGB;
@@ -383,7 +385,7 @@ public class ImageToNDArray {
         }
 
         int bytesLength = toType.width() * length;
-        ByteBuffer bb = direct ? ByteBuffer.allocateDirect(bytesLength) : ByteBuffer.allocate(bytesLength);
+        ByteBuffer bb = direct ? ByteBuffer.allocateDirect(bytesLength).order(ByteOrder.LITTLE_ENDIAN) : ByteBuffer.allocate(bytesLength).order(ByteOrder.LITTLE_ENDIAN);
 
         switch (toType) {
             case DOUBLE:
@@ -407,7 +409,7 @@ public class ImageToNDArray {
                     ib.put((int) f.applyAsDouble(i));
                 break;
             case INT16:
-                ShortBuffer sb = from.asShortBuffer();
+                ShortBuffer sb = bb.asShortBuffer();
                 for (int i = 0; i < length; i++)
                     sb.put((short) f.applyAsDouble(i));
                 break;
@@ -415,14 +417,37 @@ public class ImageToNDArray {
                 for (int i = 0; i < length; i++)
                     bb.put((byte) f.applyAsDouble(i));
                 break;
-            case FLOAT16:
-            case BFLOAT16:
-            case UINT64:
-            case UINT32:
-            case UINT16:
             case UINT8:
-            case BOOL:
-            case UTF8:
+                //TODO inefficient - x -> double -> int -> uint8
+                UByteIndexer idx_ui8 = UByteIndexer.create(bb);
+                for( int i=0; i<length; i++ )
+                    idx_ui8.put(i, (int)f.applyAsDouble(i));
+                break;
+            case FLOAT16:
+                HalfIndexer idx_f16 = HalfIndexer.create(bb.asShortBuffer());
+                for( int i=0; i<length; i++)
+                    idx_f16.put(i, (float)f.applyAsDouble(i));
+                break;
+            case BFLOAT16:
+                Bfloat16Indexer idx_bf16 = Bfloat16Indexer.create(bb.asShortBuffer());
+                for( int i=0; i<length; i++ )
+                    idx_bf16.put(i, (float)f.applyAsDouble(i));
+                break;
+            case UINT64:
+                ULongIndexer idx_ui64 = ULongIndexer.create(bb.asLongBuffer());
+                for( int i=0; i<length; i++)
+                    idx_ui64.put(i, (long)f.applyAsDouble(i));
+                break;
+            case UINT32:
+                UIntIndexer idx_ui32 = UIntIndexer.create(bb.asIntBuffer());
+                for( int i=0; i<length; i++ )
+                    idx_ui32.put(i, (int)f.applyAsDouble(i));
+                break;
+            case UINT16:
+                UShortIndexer idx_ui16 = UShortIndexer.create(bb.asShortBuffer());
+                for( int i=0; i<length; i++ )
+                    idx_ui16.put(i, (int)f.applyAsDouble(i));
+                break;
             default:
                 throw new UnsupportedOperationException("Conversion to " + fromType + " to " + toType + " not supported or not yet implemented");
         }
