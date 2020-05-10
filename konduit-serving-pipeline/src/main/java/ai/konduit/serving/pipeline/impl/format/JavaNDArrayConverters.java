@@ -27,6 +27,7 @@ import lombok.AllArgsConstructor;
 import org.nd4j.common.base.Preconditions;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 public class JavaNDArrayConverters {
@@ -107,7 +108,7 @@ public class JavaNDArrayConverters {
             long bufferLength = prod * 4L;  //Float = 4 bytes per element
             Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java float array - unable to convert to SerializedNDArray");
 
-            ByteBuffer bb = ByteBuffer.allocateDirect((int)bufferLength);
+            ByteBuffer bb = ByteBuffer.allocateDirect((int)bufferLength).order(ByteOrder.LITTLE_ENDIAN);
             FloatBuffer fb = bb.asFloatBuffer();
 
             int rank = rank(o);
