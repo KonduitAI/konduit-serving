@@ -80,7 +80,7 @@ public abstract class ModelStep extends BasePipelineStep<ModelStep> {
     private Map<String, TensorDataType> outputDataTypes;
 
     @JsonProperty
-    @JsonAlias("modelLoadingPath")
+    @JsonAlias({"modelLoadingPath", "model_loading_path"})
     private String path;
 
     @Builder.Default
