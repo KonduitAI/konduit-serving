@@ -131,7 +131,7 @@
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
         <onnxruntime.version>1.2.0</onnxruntime.version>
         <onnxruntime.javacpp.version>${onnxruntime.version}-${javacpp.version}</onnxruntime.javacpp.version>
-        <openblas.version>0.3.9</openblas.version>
+        <openblas.version>0.3.9-1</openblas.version>
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>
         <leptonica.version>1.79.0</leptonica.version>
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
