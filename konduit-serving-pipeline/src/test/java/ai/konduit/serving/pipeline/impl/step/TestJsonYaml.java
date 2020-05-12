@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class TestJsonYaml {
 
@@ -47,8 +48,9 @@ public class TestJsonYaml {
 
     @Test
     public void testJsonYamlSimpleGraph(){
+        fail("Not yet re-implemented");
         Map<String, PipelineStep> m = Collections.singletonMap("logging", LoggingPipelineStep.builder().build());
-        Pipeline p = new GraphPipeline(m);
+        Pipeline p = new GraphPipeline(null, null);   //m);
 
         String json = p.toJson();
         Pipeline pJson = Pipeline.fromJson(json);

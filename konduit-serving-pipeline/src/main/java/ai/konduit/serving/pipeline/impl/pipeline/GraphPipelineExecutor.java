@@ -1,0 +1,175 @@
+/*
+ *  ******************************************************************************
+ *  * Copyright (c) 2020 Konduit K.K.
+ *  *
+ *  * This program and the accompanying materials are made available under the
+ *  * terms of the Apache License, Version 2.0 which is available at
+ *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  * License for the specific language governing permissions and limitations
+ *  * under the License.
+ *  *
+ *  * SPDX-License-Identifier: Apache-2.0
+ *  *****************************************************************************
+ */
+
+package ai.konduit.serving.pipeline.impl.pipeline;
+
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.MergeStep;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.StandardGraphStep;
+import ai.konduit.serving.pipeline.registry.PipelineRegistry;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.nd4j.common.base.Preconditions;
+import org.slf4j.Logger;
+
+import java.util.*;
+
+@Slf4j
+@AllArgsConstructor
+public class GraphPipelineExecutor extends BasePipelineExecutor {
+
+    private final GraphPipeline pipeline;
+    private Map<String,PipelineStepRunner> runners;
+    private Map<String,List<String>> inputsFor;     //Key: a step. Value: The steps that this is an input for: i.e., key -> X exists
+
+    public GraphPipelineExecutor(GraphPipeline pipeline){
+        this.pipeline = pipeline;
+
+        Map<String, GraphStep> steps = pipeline.getSteps();
+
+        inputsFor = new HashMap<>();
+        for(Map.Entry<String, GraphStep> e : steps.entrySet()){
+            GraphStep g = e.getValue();
+            List<String> inputs = g.inputs();
+            for(String s : inputs){
+                List<String> l = inputsFor.computeIfAbsent(s, x -> new ArrayList<>());
+                l.add(e.getKey());
+            }
+        }
+
+        //Initialize runners:
+        runners = new HashMap<>();
+        List<PipelineStepRunnerFactory> factories = PipelineRegistry.getStepRunnerFactories();
+        for(Map.Entry<String, GraphStep> e : steps.entrySet()){
+            GraphStep g = e.getValue();
+            if(g.hasStep()){
+                PipelineStep s = g.getStep();
+                PipelineStepRunner r = getRunner(s);
+                runners.put(e.getKey(), r);
+            }
+
+            if(g instanceof MergeStep){
+                runners.put(e.getKey(), null);
+            }
+        }
+    }
+
+    @Override
+    public Pipeline getPipeline() {
+        return pipeline;
+    }
+
+    @Override
+    public List<PipelineStepRunner> getRunners() {
+        return new ArrayList<>(runners.values());
+    }
+
+    @Override
+    public Data exec(Data in) {
+
+        Queue<String> canExec = new LinkedList<>();
+        Set<String> canExecSet = new HashSet<>();
+
+        Map<String,Data> stepOutputData = new HashMap<>();
+        stepOutputData.put(GraphPipeline.INPUT_KEY, in);
+
+        Map<String,GraphStep> m = pipeline.getSteps();
+
+        for(Map.Entry<String, GraphStep> e : m.entrySet()){
+            List<String> inputs = e.getValue().inputs();
+            if(inputs != null && inputs.size() == 1 && inputs.get(0).equals(GraphPipeline.INPUT_KEY)){
+                canExec.add(e.getKey());
+                canExecSet.add(e.getKey());
+            }
+        }
+
+        Data out = null;
+        while(!canExec.isEmpty()){
+            String next = canExec.remove();
+            canExecSet.remove(next);
+            GraphStep gs = m.get(next);
+            List<String> inputs = gs.inputs();
+
+            Data stepOut;
+            if(gs instanceof MergeStep){
+                stepOut = Data.empty();
+                for( String s : inputs){
+                    Data d = stepOutputData.get(s);
+                    stepOut.merge(false, d);
+                }
+            } else if(gs instanceof StandardGraphStep){
+                Preconditions.checkState(inputs.size() == 1, "PipelineSteps should only have 1 input: got inputs %s", inputs);;
+                if (inputs.size() != 1 && !GraphPipeline.INPUT_KEY.equals(next))
+                    throw new IllegalStateException("Execution of steps with numInputs != 1 is not supported: " + next + ".numInputs=" + inputs.size());
+
+                PipelineStepRunner exec = runners.get(next);
+                Data inData = stepOutputData.get(inputs.get(0));
+                Preconditions.checkState(inData != null, "Input data is null for step %s - input %s", next, 0);
+                stepOut = exec.exec(null, inData);
+            } else {
+                throw new UnsupportedOperationException("Execution support not yet implemented: " + gs);
+            }
+
+            if(next.equals(pipeline.getOutputStepName())){
+                out = stepOut;
+                break;
+            }
+
+            stepOutputData.put(next, stepOut);
+
+            //Check what can now be executed
+            //TODO This should be optimized
+            Map<String, GraphStep> steps = pipeline.getSteps();
+            for(String s : steps.keySet()){
+                if(canExecSet.contains(s))
+                    continue;
+                if(stepOutputData.containsKey(s))
+                    continue;
+
+                List<String> stepInputs = steps.get(s).inputs();
+                boolean allSeen = true;
+                for(String inName : stepInputs ){
+                    if(!stepOutputData.containsKey(inName)){
+                        allSeen = false;
+                        break;
+                    }
+                }
+
+                if(allSeen) {
+                    canExec.add(s);
+                    canExecSet.add(s);
+                }
+            }
+        }
+
+        if(out == null)
+            throw new IllegalStateException("Could not get output");
+
+        return out;
+    }
+
+    @Override
+    public Logger getLogger() {
+        return log;
+    }
+}
