@@ -45,7 +45,7 @@ import java.util.function.Supplier;
  * A {@link MetricsRenderer} that takes in matrices of counts
  * where each column (indexed by what is specified in the {@link #multiLabelMetricsConfig}
  * specified in {@link #updateMetrics(Object...)}
- * is a size of how to increment the column.
+ * is a count of how to increment the column.
  *
  * Note that similar to {@link ClassificationMetrics}
  * the counts will reset upon sampling via prometheus.
