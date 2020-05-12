@@ -101,20 +101,33 @@ public final class DataProtoMessage {
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder getImValueOrBuilder();
 
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+     * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+     */
+    boolean hasBoxValue();
+    /**
+     * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox getBoxValue();
+    /**
+     * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder getBoxValueOrBuilder();
+
+    /**
+     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
      */
     int getListTypeValue();
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getListType();
 
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
+     * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
      */
     int getTypeValue();
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
+     * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getType();
 
@@ -248,13 +261,27 @@ public final class DataProtoMessage {
               valueCase_ = 10;
               break;
             }
-            case 88: {
+            case 90: {
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.Builder subBuilder = null;
+              if (valueCase_ == 11) {
+                subBuilder = ((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_).toBuilder();
+              }
+              value_ =
+                  input.readMessage(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_);
+                value_ = subBuilder.buildPartial();
+              }
+              valueCase_ = 11;
+              break;
+            }
+            case 96: {
               int rawValue = input.readEnum();
 
               listType_ = rawValue;
               break;
             }
-            case 96: {
+            case 104: {
               int rawValue = input.readEnum();
 
               type_ = rawValue;
@@ -474,6 +501,7 @@ public final class DataProtoMessage {
       LISTVALUE(8),
       NDVALUE(9),
       IMVALUE(10),
+      BOXVALUE(11),
       VALUE_NOT_SET(0);
       private final int value;
       private ValueCase(int value) {
@@ -497,6 +525,7 @@ public final class DataProtoMessage {
           case 8: return LISTVALUE;
           case 9: return NDVALUE;
           case 10: return IMVALUE;
+          case 11: return BOXVALUE;
           case 0: return VALUE_NOT_SET;
           default: return null;
         }
@@ -698,16 +727,42 @@ public final class DataProtoMessage {
       return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.getDefaultInstance();
     }
 
-    public static final int LISTTYPE_FIELD_NUMBER = 11;
+    public static final int BOXVALUE_FIELD_NUMBER = 11;
+    /**
+     * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+     */
+    public boolean hasBoxValue() {
+      return valueCase_ == 11;
+    }
+    /**
+     * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox getBoxValue() {
+      if (valueCase_ == 11) {
+         return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_;
+      }
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.getDefaultInstance();
+    }
+    /**
+     * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder getBoxValueOrBuilder() {
+      if (valueCase_ == 11) {
+         return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_;
+      }
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.getDefaultInstance();
+    }
+
+    public static final int LISTTYPE_FIELD_NUMBER = 12;
     private int listType_;
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
      */
     public int getListTypeValue() {
       return listType_;
     }
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+     * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
      */
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getListType() {
       @SuppressWarnings("deprecation")
@@ -715,16 +770,16 @@ public final class DataProtoMessage {
       return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.UNRECOGNIZED : result;
     }
 
-    public static final int TYPE_FIELD_NUMBER = 12;
+    public static final int TYPE_FIELD_NUMBER = 13;
     private int type_;
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
+     * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
      */
     public int getTypeValue() {
       return type_;
     }
     /**
-     * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
+     * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
      */
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getType() {
       @SuppressWarnings("deprecation")
@@ -777,11 +832,14 @@ public final class DataProtoMessage {
       if (valueCase_ == 10) {
         output.writeMessage(10, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image) value_);
       }
+      if (valueCase_ == 11) {
+        output.writeMessage(11, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_);
+      }
       if (listType_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.NDARRAY.getNumber()) {
-        output.writeEnum(11, listType_);
+        output.writeEnum(12, listType_);
       }
       if (type_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.NDARRAY.getNumber()) {
-        output.writeEnum(12, type_);
+        output.writeEnum(13, type_);
       }
       unknownFields.writeTo(output);
     }
@@ -831,13 +889,17 @@ public final class DataProtoMessage {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image) value_);
       }
+      if (valueCase_ == 11) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(11, (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_);
+      }
       if (listType_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.NDARRAY.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(11, listType_);
+          .computeEnumSize(12, listType_);
       }
       if (type_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.NDARRAY.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(12, type_);
+          .computeEnumSize(13, type_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -896,6 +958,10 @@ public final class DataProtoMessage {
           if (!getImValue()
               .equals(other.getImValue())) return false;
           break;
+        case 11:
+          if (!getBoxValue()
+              .equals(other.getBoxValue())) return false;
+          break;
         case 0:
         default:
       }
@@ -953,6 +1019,10 @@ public final class DataProtoMessage {
         case 10:
           hash = (37 * hash) + IMVALUE_FIELD_NUMBER;
           hash = (53 * hash) + getImValue().hashCode();
+          break;
+        case 11:
+          hash = (37 * hash) + BOXVALUE_FIELD_NUMBER;
+          hash = (53 * hash) + getBoxValue().hashCode();
           break;
         case 0:
         default:
@@ -1169,6 +1239,13 @@ public final class DataProtoMessage {
             result.value_ = imValueBuilder_.build();
           }
         }
+        if (valueCase_ == 11) {
+          if (boxValueBuilder_ == null) {
+            result.value_ = value_;
+          } else {
+            result.value_ = boxValueBuilder_.build();
+          }
+        }
         result.listType_ = listType_;
         result.type_ = type_;
         result.valueCase_ = valueCase_;
@@ -1262,6 +1339,10 @@ public final class DataProtoMessage {
           }
           case IMVALUE: {
             mergeImValue(other.getImValue());
+            break;
+          }
+          case BOXVALUE: {
+            mergeBoxValue(other.getBoxValue());
             break;
           }
           case VALUE_NOT_SET: {
@@ -2040,15 +2121,151 @@ public final class DataProtoMessage {
         return imValueBuilder_;
       }
 
+      private com.google.protobuf.SingleFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder> boxValueBuilder_;
+      /**
+       * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+       */
+      public boolean hasBoxValue() {
+        return valueCase_ == 11;
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox getBoxValue() {
+        if (boxValueBuilder_ == null) {
+          if (valueCase_ == 11) {
+            return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_;
+          }
+          return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.getDefaultInstance();
+        } else {
+          if (valueCase_ == 11) {
+            return boxValueBuilder_.getMessage();
+          }
+          return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+       */
+      public Builder setBoxValue(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox value) {
+        if (boxValueBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          value_ = value;
+          onChanged();
+        } else {
+          boxValueBuilder_.setMessage(value);
+        }
+        valueCase_ = 11;
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+       */
+      public Builder setBoxValue(
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.Builder builderForValue) {
+        if (boxValueBuilder_ == null) {
+          value_ = builderForValue.build();
+          onChanged();
+        } else {
+          boxValueBuilder_.setMessage(builderForValue.build());
+        }
+        valueCase_ = 11;
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+       */
+      public Builder mergeBoxValue(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox value) {
+        if (boxValueBuilder_ == null) {
+          if (valueCase_ == 11 &&
+              value_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.getDefaultInstance()) {
+            value_ = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.newBuilder((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            value_ = value;
+          }
+          onChanged();
+        } else {
+          if (valueCase_ == 11) {
+            boxValueBuilder_.mergeFrom(value);
+          }
+          boxValueBuilder_.setMessage(value);
+        }
+        valueCase_ = 11;
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+       */
+      public Builder clearBoxValue() {
+        if (boxValueBuilder_ == null) {
+          if (valueCase_ == 11) {
+            valueCase_ = 0;
+            value_ = null;
+            onChanged();
+          }
+        } else {
+          if (valueCase_ == 11) {
+            valueCase_ = 0;
+            value_ = null;
+          }
+          boxValueBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.Builder getBoxValueBuilder() {
+        return getBoxValueFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder getBoxValueOrBuilder() {
+        if ((valueCase_ == 11) && (boxValueBuilder_ != null)) {
+          return boxValueBuilder_.getMessageOrBuilder();
+        } else {
+          if (valueCase_ == 11) {
+            return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_;
+          }
+          return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox boxValue = 11;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder> 
+          getBoxValueFieldBuilder() {
+        if (boxValueBuilder_ == null) {
+          if (!(valueCase_ == 11)) {
+            value_ = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.getDefaultInstance();
+          }
+          boxValueBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder>(
+                  (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_,
+                  getParentForChildren(),
+                  isClean());
+          value_ = null;
+        }
+        valueCase_ = 11;
+        onChanged();;
+        return boxValueBuilder_;
+      }
+
       private int listType_ = 0;
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
        */
       public int getListTypeValue() {
         return listType_;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
        */
       public Builder setListTypeValue(int value) {
         listType_ = value;
@@ -2056,7 +2273,7 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
        */
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getListType() {
         @SuppressWarnings("deprecation")
@@ -2064,7 +2281,7 @@ public final class DataProtoMessage {
         return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.UNRECOGNIZED : result;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
        */
       public Builder setListType(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType value) {
         if (value == null) {
@@ -2076,7 +2293,7 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 11;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
        */
       public Builder clearListType() {
         
@@ -2087,13 +2304,13 @@ public final class DataProtoMessage {
 
       private int type_ = 0;
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
        */
       public int getTypeValue() {
         return type_;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
        */
       public Builder setTypeValue(int value) {
         type_ = value;
@@ -2101,7 +2318,7 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
        */
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getType() {
         @SuppressWarnings("deprecation")
@@ -2109,7 +2326,7 @@ public final class DataProtoMessage {
         return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.UNRECOGNIZED : result;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
        */
       public Builder setType(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType value) {
         if (value == null) {
@@ -2121,7 +2338,7 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme.ValueType type = 12;</code>
+       * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
        */
       public Builder clearType() {
         
@@ -9440,6 +9657,1329 @@ public final class DataProtoMessage {
 
   }
 
+  public interface BoundingBoxOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ai.konduit.serving.BoundingBox)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>double x0 = 1;</code>
+     */
+    double getX0();
+
+    /**
+     * <code>double x1 = 2;</code>
+     */
+    double getX1();
+
+    /**
+     * <code>double y0 = 3;</code>
+     */
+    double getY0();
+
+    /**
+     * <code>double y1 = 4;</code>
+     */
+    double getY1();
+
+    /**
+     * <code>double cx = 5;</code>
+     */
+    double getCx();
+
+    /**
+     * <code>double cy = 6;</code>
+     */
+    double getCy();
+
+    /**
+     * <code>double h = 7;</code>
+     */
+    double getH();
+
+    /**
+     * <code>double w = 8;</code>
+     */
+    double getW();
+
+    /**
+     * <code>string label = 9;</code>
+     */
+    java.lang.String getLabel();
+    /**
+     * <code>string label = 9;</code>
+     */
+    com.google.protobuf.ByteString
+        getLabelBytes();
+
+    /**
+     * <code>double probability = 10;</code>
+     */
+    double getProbability();
+
+    /**
+     * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+     */
+    int getTypeValue();
+    /**
+     * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType getType();
+  }
+  /**
+   * Protobuf type {@code ai.konduit.serving.BoundingBox}
+   */
+  public  static final class BoundingBox extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:ai.konduit.serving.BoundingBox)
+      BoundingBoxOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use BoundingBox.newBuilder() to construct.
+    private BoundingBox(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private BoundingBox() {
+      label_ = "";
+      type_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new BoundingBox();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private BoundingBox(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 9: {
+
+              x0_ = input.readDouble();
+              break;
+            }
+            case 17: {
+
+              x1_ = input.readDouble();
+              break;
+            }
+            case 25: {
+
+              y0_ = input.readDouble();
+              break;
+            }
+            case 33: {
+
+              y1_ = input.readDouble();
+              break;
+            }
+            case 41: {
+
+              cx_ = input.readDouble();
+              break;
+            }
+            case 49: {
+
+              cy_ = input.readDouble();
+              break;
+            }
+            case 57: {
+
+              h_ = input.readDouble();
+              break;
+            }
+            case 65: {
+
+              w_ = input.readDouble();
+              break;
+            }
+            case 74: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              label_ = s;
+              break;
+            }
+            case 81: {
+
+              probability_ = input.readDouble();
+              break;
+            }
+            case 88: {
+              int rawValue = input.readEnum();
+
+              type_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_BoundingBox_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_BoundingBox_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.class, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code ai.konduit.serving.BoundingBox.BoxType}
+     */
+    public enum BoxType
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>CHW = 0;</code>
+       */
+      CHW(0),
+      /**
+       * <code>XY = 1;</code>
+       */
+      XY(1),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>CHW = 0;</code>
+       */
+      public static final int CHW_VALUE = 0;
+      /**
+       * <code>XY = 1;</code>
+       */
+      public static final int XY_VALUE = 1;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static BoxType valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static BoxType forNumber(int value) {
+        switch (value) {
+          case 0: return CHW;
+          case 1: return XY;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<BoxType>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          BoxType> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<BoxType>() {
+              public BoxType findValueByNumber(int number) {
+                return BoxType.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final BoxType[] VALUES = values();
+
+      public static BoxType valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private BoxType(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:ai.konduit.serving.BoundingBox.BoxType)
+    }
+
+    public static final int X0_FIELD_NUMBER = 1;
+    private double x0_;
+    /**
+     * <code>double x0 = 1;</code>
+     */
+    public double getX0() {
+      return x0_;
+    }
+
+    public static final int X1_FIELD_NUMBER = 2;
+    private double x1_;
+    /**
+     * <code>double x1 = 2;</code>
+     */
+    public double getX1() {
+      return x1_;
+    }
+
+    public static final int Y0_FIELD_NUMBER = 3;
+    private double y0_;
+    /**
+     * <code>double y0 = 3;</code>
+     */
+    public double getY0() {
+      return y0_;
+    }
+
+    public static final int Y1_FIELD_NUMBER = 4;
+    private double y1_;
+    /**
+     * <code>double y1 = 4;</code>
+     */
+    public double getY1() {
+      return y1_;
+    }
+
+    public static final int CX_FIELD_NUMBER = 5;
+    private double cx_;
+    /**
+     * <code>double cx = 5;</code>
+     */
+    public double getCx() {
+      return cx_;
+    }
+
+    public static final int CY_FIELD_NUMBER = 6;
+    private double cy_;
+    /**
+     * <code>double cy = 6;</code>
+     */
+    public double getCy() {
+      return cy_;
+    }
+
+    public static final int H_FIELD_NUMBER = 7;
+    private double h_;
+    /**
+     * <code>double h = 7;</code>
+     */
+    public double getH() {
+      return h_;
+    }
+
+    public static final int W_FIELD_NUMBER = 8;
+    private double w_;
+    /**
+     * <code>double w = 8;</code>
+     */
+    public double getW() {
+      return w_;
+    }
+
+    public static final int LABEL_FIELD_NUMBER = 9;
+    private volatile java.lang.Object label_;
+    /**
+     * <code>string label = 9;</code>
+     */
+    public java.lang.String getLabel() {
+      java.lang.Object ref = label_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        label_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string label = 9;</code>
+     */
+    public com.google.protobuf.ByteString
+        getLabelBytes() {
+      java.lang.Object ref = label_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        label_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PROBABILITY_FIELD_NUMBER = 10;
+    private double probability_;
+    /**
+     * <code>double probability = 10;</code>
+     */
+    public double getProbability() {
+      return probability_;
+    }
+
+    public static final int TYPE_FIELD_NUMBER = 11;
+    private int type_;
+    /**
+     * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+     */
+    public int getTypeValue() {
+      return type_;
+    }
+    /**
+     * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType getType() {
+      @SuppressWarnings("deprecation")
+      ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType.valueOf(type_);
+      return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (x0_ != 0D) {
+        output.writeDouble(1, x0_);
+      }
+      if (x1_ != 0D) {
+        output.writeDouble(2, x1_);
+      }
+      if (y0_ != 0D) {
+        output.writeDouble(3, y0_);
+      }
+      if (y1_ != 0D) {
+        output.writeDouble(4, y1_);
+      }
+      if (cx_ != 0D) {
+        output.writeDouble(5, cx_);
+      }
+      if (cy_ != 0D) {
+        output.writeDouble(6, cy_);
+      }
+      if (h_ != 0D) {
+        output.writeDouble(7, h_);
+      }
+      if (w_ != 0D) {
+        output.writeDouble(8, w_);
+      }
+      if (!getLabelBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, label_);
+      }
+      if (probability_ != 0D) {
+        output.writeDouble(10, probability_);
+      }
+      if (type_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType.CHW.getNumber()) {
+        output.writeEnum(11, type_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (x0_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1, x0_);
+      }
+      if (x1_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, x1_);
+      }
+      if (y0_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(3, y0_);
+      }
+      if (y1_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(4, y1_);
+      }
+      if (cx_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(5, cx_);
+      }
+      if (cy_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(6, cy_);
+      }
+      if (h_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(7, h_);
+      }
+      if (w_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(8, w_);
+      }
+      if (!getLabelBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, label_);
+      }
+      if (probability_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(10, probability_);
+      }
+      if (type_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType.CHW.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(11, type_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox)) {
+        return super.equals(obj);
+      }
+      ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox other = (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) obj;
+
+      if (java.lang.Double.doubleToLongBits(getX0())
+          != java.lang.Double.doubleToLongBits(
+              other.getX0())) return false;
+      if (java.lang.Double.doubleToLongBits(getX1())
+          != java.lang.Double.doubleToLongBits(
+              other.getX1())) return false;
+      if (java.lang.Double.doubleToLongBits(getY0())
+          != java.lang.Double.doubleToLongBits(
+              other.getY0())) return false;
+      if (java.lang.Double.doubleToLongBits(getY1())
+          != java.lang.Double.doubleToLongBits(
+              other.getY1())) return false;
+      if (java.lang.Double.doubleToLongBits(getCx())
+          != java.lang.Double.doubleToLongBits(
+              other.getCx())) return false;
+      if (java.lang.Double.doubleToLongBits(getCy())
+          != java.lang.Double.doubleToLongBits(
+              other.getCy())) return false;
+      if (java.lang.Double.doubleToLongBits(getH())
+          != java.lang.Double.doubleToLongBits(
+              other.getH())) return false;
+      if (java.lang.Double.doubleToLongBits(getW())
+          != java.lang.Double.doubleToLongBits(
+              other.getW())) return false;
+      if (!getLabel()
+          .equals(other.getLabel())) return false;
+      if (java.lang.Double.doubleToLongBits(getProbability())
+          != java.lang.Double.doubleToLongBits(
+              other.getProbability())) return false;
+      if (type_ != other.type_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + X0_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getX0()));
+      hash = (37 * hash) + X1_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getX1()));
+      hash = (37 * hash) + Y0_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getY0()));
+      hash = (37 * hash) + Y1_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getY1()));
+      hash = (37 * hash) + CX_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getCx()));
+      hash = (37 * hash) + CY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getCy()));
+      hash = (37 * hash) + H_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getH()));
+      hash = (37 * hash) + W_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getW()));
+      hash = (37 * hash) + LABEL_FIELD_NUMBER;
+      hash = (53 * hash) + getLabel().hashCode();
+      hash = (37 * hash) + PROBABILITY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getProbability()));
+      hash = (37 * hash) + TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + type_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code ai.konduit.serving.BoundingBox}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ai.konduit.serving.BoundingBox)
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_BoundingBox_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_BoundingBox_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.class, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.Builder.class);
+      }
+
+      // Construct using ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        x0_ = 0D;
+
+        x1_ = 0D;
+
+        y0_ = 0D;
+
+        y1_ = 0D;
+
+        cx_ = 0D;
+
+        cy_ = 0D;
+
+        h_ = 0D;
+
+        w_ = 0D;
+
+        label_ = "";
+
+        probability_ = 0D;
+
+        type_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_BoundingBox_descriptor;
+      }
+
+      @java.lang.Override
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox getDefaultInstanceForType() {
+        return ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox build() {
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox buildPartial() {
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox result = new ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox(this);
+        result.x0_ = x0_;
+        result.x1_ = x1_;
+        result.y0_ = y0_;
+        result.y1_ = y1_;
+        result.cx_ = cx_;
+        result.cy_ = cy_;
+        result.h_ = h_;
+        result.w_ = w_;
+        result.label_ = label_;
+        result.probability_ = probability_;
+        result.type_ = type_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) {
+          return mergeFrom((ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox other) {
+        if (other == ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.getDefaultInstance()) return this;
+        if (other.getX0() != 0D) {
+          setX0(other.getX0());
+        }
+        if (other.getX1() != 0D) {
+          setX1(other.getX1());
+        }
+        if (other.getY0() != 0D) {
+          setY0(other.getY0());
+        }
+        if (other.getY1() != 0D) {
+          setY1(other.getY1());
+        }
+        if (other.getCx() != 0D) {
+          setCx(other.getCx());
+        }
+        if (other.getCy() != 0D) {
+          setCy(other.getCy());
+        }
+        if (other.getH() != 0D) {
+          setH(other.getH());
+        }
+        if (other.getW() != 0D) {
+          setW(other.getW());
+        }
+        if (!other.getLabel().isEmpty()) {
+          label_ = other.label_;
+          onChanged();
+        }
+        if (other.getProbability() != 0D) {
+          setProbability(other.getProbability());
+        }
+        if (other.type_ != 0) {
+          setTypeValue(other.getTypeValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private double x0_ ;
+      /**
+       * <code>double x0 = 1;</code>
+       */
+      public double getX0() {
+        return x0_;
+      }
+      /**
+       * <code>double x0 = 1;</code>
+       */
+      public Builder setX0(double value) {
+        
+        x0_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double x0 = 1;</code>
+       */
+      public Builder clearX0() {
+        
+        x0_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double x1_ ;
+      /**
+       * <code>double x1 = 2;</code>
+       */
+      public double getX1() {
+        return x1_;
+      }
+      /**
+       * <code>double x1 = 2;</code>
+       */
+      public Builder setX1(double value) {
+        
+        x1_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double x1 = 2;</code>
+       */
+      public Builder clearX1() {
+        
+        x1_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double y0_ ;
+      /**
+       * <code>double y0 = 3;</code>
+       */
+      public double getY0() {
+        return y0_;
+      }
+      /**
+       * <code>double y0 = 3;</code>
+       */
+      public Builder setY0(double value) {
+        
+        y0_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double y0 = 3;</code>
+       */
+      public Builder clearY0() {
+        
+        y0_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double y1_ ;
+      /**
+       * <code>double y1 = 4;</code>
+       */
+      public double getY1() {
+        return y1_;
+      }
+      /**
+       * <code>double y1 = 4;</code>
+       */
+      public Builder setY1(double value) {
+        
+        y1_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double y1 = 4;</code>
+       */
+      public Builder clearY1() {
+        
+        y1_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double cx_ ;
+      /**
+       * <code>double cx = 5;</code>
+       */
+      public double getCx() {
+        return cx_;
+      }
+      /**
+       * <code>double cx = 5;</code>
+       */
+      public Builder setCx(double value) {
+        
+        cx_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double cx = 5;</code>
+       */
+      public Builder clearCx() {
+        
+        cx_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double cy_ ;
+      /**
+       * <code>double cy = 6;</code>
+       */
+      public double getCy() {
+        return cy_;
+      }
+      /**
+       * <code>double cy = 6;</code>
+       */
+      public Builder setCy(double value) {
+        
+        cy_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double cy = 6;</code>
+       */
+      public Builder clearCy() {
+        
+        cy_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double h_ ;
+      /**
+       * <code>double h = 7;</code>
+       */
+      public double getH() {
+        return h_;
+      }
+      /**
+       * <code>double h = 7;</code>
+       */
+      public Builder setH(double value) {
+        
+        h_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double h = 7;</code>
+       */
+      public Builder clearH() {
+        
+        h_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double w_ ;
+      /**
+       * <code>double w = 8;</code>
+       */
+      public double getW() {
+        return w_;
+      }
+      /**
+       * <code>double w = 8;</code>
+       */
+      public Builder setW(double value) {
+        
+        w_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double w = 8;</code>
+       */
+      public Builder clearW() {
+        
+        w_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object label_ = "";
+      /**
+       * <code>string label = 9;</code>
+       */
+      public java.lang.String getLabel() {
+        java.lang.Object ref = label_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          label_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string label = 9;</code>
+       */
+      public com.google.protobuf.ByteString
+          getLabelBytes() {
+        java.lang.Object ref = label_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          label_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string label = 9;</code>
+       */
+      public Builder setLabel(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        label_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string label = 9;</code>
+       */
+      public Builder clearLabel() {
+        
+        label_ = getDefaultInstance().getLabel();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string label = 9;</code>
+       */
+      public Builder setLabelBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        label_ = value;
+        onChanged();
+        return this;
+      }
+
+      private double probability_ ;
+      /**
+       * <code>double probability = 10;</code>
+       */
+      public double getProbability() {
+        return probability_;
+      }
+      /**
+       * <code>double probability = 10;</code>
+       */
+      public Builder setProbability(double value) {
+        
+        probability_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double probability = 10;</code>
+       */
+      public Builder clearProbability() {
+        
+        probability_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int type_ = 0;
+      /**
+       * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+       */
+      public int getTypeValue() {
+        return type_;
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+       */
+      public Builder setTypeValue(int value) {
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType getType() {
+        @SuppressWarnings("deprecation")
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType.valueOf(type_);
+        return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+       */
+      public Builder setType(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        type_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+       */
+      public Builder clearType() {
+        
+        type_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:ai.konduit.serving.BoundingBox)
+    }
+
+    // @@protoc_insertion_point(class_scope:ai.konduit.serving.BoundingBox)
+    private static final ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox();
+    }
+
+    public static ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<BoundingBox>
+        PARSER = new com.google.protobuf.AbstractParser<BoundingBox>() {
+      @java.lang.Override
+      public BoundingBox parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new BoundingBox(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<BoundingBox> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<BoundingBox> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface DataMapOrBuilder extends
       // @@protoc_insertion_point(interface_extends:ai.konduit.serving.DataMap)
       com.google.protobuf.MessageOrBuilder {
@@ -10219,6 +11759,11 @@ public final class DataProtoMessage {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ai_konduit_serving_NDArray_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_ai_konduit_serving_BoundingBox_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_ai_konduit_serving_BoundingBox_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_ai_konduit_serving_DataMap_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -10237,7 +11782,7 @@ public final class DataProtoMessage {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\ndata.proto\022\022ai.konduit.serving\"\256\004\n\nDat" +
+      "\n\ndata.proto\022\022ai.konduit.serving\"\343\004\n\nDat" +
       "aScheme\022-\n\010metaData\030\002 \001(\0132\033.ai.konduit.s" +
       "erving.DataMap\022\020\n\006sValue\030\003 \001(\tH\000\022\020\n\006bVal" +
       "ue\030\004 \001(\014H\000\022\020\n\006iValue\030\005 \001(\003H\000\022\023\n\tboolValu" +
@@ -10245,36 +11790,43 @@ public final class DataProtoMessage {
       "Value\030\010 \001(\0132\030.ai.konduit.serving.ListH\000\022" +
       ".\n\007ndValue\030\t \001(\0132\033.ai.konduit.serving.ND" +
       "ArrayH\000\022,\n\007imValue\030\n \001(\0132\031.ai.konduit.se" +
-      "rving.ImageH\000\022:\n\010listType\030\013 \001(\0162(.ai.kon" +
-      "duit.serving.DataScheme.ValueType\0226\n\004typ" +
-      "e\030\014 \001(\0162(.ai.konduit.serving.DataScheme." +
-      "ValueType\"\204\001\n\tValueType\022\013\n\007NDARRAY\020\000\022\n\n\006" +
-      "STRING\020\001\022\t\n\005BYTES\020\002\022\t\n\005IMAGE\020\003\022\n\n\006DOUBLE" +
-      "\020\004\022\t\n\005INT64\020\005\022\013\n\007BOOLEAN\020\006\022\020\n\014BOUNDING_B" +
-      "OX\020\007\022\010\n\004DATA\020\010\022\010\n\004LIST\020\tB\007\n\005value\"\032\n\nStr" +
-      "ingList\022\014\n\004list\030\001 \003(\t\"\031\n\tInt64List\022\014\n\004li" +
-      "st\030\001 \003(\003\"\033\n\013BooleanList\022\014\n\004list\030\001 \003(\010\"\032\n" +
-      "\nDoubleList\022\014\n\004list\030\001 \003(\001\"4\n\tImageList\022\'" +
-      "\n\004list\030\001 \003(\0132\031.ai.konduit.serving.Image\"" +
-      "8\n\013NDArrayList\022)\n\004list\030\001 \003(\0132\033.ai.kondui" +
-      "t.serving.NDArray\"\266\002\n\004List\022/\n\005sList\030\001 \001(" +
-      "\0132\036.ai.konduit.serving.StringListH\000\022.\n\005i" +
-      "List\030\002 \001(\0132\035.ai.konduit.serving.Int64Lis" +
-      "tH\000\0220\n\005bList\030\003 \001(\0132\037.ai.konduit.serving." +
-      "BooleanListH\000\022/\n\005dList\030\004 \001(\0132\036.ai.kondui" +
-      "t.serving.DoubleListH\000\022/\n\006imList\030\005 \001(\0132\035" +
-      ".ai.konduit.serving.ImageListH\000\0221\n\006ndLis" +
-      "t\030\006 \001(\0132\037.ai.konduit.serving.NDArrayList" +
-      "H\000B\006\n\004list\"\025\n\005Image\022\014\n\004data\030\001 \003(\014\"t\n\007NDA" +
-      "rray\022\r\n\005shape\030\001 \003(\003\022\r\n\005array\030\003 \003(\014\0223\n\004ty" +
-      "pe\030\002 \001(\0162%.ai.konduit.serving.NDArray.Va" +
-      "lueType\"\026\n\tValueType\022\t\n\005FLOAT\020\000\"\227\001\n\007Data" +
-      "Map\022;\n\010mapItems\030\001 \003(\0132).ai.konduit.servi" +
-      "ng.DataMap.MapItemsEntry\032O\n\rMapItemsEntr" +
-      "y\022\013\n\003key\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.ai.kondu" +
-      "it.serving.DataScheme:\0028\001BB\n.ai.konduit." +
-      "serving.pipeline.impl.data.protobufB\020Dat" +
-      "aProtoMessageb\006proto3"
+      "rving.ImageH\000\0223\n\010boxValue\030\013 \001(\0132\037.ai.kon" +
+      "duit.serving.BoundingBoxH\000\022:\n\010listType\030\014" +
+      " \001(\0162(.ai.konduit.serving.DataScheme.Val" +
+      "ueType\0226\n\004type\030\r \001(\0162(.ai.konduit.servin" +
+      "g.DataScheme.ValueType\"\204\001\n\tValueType\022\013\n\007" +
+      "NDARRAY\020\000\022\n\n\006STRING\020\001\022\t\n\005BYTES\020\002\022\t\n\005IMAG" +
+      "E\020\003\022\n\n\006DOUBLE\020\004\022\t\n\005INT64\020\005\022\013\n\007BOOLEAN\020\006\022" +
+      "\020\n\014BOUNDING_BOX\020\007\022\010\n\004DATA\020\010\022\010\n\004LIST\020\tB\007\n" +
+      "\005value\"\032\n\nStringList\022\014\n\004list\030\001 \003(\t\"\031\n\tIn" +
+      "t64List\022\014\n\004list\030\001 \003(\003\"\033\n\013BooleanList\022\014\n\004" +
+      "list\030\001 \003(\010\"\032\n\nDoubleList\022\014\n\004list\030\001 \003(\001\"4" +
+      "\n\tImageList\022\'\n\004list\030\001 \003(\0132\031.ai.konduit.s" +
+      "erving.Image\"8\n\013NDArrayList\022)\n\004list\030\001 \003(" +
+      "\0132\033.ai.konduit.serving.NDArray\"\266\002\n\004List\022" +
+      "/\n\005sList\030\001 \001(\0132\036.ai.konduit.serving.Stri" +
+      "ngListH\000\022.\n\005iList\030\002 \001(\0132\035.ai.konduit.ser" +
+      "ving.Int64ListH\000\0220\n\005bList\030\003 \001(\0132\037.ai.kon" +
+      "duit.serving.BooleanListH\000\022/\n\005dList\030\004 \001(" +
+      "\0132\036.ai.konduit.serving.DoubleListH\000\022/\n\006i" +
+      "mList\030\005 \001(\0132\035.ai.konduit.serving.ImageLi" +
+      "stH\000\0221\n\006ndList\030\006 \001(\0132\037.ai.konduit.servin" +
+      "g.NDArrayListH\000B\006\n\004list\"\025\n\005Image\022\014\n\004data" +
+      "\030\001 \003(\014\"t\n\007NDArray\022\r\n\005shape\030\001 \003(\003\022\r\n\005arra" +
+      "y\030\003 \003(\014\0223\n\004type\030\002 \001(\0162%.ai.konduit.servi" +
+      "ng.NDArray.ValueType\"\026\n\tValueType\022\t\n\005FLO" +
+      "AT\020\000\"\342\001\n\013BoundingBox\022\n\n\002x0\030\001 \001(\001\022\n\n\002x1\030\002" +
+      " \001(\001\022\n\n\002y0\030\003 \001(\001\022\n\n\002y1\030\004 \001(\001\022\n\n\002cx\030\005 \001(\001" +
+      "\022\n\n\002cy\030\006 \001(\001\022\t\n\001h\030\007 \001(\001\022\t\n\001w\030\010 \001(\001\022\r\n\005la" +
+      "bel\030\t \001(\t\022\023\n\013probability\030\n \001(\001\0225\n\004type\030\013" +
+      " \001(\0162\'.ai.konduit.serving.BoundingBox.Bo" +
+      "xType\"\032\n\007BoxType\022\007\n\003CHW\020\000\022\006\n\002XY\020\001\"\227\001\n\007Da" +
+      "taMap\022;\n\010mapItems\030\001 \003(\0132).ai.konduit.ser" +
+      "ving.DataMap.MapItemsEntry\032O\n\rMapItemsEn" +
+      "try\022\013\n\003key\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.ai.kon" +
+      "duit.serving.DataScheme:\0028\001BB\n.ai.kondui" +
+      "t.serving.pipeline.impl.data.protobufB\020D" +
+      "ataProtoMessageb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -10285,7 +11837,7 @@ public final class DataProtoMessage {
     internal_static_ai_konduit_serving_DataScheme_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_DataScheme_descriptor,
-        new java.lang.String[] { "MetaData", "SValue", "BValue", "IValue", "BoolValue", "DoubleValue", "ListValue", "NdValue", "ImValue", "ListType", "Type", "Value", });
+        new java.lang.String[] { "MetaData", "SValue", "BValue", "IValue", "BoolValue", "DoubleValue", "ListValue", "NdValue", "ImValue", "BoxValue", "ListType", "Type", "Value", });
     internal_static_ai_konduit_serving_StringList_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_ai_konduit_serving_StringList_fieldAccessorTable = new
@@ -10340,8 +11892,14 @@ public final class DataProtoMessage {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_NDArray_descriptor,
         new java.lang.String[] { "Shape", "Array", "Type", });
-    internal_static_ai_konduit_serving_DataMap_descriptor =
+    internal_static_ai_konduit_serving_BoundingBox_descriptor =
       getDescriptor().getMessageTypes().get(10);
+    internal_static_ai_konduit_serving_BoundingBox_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ai_konduit_serving_BoundingBox_descriptor,
+        new java.lang.String[] { "X0", "X1", "Y0", "Y1", "Cx", "Cy", "H", "W", "Label", "Probability", "Type", });
+    internal_static_ai_konduit_serving_DataMap_descriptor =
+      getDescriptor().getMessageTypes().get(11);
     internal_static_ai_konduit_serving_DataMap_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_DataMap_descriptor,

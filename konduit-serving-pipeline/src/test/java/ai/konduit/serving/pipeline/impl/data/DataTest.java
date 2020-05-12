@@ -15,10 +15,9 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data;
 
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.api.data.ValueType;
-import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.*;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import org.apache.commons.compress.utils.Lists;
@@ -478,8 +477,26 @@ public class DataTest {
     }
 
     @Test
-    public void testMetaDataSerde() {
+    public void testBoundingBoxesCHWSerde() throws IOException {
+        BoundingBox boundingBox = new BBoxCHW(1.0, 2.0, 1.0, 2.0);
+        Data boxData = Data.singleton(KEY, boundingBox);
+        assertEquals(boundingBox, boxData.get(KEY));
 
+        File newFile = testDir.newFile();
+        boxData.save(newFile);
+        Data restoredData = Data.fromFile(newFile);
+        assertEquals(boxData.get(KEY), restoredData.get(KEY));
     }
 
+    @Test
+    public void testBoundingBoxesXYSerde() throws IOException {
+        BoundingBox boundingBox = new BBoxXY(1.0, 2.0, 1.0, 2.0);
+        Data boxData = Data.singleton(KEY, boundingBox);
+        assertEquals(boundingBox, boxData.get(KEY));
+
+        File newFile = testDir.newFile();
+        boxData.save(newFile);
+        Data restoredData = Data.fromFile(newFile);
+        assertEquals(boxData.get(KEY), restoredData.get(KEY));
+    }
 }

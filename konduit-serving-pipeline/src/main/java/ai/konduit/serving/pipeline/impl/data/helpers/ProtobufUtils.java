@@ -24,6 +24,8 @@ import ai.konduit.serving.pipeline.impl.data.Value;
 import java.nio.ByteBuffer;
 import java.util.*;
 
+import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage;
@@ -31,6 +33,7 @@ import ai.konduit.serving.pipeline.impl.data.wrappers.ListValue;
 import com.google.protobuf.ByteString;
 import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class ProtobufUtils {
 
@@ -109,6 +112,33 @@ public class ProtobufUtils {
                 item = DataProtoMessage.DataScheme.newBuilder().
                         setMetaData(dataMapEmbedded).
                         setTypeValue(ValueType.DATA.ordinal()).
+                        build();
+            }
+            else if (value.type() == ValueType.BOUNDING_BOX) {
+                BoundingBox boundingBox = (BoundingBox) nextItem.getValue().get();
+                DataProtoMessage.BoundingBox pbBox = null;
+                if (boundingBox instanceof BBoxCHW) {
+                    pbBox = DataProtoMessage.BoundingBox.newBuilder().
+                            setCx(boundingBox.cx()).setCy(boundingBox.cy()).
+                            setH(boundingBox.y2()-boundingBox.y1()).
+                            setW(boundingBox.x2()-boundingBox.x1()).
+                            setLabel(StringUtils.defaultIfEmpty(boundingBox.label(), StringUtils.EMPTY)).
+                            setType(DataProtoMessage.BoundingBox.BoxType.CHW).
+                            //setProbability(boundingBox.probability()).
+                            build();
+                }
+                else if (boundingBox instanceof BBoxXY) {
+                    pbBox = DataProtoMessage.BoundingBox.newBuilder().
+                            setX0(boundingBox.x1()).setX1(boundingBox.x2()).
+                            setY0(boundingBox.y1()).setY1(boundingBox.y2()).
+                            setLabel(StringUtils.defaultIfEmpty(boundingBox.label(), StringUtils.EMPTY)).
+                            setType(DataProtoMessage.BoundingBox.BoxType.XY).
+                            //setProbability(boundingBox.probability()).
+                            build();
+                }
+                item = DataProtoMessage.DataScheme.newBuilder().
+                        setBoxValue(pbBox).
+                        setTypeValue(ValueType.BOUNDING_BOX.ordinal()).
                         build();
             }
             else if (value.type() == ValueType.LIST) {
@@ -236,6 +266,16 @@ public class ProtobufUtils {
                 Data embeddedData = deserialize(itemMetaData);
                 retData.put(entry.getKey(), embeddedData);
             }
+            if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.BOUNDING_BOX.ordinal()) {
+                DataProtoMessage.BoundingBox pbBox = item.getBoxValue();
+                BoundingBox boundingBox = null;
+                if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.CHW)
+                    boundingBox = new BBoxCHW(pbBox.getCx(), pbBox.getCy(), pbBox.getH(), pbBox.getW());
+                else if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.XY)
+                    boundingBox = new BBoxXY(pbBox.getX0(), pbBox.getX1(), pbBox.getY0(), pbBox.getY1());
+                retData.put(entry.getKey(), boundingBox);
+            }
+
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.LIST.ordinal()) {
                 if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.DOUBLE.ordinal()) {
                     retData.putListDouble(entry.getKey(), item.getListValue().getDList().getListList());

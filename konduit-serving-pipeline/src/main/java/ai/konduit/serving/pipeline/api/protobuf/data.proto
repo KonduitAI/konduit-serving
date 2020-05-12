@@ -16,9 +16,10 @@ message DataScheme {
         List listValue = 8;
         NDArray ndValue = 9;
         Image imValue = 10;
+        BoundingBox boxValue = 11;
     }
-    ValueType listType = 11;
-    ValueType type = 12;
+    ValueType listType = 12;
+    ValueType type = 13;
 
     enum ValueType {
         NDARRAY = 0;
@@ -77,12 +78,24 @@ message NDArray {
     }
 }
 
-//message List {
-    //repeated string listStrings = 1;
-    //repeated int64 listInts = 2;
-    //repeated bool listBools = 3;
-    //repeated double listDoubles = 4;
-//}
+message BoundingBox {
+    double x0 = 1;
+    double x1 = 2;
+    double y0 = 3;
+    double y1 = 4;
+    double cx = 5;
+    double cy = 6;
+    double h = 7;
+    double w = 8;
+    string label = 9;
+    double probability = 10;
+    BoxType type = 11;
+
+    enum BoxType {
+        CHW = 0;
+        XY = 1;
+    }
+}
 
 message DataMap {
     map<string, DataScheme> mapItems = 1;
