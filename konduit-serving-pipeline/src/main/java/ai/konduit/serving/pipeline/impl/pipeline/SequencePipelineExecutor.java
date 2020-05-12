@@ -57,7 +57,7 @@ public class SequencePipelineExecutor implements PipelineExecutor {
 
                     f = psrf;
                     //TODO make debug level later
-                    log.info("PipelineStepRunnerFactory {} used to run step {}", psrf.getClass().getName(), ps.getClass().getName());
+                    //log.info("PipelineStepRunnerFactory {} used to run step {}", psrf.getClass().getName(), ps.getClass().getName());
                 }
             }
 

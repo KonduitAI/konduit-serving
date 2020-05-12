@@ -24,6 +24,8 @@ package ai.konduit.serving.codegen.pythoncodegen;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.*;
+import ai.konduit.serving.config.metrics.ColumnDistribution;
+import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.config.metrics.NoOpMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.ClassificationMetricsConfig;
 import ai.konduit.serving.config.metrics.impl.MultiLabelMetricsConfig;
@@ -63,6 +65,8 @@ public class CodeGen {
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper, JsonSchemaConfig.html5EnabledSchema());
 
         Set<Class<?>> clazzes = new LinkedHashSet<>();
+        clazzes.add(ColumnDistribution.class);
+        clazzes.add(MetricsConfig.class);
         clazzes.add(MultiLabelMetricsConfig.class);
         clazzes.add(NoOpMetricsConfig.class);
         clazzes.add(ClassificationMetricsConfig.class);

@@ -18,11 +18,9 @@
 
 package ai.konduit.serving.pipeline.impl.serde;
 
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.api.data.NDArrayType;
-import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.data.*;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import org.nd4j.shade.jackson.core.JsonGenerator;
@@ -99,6 +97,12 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
                     List<?> list = data.getList(s, listVt);
                     writeList(jg, list, listVt);
                     break;
+                case BOUNDING_BOX:
+                    BoundingBox bb = data.getBoundingBox(s);
+                    writeBB(jg, bb);
+                    break;
+                default:
+                    throw new IllegalStateException("Value type not yet supported/implemented: " + vt);
             }
         }
 
@@ -175,13 +179,50 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
         jg.writeEndObject();
     }
 
+    private void writeBB(JsonGenerator jg, BoundingBox bb) throws IOException {
+        //We'll keep it in the original format, if possible - but encode it as a X/Y format otherwise
+        jg.writeStartObject();
+        if(bb instanceof BBoxCHW){
+            BBoxCHW b = (BBoxCHW)bb;
+            jg.writeFieldName(Data.RESERVED_KEY_BB_CX);
+            jg.writeNumber(b.cx());
+            jg.writeFieldName(Data.RESERVED_KEY_BB_CY);
+            jg.writeNumber(b.cy());
+            jg.writeFieldName(Data.RESERVED_KEY_BB_H);
+            jg.writeNumber(b.h());
+            jg.writeFieldName(Data.RESERVED_KEY_BB_W);
+            jg.writeNumber(b.w());
+        } else {
+            jg.writeFieldName(Data.RESERVED_KEY_BB_X1);
+            jg.writeNumber(bb.x1());
+            jg.writeFieldName(Data.RESERVED_KEY_BB_X2);
+            jg.writeNumber(bb.x2());
+            jg.writeFieldName(Data.RESERVED_KEY_BB_Y1);
+            jg.writeNumber(bb.y1());
+            jg.writeFieldName(Data.RESERVED_KEY_BB_Y2);
+            jg.writeNumber(bb.y2());
+        }
+        if(bb.label() != null){
+            jg.writeFieldName("label");
+            jg.writeString(bb.label());
+        }
+        if(bb.probability() != null){
+            jg.writeFieldName("probability");
+            jg.writeNumber(bb.probability());
+        }
+
+        jg.writeEndObject();
+    }
+
     private void writeList(JsonGenerator jg, List<?> list, ValueType listType) throws IOException {
         int n = list.size();
         jg.writeStartArray(n);
 
-        int i = 0;
         switch (listType) {
             case NDARRAY:
+                for(NDArray arr : (List<NDArray>) list){
+                    writeNDArray(jg, arr);
+                }
                 break;
             case STRING:
                 for (String s : (List<String>) list) {             //TODO avoid unsafe cast?
@@ -200,35 +241,33 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
                 break;
             case DOUBLE:
                 List<Double> dList = (List<Double>) list;        //TODO checks for unsafe cast?
-                double[] dArr = new double[dList.size()];
-                for (Double d : dList) {
-                    dArr[i++] = d;
+                for(Double d : dList){
+                    writeDouble(jg, d);
                 }
-                jg.writeArray(dArr, 0, dArr.length);
                 break;
             case INT64:
                 List<Long> lList = (List<Long>) list;
-                long[] lArr = new long[lList.size()];
-                for (Long l : lList) {
-                    lArr[i++] = l;
+                for(Long l : lList){
+                    writeLong(jg, l);
                 }
-                jg.writeArray(lArr, 0, lArr.length);
                 break;
             case BOOLEAN:
                 List<Boolean> bList = (List<Boolean>) list;
-                jg.writeStartArray(bList.size());
                 for (Boolean b : bList) {
                     jg.writeBoolean(b);
                 }
-                jg.writeEndArray();
                 break;
             case DATA:
                 List<Data> dataList = (List<Data>) list;
-                jg.writeStartArray(dataList.size());
                 for (Data d : dataList) {
                     writeNestedData(jg, d);
                 }
-                jg.writeEndArray();
+                break;
+            case BOUNDING_BOX:
+                List<BoundingBox> bbList = (List<BoundingBox>)list;
+                for(BoundingBox bb : bbList){
+                    writeBB(jg, bb);
+                }
                 break;
             case LIST:
                 //List of lists...

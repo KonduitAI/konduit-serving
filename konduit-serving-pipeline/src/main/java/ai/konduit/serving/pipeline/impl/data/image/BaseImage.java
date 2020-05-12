@@ -30,7 +30,7 @@ import java.util.Arrays;
 @AllArgsConstructor
 public abstract class BaseImage<T> implements Image {
 
-    private final T image;
+    protected final T image;
 
     @Override
     public Object get() {

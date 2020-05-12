@@ -4,6 +4,7 @@ from konduit import *
 
 @pytest.mark.integration
 def test_client_from_server():
+    server_id = "python_server"
 
     python_config = PythonConfig(
         python_code="first += 2",
@@ -13,12 +14,12 @@ def test_client_from_server():
 
     step = PythonStep().step(python_config)
     server = Server(steps=step, serving_config=ServingConfig())
-    server.start()
+    server.start(server_id)
 
     try:
         server.get_client()
     finally:
-        server.stop()
+        server.stop(server_id)
 
 
 @pytest.mark.unit

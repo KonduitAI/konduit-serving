@@ -15,7 +15,8 @@ See `ADRs/0003-Pipeline-API_Rewrite.md` for background and motivation on the cur
 * PipelineStepRunner: An interface for running a PipelineStep
 * PipelineStepRunnerFactory: For creating PipelineStepRunner from PipelineExecutor. Explained in more detail later.
 * Data: A map-like store of key-value pairs.
-    * Keys are always Strings, values are one of: {String, int64 (long), double, boolean, NDArray, byte[], Image, List[T], Data} where T is any of these types.
+    * Keys are always Strings, values are one of: {String, int64 (long), double, boolean, NDArray, byte[], Image, bounding box,
+     List[T], Data} where T is any of these types.
       Note that we allow nested Data and List objects.
     * Data instances also have optional metadata, stored as a nested Data instance 
     * Note NDArray and Image are special cases here, discussed in detail below
@@ -30,7 +31,7 @@ The list below briefly describes those implemented so far (as of 05/05/2020)- th
     * konduit-serving-deeplearning4j: Deeplearning4j models.
 * konduit-serving-data: Parent module for data and datatypes
     * konduit-serving-nd4j: Mainly NDArray integration/functionality for ND4J
-    * konduit-serving-javacv: Image conversion functionality for JavaCV 
+    * konduit-serving-image: Image conversion functionality using JavaCV; also Image -> NDArray functionality 
 * konduit-serving-io: Parent module for I/O functionality - sensors, cameras, etc - and maybe later things like HDFS, S3, etc
     * konduit-serving-camera: Steps related to capturing data from device-connected cameras (WIP)
 
@@ -134,6 +135,7 @@ Again, the supported datatypes include: (see `ValueType` enum):
 * BOOLEAN
 * DATA
 * LIST
+* BOUNDING_BOX
 
 `JData` is the Java Map-based implementation of the `Data` interface - i.e., literally it has a `Map<String,Value<T>>` internally,
 where `Value<T>` is a trivially simple object to hold objects of different types.
@@ -254,7 +256,6 @@ As of 07/05/2020 supported formats for images include:
 * BufferedImage
 * JavaCV Mat    (konduit-serving-javacv)
 * JavaCV Frame  (konduit-serving-javacv)
-* OpenCV Mat    (konduit-serving-javacv)
 More formats will be added in the future.
 
 As of 07/05/2020 supported NDArray formats include:
@@ -262,6 +263,25 @@ As of 07/05/2020 supported NDArray formats include:
 * float[], float[][], float[][][], float[][][][], float[][][][][]
 * INDArray      (konduit-serving-nd4j)
 The full set of Java primitive array types (1d to 5d int[], double[], byte[] etc is planned to be added)
+
+
+### Image to NDArray
+
+At some point, if we want to make predictions based on an Image, we need to convert it to an NDArray, and likely normalize it.
+
+There are two main classes (both in )
+* ImageToNDArrayStep - Image -> NDArray as a pipeline step 
+* ImageToNDArray utility class
+
+Both of these take an ImageToNDArrayConfig to specify the format, which allows configuration of:
+* The output NDArray height/width
+* The output NDArray datatype (i.e., float, double, etc)
+* Whether a leading dimension (of size 1) should be included or not - i.e., [c,h,w] or [1,c,h,w] (or similar for channels last) 
+* How to handle the situation where image aspect ratio doesn't match the output NDArray aspect ratio
+* Whether to use channels first or channels last for the NDArray
+* The chanels layout - RGB, BGR, etc
+* The normalization to apply (build in methods: none, scale 0-1, subtract mean, standardize, inception or VGG)
+
 
 
 ## JSON Serialization / Deserialization
@@ -349,17 +369,37 @@ As for the actual JSON format - this is basically as follows (taken from DataJso
 {
   "myKey" : true
 }
+ ----- BOUNDING_BOX -----
+{
+  "myKey" : {
+    "@cx" : 0.5,
+    "@cy" : 0.4,
+    "@h" : 0.9,
+    "@w" : 1.0
+  },
+  "myKey2" : {
+    "@x1" : 0.1,
+    "@x2" : 1.0,
+    "@y1" : 0.2,
+    "@y2" : 0.9,
+    "label" : "label",
+    "probability" : 0.7
+  }
+}
  ----- DATA -----
 {
   "myKey" : {
-    "myInnerKey" : "myInnerValue"
-  }
+  "myInnerKey" : "myInnerValue"
+}
+}
+ ----- LIST -----
+{
+  "myKey" : [ "some", "list", "values" ]
 }
 ```
 
-Note that strings, bytes, double, int64 and boolean are basically as you would expect.  
-The format for nested Data instances is identical to the non-nested ones.  
-List formats (not shown above) will use JSON arrays - so it'll look like `"myKey" : ["some", "list", "values"]`  
+Note that strings, bytes, double, int64, boolean and lists are basically as you would expect.  
+The format for nested Data instances is identical to the non-nested ones.    
 Bytes, is a special case - it's an object with a special protected key: `@BytesBase64`. Currently (and by default) we
 will encode `byte[]` objects as base64 format for space efficiency; later we will allow "array style" byte[] encoding
 (i.e., `"@BytesArray" : [1,2,3]`). Users are not allowed to add anything to a Data instance with these protected keys.
@@ -368,6 +408,9 @@ Image data is stored by default in PNG format, base64 encoded (this will be conf
 
 NDArray is a special case also: it in a JSON object with type/shape/data keys. Currently data is base64 encoded, but
 we may allow a "1d buffer array" format in the future also.
+
+Bounding boxes are also stored with special keys in either (cx, cy, h, w) format or (x1, x2, y1, y2) format, again with
+special/reserved names to differentiate a bounding box from a Data instance (otherwise the JSON would be ambiguous). 
 
 The full set of protected keys can be found on the Data interface. They include:
 * @BytesBase64
@@ -378,6 +421,8 @@ The full set of protected keys can be found on the Data interface. They include:
 * @NDArrayType
 * @NDArrayDataBase64
 * @Metadata
+* Bounding box: @x1, @x2, @y1, @y2
+* Bounding box: @cx, @cy, @h, @w 
 
 In practice, Data JSON serialization/deserialization is implemneted in the DataJsonSerializer and DataJsonDeserializer classes. 
 
@@ -438,10 +483,4 @@ It's fine to have sub-packages (i.e., any X in `ai.konduit.serving.data.nd4j.X` 
 in the same package - i.e., modules X and Y can't both define classes directly in the same namespace.
 The reason is to avoid split packages issues for OSGi and Java 9 Modules. We will likely use OSGi extensively in the future.
 
- 
-
-
-
-
- 
  

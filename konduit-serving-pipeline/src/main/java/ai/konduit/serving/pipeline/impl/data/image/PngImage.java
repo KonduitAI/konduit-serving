@@ -19,8 +19,17 @@
 package ai.konduit.serving.pipeline.impl.data.image;
 
 public class PngImage extends BaseImage<Png> {
-
     public PngImage(Png image) {
         super(image);
+    }
+
+    @Override
+    public int height() {
+        return image.height();
+    }
+
+    @Override
+    public int width() {
+        return image.width();
     }
 }

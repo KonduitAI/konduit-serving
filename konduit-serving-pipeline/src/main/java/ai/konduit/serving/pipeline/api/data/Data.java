@@ -22,8 +22,10 @@ import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonDeserializer;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonSerializer;
+import ai.konduit.serving.pipeline.util.DataUtils;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import lombok.NonNull;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
@@ -46,11 +48,22 @@ public interface Data {
     String RESERVED_KEY_NDARRAY_DATA_BASE64 = "@NDArrayDataBase64";
     String RESERVED_KEY_NDARRAY_DATA_ARRAY = "@NDArrayDataBase64";
     String RESERVED_KEY_METADATA = "@Metadata";
+    String RESERVED_KEY_BB_X1 = "@x1";
+    String RESERVED_KEY_BB_X2 = "@x2";
+    String RESERVED_KEY_BB_Y1 = "@y1";
+    String RESERVED_KEY_BB_Y2 = "@y2";
+    String RESERVED_KEY_BB_CX = "@cx";
+    String RESERVED_KEY_BB_CY = "@cy";
+    String RESERVED_KEY_BB_H = "@h";
+    String RESERVED_KEY_BB_W = "@w";
+
 
     static List<String> reservedKeywords(){
         return Arrays.asList(RESERVED_KEY_BYTES_BASE64, RESERVED_KEY_BYTES_ARRAY, RESERVED_KEY_IMAGE_FORMAT,
                 RESERVED_KEY_IMAGE_DATA, RESERVED_KEY_NDARRAY_SHAPE, RESERVED_KEY_NDARRAY_TYPE, RESERVED_KEY_NDARRAY_DATA_BASE64,
-                RESERVED_KEY_NDARRAY_DATA_ARRAY, RESERVED_KEY_METADATA);
+                RESERVED_KEY_NDARRAY_DATA_ARRAY, RESERVED_KEY_METADATA,
+                RESERVED_KEY_BB_X1, RESERVED_KEY_BB_X2, RESERVED_KEY_BB_Y1, RESERVED_KEY_BB_Y2,
+                RESERVED_KEY_BB_CX, RESERVED_KEY_BB_CY, RESERVED_KEY_BB_H, RESERVED_KEY_BB_W);
     }
 
     int size();
@@ -89,6 +102,7 @@ public interface Data {
     double getDouble(String key) throws ValueNotFoundException;
     Image getImage(String key) throws ValueNotFoundException;
     long getLong(String key) throws ValueNotFoundException;
+    BoundingBox getBoundingBox(String key) throws ValueNotFoundException;
     List<Object> getList(String key, ValueType type);                   //TODO type
     Data getData(String key);
 
@@ -99,14 +113,17 @@ public interface Data {
     void put(String key, long data);
     void put(String key, double data);
     void put(String key, boolean data);
+    void put(String key, BoundingBox data);
 
     void putListString(String key, List<String> data);
     void putListInt64(String key, List<Long> data);
     void putListBoolean(String key, List<Boolean> data);
+    void putListBytes(String key, List<byte[]> data);
     void putListDouble(String key, List<Double> data);
     void putListData(String key, List<Data> data);
     void putListImage(String key, List<Image> data);
     void putListNDArray(String key, List<NDArray> data);
+    void putListBoundingBox(String key, List<BoundingBox> data);
     void put(String key, Data data);
 
     boolean hasMetaData();
@@ -161,6 +178,14 @@ public interface Data {
         return new JData();
     }
 
+    static String toString(Data d){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Data(");
+        sb.append(d.keys().toString());
+        sb.append(")");
+        return sb.toString();
+    }
+
     static boolean equals(@NonNull Data d1, @NonNull Data d2){
 
         if(d1.size() != d2.size())
@@ -184,6 +209,16 @@ public interface Data {
                 default:
                     //TODO
                     throw new UnsupportedOperationException(vt + " equality not yet implemented");
+                case LIST:
+                    //TODO will this be robust for equality of any objects? Probably not...
+                    ValueType l1Type = d1.listType(s);
+                    ValueType l2Type = d2.listType(s);
+                    List<?> list1 = d1.getList(s, l1Type);
+                    List<?> list2 = d2.getList(s, l2Type);
+                    if(!DataUtils.listEquals(list1, list2, l1Type, l2Type))
+                        return false;
+
+                    break;
                 case IMAGE:
                     Png png1 = d1.getImage(s).getAs(Png.class);
                     Png png2 = d1.getImage(s).getAs(Png.class);
@@ -237,12 +272,20 @@ public interface Data {
                     Data d2a = d2.getData(s);
                     if(!equals(d1a, d2a))
                         return false;
-
+                    break;
+                case BOUNDING_BOX:
+                    BoundingBox bb1 = d1.getBoundingBox(s);
+                    BoundingBox bb2 = d2.getBoundingBox(s);
+                    if(!BoundingBox.equals(bb1, bb2))
+                        return false;
+                    break;
             }
         }
 
         return true;
     }
+
+
 
     static void assertNotReservedKey(@NonNull String s){
         for(String kwd : reservedKeywords()){
@@ -250,6 +293,42 @@ public interface Data {
                 throw new IllegalStateException("Cannot use key \"" + kwd + "\" in a Data instance: This key is reserved" +
                         " for internal use only");
             }
+        }
+    }
+
+
+    default void copyFrom(@NonNull String key, @NonNull Data from){
+        Preconditions.checkState(from.has(key), "Key %s does not exist in provided Data instance");
+        ValueType vt = from.type(key);
+        switch (vt){
+            case NDARRAY:
+                put(key, getNDArray(key));
+                return;
+            case STRING:
+                put(key, getString(key));
+                return;
+            case BYTES:
+                put(key, getBytes(key));
+                return;
+            case IMAGE:
+                put(key, getImage(key));
+                return;
+            case DOUBLE:
+                put(key, getDouble(key));
+                return;
+            case INT64:
+                put(key, getLong(key));
+                return;
+            case BOOLEAN:
+                put(key, getBoolean(key));
+                return;
+            case DATA:
+                put(key, getData(key));
+                return;
+            case LIST:
+                throw new UnsupportedOperationException("List copyFrom not yet implemented");
+            default:
+                throw new UnsupportedOperationException("Not supported: " + vt);
         }
     }
 }

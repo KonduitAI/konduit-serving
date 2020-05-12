@@ -18,19 +18,15 @@
 
 package ai.konduit.serving.pipeline.impl.data;
 
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.api.data.ValueType;
-import org.junit.Ignore;
+import ai.konduit.serving.pipeline.api.data.*;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class DataJsonTest {
 
@@ -38,10 +34,6 @@ public class DataJsonTest {
     public void testBasic(){
 
         for(ValueType vt : ValueType.values()){
-            if(vt == ValueType.LIST ){     //TODO NO WAY TO PUT LISTS INTO DATA YET - WIP TO BE MERGED SOON
-                System.out.println("SKIPPING: " + vt);
-                continue;
-            }
 
             System.out.println(" ----- " + vt + " -----");
 
@@ -72,10 +64,14 @@ public class DataJsonTest {
                     d = Data.singleton("myKey", Data.singleton("myInnerKey", "myInnerValue"));
                     break;
                 case LIST:
-                    d = null;
+                    d = Data.singletonList("myKey", Arrays.asList("some", "list", "values"), ValueType.STRING);
+                    break;
+                case BOUNDING_BOX:
+                    d = Data.singleton("myKey", BoundingBox.create(0.5, 0.4, 0.9, 1.0));
+                    d.put("myKey2", BoundingBox.createXY(0.1, 1, 0.2, 0.9, "label", 0.7));
                     break;
                 default:
-                    d = null;
+                    throw new RuntimeException();
             }
 
             String s = d.toJson();
@@ -103,12 +99,12 @@ public class DataJsonTest {
         assertEquals(dInner, dInnerJson);
     }
 
-    @Ignore     //TODO NO WAY TO PUT LISTS INTO DATA YET - WIP TO BE MERGED SOON
     @Test
     public void testList(){
 
         for(ValueType vt : ValueType.values()) {
-            if (vt == ValueType.IMAGE || vt == ValueType.DATA || vt == ValueType.LIST || vt == ValueType.NDARRAY) {
+            if (vt == ValueType.LIST) {
+                //TODO NESTED LIST SERIALIZATION NOT YET IMPLEMENTED
                 System.out.println("SKIPPING: " + vt);
                 continue;
             }
@@ -117,21 +113,54 @@ public class DataJsonTest {
             switch (vt){
                 case STRING:
                     List<String> strList = Arrays.asList("test", "string", "list");
-
+                    d = Data.singletonList("key", strList, ValueType.STRING);
                     break;
                 case BYTES:
+                    List<byte[]> bList = Arrays.asList(new byte[]{0,1,2}, new byte[]{9,8,7});
+                    d = Data.singletonList("key", bList, ValueType.BYTES);
                     break;
                 case DOUBLE:
+                    List<Double> dList = Arrays.asList(0.0, 1.0, 2.0);
+                    d = Data.singletonList("key", dList, ValueType.DOUBLE);
                     break;
                 case INT64:
+                    List<Long> lList = Arrays.asList(0L, 1L, 2L);
+                    d = Data.singletonList("key", lList, ValueType.INT64);
                     break;
                 case BOOLEAN:
+                    List<Boolean> boolList = Arrays.asList(false, true, false);
+                    d = Data.singletonList("key", boolList, ValueType.BOOLEAN);
                     break;
+                case IMAGE:
+                    File f = Resources.asFile("data/5_32x32.png");
+                    List<Image> imgList = Arrays.asList(Image.create(f), Image.create(f));
+                    d = Data.singletonList("key", imgList, ValueType.IMAGE);
+                    break;
+                case NDARRAY:
+                    List<NDArray> ndList = Arrays.asList(NDArray.create(new float[]{1,2,3}), NDArray.create(new float[]{4,5,6}));
+                    d = Data.singletonList("key", ndList, ValueType.NDARRAY);
+                    break;
+                case DATA:
+                    List<Data> dataList = Arrays.asList(Data.singleton("key", "value"), Data.singletonList("key", Arrays.asList("string", "list"), ValueType.STRING));
+                    d = Data.singletonList("key", dataList, ValueType.DATA);
+                    break;
+                case BOUNDING_BOX:
+                    List<BoundingBox> bbList = Arrays.asList(BoundingBox.createXY(0.2, 0.4, 0.7, 0.9, "myLabel", 0.8),
+                            BoundingBox.create(0.4, 0.5, 0.3, 0.1, "otherlabel", 0.99));
+                    d = Data.singletonList("key", bbList, ValueType.BOUNDING_BOX);
+                    break;
+                default:
+                    throw new RuntimeException();
             }
 
+            String json = d.toJson();
 
+            System.out.println("======================================");
+            System.out.println(json);
+
+            Data dJson = Data.fromJson(json);
+            assertEquals(d, dJson);
         }
-
     }
 
 
@@ -147,7 +176,7 @@ public class DataJsonTest {
 
 
         String json = d.toJson();
-        System.out.println(json);
+//        System.out.println(json);
         Data d2 = Data.fromJson(json);
         assertEquals(d, d2);
 

@@ -30,25 +30,21 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
 @JsonSubTypes({
         @JsonSubTypes.Type(value = PmmlStep.class, name = "PMML"),
-        @JsonSubTypes.Type(value = PmmlStep.class, name = "PmmlConfig"),
+        @JsonSubTypes.Type(value = PmmlStep.class, name = "PmmlStep"),
         @JsonSubTypes.Type(value = SameDiffStep.class, name = "SAMEDIFF"),
-        @JsonSubTypes.Type(value = SameDiffStep.class, name = "SameDiffConfig"),
+        @JsonSubTypes.Type(value = SameDiffStep.class, name = "SameDiffStep"),
         @JsonSubTypes.Type(value = TensorFlowStep.class, name = "TENSORFLOW"),
-        @JsonSubTypes.Type(value = TensorFlowStep.class, name = "TensorFlowConfig"),
+        @JsonSubTypes.Type(value = TensorFlowStep.class, name = "TensorFlowStep"),
         @JsonSubTypes.Type(value = OnnxStep.class, name = "ONNX"),
-        @JsonSubTypes.Type(value = OnnxStep.class, name = "OnnxConfig"),
+        @JsonSubTypes.Type(value = OnnxStep.class, name = "OnnxStep"),
         @JsonSubTypes.Type(value = KerasStep.class, name = "KERAS"),
-        @JsonSubTypes.Type(value = KerasStep.class, name = "KerasConfig"),
+        @JsonSubTypes.Type(value = KerasStep.class, name = "KerasStep"),
         @JsonSubTypes.Type(value = Dl4jStep.class, name= "DL4J"),
-        @JsonSubTypes.Type(value = Dl4jStep.class, name= "DL4JConfig"),
+        @JsonSubTypes.Type(value = Dl4jStep.class, name= "Dl4jStep"),
         @JsonSubTypes.Type(value = PythonStep.class, name = "PYTHON"),
         @JsonSubTypes.Type(value = PythonStep.class, name = "PythonStep"),
-        @JsonSubTypes.Type(value = PmmlStep.class, name = "PMML"),
-        @JsonSubTypes.Type(value = PmmlStep.class, name = "PmmlStep"),
         @JsonSubTypes.Type(value = TransformProcessStep.class, name = "TRANSFORM"),
         @JsonSubTypes.Type(value = TransformProcessStep.class, name = "TransformProcessStep"),
-        @JsonSubTypes.Type(value = CustomPipelineStep.class, name = "CUSTOM"),
-        @JsonSubTypes.Type(value = CustomPipelineStep.class, name = "CustomPipelineStep"),
         @JsonSubTypes.Type(value = ImageLoadingStep.class, name = "IMAGE"),
         @JsonSubTypes.Type(value = ImageLoadingStep.class, name = "ImageLoadingStep"),
         @JsonSubTypes.Type(value = JsonExpanderTransformStep.class, name = "JSON_EXPANDER"),
@@ -56,7 +52,9 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
         @JsonSubTypes.Type(value = ArrayConcatenationStep.class, name = "ARRAY_CONCAT"),
         @JsonSubTypes.Type(value = ArrayConcatenationStep.class, name = "ArrayConcatenationStep"),
         @JsonSubTypes.Type(value = WordPieceTokenizerStep.class, name = "WORDPIECE_TOKENIZER"),
-        @JsonSubTypes.Type(value = WordPieceTokenizerStep.class, name = "WordPieceTokenizerStep")
+        @JsonSubTypes.Type(value = WordPieceTokenizerStep.class, name = "WordPieceTokenizerStep"),
+        @JsonSubTypes.Type(value = CustomPipelineStep.class, name = "CUSTOM"),
+        @JsonSubTypes.Type(value = CustomPipelineStep.class, name = "CustomPipelineStep")
 })
 @JsonTypeInfo(use = NAME, property = "type")
 @Deprecated

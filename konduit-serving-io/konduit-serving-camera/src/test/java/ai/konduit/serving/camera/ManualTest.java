@@ -1,7 +1,7 @@
 package ai.konduit.serving.camera;
 
 import ai.konduit.serving.camera.step.capture.FrameCapturePipelineStep;
-import ai.konduit.serving.camera.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
@@ -27,7 +27,7 @@ public class ManualTest {
                         .width(w)
                         .height(h)
                         .outputKey("myImage")
-                    .build())
+                        .build())
                 .add(ShowImagePipelineStep.builder()
                         .displayName("Image Viewer")
                         .width(w)
