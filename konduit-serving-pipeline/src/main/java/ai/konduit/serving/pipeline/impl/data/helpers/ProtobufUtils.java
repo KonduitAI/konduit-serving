@@ -37,6 +37,15 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ProtobufUtils {
 
+    private static List<ByteString> ndArrayToByteStringList(SerializedNDArray sn) {
+        byte[] bufferBytes = new byte[sn.getBuffer().remaining()];
+        sn.getBuffer().get(bufferBytes);
+        ByteString byteString = ByteString.copyFrom(bufferBytes);
+        List<ByteString> byteStringList = new ArrayList<>();
+        byteStringList.add(byteString);
+        return byteStringList;
+    }
+
     public static DataProtoMessage.DataMap serialize(Map<String,Value> dataMap) {
 
         Map<String, DataProtoMessage.DataScheme> pbItemsMap = new HashMap<>();
@@ -86,12 +95,7 @@ public class ProtobufUtils {
             else if (value.type() == ValueType.NDARRAY) {
                 NDArray ndArray = (NDArray)nextItem.getValue().get();
                 SerializedNDArray sn = ndArray.getAs(SerializedNDArray.class);
-
-                byte[] bufferBytes = new byte[sn.getBuffer().remaining()];
-                sn.getBuffer().get(bufferBytes);
-                ByteString byteString = ByteString.copyFrom(bufferBytes);
-                List<ByteString> byteStringList = new ArrayList<>();
-                byteStringList.add(byteString);
+                List<ByteString> byteStringList = ndArrayToByteStringList(sn);
 
                 // TODO: setType must be fixed when anoter ndarray types are supported.
                 DataProtoMessage.NDArray pbNDArray = DataProtoMessage.NDArray.newBuilder().
@@ -209,11 +213,7 @@ public class ProtobufUtils {
                     List<DataProtoMessage.NDArray> pbArrays = new ArrayList<>();
                     for (val arr : arrays) {
                         SerializedNDArray sn = arr.getAs(SerializedNDArray.class);
-                        byte[] bufferBytes = new byte[sn.getBuffer().remaining()];
-                        sn.getBuffer().get(bufferBytes);
-                        ByteString byteString = ByteString.copyFrom(bufferBytes);
-                        List<ByteString> byteStringList = new ArrayList<>();
-                        byteStringList.add(byteString);
+                        List<ByteString> byteStringList = ndArrayToByteStringList(sn);
                         DataProtoMessage.NDArray pbNDArray = DataProtoMessage.NDArray.newBuilder().
                                 addAllShape(Arrays.asList(ArrayUtils.toObject(sn.getShape()))).
                                 addAllArray(byteStringList).
