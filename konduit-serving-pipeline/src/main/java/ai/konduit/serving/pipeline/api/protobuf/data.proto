@@ -6,7 +6,7 @@ option java_package = "ai.konduit.serving.pipeline.impl.data.protobuf";
 option java_outer_classname = "DataProtoMessage";
 
 message DataScheme {
-    DataScheme metaData = 2;
+    DataMap metaData = 2;
     oneof value {
         string sValue = 3;
         bytes bValue = 4;
@@ -28,8 +28,9 @@ message DataScheme {
         DOUBLE = 4;
         INT64 = 5;
         BOOLEAN = 6;
-        DATA = 7;
-        LIST = 8;
+        BOUNDING_BOX = 7;
+        DATA = 8;
+        LIST = 9;
     }
 }
 

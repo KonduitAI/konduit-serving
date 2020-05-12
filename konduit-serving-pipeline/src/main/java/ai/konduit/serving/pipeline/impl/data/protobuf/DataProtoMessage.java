@@ -19,17 +19,17 @@ public final class DataProtoMessage {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
      */
     boolean hasMetaData();
     /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
      */
-    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaData();
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap getMetaData();
     /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
      */
-    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder getMetaDataOrBuilder();
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMapOrBuilder getMetaDataOrBuilder();
 
     /**
      * <code>string sValue = 3;</code>
@@ -168,11 +168,11 @@ public final class DataProtoMessage {
               done = true;
               break;
             case 18: {
-              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder subBuilder = null;
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.Builder subBuilder = null;
               if (metaData_ != null) {
                 subBuilder = metaData_.toBuilder();
               }
-              metaData_ = input.readMessage(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.parser(), extensionRegistry);
+              metaData_ = input.readMessage(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(metaData_);
                 metaData_ = subBuilder.buildPartial();
@@ -326,13 +326,17 @@ public final class DataProtoMessage {
        */
       BOOLEAN(6),
       /**
-       * <code>DATA = 7;</code>
+       * <code>BOUNDING_BOX = 7;</code>
        */
-      DATA(7),
+      BOUNDING_BOX(7),
       /**
-       * <code>LIST = 8;</code>
+       * <code>DATA = 8;</code>
        */
-      LIST(8),
+      DATA(8),
+      /**
+       * <code>LIST = 9;</code>
+       */
+      LIST(9),
       UNRECOGNIZED(-1),
       ;
 
@@ -365,13 +369,17 @@ public final class DataProtoMessage {
        */
       public static final int BOOLEAN_VALUE = 6;
       /**
-       * <code>DATA = 7;</code>
+       * <code>BOUNDING_BOX = 7;</code>
        */
-      public static final int DATA_VALUE = 7;
+      public static final int BOUNDING_BOX_VALUE = 7;
       /**
-       * <code>LIST = 8;</code>
+       * <code>DATA = 8;</code>
        */
-      public static final int LIST_VALUE = 8;
+      public static final int DATA_VALUE = 8;
+      /**
+       * <code>LIST = 9;</code>
+       */
+      public static final int LIST_VALUE = 9;
 
 
       public final int getNumber() {
@@ -399,8 +407,9 @@ public final class DataProtoMessage {
           case 4: return DOUBLE;
           case 5: return INT64;
           case 6: return BOOLEAN;
-          case 7: return DATA;
-          case 8: return LIST;
+          case 7: return BOUNDING_BOX;
+          case 8: return DATA;
+          case 9: return LIST;
           default: return null;
         }
       }
@@ -504,23 +513,23 @@ public final class DataProtoMessage {
     }
 
     public static final int METADATA_FIELD_NUMBER = 2;
-    private ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme metaData_;
+    private ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap metaData_;
     /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
      */
     public boolean hasMetaData() {
       return metaData_ != null;
     }
     /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
      */
-    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaData() {
-      return metaData_ == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance() : metaData_;
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap getMetaData() {
+      return metaData_ == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.getDefaultInstance() : metaData_;
     }
     /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
      */
-    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder getMetaDataOrBuilder() {
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMapOrBuilder getMetaDataOrBuilder() {
       return getMetaData();
     }
 
@@ -1303,29 +1312,29 @@ public final class DataProtoMessage {
       }
 
 
-      private ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme metaData_;
+      private ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap metaData_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder> metaDataBuilder_;
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMapOrBuilder> metaDataBuilder_;
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
        */
       public boolean hasMetaData() {
         return metaDataBuilder_ != null || metaData_ != null;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
        */
-      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaData() {
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap getMetaData() {
         if (metaDataBuilder_ == null) {
-          return metaData_ == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance() : metaData_;
+          return metaData_ == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.getDefaultInstance() : metaData_;
         } else {
           return metaDataBuilder_.getMessage();
         }
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
        */
-      public Builder setMetaData(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme value) {
+      public Builder setMetaData(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap value) {
         if (metaDataBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -1339,10 +1348,10 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
        */
       public Builder setMetaData(
-          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder builderForValue) {
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.Builder builderForValue) {
         if (metaDataBuilder_ == null) {
           metaData_ = builderForValue.build();
           onChanged();
@@ -1353,13 +1362,13 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
        */
-      public Builder mergeMetaData(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme value) {
+      public Builder mergeMetaData(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap value) {
         if (metaDataBuilder_ == null) {
           if (metaData_ != null) {
             metaData_ =
-              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.newBuilder(metaData_).mergeFrom(value).buildPartial();
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.newBuilder(metaData_).mergeFrom(value).buildPartial();
           } else {
             metaData_ = value;
           }
@@ -1371,7 +1380,7 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
        */
       public Builder clearMetaData() {
         if (metaDataBuilder_ == null) {
@@ -1385,33 +1394,33 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
        */
-      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder getMetaDataBuilder() {
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.Builder getMetaDataBuilder() {
         
         onChanged();
         return getMetaDataFieldBuilder().getBuilder();
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
        */
-      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder getMetaDataOrBuilder() {
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMapOrBuilder getMetaDataOrBuilder() {
         if (metaDataBuilder_ != null) {
           return metaDataBuilder_.getMessageOrBuilder();
         } else {
           return metaData_ == null ?
-              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance() : metaData_;
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.getDefaultInstance() : metaData_;
         }
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>.ai.konduit.serving.DataMap metaData = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder> 
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMapOrBuilder> 
           getMetaDataFieldBuilder() {
         if (metaDataBuilder_ == null) {
           metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder>(
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMapOrBuilder>(
                   getMetaData(),
                   getParentForChildren(),
                   isClean());
@@ -10228,44 +10237,44 @@ public final class DataProtoMessage {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\ndata.proto\022\022ai.konduit.serving\"\236\004\n\nDat" +
-      "aScheme\0220\n\010metaData\030\002 \001(\0132\036.ai.konduit.s" +
-      "erving.DataScheme\022\020\n\006sValue\030\003 \001(\tH\000\022\020\n\006b" +
-      "Value\030\004 \001(\014H\000\022\020\n\006iValue\030\005 \001(\003H\000\022\023\n\tboolV" +
-      "alue\030\006 \001(\010H\000\022\025\n\013doubleValue\030\007 \001(\001H\000\022-\n\tl" +
-      "istValue\030\010 \001(\0132\030.ai.konduit.serving.List" +
-      "H\000\022.\n\007ndValue\030\t \001(\0132\033.ai.konduit.serving" +
-      ".NDArrayH\000\022,\n\007imValue\030\n \001(\0132\031.ai.konduit" +
-      ".serving.ImageH\000\022:\n\010listType\030\013 \001(\0162(.ai." +
-      "konduit.serving.DataScheme.ValueType\0226\n\004" +
-      "type\030\014 \001(\0162(.ai.konduit.serving.DataSche" +
-      "me.ValueType\"r\n\tValueType\022\013\n\007NDARRAY\020\000\022\n" +
-      "\n\006STRING\020\001\022\t\n\005BYTES\020\002\022\t\n\005IMAGE\020\003\022\n\n\006DOUB" +
-      "LE\020\004\022\t\n\005INT64\020\005\022\013\n\007BOOLEAN\020\006\022\010\n\004DATA\020\007\022\010" +
-      "\n\004LIST\020\010B\007\n\005value\"\032\n\nStringList\022\014\n\004list\030" +
-      "\001 \003(\t\"\031\n\tInt64List\022\014\n\004list\030\001 \003(\003\"\033\n\013Bool" +
-      "eanList\022\014\n\004list\030\001 \003(\010\"\032\n\nDoubleList\022\014\n\004l" +
-      "ist\030\001 \003(\001\"4\n\tImageList\022\'\n\004list\030\001 \003(\0132\031.a" +
-      "i.konduit.serving.Image\"8\n\013NDArrayList\022)" +
-      "\n\004list\030\001 \003(\0132\033.ai.konduit.serving.NDArra" +
-      "y\"\266\002\n\004List\022/\n\005sList\030\001 \001(\0132\036.ai.konduit.s" +
-      "erving.StringListH\000\022.\n\005iList\030\002 \001(\0132\035.ai." +
-      "konduit.serving.Int64ListH\000\0220\n\005bList\030\003 \001" +
-      "(\0132\037.ai.konduit.serving.BooleanListH\000\022/\n" +
-      "\005dList\030\004 \001(\0132\036.ai.konduit.serving.Double" +
-      "ListH\000\022/\n\006imList\030\005 \001(\0132\035.ai.konduit.serv" +
-      "ing.ImageListH\000\0221\n\006ndList\030\006 \001(\0132\037.ai.kon" +
-      "duit.serving.NDArrayListH\000B\006\n\004list\"\025\n\005Im" +
-      "age\022\014\n\004data\030\001 \003(\014\"t\n\007NDArray\022\r\n\005shape\030\001 " +
-      "\003(\003\022\r\n\005array\030\003 \003(\014\0223\n\004type\030\002 \001(\0162%.ai.ko" +
-      "nduit.serving.NDArray.ValueType\"\026\n\tValue" +
-      "Type\022\t\n\005FLOAT\020\000\"\227\001\n\007DataMap\022;\n\010mapItems\030" +
-      "\001 \003(\0132).ai.konduit.serving.DataMap.MapIt" +
-      "emsEntry\032O\n\rMapItemsEntry\022\013\n\003key\030\001 \001(\t\022-" +
-      "\n\005value\030\002 \001(\0132\036.ai.konduit.serving.DataS" +
-      "cheme:\0028\001BB\n.ai.konduit.serving.pipeline" +
-      ".impl.data.protobufB\020DataProtoMessageb\006p" +
-      "roto3"
+      "\n\ndata.proto\022\022ai.konduit.serving\"\256\004\n\nDat" +
+      "aScheme\022-\n\010metaData\030\002 \001(\0132\033.ai.konduit.s" +
+      "erving.DataMap\022\020\n\006sValue\030\003 \001(\tH\000\022\020\n\006bVal" +
+      "ue\030\004 \001(\014H\000\022\020\n\006iValue\030\005 \001(\003H\000\022\023\n\tboolValu" +
+      "e\030\006 \001(\010H\000\022\025\n\013doubleValue\030\007 \001(\001H\000\022-\n\tlist" +
+      "Value\030\010 \001(\0132\030.ai.konduit.serving.ListH\000\022" +
+      ".\n\007ndValue\030\t \001(\0132\033.ai.konduit.serving.ND" +
+      "ArrayH\000\022,\n\007imValue\030\n \001(\0132\031.ai.konduit.se" +
+      "rving.ImageH\000\022:\n\010listType\030\013 \001(\0162(.ai.kon" +
+      "duit.serving.DataScheme.ValueType\0226\n\004typ" +
+      "e\030\014 \001(\0162(.ai.konduit.serving.DataScheme." +
+      "ValueType\"\204\001\n\tValueType\022\013\n\007NDARRAY\020\000\022\n\n\006" +
+      "STRING\020\001\022\t\n\005BYTES\020\002\022\t\n\005IMAGE\020\003\022\n\n\006DOUBLE" +
+      "\020\004\022\t\n\005INT64\020\005\022\013\n\007BOOLEAN\020\006\022\020\n\014BOUNDING_B" +
+      "OX\020\007\022\010\n\004DATA\020\010\022\010\n\004LIST\020\tB\007\n\005value\"\032\n\nStr" +
+      "ingList\022\014\n\004list\030\001 \003(\t\"\031\n\tInt64List\022\014\n\004li" +
+      "st\030\001 \003(\003\"\033\n\013BooleanList\022\014\n\004list\030\001 \003(\010\"\032\n" +
+      "\nDoubleList\022\014\n\004list\030\001 \003(\001\"4\n\tImageList\022\'" +
+      "\n\004list\030\001 \003(\0132\031.ai.konduit.serving.Image\"" +
+      "8\n\013NDArrayList\022)\n\004list\030\001 \003(\0132\033.ai.kondui" +
+      "t.serving.NDArray\"\266\002\n\004List\022/\n\005sList\030\001 \001(" +
+      "\0132\036.ai.konduit.serving.StringListH\000\022.\n\005i" +
+      "List\030\002 \001(\0132\035.ai.konduit.serving.Int64Lis" +
+      "tH\000\0220\n\005bList\030\003 \001(\0132\037.ai.konduit.serving." +
+      "BooleanListH\000\022/\n\005dList\030\004 \001(\0132\036.ai.kondui" +
+      "t.serving.DoubleListH\000\022/\n\006imList\030\005 \001(\0132\035" +
+      ".ai.konduit.serving.ImageListH\000\0221\n\006ndLis" +
+      "t\030\006 \001(\0132\037.ai.konduit.serving.NDArrayList" +
+      "H\000B\006\n\004list\"\025\n\005Image\022\014\n\004data\030\001 \003(\014\"t\n\007NDA" +
+      "rray\022\r\n\005shape\030\001 \003(\003\022\r\n\005array\030\003 \003(\014\0223\n\004ty" +
+      "pe\030\002 \001(\0162%.ai.konduit.serving.NDArray.Va" +
+      "lueType\"\026\n\tValueType\022\t\n\005FLOAT\020\000\"\227\001\n\007Data" +
+      "Map\022;\n\010mapItems\030\001 \003(\0132).ai.konduit.servi" +
+      "ng.DataMap.MapItemsEntry\032O\n\rMapItemsEntr" +
+      "y\022\013\n\003key\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.ai.kondu" +
+      "it.serving.DataScheme:\0028\001BB\n.ai.konduit." +
+      "serving.pipeline.impl.data.protobufB\020Dat" +
+      "aProtoMessageb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -102,6 +102,15 @@ public class ProtobufUtils {
                         setTypeValue(ValueType.NDARRAY.ordinal()).
                         build();
             }
+            else if (value.type() == ValueType.DATA) {
+                JData jData = (JData)nextItem.getValue().get();
+                DataProtoMessage.DataMap dataMapEmbedded = serialize(jData.getDataMap());
+
+                item = DataProtoMessage.DataScheme.newBuilder().
+                        setMetaData(dataMapEmbedded).
+                        setTypeValue(ValueType.DATA.ordinal()).
+                        build();
+            }
             else if (value.type() == ValueType.LIST) {
                 ListValue lv = (ListValue)value;
                 if (lv.elementType() == ValueType.INT64) {
@@ -221,6 +230,11 @@ public class ProtobufUtils {
             }
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.DOUBLE.ordinal()) {
                 retData.put(entry.getKey(), item.getDoubleValue());
+            }
+            if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.DATA.ordinal()) {
+                DataProtoMessage.DataMap itemMetaData = item.getMetaData();
+                Data embeddedData = deserialize(itemMetaData);
+                retData.put(entry.getKey(), embeddedData);
             }
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.LIST.ordinal()) {
                 if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.DOUBLE.ordinal()) {

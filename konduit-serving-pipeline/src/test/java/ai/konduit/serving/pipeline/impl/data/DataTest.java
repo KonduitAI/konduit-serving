@@ -91,22 +91,6 @@ public class DataTest {
         assertEquals(input, container.getDouble(KEY), 1e-4);
     }
 
-    /*@Test
-    public void testImageData() {
-        INDArray image = Nd4j.create(1,10,10,20);
-        Image input = new Image(image, 1,1,1);
-        Data container = JData.makeData(KEY, input);
-        assertEquals(input, container.getImage(KEY));
-    }*/
-
-    /*
-    @Test
-    public void testINDArrayData() {
-        INDArray input = Nd4j.rand(10,100, 1024);
-        Data container = JData.makeData(KEY, input);
-        assertEquals(input, container.getNDArray(KEY));
-    }*/
-
     @Test
     public void testIntData() {
         long data = 100;
@@ -474,28 +458,28 @@ public class DataTest {
 
     @Test
     public void testDataSerde() throws IOException {
-        List<Long> rawData = new ArrayList<>();
-        for (long l = 0; l < 10000; ++l) {
-            rawData.add(l);
-        }
         List<String> strings = new ArrayList<>();
         strings.add("one");
         strings.add("two");
         strings.add("three");
         strings.add("four");
 
-        Data intData = Data.singletonList(KEY, rawData, ValueType.INT64);
-        Data withMetaData = Data.singletonList("meta", strings, ValueType.STRING);
-        withMetaData.setMetaData(intData);
+        final String dataAsValue = "dataAsValue";
+        Data strData = Data.singletonList(KEY, strings, ValueType.STRING);
+        Data wrapppedData = Data.singleton(dataAsValue, strData);
 
         File serFile = testDir.newFile();
-        withMetaData.save(serFile);
+        wrapppedData.save(serFile);
         Data restoredData = Data.fromFile(serFile);
+        Data expectedData = (Data)wrapppedData.get(dataAsValue);
+        Data actualData = (Data)restoredData.get(dataAsValue);
+        assertEquals(expectedData, actualData);
+        assertEquals(expectedData.get(KEY), actualData.get(KEY));
+    }
 
-        //assertEquals(intData, withMetaData.getMetaData());
-        assertEquals(null, intData.getMetaData());
-        assertEquals(withMetaData.getMetaData(),
-                    restoredData.getMetaData());
+    @Test
+    public void testMetaDataSerde() {
 
     }
+
 }
