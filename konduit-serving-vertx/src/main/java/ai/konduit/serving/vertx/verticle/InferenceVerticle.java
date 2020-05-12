@@ -16,24 +16,47 @@
  * ****************************************************************************
  */
 
-package ai.konduit.serving.vertx.verticles;
+package ai.konduit.serving.vertx.verticle;
 
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
+import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class InferenceVerticle extends AbstractVerticle {
 
-    Pipeline pipeline;
-    PipelineExecutor pipelineExecutor;
+    protected ai.konduit.serving.pipeline.api.context.Context pipelineContext;
+    protected InferenceConfiguration inferenceConfiguration;
+    protected Pipeline pipeline;
+    protected PipelineExecutor pipelineExecutor;
 
     @Override
     public void init(Vertx vertx, Context context) {
         super.init(vertx, context);
 
-        pipeline = context.config().mapTo(Pipeline.class);
+        inferenceConfiguration = context.config().mapTo(InferenceConfiguration.class);
+        pipeline = inferenceConfiguration.getPipeline();
         pipelineExecutor = pipeline.executor();
+    }
+
+    @Override
+    public void stop(Promise<Void> stopPromise) {
+        if (vertx != null) {
+            vertx.close(handler -> {
+                if(handler.succeeded()) {
+                    log.debug("Shut down server.");
+                    stopPromise.complete();
+                } else {
+                    stopPromise.fail(handler.cause());
+                }
+            });
+        } else {
+            stopPromise.complete();
+        }
     }
 }

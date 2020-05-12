@@ -35,7 +35,7 @@ import java.util.Map;
  * that, given a set of specified labels
  * takes in counts of columns to increment.
  * The input is either a matrix or a vector representing the columns
- * to increment the count by. The column counts should be the same order
+ * to increment the size by. The column counts should be the same order
  * as the specified labels for this configuration.
  *
  * @author Adam Gibson

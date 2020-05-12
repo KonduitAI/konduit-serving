@@ -1,0 +1,3 @@
+{
+  "main": "ai.konduit.serving.vertx.protocols.grpc.verticle.InferenceVerticleGrpc"
+}

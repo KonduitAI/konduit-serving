@@ -44,6 +44,7 @@
         <module>konduit-serving-io</module>
         <module>konduit-serving-data</module>
         <module>konduit-serving-vertx</module>
+        <module>konduit-serving-vertx-protocols</module>
     </modules>
 
     <name>konduit-serving</name>

@@ -25,7 +25,9 @@ import lombok.NoArgsConstructor;
 /**
  * This class contains important constants for different environment variable settings
  * for konduit-serving.
+ * @deprecated To be removed - https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EnvironmentConstants {
 

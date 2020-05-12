@@ -1,0 +1,3 @@
+{
+  "main": "ai.konduit.serving.vertx.protocols.mqtt.verticle.InferenceVerticleMqtt"
+}

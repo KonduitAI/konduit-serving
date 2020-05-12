@@ -40,4 +40,9 @@ public class GraphPipeline implements Pipeline {
     public PipelineExecutor executor() {
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
+    @Override
+    public int size() {
+        return steps != null ? steps.size() : 0;
+    }
 }
