@@ -40,6 +40,7 @@ public class ProtobufUtils {
     private static String PNG = "PNG";
 
     private static List<ByteString> ndArrayToByteStringList(SerializedNDArray sn) {
+        sn.getBuffer().rewind();
         byte[] bufferBytes = new byte[sn.getBuffer().remaining()];
         sn.getBuffer().get(bufferBytes);
         ByteString byteString = ByteString.copyFrom(bufferBytes);
