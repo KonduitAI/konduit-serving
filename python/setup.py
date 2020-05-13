@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="konduit",
-    version="0.1.8",
+    version="0.1.9",
     packages=find_packages(),
     install_requires=[
         "requests>=2.22.0",
@@ -19,13 +19,13 @@ setup(
         "packaging",
         "hurry.filesize"
     ],
-    py_modules=["konduit", "cli"],
+    py_modules=["konduit", "cli", "cli_init"],
     extras_require={
         "tests": ["pytest", "pytest-pep8", "pytest-cov", "mock"],
         "codegen": ["jsonschema2popo"],
         "dev": ["black", "pre-commit"],
     },
-    entry_points={"console_scripts": ["konduit=cli:cli", "konduit-init=cli:init"]},
+    entry_points={"console_scripts": ["konduit=cli:cli", "konduit-init=cli_init:init"]},
     include_package_data=True,
     license="Apache",
     description="konduit: Enterprise Runtime for Machine Learning Models",

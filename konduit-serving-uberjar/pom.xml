@@ -44,8 +44,25 @@
         </dependency>
     </dependencies>
 
+    <properties>
+        <base.classifier.name>${spin.version}-${javacpp.platform}-${chip}</base.classifier.name>
+        <classifier.name>${base.classifier.name}</classifier.name>
+    </properties>
+
 
     <profiles>
+        <profile>
+            <id>gpu</id>
+            <activation>
+                <property>
+                    <name>chip</name>
+                    <value>gpu</value>
+                </property>
+            </activation>
+            <properties>
+                <classifier.name>${base.classifier.name}-cuda-${cuda.version}</classifier.name>
+            </properties>
+        </profile>
         <profile>
             <id>uberjar</id>
             <build>
@@ -56,7 +73,7 @@
                         <version>${maven-shade-plugin.version}</version>
                         <configuration>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>${spin.version}-${javacpp.platform}-${chip}</shadedClassifierName>
+                            <shadedClassifierName>${classifier.name}</shadedClassifierName>
                             <createDependencyReducedPom>true</createDependencyReducedPom>
                             <filters>
                                 <filter>

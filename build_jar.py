@@ -34,13 +34,14 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--os",
+        "-p",
         type=str,
         default=get_platform(),
         help="the javacpp.platform to use: Possible values are: " + os_choices.__str__(),
     )
 
     parser.add_argument(
-        "--spin",
+        "--spin", "-s",
         type=str,
         default="all",
         choices=["minimal", "python", "pmml", "all"],
@@ -50,7 +51,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--chip",
+        "--chip", "-c",
         type=str,
         default="cpu",
         choices=["cpu", "gpu", "arm"],
@@ -58,11 +59,26 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--source", type=str, help="the path to the model server", default="."
+        "--cuda-version", "-cv",
+        type=str,
+        default="10.2",
+        choices=["10.1", "10.2"],
+        help="whether to bundle Python, PMML, both or neither. Python bundling is"
+             + "not encouraged with ARM, and PMML bundling is not encouraged if agpl"
+             + "license is an issue.",
+    )
+
+    parser.add_argument(
+        "--source",
+        "-so",
+        type=str,
+        help="the path to the model server",
+        default="."
     )
 
     parser.add_argument(
         "--target",
+        "-t",
         type=str,
         help="the path to the model server output",
         default="konduit.jar",
@@ -89,6 +105,10 @@ if __name__ == "__main__":
         command.append("-Ppmml")
 
     command.append("-Dspin.version={}".format(args.spin))
+
+    if args.chip == "gpu":
+        command.append("-Dcuda.version={}".format(args.cuda_version))
+
     command.append("-Denforcer.skip=true")
 
     with open(os.path.join(args.source, "pom.xml"), "r") as pom:
@@ -105,14 +125,21 @@ if __name__ == "__main__":
 
     # Copy the jar file to the path specified by the "target" argument
 
+    if args.chip == "gpu":
+        uberjar_file = "konduit-serving-uberjar-{}-{}-{}-gpu-cuda-{}.jar".format(
+            version[0], args.spin, args.os, args.cuda_version
+        )
+    else:
+        uberjar_file = "konduit-serving-uberjar-{}-{}-{}-{}.jar".format(
+            version[0], args.spin, args.os, args.chip
+        )
+
     copyfile(
         os.path.join(
             args.source,
             "konduit-serving-uberjar",
             "target",
-            "konduit-serving-uberjar-{}-{}-{}-{}.jar".format(
-                version[0], args.spin, args.os, args.chip
-            ),
+            uberjar_file,
         ),
         os.path.join(args.source, args.target),
     )
