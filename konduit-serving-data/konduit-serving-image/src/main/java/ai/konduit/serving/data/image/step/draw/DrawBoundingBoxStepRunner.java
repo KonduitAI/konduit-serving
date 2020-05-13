@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.data.image.step.draw;
 
+import ai.konduit.serving.data.image.convert.ImageToNDArray;
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -92,7 +94,10 @@ public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
 
         int thickness = Math.max(1, step.lineThickness());
 
+        ImageToNDArrayConfig im2ndConf = step.imageToNDArrayConfig();
+
         for(BoundingBox bb : list) {
+            bb = accountForCrop(i, bb, im2ndConf);
 
             Scalar color;
             if (step.classColors() == null && step.color() == null) {
@@ -118,7 +123,26 @@ public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
             int y = (int)(y1 * scaled.rows());
             int h = (int)(bb.height() * scaled.rows());
             int w = (int)(bb.width() * scaled.cols());
-            Rect r = new Rect(x, y, h, w);
+            Rect r = new Rect(x, y, w, h);
+            org.bytedeco.opencv.global.opencv_imgproc.rectangle(scaled, r, color, thickness, 8, 0);
+        }
+
+        if(im2ndConf != null && step.drawCropRegion()){
+            BoundingBox bb = ImageToNDArray.getCropRegion(i, im2ndConf);
+
+            Scalar color;
+            if (step.cropRegionColor() == null) {
+                //No color specified - use default color
+                color = Scalar.BLUE;
+            } else {
+                color = stringToColor(step.cropRegionColor());
+            }
+
+            int x = (int)(bb.x1() * scaled.cols());
+            int y = (int)(bb.y1() * scaled.rows());
+            int h = (int)(bb.height() * scaled.rows());
+            int w = (int)(bb.width() * scaled.cols());
+            Rect r = new Rect(x, y, w, h);
             org.bytedeco.opencv.global.opencv_imgproc.rectangle(scaled, r, color, thickness, 8, 0);
         }
 
@@ -213,5 +237,23 @@ public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
         } else {
             return m;
         }
+    }
+
+
+    protected BoundingBox accountForCrop(Image image, BoundingBox bbox, ImageToNDArrayConfig config){
+        if(config == null)
+            return bbox;
+
+        BoundingBox cropRegion = ImageToNDArray.getCropRegion(image, config);
+
+        double cropWidth = cropRegion.width();
+        double cropHeight = cropRegion.height();
+
+        double x1 = cropRegion.x1() + cropWidth * bbox.x1();
+        double x2 = cropRegion.x1() + cropWidth * bbox.x2();
+        double y1 = cropRegion.y1() + cropHeight * bbox.y1();
+        double y2 = cropRegion.y1() + cropHeight * bbox.y2();
+
+        return BoundingBox.createXY(x1, x2, y1, y2, bbox.label(), bbox.probability());
     }
 }

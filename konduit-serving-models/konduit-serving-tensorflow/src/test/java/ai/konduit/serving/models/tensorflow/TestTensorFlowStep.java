@@ -116,6 +116,8 @@ public class TestTensorFlowStep {
                 .imageName("image")
                 .bboxName("img_bbox")
                 .lineThickness(2)
+                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
+                .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
                 .build());
 
         //Show image in Java frame

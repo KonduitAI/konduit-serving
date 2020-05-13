@@ -68,10 +68,40 @@ public class ImageToNDArray {
         return convert(image, config, true);
     }
 
-    protected static Pair<NDArray,BoundingBox> convert(Image image, ImageToNDArrayConfig config, boolean withMeta) {
+    public static BoundingBox getCropRegion(Image image, ImageToNDArrayConfig config){
+
+        Integer outH = config.height();
+        Integer outW = config.width();
+        if (outH == null)
+            outH = image.height();
+        if (outW == null)
+            outW = image.width();
 
         int imgH = image.height();
         int imgW = image.width();
+
+
+        //Resize if necessary
+        boolean correctSize = outH == image.height() && outW == image.width();
+        Mat m = image.getAs(Mat.class);
+        if (!correctSize) {
+            AspectRatioHandling h = config.aspectRatioHandling();
+            if (h == AspectRatioHandling.CENTER_CROP) {
+                return centerCropBB(imgH, imgW, outH, outW);
+            } else if (h == AspectRatioHandling.PAD) {
+                throw new UnsupportedOperationException("Not yet implemented");
+            } else if (h == AspectRatioHandling.STRETCH) {
+                return BoundingBox.createXY(0.0, 1.0, 0.0, 1.0);
+            } else {
+                throw new UnsupportedOperationException("Not supported image conversion: " + h);
+            }
+        } else {
+            return BoundingBox.createXY(0.0, 1.0, 0.0, 1.0);
+        }
+
+    }
+
+    protected static Pair<NDArray,BoundingBox> convert(Image image, ImageToNDArrayConfig config, boolean withMeta) {
         BoundingBox bbMeta = null;
 
         Integer outH = config.height();
@@ -164,13 +194,52 @@ public class ImageToNDArray {
             croppedH = imgH;
             int delta = imgW - croppedW;
             x0 = delta / 2;
+            y0 = 0;
+        } else {
+            //Need to crop from the height dimension
+            croppedW = imgW;
+            croppedH = (int)(image.rows() / aspectOut);
+            int delta = imgH - croppedH;
+            x0 = 0;
+            y0 = delta / 2;
+        }
+
+        Rect crop = new Rect(x0, y0, croppedW, croppedH);
+        BoundingBox bb = null;
+        if(withBB){
+            bb = centerCropBB(imgH, imgW, outH, outW);
+        }
+
+        Mat out = image.apply(crop);
+        return new Pair<>(out, bb);
+    }
+
+    protected static BoundingBox centerCropBB(int imgH, int imgW, int outH, int outW){
+        double aspectIn = imgW / (double)imgH;
+        double aspectOut = outW / (double)outH;
+
+        int croppedW;
+        int croppedH;
+        int x0;
+        int x1;
+        int y0;
+        int y1;
+        if(aspectIn == aspectOut){
+            //No crop necessary
+            return BoundingBox.createXY(0.0, 1.0, 0.0, 1.0);
+        } else if(aspectIn > aspectOut){
+            //Need to crop from width dimension
+            croppedW = (int)(aspectOut * imgH);
+            croppedH = imgH;
+            int delta = imgW - croppedW;
+            x0 = delta / 2;
             x1 = imgW - (delta/2);
             y0 = 0;
             y1 = imgH;
         } else {
             //Need to crop from the height dimension
             croppedW = imgW;
-            croppedH = (int)(image.rows() / aspectOut);
+            croppedH = (int)(imgW / aspectOut);
             int delta = imgH - croppedH;
             x0 = 0;
             x1 = imgW;
@@ -178,18 +247,11 @@ public class ImageToNDArray {
             y1 = imgH - (delta/2);
         }
 
-        Rect crop = new Rect(x0, y0, croppedW, croppedH);
-        BoundingBox bb = null;
-        if(withBB){
-            double dx1 = x0 / (double)imgW;
-            double dx2 = x1 / (double)imgW;
-            double dy1 = y0 / (double)imgH;
-            double dy2 = y1 / (double)imgH;
-            bb = BoundingBox.createXY(dx1, dx2, dy1, dy2);
-        }
-
-        Mat out = image.apply(crop);
-        return new Pair<>(out, bb);
+        double dx1 = x0 / (double)imgW;
+        double dx2 = x1 / (double)imgW;
+        double dy1 = y0 / (double)imgH;
+        double dy2 = y1 / (double)imgH;
+        return BoundingBox.createXY(dx1, dx2, dy1, dy2);
     }
 
     protected static Mat convertColor(Mat m, ImageToNDArrayConfig config) {
@@ -271,8 +333,6 @@ public class ImageToNDArray {
                     throw new UnsupportedOperationException("Unsupported image normalization type: " + config.normalization().type());
             }
         }
-
-
 
         Indexer imgIdx = m.createIndexer(direct);
         if (imgIdx instanceof UByteIndexer) {

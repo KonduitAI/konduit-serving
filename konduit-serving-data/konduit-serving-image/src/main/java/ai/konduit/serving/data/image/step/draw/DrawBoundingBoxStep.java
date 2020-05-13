@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.draw;
 
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -57,6 +58,11 @@ public class DrawBoundingBoxStep implements PipelineStep {
     private Scale scale = Scale.NONE;
     private int resizeH;
     private int resizeW;
+
+    //Used to account for the fact that ImageToNDArray can crop images
+    private ImageToNDArrayConfig imageToNDArrayConfig;
+    private boolean drawCropRegion = false;
+    private String cropRegionColor;
 
     /*
     Other things could add:

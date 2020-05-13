@@ -640,7 +640,4 @@ public class TestImageToNDArray {
         System.out.println("***** NON-RGB NORMALIZATION NOT YET IMPLEMENTED *****");
     }
 
-
-
-
 }

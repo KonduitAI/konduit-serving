@@ -61,6 +61,7 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
 
         List<BoundingBox> l = new ArrayList<>();
         for(int i=0; i<bArr[0].length; i++ ){
+            //SSD order usually: [y1, x1, y2, x2]
             double y1 = bArr[0][i][0];
             double x1 = bArr[0][i][1];
             double y2 = bArr[0][i][2];
