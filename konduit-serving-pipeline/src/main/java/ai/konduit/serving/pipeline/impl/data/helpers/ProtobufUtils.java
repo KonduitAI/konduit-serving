@@ -37,6 +37,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ProtobufUtils {
 
+    private static String PNG = "PNG";
+
     private static List<ByteString> ndArrayToByteStringList(SerializedNDArray sn) {
         byte[] bufferBytes = new byte[sn.getBuffer().remaining()];
         sn.getBuffer().get(bufferBytes);
@@ -44,6 +46,57 @@ public class ProtobufUtils {
         List<ByteString> byteStringList = new ArrayList<>();
         byteStringList.add(byteString);
         return byteStringList;
+    }
+
+    private static DataProtoMessage.NDArray.ValueType toPbNDArrayType(NDArrayType origType) {
+        DataProtoMessage.NDArray.ValueType ndType = null;
+        switch (origType) {
+            case DOUBLE:
+                ndType = DataProtoMessage.NDArray.ValueType.DOUBLE;
+                break;
+            case FLOAT:
+                ndType = DataProtoMessage.NDArray.ValueType.FLOAT;
+                break;
+            case FLOAT16:
+                ndType = DataProtoMessage.NDArray.ValueType.FLOAT16;
+                break;
+            case BFLOAT16:
+                ndType = DataProtoMessage.NDArray.ValueType.BFLOAT16;
+                break;
+            case INT64:
+                ndType = DataProtoMessage.NDArray.ValueType.INT64;
+                break;
+            case INT32:
+                ndType = DataProtoMessage.NDArray.ValueType.INT32;
+                break;
+            case INT16:
+                ndType = DataProtoMessage.NDArray.ValueType.INT16;
+                break;
+            case INT8:
+                ndType = DataProtoMessage.NDArray.ValueType.INT8;
+                break;
+            case UINT64:
+                ndType = DataProtoMessage.NDArray.ValueType.UINT64;
+                break;
+            case UINT32:
+                ndType = DataProtoMessage.NDArray.ValueType.UINT32;
+                break;
+            case UINT16:
+                ndType = DataProtoMessage.NDArray.ValueType.UINT16;
+                break;
+            case UINT8:
+                ndType = DataProtoMessage.NDArray.ValueType.UINT8;
+                break;
+            case BOOL:
+                ndType = DataProtoMessage.NDArray.ValueType.BOOL;
+                break;
+            case UTF8:
+                ndType = DataProtoMessage.NDArray.ValueType.DOUBLE;
+                break;
+            default:
+                throw new IllegalStateException("NDArrayType " + origType + " not supported");
+        }
+        return ndType;
     }
 
     public static DataProtoMessage.DataMap serialize(Map<String,Value> dataMap) {
@@ -85,6 +138,7 @@ public class ProtobufUtils {
                 //byte[] imageBytes = new JavaImageConverters.IdentityConverter().convert(image, byte[].class);
                 DataProtoMessage.Image pbImage = DataProtoMessage.Image.newBuilder().
                         addData(ByteString.copyFrom(imageBytes)).
+                        setType(PNG).
                         build();
 
                 item = DataProtoMessage.DataScheme.newBuilder().
@@ -96,12 +150,13 @@ public class ProtobufUtils {
                 NDArray ndArray = (NDArray)nextItem.getValue().get();
                 SerializedNDArray sn = ndArray.getAs(SerializedNDArray.class);
                 List<ByteString> byteStringList = ndArrayToByteStringList(sn);
+                DataProtoMessage.NDArray.ValueType ndType =
+                        toPbNDArrayType(ndArray.type());
 
-                // TODO: setType must be fixed when anoter ndarray types are supported.
                 DataProtoMessage.NDArray pbNDArray = DataProtoMessage.NDArray.newBuilder().
                         addAllShape(Arrays.asList(ArrayUtils.toObject(sn.getShape()))).
                         addAllArray(byteStringList).
-                        setType(DataProtoMessage.NDArray.ValueType.FLOAT).
+                        setType(ndType).
                         build();
 
                 item = DataProtoMessage.DataScheme.newBuilder().
@@ -124,11 +179,11 @@ public class ProtobufUtils {
                 if (boundingBox instanceof BBoxCHW) {
                     pbBox = DataProtoMessage.BoundingBox.newBuilder().
                             setCx(boundingBox.cx()).setCy(boundingBox.cy()).
-                            setH(boundingBox.y2()-boundingBox.y1()).
-                            setW(boundingBox.x2()-boundingBox.x1()).
+                            setH(boundingBox.height()).
+                            setW(boundingBox.width()).
                             setLabel(StringUtils.defaultIfEmpty(boundingBox.label(), StringUtils.EMPTY)).
                             setType(DataProtoMessage.BoundingBox.BoxType.CHW).
-                            //setProbability(boundingBox.probability()).
+                            setProbability(boundingBox.probability()).
                             build();
                 }
                 else if (boundingBox instanceof BBoxXY) {
@@ -137,7 +192,7 @@ public class ProtobufUtils {
                             setY0(boundingBox.y1()).setY1(boundingBox.y2()).
                             setLabel(StringUtils.defaultIfEmpty(boundingBox.label(), StringUtils.EMPTY)).
                             setType(DataProtoMessage.BoundingBox.BoxType.XY).
-                            //setProbability(boundingBox.probability()).
+                            setProbability(boundingBox.probability()).
                             build();
                 }
                 item = DataProtoMessage.DataScheme.newBuilder().
@@ -157,7 +212,7 @@ public class ProtobufUtils {
                             setTypeValue(ValueType.LIST.ordinal()).
                             build();
                 }
-                if (lv.elementType() == ValueType.BOOLEAN) {
+                else if (lv.elementType() == ValueType.BOOLEAN) {
                     List<Boolean> longs = (List<Boolean>)nextItem.getValue().get();
                     DataProtoMessage.BooleanList toAdd = DataProtoMessage.BooleanList.newBuilder().addAllList(longs).build();
                     DataProtoMessage.List toAddGen = DataProtoMessage.List.newBuilder().setBList(toAdd).build();
@@ -167,7 +222,7 @@ public class ProtobufUtils {
                             setTypeValue(ValueType.LIST.ordinal()).
                             build();
                 }
-                if (lv.elementType() == ValueType.DOUBLE) {
+                else if (lv.elementType() == ValueType.DOUBLE) {
                     List<Double> doubles = (List<Double>)nextItem.getValue().get();
                     DataProtoMessage.DoubleList toAdd = DataProtoMessage.DoubleList.newBuilder().addAllList(doubles).build();
                     DataProtoMessage.List toAddGen = DataProtoMessage.List.newBuilder().setDList(toAdd).build();
@@ -177,7 +232,7 @@ public class ProtobufUtils {
                             setTypeValue(ValueType.LIST.ordinal()).
                             build();
                 }
-                if (lv.elementType() == ValueType.STRING) {
+                else if (lv.elementType() == ValueType.STRING) {
                     List<String> strings = (List<String>)nextItem.getValue().get();
                     DataProtoMessage.StringList toAdd = DataProtoMessage.StringList.newBuilder().addAllList(strings).build();
                     DataProtoMessage.List toAddGen = DataProtoMessage.List.newBuilder().setSList(toAdd).build();
@@ -188,7 +243,7 @@ public class ProtobufUtils {
                             setTypeValue(ValueType.LIST.ordinal()).
                             build();
                 }
-                if (lv.elementType() == ValueType.IMAGE) {
+                else if (lv.elementType() == ValueType.IMAGE) {
                     List<Image> images = (List<Image>)nextItem.getValue().get();
                     List<DataProtoMessage.Image> pbImages = new ArrayList<>();
                     for (val image : images) {
@@ -196,6 +251,7 @@ public class ProtobufUtils {
                         byte[] imageBytes = p.getBytes();
                         DataProtoMessage.Image pbImage = DataProtoMessage.Image.newBuilder().
                                 addData(ByteString.copyFrom(imageBytes)).
+                                setType(PNG).
                                 build();
                         pbImages.add(pbImage);
                     }
@@ -208,7 +264,7 @@ public class ProtobufUtils {
                             setTypeValue(ValueType.LIST.ordinal()).
                             build();
                 }
-                if (lv.elementType() == ValueType.NDARRAY) {
+                else if (lv.elementType() == ValueType.NDARRAY) {
                     List<NDArray> arrays = (List<NDArray>)nextItem.getValue().get();
                     List<DataProtoMessage.NDArray> pbArrays = new ArrayList<>();
                     for (val arr : arrays) {
@@ -228,6 +284,9 @@ public class ProtobufUtils {
                             setListTypeValue(ValueType.NDARRAY.ordinal()).
                             setTypeValue(ValueType.LIST.ordinal()).
                             build();
+                }
+                else {
+                    throw new IllegalStateException("List type is not implemented yet " + lv.elementType());
                 }
             }
             if (item == null) {
@@ -270,9 +329,11 @@ public class ProtobufUtils {
                 DataProtoMessage.BoundingBox pbBox = item.getBoxValue();
                 BoundingBox boundingBox = null;
                 if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.CHW)
-                    boundingBox = new BBoxCHW(pbBox.getCx(), pbBox.getCy(), pbBox.getH(), pbBox.getW());
+                    boundingBox = new BBoxCHW(pbBox.getCx(), pbBox.getCy(), pbBox.getH(), pbBox.getW(),
+                                            pbBox.getLabel(), pbBox.getProbability());
                 else if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.XY)
-                    boundingBox = new BBoxXY(pbBox.getX0(), pbBox.getX1(), pbBox.getY0(), pbBox.getY1());
+                    boundingBox = new BBoxXY(pbBox.getX0(), pbBox.getX1(), pbBox.getY0(), pbBox.getY1(),
+                                            pbBox.getLabel(), pbBox.getProbability());
                 retData.put(entry.getKey(), boundingBox);
             }
 
@@ -293,6 +354,8 @@ public class ProtobufUtils {
                     List<DataProtoMessage.Image> pbImages = item.getListValue().getImList().getListList();
                     List<Image> images = new ArrayList<>();
                     for (val pbImage : pbImages) {
+                        if (!StringUtils.equals(pbImage.getType(), PNG))
+                            throw new IllegalStateException("Only PNG images supported for now.");
                         List<ByteString> pbData = pbImage.getDataList();
                         byte[] data = pbData.get(0).toByteArray();
                         // TODO: obviously should be working for different formats

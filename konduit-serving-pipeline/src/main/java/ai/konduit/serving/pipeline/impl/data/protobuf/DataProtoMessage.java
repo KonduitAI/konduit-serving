@@ -8177,15 +8177,25 @@ public final class DataProtoMessage {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated bytes data = 1;</code>
+     * <code>string type = 1;</code>
+     */
+    java.lang.String getType();
+    /**
+     * <code>string type = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getTypeBytes();
+
+    /**
+     * <code>repeated bytes data = 2;</code>
      */
     java.util.List<com.google.protobuf.ByteString> getDataList();
     /**
-     * <code>repeated bytes data = 1;</code>
+     * <code>repeated bytes data = 2;</code>
      */
     int getDataCount();
     /**
-     * <code>repeated bytes data = 1;</code>
+     * <code>repeated bytes data = 2;</code>
      */
     com.google.protobuf.ByteString getData(int index);
   }
@@ -8202,6 +8212,7 @@ public final class DataProtoMessage {
       super(builder);
     }
     private Image() {
+      type_ = "";
       data_ = java.util.Collections.emptyList();
     }
 
@@ -8237,6 +8248,12 @@ public final class DataProtoMessage {
               done = true;
               break;
             case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              type_ = s;
+              break;
+            }
+            case 18: {
               if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 data_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
                 mutable_bitField0_ |= 0x00000001;
@@ -8279,23 +8296,57 @@ public final class DataProtoMessage {
               ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.class, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder.class);
     }
 
-    public static final int DATA_FIELD_NUMBER = 1;
+    public static final int TYPE_FIELD_NUMBER = 1;
+    private volatile java.lang.Object type_;
+    /**
+     * <code>string type = 1;</code>
+     */
+    public java.lang.String getType() {
+      java.lang.Object ref = type_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        type_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string type = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTypeBytes() {
+      java.lang.Object ref = type_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        type_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DATA_FIELD_NUMBER = 2;
     private java.util.List<com.google.protobuf.ByteString> data_;
     /**
-     * <code>repeated bytes data = 1;</code>
+     * <code>repeated bytes data = 2;</code>
      */
     public java.util.List<com.google.protobuf.ByteString>
         getDataList() {
       return data_;
     }
     /**
-     * <code>repeated bytes data = 1;</code>
+     * <code>repeated bytes data = 2;</code>
      */
     public int getDataCount() {
       return data_.size();
     }
     /**
-     * <code>repeated bytes data = 1;</code>
+     * <code>repeated bytes data = 2;</code>
      */
     public com.google.protobuf.ByteString getData(int index) {
       return data_.get(index);
@@ -8315,8 +8366,11 @@ public final class DataProtoMessage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (!getTypeBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, type_);
+      }
       for (int i = 0; i < data_.size(); i++) {
-        output.writeBytes(1, data_.get(i));
+        output.writeBytes(2, data_.get(i));
       }
       unknownFields.writeTo(output);
     }
@@ -8327,6 +8381,9 @@ public final class DataProtoMessage {
       if (size != -1) return size;
 
       size = 0;
+      if (!getTypeBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, type_);
+      }
       {
         int dataSize = 0;
         for (int i = 0; i < data_.size(); i++) {
@@ -8351,6 +8408,8 @@ public final class DataProtoMessage {
       }
       ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image other = (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image) obj;
 
+      if (!getType()
+          .equals(other.getType())) return false;
       if (!getDataList()
           .equals(other.getDataList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -8364,6 +8423,8 @@ public final class DataProtoMessage {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getType().hashCode();
       if (getDataCount() > 0) {
         hash = (37 * hash) + DATA_FIELD_NUMBER;
         hash = (53 * hash) + getDataList().hashCode();
@@ -8501,6 +8562,8 @@ public final class DataProtoMessage {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        type_ = "";
+
         data_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
@@ -8530,6 +8593,7 @@ public final class DataProtoMessage {
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image buildPartial() {
         ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image result = new ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image(this);
         int from_bitField0_ = bitField0_;
+        result.type_ = type_;
         if (((bitField0_ & 0x00000001) != 0)) {
           data_ = java.util.Collections.unmodifiableList(data_);
           bitField0_ = (bitField0_ & ~0x00000001);
@@ -8583,6 +8647,10 @@ public final class DataProtoMessage {
 
       public Builder mergeFrom(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image other) {
         if (other == ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.getDefaultInstance()) return this;
+        if (!other.getType().isEmpty()) {
+          type_ = other.type_;
+          onChanged();
+        }
         if (!other.data_.isEmpty()) {
           if (data_.isEmpty()) {
             data_ = other.data_;
@@ -8623,6 +8691,75 @@ public final class DataProtoMessage {
       }
       private int bitField0_;
 
+      private java.lang.Object type_ = "";
+      /**
+       * <code>string type = 1;</code>
+       */
+      public java.lang.String getType() {
+        java.lang.Object ref = type_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          type_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string type = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTypeBytes() {
+        java.lang.Object ref = type_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          type_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string type = 1;</code>
+       */
+      public Builder setType(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string type = 1;</code>
+       */
+      public Builder clearType() {
+        
+        type_ = getDefaultInstance().getType();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string type = 1;</code>
+       */
+      public Builder setTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        type_ = value;
+        onChanged();
+        return this;
+      }
+
       private java.util.List<com.google.protobuf.ByteString> data_ = java.util.Collections.emptyList();
       private void ensureDataIsMutable() {
         if (!((bitField0_ & 0x00000001) != 0)) {
@@ -8631,7 +8768,7 @@ public final class DataProtoMessage {
          }
       }
       /**
-       * <code>repeated bytes data = 1;</code>
+       * <code>repeated bytes data = 2;</code>
        */
       public java.util.List<com.google.protobuf.ByteString>
           getDataList() {
@@ -8639,19 +8776,19 @@ public final class DataProtoMessage {
                  java.util.Collections.unmodifiableList(data_) : data_;
       }
       /**
-       * <code>repeated bytes data = 1;</code>
+       * <code>repeated bytes data = 2;</code>
        */
       public int getDataCount() {
         return data_.size();
       }
       /**
-       * <code>repeated bytes data = 1;</code>
+       * <code>repeated bytes data = 2;</code>
        */
       public com.google.protobuf.ByteString getData(int index) {
         return data_.get(index);
       }
       /**
-       * <code>repeated bytes data = 1;</code>
+       * <code>repeated bytes data = 2;</code>
        */
       public Builder setData(
           int index, com.google.protobuf.ByteString value) {
@@ -8664,7 +8801,7 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>repeated bytes data = 1;</code>
+       * <code>repeated bytes data = 2;</code>
        */
       public Builder addData(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -8676,7 +8813,7 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>repeated bytes data = 1;</code>
+       * <code>repeated bytes data = 2;</code>
        */
       public Builder addAllData(
           java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
@@ -8687,7 +8824,7 @@ public final class DataProtoMessage {
         return this;
       }
       /**
-       * <code>repeated bytes data = 1;</code>
+       * <code>repeated bytes data = 2;</code>
        */
       public Builder clearData() {
         data_ = java.util.Collections.emptyList();
@@ -8915,16 +9052,120 @@ public final class DataProtoMessage {
     public enum ValueType
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
-       * <code>FLOAT = 0;</code>
+       * <code>DOUBLE = 0;</code>
        */
-      FLOAT(0),
+      DOUBLE(0),
+      /**
+       * <code>FLOAT = 1;</code>
+       */
+      FLOAT(1),
+      /**
+       * <code>FLOAT16 = 2;</code>
+       */
+      FLOAT16(2),
+      /**
+       * <code>BFLOAT16 = 3;</code>
+       */
+      BFLOAT16(3),
+      /**
+       * <code>INT64 = 4;</code>
+       */
+      INT64(4),
+      /**
+       * <code>INT32 = 5;</code>
+       */
+      INT32(5),
+      /**
+       * <code>INT16 = 6;</code>
+       */
+      INT16(6),
+      /**
+       * <code>INT8 = 7;</code>
+       */
+      INT8(7),
+      /**
+       * <code>UINT64 = 8;</code>
+       */
+      UINT64(8),
+      /**
+       * <code>UINT32 = 9;</code>
+       */
+      UINT32(9),
+      /**
+       * <code>UINT16 = 10;</code>
+       */
+      UINT16(10),
+      /**
+       * <code>UINT8 = 11;</code>
+       */
+      UINT8(11),
+      /**
+       * <code>BOOL = 12;</code>
+       */
+      BOOL(12),
+      /**
+       * <code>UTF8 = 13;</code>
+       */
+      UTF8(13),
       UNRECOGNIZED(-1),
       ;
 
       /**
-       * <code>FLOAT = 0;</code>
+       * <code>DOUBLE = 0;</code>
        */
-      public static final int FLOAT_VALUE = 0;
+      public static final int DOUBLE_VALUE = 0;
+      /**
+       * <code>FLOAT = 1;</code>
+       */
+      public static final int FLOAT_VALUE = 1;
+      /**
+       * <code>FLOAT16 = 2;</code>
+       */
+      public static final int FLOAT16_VALUE = 2;
+      /**
+       * <code>BFLOAT16 = 3;</code>
+       */
+      public static final int BFLOAT16_VALUE = 3;
+      /**
+       * <code>INT64 = 4;</code>
+       */
+      public static final int INT64_VALUE = 4;
+      /**
+       * <code>INT32 = 5;</code>
+       */
+      public static final int INT32_VALUE = 5;
+      /**
+       * <code>INT16 = 6;</code>
+       */
+      public static final int INT16_VALUE = 6;
+      /**
+       * <code>INT8 = 7;</code>
+       */
+      public static final int INT8_VALUE = 7;
+      /**
+       * <code>UINT64 = 8;</code>
+       */
+      public static final int UINT64_VALUE = 8;
+      /**
+       * <code>UINT32 = 9;</code>
+       */
+      public static final int UINT32_VALUE = 9;
+      /**
+       * <code>UINT16 = 10;</code>
+       */
+      public static final int UINT16_VALUE = 10;
+      /**
+       * <code>UINT8 = 11;</code>
+       */
+      public static final int UINT8_VALUE = 11;
+      /**
+       * <code>BOOL = 12;</code>
+       */
+      public static final int BOOL_VALUE = 12;
+      /**
+       * <code>UTF8 = 13;</code>
+       */
+      public static final int UTF8_VALUE = 13;
 
 
       public final int getNumber() {
@@ -8945,7 +9186,20 @@ public final class DataProtoMessage {
 
       public static ValueType forNumber(int value) {
         switch (value) {
-          case 0: return FLOAT;
+          case 0: return DOUBLE;
+          case 1: return FLOAT;
+          case 2: return FLOAT16;
+          case 3: return BFLOAT16;
+          case 4: return INT64;
+          case 5: return INT32;
+          case 6: return INT16;
+          case 7: return INT8;
+          case 8: return UINT64;
+          case 9: return UINT32;
+          case 10: return UINT16;
+          case 11: return UINT8;
+          case 12: return BOOL;
+          case 13: return UTF8;
           default: return null;
         }
       }
@@ -9082,7 +9336,7 @@ public final class DataProtoMessage {
       for (int i = 0; i < shape_.size(); i++) {
         output.writeInt64NoTag(shape_.getLong(i));
       }
-      if (type_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType.FLOAT.getNumber()) {
+      if (type_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType.DOUBLE.getNumber()) {
         output.writeEnum(2, type_);
       }
       for (int i = 0; i < array_.size(); i++) {
@@ -9111,7 +9365,7 @@ public final class DataProtoMessage {
         }
         shapeMemoizedSerializedSize = dataSize;
       }
-      if (type_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType.FLOAT.getNumber()) {
+      if (type_ != ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType.DOUBLE.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, type_);
       }
@@ -11834,22 +12088,26 @@ public final class DataProtoMessage {
       "\001(\0132\036.ai.konduit.serving.DoubleListH\000\022/\n" +
       "\006imList\030\005 \001(\0132\035.ai.konduit.serving.Image" +
       "ListH\000\0221\n\006ndList\030\006 \001(\0132\037.ai.konduit.serv" +
-      "ing.NDArrayListH\000B\006\n\004list\"\025\n\005Image\022\014\n\004da" +
-      "ta\030\001 \003(\014\"t\n\007NDArray\022\r\n\005shape\030\001 \003(\003\022\r\n\005ar" +
-      "ray\030\003 \003(\014\0223\n\004type\030\002 \001(\0162%.ai.konduit.ser" +
-      "ving.NDArray.ValueType\"\026\n\tValueType\022\t\n\005F" +
-      "LOAT\020\000\"\342\001\n\013BoundingBox\022\n\n\002x0\030\001 \001(\001\022\n\n\002x1" +
-      "\030\002 \001(\001\022\n\n\002y0\030\003 \001(\001\022\n\n\002y1\030\004 \001(\001\022\n\n\002cx\030\005 \001" +
-      "(\001\022\n\n\002cy\030\006 \001(\001\022\t\n\001h\030\007 \001(\001\022\t\n\001w\030\010 \001(\001\022\r\n\005" +
-      "label\030\t \001(\t\022\023\n\013probability\030\n \001(\001\0225\n\004type" +
-      "\030\013 \001(\0162\'.ai.konduit.serving.BoundingBox." +
-      "BoxType\"\032\n\007BoxType\022\007\n\003CHW\020\000\022\006\n\002XY\020\001\"\227\001\n\007" +
-      "DataMap\022;\n\010mapItems\030\001 \003(\0132).ai.konduit.s" +
-      "erving.DataMap.MapItemsEntry\032O\n\rMapItems" +
-      "Entry\022\013\n\003key\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.ai.k" +
-      "onduit.serving.DataScheme:\0028\001BB\n.ai.kond" +
-      "uit.serving.pipeline.impl.data.protobufB" +
-      "\020DataProtoMessageb\006proto3"
+      "ing.NDArrayListH\000B\006\n\004list\"#\n\005Image\022\014\n\004ty" +
+      "pe\030\001 \001(\t\022\014\n\004data\030\002 \003(\014\"\212\002\n\007NDArray\022\r\n\005sh" +
+      "ape\030\001 \003(\003\022\r\n\005array\030\003 \003(\014\0223\n\004type\030\002 \001(\0162%" +
+      ".ai.konduit.serving.NDArray.ValueType\"\253\001" +
+      "\n\tValueType\022\n\n\006DOUBLE\020\000\022\t\n\005FLOAT\020\001\022\013\n\007FL" +
+      "OAT16\020\002\022\014\n\010BFLOAT16\020\003\022\t\n\005INT64\020\004\022\t\n\005INT3" +
+      "2\020\005\022\t\n\005INT16\020\006\022\010\n\004INT8\020\007\022\n\n\006UINT64\020\010\022\n\n\006" +
+      "UINT32\020\t\022\n\n\006UINT16\020\n\022\t\n\005UINT8\020\013\022\010\n\004BOOL\020" +
+      "\014\022\010\n\004UTF8\020\r\"\342\001\n\013BoundingBox\022\n\n\002x0\030\001 \001(\001\022" +
+      "\n\n\002x1\030\002 \001(\001\022\n\n\002y0\030\003 \001(\001\022\n\n\002y1\030\004 \001(\001\022\n\n\002c" +
+      "x\030\005 \001(\001\022\n\n\002cy\030\006 \001(\001\022\t\n\001h\030\007 \001(\001\022\t\n\001w\030\010 \001(" +
+      "\001\022\r\n\005label\030\t \001(\t\022\023\n\013probability\030\n \001(\001\0225\n" +
+      "\004type\030\013 \001(\0162\'.ai.konduit.serving.Boundin" +
+      "gBox.BoxType\"\032\n\007BoxType\022\007\n\003CHW\020\000\022\006\n\002XY\020\001" +
+      "\"\227\001\n\007DataMap\022;\n\010mapItems\030\001 \003(\0132).ai.kond" +
+      "uit.serving.DataMap.MapItemsEntry\032O\n\rMap" +
+      "ItemsEntry\022\013\n\003key\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036" +
+      ".ai.konduit.serving.DataScheme:\0028\001BB\n.ai" +
+      ".konduit.serving.pipeline.impl.data.prot" +
+      "obufB\020DataProtoMessageb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -11908,7 +12166,7 @@ public final class DataProtoMessage {
     internal_static_ai_konduit_serving_Image_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_Image_descriptor,
-        new java.lang.String[] { "Data", });
+        new java.lang.String[] { "Type", "Data", });
     internal_static_ai_konduit_serving_NDArray_descriptor =
       getDescriptor().getMessageTypes().get(9);
     internal_static_ai_konduit_serving_NDArray_fieldAccessorTable = new

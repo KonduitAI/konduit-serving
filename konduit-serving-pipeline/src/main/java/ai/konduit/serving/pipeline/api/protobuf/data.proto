@@ -65,7 +65,8 @@ message List {
 }
 
 message Image {
-    repeated bytes data = 1;
+    string type = 1;
+    repeated bytes data = 2;
 }
 
 message NDArray {
@@ -74,7 +75,20 @@ message NDArray {
     ValueType type = 2;
 
     enum ValueType {
-        FLOAT = 0;
+        DOUBLE = 0;
+        FLOAT = 1;
+        FLOAT16 = 2;
+        BFLOAT16 = 3;
+        INT64 = 4;
+        INT32 = 5;
+        INT16 = 6;
+        INT8 = 7;
+        UINT64 = 8;
+        UINT32 = 9;
+        UINT16 = 10;
+        UINT8 = 11;
+        BOOL = 12;
+        UTF8 = 13;
     }
 }
 

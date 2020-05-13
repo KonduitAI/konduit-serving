@@ -502,7 +502,7 @@ public class DataTest {
 
     @Test
     public void testBoundingBoxesCHWSerde() throws IOException {
-        BoundingBox boundingBox = new BBoxCHW(1.0, 2.0, 1.0, 2.0);
+        BoundingBox boundingBox = new BBoxCHW(1.0, 2.0, 1.0, 2.0, "head", 7.0);
         Data boxData = Data.singleton(KEY, boundingBox);
         assertEquals(boundingBox, boxData.get(KEY));
 
@@ -514,7 +514,7 @@ public class DataTest {
 
     @Test
     public void testBoundingBoxesXYSerde() throws IOException {
-        BoundingBox boundingBox = new BBoxXY(1.0, 2.0, 1.0, 2.0);
+        BoundingBox boundingBox = new BBoxXY(1.0, 2.0, 1.0, 2.0, "tail", 3.0);
         Data boxData = Data.singleton(KEY, boundingBox);
         assertEquals(boundingBox, boxData.get(KEY));
 
