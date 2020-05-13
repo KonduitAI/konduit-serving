@@ -59,7 +59,6 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
 
         //Initialize runners:
         runners = new HashMap<>();
-        List<PipelineStepRunnerFactory> factories = PipelineRegistry.getStepRunnerFactories();
         for(Map.Entry<String, GraphStep> e : steps.entrySet()){
             GraphStep g = e.getValue();
             if(g.hasStep()){
@@ -104,6 +103,12 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
         }
 
         Data out = null;
+
+        if(m.size() == 1){
+            //No steps other than input - no-op
+            out = in;
+        }
+
         while(!canExec.isEmpty()){
             String next = canExec.remove();
 
