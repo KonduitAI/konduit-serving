@@ -1,20 +1,39 @@
+/*
+ *  ******************************************************************************
+ *  * Copyright (c) 2020 Konduit K.K.
+ *  *
+ *  * This program and the accompanying materials are made available under the
+ *  * terms of the Apache License, Version 2.0 which is available at
+ *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  * License for the specific language governing permissions and limitations
+ *  * under the License.
+ *  *
+ *  * SPDX-License-Identifier: Apache-2.0
+ *  *****************************************************************************
+ */
+
 package ai.konduit.serving.data.image.convert;
 
 import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
 import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
+import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import org.bytedeco.javacpp.Loader;
-import org.bytedeco.javacpp.indexer.Indexer;
-import org.bytedeco.javacpp.indexer.UByteIndexer;
+import org.bytedeco.javacpp.indexer.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.common.util.ArrayUtil;
 
 import java.nio.*;
@@ -42,6 +61,48 @@ public class ImageToNDArray {
      * @return The Image converted to an NDArray
      */
     public static NDArray convert(Image image, ImageToNDArrayConfig config) {
+        return convert(image, config, false).getFirst();
+    }
+
+    public static Pair<NDArray,BoundingBox> convertWithMetadata(Image image, ImageToNDArrayConfig config) {
+        return convert(image, config, true);
+    }
+
+    public static BoundingBox getCropRegion(Image image, ImageToNDArrayConfig config){
+
+        Integer outH = config.height();
+        Integer outW = config.width();
+        if (outH == null)
+            outH = image.height();
+        if (outW == null)
+            outW = image.width();
+
+        int imgH = image.height();
+        int imgW = image.width();
+
+
+        //Resize if necessary
+        boolean correctSize = outH == image.height() && outW == image.width();
+        Mat m = image.getAs(Mat.class);
+        if (!correctSize) {
+            AspectRatioHandling h = config.aspectRatioHandling();
+            if (h == AspectRatioHandling.CENTER_CROP) {
+                return centerCropBB(imgH, imgW, outH, outW);
+            } else if (h == AspectRatioHandling.PAD) {
+                throw new UnsupportedOperationException("Not yet implemented");
+            } else if (h == AspectRatioHandling.STRETCH) {
+                return BoundingBox.createXY(0.0, 1.0, 0.0, 1.0);
+            } else {
+                throw new UnsupportedOperationException("Not supported image conversion: " + h);
+            }
+        } else {
+            return BoundingBox.createXY(0.0, 1.0, 0.0, 1.0);
+        }
+
+    }
+
+    protected static Pair<NDArray,BoundingBox> convert(Image image, ImageToNDArrayConfig config, boolean withMeta) {
+        BoundingBox bbMeta = null;
 
         Integer outH = config.height();
         Integer outW = config.width();
@@ -57,7 +118,8 @@ public class ImageToNDArray {
         if (!correctSize) {
             AspectRatioHandling h = config.aspectRatioHandling();
             if (h == AspectRatioHandling.CENTER_CROP) {
-                Mat cropped = centerCrop(m); //new Mat(m, crop);
+                Pair<Mat,BoundingBox> p = centerCrop(m, outH, outW, withMeta); //new Mat(m, crop);;
+                Mat cropped = p.getFirst();
                 if (cropped.cols() == outW && cropped.rows() == outH) {
                     m = cropped;
                 } else {
@@ -65,14 +127,26 @@ public class ImageToNDArray {
                     org.bytedeco.opencv.global.opencv_imgproc.resize(cropped, resized, new Size(outW, outH));
                     m = resized;
                 }
+
+                if(withMeta){
+                    bbMeta = p.getSecond();
+                }
             } else if (h == AspectRatioHandling.PAD) {
                 throw new UnsupportedOperationException("Not yet implemented");
             } else if (h == AspectRatioHandling.STRETCH) {
                 Mat resized = new Mat();
                 org.bytedeco.opencv.global.opencv_imgproc.resize(m, resized, new Size(outW, outH));
                 m = resized;
+
+                if(withMeta){
+                    bbMeta = BoundingBox.createXY(0.0, 1.0, 0.0, 1.0);
+                }
             } else {
                 throw new UnsupportedOperationException("Not supported image conversion: " + h);
+            }
+        } else {
+            if(withMeta){
+                bbMeta = BoundingBox.createXY(0.0, 1.0, 0.0, 1.0);
             }
         }
 
@@ -94,26 +168,90 @@ public class ImageToNDArray {
 
         SerializedNDArray arr = new SerializedNDArray(config.dataType(), shape, bb);
 
-        return NDArray.create(arr);
+        return new Pair<>(NDArray.create(arr), bbMeta);
     }
 
-    protected static Mat centerCrop(Mat image) {
+    protected static Pair<Mat,BoundingBox> centerCrop(Mat image, int outH, int outW, boolean withBB) {
         int imgH = image.rows();
         int imgW = image.cols();
 
-        int x = 0;
-        int y = 0;
-        int newHW;
-        int cropSize = Math.abs(imgH - imgW) / 2;
-        if (imgH > imgW) {
-            newHW = imgW;
-            y = cropSize;
+        double aspectIn = image.cols() / (double)image.rows();
+        double aspectOut = outW / (double)outH;
+
+
+        int croppedW;
+        int croppedH;
+        int x0;
+        int x1;
+        int y0;
+        int y1;
+        if(aspectIn == aspectOut){
+            //No crop necessary
+            return new Pair<>(image, BoundingBox.createXY(0.0, 1.0, 0.0, 1.0));
+        } else if(aspectIn > aspectOut){
+            //Need to crop from width dimension
+            croppedW = (int)(aspectOut * image.rows());
+            croppedH = imgH;
+            int delta = imgW - croppedW;
+            x0 = delta / 2;
+            y0 = 0;
         } else {
-            x = cropSize;
-            newHW = imgH;
+            //Need to crop from the height dimension
+            croppedW = imgW;
+            croppedH = (int)(image.rows() / aspectOut);
+            int delta = imgH - croppedH;
+            x0 = 0;
+            y0 = delta / 2;
         }
-        Rect crop = new Rect(x, y, newHW, newHW);
-        return image.apply(crop);
+
+        Rect crop = new Rect(x0, y0, croppedW, croppedH);
+        BoundingBox bb = null;
+        if(withBB){
+            bb = centerCropBB(imgH, imgW, outH, outW);
+        }
+
+        Mat out = image.apply(crop);
+        return new Pair<>(out, bb);
+    }
+
+    protected static BoundingBox centerCropBB(int imgH, int imgW, int outH, int outW){
+        double aspectIn = imgW / (double)imgH;
+        double aspectOut = outW / (double)outH;
+
+        int croppedW;
+        int croppedH;
+        int x0;
+        int x1;
+        int y0;
+        int y1;
+        if(aspectIn == aspectOut){
+            //No crop necessary
+            return BoundingBox.createXY(0.0, 1.0, 0.0, 1.0);
+        } else if(aspectIn > aspectOut){
+            //Need to crop from width dimension
+            croppedW = (int)(aspectOut * imgH);
+            croppedH = imgH;
+            int delta = imgW - croppedW;
+            x0 = delta / 2;
+            x1 = imgW - (delta/2);
+            y0 = 0;
+            y1 = imgH;
+        } else {
+            //Need to crop from the height dimension
+            croppedW = imgW;
+            croppedH = (int)(imgW / aspectOut);
+            int delta = imgH - croppedH;
+            x0 = 0;
+            x1 = imgW;
+            y0 = delta / 2;
+            y1 = imgH - (delta/2);
+        }
+
+        double dx1 = x0 / (double)imgW;
+        double dx2 = x1 / (double)imgW;
+        double dy1 = y0 / (double)imgH;
+        double dy2 = y1 / (double)imgH;
+        return BoundingBox.createXY(dx1, dx2, dy1, dy2);
     }
 
     protected static Mat convertColor(Mat m, ImageToNDArrayConfig config) {
@@ -135,6 +273,9 @@ public class ImageToNDArray {
         Preconditions.checkState(config.channelLayout() == NDChannelLayout.RGB || config.channelLayout() == NDChannelLayout.BGR,
                 "Only RGB and BGR conversion implement so far");
 
+        Preconditions.checkState(config.dataType() != NDArrayType.BOOL && config.dataType() != NDArrayType.UTF8,
+                "%s datatype is not supported for ImageToNDArray", config.dataType());
+
         boolean direct = !Loader.getPlatform().startsWith("android");
 
         //By default, Mat stores values in channels first format - CHW
@@ -145,7 +286,7 @@ public class ImageToNDArray {
         int lengthElements = h * w * ch;
         int lengthBytes = lengthElements * 4;
 
-        ByteBuffer bb = direct ? ByteBuffer.allocateDirect(lengthBytes) : ByteBuffer.allocate(lengthBytes);
+        ByteBuffer bb = direct ? ByteBuffer.allocateDirect(lengthBytes).order(ByteOrder.LITTLE_ENDIAN) : ByteBuffer.allocate(lengthBytes).order(ByteOrder.LITTLE_ENDIAN);
         FloatBuffer fb = bb.asFloatBuffer();
 
         boolean rgb = config.channelLayout() == NDChannelLayout.RGB;
@@ -192,8 +333,6 @@ public class ImageToNDArray {
                     throw new UnsupportedOperationException("Unsupported image normalization type: " + config.normalization().type());
             }
         }
-
-
 
         Indexer imgIdx = m.createIndexer(direct);
         if (imgIdx instanceof UByteIndexer) {
@@ -306,7 +445,7 @@ public class ImageToNDArray {
         }
 
         int bytesLength = toType.width() * length;
-        ByteBuffer bb = direct ? ByteBuffer.allocateDirect(bytesLength) : ByteBuffer.allocate(bytesLength);
+        ByteBuffer bb = direct ? ByteBuffer.allocateDirect(bytesLength).order(ByteOrder.LITTLE_ENDIAN) : ByteBuffer.allocate(bytesLength).order(ByteOrder.LITTLE_ENDIAN);
 
         switch (toType) {
             case DOUBLE:
@@ -330,7 +469,7 @@ public class ImageToNDArray {
                     ib.put((int) f.applyAsDouble(i));
                 break;
             case INT16:
-                ShortBuffer sb = from.asShortBuffer();
+                ShortBuffer sb = bb.asShortBuffer();
                 for (int i = 0; i < length; i++)
                     sb.put((short) f.applyAsDouble(i));
                 break;
@@ -338,14 +477,37 @@ public class ImageToNDArray {
                 for (int i = 0; i < length; i++)
                     bb.put((byte) f.applyAsDouble(i));
                 break;
-            case FLOAT16:
-            case BFLOAT16:
-            case UINT64:
-            case UINT32:
-            case UINT16:
             case UINT8:
-            case BOOL:
-            case UTF8:
+                //TODO inefficient - x -> double -> int -> uint8
+                UByteIndexer idx_ui8 = UByteIndexer.create(bb);
+                for( int i=0; i<length; i++ )
+                    idx_ui8.put(i, (int)f.applyAsDouble(i));
+                break;
+            case FLOAT16:
+                HalfIndexer idx_f16 = HalfIndexer.create(bb.asShortBuffer());
+                for( int i=0; i<length; i++)
+                    idx_f16.put(i, (float)f.applyAsDouble(i));
+                break;
+            case BFLOAT16:
+                Bfloat16Indexer idx_bf16 = Bfloat16Indexer.create(bb.asShortBuffer());
+                for( int i=0; i<length; i++ )
+                    idx_bf16.put(i, (float)f.applyAsDouble(i));
+                break;
+            case UINT64:
+                ULongIndexer idx_ui64 = ULongIndexer.create(bb.asLongBuffer());
+                for( int i=0; i<length; i++)
+                    idx_ui64.put(i, (long)f.applyAsDouble(i));
+                break;
+            case UINT32:
+                UIntIndexer idx_ui32 = UIntIndexer.create(bb.asIntBuffer());
+                for( int i=0; i<length; i++ )
+                    idx_ui32.put(i, (int)f.applyAsDouble(i));
+                break;
+            case UINT16:
+                UShortIndexer idx_ui16 = UShortIndexer.create(bb.asShortBuffer());
+                for( int i=0; i<length; i++ )
+                    idx_ui16.put(i, (int)f.applyAsDouble(i));
+                break;
             default:
                 throw new UnsupportedOperationException("Conversion to " + fromType + " to " + toType + " not supported or not yet implemented");
         }

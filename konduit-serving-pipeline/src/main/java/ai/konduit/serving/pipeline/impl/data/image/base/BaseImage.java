@@ -16,11 +16,12 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.data.image;
+package ai.konduit.serving.pipeline.impl.data.image.base;
 
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.format.ImageConverter;
 import ai.konduit.serving.pipeline.api.format.ImageFormat;
+import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.registry.ImageConverterRegistry;
 import lombok.AllArgsConstructor;
 import org.nd4j.common.base.Preconditions;

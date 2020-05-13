@@ -96,6 +96,14 @@ public interface BoundingBox {
      */
     double cy();
 
+    default double width(){
+        return Math.abs(x2() - x1());
+    }
+
+    default double height(){
+        return Math.abs(y2() - y1());
+    }
+
     /**
      * @return The label for the bounding box. May be null.
      */

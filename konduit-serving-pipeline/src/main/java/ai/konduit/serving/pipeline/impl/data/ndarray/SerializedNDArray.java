@@ -25,6 +25,9 @@ import lombok.Data;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+/**
+ * Note that the provided ByteBuffer should be little endian
+ */
 @AllArgsConstructor
 @Data
 public class SerializedNDArray {
