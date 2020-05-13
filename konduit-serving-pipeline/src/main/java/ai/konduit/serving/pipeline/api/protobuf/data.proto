@@ -53,6 +53,9 @@ message ImageList {
 message NDArrayList {
     repeated NDArray list = 1;
 }
+message BoundingBoxesList {
+    repeated BoundingBox list = 1;
+}
 message List {
     oneof list {
 	   StringList sList = 1;
@@ -61,6 +64,7 @@ message List {
 	   DoubleList dList = 4;
 	   ImageList imList = 5;
 	   NDArrayList ndList = 6;
+	   BoundingBoxesList bboxList = 7;
 	}
 }
 

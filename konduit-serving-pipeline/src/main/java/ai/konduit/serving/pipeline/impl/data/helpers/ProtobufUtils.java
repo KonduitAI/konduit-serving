@@ -285,6 +285,39 @@ public class ProtobufUtils {
                             setTypeValue(ValueType.LIST.ordinal()).
                             build();
                 }
+                else if (lv.elementType() == ValueType.BOUNDING_BOX) {
+                    List<BoundingBox> bboxes = (List<BoundingBox>)nextItem.getValue().get();
+                    List<DataProtoMessage.BoundingBox> pbBoxes = new ArrayList<>();
+                    for (val boundingBox : bboxes) {
+                        DataProtoMessage.BoundingBox pbBox = null;
+                        if (boundingBox instanceof BBoxCHW) {
+                            pbBox = DataProtoMessage.BoundingBox.newBuilder().
+                                    setCx(boundingBox.cx()).setCy(boundingBox.cy()).
+                                    setH(boundingBox.height()).
+                                    setW(boundingBox.width()).
+                                    setLabel(StringUtils.defaultIfEmpty(boundingBox.label(), StringUtils.EMPTY)).
+                                    setType(DataProtoMessage.BoundingBox.BoxType.CHW).
+                                    setProbability(boundingBox.probability()).
+                                    build();
+                        } else if (boundingBox instanceof BBoxXY) {
+                            pbBox = DataProtoMessage.BoundingBox.newBuilder().
+                                    setX0(boundingBox.x1()).setX1(boundingBox.x2()).
+                                    setY0(boundingBox.y1()).setY1(boundingBox.y2()).
+                                    setLabel(StringUtils.defaultIfEmpty(boundingBox.label(), StringUtils.EMPTY)).
+                                    setType(DataProtoMessage.BoundingBox.BoxType.XY).
+                                    setProbability(boundingBox.probability()).
+                                    build();
+                        }
+                        pbBoxes.add(pbBox);
+                    }
+                    DataProtoMessage.BoundingBoxesList toAdd = DataProtoMessage.BoundingBoxesList.newBuilder().addAllList(pbBoxes).build();
+                    DataProtoMessage.List toAddGen = DataProtoMessage.List.newBuilder().setBboxList(toAdd).build();
+                    item = DataProtoMessage.DataScheme.newBuilder().
+                            setListValue(toAddGen).
+                            setListTypeValue(ValueType.BOUNDING_BOX.ordinal()).
+                            setTypeValue(ValueType.LIST.ordinal()).
+                            build();
+                }
                 else {
                     throw new IllegalStateException("List type is not implemented yet " + lv.elementType());
                 }
@@ -344,13 +377,13 @@ public class ProtobufUtils {
                 else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.BOOLEAN.ordinal()) {
                     retData.putListBoolean(entry.getKey(), item.getListValue().getBList().getListList());
                 }
-                if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.INT64.ordinal()) {
+                else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.INT64.ordinal()) {
                     retData.putListInt64(entry.getKey(), item.getListValue().getIList().getListList());
                 }
-                if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.STRING.ordinal()) {
+                else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.STRING.ordinal()) {
                     retData.putListString(entry.getKey(), item.getListValue().getSList().getListList());
                 }
-                if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.IMAGE.ordinal()) {
+                else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.IMAGE.ordinal()) {
                     List<DataProtoMessage.Image> pbImages = item.getListValue().getImList().getListList();
                     List<Image> images = new ArrayList<>();
                     for (val pbImage : pbImages) {
@@ -364,7 +397,7 @@ public class ProtobufUtils {
                     }
                     retData.putListImage(entry.getKey(), images);
                 }
-                if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.NDARRAY.ordinal()) {
+                else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.NDARRAY.ordinal()) {
                     List<DataProtoMessage.NDArray> pbArrays = item.getListValue().getNdList().getListList();
                     List<NDArray> arrays = new ArrayList<>();
                     for (val pbArray : pbArrays) {
@@ -383,6 +416,21 @@ public class ProtobufUtils {
                         arrays.add(NDArray.create(ndArray));
                     }
                     retData.putListNDArray(entry.getKey(), arrays);
+                }
+                else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.BOUNDING_BOX.ordinal()) {
+                    List<DataProtoMessage.BoundingBox> pbArrays = item.getListValue().getBboxList().getListList();
+                    List<BoundingBox> boxes = new ArrayList<>();
+                    for (val pbBox : pbArrays) {
+                        BoundingBox boundingBox = null;
+                        if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.CHW)
+                            boundingBox = new BBoxCHW(pbBox.getCx(), pbBox.getCy(), pbBox.getH(), pbBox.getW(),
+                                    pbBox.getLabel(), pbBox.getProbability());
+                        else if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.XY)
+                            boundingBox = new BBoxXY(pbBox.getX0(), pbBox.getX1(), pbBox.getY0(), pbBox.getY1(),
+                                    pbBox.getLabel(), pbBox.getProbability());
+                        boxes.add(boundingBox);
+                    }
+                    retData.putListBoundingBox(entry.getKey(), boxes);
                 }
             }
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.IMAGE.ordinal()) {

@@ -523,4 +523,20 @@ public class DataTest {
         Data restoredData = Data.fromFile(newFile);
         assertEquals(boxData.get(KEY), restoredData.get(KEY));
     }
+
+    @Test
+    public void testBoundingBoxesListSerde() throws IOException {
+        List<BoundingBox> boxes = new ArrayList<>();
+        for (double d = 0; d < 10; ++d) {
+            boxes.add(new BBoxXY(d, d, d+5, d+6, "testArea", 0.7));
+        }
+        Data boxesData = Data.singletonList(KEY, boxes, ValueType.BOUNDING_BOX);
+        File newFile = testDir.newFile();
+        boxesData.save(newFile);
+
+        Data restoredData = Data.fromFile(newFile);
+        assertEquals(boxesData.getList(KEY, ValueType.BOUNDING_BOX),
+                restoredData.getList(KEY, ValueType.BOUNDING_BOX));
+    }
+
 }
