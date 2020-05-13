@@ -41,37 +41,7 @@
             <artifactId>konduit-serving-pipeline</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-nd4j</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
-        <dependency>
-            <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-image</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- TODO probably remove this dependency -->
-        <dependency>
-            <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-nd4j</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>tensorflow</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>tensorflow-platform</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-tensorflow</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -83,6 +53,21 @@
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-camera</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-nd4j</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-image</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
