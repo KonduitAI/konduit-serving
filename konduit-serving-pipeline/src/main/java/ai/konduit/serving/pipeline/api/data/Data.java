@@ -106,6 +106,16 @@ public interface Data {
     List<Object> getList(String key, ValueType type);                   //TODO type
     Data getData(String key);
 
+    List<String> getListString(String key);
+    List<Long> getListInt64(String key);
+    List<Boolean> getListBoolean(String key);
+    List<byte[]> getListBytes(String key);
+    List<Double> getListDouble(String key);
+    List<List<?>> getListData(String key);
+    List<Image> getListImage(String key);
+    List<NDArray> getListNDArray(String key);
+    List<BoundingBox> getListBoundingBox(String key);
+
     void put(String key, String data);
     void put(String key, NDArray data);
     void put(String key, byte[] data);
@@ -300,35 +310,88 @@ public interface Data {
     default void copyFrom(@NonNull String key, @NonNull Data from){
         Preconditions.checkState(from.has(key), "Key %s does not exist in provided Data instance");
         ValueType vt = from.type(key);
+        //TODO is there a cleaner way?
         switch (vt){
             case NDARRAY:
-                put(key, getNDArray(key));
+                put(key, from.getNDArray(key));
                 return;
             case STRING:
-                put(key, getString(key));
+                put(key, from.getString(key));
                 return;
             case BYTES:
-                put(key, getBytes(key));
+                put(key, from.getBytes(key));
                 return;
             case IMAGE:
-                put(key, getImage(key));
+                put(key, from.getImage(key));
                 return;
             case DOUBLE:
-                put(key, getDouble(key));
+                put(key, from.getDouble(key));
                 return;
             case INT64:
-                put(key, getLong(key));
+                put(key, from.getLong(key));
                 return;
             case BOOLEAN:
-                put(key, getBoolean(key));
+                put(key, from.getBoolean(key));
                 return;
             case DATA:
-                put(key, getData(key));
+                put(key, from.getData(key));
                 return;
             case LIST:
-                throw new UnsupportedOperationException("List copyFrom not yet implemented");
+                ValueType vtList = from.listType(key);
+                List<?> l = from.getList(key, vtList);
+                switch (vtList){
+                    case NDARRAY:
+                        putListNDArray(key, (List<NDArray>)l);
+                        break;
+                    case STRING:
+                        putListString(key, (List<String>)l);
+                        break;
+                    case BYTES:
+                        putListBytes(key, (List<byte[]>)l);
+                        break;
+                    case IMAGE:
+                        putListImage(key, (List<Image>)l);
+                        break;
+                    case DOUBLE:
+                        putListDouble(key, (List<Double>)l);
+                        break;
+                    case INT64:
+                        putListInt64(key, (List<Long>)l);
+                        break;
+                    case BOOLEAN:
+                        putListBoolean(key, (List<Boolean>)l);
+                        break;
+                    case BOUNDING_BOX:
+                        putListBoundingBox(key, (List<BoundingBox>)l);
+                        break;
+                    case DATA:
+                        putListData(key, (List<Data>)l);
+                        break;
+                    case LIST:
+                        throw new UnsupportedOperationException("List<List> copyFrom not yet implemented");
+                    default:
+                        throw new UnsupportedOperationException("Not supported: " + vt);
+                }
+                break;
             default:
                 throw new UnsupportedOperationException("Not supported: " + vt);
+        }
+    }
+
+    /**
+     * Merge all of the specified Data instance values into this Data instance
+     * @param allowOverwrite If true: allow duplicate keys to overwrite the keys in this Data instance
+     * @param datas          The Data instances to merge into this one
+     */
+    default void merge(boolean allowOverwrite, Data... datas){
+        for(Data d : datas){
+            for(String s : d.keys()){
+                //TODO we should check this BEFORE doing merging
+                if(has(s) && !allowOverwrite)
+                    throw new IllegalStateException("Error during merging: Data instance already has key \"" + s + "\" and allowOverwrite is false");
+
+                this.copyFrom(s, d);
+            }
         }
     }
 }

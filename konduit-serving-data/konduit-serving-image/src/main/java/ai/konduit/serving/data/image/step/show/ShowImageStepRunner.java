@@ -32,6 +32,9 @@ import java.util.List;
 
 public class ShowImageStepRunner implements PipelineStepRunner {
 
+    private static final int MIN_HEIGHT = 64;
+    private static final int MIN_WIDTH = 64;
+
     private ShowImagePipelineStep step;
     private boolean initialized;
     private CanvasFrame canvas;
@@ -67,6 +70,9 @@ public class ShowImageStepRunner implements PipelineStepRunner {
             init();
 
         canvas.showImage(f);
+        if(step.getWidth() == 0 || step.getHeight() == 0){
+            canvas.setCanvasSize(Math.max(MIN_WIDTH, i.width()), Math.max(MIN_HEIGHT, i.height()));
+        }
 
         return data;
     }

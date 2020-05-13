@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>konduit-serving-deeplearning4j</module>
+        <module>konduit-serving-tensorflow</module>
     </modules>
-
 
 </project>

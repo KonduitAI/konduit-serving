@@ -19,13 +19,14 @@
 package ai.konduit.serving.data.nd4j.util;
 
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
+import lombok.NonNull;
 import org.nd4j.linalg.api.buffer.DataType;
 
 public class ND4JUtil {
 
     private ND4JUtil(){ }
 
-    public static NDArrayType convertType(DataType dataType){
+    public static NDArrayType typeNd4jToNDArrayType(@NonNull DataType dataType){
         switch (dataType){
             case DOUBLE:
                 return NDArrayType.DOUBLE;
@@ -61,5 +62,41 @@ public class ND4JUtil {
                 throw new UnsupportedOperationException("Unknown or not supported type: " + dataType);
         }
     }
+
+    public static DataType typeNDArrayTypeToNd4j(@NonNull NDArrayType type){
+        switch (type){
+            case DOUBLE:
+                return DataType.DOUBLE;
+            case FLOAT:
+                return DataType.FLOAT;
+            case FLOAT16:
+                return DataType.FLOAT16;
+            case BFLOAT16:
+                return DataType.BFLOAT16;
+            case INT64:
+                return DataType.INT64;
+            case INT32:
+                return DataType.INT32;
+            case INT16:
+                return DataType.INT16;
+            case INT8:
+                return DataType.INT8;
+            case UINT64:
+                return DataType.UINT64;
+            case UINT32:
+                return DataType.UINT32;
+            case UINT16:
+                return DataType.UINT16;
+            case UINT8:
+                return DataType.UINT8;
+            case BOOL:
+                return DataType.BOOL;
+            case UTF8:
+                return DataType.UTF8;
+            default:
+                throw new UnsupportedOperationException("Unable to convert datatype to ND4J datatype: " + type);
+        }
+    }
+
 
 }

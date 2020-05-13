@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class SequencePipelineExecutor implements PipelineExecutor {
+public class SequencePipelineExecutor extends BasePipelineExecutor {
 
     private SequencePipeline pipeline;
     private List<PipelineStepRunner> runners;
@@ -44,44 +44,8 @@ public class SequencePipelineExecutor implements PipelineExecutor {
         runners = new ArrayList<>();
         List<PipelineStep> steps = p.getSteps();
 
-        List<PipelineStepRunnerFactory> factories = PipelineRegistry.getStepRunnerFactories();
-
-
         for(PipelineStep ps : steps){
-            PipelineStepRunnerFactory f = null;
-            for(PipelineStepRunnerFactory psrf : factories){
-                if(psrf.canRun(ps)){
-                    if(f != null){
-                        log.warn("TODO - Multiple PipelineStepRunnerFactory instances can run pipeline {} - {} and {}", ps.getClass(), f.getClass(), psrf.getClass());
-                    }
-
-                    f = psrf;
-                    //TODO make debug level later
-                    //log.info("PipelineStepRunnerFactory {} used to run step {}", psrf.getClass().getName(), ps.getClass().getName());
-                }
-            }
-
-            if(f == null){
-                StringBuilder msg = new StringBuilder("Unable to execute pipeline step of type " + ps.getClass().getName() + ": No PipelineStepRunnerFactory instances"
-                        + " are available that can execute this pipeline step.\nThis likely means a required dependency is missing for executing this pipeline." +
-                        "\nAvailable executor factories:");
-                if(factories.isEmpty()){
-                    msg.append(" <None>");
-                }
-                boolean first = true;
-                for(PipelineStepRunnerFactory psrf : factories){
-                    if(!first)
-                        msg.append("\n");
-                    msg.append("  ").append(psrf.getClass().getName());
-
-                    first = false;
-                }
-                throw new IllegalStateException(msg.toString());
-            }
-
-            PipelineStepRunner r = f.create(ps);
-            Preconditions.checkNotNull(r, "Failed to create PipelineStepRunner: PipelineStepRunnerFactory.create(...) returned null: " +
-                    "Pipeline step %s, PipelineStepRunnerFactory %s", ps.getClass(), f.getClass());
+            PipelineStepRunner r = getRunner(ps);
             runners.add(r);
         }
     }
@@ -98,7 +62,8 @@ public class SequencePipelineExecutor implements PipelineExecutor {
     }
 
     @Override
-    public Data exec(Context ctx, Data data) {
+    public Data exec(Data data) {
+        Context ctx = null; //TODO
         Data current = data;
         for(PipelineStepRunner psr : runners){
             current = psr.exec(ctx, current);

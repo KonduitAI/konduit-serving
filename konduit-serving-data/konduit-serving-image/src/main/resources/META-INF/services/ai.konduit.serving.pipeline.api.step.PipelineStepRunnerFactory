@@ -14,5 +14,6 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################################
 
+ai.konduit.serving.data.image.step.draw.DrawBoundingBoxStepRunnerFactory
 ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStepRunnerFactory
 ai.konduit.serving.data.image.step.show.ShowImageStepRunnerFactory

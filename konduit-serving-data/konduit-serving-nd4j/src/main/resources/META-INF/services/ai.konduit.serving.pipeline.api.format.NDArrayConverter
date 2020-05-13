@@ -25,3 +25,6 @@ ai.konduit.serving.data.nd4j.format.ND4JConverters$Float1ToArrConverter
 ai.konduit.serving.data.nd4j.format.ND4JConverters$Float2ToArrConverter
 ai.konduit.serving.data.nd4j.format.ND4JConverters$Float3ToArrConverter
 ai.konduit.serving.data.nd4j.format.ND4JConverters$Float4ToArrConverter
+
+ai.konduit.serving.data.nd4j.format.ND4JConverters$SerializedToNd4jArrConverter
+ai.konduit.serving.data.nd4j.format.ND4JConverters$Nd4jToSerializedConverter
