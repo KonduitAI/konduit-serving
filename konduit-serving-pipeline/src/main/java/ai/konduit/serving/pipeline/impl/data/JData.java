@@ -28,6 +28,7 @@ import java.util.*;
 public class JData implements Data {
 
     private Map<String, Value> dataMap = new LinkedHashMap<>();
+    private Data metaData;
 
     private static final String VALUE_NOT_FOUND_TEXT = "Value not found for key %s";
     private static final String VALUE_HAS_WRONG_TYPE_TEXT = "Value has wrong type for key %s: requested type %s, actual type %s";
@@ -327,20 +328,17 @@ public class JData implements Data {
 
     @Override
     public boolean hasMetaData() {
-        return dataMap.containsKey(Data.RESERVED_KEY_METADATA);
+        return this.metaData != null;
     }
 
     @Override
     public Data getMetaData() {
-        DataValue metaData = (DataValue) dataMap.get(Data.RESERVED_KEY_METADATA);
-        if (metaData == null)
-            return null;
-        return metaData.get();
+        return this.metaData;
     }
 
     @Override
     public void setMetaData(Data data) {
-        dataMap.put(Data.RESERVED_KEY_METADATA, new DataValue(data));
+        this.metaData = data;
     }
 
     @Override

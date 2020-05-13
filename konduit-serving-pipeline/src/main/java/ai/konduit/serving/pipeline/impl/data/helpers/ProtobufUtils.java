@@ -187,6 +187,32 @@ public class ProtobufUtils {
     }
 
     public static DataProtoMessage.DataMap serialize(Map<String,Value> dataMap) {
+        return serialize(dataMap, null);
+    }
+
+    public static DataProtoMessage.DataMap serialize(Map<String,Value> dataMap,
+                                                     Map<String,Value> metaData) {
+
+        DataProtoMessage.DataMap pbDataMap = null;
+
+        Map<String, DataProtoMessage.DataScheme> pbItemsMap = serializeMap(dataMap);
+        if (metaData != null) {
+            Map<String, DataProtoMessage.DataScheme> pbMetaData = serializeMap(metaData);
+            pbDataMap = DataProtoMessage.DataMap.newBuilder().
+                    putAllMapItems(pbItemsMap).
+                    setMetaData(pbMetaData.values().iterator().next()).
+                    setMetaLabel(pbMetaData.keySet().iterator().next()).
+                    build();
+        }
+        else {
+            pbDataMap = DataProtoMessage.DataMap.newBuilder().
+                    putAllMapItems(pbItemsMap).
+                    build();
+        }
+        return pbDataMap;
+    }
+
+    public static Map<String, DataProtoMessage.DataScheme> serializeMap(Map<String,Value> dataMap) {
 
         Map<String, DataProtoMessage.DataScheme> pbItemsMap = new HashMap<>();
         Iterator<Map.Entry<String, Value>> iterator = dataMap.entrySet().iterator();
@@ -414,14 +440,12 @@ public class ProtobufUtils {
             }
             pbItemsMap.put(nextItem.getKey(), item);
         }
-        DataProtoMessage.DataMap pbDataMap = DataProtoMessage.DataMap.newBuilder().
-                putAllMapItems(pbItemsMap).
-                build();
-        return pbDataMap;
+        return pbItemsMap;
     }
 
     public static Data deserialize(DataProtoMessage.DataMap dataMap) {
         JData retData = new JData();
+
         Map<String, DataProtoMessage.DataScheme> schemeMap = dataMap.getMapItemsMap();
         Iterator<Map.Entry<String, DataProtoMessage.DataScheme>> iterator =
                 schemeMap.entrySet().iterator();
@@ -503,6 +527,35 @@ public class ProtobufUtils {
                 retData.put(entry.getKey(), ndArray);
             }
         }
+        DataProtoMessage.DataScheme metadata = dataMap.getMetaData();
+        JData jMetaData = new JData();
+        if (metadata.getTypeValue() == DataProtoMessage.DataScheme.ValueType.BOOLEAN.ordinal()) {
+            jMetaData.put(dataMap.getMetaLabel(), metadata.getBoolValue());
+        }
+        else if (metadata.getTypeValue() == DataProtoMessage.DataScheme.ValueType.DOUBLE.ordinal()) {
+            jMetaData.put(dataMap.getMetaLabel(), metadata.getDoubleValue());
+        }
+        else if (metadata.getTypeValue() == DataProtoMessage.DataScheme.ValueType.INT64.ordinal()) {
+            jMetaData.put(dataMap.getMetaLabel(), metadata.getIValue());
+        }
+        else if (metadata.getTypeValue() == DataProtoMessage.DataScheme.ValueType.STRING.ordinal()) {
+            jMetaData.put(dataMap.getMetaLabel(), metadata.getSValue());
+        }
+        else if (metadata.getTypeValue() == DataProtoMessage.DataScheme.ValueType.LIST.ordinal()) {
+            if (metadata.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.BOOLEAN.ordinal()) {
+                jMetaData.putListBoolean(dataMap.getMetaLabel(), metadata.getListValue().getBList().getListList());
+            }
+            else if (metadata.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.DOUBLE.ordinal()) {
+                jMetaData.putListDouble(dataMap.getMetaLabel(), metadata.getListValue().getDList().getListList());
+            }
+            else if (metadata.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.INT64.ordinal()) {
+                jMetaData.putListInt64(dataMap.getMetaLabel(), metadata.getListValue().getIList().getListList());
+            }
+            else if (metadata.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.STRING.ordinal()) {
+                jMetaData.putListString(dataMap.getMetaLabel(), metadata.getListValue().getSList().getListList());
+            }
+        }
+        retData.setMetaData(jMetaData);
         return retData;
     }
 

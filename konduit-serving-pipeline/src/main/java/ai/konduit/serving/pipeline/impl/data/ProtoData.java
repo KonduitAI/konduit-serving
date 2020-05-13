@@ -25,6 +25,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage;
 import java.io.*;
+import java.util.Map;
 
 @Slf4j
 public class ProtoData extends JData {
@@ -44,6 +45,7 @@ public class ProtoData extends JData {
     public ProtoData(@NonNull Data data) {
         if(data instanceof JData){
             getDataMap().putAll(((JData)data).getDataMap());
+            setMetaData(data.getMetaData());
         }
         else {
             throw new UnsupportedOperationException("ProtoData(Data data) constructor not supported");
@@ -65,17 +67,17 @@ public class ProtoData extends JData {
     @Override
     public void write(OutputStream toStream) throws IOException {
 
-        DataProtoMessage.DataMap newItemsMap =
-                ProtobufUtils.serialize(getDataMap());
-
-        DataProtoMessage.DataMap pbDataMap = DataProtoMessage.DataMap.newBuilder().
-                putAllMapItems(newItemsMap.getMapItemsMap()).
-                build();
-        pbDataMap.writeTo(toStream);
-
-        /*if (hasMetaData()) {
-            getMetaData().write(toStream);
-        }*/
+        if (hasMetaData()) {
+            DataProtoMessage.DataMap pbDataMap = ProtobufUtils.serialize(getDataMap(), ((JData)getMetaData()).getDataMap());
+            pbDataMap.writeTo(toStream);
+        }
+        else {
+            Map<String, DataProtoMessage.DataScheme> newItemsMap = ProtobufUtils.serializeMap(getDataMap());
+            DataProtoMessage.DataMap pbDataMap = DataProtoMessage.DataMap.newBuilder().
+                    putAllMapItems(newItemsMap).
+                    build();
+            pbDataMap.writeTo(toStream);
+        }
     }
 
     public static Data fromFile(File fromFile) throws IOException {
@@ -90,7 +92,6 @@ public class ProtoData extends JData {
         DataProtoMessage.DataMap dataMap = builder.build();
         return ProtobufUtils.deserialize(dataMap);
     }
-
 
     public byte[] asBytes() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

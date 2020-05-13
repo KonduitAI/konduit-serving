@@ -12299,6 +12299,29 @@ public final class DataProtoMessage {
 
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMapItemsOrThrow(
         java.lang.String key);
+
+    /**
+     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     */
+    boolean hasMetaData();
+    /**
+     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaData();
+    /**
+     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     */
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder getMetaDataOrBuilder();
+
+    /**
+     * <code>string metaLabel = 3;</code>
+     */
+    java.lang.String getMetaLabel();
+    /**
+     * <code>string metaLabel = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getMetaLabelBytes();
   }
   /**
    * Protobuf type {@code ai.konduit.serving.DataMap}
@@ -12313,6 +12336,7 @@ public final class DataProtoMessage {
       super(builder);
     }
     private DataMap() {
+      metaLabel_ = "";
     }
 
     @java.lang.Override
@@ -12357,6 +12381,25 @@ public final class DataProtoMessage {
                   MapItemsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
               mapItems_.getMutableMap().put(
                   mapItems__.getKey(), mapItems__.getValue());
+              break;
+            }
+            case 18: {
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder subBuilder = null;
+              if (metaData_ != null) {
+                subBuilder = metaData_.toBuilder();
+              }
+              metaData_ = input.readMessage(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(metaData_);
+                metaData_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              metaLabel_ = s;
               break;
             }
             default: {
@@ -12479,6 +12522,61 @@ public final class DataProtoMessage {
       return map.get(key);
     }
 
+    public static final int METADATA_FIELD_NUMBER = 2;
+    private ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme metaData_;
+    /**
+     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     */
+    public boolean hasMetaData() {
+      return metaData_ != null;
+    }
+    /**
+     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaData() {
+      return metaData_ == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance() : metaData_;
+    }
+    /**
+     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     */
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder getMetaDataOrBuilder() {
+      return getMetaData();
+    }
+
+    public static final int METALABEL_FIELD_NUMBER = 3;
+    private volatile java.lang.Object metaLabel_;
+    /**
+     * <code>string metaLabel = 3;</code>
+     */
+    public java.lang.String getMetaLabel() {
+      java.lang.Object ref = metaLabel_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        metaLabel_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string metaLabel = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getMetaLabelBytes() {
+      java.lang.Object ref = metaLabel_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        metaLabel_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -12499,6 +12597,12 @@ public final class DataProtoMessage {
           internalGetMapItems(),
           MapItemsDefaultEntryHolder.defaultEntry,
           1);
+      if (metaData_ != null) {
+        output.writeMessage(2, getMetaData());
+      }
+      if (!getMetaLabelBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, metaLabel_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -12518,6 +12622,13 @@ public final class DataProtoMessage {
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(1, mapItems__);
       }
+      if (metaData_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getMetaData());
+      }
+      if (!getMetaLabelBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, metaLabel_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -12535,6 +12646,13 @@ public final class DataProtoMessage {
 
       if (!internalGetMapItems().equals(
           other.internalGetMapItems())) return false;
+      if (hasMetaData() != other.hasMetaData()) return false;
+      if (hasMetaData()) {
+        if (!getMetaData()
+            .equals(other.getMetaData())) return false;
+      }
+      if (!getMetaLabel()
+          .equals(other.getMetaLabel())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -12550,6 +12668,12 @@ public final class DataProtoMessage {
         hash = (37 * hash) + MAPITEMS_FIELD_NUMBER;
         hash = (53 * hash) + internalGetMapItems().hashCode();
       }
+      if (hasMetaData()) {
+        hash = (37 * hash) + METADATA_FIELD_NUMBER;
+        hash = (53 * hash) + getMetaData().hashCode();
+      }
+      hash = (37 * hash) + METALABEL_FIELD_NUMBER;
+      hash = (53 * hash) + getMetaLabel().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -12706,6 +12830,14 @@ public final class DataProtoMessage {
       public Builder clear() {
         super.clear();
         internalGetMutableMapItems().clear();
+        if (metaDataBuilder_ == null) {
+          metaData_ = null;
+        } else {
+          metaData_ = null;
+          metaDataBuilder_ = null;
+        }
+        metaLabel_ = "";
+
         return this;
       }
 
@@ -12735,6 +12867,12 @@ public final class DataProtoMessage {
         int from_bitField0_ = bitField0_;
         result.mapItems_ = internalGetMapItems();
         result.mapItems_.makeImmutable();
+        if (metaDataBuilder_ == null) {
+          result.metaData_ = metaData_;
+        } else {
+          result.metaData_ = metaDataBuilder_.build();
+        }
+        result.metaLabel_ = metaLabel_;
         onBuilt();
         return result;
       }
@@ -12785,6 +12923,13 @@ public final class DataProtoMessage {
         if (other == ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.getDefaultInstance()) return this;
         internalGetMutableMapItems().mergeFrom(
             other.internalGetMapItems());
+        if (other.hasMetaData()) {
+          mergeMetaData(other.getMetaData());
+        }
+        if (!other.getMetaLabel().isEmpty()) {
+          metaLabel_ = other.metaLabel_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -12935,6 +13080,192 @@ public final class DataProtoMessage {
           java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> values) {
         internalGetMutableMapItems().getMutableMap()
             .putAll(values);
+        return this;
+      }
+
+      private ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme metaData_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder> metaDataBuilder_;
+      /**
+       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       */
+      public boolean hasMetaData() {
+        return metaDataBuilder_ != null || metaData_ != null;
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaData() {
+        if (metaDataBuilder_ == null) {
+          return metaData_ == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance() : metaData_;
+        } else {
+          return metaDataBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       */
+      public Builder setMetaData(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme value) {
+        if (metaDataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          metaData_ = value;
+          onChanged();
+        } else {
+          metaDataBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       */
+      public Builder setMetaData(
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder builderForValue) {
+        if (metaDataBuilder_ == null) {
+          metaData_ = builderForValue.build();
+          onChanged();
+        } else {
+          metaDataBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       */
+      public Builder mergeMetaData(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme value) {
+        if (metaDataBuilder_ == null) {
+          if (metaData_ != null) {
+            metaData_ =
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.newBuilder(metaData_).mergeFrom(value).buildPartial();
+          } else {
+            metaData_ = value;
+          }
+          onChanged();
+        } else {
+          metaDataBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       */
+      public Builder clearMetaData() {
+        if (metaDataBuilder_ == null) {
+          metaData_ = null;
+          onChanged();
+        } else {
+          metaData_ = null;
+          metaDataBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder getMetaDataBuilder() {
+        
+        onChanged();
+        return getMetaDataFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       */
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder getMetaDataOrBuilder() {
+        if (metaDataBuilder_ != null) {
+          return metaDataBuilder_.getMessageOrBuilder();
+        } else {
+          return metaData_ == null ?
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance() : metaData_;
+        }
+      }
+      /**
+       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder> 
+          getMetaDataFieldBuilder() {
+        if (metaDataBuilder_ == null) {
+          metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder>(
+                  getMetaData(),
+                  getParentForChildren(),
+                  isClean());
+          metaData_ = null;
+        }
+        return metaDataBuilder_;
+      }
+
+      private java.lang.Object metaLabel_ = "";
+      /**
+       * <code>string metaLabel = 3;</code>
+       */
+      public java.lang.String getMetaLabel() {
+        java.lang.Object ref = metaLabel_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          metaLabel_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string metaLabel = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getMetaLabelBytes() {
+        java.lang.Object ref = metaLabel_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          metaLabel_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string metaLabel = 3;</code>
+       */
+      public Builder setMetaLabel(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        metaLabel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string metaLabel = 3;</code>
+       */
+      public Builder clearMetaLabel() {
+        
+        metaLabel_ = getDefaultInstance().getMetaLabel();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string metaLabel = 3;</code>
+       */
+      public Builder setMetaLabelBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        metaLabel_ = value;
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -13115,12 +13446,14 @@ public final class DataProtoMessage {
       "\001w\030\010 \001(\001\022\r\n\005label\030\t \001(\t\022\023\n\013probability\030\n" +
       " \001(\001\0225\n\004type\030\013 \001(\0162\'.ai.konduit.serving." +
       "BoundingBox.BoxType\"\032\n\007BoxType\022\007\n\003CHW\020\000\022" +
-      "\006\n\002XY\020\001\"\227\001\n\007DataMap\022;\n\010mapItems\030\001 \003(\0132)." +
+      "\006\n\002XY\020\001\"\334\001\n\007DataMap\022;\n\010mapItems\030\001 \003(\0132)." +
       "ai.konduit.serving.DataMap.MapItemsEntry" +
-      "\032O\n\rMapItemsEntry\022\013\n\003key\030\001 \001(\t\022-\n\005value\030" +
-      "\002 \001(\0132\036.ai.konduit.serving.DataScheme:\0028" +
-      "\001BB\n.ai.konduit.serving.pipeline.impl.da" +
-      "ta.protobufB\020DataProtoMessageb\006proto3"
+      "\0220\n\010metaData\030\002 \001(\0132\036.ai.konduit.serving." +
+      "DataScheme\022\021\n\tmetaLabel\030\003 \001(\t\032O\n\rMapItem" +
+      "sEntry\022\013\n\003key\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.ai." +
+      "konduit.serving.DataScheme:\0028\001BB\n.ai.kon" +
+      "duit.serving.pipeline.impl.data.protobuf" +
+      "B\020DataProtoMessageb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -13203,7 +13536,7 @@ public final class DataProtoMessage {
     internal_static_ai_konduit_serving_DataMap_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_DataMap_descriptor,
-        new java.lang.String[] { "MapItems", });
+        new java.lang.String[] { "MapItems", "MetaData", "MetaLabel", });
     internal_static_ai_konduit_serving_DataMap_MapItemsEntry_descriptor =
       internal_static_ai_konduit_serving_DataMap_descriptor.getNestedTypes().get(0);
     internal_static_ai_konduit_serving_DataMap_MapItemsEntry_fieldAccessorTable = new
