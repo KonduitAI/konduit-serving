@@ -26,6 +26,7 @@ import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
 
@@ -36,7 +37,7 @@ import java.util.Map;
 
 public class TestBoundingBoxStep {
 
-    @Test
+    @Test @Ignore   //To be run manually
     public void testBBox() throws Exception {
 
         File f = Resources.asFile("data/5_32x32.png");

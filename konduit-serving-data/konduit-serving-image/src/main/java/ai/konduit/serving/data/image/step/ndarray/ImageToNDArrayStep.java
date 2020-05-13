@@ -48,10 +48,8 @@ import java.util.List;
  * i.e.:
  * <pre>
  * {@code
- * Data meta = myData.get
+ * Data meta = myData.get( "@ImageToNDArrayStepMetadata");
  * }}</pre>
- *
- * If multiple images are converted
  *
  * @author Alex Black
  */
