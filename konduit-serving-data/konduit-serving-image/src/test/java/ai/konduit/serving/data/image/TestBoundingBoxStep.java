@@ -70,7 +70,7 @@ public class TestBoundingBoxStep {
 
         PipelineExecutor exec = p.executor();
 
-        exec.exec(null, in);
+        exec.exec(in);
 
         Thread.sleep(100000);
     }

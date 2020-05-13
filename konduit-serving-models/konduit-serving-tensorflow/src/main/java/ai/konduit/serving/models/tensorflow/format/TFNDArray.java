@@ -24,6 +24,8 @@ import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
 import org.tensorflow.DataType;
 import org.tensorflow.Tensor;
 
+import java.util.Arrays;
+
 public class TFNDArray extends BaseNDArray<Tensor> {
     public TFNDArray(Tensor array) {
         super(array);
@@ -38,5 +40,10 @@ public class TFNDArray extends BaseNDArray<Tensor> {
     @Override
     public long[] shape() {
         return array.shape();
+    }
+
+    @Override
+    public String toString() {
+        return "TensorFlowNDArray(type=" + type() + ",shape=" + Arrays.toString(shape()) + ")";
     }
 }

@@ -30,8 +30,8 @@ import java.util.List;
 @SuperBuilder
 public class TensorFlowPipelineStep extends BaseModelPipelineStep<TensorFlowConfiguration> {
 
-    private List<String> inputNames;        //Mainly for ComputationGraph with multiple inputs - map Data keys to ComputationGraph outputs
-    private List<String> outputNames;       //Mainly for ComputationGraph with multiple outputs - map INDArray[] to Data keys
+    private List<String> inputNames;
+    private List<String> outputNames;
 
     public TensorFlowPipelineStep(String modelUri, TensorFlowConfiguration config) {
         super(modelUri, config);

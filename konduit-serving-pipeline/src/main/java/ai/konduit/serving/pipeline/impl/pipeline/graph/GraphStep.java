@@ -52,7 +52,9 @@ public interface GraphStep {
         allSteps.add(this);
         Collections.addAll(allSteps, steps);
 
-        return new MergeStep(builder(), allSteps, name);
+        MergeStep out = new MergeStep(builder(), allSteps, name);
+        builder().add(out);
+        return out;
     }
 
 }

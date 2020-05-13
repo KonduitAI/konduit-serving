@@ -310,6 +310,7 @@ public interface Data {
     default void copyFrom(@NonNull String key, @NonNull Data from){
         Preconditions.checkState(from.has(key), "Key %s does not exist in provided Data instance");
         ValueType vt = from.type(key);
+        //TODO is there a cleaner way?
         switch (vt){
             case NDARRAY:
                 put(key, from.getNDArray(key));
@@ -336,7 +337,42 @@ public interface Data {
                 put(key, from.getData(key));
                 return;
             case LIST:
-                throw new UnsupportedOperationException("List copyFrom not yet implemented");
+                ValueType vtList = from.listType(key);
+                List<?> l = from.getList(key, vtList);
+                switch (vtList){
+                    case NDARRAY:
+                        putListNDArray(key, (List<NDArray>)l);
+                        break;
+                    case STRING:
+                        putListString(key, (List<String>)l);
+                        break;
+                    case BYTES:
+                        putListBytes(key, (List<byte[]>)l);
+                        break;
+                    case IMAGE:
+                        putListImage(key, (List<Image>)l);
+                        break;
+                    case DOUBLE:
+                        putListDouble(key, (List<Double>)l);
+                        break;
+                    case INT64:
+                        putListInt64(key, (List<Long>)l);
+                        break;
+                    case BOOLEAN:
+                        putListBoolean(key, (List<Boolean>)l);
+                        break;
+                    case BOUNDING_BOX:
+                        putListBoundingBox(key, (List<BoundingBox>)l);
+                        break;
+                    case DATA:
+                        putListData(key, (List<Data>)l);
+                        break;
+                    case LIST:
+                        throw new UnsupportedOperationException("List<List> copyFrom not yet implemented");
+                    default:
+                        throw new UnsupportedOperationException("Not supported: " + vt);
+                }
+                break;
             default:
                 throw new UnsupportedOperationException("Not supported: " + vt);
         }

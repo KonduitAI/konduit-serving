@@ -31,8 +31,10 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class GraphPipelineTest {
 
@@ -97,6 +99,14 @@ public class GraphPipelineTest {
 
 
         Pipeline p = b.build(merge);
+        GraphPipeline gp = (GraphPipeline)p;
+
+        Map<String,GraphStep> s = gp.getSteps();
+        assertTrue(s.containsKey("step1"));
+        assertTrue(s.containsKey("step2"));
+        assertTrue(s.containsKey("merge"));
+
+
         PipelineExecutor exec = p.executor();
 
 

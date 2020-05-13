@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.step.ml;
+package ai.konduit.serving.pipeline.impl.step.ml.ssd;
 
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
@@ -71,7 +71,22 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
             }
         }
 
+        //TODO copy other data to output
 
-        return Data.singletonList("out", l, ValueType.BOUNDING_BOX);
+        String outName = step.outputName();
+        if(outName == null)
+            outName = SSDToBoundingBoxStep.DEFAULT_OUTPUT_NAME;
+
+        Data d = Data.singletonList(outName, l, ValueType.BOUNDING_BOX);
+
+        if(step.keepOtherValues()){
+            for(String s : data.keys()){
+                if(!key.equals(s) && !prob.equals(s)){
+                    d.copyFrom(s, data);
+                }
+            }
+        }
+
+        return d;
     }
 }

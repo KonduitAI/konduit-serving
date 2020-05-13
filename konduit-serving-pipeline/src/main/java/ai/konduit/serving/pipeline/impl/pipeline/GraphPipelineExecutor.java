@@ -106,6 +106,9 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
         Data out = null;
         while(!canExec.isEmpty()){
             String next = canExec.remove();
+
+//            log.info("Executing step: {}", next);
+
             canExecSet.remove(next);
             GraphStep gs = m.get(next);
             List<String> inputs = gs.inputs();
@@ -129,6 +132,9 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
             } else {
                 throw new UnsupportedOperationException("Execution support not yet implemented: " + gs);
             }
+
+            if(stepOut == null)
+                throw new IllegalStateException("Got null output from step \"" + next + "\"");
 
             if(next.equals(pipeline.getOutputStepName())){
                 out = stepOut;
@@ -158,6 +164,7 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
                 if(allSeen) {
                     canExec.add(s);
                     canExecSet.add(s);
+                    //log.info("Can now exec: {}", s);
                 }
             }
         }
