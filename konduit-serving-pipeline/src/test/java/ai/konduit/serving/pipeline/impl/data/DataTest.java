@@ -477,6 +477,30 @@ public class DataTest {
     }
 
     @Test
+    public void testMetaDataSerde() throws IOException {
+        List<String> strings = new ArrayList<>();
+        strings.add("one");
+        strings.add("two");
+        strings.add("three");
+        strings.add("four");
+
+        Data strData = Data.singletonList(KEY, strings, ValueType.STRING);
+
+        List<Long> numbers = new ArrayList<>();
+        for (long l = 0; l < 100; ++l) {
+            numbers.add(l);
+        }
+        Data numData = Data.singletonList("numData", numbers, ValueType.INT64);
+        strData.setMetaData(numData);
+        assertEquals(numData, strData.getMetaData());
+
+        File serFile = testDir.newFile();
+        strData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(numData, restoredData.getMetaData());
+    }
+
+    @Test
     public void testBoundingBoxesCHWSerde() throws IOException {
         BoundingBox boundingBox = new BBoxCHW(1.0, 2.0, 1.0, 2.0);
         Data boxData = Data.singleton(KEY, boundingBox);

@@ -6,17 +6,17 @@ option java_package = "ai.konduit.serving.pipeline.impl.data.protobuf";
 option java_outer_classname = "DataProtoMessage";
 
 message DataScheme {
-    DataMap metaData = 2;
     oneof value {
-        string sValue = 3;
-        bytes bValue = 4;
-        int64 iValue = 5;
-        bool boolValue = 6;
-        double doubleValue = 7;
-        List listValue = 8;
-        NDArray ndValue = 9;
-        Image imValue = 10;
-        BoundingBox boxValue = 11;
+        string sValue = 2;
+        bytes bValue = 3;
+        int64 iValue = 4;
+        bool boolValue = 5;
+        double doubleValue = 6;
+        List listValue = 7;
+        NDArray ndValue = 8;
+        Image imValue = 9;
+        BoundingBox boxValue = 10;
+        DataMap metaData = 11;
     }
     ValueType listType = 12;
     ValueType type = 13;
