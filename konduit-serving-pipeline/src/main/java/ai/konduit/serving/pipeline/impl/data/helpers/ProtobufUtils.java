@@ -200,8 +200,7 @@ public class ProtobufUtils {
             Map<String, DataProtoMessage.DataScheme> pbMetaData = serializeMap(metaData);
             pbDataMap = DataProtoMessage.DataMap.newBuilder().
                     putAllMapItems(pbItemsMap).
-                    setMetaData(pbMetaData.values().iterator().next()).
-                    setMetaLabel(pbMetaData.keySet().iterator().next()).
+                    putAllMetaData(pbMetaData).
                     build();
         }
         else {
@@ -443,10 +442,9 @@ public class ProtobufUtils {
         return pbItemsMap;
     }
 
-    public static Data deserialize(DataProtoMessage.DataMap dataMap) {
-        JData retData = new JData();
+    private static Data dataFromMap(Map<String, DataProtoMessage.DataScheme> schemeMap) {
 
-        Map<String, DataProtoMessage.DataScheme> schemeMap = dataMap.getMapItemsMap();
+        Data retData = new JData();
         Iterator<Map.Entry<String, DataProtoMessage.DataScheme>> iterator =
                 schemeMap.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -478,17 +476,13 @@ public class ProtobufUtils {
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.LIST.ordinal()) {
                 if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.DOUBLE.ordinal()) {
                     retData.putListDouble(entry.getKey(), item.getListValue().getDList().getListList());
-                }
-                else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.BOOLEAN.ordinal()) {
+                } else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.BOOLEAN.ordinal()) {
                     retData.putListBoolean(entry.getKey(), item.getListValue().getBList().getListList());
-                }
-                else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.INT64.ordinal()) {
+                } else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.INT64.ordinal()) {
                     retData.putListInt64(entry.getKey(), item.getListValue().getIList().getListList());
-                }
-                else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.STRING.ordinal()) {
+                } else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.STRING.ordinal()) {
                     retData.putListString(entry.getKey(), item.getListValue().getSList().getListList());
-                }
-                else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.IMAGE.ordinal()) {
+                } else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.IMAGE.ordinal()) {
                     List<DataProtoMessage.Image> pbImages = item.getListValue().getImList().getListList();
                     List<Image> images = new ArrayList<>();
                     for (val pbImage : pbImages) {
@@ -496,8 +490,7 @@ public class ProtobufUtils {
                         images.add(image);
                     }
                     retData.putListImage(entry.getKey(), images);
-                }
-                else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.NDARRAY.ordinal()) {
+                } else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.NDARRAY.ordinal()) {
                     List<DataProtoMessage.NDArray> pbArrays = item.getListValue().getNdList().getListList();
                     List<NDArray> arrays = new ArrayList<>();
                     for (val pbArray : pbArrays) {
@@ -505,8 +498,7 @@ public class ProtobufUtils {
                         arrays.add(ndArray);
                     }
                     retData.putListNDArray(entry.getKey(), arrays);
-                }
-                else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.BOUNDING_BOX.ordinal()) {
+                } else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.BOUNDING_BOX.ordinal()) {
                     List<DataProtoMessage.BoundingBox> pbArrays = item.getListValue().getBboxList().getListList();
                     List<BoundingBox> boxes = new ArrayList<>();
                     for (val pbBox : pbArrays) {
@@ -527,34 +519,14 @@ public class ProtobufUtils {
                 retData.put(entry.getKey(), ndArray);
             }
         }
-        DataProtoMessage.DataScheme metadata = dataMap.getMetaData();
-        JData jMetaData = new JData();
-        if (metadata.getTypeValue() == DataProtoMessage.DataScheme.ValueType.BOOLEAN.ordinal()) {
-            jMetaData.put(dataMap.getMetaLabel(), metadata.getBoolValue());
-        }
-        else if (metadata.getTypeValue() == DataProtoMessage.DataScheme.ValueType.DOUBLE.ordinal()) {
-            jMetaData.put(dataMap.getMetaLabel(), metadata.getDoubleValue());
-        }
-        else if (metadata.getTypeValue() == DataProtoMessage.DataScheme.ValueType.INT64.ordinal()) {
-            jMetaData.put(dataMap.getMetaLabel(), metadata.getIValue());
-        }
-        else if (metadata.getTypeValue() == DataProtoMessage.DataScheme.ValueType.STRING.ordinal()) {
-            jMetaData.put(dataMap.getMetaLabel(), metadata.getSValue());
-        }
-        else if (metadata.getTypeValue() == DataProtoMessage.DataScheme.ValueType.LIST.ordinal()) {
-            if (metadata.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.BOOLEAN.ordinal()) {
-                jMetaData.putListBoolean(dataMap.getMetaLabel(), metadata.getListValue().getBList().getListList());
-            }
-            else if (metadata.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.DOUBLE.ordinal()) {
-                jMetaData.putListDouble(dataMap.getMetaLabel(), metadata.getListValue().getDList().getListList());
-            }
-            else if (metadata.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.INT64.ordinal()) {
-                jMetaData.putListInt64(dataMap.getMetaLabel(), metadata.getListValue().getIList().getListList());
-            }
-            else if (metadata.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.STRING.ordinal()) {
-                jMetaData.putListString(dataMap.getMetaLabel(), metadata.getListValue().getSList().getListList());
-            }
-        }
+        return retData;
+    }
+
+    public static Data deserialize(DataProtoMessage.DataMap dataMap) {
+        Map<String, DataProtoMessage.DataScheme> schemeMap = dataMap.getMapItemsMap();
+        Data retData = dataFromMap(schemeMap);
+        Map<String,DataProtoMessage.DataScheme> metadata = dataMap.getMetaDataMap();
+        Data jMetaData = dataFromMap(metadata);
         retData.setMetaData(jMetaData);
         return retData;
     }

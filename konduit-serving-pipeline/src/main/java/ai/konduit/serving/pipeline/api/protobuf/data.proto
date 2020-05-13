@@ -117,7 +117,6 @@ message BoundingBox {
 
 message DataMap {
     map<string, DataScheme> mapItems = 1;
-    DataScheme metaData = 2;
-    string metaLabel = 3;
+    map<string, DataScheme> metaData = 2;
 }
 

@@ -12301,27 +12301,38 @@ public final class DataProtoMessage {
         java.lang.String key);
 
     /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
      */
-    boolean hasMetaData();
+    int getMetaDataCount();
     /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
      */
-    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaData();
+    boolean containsMetaData(
+        java.lang.String key);
     /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+     * Use {@link #getMetaDataMap()} instead.
      */
-    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder getMetaDataOrBuilder();
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme>
+    getMetaData();
+    /**
+     * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
+     */
+    java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme>
+    getMetaDataMap();
+    /**
+     * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
+     */
 
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaDataOrDefault(
+        java.lang.String key,
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme defaultValue);
     /**
-     * <code>string metaLabel = 3;</code>
+     * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
      */
-    java.lang.String getMetaLabel();
-    /**
-     * <code>string metaLabel = 3;</code>
-     */
-    com.google.protobuf.ByteString
-        getMetaLabelBytes();
+
+    ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaDataOrThrow(
+        java.lang.String key);
   }
   /**
    * Protobuf type {@code ai.konduit.serving.DataMap}
@@ -12336,7 +12347,6 @@ public final class DataProtoMessage {
       super(builder);
     }
     private DataMap() {
-      metaLabel_ = "";
     }
 
     @java.lang.Override
@@ -12384,22 +12394,16 @@ public final class DataProtoMessage {
               break;
             }
             case 18: {
-              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder subBuilder = null;
-              if (metaData_ != null) {
-                subBuilder = metaData_.toBuilder();
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                metaData_ = com.google.protobuf.MapField.newMapField(
+                    MetaDataDefaultEntryHolder.defaultEntry);
+                mutable_bitField0_ |= 0x00000002;
               }
-              metaData_ = input.readMessage(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(metaData_);
-                metaData_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              metaLabel_ = s;
+              com.google.protobuf.MapEntry<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme>
+              metaData__ = input.readMessage(
+                  MetaDataDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              metaData_.getMutableMap().put(
+                  metaData__.getKey(), metaData__.getValue());
               break;
             }
             default: {
@@ -12433,6 +12437,8 @@ public final class DataProtoMessage {
       switch (number) {
         case 1:
           return internalGetMapItems();
+        case 2:
+          return internalGetMetaData();
         default:
           throw new RuntimeException(
               "Invalid map field number: " + number);
@@ -12523,58 +12529,79 @@ public final class DataProtoMessage {
     }
 
     public static final int METADATA_FIELD_NUMBER = 2;
-    private ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme metaData_;
-    /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
-     */
-    public boolean hasMetaData() {
-      return metaData_ != null;
+    private static final class MetaDataDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme>newDefaultInstance(
+                  ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.internal_static_ai_konduit_serving_DataMap_MetaDataEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                  ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance());
     }
-    /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
-     */
-    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaData() {
-      return metaData_ == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance() : metaData_;
-    }
-    /**
-     * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
-     */
-    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder getMetaDataOrBuilder() {
-      return getMetaData();
+    private com.google.protobuf.MapField<
+        java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> metaData_;
+    private com.google.protobuf.MapField<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme>
+    internalGetMetaData() {
+      if (metaData_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            MetaDataDefaultEntryHolder.defaultEntry);
+      }
+      return metaData_;
     }
 
-    public static final int METALABEL_FIELD_NUMBER = 3;
-    private volatile java.lang.Object metaLabel_;
-    /**
-     * <code>string metaLabel = 3;</code>
-     */
-    public java.lang.String getMetaLabel() {
-      java.lang.Object ref = metaLabel_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        metaLabel_ = s;
-        return s;
-      }
+    public int getMetaDataCount() {
+      return internalGetMetaData().getMap().size();
     }
     /**
-     * <code>string metaLabel = 3;</code>
+     * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
      */
-    public com.google.protobuf.ByteString
-        getMetaLabelBytes() {
-      java.lang.Object ref = metaLabel_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        metaLabel_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
+
+    public boolean containsMetaData(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetMetaData().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getMetaDataMap()} instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMetaData() {
+      return getMetaDataMap();
+    }
+    /**
+     * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
+     */
+
+    public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMetaDataMap() {
+      return internalGetMetaData().getMap();
+    }
+    /**
+     * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
+     */
+
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaDataOrDefault(
+        java.lang.String key,
+        ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> map =
+          internalGetMetaData().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
+     */
+
+    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaDataOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> map =
+          internalGetMetaData().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
       }
+      return map.get(key);
     }
 
     private byte memoizedIsInitialized = -1;
@@ -12597,12 +12624,12 @@ public final class DataProtoMessage {
           internalGetMapItems(),
           MapItemsDefaultEntryHolder.defaultEntry,
           1);
-      if (metaData_ != null) {
-        output.writeMessage(2, getMetaData());
-      }
-      if (!getMetaLabelBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, metaLabel_);
-      }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetMetaData(),
+          MetaDataDefaultEntryHolder.defaultEntry,
+          2);
       unknownFields.writeTo(output);
     }
 
@@ -12622,12 +12649,15 @@ public final class DataProtoMessage {
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(1, mapItems__);
       }
-      if (metaData_ != null) {
+      for (java.util.Map.Entry<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> entry
+           : internalGetMetaData().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme>
+        metaData__ = MetaDataDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, getMetaData());
-      }
-      if (!getMetaLabelBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, metaLabel_);
+            .computeMessageSize(2, metaData__);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -12646,13 +12676,8 @@ public final class DataProtoMessage {
 
       if (!internalGetMapItems().equals(
           other.internalGetMapItems())) return false;
-      if (hasMetaData() != other.hasMetaData()) return false;
-      if (hasMetaData()) {
-        if (!getMetaData()
-            .equals(other.getMetaData())) return false;
-      }
-      if (!getMetaLabel()
-          .equals(other.getMetaLabel())) return false;
+      if (!internalGetMetaData().equals(
+          other.internalGetMetaData())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -12668,12 +12693,10 @@ public final class DataProtoMessage {
         hash = (37 * hash) + MAPITEMS_FIELD_NUMBER;
         hash = (53 * hash) + internalGetMapItems().hashCode();
       }
-      if (hasMetaData()) {
+      if (!internalGetMetaData().getMap().isEmpty()) {
         hash = (37 * hash) + METADATA_FIELD_NUMBER;
-        hash = (53 * hash) + getMetaData().hashCode();
+        hash = (53 * hash) + internalGetMetaData().hashCode();
       }
-      hash = (37 * hash) + METALABEL_FIELD_NUMBER;
-      hash = (53 * hash) + getMetaLabel().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -12787,6 +12810,8 @@ public final class DataProtoMessage {
         switch (number) {
           case 1:
             return internalGetMapItems();
+          case 2:
+            return internalGetMetaData();
           default:
             throw new RuntimeException(
                 "Invalid map field number: " + number);
@@ -12798,6 +12823,8 @@ public final class DataProtoMessage {
         switch (number) {
           case 1:
             return internalGetMutableMapItems();
+          case 2:
+            return internalGetMutableMetaData();
           default:
             throw new RuntimeException(
                 "Invalid map field number: " + number);
@@ -12830,14 +12857,7 @@ public final class DataProtoMessage {
       public Builder clear() {
         super.clear();
         internalGetMutableMapItems().clear();
-        if (metaDataBuilder_ == null) {
-          metaData_ = null;
-        } else {
-          metaData_ = null;
-          metaDataBuilder_ = null;
-        }
-        metaLabel_ = "";
-
+        internalGetMutableMetaData().clear();
         return this;
       }
 
@@ -12867,12 +12887,8 @@ public final class DataProtoMessage {
         int from_bitField0_ = bitField0_;
         result.mapItems_ = internalGetMapItems();
         result.mapItems_.makeImmutable();
-        if (metaDataBuilder_ == null) {
-          result.metaData_ = metaData_;
-        } else {
-          result.metaData_ = metaDataBuilder_.build();
-        }
-        result.metaLabel_ = metaLabel_;
+        result.metaData_ = internalGetMetaData();
+        result.metaData_.makeImmutable();
         onBuilt();
         return result;
       }
@@ -12923,13 +12939,8 @@ public final class DataProtoMessage {
         if (other == ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.getDefaultInstance()) return this;
         internalGetMutableMapItems().mergeFrom(
             other.internalGetMapItems());
-        if (other.hasMetaData()) {
-          mergeMetaData(other.getMetaData());
-        }
-        if (!other.getMetaLabel().isEmpty()) {
-          metaLabel_ = other.metaLabel_;
-          onChanged();
-        }
+        internalGetMutableMetaData().mergeFrom(
+            other.internalGetMetaData());
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -13083,189 +13094,126 @@ public final class DataProtoMessage {
         return this;
       }
 
-      private ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme metaData_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder> metaDataBuilder_;
-      /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
-       */
-      public boolean hasMetaData() {
-        return metaDataBuilder_ != null || metaData_ != null;
-      }
-      /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
-       */
-      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaData() {
-        if (metaDataBuilder_ == null) {
-          return metaData_ == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance() : metaData_;
-        } else {
-          return metaDataBuilder_.getMessage();
+      private com.google.protobuf.MapField<
+          java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> metaData_;
+      private com.google.protobuf.MapField<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme>
+      internalGetMetaData() {
+        if (metaData_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              MetaDataDefaultEntryHolder.defaultEntry);
         }
+        return metaData_;
       }
-      /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
-       */
-      public Builder setMetaData(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme value) {
-        if (metaDataBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          metaData_ = value;
-          onChanged();
-        } else {
-          metaDataBuilder_.setMessage(value);
+      private com.google.protobuf.MapField<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme>
+      internalGetMutableMetaData() {
+        onChanged();;
+        if (metaData_ == null) {
+          metaData_ = com.google.protobuf.MapField.newMapField(
+              MetaDataDefaultEntryHolder.defaultEntry);
         }
+        if (!metaData_.isMutable()) {
+          metaData_ = metaData_.copy();
+        }
+        return metaData_;
+      }
 
-        return this;
+      public int getMetaDataCount() {
+        return internalGetMetaData().getMap().size();
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
        */
-      public Builder setMetaData(
-          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder builderForValue) {
-        if (metaDataBuilder_ == null) {
-          metaData_ = builderForValue.build();
-          onChanged();
-        } else {
-          metaDataBuilder_.setMessage(builderForValue.build());
-        }
 
-        return this;
+      public boolean containsMetaData(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        return internalGetMetaData().getMap().containsKey(key);
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * Use {@link #getMetaDataMap()} instead.
        */
-      public Builder mergeMetaData(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme value) {
-        if (metaDataBuilder_ == null) {
-          if (metaData_ != null) {
-            metaData_ =
-              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.newBuilder(metaData_).mergeFrom(value).buildPartial();
-          } else {
-            metaData_ = value;
-          }
-          onChanged();
-        } else {
-          metaDataBuilder_.mergeFrom(value);
-        }
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMetaData() {
+        return getMetaDataMap();
+      }
+      /**
+       * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
+       */
 
-        return this;
+      public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMetaDataMap() {
+        return internalGetMetaData().getMap();
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
        */
+
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaDataOrDefault(
+          java.lang.String key,
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme defaultValue) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> map =
+            internalGetMetaData().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
+       */
+
+      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaDataOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> map =
+            internalGetMetaData().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
       public Builder clearMetaData() {
-        if (metaDataBuilder_ == null) {
-          metaData_ = null;
-          onChanged();
-        } else {
-          metaData_ = null;
-          metaDataBuilder_ = null;
-        }
+        internalGetMutableMetaData().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
+       */
 
+      public Builder removeMetaData(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableMetaData().getMutableMap()
+            .remove(key);
         return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * Use alternate mutation accessors instead.
        */
-      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder getMetaDataBuilder() {
-        
-        onChanged();
-        return getMetaDataFieldBuilder().getBuilder();
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme>
+      getMutableMetaData() {
+        return internalGetMutableMetaData().getMutableMap();
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
        */
-      public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder getMetaDataOrBuilder() {
-        if (metaDataBuilder_ != null) {
-          return metaDataBuilder_.getMessageOrBuilder();
-        } else {
-          return metaData_ == null ?
-              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance() : metaData_;
-        }
+      public Builder putMetaData(
+          java.lang.String key,
+          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme value) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (value == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableMetaData().getMutableMap()
+            .put(key, value);
+        return this;
       }
       /**
-       * <code>.ai.konduit.serving.DataScheme metaData = 2;</code>
+       * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
        */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder> 
-          getMetaDataFieldBuilder() {
-        if (metaDataBuilder_ == null) {
-          metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataSchemeOrBuilder>(
-                  getMetaData(),
-                  getParentForChildren(),
-                  isClean());
-          metaData_ = null;
-        }
-        return metaDataBuilder_;
-      }
 
-      private java.lang.Object metaLabel_ = "";
-      /**
-       * <code>string metaLabel = 3;</code>
-       */
-      public java.lang.String getMetaLabel() {
-        java.lang.Object ref = metaLabel_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          metaLabel_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string metaLabel = 3;</code>
-       */
-      public com.google.protobuf.ByteString
-          getMetaLabelBytes() {
-        java.lang.Object ref = metaLabel_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          metaLabel_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string metaLabel = 3;</code>
-       */
-      public Builder setMetaLabel(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        metaLabel_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string metaLabel = 3;</code>
-       */
-      public Builder clearMetaLabel() {
-        
-        metaLabel_ = getDefaultInstance().getMetaLabel();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string metaLabel = 3;</code>
-       */
-      public Builder setMetaLabelBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        metaLabel_ = value;
-        onChanged();
+      public Builder putAllMetaData(
+          java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> values) {
+        internalGetMutableMetaData().getMutableMap()
+            .putAll(values);
         return this;
       }
       @java.lang.Override
@@ -13391,6 +13339,11 @@ public final class DataProtoMessage {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ai_konduit_serving_DataMap_MapItemsEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_ai_konduit_serving_DataMap_MetaDataEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_ai_konduit_serving_DataMap_MetaDataEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -13446,14 +13399,16 @@ public final class DataProtoMessage {
       "\001w\030\010 \001(\001\022\r\n\005label\030\t \001(\t\022\023\n\013probability\030\n" +
       " \001(\001\0225\n\004type\030\013 \001(\0162\'.ai.konduit.serving." +
       "BoundingBox.BoxType\"\032\n\007BoxType\022\007\n\003CHW\020\000\022" +
-      "\006\n\002XY\020\001\"\334\001\n\007DataMap\022;\n\010mapItems\030\001 \003(\0132)." +
+      "\006\n\002XY\020\001\"\245\002\n\007DataMap\022;\n\010mapItems\030\001 \003(\0132)." +
       "ai.konduit.serving.DataMap.MapItemsEntry" +
-      "\0220\n\010metaData\030\002 \001(\0132\036.ai.konduit.serving." +
-      "DataScheme\022\021\n\tmetaLabel\030\003 \001(\t\032O\n\rMapItem" +
-      "sEntry\022\013\n\003key\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.ai." +
-      "konduit.serving.DataScheme:\0028\001BB\n.ai.kon" +
-      "duit.serving.pipeline.impl.data.protobuf" +
-      "B\020DataProtoMessageb\006proto3"
+      "\022;\n\010metaData\030\002 \003(\0132).ai.konduit.serving." +
+      "DataMap.MetaDataEntry\032O\n\rMapItemsEntry\022\013" +
+      "\n\003key\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.ai.konduit." +
+      "serving.DataScheme:\0028\001\032O\n\rMetaDataEntry\022" +
+      "\013\n\003key\030\001 \001(\t\022-\n\005value\030\002 \001(\0132\036.ai.konduit" +
+      ".serving.DataScheme:\0028\001BB\n.ai.konduit.se" +
+      "rving.pipeline.impl.data.protobufB\020DataP" +
+      "rotoMessageb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -13536,12 +13491,18 @@ public final class DataProtoMessage {
     internal_static_ai_konduit_serving_DataMap_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_DataMap_descriptor,
-        new java.lang.String[] { "MapItems", "MetaData", "MetaLabel", });
+        new java.lang.String[] { "MapItems", "MetaData", });
     internal_static_ai_konduit_serving_DataMap_MapItemsEntry_descriptor =
       internal_static_ai_konduit_serving_DataMap_descriptor.getNestedTypes().get(0);
     internal_static_ai_konduit_serving_DataMap_MapItemsEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_konduit_serving_DataMap_MapItemsEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_ai_konduit_serving_DataMap_MetaDataEntry_descriptor =
+      internal_static_ai_konduit_serving_DataMap_descriptor.getNestedTypes().get(1);
+    internal_static_ai_konduit_serving_DataMap_MetaDataEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ai_konduit_serving_DataMap_MetaDataEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
   }
 
