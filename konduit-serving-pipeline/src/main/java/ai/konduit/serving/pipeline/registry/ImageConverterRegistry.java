@@ -84,7 +84,7 @@ public class ImageConverterRegistry extends AbstractRegistry<ImageConverter> {
             }
         }
 
-        //No factory is available. Try to fall back on X -> PNG -> Y
+        //No converter is available. Try to fall back on X -> PNG -> Y
         if(type != Png.class && !(img.get() instanceof Png)){
             ImageConverter c1 = getConverterForClass(img, Png.class);
             if(c1 != null){

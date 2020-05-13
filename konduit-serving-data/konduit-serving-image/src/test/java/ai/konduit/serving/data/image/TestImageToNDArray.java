@@ -5,7 +5,6 @@ import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
-import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStepRunner;
 import ai.konduit.serving.data.nd4j.util.ND4JUtil;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -48,7 +47,7 @@ public class TestImageToNDArray {
 
         PipelineExecutor exec = p.executor();
 
-        Data out = exec.exec(null, in);
+        Data out = exec.exec(in);
 
         assertTrue(out.has("image"));
         assertEquals(ValueType.NDARRAY, out.type("image"));
@@ -94,7 +93,7 @@ public class TestImageToNDArray {
 
                             PipelineExecutor exec = p.executor();
 
-                            Data out = exec.exec(null, d);
+                            Data out = exec.exec(d);
 
                             assertTrue(out.has("image"));
                             assertEquals(ValueType.NDARRAY, out.type("image"));
@@ -177,7 +176,7 @@ public class TestImageToNDArray {
                             Pipeline pJson = Pipeline.fromJson(json);
                             assertEquals(p, pJson);
 
-                            Data outPJson = pJson.executor().exec(null, d);
+                            Data outPJson = pJson.executor().exec(d);
                             assertEquals(out, outPJson);
                         }
                     }
@@ -224,7 +223,7 @@ public class TestImageToNDArray {
                                     .build();
 
                             PipelineExecutor exec = p.executor();
-                            Data out = exec.exec(null, d);
+                            Data out = exec.exec(d);
                             NDArray n = out.getNDArray("image");
 
                             assertTrue(out.has("image"));
@@ -248,7 +247,7 @@ public class TestImageToNDArray {
                             Pipeline pJson = Pipeline.fromJson(json);
                             assertEquals(p, pJson);
 
-                            Data outPJson = pJson.executor().exec(null, d);
+                            Data outPJson = pJson.executor().exec(d);
                             assertEquals(out, outPJson);
                         }
                     }
@@ -401,7 +400,7 @@ public class TestImageToNDArray {
                             .build();
 
                     PipelineExecutor exec = p.executor();
-                    Data out = exec.exec(null, in);
+                    Data out = exec.exec(in);
 
                     NDArray arr = out.getNDArray("im2ndarray");
                     assertEquals(NDArrayType.FLOAT, arr.type());
@@ -494,7 +493,7 @@ public class TestImageToNDArray {
 
             PipelineExecutor exec = p.executor();
 
-            Data out = exec.exec(null, in);
+            Data out = exec.exec(in);
 
             Data meta = out.getMetaData();
             assertNotNull(meta);
@@ -594,7 +593,7 @@ public class TestImageToNDArray {
                 .build();
 
         Data in = Data.singleton("image", Image.create(f));
-        Data out = p.executor().exec(null, in);
+        Data out = p.executor().exec(in);
 
         INDArray expFloat = out.getNDArray("image").getAs(INDArray.class);
 
@@ -605,8 +604,8 @@ public class TestImageToNDArray {
                 continue;
 
             //Looks like ND4J bug: TODO LOG ISSUE
-            if(t == NDArrayType.BFLOAT16 || t == NDArrayType.UINT64 || t == NDArrayType.UINT32 || t == NDArrayType.UINT16)
-                continue;
+//            if(t == NDArrayType.BFLOAT16 || t == NDArrayType.UINT64 || t == NDArrayType.UINT32 || t == NDArrayType.UINT16)
+//                continue;
 
             System.out.println("===== " + t + " =====");
 
@@ -626,7 +625,7 @@ public class TestImageToNDArray {
                             .build())
                     .build();
 
-            Data out2 = p2.executor().exec(null, in);
+            Data out2 = p2.executor().exec(in);
             INDArray act = out2.getNDArray("image").getAs(INDArray.class);
 
             assertEquals(exp, act);

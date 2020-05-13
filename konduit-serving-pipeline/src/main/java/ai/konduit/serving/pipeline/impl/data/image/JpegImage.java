@@ -18,30 +18,20 @@
 
 package ai.konduit.serving.pipeline.impl.data.image;
 
-import ai.konduit.serving.pipeline.impl.data.image.base.BaseImageFile;
+import ai.konduit.serving.pipeline.impl.data.image.base.BaseImage;
 
-import java.io.File;
-
-public class Png extends BaseImageFile {
-
-    public Png(File file) {
-        this(file, null, null);
-    }
-
-    public Png(File file, Integer height, Integer width){
-        super(file, height, width);
-    }
-
-    public Png(byte[] bytes){
-        this(bytes, null, null);
-    }
-
-    public Png(byte[] bytes, Integer height, Integer width){
-        super(bytes, height, width);
+public class JpegImage extends BaseImage<Jpeg> {
+    public JpegImage(Jpeg image) {
+        super(image);
     }
 
     @Override
-    public String formatName() {
-        return "PNG";
+    public int height() {
+        return image.height();
+    }
+
+    @Override
+    public int width() {
+        return image.width();
     }
 }

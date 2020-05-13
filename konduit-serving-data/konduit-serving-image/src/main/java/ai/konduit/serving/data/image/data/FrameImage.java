@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.data.image.data;
 
-import ai.konduit.serving.pipeline.impl.data.image.BaseImage;
+import ai.konduit.serving.pipeline.impl.data.image.base.BaseImage;
 import org.bytedeco.javacv.Frame;
 
 public class FrameImage extends BaseImage<Frame> {
