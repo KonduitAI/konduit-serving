@@ -99,6 +99,93 @@ public class ProtobufUtils {
         return ndType;
     }
 
+    private static NDArrayType fromPbNDArrayType(DataProtoMessage.NDArray.ValueType origType) {
+        NDArrayType ndType = null;
+        switch (origType) {
+            case DOUBLE:
+                ndType = NDArrayType.DOUBLE;
+                break;
+            case FLOAT:
+                ndType = NDArrayType.FLOAT;
+                break;
+            case FLOAT16:
+                ndType = NDArrayType.FLOAT16;
+                break;
+            case BFLOAT16:
+                ndType = NDArrayType.BFLOAT16;
+                break;
+            case INT64:
+                ndType = NDArrayType.INT64;
+                break;
+            case INT32:
+                ndType = NDArrayType.INT32;
+                break;
+            case INT16:
+                ndType = NDArrayType.INT16;
+                break;
+            case INT8:
+                ndType = NDArrayType.INT8;
+                break;
+            case UINT64:
+                ndType = NDArrayType.UINT64;
+                break;
+            case UINT32:
+                ndType = NDArrayType.UINT32;
+                break;
+            case UINT16:
+                ndType = NDArrayType.UINT16;
+                break;
+            case UINT8:
+                ndType = NDArrayType.UINT8;
+                break;
+            case BOOL:
+                ndType = NDArrayType.BOOL;
+                break;
+            case UTF8:
+                ndType = NDArrayType.DOUBLE;
+                break;
+            default:
+                throw new IllegalStateException("NDArrayType " + origType + " not supported");
+        }
+        return ndType;
+    }
+
+    private static BoundingBox deserializeBoundingBox(DataProtoMessage.BoundingBox pbBox) {
+        BoundingBox boundingBox = null;
+        if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.CHW)
+            boundingBox = new BBoxCHW(pbBox.getCx(), pbBox.getCy(), pbBox.getH(), pbBox.getW(),
+                    pbBox.getLabel(), pbBox.getProbability());
+        else if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.XY)
+            boundingBox = new BBoxXY(pbBox.getX0(), pbBox.getX1(), pbBox.getY0(), pbBox.getY1(),
+                    pbBox.getLabel(), pbBox.getProbability());
+        return boundingBox;
+    }
+
+    private static NDArray deserializeNDArray(DataProtoMessage.NDArray pbArray) {
+        List<Long> shapes = pbArray.getShapeList();
+        long[] aShapes = new long[shapes.size()];
+        for (int i = 0; i < shapes.size(); ++i) {
+            aShapes[i] = shapes.get(i);
+        }
+
+        List<ByteString> data = pbArray.getArrayList();
+        DataProtoMessage.NDArray.ValueType type = pbArray.getType();
+        byte[] bytes = data.get(0).toByteArray();
+        ByteBuffer bb = ByteBuffer.wrap(bytes);
+        SerializedNDArray ndArray = new SerializedNDArray(fromPbNDArrayType(type), aShapes, bb);
+        return NDArray.create(ndArray);
+    }
+
+    private static Image deserializeImage(DataProtoMessage.Image pbImage) {
+        if (!StringUtils.equals(pbImage.getType(), PNG))
+            throw new IllegalStateException("Only PNG images supported for now.");
+        List<ByteString> pbData = pbImage.getDataList();
+        byte[] data = pbData.get(0).toByteArray();
+        // TODO: obviously should be working for different formats
+        Png png = new Png(data);
+        return Image.create(png);
+    }
+
     public static DataProtoMessage.DataMap serialize(Map<String,Value> dataMap) {
 
         Map<String, DataProtoMessage.DataScheme> pbItemsMap = new HashMap<>();
@@ -360,13 +447,7 @@ public class ProtobufUtils {
             }
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.BOUNDING_BOX.ordinal()) {
                 DataProtoMessage.BoundingBox pbBox = item.getBoxValue();
-                BoundingBox boundingBox = null;
-                if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.CHW)
-                    boundingBox = new BBoxCHW(pbBox.getCx(), pbBox.getCy(), pbBox.getH(), pbBox.getW(),
-                                            pbBox.getLabel(), pbBox.getProbability());
-                else if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.XY)
-                    boundingBox = new BBoxXY(pbBox.getX0(), pbBox.getX1(), pbBox.getY0(), pbBox.getY1(),
-                                            pbBox.getLabel(), pbBox.getProbability());
+                BoundingBox boundingBox = deserializeBoundingBox(pbBox);
                 retData.put(entry.getKey(), boundingBox);
             }
 
@@ -387,13 +468,8 @@ public class ProtobufUtils {
                     List<DataProtoMessage.Image> pbImages = item.getListValue().getImList().getListList();
                     List<Image> images = new ArrayList<>();
                     for (val pbImage : pbImages) {
-                        if (!StringUtils.equals(pbImage.getType(), PNG))
-                            throw new IllegalStateException("Only PNG images supported for now.");
-                        List<ByteString> pbData = pbImage.getDataList();
-                        byte[] data = pbData.get(0).toByteArray();
-                        // TODO: obviously should be working for different formats
-                        Png png = new Png(data);
-                        images.add(Image.create(png));
+                        Image image = deserializeImage(pbImage);
+                        images.add(image);
                     }
                     retData.putListImage(entry.getKey(), images);
                 }
@@ -401,19 +477,8 @@ public class ProtobufUtils {
                     List<DataProtoMessage.NDArray> pbArrays = item.getListValue().getNdList().getListList();
                     List<NDArray> arrays = new ArrayList<>();
                     for (val pbArray : pbArrays) {
-                        List<Long> shapes = pbArray.getShapeList();
-                        long[] aShapes = new long[shapes.size()];
-                        for (int i = 0; i < shapes.size(); ++i) {
-                            aShapes[i] = shapes.get(i);
-                        }
-
-                        List<ByteString> data = pbArray.getArrayList();
-                        DataProtoMessage.NDArray.ValueType type = pbArray.getType();
-                        byte[] bytes = data.get(0).toByteArray();
-                        ByteBuffer bb = ByteBuffer.wrap(bytes);
-                        // TODO: fix ndarray type
-                        SerializedNDArray ndArray = new SerializedNDArray(NDArrayType.FLOAT, aShapes, bb);
-                        arrays.add(NDArray.create(ndArray));
+                        NDArray ndArray = deserializeNDArray(pbArray);
+                        arrays.add(ndArray);
                     }
                     retData.putListNDArray(entry.getKey(), arrays);
                 }
@@ -421,13 +486,7 @@ public class ProtobufUtils {
                     List<DataProtoMessage.BoundingBox> pbArrays = item.getListValue().getBboxList().getListList();
                     List<BoundingBox> boxes = new ArrayList<>();
                     for (val pbBox : pbArrays) {
-                        BoundingBox boundingBox = null;
-                        if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.CHW)
-                            boundingBox = new BBoxCHW(pbBox.getCx(), pbBox.getCy(), pbBox.getH(), pbBox.getW(),
-                                    pbBox.getLabel(), pbBox.getProbability());
-                        else if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.XY)
-                            boundingBox = new BBoxXY(pbBox.getX0(), pbBox.getX1(), pbBox.getY0(), pbBox.getY1(),
-                                    pbBox.getLabel(), pbBox.getProbability());
+                        BoundingBox boundingBox = deserializeBoundingBox(pbBox);
                         boxes.add(boundingBox);
                     }
                     retData.putListBoundingBox(entry.getKey(), boxes);
@@ -435,27 +494,13 @@ public class ProtobufUtils {
             }
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.IMAGE.ordinal()) {
                 DataProtoMessage.Image pbImage = item.getImValue();
-                List<ByteString> pbData = pbImage.getDataList();
-                byte[] data = pbData.get(0).toByteArray();
-                // TODO: obviously should be working for different formats
-                Png png = new Png(data);
-                retData.put(entry.getKey(), Image.create(png));
+                Image image = deserializeImage(pbImage);
+                retData.put(entry.getKey(), image);
             }
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.NDARRAY.ordinal()) {
                 DataProtoMessage.NDArray pbArray = item.getNdValue();
-                List<Long> shapes = pbArray.getShapeList();
-                long[] aShapes = new long[shapes.size()];
-                for (int i = 0; i < shapes.size(); ++i) {
-                    aShapes[i] = shapes.get(i);
-                }
-
-                List<ByteString> data = pbArray.getArrayList();
-                DataProtoMessage.NDArray.ValueType type = pbArray.getType();
-                byte[] bytes = data.get(0).toByteArray();
-                ByteBuffer bb = ByteBuffer.wrap(bytes);
-                // TODO: fix ndarray type
-                SerializedNDArray ndArray = new SerializedNDArray(NDArrayType.FLOAT, aShapes, bb);
-                retData.put(entry.getKey(), NDArray.create(ndArray));
+                NDArray ndArray = deserializeNDArray(pbArray);
+                retData.put(entry.getKey(), ndArray);
             }
         }
         return retData;
