@@ -30,7 +30,7 @@ public class ND4JNDArray extends BaseNDArray<INDArray> {
 
     @Override
     public NDArrayType type() {
-        return ND4JUtil.convertType(array.dataType());
+        return ND4JUtil.typeNd4jToNDArrayType(array.dataType());
     }
 
     @Override

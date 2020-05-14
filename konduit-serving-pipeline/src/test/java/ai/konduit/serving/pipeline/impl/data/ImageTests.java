@@ -20,9 +20,8 @@ package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.format.ImageConverter;
 import ai.konduit.serving.pipeline.api.format.ImageFactory;
-import ai.konduit.serving.pipeline.impl.data.image.BaseImage;
+import ai.konduit.serving.pipeline.impl.data.image.base.BaseImage;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.image.PngImage;
 import ai.konduit.serving.pipeline.impl.format.JavaImageConverters;

@@ -21,9 +21,7 @@ package ai.konduit.serving.pipeline.impl.format;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.exception.DataLoadingException;
 import ai.konduit.serving.pipeline.api.format.ImageFactory;
-import ai.konduit.serving.pipeline.impl.data.image.BImage;
-import ai.konduit.serving.pipeline.impl.data.image.Png;
-import ai.konduit.serving.pipeline.impl.data.image.PngImage;
+import ai.konduit.serving.pipeline.impl.data.image.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -40,6 +38,7 @@ public class JavaImageFactory implements ImageFactory {
         s.add(File.class);
         s.add(Path.class);
         s.add(Png.class);
+        s.add(Jpeg.class);
         s.add(BufferedImage.class);
     }
 
@@ -64,14 +63,18 @@ public class JavaImageFactory implements ImageFactory {
             } else {
                 f = ((Path)o).toFile();
             }
-            String name = f.getName();
-            if(name.toLowerCase().endsWith(".png")){
+            String name = f.getName().toLowerCase();
+            if(name.endsWith(".png")){
                 return new PngImage(new Png(f));
+            } else if(name.endsWith(".jpg") || name.endsWith(".jpeg")){
+                return new JpegImage(new Jpeg(f));
             }
             throw new DataLoadingException("Unable to create Image object: unable to guess image file format from File" +
                     " path/filename, or format not supported - " + f.getAbsolutePath());
-        } else if(o instanceof Png){
+        } else if(o instanceof Png) {
             return new PngImage((Png) o);
+        } else if(o instanceof Jpeg){
+            return new JpegImage((Jpeg)o);
         } else if(o instanceof BufferedImage){
             return new BImage((BufferedImage) o);
         } else {

@@ -18,37 +18,31 @@
 
 package ai.konduit.serving.data.nd4j.format;
 
+import ai.konduit.serving.data.nd4j.util.ND4JUtil;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.api.format.NDArrayConverter;
 import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import lombok.AllArgsConstructor;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.util.ArrayUtil;
+import org.nd4j.linalg.api.buffer.DataBuffer;
+import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.shape.Shape;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.NDArrayIndex;
+
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 public class ND4JConverters  {
 
 
-    ///Normally we'd just do a lamda here - but we also need to be able to refer to the class name for the service loader
-
-    public static final NDArrayConverter ArrToFloat1 = new Float1ToArrConverter();
-
-    public static final NDArrayConverter ArrToFloat2 = new Float2ToArrConverter();
-
-    public static final NDArrayConverter ArrToFloat3 = new Float3ToArrConverter();
-
-    public static final NDArrayConverter ArrToFloat4 = new Float4ToArrConverter();
-
-
-
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-
     @AllArgsConstructor
     public static abstract class BaseFromNd4jArrConverter<T> implements NDArrayConverter {
-        private final Class<T> clazz;
+        private final Class<T> cTo;
 
         @Override
         public boolean canConvert(NDArray from, NDArrayFormat to) {
@@ -57,7 +51,8 @@ public class ND4JConverters  {
 
         @Override
         public boolean canConvert(NDArray from, Class<?> to) {
-            return clazz == to;
+            boolean ret = INDArray.class.isAssignableFrom(from.get().getClass()) && to.isAssignableFrom(cTo);
+            return ret;
         }
 
         @Override
@@ -132,7 +127,7 @@ public class ND4JConverters  {
 
         @Override
         public boolean canConvert(NDArray from, Class<?> to) {
-            return clazz.isAssignableFrom(from.get().getClass());
+            return clazz.isAssignableFrom(from.get().getClass()) && INDArray.class.isAssignableFrom(to);
         }
 
         @Override
@@ -191,5 +186,88 @@ public class ND4JConverters  {
     }
 
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @AllArgsConstructor
+    public static class SerializedToNd4jArrConverter implements NDArrayConverter {
+        @Override
+        public boolean canConvert(NDArray from, NDArrayFormat to) {
+            return canConvert(from, to.formatType());
+        }
+
+        @Override
+        public boolean canConvert(NDArray from, Class<?> to) {
+            return SerializedNDArray.class.isAssignableFrom(from.get().getClass()) && INDArray.class.isAssignableFrom(to);
+        }
+
+        @Override
+        public <U> U convert(NDArray from, Class<U> to) {
+            Preconditions.checkState(canConvert(from, to), "Unable to convert NDArray to %s", to);
+            SerializedNDArray t = (SerializedNDArray) from.get();
+            INDArray out = convert(t);
+            return (U)out;
+        }
+
+        @Override
+        public <U> U convert(NDArray from, NDArrayFormat<U> to) {
+            Preconditions.checkState(canConvert(from, to), "Unable to convert to format: %s", to);
+            SerializedNDArray f = (SerializedNDArray) from.get();
+            INDArray arr = convert(f);
+            return (U)arr;
+        }
+
+        public INDArray convert(SerializedNDArray from){
+            DataType dt = ND4JUtil.typeNDArrayTypeToNd4j(from.getType());
+            long[] shape = from.getShape();
+            long length = ArrayUtil.prodLong(shape);
+
+            ByteBuffer bb = from.getBuffer();
+            bb.rewind();
+
+            DataBuffer db = Nd4j.createBuffer(bb, dt, (int)length, 0);
+            INDArray arr = Nd4j.create(db, shape);
+            return arr;
+        }
+    }
+
+
+    @AllArgsConstructor
+    public static class Nd4jToSerializedConverter implements NDArrayConverter {
+        @Override
+        public boolean canConvert(NDArray from, NDArrayFormat to) {
+            return canConvert(from, to.formatType());
+        }
+
+        @Override
+        public boolean canConvert(NDArray from, Class<?> to) {
+            return INDArray.class.isAssignableFrom(from.get().getClass()) && SerializedNDArray.class.isAssignableFrom(to);
+        }
+
+        @Override
+        public <U> U convert(NDArray from, Class<U> to) {
+            Preconditions.checkState(canConvert(from, to), "Unable to convert SerializedNDArray to %s", to);
+            INDArray f = (INDArray) from.get();
+            SerializedNDArray t = convert(f);
+            return (U)t;
+        }
+
+        @Override
+        public <U> U convert(NDArray from, NDArrayFormat<U> to) {
+            Preconditions.checkState(canConvert(from, to), "Unable to convert to format: %s", to);
+            INDArray f = (INDArray) from.get();
+            SerializedNDArray t = convert(f);
+            return (U)t;
+        }
+
+        public SerializedNDArray convert(INDArray from){
+            if(from.isView() || from.ordering() != 'c' || !Shape.hasDefaultStridesForShape(from))
+                from = from.dup('c');
+
+            NDArrayType type = ND4JUtil.typeNd4jToNDArrayType(from.dataType());
+            long[] shape = from.shape();
+            ByteBuffer bb = from.data().asNio();
+
+            return new SerializedNDArray(type, shape, bb);
+        }
+    }
 }

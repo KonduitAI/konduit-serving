@@ -20,6 +20,7 @@ import ai.konduit.serving.pipeline.impl.data.wrappers.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -66,6 +67,17 @@ public class JData implements Data {
         if (data.type() != type)
             throw new IllegalStateException(String.format(VALUE_HAS_WRONG_TYPE_TEXT, key, type, data.type()));
         return data;
+    }
+
+    private <T> List<T> listIfFound(String key, ValueType listType){
+        Value lValue = dataMap.get(key);
+        if(lValue == null)
+            throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
+        if(lValue.type() != ValueType.LIST)
+            throw new IllegalStateException(String.format(VALUE_HAS_WRONG_TYPE_TEXT, key, ValueType.LIST, lValue.type()));
+
+        //TODO Check list type
+        return (List<T>) lValue.get();
     }
 
     @Override
@@ -157,6 +169,51 @@ public class JData implements Data {
     }
 
     @Override
+    public List<String> getListString(String key) {
+        return listIfFound(key, ValueType.STRING);
+    }
+
+    @Override
+    public List<Long> getListInt64(String key) {
+        return listIfFound(key, ValueType.INT64);
+    }
+
+    @Override
+    public List<Boolean> getListBoolean(String key) {
+        return listIfFound(key, ValueType.BOOLEAN);
+    }
+
+    @Override
+    public List<byte[]> getListBytes(String key) {
+        return listIfFound(key, ValueType.BYTES);
+    }
+
+    @Override
+    public List<Double> getListDouble(String key) {
+        return listIfFound(key, ValueType.DOUBLE);
+    }
+
+    @Override
+    public List<List<?>> getListData(String key) {
+        return listIfFound(key, ValueType.LIST);
+    }
+
+    @Override
+    public List<Image> getListImage(String key) {
+        return listIfFound(key, ValueType.IMAGE);
+    }
+
+    @Override
+    public List<NDArray> getListNDArray(String key) {
+        return listIfFound(key, ValueType.NDARRAY);
+    }
+
+    @Override
+    public List<BoundingBox> getListBoundingBox(String key) {
+        return listIfFound(key, ValueType.BOUNDING_BOX);
+    }
+
+    @Override
     public void put(String key, String data) {
         Data.assertNotReservedKey(key);
         dataMap.put(key, new StringValue(data));
@@ -206,7 +263,8 @@ public class JData implements Data {
 
     @Override
     public void put(String key, Data data) {
-        Data.assertNotReservedKey(key);
+        if (!StringUtils.equals(key, Data.RESERVED_KEY_METADATA))
+            Data.assertNotReservedKey(key);
         this.dataMap.put(key, new DataValue(data));
     }
 
@@ -270,12 +328,12 @@ public class JData implements Data {
 
     @Override
     public boolean hasMetaData() {
-        return metaData != null;
+        return this.metaData != null;
     }
 
     @Override
     public Data getMetaData() {
-        return metaData;
+        return this.metaData;
     }
 
     @Override

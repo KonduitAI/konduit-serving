@@ -57,7 +57,8 @@ public class PipelineDeserializer extends StdDeserializer<Pipeline> {
                 map.put(s, ps);
             }
 
-            return new GraphPipeline(map);
+//            return new GraphPipeline(map);
+            throw new UnsupportedOperationException("Not yet (re)implemented: Graph pipeline deserialization");
         } else {
             throw new JsonParseException(jp, "Unable to deserialize Pipeline: Invalid JSON/YAML? Pipeline is neither a SequencePipeline or a GraphPipeline");
         }

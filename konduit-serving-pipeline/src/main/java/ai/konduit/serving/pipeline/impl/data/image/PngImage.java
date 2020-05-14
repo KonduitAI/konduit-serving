@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.pipeline.impl.data.image;
 
+import ai.konduit.serving.pipeline.impl.data.image.base.BaseImage;
+
 public class PngImage extends BaseImage<Png> {
     public PngImage(Png image) {
         super(image);
