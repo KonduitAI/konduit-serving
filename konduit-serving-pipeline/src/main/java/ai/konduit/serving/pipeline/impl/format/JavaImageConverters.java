@@ -125,6 +125,17 @@ public class JavaImageConverters {
         }
     }
 
+    public static class BmpToBufferedImageConverter extends BaseToBufferedImageConverter<Bmp> {
+        public BmpToBufferedImageConverter() {
+            super(Bmp.class);
+        }
+    }
+
+    public static class GifToBufferedImageConverter extends BaseToBufferedImageConverter<Gif> {
+        public GifToBufferedImageConverter() {
+            super(Gif.class);
+        }
+    }
 
     public static abstract class BaseBufferedImageToOtherConverter<ToFormat extends BaseImageFile> extends BaseConverter {
         public BaseBufferedImageToOtherConverter(Class<ToFormat> to) {
