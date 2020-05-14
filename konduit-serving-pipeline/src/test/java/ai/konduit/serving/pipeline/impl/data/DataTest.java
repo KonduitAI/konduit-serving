@@ -15,10 +15,11 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.data;
 
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.ValueType;
-import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.*;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import org.apache.commons.compress.utils.Lists;
 import org.junit.Rule;
 import org.junit.Test;
@@ -88,22 +89,6 @@ public class DataTest {
         Data container = JData.singleton(KEY, input);
         assertEquals(input, container.getDouble(KEY), 1e-4);
     }
-
-    /*@Test
-    public void testImageData() {
-        INDArray image = Nd4j.create(1,10,10,20);
-        Image input = new Image(image, 1,1,1);
-        Data container = JData.makeData(KEY, input);
-        assertEquals(input, container.getImage(KEY));
-    }*/
-
-    /*
-    @Test
-    public void testINDArrayData() {
-        INDArray input = Nd4j.rand(10,100, 1024);
-        Data container = JData.makeData(KEY, input);
-        assertEquals(input, container.getNDArray(KEY));
-    }*/
 
     @Test
     public void testIntData() {
@@ -349,4 +334,209 @@ public class DataTest {
 
         assertEquals(origBytes, actualBytes);
     }
+
+    @Test
+    public void testImageSerde() throws IOException {
+        File f = Resources.asFile("data/5_32x32.png");
+        Image i = Image.create(f);
+
+        Data imageData = Data.singleton(KEY, i);
+        File serFile = testDir.newFile();
+        imageData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(imageData.get(KEY), restoredData.get(KEY));
+    }
+
+    @Test
+    public void testNDArraySerde() throws IOException {
+        float[] rawData = {1, 3, 6, 7, 8, 10, 4, 3, 2, 4};
+        long[] shape = {1, 10};
+        NDArray ndArray = NDArray.create(rawData);
+        //SerializedNDArray serializedNDArray = ndArray.getAs(SerializedNDArray.class);
+        Data ndData = Data.singleton(KEY, ndArray);
+        File serFile = testDir.newFile();
+        ndData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(ndData.get(KEY), restoredData.get(KEY));
+    }
+
+    @Test
+    public void testImageListSerde() throws IOException {
+        List<Image> imageList = new ArrayList<>();
+        for (int i = 0; i < 5; ++i) {
+            File f = Resources.asFile("data/5_32x32.png");
+            imageList.add(Image.create(f));
+        }
+
+        Data imageData = Data.singletonList(KEY, imageList, ValueType.IMAGE);
+        File serFile = testDir.newFile();
+        imageData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(imageData.getList(KEY, ValueType.IMAGE),
+                     restoredData.getList(KEY, ValueType.IMAGE));
+    }
+
+    @Test
+    public void testNDArraysListSerde() throws IOException {
+        List<NDArray> arrays = new ArrayList<>();
+        for (int i = 0; i < 5; ++i) {
+            float[] rawData = {1, 3, 6, 7, 8, 10, 4, 3, 2, 4};
+            arrays.add(NDArray.create(rawData));
+        }
+        Data ndData = Data.singletonList(KEY, arrays, ValueType.NDARRAY);
+        File serFile = testDir.newFile();
+        ndData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(ndData.getList(KEY, ValueType.NDARRAY),
+                restoredData.getList(KEY, ValueType.NDARRAY));
+    }
+
+    @Test
+    public void testStringsListSerde() throws IOException {
+        List<String> strData = new ArrayList<>();
+        strData.add("one");
+        strData.add("two");
+        strData.add("three");
+        Data stringsData = Data.singletonList(KEY, strData, ValueType.STRING);
+        File serFile = testDir.newFile();
+        stringsData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(stringsData.getList(KEY, ValueType.STRING),
+                     restoredData.getList(KEY, ValueType.STRING));
+    }
+
+    @Test
+    public void testDoubleListsSerde() throws IOException {
+        List<Double> rawData = new ArrayList<>();
+        rawData.add(1.);
+        rawData.add(20.);
+        rawData.add(50.);
+        rawData.add(0.78767);
+
+        Data doubleData = Data.singletonList(KEY, rawData, ValueType.DOUBLE);
+        File serFile = testDir.newFile();
+        doubleData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(doubleData.getList(KEY, ValueType.DOUBLE),
+                        restoredData.getList(KEY, ValueType.DOUBLE));
+
+    }
+
+    @Test
+    public void testBooleanListsSerde() throws IOException {
+        List<Boolean> rawData = new ArrayList<>();
+        rawData.add(true);
+        rawData.add(false);
+        rawData.add(true);
+        rawData.add(true);
+
+        Data boolData = Data.singletonList(KEY, rawData, ValueType.BOOLEAN);
+        File serFile = testDir.newFile();
+        boolData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(boolData.getList(KEY, ValueType.DOUBLE),
+                restoredData.getList(KEY, ValueType.DOUBLE));
+
+    }
+
+    @Test
+    public void testInt64ListsSerde() throws IOException {
+        List<Long> rawData = new ArrayList<>();
+        for (long l = 0; l < 10000; ++l) {
+            rawData.add(l);
+        }
+
+        Data intData = Data.singletonList(KEY, rawData, ValueType.INT64);
+        File serFile = testDir.newFile();
+        intData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(intData.getList(KEY, ValueType.DOUBLE),
+                restoredData.getList(KEY, ValueType.DOUBLE));
+
+    }
+
+    @Test
+    public void testDataSerde() throws IOException {
+        List<String> strings = new ArrayList<>();
+        strings.add("one");
+        strings.add("two");
+        strings.add("three");
+        strings.add("four");
+
+        final String dataAsValue = "dataAsValue";
+        Data strData = Data.singletonList(KEY, strings, ValueType.STRING);
+        Data wrapppedData = Data.singleton(dataAsValue, strData);
+
+        File serFile = testDir.newFile();
+        wrapppedData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        Data expectedData = (Data)wrapppedData.get(dataAsValue);
+        Data actualData = (Data)restoredData.get(dataAsValue);
+        assertEquals(expectedData, actualData);
+        assertEquals(expectedData.get(KEY), actualData.get(KEY));
+    }
+
+    @Test
+    public void testMetaDataSerde() throws IOException {
+        List<String> strings = new ArrayList<>();
+        strings.add("one");
+        strings.add("two");
+        strings.add("three");
+        strings.add("four");
+
+        Data strData = Data.singletonList(KEY, strings, ValueType.STRING);
+
+        List<Long> numbers = new ArrayList<>();
+        for (long l = 0; l < 100; ++l) {
+            numbers.add(l);
+        }
+        Data numData = Data.singletonList("numData", numbers, ValueType.INT64);
+        strData.setMetaData(numData);
+        assertEquals(numData, strData.getMetaData());
+
+        File serFile = testDir.newFile();
+        strData.save(serFile);
+        Data restoredData = Data.fromFile(serFile);
+        assertEquals(numData, restoredData.getMetaData());
+    }
+
+    @Test
+    public void testBoundingBoxesCHWSerde() throws IOException {
+        BoundingBox boundingBox = new BBoxCHW(1.0, 2.0, 1.0, 2.0, "head", 7.0);
+        Data boxData = Data.singleton(KEY, boundingBox);
+        assertEquals(boundingBox, boxData.get(KEY));
+
+        File newFile = testDir.newFile();
+        boxData.save(newFile);
+        Data restoredData = Data.fromFile(newFile);
+        assertEquals(boxData.get(KEY), restoredData.get(KEY));
+    }
+
+    @Test
+    public void testBoundingBoxesXYSerde() throws IOException {
+        BoundingBox boundingBox = new BBoxXY(1.0, 2.0, 1.0, 2.0, "tail", 3.0);
+        Data boxData = Data.singleton(KEY, boundingBox);
+        assertEquals(boundingBox, boxData.get(KEY));
+
+        File newFile = testDir.newFile();
+        boxData.save(newFile);
+        Data restoredData = Data.fromFile(newFile);
+        assertEquals(boxData.get(KEY), restoredData.get(KEY));
+    }
+
+    @Test
+    public void testBoundingBoxesListSerde() throws IOException {
+        List<BoundingBox> boxes = new ArrayList<>();
+        for (double d = 0; d < 10; ++d) {
+            boxes.add(new BBoxXY(d, d, d+5, d+6, "testArea", 0.7));
+        }
+        Data boxesData = Data.singletonList(KEY, boxes, ValueType.BOUNDING_BOX);
+        File newFile = testDir.newFile();
+        boxesData.save(newFile);
+
+        Data restoredData = Data.fromFile(newFile);
+        assertEquals(boxesData.getList(KEY, ValueType.BOUNDING_BOX),
+                restoredData.getList(KEY, ValueType.BOUNDING_BOX));
+    }
+
 }

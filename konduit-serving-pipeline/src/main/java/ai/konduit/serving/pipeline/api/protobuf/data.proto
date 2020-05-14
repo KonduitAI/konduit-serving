@@ -6,18 +6,20 @@ option java_package = "ai.konduit.serving.pipeline.impl.data.protobuf";
 option java_outer_classname = "DataProtoMessage";
 
 message DataScheme {
-    DataScheme metaData = 2;
     oneof value {
-        string sValue = 3;
-        bytes bValue = 4;
-        int64 iValue = 5;
-        bool boolValue = 6;
-        double doubleValue = 7;
-        List listValue = 8;
-        NDArray ndValue = 9;
-        Image imValue = 10;
+        string sValue = 2;
+        bytes bValue = 3;
+        int64 iValue = 4;
+        bool boolValue = 5;
+        double doubleValue = 6;
+        List listValue = 7;
+        NDArray ndValue = 8;
+        Image imValue = 9;
+        BoundingBox boxValue = 10;
+        DataMap metaData = 11;
     }
-    ValueType type = 11;
+    ValueType listType = 12;
+    ValueType type = 13;
 
     enum ValueType {
         NDARRAY = 0;
@@ -27,8 +29,9 @@ message DataScheme {
         DOUBLE = 4;
         INT64 = 5;
         BOOLEAN = 6;
-        DATA = 7;
-        LIST = 8;
+        BOUNDING_BOX = 7;
+        DATA = 8;
+        LIST = 9;
     }
 }
 
@@ -44,17 +47,30 @@ message BooleanList {
 message DoubleList {
     repeated double list = 1;
 }
+message ImageList {
+    repeated Image list = 1;
+}
+message NDArrayList {
+    repeated NDArray list = 1;
+}
+message BoundingBoxesList {
+    repeated BoundingBox list = 1;
+}
 message List {
     oneof list {
 	   StringList sList = 1;
 	   Int64List iList = 2;
 	   BooleanList bList = 3;
 	   DoubleList dList = 4;
+	   ImageList imList = 5;
+	   NDArrayList ndList = 6;
+	   BoundingBoxesList bboxList = 7;
 	}
 }
 
 message Image {
-    repeated bytes data = 1;
+    string type = 1;
+    repeated bytes data = 2;
 }
 
 message NDArray {
@@ -63,18 +79,44 @@ message NDArray {
     ValueType type = 2;
 
     enum ValueType {
-        FLOAT = 0;
+        DOUBLE = 0;
+        FLOAT = 1;
+        FLOAT16 = 2;
+        BFLOAT16 = 3;
+        INT64 = 4;
+        INT32 = 5;
+        INT16 = 6;
+        INT8 = 7;
+        UINT64 = 8;
+        UINT32 = 9;
+        UINT16 = 10;
+        UINT8 = 11;
+        BOOL = 12;
+        UTF8 = 13;
     }
 }
 
-//message List {
-    //repeated string listStrings = 1;
-    //repeated int64 listInts = 2;
-    //repeated bool listBools = 3;
-    //repeated double listDoubles = 4;
-//}
+message BoundingBox {
+    double x0 = 1;
+    double x1 = 2;
+    double y0 = 3;
+    double y1 = 4;
+    double cx = 5;
+    double cy = 6;
+    double h = 7;
+    double w = 8;
+    string label = 9;
+    double probability = 10;
+    BoxType type = 11;
+
+    enum BoxType {
+        CHW = 0;
+        XY = 1;
+    }
+}
 
 message DataMap {
     map<string, DataScheme> mapItems = 1;
+    map<string, DataScheme> metaData = 2;
 }
 

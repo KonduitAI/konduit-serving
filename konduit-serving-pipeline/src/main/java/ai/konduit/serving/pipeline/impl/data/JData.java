@@ -20,6 +20,7 @@ import ai.konduit.serving.pipeline.impl.data.wrappers.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -262,7 +263,8 @@ public class JData implements Data {
 
     @Override
     public void put(String key, Data data) {
-        Data.assertNotReservedKey(key);
+        if (!StringUtils.equals(key, Data.RESERVED_KEY_METADATA))
+            Data.assertNotReservedKey(key);
         this.dataMap.put(key, new DataValue(data));
     }
 
@@ -326,12 +328,12 @@ public class JData implements Data {
 
     @Override
     public boolean hasMetaData() {
-        return metaData != null;
+        return this.metaData != null;
     }
 
     @Override
     public Data getMetaData() {
-        return metaData;
+        return this.metaData;
     }
 
     @Override
