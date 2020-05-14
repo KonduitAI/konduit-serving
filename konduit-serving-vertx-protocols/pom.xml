@@ -36,11 +36,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>systems</artifactId>
-            <version>${javacpp.version}</version>
-        </dependency>
-        <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-vertx</artifactId>
             <version>${project.version}</version>
@@ -48,6 +43,22 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-unit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>2.4.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

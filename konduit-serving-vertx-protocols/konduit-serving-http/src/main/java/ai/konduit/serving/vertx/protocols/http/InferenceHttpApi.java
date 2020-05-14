@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.vertx.protocols.http.api;
+package ai.konduit.serving.vertx.protocols.http;
 
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -24,11 +24,11 @@ import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
 import lombok.AllArgsConstructor;
+import org.nd4j.common.base.Preconditions;
 
 import java.nio.charset.StandardCharsets;
 
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
-import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM;
 import static io.vertx.core.http.HttpHeaders.ACCEPT;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
@@ -39,8 +39,7 @@ public class InferenceHttpApi {
     PipelineExecutor pipelineExecutor;
 
     private Data extractData(String contentType, RoutingContext ctx) {
-
-        if(APPLICATION_JSON.toString().equals(contentType)) {
+        if(contentType.contains(APPLICATION_JSON.toString())) {
             return Data.fromJson(ctx.getBodyAsString());
         } else {
             return Data.fromBytes(ctx.getBody().getBytes());
@@ -52,12 +51,23 @@ public class InferenceHttpApi {
         String contentType = ctx.request().headers().get(CONTENT_TYPE);
         String accepts = ctx.request().headers().get(ACCEPT);
 
+        Preconditions.checkNotNull(contentType, "Content-Type header should not be null. Possible values are: " +
+                    "[application/json, application/octet-stream]");
+        Preconditions.checkNotNull(accepts, "Accept header should not be null. Possible values are: " +
+                "[application/json, application/octet-stream]");
+
         Data output = pipelineExecutor.exec(context, extractData(contentType, ctx));
 
-        if(APPLICATION_OCTET_STREAM.toString().equals(accepts)) {
-            ctx.response().setStatusCode(200).end(output.toJson(), StandardCharsets.UTF_8.name());
+        if(accepts.contains(APPLICATION_JSON.toString())) {
+            ctx.response()
+                    .setStatusCode(200)
+                    .putHeader(CONTENT_TYPE, accepts)
+                    .end(output.toJson(), StandardCharsets.UTF_8.name());
         } else {
-            ctx.response().setStatusCode(200).end(Buffer.buffer(output.toProtoData().asBytes()));
+            ctx.response()
+                    .setStatusCode(200)
+                    .putHeader(CONTENT_TYPE, accepts)
+                    .end(Buffer.buffer(output.toProtoData().asBytes()));
         }
     }
 }

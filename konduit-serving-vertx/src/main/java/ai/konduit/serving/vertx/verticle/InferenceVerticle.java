@@ -39,7 +39,7 @@ public abstract class InferenceVerticle extends AbstractVerticle {
     public void init(Vertx vertx, Context context) {
         super.init(vertx, context);
 
-        inferenceConfiguration = context.config().mapTo(InferenceConfiguration.class);
+        inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
         pipeline = inferenceConfiguration.getPipeline();
         pipelineExecutor = pipeline.executor();
     }

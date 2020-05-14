@@ -151,7 +151,6 @@ public class ObjectMappers {
         }
     }
 
-
     public static List<JsonSubType> getAllSubtypes(){
 
         ServiceLoader<JsonSubTypesMapping> sl = ServiceLoader.load(JsonSubTypesMapping.class);

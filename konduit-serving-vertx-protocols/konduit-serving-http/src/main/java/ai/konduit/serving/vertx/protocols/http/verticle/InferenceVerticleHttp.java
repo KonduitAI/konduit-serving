@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.vertx.protocols.http.verticle;
 
-import ai.konduit.serving.vertx.protocols.http.api.InferenceHttpApi;
+import ai.konduit.serving.vertx.protocols.http.InferenceHttpApi;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
@@ -29,16 +29,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.SystemUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import org.bytedeco.systems.global.linux;
-import org.bytedeco.systems.global.macosx;
-import org.bytedeco.systems.global.windows;
 
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM;
@@ -85,15 +75,6 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                                     .deploymentOptions()
                                     .setConfig(new JsonObject(inferenceConfiguration.toJson()));
 
-                            int pid = getPid();
-
-                            if(pid != -1) {
-                                saveInspectionDataIfRequired(pid);
-
-                                // Periodically checks for configuration updates and save them.
-                                vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
-                            }
-
                             log.info("Inference server is listening on host: '{}'", inferenceConfiguration.getHost());
                             log.info("Inference server started on port {} with {} pipeline steps", port, pipeline.size());
                             startPromise.complete();
@@ -138,38 +119,5 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                 .handler(inferenceHttpApi::predict);
 
         return inferenceRouter;
-    }
-
-    public static int getPid() throws UnsatisfiedLinkError {
-        if (SystemUtils.IS_OS_WINDOWS) {
-            return windows.GetCurrentProcessId();
-        } else if (SystemUtils.IS_OS_MAC) {
-            return macosx.getpid();
-        } else if (SystemUtils.IS_OS_LINUX){
-            return linux.getpid();
-        } else {
-            return -1;
-        }
-    }
-
-    private void saveInspectionDataIfRequired(int pid) {
-        try {
-            File processConfigFile = new File(DirectoryFetcher.getServersDataDir(), pid + ".data");
-            String inferenceConfigurationJson = ((ContextInternal) context).getDeployment()
-                    .deploymentOptions().getConfig().encodePrettily();
-
-            if(processConfigFile.exists()) {
-                if(!FileUtils.readFileToString(processConfigFile, StandardCharsets.UTF_8).contains(inferenceConfigurationJson)) {
-                    FileUtils.writeStringToFile(processConfigFile, inferenceConfigurationJson, StandardCharsets.UTF_8);
-                }
-            } else {
-                FileUtils.writeStringToFile(processConfigFile, inferenceConfigurationJson, StandardCharsets.UTF_8);
-                log.info("Writing inspection data at '{}' with configuration: \n{}", processConfigFile.getAbsolutePath(),
-                        inferenceConfiguration.toJson());
-            }
-            processConfigFile.deleteOnExit();
-        } catch (IOException exception) {
-            log.error("Unable to save konduit server inspection information", exception);
-        }
     }
 }

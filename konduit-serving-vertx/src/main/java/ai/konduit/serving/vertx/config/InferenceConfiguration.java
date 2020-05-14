@@ -20,18 +20,34 @@ package ai.konduit.serving.vertx.config;
 
 import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class InferenceConfiguration implements Serializable, TextConfig {
 
-    private String host;
-    private int port;
-    private ServerProtocol protocol;
+    @Builder.Default
+    private String host = "localhost";
+    @Builder.Default
+    private int port = 0;
+    @Builder.Default
+    private ServerProtocol protocol = ServerProtocol.HTTP;
 
     private Pipeline pipeline;
+
+    public static InferenceConfiguration fromJson(String json){
+        return ObjectMappers.fromJson(json, InferenceConfiguration.class);
+    }
+
+    public static InferenceConfiguration fromYaml(String yaml){
+        return ObjectMappers.fromYaml(yaml, InferenceConfiguration.class);
+    }
 }
