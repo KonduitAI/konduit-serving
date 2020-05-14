@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.pipeline.impl.data.image;
 
+import ai.konduit.serving.pipeline.impl.data.image.base.BaseImage;
+
 import java.awt.image.BufferedImage;
 
 public class BImage extends BaseImage<BufferedImage> {

@@ -15,7 +15,6 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.api.pipeline;
 
-import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import org.slf4j.Logger;
@@ -43,15 +42,15 @@ public interface PipelineExecutor {
     /**
      * Execute the pipeline on the specified Data instance
      */
-    Data exec(Context context, Data data);
+    Data exec(Data data);
 
     /**
      * Execute the pipeline on all of the specified Data instances
      */
-    default Data[] exec(Context context, Data... data) {
+    default Data[] exec(Data... data) {
         Data[] out = new Data[data.length];
         for (int i = 0; i < data.length; i++) {
-            out[i] = exec(context, data[i]);
+            out[i] = exec(data[i]);
         }
         return out;
     }

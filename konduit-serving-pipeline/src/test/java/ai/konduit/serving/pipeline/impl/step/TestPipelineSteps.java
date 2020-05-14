@@ -46,10 +46,10 @@ public class TestPipelineSteps {
         Data d = Data.singleton("someDouble", 1.0);
         d.put("someKey", "someValue");
 
-        pe.exec(null, d);
+        pe.exec(d);
         assertEquals(1, count1.get());
         assertEquals(1, count2.get());
-        pe.exec(null, d);
+        pe.exec(d);
         assertEquals(2, count1.get());
         assertEquals(2, count2.get());
     }

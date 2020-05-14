@@ -18,40 +18,18 @@
 
 package ai.konduit.serving.pipeline.impl.data.image;
 
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.exception.DataLoadingException;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import org.apache.commons.io.FileUtils;
+import ai.konduit.serving.pipeline.impl.data.image.base.BaseImageFile;
 
-import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
 
-@AllArgsConstructor
-public class Png {
-
-    @Getter
-    private ByteBuffer pngFileBytes;
-    private Integer height;
-    private Integer width;
+public class Png extends BaseImageFile {
 
     public Png(File file) {
         this(file, null, null);
     }
 
     public Png(File file, Integer height, Integer width){
-        try {
-            pngFileBytes = ByteBuffer.wrap(FileUtils.readFileToByteArray(file));
-        } catch (IOException e){
-            throw new DataLoadingException("Unable to load PNG image from file " + file.getAbsolutePath());
-        }
-        this.height = height;
-        this.width = width;
+        super(file, height, width);
     }
 
     public Png(byte[] bytes){
@@ -59,52 +37,11 @@ public class Png {
     }
 
     public Png(byte[] bytes, Integer height, Integer width){
-        this.pngFileBytes = ByteBuffer.wrap(bytes);
-        this.height = height;
-        this.width = width;
+        super(bytes, height, width);
     }
 
-    public int height(){
-        initHW();
-        return height;
-    }
-
-    public int width(){
-        initHW();
-        return width;
-    }
-
-    protected void initHW(){
-        if(height != null && width != null)
-            return;
-        BufferedImage bi = Image.create(this).getAs(BufferedImage.class);
-        height = bi.getHeight();
-        width = bi.getWidth();
-    }
-
-
-    public byte[] getBytes(){
-        if(pngFileBytes.hasArray()){
-            return pngFileBytes.array();
-        } else {
-            byte[] bytes = new byte[pngFileBytes.capacity()];
-            pngFileBytes.position(0);
-            pngFileBytes.get(bytes);
-            return bytes;
-        }
-
-    }
-
-    public void save(File f) throws IOException {
-        FileUtils.writeByteArrayToFile(f, getBytes());
-    }
-
-    public void write(OutputStream os) throws IOException {
-        boolean buffered = os instanceof BufferedOutputStream;
-        if(!buffered)
-            os = new BufferedOutputStream(os);
-        try(OutputStream o = os){
-            o.write(getBytes());
-        }
+    @Override
+    public String formatName() {
+        return "PNG";
     }
 }

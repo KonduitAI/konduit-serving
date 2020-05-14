@@ -23,7 +23,9 @@ import ai.konduit.serving.pipeline.api.exception.DataConversionException;
 import ai.konduit.serving.pipeline.api.exception.DataLoadingException;
 import ai.konduit.serving.pipeline.api.format.ImageConverter;
 import ai.konduit.serving.pipeline.api.format.ImageFormat;
+import ai.konduit.serving.pipeline.impl.data.image.Jpeg;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
+import ai.konduit.serving.pipeline.impl.data.image.base.BaseImageFile;
 import lombok.AllArgsConstructor;
 import org.nd4j.common.base.Preconditions;
 
@@ -91,42 +93,117 @@ public class JavaImageConverters {
         protected abstract <T> T doConversion(Image from, Class<T> to);
     }
 
-    public static class PngToBufferedImageConverter extends BaseConverter {
-
-        public PngToBufferedImageConverter() {
-            super(Png.class, BufferedImage.class);
+    public static abstract class BaseToBufferedImageConverter<F extends BaseImageFile> extends BaseConverter {
+        public BaseToBufferedImageConverter(Class<F> c) {
+            super(c, BufferedImage.class);
         }
 
         @Override
         protected <T> T doConversion(Image from, Class<T> to) {
-            Png png = (Png) from.get();
-            byte[] bytes = png.getBytes();
+            F f = (F) from.get();
+            byte[] bytes = f.getBytes();
             try(ByteArrayInputStream is = new ByteArrayInputStream(bytes)){
                 BufferedImage bi = ImageIO.read(is);
                 return (T) bi;
             } catch (IOException e){
-                throw new DataLoadingException("Error converting PNG to BufferedImage", e);
+                throw new DataLoadingException("Error converting " + cFrom.getClass().getSimpleName() + " to BufferedImage", e);
             }
         }
     }
 
-    public static class BufferedImageToPngConverter extends BaseConverter {
-        public BufferedImageToPngConverter() {
-            super(BufferedImage.class, Png.class);
+    public static class JpegToBufferedImageConverter extends BaseToBufferedImageConverter<Jpeg> {
+        public JpegToBufferedImageConverter() {
+            super(Jpeg.class);
         }
+    }
+
+    public static class PngToBufferedImageConverter extends BaseToBufferedImageConverter<Png> {
+        public PngToBufferedImageConverter() {
+            super(Png.class);
+        }
+    }
+
+
+    public static abstract class BaseBufferedImageToOtherConverter<ToFormat extends BaseImageFile> extends BaseConverter {
+        public BaseBufferedImageToOtherConverter(Class<ToFormat> to) {
+            super(BufferedImage.class, to);
+        }
+
+        protected abstract String formatName();
+
+        protected abstract ToFormat get(byte[] bytes);
 
         @Override
         protected <T> T doConversion(Image from, Class<T> to) {
             BufferedImage bi = (BufferedImage) from.get();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
-                ImageIO.write(bi, "png", os);
+                ImageIO.write(bi, formatName(), os);
             } catch (IOException e){
-                throw new DataConversionException("Error converting BufferedImage to PNG", e);
+                throw new DataConversionException("Error converting BufferedImage to " + formatName(), e);
             }
             byte[] bytes = os.toByteArray();
-            return (T) new Png(bytes);
+            return (T) get(bytes);
         }
     }
 
+    public static class BufferedImageToPngConverter extends BaseBufferedImageToOtherConverter<Png> {
+        public BufferedImageToPngConverter() {
+            super(Png.class);
+        }
+
+        @Override
+        protected String formatName() {
+            return "png";
+        }
+
+        @Override
+        protected Png get(byte[] bytes) {
+            return new Png(bytes);
+        }
+    }
+
+    public static class BufferedImageToJpgConverter extends BaseBufferedImageToOtherConverter<Jpeg> {
+        public BufferedImageToJpgConverter() {
+            super(Jpeg.class);
+        }
+
+        @Override
+        protected String formatName() {
+            return "jpg";
+        }
+
+        @Override
+        protected Jpeg get(byte[] bytes) {
+            return new Jpeg(bytes);
+        }
+    }
+
+
+    public static class JpegToPngImageConverter extends BaseConverter {
+
+        public JpegToPngImageConverter() {
+            super(Jpeg.class, Png.class);
+        }
+
+        @Override
+        protected <T> T doConversion(Image from, Class<T> to) {
+            BufferedImage bi = from.getAs(BufferedImage.class);
+            Png g = Image.create(bi).getAs(Png.class);
+            return (T) g;
+        }
+    }
+
+    public static class PngToJpegConverter extends BaseConverter {
+        public PngToJpegConverter() {
+            super(Png.class, Jpeg.class);
+        }
+
+        @Override
+        protected <T> T doConversion(Image from, Class<T> to) {
+            BufferedImage bi = from.getAs(BufferedImage.class);
+            Jpeg j = Image.create(bi).getAs(Jpeg.class);
+            return (T) j;
+        }
+    }
 }

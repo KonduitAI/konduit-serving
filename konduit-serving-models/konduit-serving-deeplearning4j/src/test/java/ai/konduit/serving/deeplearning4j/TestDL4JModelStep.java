@@ -73,7 +73,7 @@ public class TestDL4JModelStep {
 
             Data d = Data.singleton("in", NDArray.create(arr));
 
-            Data out = e.exec(null, d);
+            Data out = e.exec(d);
             INDArray actual = out.getNDArray(outName).getAs(INDArray.class);
 
             assertEquals(exp, actual);
@@ -81,13 +81,13 @@ public class TestDL4JModelStep {
             String json = p.toJson();
             System.out.println(json);
             Pipeline pJson = Pipeline.fromJson(json);
-            INDArray outJson = pJson.executor().exec(null, d).getNDArray(outName).getAs(INDArray.class);
+            INDArray outJson = pJson.executor().exec(d).getNDArray(outName).getAs(INDArray.class);
             assertEquals(exp, outJson);
 
             String yaml = p.toYaml();
             System.out.println(yaml);
             Pipeline pYaml = Pipeline.fromYaml(yaml);
-            INDArray outYaml = pYaml.executor().exec(null, d).getNDArray(outName).getAs(INDArray.class);
+            INDArray outYaml = pYaml.executor().exec(d).getNDArray(outName).getAs(INDArray.class);
             assertEquals(exp, outYaml);
         }
     }
@@ -115,7 +115,7 @@ public class TestDL4JModelStep {
 
             Data d = Data.singleton("in", NDArray.create(arr));
 
-            Data out = e.exec(null, d);
+            Data out = e.exec(d);
             INDArray actual = out.getNDArray(outName).getAs(INDArray.class);
 
             assertEquals(exp, actual);
@@ -123,12 +123,12 @@ public class TestDL4JModelStep {
 
             String json = p.toJson();
             Pipeline pJson = Pipeline.fromJson(json);
-            INDArray outJson = pJson.executor().exec(null, d).getNDArray(outName).getAs(INDArray.class);
+            INDArray outJson = pJson.executor().exec(d).getNDArray(outName).getAs(INDArray.class);
             assertEquals(exp, outJson);
 
             String yaml = p.toYaml();
             Pipeline pYaml = Pipeline.fromYaml(yaml);
-            INDArray outYaml = pYaml.executor().exec(null, d).getNDArray(outName).getAs(INDArray.class);
+            INDArray outYaml = pYaml.executor().exec(d).getNDArray(outName).getAs(INDArray.class);
             assertEquals(exp, outYaml);
         }
     }
