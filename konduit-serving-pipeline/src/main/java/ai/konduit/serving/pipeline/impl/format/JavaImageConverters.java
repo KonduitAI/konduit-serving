@@ -23,6 +23,8 @@ import ai.konduit.serving.pipeline.api.exception.DataConversionException;
 import ai.konduit.serving.pipeline.api.exception.DataLoadingException;
 import ai.konduit.serving.pipeline.api.format.ImageConverter;
 import ai.konduit.serving.pipeline.api.format.ImageFormat;
+import ai.konduit.serving.pipeline.impl.data.image.Bmp;
+import ai.konduit.serving.pipeline.impl.data.image.Gif;
 import ai.konduit.serving.pipeline.impl.data.image.Jpeg;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.image.base.BaseImageFile;
@@ -179,6 +181,37 @@ public class JavaImageConverters {
         }
     }
 
+    public static class BufferedImageToBmpConverter extends BaseBufferedImageToOtherConverter<Bmp> {
+        public BufferedImageToBmpConverter() {
+            super(Bmp.class);
+        }
+
+        @Override
+        protected String formatName() {
+            return "bmp";
+        }
+
+        @Override
+        protected Bmp get(byte[] bytes) {
+            return new Bmp(bytes);
+        }
+    }
+
+    public static class BufferedImageToGifConverter extends BaseBufferedImageToOtherConverter<Gif> {
+        public BufferedImageToGifConverter() {
+            super(Gif.class);
+        }
+
+        @Override
+        protected String formatName() {
+            return "gif";
+        }
+
+        @Override
+        protected Gif get(byte[] bytes) {
+            return new Gif(bytes);
+        }
+    }
 
     public static class JpegToPngImageConverter extends BaseConverter {
 
@@ -203,6 +236,60 @@ public class JavaImageConverters {
         protected <T> T doConversion(Image from, Class<T> to) {
             BufferedImage bi = from.getAs(BufferedImage.class);
             Jpeg j = Image.create(bi).getAs(Jpeg.class);
+            return (T) j;
+        }
+    }
+
+    public static class BmpToPngImageConverter extends BaseConverter {
+
+        public BmpToPngImageConverter() {
+            super(Bmp.class, Png.class);
+        }
+
+        @Override
+        protected <T> T doConversion(Image from, Class<T> to) {
+            BufferedImage bi = from.getAs(BufferedImage.class);
+            Png g = Image.create(bi).getAs(Png.class);
+            return (T) g;
+        }
+    }
+
+    public static class PngToBmpConverter extends BaseConverter {
+        public PngToBmpConverter() {
+            super(Png.class, Bmp.class);
+        }
+
+        @Override
+        protected <T> T doConversion(Image from, Class<T> to) {
+            BufferedImage bi = from.getAs(BufferedImage.class);
+            Bmp j = Image.create(bi).getAs(Bmp.class);
+            return (T) j;
+        }
+    }
+
+    public static class GifToPngImageConverter extends BaseConverter {
+
+        public GifToPngImageConverter() {
+            super(Gif.class, Png.class);
+        }
+
+        @Override
+        protected <T> T doConversion(Image from, Class<T> to) {
+            BufferedImage bi = from.getAs(BufferedImage.class);
+            Png g = Image.create(bi).getAs(Png.class);
+            return (T) g;
+        }
+    }
+
+    public static class PngToGifConverter extends BaseConverter {
+        public PngToGifConverter() {
+            super(Png.class, Gif.class);
+        }
+
+        @Override
+        protected <T> T doConversion(Image from, Class<T> to) {
+            BufferedImage bi = from.getAs(BufferedImage.class);
+            Gif j = Image.create(bi).getAs(Gif.class);
             return (T) j;
         }
     }
