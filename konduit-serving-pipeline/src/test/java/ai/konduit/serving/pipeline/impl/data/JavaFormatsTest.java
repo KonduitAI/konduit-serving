@@ -38,17 +38,17 @@ public class JavaFormatsTest {
                 float[][].class,
                 float[][][].class,
                 float[][][][].class,
-                float[][][][][].class
-                /*double[].class,
+                float[][][][][].class,
+                double[].class,
                 double[][].class,
                 double[][][].class,
                 double[][][][].class,
-                double[][][][][].class
-                byte[].class,
+                double[][][][][].class,
+                /*byte[].class,
                 byte[][].class,
                 byte[][][].class,
                 byte[][][][].class,
-                byte[][][][][].class,
+                byte[][][][][].class*/
                 short[].class,
                 short[][].class,
                 short[][][].class,
@@ -58,12 +58,12 @@ public class JavaFormatsTest {
                 int[][].class,
                 int[][][].class,
                 int[][][][].class,
-                int[][][][][].class
+                int[][][][][].class,
                 long[].class,
                 long[][].class,
                 long[][][].class,
                 long[][][][].class,
-                long[][][][][].class*/
+                long[][][][][].class
         ));
 
     }
@@ -118,7 +118,7 @@ public class JavaFormatsTest {
         } else if( c == float[][][][][].class){
             float[][][][] f4 = new float[][][][]{{{{1,2},{3,4}},{{5,6},{7,8}}}, {{{9,10},{11,12}},{{13,14},{15,16}}}};
             return new float[][][][][]{f4, f4};
-        } /*else if(c == double[].class){
+        } else if(c == double[].class){
             return new double[]{1,2,3};
         } else if(c == double[][].class){
             return new double[][]{{1,2},{3,4}};
@@ -129,7 +129,7 @@ public class JavaFormatsTest {
         } else if( c == double[][][][][].class){
             double[][][][] f4 = new double[][][][]{{{{1,2},{3,4}},{{5,6},{7,8}}}, {{{9,10},{11,12}},{{13,14},{15,16}}}};
             return new double[][][][][]{f4, f4};
-        } else if(c == byte[].class){
+        } /*else if(c == byte[].class){
             return new byte[]{1,2,3};
         } else if(c == byte[][].class){
             return new byte[][]{{1,2},{3,4}};
@@ -140,7 +140,7 @@ public class JavaFormatsTest {
         } else if( c == byte[][][][][].class){
             byte[][][][] f4 = new byte[][][][]{{{{1,2},{3,4}},{{5,6},{7,8}}}, {{{9,10},{11,12}},{{13,14},{15,16}}}};
             return new byte[][][][][]{f4, f4};
-        } else if(c == short[].class){
+        } */ else if(c == short[].class){
             return new short[]{1,2,3};
         } else if(c == short[][].class){
             return new short[][]{{1,2},{3,4}};
@@ -173,7 +173,7 @@ public class JavaFormatsTest {
         } else if( c == long[][][][][].class){
             long[][][][] f4 = new long[][][][]{{{{1,2},{3,4}},{{5,6},{7,8}}}, {{{9,10},{11,12}},{{13,14},{15,16}}}};
             return new long[][][][][]{f4, f4};
-        }*/
+        }
 
         throw new RuntimeException("Data type not supported for " + c.toString());
     }

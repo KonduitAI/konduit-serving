@@ -20,6 +20,7 @@ package ai.konduit.serving.pipeline.impl.format;
 
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.api.format.NDArrayConverter;
 import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
@@ -236,7 +237,7 @@ public class JavaNDArrayConverters {
             for(long l : shape)
                 prod *= l;
 
-            long bufferLength = prod * 4L;  //Float = 4 bytes per element
+            long bufferLength = prod * 8L;  //Double = 8 bytes per element
             Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java float array - unable to convert to SerializedNDArray");
 
             ByteBuffer bb = ByteBuffer.allocateDirect((int)bufferLength).order(ByteOrder.LITTLE_ENDIAN);
@@ -360,7 +361,7 @@ public class JavaNDArrayConverters {
             ByteBuffer bb = flatten(o);
 
 
-            return (T)new SerializedNDArray(NDArrayType.FLOAT, shape, bb);
+            return (T)new SerializedNDArray(NDArrayType.INT8, shape, bb);
         }
 
         private ByteBuffer flatten(Object o){
@@ -369,28 +370,28 @@ public class JavaNDArrayConverters {
             for(long l : shape)
                 prod *= l;
 
-            long bufferLength = prod * 4L;  //Float = 4 bytes per element
+            long bufferLength = prod * 1L;  //Float = 4 bytes per element
             Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java float array - unable to convert to SerializedNDArray");
 
             ByteBuffer bb = ByteBuffer.allocateDirect((int)bufferLength).order(ByteOrder.LITTLE_ENDIAN);
-            ByteBuffer byteBuffer = bb.asReadOnlyBuffer();
+            //ByteBuffer byteBuffer = bb.asReadOnlyBuffer();
 
             int rank = rank(o);
             switch (rank){
                 case 1:
-                    byteBuffer.put((byte[])o);
+                    bb.put((byte[])o);
                     break;
                 case 2:
-                    put((byte[][])o, byteBuffer);
+                    put((byte[][])o, bb);
                     break;
                 case 3:
-                    put((byte[][][])o, byteBuffer);
+                    put((byte[][][])o, bb);
                     break;
                 case 4:
-                    put((byte[][][][])o, byteBuffer);
+                    put((byte[][][][])o, bb);
                     break;
                 case 5:
-                    put((byte[][][][][])o, byteBuffer);
+                    put((byte[][][][][])o, bb);
                     break;
                 default:
                     throw new IllegalStateException("Unable to convert: " + o.getClass());
@@ -493,7 +494,7 @@ public class JavaNDArrayConverters {
             ByteBuffer bb = flatten(o);
 
 
-            return (T)new SerializedNDArray(NDArrayType.FLOAT, shape, bb);
+            return (T)new SerializedNDArray(NDArrayType.INT16, shape, bb);
         }
 
         private ByteBuffer flatten(Object o){
@@ -532,7 +533,7 @@ public class JavaNDArrayConverters {
         }
 
         private int rank(Object o){
-            if(o instanceof float[]) {
+            if(o instanceof short[]) {
                 return 1;
             } else if(o instanceof short[][]) {
                 return 2;
@@ -635,7 +636,7 @@ public class JavaNDArrayConverters {
             for(long l : shape)
                 prod *= l;
 
-            long bufferLength = prod * 4L;  //Float = 4 bytes per element
+            long bufferLength = prod * 32L;  //Float = 4 bytes per element
             Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java float array - unable to convert to SerializedNDArray");
 
             ByteBuffer bb = ByteBuffer.allocateDirect((int)bufferLength).order(ByteOrder.LITTLE_ENDIAN);
@@ -759,7 +760,7 @@ public class JavaNDArrayConverters {
             ByteBuffer bb = flatten(o);
 
 
-            return (T)new SerializedNDArray(NDArrayType.FLOAT, shape, bb);
+            return (T)new SerializedNDArray(NDArrayType.INT64, shape, bb);
         }
 
         private ByteBuffer flatten(Object o){
@@ -768,7 +769,7 @@ public class JavaNDArrayConverters {
             for(long l : shape)
                 prod *= l;
 
-            long bufferLength = prod * 4L;  //Float = 4 bytes per element
+            long bufferLength = prod * 64L;  //Float = 4 bytes per element
             Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java float array - unable to convert to SerializedNDArray");
 
             ByteBuffer bb = ByteBuffer.allocateDirect((int)bufferLength).order(ByteOrder.LITTLE_ENDIAN);
@@ -884,8 +885,10 @@ public class JavaNDArrayConverters {
             if(arr.getShape().length != rank)
                 return false;
             //TODO do we allow type conversion? Float -> Double etc?
-            return arr.getType() == NDArrayType.FLOAT;
+            return arr.getType() == sourceType();
         }
+
+        abstract protected NDArrayType sourceType();
 
         @Override
         public <T> T convert(NDArray from, Class<T> to) {
@@ -910,6 +913,8 @@ public class JavaNDArrayConverters {
             fb.get(out);
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.FLOAT; }
     }
 
     public static class SerializedToFloat2Converter extends BaseS2FConverter {
@@ -930,6 +935,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.FLOAT; }
     }
 
     public static class SerializedToFloat3Converter extends BaseS2FConverter {
@@ -952,6 +959,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.FLOAT; }
     }
 
     public static class SerializedToFloat4Converter extends BaseS2FConverter {
@@ -976,6 +985,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.FLOAT; }
     }
 
     public static class SerializedToFloat5Converter extends BaseS2FConverter {
@@ -1002,6 +1013,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.FLOAT; }
     }
 
     public static class SerializedToDouble1Converter extends BaseS2FConverter {
@@ -1018,6 +1031,8 @@ public class JavaNDArrayConverters {
             db.get(out);
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.DOUBLE; }
     }
 
     public static class SerializedToDouble2Converter extends BaseS2FConverter {
@@ -1038,6 +1053,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.DOUBLE; }
     }
 
     public static class SerializedToDouble3Converter extends BaseS2FConverter {
@@ -1060,6 +1077,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.DOUBLE; }
     }
 
     public static class SerializedToDouble4Converter extends BaseS2FConverter {
@@ -1084,6 +1103,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.DOUBLE; }
     }
 
     public static class SerializedToDouble5Converter extends BaseS2FConverter {
@@ -1110,6 +1131,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.DOUBLE; }
     }
 
     public static class SerializedToByte1Converter extends BaseS2FConverter {
@@ -1126,6 +1149,8 @@ public class JavaNDArrayConverters {
             byteBuffer.get(out);
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT8; }
     }
 
     public static class SerializedToByte2Converter extends BaseS2FConverter {
@@ -1146,6 +1171,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT8; }
     }
 
     public static class SerializedToByte3Converter extends BaseS2FConverter {
@@ -1168,6 +1195,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT8; }
     }
 
     public static class SerializedToByte4Converter extends BaseS2FConverter {
@@ -1192,6 +1221,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT8; }
     }
 
     public static class SerializedToByte5Converter extends BaseS2FConverter {
@@ -1218,6 +1249,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT8; }
     }
 
     public static class SerializedToShort1Converter extends BaseS2FConverter {
@@ -1234,6 +1267,8 @@ public class JavaNDArrayConverters {
             sb.get(out);
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT16; }
     }
 
     public static class SerializedToShort2Converter extends BaseS2FConverter {
@@ -1254,6 +1289,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT16; }
     }
 
     public static class SerializedToShort3Converter extends BaseS2FConverter {
@@ -1276,6 +1313,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT16; }
     }
 
     public static class SerializedToShort4Converter extends BaseS2FConverter {
@@ -1300,6 +1339,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT16; }
     }
 
     public static class SerializedToShort5Converter extends BaseS2FConverter {
@@ -1326,6 +1367,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT16; }
     }
 
     public static class SerializedToInt1Converter extends BaseS2FConverter {
@@ -1342,11 +1385,13 @@ public class JavaNDArrayConverters {
             ib.get(out);
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT32; }
     }
 
     public static class SerializedToInt2Converter extends BaseS2FConverter {
         public SerializedToInt2Converter() {
-            super(double[][].class, 2);
+            super(int[][].class, 2);
         }
 
         @Override
@@ -1362,6 +1407,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT32; }
     }
 
     public static class SerializedToInt3Converter extends BaseS2FConverter {
@@ -1384,6 +1431,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT32; }
     }
 
     public static class SerializedToInt4Converter extends BaseS2FConverter {
@@ -1408,6 +1457,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT32; }
     }
 
     public static class SerializedToInt5Converter extends BaseS2FConverter {
@@ -1434,6 +1485,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT32; }
     }
 
     public static class SerializedToLong1Converter extends BaseS2FConverter {
@@ -1450,6 +1503,8 @@ public class JavaNDArrayConverters {
             lb.get(out);
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT64; }
     }
 
     public static class SerializedToLong2Converter extends BaseS2FConverter {
@@ -1470,6 +1525,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT64; }
     }
 
     public static class SerializedToLong3Converter extends BaseS2FConverter {
@@ -1492,6 +1549,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT64; }
     }
 
     public static class SerializedToLong4Converter extends BaseS2FConverter {
@@ -1516,6 +1575,8 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT64; }
     }
 
     public static class SerializedToLong5Converter extends BaseS2FConverter {
@@ -1542,5 +1603,7 @@ public class JavaNDArrayConverters {
             }
             return (T) out;
         }
+
+        protected NDArrayType sourceType() { return NDArrayType.INT64; }
     }
 }
