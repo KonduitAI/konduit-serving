@@ -124,7 +124,7 @@ public class ListCommand extends DefaultCommand {
             hostAndPort = String.format("%s:%s", servingConfig.getListenHost(), servingConfig.getHttpPort());
             status = "started";
         } catch (IOException exception) {
-            log.error("Error occurred while reading server configuration file\n", exception);
+            log.debug("Error occurred while reading server configuration file\n", exception);
         }
 
         out.format(printFormat, index, id, getServiceType(line), hostAndPort, pid, status);

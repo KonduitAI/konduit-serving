@@ -115,7 +115,7 @@ def git_clone_konduit(use_https=True, tag=DEFAULT_KONDUIT_TAG):
                            .format(tag), e)
 
 
-def build_jar(operating_sys, spin, chip, cuda_version):
+def build_jar(operating_sys, spin, chip, cuda_version, options):
     """Build the actual JAR, using our mvnw wrapper under the hood."""
 
     if not os.path.exists(KONDUIT_JAR_DIR):
@@ -126,23 +126,26 @@ def build_jar(operating_sys, spin, chip, cuda_version):
 
     # Building the uber-jar file
     try:
+        command = [
+            "python",
+            os.path.join(KONDUIT_SOURCE_DIR, "build_jar.py"),
+            "--os",
+            operating_sys,
+            "--source",
+            KONDUIT_SOURCE_DIR,
+            "--spin",
+            spin,
+            "--chip",
+            chip,
+            "--cuda-version",
+            cuda_version,
+            "--target",
+            KONDUIT_JAR_PATH
+        ]
+        command.extend(["--option {}".format(option) for option in options])
+
         subprocess.call(
-            [
-                "python",
-                os.path.join(KONDUIT_SOURCE_DIR, "build_jar.py"),
-                "--os",
-                operating_sys,
-                "--source",
-                KONDUIT_SOURCE_DIR,
-                "--spin",
-                spin,
-                "--chip",
-                chip,
-                "--cuda-version",
-                cuda_version,
-                "--target",
-                KONDUIT_JAR_PATH
-            ],
+            command,
             shell=sys.platform.startswith("win")
         )
     except Exception as e:
@@ -219,9 +222,14 @@ DEFAULT_KONDUIT_TAG = git_tags[0]  # Assuming the first one in the response is t
     "-cv", "--cuda-version",
     default="10.2",
     show_default=True,
-    help="Specifies the cuda version to compile when `--chip == gpu` architecture" +
-         "which could be cpu, gpu (CUDA) or arm.",
+    help="Specifies the CUDA version to compile when `--chip == gpu`",
     type=click.Choice(["10.0", "10.1", "10.2"])
+)
+@click.option(
+    "-o", "--options",
+    multiple=True,
+    help="Extra java property to add to the build command. Can be used multiple times."
+         "Format: -o <property1.name>=<property1.value>"
 )
 @click.option(
     "-v", "--version",
@@ -235,7 +243,7 @@ DEFAULT_KONDUIT_TAG = git_tags[0]  # Assuming the first one in the response is t
     help="If set, downloads the pre-built jar file instead of building it. "
          "Also works with `--platform`, `--chip`, `--cuda-version`, `--version` and `--spin` options."
 )
-def init(platform, https, tag, spin, chip, cuda_version, version, download):
+def init(platform, https, tag, spin, chip, cuda_version, options, version, download):
     if download:
         if parse(LAST_COMPATIBLE_KONDUIT_VERSION.replace("-SNAPSHOT", "")) < parse(version.replace("-SNAPSHOT", "")):
             print("This version of Python CLI is only compatible with versions <= {}"
@@ -244,4 +252,4 @@ def init(platform, https, tag, spin, chip, cuda_version, version, download):
             download_if_required(get_jar_url(platform, version, spin, chip, cuda_version), KONDUIT_JAR_PATH)
     else:
         git_clone_konduit(https, tag)
-        build_jar(platform, spin, chip, cuda_version)
+        build_jar(platform, spin, chip, cuda_version, options)

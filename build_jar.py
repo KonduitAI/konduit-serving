@@ -62,10 +62,15 @@ if __name__ == "__main__":
         "--cuda-version", "-cv",
         type=str,
         default="10.2",
-        choices=["10.1", "10.2"],
-        help="whether to bundle Python, PMML, both or neither. Python bundling is"
-             + "not encouraged with ARM, and PMML bundling is not encouraged if agpl"
-             + "license is an issue.",
+        choices=["10.0", "10.1", "10.2"],
+        help="Specifies the CUDA version to compile when `--chip == gpu`",
+    )
+
+    parser.add_argument(
+        "--options", "-o",
+        action='append',
+        help="Extra java property to add to the build command. Can be used multiple times."
+             "Format: -o <property1.name>=<property1.value>"
     )
 
     parser.add_argument(
@@ -108,6 +113,14 @@ if __name__ == "__main__":
 
     if args.chip == "gpu":
         command.append("-Dcuda.version={}".format(args.cuda_version))
+
+        if args.cuda_version == "10.0":
+            command.append("-Dcuda.javacpp.version=10.0-7.4-1.5")
+        elif args.cuda_version == "10.1":
+            command.append("-Dcuda.javacpp.version=10.1-7.6-1.5.2")
+
+    for option in args.options:
+        command.append("-D{}".format(option))
 
     command.append("-Denforcer.skip=true")
 
