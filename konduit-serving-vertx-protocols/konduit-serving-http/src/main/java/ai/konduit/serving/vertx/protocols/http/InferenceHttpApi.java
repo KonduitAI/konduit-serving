@@ -35,7 +35,6 @@ import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 @AllArgsConstructor
 public class InferenceHttpApi {
 
-    Context context;
     PipelineExecutor pipelineExecutor;
 
     private Data extractData(String contentType, RoutingContext ctx) {
@@ -56,7 +55,7 @@ public class InferenceHttpApi {
         Preconditions.checkNotNull(accepts, "Accept header should not be null. Possible values are: " +
                 "[application/json, application/octet-stream]");
 
-        Data output = pipelineExecutor.exec(context, extractData(contentType, ctx));
+        Data output = pipelineExecutor.exec(extractData(contentType, ctx));
 
         if(accepts.contains(APPLICATION_JSON.toString())) {
             ctx.response()

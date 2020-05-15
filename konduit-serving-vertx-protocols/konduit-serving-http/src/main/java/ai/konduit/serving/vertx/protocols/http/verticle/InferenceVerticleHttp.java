@@ -86,7 +86,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
     }
 
     public Router createRouter() {
-        InferenceHttpApi inferenceHttpApi = new InferenceHttpApi(pipelineContext, pipelineExecutor);
+        InferenceHttpApi inferenceHttpApi = new InferenceHttpApi(pipelineExecutor);
 
         Router inferenceRouter = Router.router(vertx);
 
@@ -109,7 +109,6 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                             .setStatusCode(500)
                             .end(failureHandlder.failure().toString());
                 });
-
 
         inferenceRouter.post("/predict")
                 .consumes(APPLICATION_JSON.toString())
