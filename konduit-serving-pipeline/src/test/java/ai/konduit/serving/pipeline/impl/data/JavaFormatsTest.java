@@ -44,11 +44,11 @@ public class JavaFormatsTest {
                 double[][][].class,
                 double[][][][].class,
                 double[][][][][].class,
-                /*byte[].class,
+                byte[].class,
                 byte[][].class,
                 byte[][][].class,
                 byte[][][][].class,
-                byte[][][][][].class*/
+                byte[][][][][].class,
                 short[].class,
                 short[][].class,
                 short[][][].class,
@@ -129,7 +129,7 @@ public class JavaFormatsTest {
         } else if( c == double[][][][][].class){
             double[][][][] f4 = new double[][][][]{{{{1,2},{3,4}},{{5,6},{7,8}}}, {{{9,10},{11,12}},{{13,14},{15,16}}}};
             return new double[][][][][]{f4, f4};
-        } /*else if(c == byte[].class){
+        } else if(c == byte[].class){
             return new byte[]{1,2,3};
         } else if(c == byte[][].class){
             return new byte[][]{{1,2},{3,4}};
@@ -140,7 +140,7 @@ public class JavaFormatsTest {
         } else if( c == byte[][][][][].class){
             byte[][][][] f4 = new byte[][][][]{{{{1,2},{3,4}},{{5,6},{7,8}}}, {{{9,10},{11,12}},{{13,14},{15,16}}}};
             return new byte[][][][][]{f4, f4};
-        } */ else if(c == short[].class){
+        } else if(c == short[].class){
             return new short[]{1,2,3};
         } else if(c == short[][].class){
             return new short[][]{{1,2},{3,4}};

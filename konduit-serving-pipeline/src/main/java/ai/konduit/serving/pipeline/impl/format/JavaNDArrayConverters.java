@@ -238,7 +238,7 @@ public class JavaNDArrayConverters {
                 prod *= l;
 
             long bufferLength = prod * 8L;  //Double = 8 bytes per element
-            Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java float array - unable to convert to SerializedNDArray");
+            Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java double array - unable to convert to SerializedNDArray");
 
             ByteBuffer bb = ByteBuffer.allocateDirect((int)bufferLength).order(ByteOrder.LITTLE_ENDIAN);
             DoubleBuffer fb = bb.asDoubleBuffer();
@@ -371,7 +371,7 @@ public class JavaNDArrayConverters {
                 prod *= l;
 
             long bufferLength = prod * 1L;  //Float = 4 bytes per element
-            Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java float array - unable to convert to SerializedNDArray");
+            Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java byte array - unable to convert to SerializedNDArray");
 
             ByteBuffer bb = ByteBuffer.allocateDirect((int)bufferLength).order(ByteOrder.LITTLE_ENDIAN);
             //ByteBuffer byteBuffer = bb.asReadOnlyBuffer();
@@ -504,7 +504,7 @@ public class JavaNDArrayConverters {
                 prod *= l;
 
             long bufferLength = prod * 4L;  //Float = 4 bytes per element
-            Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java float array - unable to convert to SerializedNDArray");
+            Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java short array - unable to convert to SerializedNDArray");
 
             ByteBuffer bb = ByteBuffer.allocateDirect((int)bufferLength).order(ByteOrder.LITTLE_ENDIAN);
             ShortBuffer sb = bb.asShortBuffer();
@@ -637,7 +637,7 @@ public class JavaNDArrayConverters {
                 prod *= l;
 
             long bufferLength = prod * 32L;  //Float = 4 bytes per element
-            Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java float array - unable to convert to SerializedNDArray");
+            Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java int array - unable to convert to SerializedNDArray");
 
             ByteBuffer bb = ByteBuffer.allocateDirect((int)bufferLength).order(ByteOrder.LITTLE_ENDIAN);
             IntBuffer ib = bb.asIntBuffer();
@@ -770,7 +770,7 @@ public class JavaNDArrayConverters {
                 prod *= l;
 
             long bufferLength = prod * 64L;  //Float = 4 bytes per element
-            Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java float array - unable to convert to SerializedNDArray");
+            Preconditions.checkState(prod < Integer.MAX_VALUE, "More than 2 billion bytes in Java long array - unable to convert to SerializedNDArray");
 
             ByteBuffer bb = ByteBuffer.allocateDirect((int)bufferLength).order(ByteOrder.LITTLE_ENDIAN);
             LongBuffer lb = bb.asLongBuffer();
