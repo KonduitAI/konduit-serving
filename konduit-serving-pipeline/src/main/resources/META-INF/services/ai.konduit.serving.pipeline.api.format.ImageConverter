@@ -19,7 +19,15 @@
 ai.konduit.serving.pipeline.impl.format.JavaImageConverters$IdentityConverter
 ai.konduit.serving.pipeline.impl.format.JavaImageConverters$PngToBufferedImageConverter
 ai.konduit.serving.pipeline.impl.format.JavaImageConverters$JpegToBufferedImageConverter
+ai.konduit.serving.pipeline.impl.format.JavaImageConverters$BmpToBufferedImageConverter
+ai.konduit.serving.pipeline.impl.format.JavaImageConverters$GifToBufferedImageConverter
 ai.konduit.serving.pipeline.impl.format.JavaImageConverters$BufferedImageToPngConverter
 ai.konduit.serving.pipeline.impl.format.JavaImageConverters$BufferedImageToJpgConverter
+ai.konduit.serving.pipeline.impl.format.JavaImageConverters$BufferedImageToBmpConverter
+ai.konduit.serving.pipeline.impl.format.JavaImageConverters$BufferedImageToGifConverter
 ai.konduit.serving.pipeline.impl.format.JavaImageConverters$JpegToPngImageConverter
 ai.konduit.serving.pipeline.impl.format.JavaImageConverters$PngToJpegConverter
+ai.konduit.serving.pipeline.impl.format.JavaImageConverters$BmpToPngImageConverter
+ai.konduit.serving.pipeline.impl.format.JavaImageConverters$PngToBmpConverter
+ai.konduit.serving.pipeline.impl.format.JavaImageConverters$GifToPngImageConverter
+ai.konduit.serving.pipeline.impl.format.JavaImageConverters$PngToGifConverter
