@@ -119,8 +119,9 @@ if __name__ == "__main__":
         elif args.cuda_version == "10.1":
             command.append("-Dcuda.javacpp.version=10.1-7.6-1.5.2")
 
-    for option in args.options:
-        command.append("-D{}".format(option))
+    if args.options:
+        for option in args.options:
+            command.append("-D{}".format(option))
 
     command.append("-Denforcer.skip=true")
 

@@ -172,7 +172,7 @@ def get_jar_url(platform, version, spin, chip, cuda_version=None):
                                          tag=DOWNLOAD_TAG,
                                          spin=spin,
                                          chip=chip,
-                                         cuda_version=("-" + cuda_version) if chip == "gpu" else "")
+                                         cuda_version=("-cuda" + cuda_version) if chip == "gpu" else "")
 
 
 git_tags = list(set(get_git_tags()).difference(INCOMPATIBLE_COMPILATION_TAGS))
