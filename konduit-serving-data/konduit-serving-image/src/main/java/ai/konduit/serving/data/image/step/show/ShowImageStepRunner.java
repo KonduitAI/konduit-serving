@@ -60,10 +60,19 @@ public class ShowImageStepRunner implements PipelineStepRunner {
         if(name == null)
             name = tryInferName(data);
 
-        Preconditions.checkState(data.has(name) && data.type(name) == ValueType.IMAGE, "Data does not have image value for name \"%s\" - data keys = %s",
+        boolean isSingle = data.has(name) && data.type(name) == ValueType.IMAGE;
+        boolean isSingleList = data.has(name) && data.type(name) == ValueType.LIST && data.listType(name) == ValueType.IMAGE
+                && data.getListImage(name).size() == 1;
+
+        Preconditions.checkState(isSingle || isSingleList, "Data does not have image value (or size 1 List<Image>) for name \"%s\" - data keys = %s",
                 name, data.keys());
 
-        Image i = data.getImage(name);
+        Image i;
+        if(isSingle){
+            i = data.getImage(name);
+        } else {
+            i = data.getListImage(name).get(0);
+        }
         Frame f = i.getAs(Frame.class);
 
         if(!initialized)
