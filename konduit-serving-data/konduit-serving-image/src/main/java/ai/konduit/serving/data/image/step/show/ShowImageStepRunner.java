@@ -70,7 +70,7 @@ public class ShowImageStepRunner implements PipelineStepRunner {
             init();
 
         canvas.showImage(f);
-        if(step.getWidth() == 0 || step.getHeight() == 0){
+        if(step.getWidth() == null || step.getHeight() == null || step.getWidth() == 0 || step.getHeight() == 0){
             canvas.setCanvasSize(Math.max(MIN_WIDTH, i.width()), Math.max(MIN_HEIGHT, i.height()));
         }
 
@@ -79,7 +79,9 @@ public class ShowImageStepRunner implements PipelineStepRunner {
 
     protected synchronized void init(){
         canvas = new CanvasFrame(step.getDisplayName());
-        canvas.setCanvasSize(step.getWidth(), step.getHeight());
+        int w = (step.getWidth() == null || step.getWidth() == 0) ? MIN_WIDTH : step.getWidth();
+        int h = (step.getHeight() == null || step.getHeight() == 0) ? MIN_HEIGHT : step.getHeight();
+        canvas.setCanvasSize(w, h);
         initialized = true;
     }
 
