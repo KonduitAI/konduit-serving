@@ -23,6 +23,7 @@ import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.draw.DrawBoundingBoxStep;
+import ai.konduit.serving.data.image.step.extract.ExtractBoundingBoxStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep;
@@ -119,6 +120,17 @@ public class TestTensorFlowStep {
                 .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
                 .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
                 .build());
+
+        /*
+        //Crop out the detected face region instead, for visualization
+        //This works, but is a little buggy ATM as there's obviously no image to draw when there's no face, and it
+        // can't yet draw multiple images simultaneously
+        GraphStep drawer = merged.then("drawer", ExtractBoundingBoxStep.builder()
+                .imageName("image")
+                .bboxName("img_bbox")
+                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
+                .build());
+         */
 
         //Show image in Java frame
         GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()

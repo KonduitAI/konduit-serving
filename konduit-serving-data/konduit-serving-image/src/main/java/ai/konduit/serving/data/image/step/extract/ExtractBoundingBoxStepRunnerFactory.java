@@ -16,33 +16,22 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.show;
+package ai.konduit.serving.data.image.step.extract;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import lombok.Builder;
-import lombok.Data;
-import org.nd4j.shade.jackson.annotation.JsonProperty;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import org.nd4j.common.base.Preconditions;
 
-@Data
-@Builder
-public class ShowImagePipelineStep implements PipelineStep {
-
-    @Builder.Default
-    private String imageName = "image";
-    @Builder.Default
-    private String displayName = "Image";
-    @Builder.Default
-    private Integer width = 1280;
-    @Builder.Default
-    private Integer height = 720;
-
-    public ShowImagePipelineStep(@JsonProperty("imageName") String imageName, @JsonProperty("displayName") String displayName,
-                                 @JsonProperty("width") Integer width, @JsonProperty("height") Integer height){
-        this.imageName = imageName;
-        this.displayName = displayName;
-        this.width = width;
-        this.height = height;
+public class ExtractBoundingBoxStepRunnerFactory implements PipelineStepRunnerFactory {
+    @Override
+    public boolean canRun(PipelineStep pipelineStep) {
+        return pipelineStep instanceof ExtractBoundingBoxStep;
     }
 
-
+    @Override
+    public PipelineStepRunner create(PipelineStep pipelineStep) {
+        Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
+        return new ExtractBoundingBoxStepRunner((ExtractBoundingBoxStep) pipelineStep);
+    }
 }
