@@ -45,17 +45,11 @@ public class InferenceHttpApi {
             } else if (contentType.contains(APPLICATION_OCTET_STREAM.toString())) {
                 return Data.fromBytes(ctx.getBody().getBytes());
             } else {
-                KonduitServingHttpException exception = new KonduitServingHttpException(HttpApiErrorCode.INVALID_CONTENT_TYPE_HEADER,
+                throw new KonduitServingHttpException(HttpApiErrorCode.INVALID_CONTENT_TYPE_HEADER,
                         String.format("Invalid Content-Type header %s. Should be one of [application/json, application/octet-stream]", contentType));
-                sendErrorResponse(ctx, exception.getErrorResponse());
-                throw exception;
             }
         } catch (Exception exception) {
-            KonduitServingHttpException konduitServingHttpException =
-                    new KonduitServingHttpException(HttpApiErrorCode.DATA_PARSING_ERROR, exception.toString());
-            sendErrorResponse(ctx, konduitServingHttpException.getErrorResponse());
-
-            throw exception;
+            throw new KonduitServingHttpException(HttpApiErrorCode.DATA_PARSING_ERROR, exception.toString());
         }
     }
 
@@ -65,19 +59,13 @@ public class InferenceHttpApi {
         String accept = ctx.request().headers().get(ACCEPT);
 
         if(Strings.isNullOrEmpty(contentType)) {
-            KonduitServingHttpException exception = new KonduitServingHttpException(HttpApiErrorCode.MISSING_CONTENT_TYPE_HEADER,
+            throw new KonduitServingHttpException(HttpApiErrorCode.MISSING_OR_EMPTY_CONTENT_TYPE_HEADER,
                     "Content-Type header should not be null. Possible values are: [application/json, application/octet-stream]");
-            sendErrorResponse(ctx, exception.getErrorResponse());
-
-            throw exception;
         }
 
         if(Strings.isNullOrEmpty(accept)) {
-            KonduitServingHttpException exception = new KonduitServingHttpException(HttpApiErrorCode.MISSING_ACCEPT_HEADER,
+            throw new KonduitServingHttpException(HttpApiErrorCode.MISSING_OR_EMPTY_ACCEPT_HEADER,
                     "Accept header should not be null. Possible values are: [application/json, application/octet-stream]");
-            sendErrorResponse(ctx, exception.getErrorResponse());
-
-            throw exception;
         }
 
         Data input = extractData(contentType, ctx);
@@ -86,43 +74,22 @@ public class InferenceHttpApi {
         try {
             output = pipelineExecutor.exec(input);
         } catch (Exception exception) {
-            KonduitServingHttpException konduitServingHttpException =
-                    new KonduitServingHttpException(HttpApiErrorCode.PIPELINE_PROCESSING_ERROR, exception.toString());
-            sendErrorResponse(ctx, konduitServingHttpException.getErrorResponse());
-
-            throw exception;
+            throw new KonduitServingHttpException(HttpApiErrorCode.PIPELINE_PROCESSING_ERROR, exception.toString());
         }
 
         if(accept.contains(APPLICATION_JSON.toString())) {
             ctx.response()
                     .setStatusCode(200)
-                    .putHeader(CONTENT_TYPE, accept)
+                    .putHeader(CONTENT_TYPE, APPLICATION_JSON.toString())
                     .end(output.toJson(), StandardCharsets.UTF_8.name());
         } else if(accept.contains(APPLICATION_OCTET_STREAM.toString())) {
             ctx.response()
                     .setStatusCode(200)
-                    .putHeader(CONTENT_TYPE, accept)
+                    .putHeader(CONTENT_TYPE, APPLICATION_OCTET_STREAM.toString())
                     .end(Buffer.buffer(output.toProtoData().asBytes()));
         } else {
-            KonduitServingHttpException exception = new KonduitServingHttpException(HttpApiErrorCode.INVALID_ACCEPT_HEADER,
+            throw new KonduitServingHttpException(HttpApiErrorCode.INVALID_ACCEPT_HEADER,
                     String.format("Invalid Accept header %s. Should be one of [application/json, application/octet-stream]", accept));
-            sendErrorResponse(ctx, exception.getErrorResponse());
-
-            throw exception;
         }
-    }
-
-    private void sendErrorResponse(RoutingContext ctx, ErrorResponse errorResponse) {
-        sendErrorResponse(ctx, errorResponse.getErrorCode(), errorResponse.getErrorMessage());
-    }
-
-    private void sendErrorResponse(RoutingContext ctx, HttpApiErrorCode errorCode, String errorMessage) {
-        ctx.response()
-                .setStatusCode(500)
-                .putHeader(CONTENT_TYPE, APPLICATION_JSON.toString())
-                .end(ObjectMappers.toJson(ErrorResponse.builder()
-                        .errorCode(errorCode)
-                        .errorMessage(errorMessage)
-                        .build()));
     }
 }

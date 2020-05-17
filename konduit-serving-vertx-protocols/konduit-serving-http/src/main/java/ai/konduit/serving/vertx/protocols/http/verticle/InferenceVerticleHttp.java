@@ -18,7 +18,11 @@
 
 package ai.konduit.serving.vertx.protocols.http.verticle;
 
+import ai.konduit.serving.pipeline.util.ObjectMappers;
+import ai.konduit.serving.vertx.protocols.http.api.ErrorResponse;
+import ai.konduit.serving.vertx.protocols.http.api.HttpApiErrorCode;
 import ai.konduit.serving.vertx.protocols.http.api.InferenceHttpApi;
+import ai.konduit.serving.vertx.protocols.http.api.KonduitServingHttpException;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
@@ -27,11 +31,13 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM;
+import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 @Slf4j
 public class InferenceVerticleHttp extends InferenceVerticle {
@@ -94,20 +100,27 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                 .setUploadsDirectory(DirectoryFetcher.getFileUploadsDir().getAbsolutePath())
                 .setDeleteUploadedFilesOnEnd(true)
                 .setMergeFormAttributes(true))
-                .failureHandler(failureHandlder -> {
-                    if (failureHandlder.statusCode() == 404) {
-                        log.warn("404 at route " + failureHandlder.request().path());
-                    } else if (failureHandlder.failed()) {
-                        if (failureHandlder.failure() != null) {
-                            log.error("Request failed with cause ", failureHandlder.failure());
+                .failureHandler(failureHandler -> {
+                    Throwable throwable = failureHandler.failure();
+                    int statusCode = failureHandler.statusCode();
+
+                    if (statusCode == 404) {
+                        log.warn("404 at route " + failureHandler.request().path());
+                    } else if (failureHandler.failed()) {
+                        if (throwable != null) {
+                            log.error("Request failed with cause ", throwable);
                         } else {
                             log.error("Request failed with unknown cause.");
                         }
                     }
 
-                    failureHandlder.response()
-                            .setStatusCode(500)
-                            .end(failureHandlder.failure().toString());
+                    if(throwable instanceof KonduitServingHttpException) {
+                        sendErrorResponse(failureHandler, ((KonduitServingHttpException) throwable).getErrorResponse());
+                    } else {
+                        failureHandler.response()
+                                .setStatusCode(500)
+                                .end(throwable != null ? throwable.toString() : "Internal Server Exception");
+                    }
                 });
 
         inferenceRouter.post("/predict")
@@ -118,5 +131,19 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                 .handler(inferenceHttpApi::predict);
 
         return inferenceRouter;
+    }
+
+    private void sendErrorResponse(RoutingContext ctx, ErrorResponse errorResponse) {
+        sendErrorResponse(ctx, errorResponse.getErrorCode(), errorResponse.getErrorMessage());
+    }
+
+    private void sendErrorResponse(RoutingContext ctx, HttpApiErrorCode errorCode, String errorMessage) {
+        ctx.response()
+                .setStatusCode(500)
+                .putHeader(CONTENT_TYPE, APPLICATION_JSON.toString())
+                .end(ObjectMappers.toJson(ErrorResponse.builder()
+                        .errorCode(errorCode)
+                        .errorMessage(errorMessage)
+                        .build()));
     }
 }

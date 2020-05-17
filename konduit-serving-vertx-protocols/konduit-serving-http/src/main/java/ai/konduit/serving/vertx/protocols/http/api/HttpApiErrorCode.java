@@ -29,7 +29,7 @@ public enum HttpApiErrorCode {
     /**
      * If the requests has no Content-Type header
      */
-    MISSING_CONTENT_TYPE_HEADER,
+    MISSING_OR_EMPTY_CONTENT_TYPE_HEADER,
 
     /**
      * If the "Content-Type" header has an invalid value. Currently it should be either application/json or application/octet-stream
@@ -39,7 +39,7 @@ public enum HttpApiErrorCode {
     /**
      * If the request has no "Accept" header
      */
-    MISSING_ACCEPT_HEADER,
+    MISSING_OR_EMPTY_ACCEPT_HEADER,
 
     /**
      * If the "Accept" header has an invalid value. Currently it should be either application/json or application/octet-stream

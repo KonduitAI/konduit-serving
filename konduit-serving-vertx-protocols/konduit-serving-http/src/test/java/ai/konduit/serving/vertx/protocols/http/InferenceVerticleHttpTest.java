@@ -25,6 +25,7 @@ import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
 import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.InferenceDeploymentResult;
+import ai.konduit.serving.vertx.protocols.http.api.ErrorResponse;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import io.vertx.core.DeploymentOptions;
@@ -35,10 +36,12 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.event.Level;
 
+import static ai.konduit.serving.vertx.protocols.http.api.HttpApiErrorCode.*;
 import static com.jayway.restassured.RestAssured.given;
 
 @RunWith(VertxUnitRunner.class)
@@ -85,6 +88,7 @@ public class InferenceVerticleHttpTest {
                 .andReturn();
 
         testContext.assertEquals(200, response.statusCode());
+        testContext.assertEquals(ContentType.JSON.toString(), response.contentType());
         testContext.assertEquals(input, Data.fromJson(response.asString()));
     }
 
@@ -100,6 +104,7 @@ public class InferenceVerticleHttpTest {
                 .andReturn();
 
         testContext.assertEquals(200, response.statusCode());
+        testContext.assertEquals(ContentType.BINARY.toString(), response.contentType());
         testContext.assertEquals(input, Data.fromBytes(response.asByteArray()));
     }
 
@@ -115,6 +120,7 @@ public class InferenceVerticleHttpTest {
                 .andReturn();
 
         testContext.assertEquals(200, response.statusCode());
+        testContext.assertEquals(ContentType.JSON.toString(), response.contentType());
         testContext.assertEquals(input, Data.fromJson(response.asString()));
     }
 
@@ -130,7 +136,109 @@ public class InferenceVerticleHttpTest {
                 .andReturn();
 
         testContext.assertEquals(200, response.statusCode());
+        testContext.assertEquals(ContentType.BINARY.toString(), response.contentType());
         testContext.assertEquals(input, Data.fromBytes(response.asByteArray()));
+    }
+
+    @Test
+    public void testEmptyOrNullContentTypeHeader(TestContext testContext) {
+        Data input = JData.singleton("key_null_or_empty_content_type_header", false);
+
+        Response response = given().port(inferenceDeploymentResult.getActualPort())
+                .contentType("")
+                .accept(ContentType.BINARY)
+                .body(input.asBytes())
+                .post(PREDICT_ENDPOINT)
+                .andReturn();
+
+        if(response.statusCode() != 415) {
+            testContext.assertEquals(500, response.statusCode());
+            testContext.assertEquals(ContentType.JSON.toString(), response.contentType());
+            testContext.assertEquals(MISSING_OR_EMPTY_CONTENT_TYPE_HEADER.name(), ErrorResponse.fromJson(response.asString()).getErrorCode().name());
+        }
+    }
+
+    @Test
+    public void testEmptyOrNullAcceptHeader(TestContext testContext) {
+        Data input = JData.singleton("key_null_or_empty_accept_header", false);
+
+        Response response = given().port(inferenceDeploymentResult.getActualPort())
+                .contentType(ContentType.BINARY)
+                .accept("") // empty
+                .body(input.asBytes())
+                .post(PREDICT_ENDPOINT)
+                .andReturn();
+
+        testContext.assertEquals(500, response.statusCode());
+        testContext.assertEquals(ContentType.JSON.toString(), response.contentType());
+        testContext.assertEquals(MISSING_OR_EMPTY_ACCEPT_HEADER.name(), ErrorResponse.fromJson(response.asString()).getErrorCode().name());
+    }
+
+    @Test
+    public void testInvalidContentTypeHeader(TestContext testContext) {
+        Data input = JData.singleton("invalid_content_type_header", false);
+
+        Response response = given().port(inferenceDeploymentResult.getActualPort())
+                .contentType(ContentType.TEXT) // invalid
+                .accept(ContentType.BINARY)
+                .body(input.asBytes())
+                .post(PREDICT_ENDPOINT)
+                .andReturn();
+
+        if(response.statusCode() != 415) {
+            testContext.assertEquals(500, response.statusCode());
+            testContext.assertEquals(ContentType.JSON.toString(), response.contentType());
+            testContext.assertEquals(INVALID_CONTENT_TYPE_HEADER.name(), ErrorResponse.fromJson(response.asString()).getErrorCode().name());
+        }
+    }
+
+    @Test
+    public void testInvalidAcceptHeader(TestContext testContext) {
+        Data input = JData.singleton("invalid_accept_header", false);
+
+        Response response = given().port(inferenceDeploymentResult.getActualPort())
+                .contentType(ContentType.BINARY)
+                .accept(ContentType.TEXT) // invalid
+                .body(input.asBytes())
+                .post(PREDICT_ENDPOINT)
+                .andReturn();
+
+        if(response.statusCode() != 406) {
+            testContext.assertEquals(500, response.statusCode());
+            testContext.assertEquals(ContentType.JSON.toString(), response.contentType());
+            testContext.assertEquals(INVALID_ACCEPT_HEADER.name(), ErrorResponse.fromJson(response.asString()).getErrorCode().name());
+        }
+    }
+
+    @Test
+    public void testInvalidData(TestContext testContext) {
+        Response response = given().port(inferenceDeploymentResult.getActualPort())
+                .contentType(ContentType.BINARY)
+                .accept(ContentType.BINARY)
+                .body(new byte[] {0x11, 0x22, 0x33, 0x44}) // invalid data
+                .post(PREDICT_ENDPOINT)
+                .andReturn();
+
+        testContext.assertEquals(500, response.statusCode());
+        testContext.assertEquals(ContentType.JSON.toString(), response.contentType());
+        testContext.assertEquals(DATA_PARSING_ERROR.name(), ErrorResponse.fromJson(response.asString()).getErrorCode().name());
+    }
+
+    @Test
+    @Ignore("Make pipeline execution fail here.") // Todo
+    public void testFailedPipeline(TestContext testContext) {
+        Data input = JData.singleton("invalid_accept_header", false);
+
+        Response response = given().port(inferenceDeploymentResult.getActualPort())
+                .contentType(ContentType.BINARY)
+                .accept(ContentType.BINARY)
+                .body(input.asBytes())
+                .post(PREDICT_ENDPOINT)
+                .andReturn();
+
+        testContext.assertEquals(500, response.statusCode());
+        testContext.assertEquals(ContentType.JSON.toString(), response.contentType());
+        testContext.assertEquals(PIPELINE_PROCESSING_ERROR.name(), ErrorResponse.fromJson(response.asString()).getErrorCode().name());
     }
 
     @AfterClass

@@ -18,8 +18,11 @@
 
 package ai.konduit.serving.vertx.protocols.http.api;
 
+import ai.konduit.serving.pipeline.util.ObjectMappers;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -28,7 +31,13 @@ import java.io.Serializable;
  */
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ErrorResponse implements Serializable {
     private HttpApiErrorCode errorCode;
     private String errorMessage;
+
+    public static ErrorResponse fromJson(String jsonString) {
+        return ObjectMappers.fromJson(jsonString, ErrorResponse.class);
+    }
 }
