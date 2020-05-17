@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.vertx.protocols.http.verticle;
 
-import ai.konduit.serving.vertx.protocols.http.InferenceHttpApi;
+import ai.konduit.serving.vertx.protocols.http.api.InferenceHttpApi;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
