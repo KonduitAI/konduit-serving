@@ -305,7 +305,7 @@ public class TestImageToNDArray {
         return bi;
     }
 
-    public BufferedImage createConstantImageRgb(int h, int w, int red, int green, int blue){
+    public static BufferedImage createConstantImageRgb(int h, int w, int red, int green, int blue){
         BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 
         for( int i=0; i<h; i++){

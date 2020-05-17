@@ -162,6 +162,7 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
         jg.writeArray(shape, 0, shape.length);
 
         ByteBuffer bb = sn.getBuffer();
+        bb.rewind();
         byte[] array;
         if (bb.hasArray()) {
             array = bb.array();

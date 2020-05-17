@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.data.image.serde;
 
+import ai.konduit.serving.data.image.step.draw.DrawBoundingBoxStep;
+import ai.konduit.serving.data.image.step.extract.ExtractBoundingBoxStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.serde.JsonSubType;
@@ -33,6 +35,8 @@ public class ImageJsonSubTypesMapping implements JsonSubTypesMapping {
         List<JsonSubType> l = new ArrayList<>();
         l.add(new JsonSubType("SHOW_IMAGE", ShowImagePipelineStep.class, PipelineStep.class));
         l.add(new JsonSubType("IMAGE_TO_NDARRAY", ImageToNDArrayStep.class, PipelineStep.class));
+        l.add(new JsonSubType("DRAW_BOUNDING_BOX", DrawBoundingBoxStep.class, PipelineStep.class));
+        l.add(new JsonSubType("EXTRACT_BOUNDING_BOX", ExtractBoundingBoxStep.class, PipelineStep.class));
         return l;
     }
 }
