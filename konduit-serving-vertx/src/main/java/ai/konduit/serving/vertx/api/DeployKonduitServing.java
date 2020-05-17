@@ -38,7 +38,7 @@ public class DeployKonduitServing {
     public static final String SERVICE_PREFIX = "konduit";
     public static final String INFERENCE_SERVICE_IDENTIFIER = SERVICE_PREFIX + ":ai.konduit.serving:inference";
 
-    public static void deploy(VertxOptions vertxOptions,
+    public static Vertx deploy(VertxOptions vertxOptions,
                               DeploymentOptions deploymentOptions,
                               InferenceConfiguration inferenceConfiguration,
                               Handler<AsyncResult<InferenceDeploymentResult>> eventHandler) {
@@ -53,16 +53,16 @@ public class DeployKonduitServing {
 
             @Override
             public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
-                    String protocolName = verticleName.substring(verticleName.lastIndexOf(":") + 1);
+                    String protocolName = verticleName.substring(verticleName.lastIndexOf(':') + 1);
 
                     try {
                         switch (ServerProtocol.valueOf(protocolName.toUpperCase())) {
                             case HTTP:
-                                return createVerticleFromClassString("ai.konduit.serving.vertx.protocols.http.verticle.InferenceVerticleHttp");
+                                return createVerticleFromClassName("ai.konduit.serving.vertx.protocols.http.verticle.InferenceVerticleHttp");
                             case GRPC:
-                                return createVerticleFromClassString("ai.konduit.serving.vertx.protocols.grpc.verticle.InferenceVerticleGrpc");
+                                return createVerticleFromClassName("ai.konduit.serving.vertx.protocols.grpc.verticle.InferenceVerticleGrpc");
                             case MQTT:
-                                return createVerticleFromClassString("ai.konduit.serving.vertx.protocols.mqtt.verticle.InferenceVerticleMqtt");
+                                return createVerticleFromClassName("ai.konduit.serving.vertx.protocols.mqtt.verticle.InferenceVerticleMqtt");
                             default:
                                 throw new IllegalStateException(
                                         String.format("Invalid service type %s. Possible values are: %s",
@@ -77,7 +77,7 @@ public class DeployKonduitServing {
                     }
             }
 
-            private Verticle createVerticleFromClassString(String className) throws Exception {
+            private Verticle createVerticleFromClassName(String className) throws Exception {
                 return (Verticle) ClassLoader.getSystemClassLoader()
                         .loadClass(className)
                         .getConstructor().newInstance();
@@ -109,10 +109,13 @@ public class DeployKonduitServing {
 
                     eventHandler.handle(Future.succeededFuture(
                             new InferenceDeploymentResult(
-                                    inferenceDeploymentOptions.getConfig().getInteger("port")
+                                    inferenceDeploymentOptions.getConfig().getInteger("port"),
+                                    handler.result()
                             )));
                 }
             }
         });
+
+        return vertx;
     }
 }

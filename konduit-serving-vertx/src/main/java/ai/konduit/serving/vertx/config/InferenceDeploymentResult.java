@@ -25,4 +25,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class InferenceDeploymentResult {
     private int actualPort;
+    private String deploymentId;
 }
