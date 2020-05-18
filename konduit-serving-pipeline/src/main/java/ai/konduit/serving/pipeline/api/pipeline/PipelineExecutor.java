@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.api.pipeline;
 
+import ai.konduit.serving.pipeline.api.context.ProfilerConfig;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import org.slf4j.Logger;
@@ -76,4 +77,9 @@ public interface PipelineExecutor {
      * Get the logger used by this PipelineExecutor
      */
     Logger getLogger();
+
+    /**
+     * Profiling
+     */
+    void profilerConfig(ProfilerConfig config);
 }
