@@ -26,6 +26,7 @@ import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.InferenceDeploymentResult;
 import ai.konduit.serving.vertx.protocols.http.api.ErrorResponse;
+import ai.konduit.serving.vertx.protocols.http.test.FailureTestingPipelineStep;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import io.vertx.core.DeploymentOptions;
@@ -35,11 +36,13 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.event.Level;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static ai.konduit.serving.vertx.protocols.http.api.HttpApiErrorCode.*;
 import static com.jayway.restassured.RestAssured.given;
@@ -52,12 +55,14 @@ public class InferenceVerticleHttpTest {
     static InferenceConfiguration configuration;
     static Vertx vertx;
     static InferenceDeploymentResult inferenceDeploymentResult;
+    public static AtomicBoolean causeFailure = new AtomicBoolean();
 
     @BeforeClass
     public static void setUp(TestContext testContext) {
         configuration = InferenceConfiguration.builder()
                 .pipeline(SequencePipeline.builder()
                         .add(LoggingPipelineStep.builder().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR).build())
+                        .add(new FailureTestingPipelineStep())
                         .build())
                 .build();
 
@@ -74,6 +79,11 @@ public class InferenceVerticleHttpTest {
                         testContext.fail(handler.cause());
                     }
                 });
+    }
+
+    @Before
+    public void before(){
+        causeFailure.set(false);
     }
 
     @Test
@@ -225,8 +235,8 @@ public class InferenceVerticleHttpTest {
     }
 
     @Test
-    @Ignore("Make pipeline execution fail here.") // Todo
     public void testFailedPipeline(TestContext testContext) {
+        causeFailure.set(true);
         Data input = JData.singleton("invalid_accept_header", false);
 
         Response response = given().port(inferenceDeploymentResult.getActualPort())
@@ -245,4 +255,6 @@ public class InferenceVerticleHttpTest {
     public static void tearDown(TestContext testContext) {
         vertx.close(testContext.asyncAssertSuccess());
     }
+
+
 }

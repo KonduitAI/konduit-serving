@@ -32,10 +32,7 @@ import org.nd4j.shade.jackson.dataformat.yaml.YAMLGenerator;
 import org.nd4j.shade.jackson.datatype.joda.JodaModule;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 
 /**
  * A simple object mapper holder for using one single {@link ObjectMapper} across the whole project.
@@ -43,8 +40,10 @@ import java.util.ServiceLoader;
 @Slf4j
 public class ObjectMappers {
 
-    private static final ObjectMapper jsonMapper = configureMapper(new ObjectMapper());
-    private static final ObjectMapper yamlMapper = configureMapper(new ObjectMapper(new YAMLFactory()
+    private static final Set<JsonSubType> manuallyRegisteredSubtypes = new HashSet<>();
+
+    private static ObjectMapper jsonMapper = configureMapper(new ObjectMapper());
+    private static ObjectMapper yamlMapper = configureMapper(new ObjectMapper(new YAMLFactory()
             .disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)  // For preventing YAML from adding `!<TYPE>` with polymorphic objects
             // and use Jackson's type information mechanism.
     ));
@@ -151,6 +150,21 @@ public class ObjectMappers {
         }
     }
 
+    /**
+     * Register JSON subtypes manually. Mainly used for testing purposes.
+     * In general ServiceLoader should be used for registering JSON subtypes.
+     *
+     * @param subTypes Subtypes to register manually
+     */
+    public static void registerSubtypes(@NonNull List<JsonSubType> subTypes){
+        manuallyRegisteredSubtypes.addAll(subTypes);
+        jsonMapper = configureMapper(new ObjectMapper());
+        yamlMapper = configureMapper(new ObjectMapper(new YAMLFactory()
+                .disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)  // For preventing YAML from adding `!<TYPE>` with polymorphic objects
+                // and use Jackson's type information mechanism.
+        ));
+    }
+
     public static List<JsonSubType> getAllSubtypes(){
 
         ServiceLoader<JsonSubTypesMapping> sl = ServiceLoader.load(JsonSubTypesMapping.class);
@@ -161,6 +175,8 @@ public class ObjectMappers {
             List<JsonSubType> l = m.getSubTypesMapping();
             out.addAll(l);
         }
+
+        out.addAll(manuallyRegisteredSubtypes);
 
         return out;
     }

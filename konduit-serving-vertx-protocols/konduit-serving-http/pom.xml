@@ -35,5 +35,12 @@
             <artifactId>vertx-web</artifactId>
             <version>${vertx-stack.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
