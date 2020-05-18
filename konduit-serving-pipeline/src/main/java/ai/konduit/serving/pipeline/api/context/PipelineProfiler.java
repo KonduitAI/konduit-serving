@@ -20,6 +20,8 @@ public class PipelineProfiler implements Profiler {
     private final BlockingQueue<TraceEvent> writeQueue;
     private final AtomicBoolean writing = new AtomicBoolean(false);
 
+    private long startTime;
+    private long endTime;
 
     public PipelineProfiler(ProfilerConfig profilerConfig) {
         try {
@@ -71,9 +73,12 @@ public class PipelineProfiler implements Profiler {
 
     @Override
     public void eventStart(String key) {
+
+        startTime = System.currentTimeMillis();
+
         TraceEvent event = TraceEvent.builder()
                 .name(key)
-                .timeStampStart(System.currentTimeMillis())
+                .timeStampStart(startTime)
                 .type(TraceEvent.EventType.START)
                 .build();
 
@@ -82,9 +87,11 @@ public class PipelineProfiler implements Profiler {
 
     @Override
     public void eventEnd(String key) {
+        endTime = System.currentTimeMillis();
+
         TraceEvent event = TraceEvent.builder()
                 .name(key)
-                .timeStampEnd(System.currentTimeMillis())
+                .timeStampEnd(endTime)
                 .type(TraceEvent.EventType.END)
                 .build();
 

@@ -11,5 +11,6 @@ import java.nio.file.Path;
 public class ProfilerConfig {
     @Getter
     private Path outputFile;
+    @Getter
     private long splitSize;
 }

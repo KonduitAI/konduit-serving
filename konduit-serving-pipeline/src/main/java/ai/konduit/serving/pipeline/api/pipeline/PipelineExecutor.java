@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.api.pipeline;
 
+import ai.konduit.serving.pipeline.api.context.Profiler;
 import ai.konduit.serving.pipeline.api.context.ProfilerConfig;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
@@ -81,5 +82,5 @@ public interface PipelineExecutor {
     /**
      * Profiling
      */
-    void profilerConfig(ProfilerConfig config);
+    void profilerConfig(Profiler profiler);
 }

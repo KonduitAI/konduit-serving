@@ -16,6 +16,7 @@
 package ai.konduit.serving.pipeline.impl.pipeline;
 
 import ai.konduit.serving.pipeline.api.context.Context;
+import ai.konduit.serving.pipeline.api.context.Profiler;
 import ai.konduit.serving.pipeline.api.context.ProfilerConfig;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -37,7 +38,7 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
 
     private SequencePipeline pipeline;
     private List<PipelineStepRunner> runners;
-    private ProfilerConfig profilerConfig;
+    private Profiler profiler;
 
     public SequencePipelineExecutor(@NonNull SequencePipeline p){
         this.pipeline = p;
@@ -68,7 +69,13 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
         Context ctx = null; //TODO
         Data current = data;
         for(PipelineStepRunner psr : runners){
+            if (profiler.profilerEnabled()) {
+                profiler.eventStart(psr.toString());
+            }
             current = psr.exec(ctx, current);
+            if (profiler.profilerEnabled()) {
+                profiler.eventEnd(psr.toString());
+            }
         }
         return current;
     }
@@ -79,7 +86,7 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
     }
 
     @Override
-    public void profilerConfig(ProfilerConfig config) {
-        this.profilerConfig = config;
+    public void profilerConfig(Profiler profiler) {
+        this.profiler = profiler;
     }
 }

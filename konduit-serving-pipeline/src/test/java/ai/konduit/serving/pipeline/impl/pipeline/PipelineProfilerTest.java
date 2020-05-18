@@ -1,5 +1,7 @@
 package ai.konduit.serving.pipeline.impl.pipeline;
 
+import ai.konduit.serving.pipeline.api.context.PipelineProfiler;
+import ai.konduit.serving.pipeline.api.context.Profiler;
 import ai.konduit.serving.pipeline.api.context.ProfilerConfig;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -37,7 +39,8 @@ public class PipelineProfilerTest {
         File logFile = testDir.newFile();
         ProfilerConfig profilerConfig = new ProfilerConfig();
         profilerConfig.setOutputFile(Paths.get(testDir.newFile().toURI()));
-        pe.profilerConfig(profilerConfig);
+        Profiler profiler = new PipelineProfiler(profilerConfig);
+        pe.profilerConfig(profiler);
         pe.exec(d);
 
         StringBuilder sb = new StringBuilder();
