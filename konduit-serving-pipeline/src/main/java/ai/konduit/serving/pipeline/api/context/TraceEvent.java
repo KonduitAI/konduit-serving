@@ -14,7 +14,6 @@ public class TraceEvent {
         START, END;
     }
     private String name;
-    private long timeStampStart;
-    private long timeStampEnd;
+    private long timeStamp;
     EventType type;
 }

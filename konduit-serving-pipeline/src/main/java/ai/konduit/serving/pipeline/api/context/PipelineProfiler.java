@@ -23,6 +23,8 @@ public class PipelineProfiler implements Profiler {
     private long startTime;
     private long endTime;
 
+    private boolean logActive;
+
     public PipelineProfiler(ProfilerConfig profilerConfig) {
         try {
             this.writer = new BufferedWriter(new FileWriter(profilerConfig.getOutputFile().toString(), false));
@@ -73,12 +75,12 @@ public class PipelineProfiler implements Profiler {
 
     @Override
     public void eventStart(String key) {
-
+        logActive = true;
         startTime = System.currentTimeMillis();
 
         TraceEvent event = TraceEvent.builder()
                 .name(key)
-                .timeStampStart(startTime)
+                .timeStamp(startTime)
                 .type(TraceEvent.EventType.START)
                 .build();
 
@@ -87,14 +89,31 @@ public class PipelineProfiler implements Profiler {
 
     @Override
     public void eventEnd(String key) {
+        if (logActive) {
+            while ((!writeQueue.isEmpty() || writing.get()) && fileWritingThread.isAlive()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            try {
+                writer.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        logActive = false;
         endTime = System.currentTimeMillis();
 
         TraceEvent event = TraceEvent.builder()
                 .name(key)
-                .timeStampEnd(endTime)
+                .timeStamp(endTime)
                 .type(TraceEvent.EventType.END)
                 .build();
 
         writeQueue.add(event);
     }
+
+
 }
