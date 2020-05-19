@@ -14,11 +14,6 @@ public final class GrpcService {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_ai_konduit_serving_ErrorResponse_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_ai_konduit_serving_ErrorResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -30,12 +25,11 @@ public final class GrpcService {
     java.lang.String[] descriptorData = {
       "\n\022grpc-service.proto\022\022ai.konduit.serving" +
       "\0323ai/konduit/serving/pipeline/api/protob" +
-      "uf/data.proto\"8\n\rErrorResponse\022\021\n\terrorC" +
-      "ode\030\001 \001(\t\022\024\n\014errorMessage\030\002 \001(\t2R\n\003Api\022K" +
-      "\n\007predict\022\036.ai.konduit.serving.DataSchem" +
-      "e\032\036.ai.konduit.serving.DataScheme\"\000B<\n+a" +
-      "i.konduit.serving.vertx.protocols.grpc.a" +
-      "piB\013GrpcServiceP\001b\006proto3"
+      "uf/data.proto2X\n\tInference\022K\n\007predict\022\036." +
+      "ai.konduit.serving.DataScheme\032\036.ai.kondu" +
+      "it.serving.DataScheme\"\000B:\n+ai.konduit.se" +
+      "rving.vertx.protocols.grpc.apiB\013GrpcServ" +
+      "iceb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -50,12 +44,6 @@ public final class GrpcService {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.getDescriptor(),
         }, assigner);
-    internal_static_ai_konduit_serving_ErrorResponse_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_ai_konduit_serving_ErrorResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_ai_konduit_serving_ErrorResponse_descriptor,
-        new java.lang.String[] { "ErrorCode", "ErrorMessage", });
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.getDescriptor();
   }
 

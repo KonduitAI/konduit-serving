@@ -20,8 +20,8 @@ package ai.konduit.serving.vertx.protocols.grpc.verticle;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.data.ProtoData;
-import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage;
-import ai.konduit.serving.vertx.protocols.grpc.api.ApiGrpc;
+import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme;
+import ai.konduit.serving.vertx.protocols.grpc.api.InferenceGrpc;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
 import io.grpc.stub.StreamObserver;
 import io.vertx.core.Promise;
@@ -39,12 +39,12 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
 
         VertxServer rpcServer = VertxServerBuilder
                 .forAddress(vertx, inferenceConfiguration.getHost(), inferenceConfiguration.getPort())
-                .addService(new ApiGrpc.ApiImplBase() {
+                .addService(new InferenceGrpc.InferenceImplBase() {
                     @Override
-                    public void predict(DataProtoMessage.DataScheme request, StreamObserver<DataProtoMessage.DataScheme> responseObserver) {
+                    public void predict(DataScheme request, StreamObserver<DataScheme> responseObserver) {
                         try {
                             Data output = pipelineExecutor.exec(ProtoData.fromBytes(request.toByteArray()));
-                            responseObserver.onNext(DataProtoMessage.DataScheme.parseFrom(output.asBytes()));
+                            responseObserver.onNext(DataScheme.parseFrom(output.asBytes()));
                             responseObserver.onCompleted();
                         } catch (Throwable throwable) {
                             responseObserver.onError(throwable);

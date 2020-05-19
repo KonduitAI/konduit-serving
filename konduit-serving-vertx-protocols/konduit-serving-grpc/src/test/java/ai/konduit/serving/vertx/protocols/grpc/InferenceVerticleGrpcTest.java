@@ -20,14 +20,14 @@ package ai.konduit.serving.vertx.protocols.grpc;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.data.JData;
-import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage;
+import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
 import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.InferenceDeploymentResult;
 import ai.konduit.serving.vertx.config.ServerProtocol;
-import ai.konduit.serving.vertx.protocols.grpc.api.ApiGrpc;
+import ai.konduit.serving.vertx.protocols.grpc.api.InferenceGrpc;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.ManagedChannel;
 import io.vertx.core.DeploymentOptions;
@@ -43,15 +43,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.event.Level;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 @RunWith(VertxUnitRunner.class)
 public class InferenceVerticleGrpcTest {
 
     static InferenceConfiguration configuration;
     static Vertx vertx;
     static InferenceDeploymentResult inferenceDeploymentResult;
-    public static AtomicBoolean causeFailure = new AtomicBoolean();
 
     @BeforeClass
     public static void setUp(TestContext testContext) {
@@ -85,10 +82,10 @@ public class InferenceVerticleGrpcTest {
                 .build();
 
         // Get a stub to use for interacting with the remote service
-        ApiGrpc.ApiVertxStub stub = ApiGrpc.newVertxStub(channel);
+        InferenceGrpc.InferenceVertxStub stub = InferenceGrpc.newVertxStub(channel);
 
         Data input = JData.singleton("key", "value");
-        DataProtoMessage.DataScheme request = DataProtoMessage.DataScheme.parseFrom(input.asBytes());
+        DataScheme request = DataScheme.parseFrom(input.asBytes());
 
         // Call the remote service
         stub.predict(request, ar -> {

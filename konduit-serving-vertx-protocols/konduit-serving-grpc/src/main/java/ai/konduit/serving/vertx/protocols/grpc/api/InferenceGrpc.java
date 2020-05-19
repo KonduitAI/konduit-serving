@@ -23,9 +23,9 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 @javax.annotation.Generated(
     value = "by gRPC proto compiler (version 1.20.0)",
     comments = "Source: grpc-service.proto")
-public final class ApiGrpc {
+public final class InferenceGrpc {
 
-  private ApiGrpc() {}
+  private InferenceGrpc() {}
 
   private static <T> io.grpc.stub.StreamObserver<T> toObserver(final io.vertx.core.Handler<io.vertx.core.AsyncResult<T>> handler) {
     return new io.grpc.stub.StreamObserver<T>() {
@@ -56,7 +56,7 @@ public final class ApiGrpc {
     };
   }
 
-  public static final String SERVICE_NAME = "ai.konduit.serving.Api";
+  public static final String SERVICE_NAME = "ai.konduit.serving.Inference";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme,
@@ -65,20 +65,20 @@ public final class ApiGrpc {
   public static io.grpc.MethodDescriptor<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme,
       ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getPredictMethod() {
     io.grpc.MethodDescriptor<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getPredictMethod;
-    if ((getPredictMethod = ApiGrpc.getPredictMethod) == null) {
-      synchronized (ApiGrpc.class) {
-        if ((getPredictMethod = ApiGrpc.getPredictMethod) == null) {
-          ApiGrpc.getPredictMethod = getPredictMethod = 
+    if ((getPredictMethod = InferenceGrpc.getPredictMethod) == null) {
+      synchronized (InferenceGrpc.class) {
+        if ((getPredictMethod = InferenceGrpc.getPredictMethod) == null) {
+          InferenceGrpc.getPredictMethod = getPredictMethod = 
               io.grpc.MethodDescriptor.<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "ai.konduit.serving.Api", "predict"))
+                  "ai.konduit.serving.Inference", "predict"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.getDefaultInstance()))
-                  .setSchemaDescriptor(new ApiMethodDescriptorSupplier("predict"))
+                  .setSchemaDescriptor(new InferenceMethodDescriptorSupplier("predict"))
                   .build();
           }
         }
@@ -89,31 +89,31 @@ public final class ApiGrpc {
   /**
    * Creates a new async stub that supports all call types for the service
    */
-  public static ApiStub newStub(io.grpc.Channel channel) {
-    return new ApiStub(channel);
+  public static InferenceStub newStub(io.grpc.Channel channel) {
+    return new InferenceStub(channel);
   }
 
   /**
    * Creates a new blocking-style stub that supports unary and streaming output calls on the service
    */
-  public static ApiBlockingStub newBlockingStub(
+  public static InferenceBlockingStub newBlockingStub(
       io.grpc.Channel channel) {
-    return new ApiBlockingStub(channel);
+    return new InferenceBlockingStub(channel);
   }
 
   /**
    * Creates a new ListenableFuture-style stub that supports unary calls on the service
    */
-  public static ApiFutureStub newFutureStub(
+  public static InferenceFutureStub newFutureStub(
       io.grpc.Channel channel) {
-    return new ApiFutureStub(channel);
+    return new InferenceFutureStub(channel);
   }
 
   /**
    * Creates a new vertx stub that supports all call types for the service
    */
-  public static ApiVertxStub newVertxStub(io.grpc.Channel channel) {
-    return new ApiVertxStub(channel);
+  public static InferenceVertxStub newVertxStub(io.grpc.Channel channel) {
+    return new InferenceVertxStub(channel);
   }
 
   /**
@@ -121,7 +121,7 @@ public final class ApiGrpc {
    * The main grpc service definition.
    * </pre>
    */
-  public static abstract class ApiImplBase implements io.grpc.BindableService {
+  public static abstract class InferenceImplBase implements io.grpc.BindableService {
 
     /**
      * <pre>
@@ -151,20 +151,20 @@ public final class ApiGrpc {
    * The main grpc service definition.
    * </pre>
    */
-  public static final class ApiStub extends io.grpc.stub.AbstractStub<ApiStub> {
-    public ApiStub(io.grpc.Channel channel) {
+  public static final class InferenceStub extends io.grpc.stub.AbstractStub<InferenceStub> {
+    public InferenceStub(io.grpc.Channel channel) {
       super(channel);
     }
 
-    public ApiStub(io.grpc.Channel channel,
+    public InferenceStub(io.grpc.Channel channel,
         io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected ApiStub build(io.grpc.Channel channel,
+    protected InferenceStub build(io.grpc.Channel channel,
         io.grpc.CallOptions callOptions) {
-      return new ApiStub(channel, callOptions);
+      return new InferenceStub(channel, callOptions);
     }
 
     /**
@@ -184,20 +184,20 @@ public final class ApiGrpc {
    * The main grpc service definition.
    * </pre>
    */
-  public static final class ApiBlockingStub extends io.grpc.stub.AbstractStub<ApiBlockingStub> {
-    public ApiBlockingStub(io.grpc.Channel channel) {
+  public static final class InferenceBlockingStub extends io.grpc.stub.AbstractStub<InferenceBlockingStub> {
+    public InferenceBlockingStub(io.grpc.Channel channel) {
       super(channel);
     }
 
-    public ApiBlockingStub(io.grpc.Channel channel,
+    public InferenceBlockingStub(io.grpc.Channel channel,
         io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected ApiBlockingStub build(io.grpc.Channel channel,
+    protected InferenceBlockingStub build(io.grpc.Channel channel,
         io.grpc.CallOptions callOptions) {
-      return new ApiBlockingStub(channel, callOptions);
+      return new InferenceBlockingStub(channel, callOptions);
     }
 
     /**
@@ -216,20 +216,20 @@ public final class ApiGrpc {
    * The main grpc service definition.
    * </pre>
    */
-  public static final class ApiFutureStub extends io.grpc.stub.AbstractStub<ApiFutureStub> {
-    public ApiFutureStub(io.grpc.Channel channel) {
+  public static final class InferenceFutureStub extends io.grpc.stub.AbstractStub<InferenceFutureStub> {
+    public InferenceFutureStub(io.grpc.Channel channel) {
       super(channel);
     }
 
-    public ApiFutureStub(io.grpc.Channel channel,
+    public InferenceFutureStub(io.grpc.Channel channel,
         io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected ApiFutureStub build(io.grpc.Channel channel,
+    protected InferenceFutureStub build(io.grpc.Channel channel,
         io.grpc.CallOptions callOptions) {
-      return new ApiFutureStub(channel, callOptions);
+      return new InferenceFutureStub(channel, callOptions);
     }
 
     /**
@@ -249,7 +249,7 @@ public final class ApiGrpc {
    * The main grpc service definition.
    * </pre>
    */
-  public static abstract class ApiVertxImplBase implements io.grpc.BindableService {
+  public static abstract class InferenceVertxImplBase implements io.grpc.BindableService {
 
     /**
      * <pre>
@@ -258,7 +258,7 @@ public final class ApiGrpc {
      */
     public void predict(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme request,
         io.vertx.core.Promise<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> response) {
-      asyncUnimplementedUnaryCall(getPredictMethod(), ApiGrpc.toObserver(response));
+      asyncUnimplementedUnaryCall(getPredictMethod(), InferenceGrpc.toObserver(response));
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -279,20 +279,20 @@ public final class ApiGrpc {
    * The main grpc service definition.
    * </pre>
    */
-  public static final class ApiVertxStub extends io.grpc.stub.AbstractStub<ApiVertxStub> {
-    public ApiVertxStub(io.grpc.Channel channel) {
+  public static final class InferenceVertxStub extends io.grpc.stub.AbstractStub<InferenceVertxStub> {
+    public InferenceVertxStub(io.grpc.Channel channel) {
       super(channel);
     }
 
-    public ApiVertxStub(io.grpc.Channel channel,
+    public InferenceVertxStub(io.grpc.Channel channel,
         io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected ApiVertxStub build(io.grpc.Channel channel,
+    protected InferenceVertxStub build(io.grpc.Channel channel,
         io.grpc.CallOptions callOptions) {
-      return new ApiVertxStub(channel, callOptions);
+      return new InferenceVertxStub(channel, callOptions);
     }
 
     /**
@@ -303,7 +303,7 @@ public final class ApiGrpc {
     public void predict(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme request,
         io.vertx.core.Handler<io.vertx.core.AsyncResult<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme>> response) {
       asyncUnaryCall(
-          getChannel().newCall(getPredictMethod(), getCallOptions()), request, ApiGrpc.toObserver(response));
+          getChannel().newCall(getPredictMethod(), getCallOptions()), request, InferenceGrpc.toObserver(response));
     }
   }
 
@@ -314,10 +314,10 @@ public final class ApiGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final ApiImplBase serviceImpl;
+    private final InferenceImplBase serviceImpl;
     private final int methodId;
 
-    MethodHandlers(ApiImplBase serviceImpl, int methodId) {
+    MethodHandlers(InferenceImplBase serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -351,10 +351,10 @@ public final class ApiGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final ApiVertxImplBase serviceImpl;
+    private final InferenceVertxImplBase serviceImpl;
     private final int methodId;
 
-    VertxMethodHandlers(ApiVertxImplBase serviceImpl, int methodId) {
+    VertxMethodHandlers(InferenceVertxImplBase serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -390,9 +390,9 @@ public final class ApiGrpc {
     }
   }
 
-  private static abstract class ApiBaseDescriptorSupplier
+  private static abstract class InferenceBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
-    ApiBaseDescriptorSupplier() {}
+    InferenceBaseDescriptorSupplier() {}
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
@@ -401,21 +401,21 @@ public final class ApiGrpc {
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.ServiceDescriptor getServiceDescriptor() {
-      return getFileDescriptor().findServiceByName("Api");
+      return getFileDescriptor().findServiceByName("Inference");
     }
   }
 
-  private static final class ApiFileDescriptorSupplier
-      extends ApiBaseDescriptorSupplier {
-    ApiFileDescriptorSupplier() {}
+  private static final class InferenceFileDescriptorSupplier
+      extends InferenceBaseDescriptorSupplier {
+    InferenceFileDescriptorSupplier() {}
   }
 
-  private static final class ApiMethodDescriptorSupplier
-      extends ApiBaseDescriptorSupplier
+  private static final class InferenceMethodDescriptorSupplier
+      extends InferenceBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
     private final String methodName;
 
-    ApiMethodDescriptorSupplier(String methodName) {
+    InferenceMethodDescriptorSupplier(String methodName) {
       this.methodName = methodName;
     }
 
@@ -430,11 +430,11 @@ public final class ApiGrpc {
   public static io.grpc.ServiceDescriptor getServiceDescriptor() {
     io.grpc.ServiceDescriptor result = serviceDescriptor;
     if (result == null) {
-      synchronized (ApiGrpc.class) {
+      synchronized (InferenceGrpc.class) {
         result = serviceDescriptor;
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
-              .setSchemaDescriptor(new ApiFileDescriptorSupplier())
+              .setSchemaDescriptor(new InferenceFileDescriptorSupplier())
               .addMethod(getPredictMethod())
               .build();
         }
