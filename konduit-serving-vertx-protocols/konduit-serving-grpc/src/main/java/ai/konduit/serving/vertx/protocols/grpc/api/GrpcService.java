@@ -31,19 +31,11 @@ public final class GrpcService {
       "rving.vertx.protocols.grpc.apiB\013GrpcServ" +
       "iceb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.getDescriptor(),
-        }, assigner);
+        });
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.getDescriptor();
   }
 
