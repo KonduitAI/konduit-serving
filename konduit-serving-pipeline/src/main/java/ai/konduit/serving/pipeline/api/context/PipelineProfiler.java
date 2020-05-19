@@ -1,13 +1,31 @@
+/* ******************************************************************************
+ * Copyright (c) 2020 Konduit K.K.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Apache License, Version 2.0 which is available at
+ * https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ******************************************************************************/
 package ai.konduit.serving.pipeline.api.context;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.nd4j.common.io.StringUtils;
 import org.nd4j.common.primitives.AtomicBoolean;
 import org.nd4j.shade.jackson.databind.ObjectMapper;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -22,10 +40,43 @@ public class PipelineProfiler implements Profiler {
 
     private long startTime;
     private long endTime;
+    private final long pid;
+    private final long tid;
 
+    @Getter
     private boolean logActive;
+    private ProfilerConfig profilerConfig;
+
+    private long getProcessId() {
+        // Note: may fail in some JVM implementations
+        // therefore fallback has to be provided
+
+        // something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
+        final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+        final int index = jvmName.indexOf('@');
+
+        if (index < 1) {
+            // part before '@' empty (index = 0) / '@' not found (index = -1)
+            return 0;
+        }
+
+        try {
+            return Long.parseLong(jvmName.substring(0, index));
+        } catch (NumberFormatException e) {
+            // ignore
+        }
+        return 0;
+    }
+
+    private void fileSizeGuard() throws IOException {
+        if (Files.size(profilerConfig.getOutputFile()) > profilerConfig.getSplitSize()) {
+            Files.delete(profilerConfig.getOutputFile());
+            Files.createFile(profilerConfig.getOutputFile());
+        }
+    }
 
     public PipelineProfiler(ProfilerConfig profilerConfig) {
+        this.profilerConfig = profilerConfig;
         try {
             this.writer = new BufferedWriter(new FileWriter(profilerConfig.getOutputFile().toString(), false));
             this.writer.write("[");     //JSON array open (array close is optional for Chrome profiler format)
@@ -34,6 +85,8 @@ public class PipelineProfiler implements Profiler {
         }
 
         this.json = new ObjectMapper();
+        this.pid = getProcessId();
+        this.tid = Thread.currentThread().getId();
 
         //Set up a queue so file access doesn't add latency to the execution thread
         writeQueue =
@@ -76,12 +129,12 @@ public class PipelineProfiler implements Profiler {
     @Override
     public void eventStart(String key) {
         logActive = true;
-        startTime = System.currentTimeMillis();
+        startTime = System.nanoTime() / 1000;
 
         TraceEvent event = TraceEvent.builder()
                 .name(key)
-                .timeStamp(startTime)
-                .type(TraceEvent.EventType.START)
+                .ts(startTime)
+                .ph(TraceEvent.EventType.START)
                 .build();
 
         writeQueue.add(event);
@@ -104,16 +157,22 @@ public class PipelineProfiler implements Profiler {
             }
         }
         logActive = false;
-        endTime = System.currentTimeMillis();
+        endTime = System.nanoTime() / 1000;
 
         TraceEvent event = TraceEvent.builder()
                 .name(key)
-                .timeStamp(endTime)
-                .type(TraceEvent.EventType.END)
+                .ts(endTime)
+                .ph(TraceEvent.EventType.END)
                 .build();
 
         writeQueue.add(event);
     }
 
-
+    public TraceEvent[] readEvents(File file) throws IOException {
+        String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        if (StringUtils.isEmpty(content))
+            return new TraceEvent[0];
+        TraceEvent[] events = json.readValue(content, TraceEvent[].class);
+        return events;
+    }
 }

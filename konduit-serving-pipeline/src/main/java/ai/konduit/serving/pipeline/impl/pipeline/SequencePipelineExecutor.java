@@ -16,6 +16,7 @@
 package ai.konduit.serving.pipeline.impl.pipeline;
 
 import ai.konduit.serving.pipeline.api.context.Context;
+import ai.konduit.serving.pipeline.api.context.PipelineProfiler;
 import ai.konduit.serving.pipeline.api.context.Profiler;
 import ai.konduit.serving.pipeline.api.context.ProfilerConfig;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -27,6 +28,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.nd4j.common.base.Preconditions;
 import org.slf4j.Logger;
 
@@ -68,14 +70,19 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
     public Data exec(Data data) {
         Context ctx = null; //TODO
         Data current = data;
+        String saved = StringUtils.EMPTY;
         for(PipelineStepRunner psr : runners){
             if (profiler.profilerEnabled()) {
-                profiler.eventStart(psr.toString());
+                saved = psr.name();
+                profiler.eventStart(saved);
             }
             current = psr.exec(ctx, current);
             if (profiler.profilerEnabled()) {
-                profiler.eventEnd(psr.toString());
+                profiler.eventEnd(psr.name());
             }
+        }
+        if (profiler.profilerEnabled() && ((PipelineProfiler)profiler).isLogActive()) {
+            profiler.eventEnd(saved);
         }
         return current;
     }
