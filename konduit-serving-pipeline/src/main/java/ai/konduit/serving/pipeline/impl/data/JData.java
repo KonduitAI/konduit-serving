@@ -528,4 +528,11 @@ public class JData implements Data {
             return instance;
         }
     }
+
+    @Override
+    public Data clone(){
+        Data ret = empty();
+        ret.merge(true, this);
+        return ret;
+    }
 }

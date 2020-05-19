@@ -19,6 +19,7 @@
 package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
+import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -35,38 +36,33 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestBoundingBoxStep {
+public class TestGridSteps {
 
     @Test @Ignore   //To be run manually
-    public void testBBox() throws Exception {
+    public void testDrawGridStep() throws Exception {
 
-        File f = Resources.asFile("data/5_32x32.png");
+        File f = Resources.asFile("data/mona_lisa.png");
         Image i = Image.create(f);
 
         Data in = Data.singleton("image", i);
-//        in.put("bbox", BoundingBox.createXY(0.2, 0.5, 0.3, 0.9));
-        in.putListBoundingBox("bbox", Arrays.asList(
-                BoundingBox.createXY(0.2, 0.5, 0.3, 0.9, "red", null),
-                BoundingBox.createXY(0.5, 0.8, 0.1, 0.5, "green", null)));
-
-        Map<String,String> classColors = new HashMap<>();
-        classColors.put("red", "rgb(255,0,0)");
-        classColors.put("green", "rgb(0,255,0)");
+        in.putListDouble("x", Arrays.asList(0.5, 0.7, 0.2, 0.6));
+        in.putListDouble("y", Arrays.asList(0.2, 0.3, 0.6, 0.7));
 
 
         Pipeline p = SequencePipeline.builder()
-                .add(DrawBoundingBoxStep.builder()
+                .add(DrawGridStep.builder()
+//                        .borderColor("yellow")
+//                        .gridColor("blue")
+                        .coordsArePixels(false)
+                        .grid1(3)
+                        .grid2(4)
+                        .xName("x")
+                        .yName("y")
                         .imageName("image")
-                        .bboxName("bbox")
-                        .color("rgb(0,0,255)")
-//                        .scale(DrawBoundingBoxStep.Scale.AT_LEAST)
-//                        .resizeH(256)
-//                        .resizeW(256)
-                        .lineThickness(1)
-                        .classColors(classColors)
-
+                        .borderThickness(4)
+                        .gridThickness(2)
                     .build())
-                .add(new ShowImagePipelineStep("image", "Display", 256, 256))
+                .add(new ShowImagePipelineStep("image", "Display", null, null))
                 .build();
 
         PipelineExecutor exec = p.executor();
@@ -74,6 +70,12 @@ public class TestBoundingBoxStep {
         exec.exec(in);
 
         Thread.sleep(100000);
+    }
+
+    @Test
+    public void testOrders(){
+
+
     }
 
 }

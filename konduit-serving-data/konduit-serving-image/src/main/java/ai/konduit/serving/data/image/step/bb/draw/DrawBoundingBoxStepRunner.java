@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.draw;
+package ai.konduit.serving.data.image.step.bb.draw;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;

@@ -1,0 +1,181 @@
+/*
+ *  ******************************************************************************
+ *  * Copyright (c) 2020 Konduit K.K.
+ *  *
+ *  * This program and the accompanying materials are made available under the
+ *  * terms of the Apache License, Version 2.0 which is available at
+ *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  * License for the specific language governing permissions and limitations
+ *  * under the License.
+ *  *
+ *  * SPDX-License-Identifier: Apache-2.0
+ *  *****************************************************************************
+ */
+
+package ai.konduit.serving.data.image.step.grid.draw;
+
+import ai.konduit.serving.data.image.convert.ImageToNDArray;
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.pipeline.api.context.Context;
+import ai.konduit.serving.pipeline.api.data.BoundingBox;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.util.DataUtils;
+import lombok.NonNull;
+import org.apache.commons.math3.geometry.euclidean.twod.Segment;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.apache.commons.math3.geometry.euclidean.twod.hull.ConvexHull2D;
+import org.apache.commons.math3.geometry.euclidean.twod.hull.MonotoneChain;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
+import org.nd4j.common.base.Preconditions;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+public class DrawGridStepRunner implements PipelineStepRunner {
+
+    protected static final String INVALID_COLOR = "Invalid color: Must be in one of the following formats: hex/HTML - #788E87, " +
+            "RGB - rgb(128,0,255), or a color such as \"green\", etc - got \"%s\"";
+
+
+
+
+    protected final DrawGridStep step;
+
+    public DrawGridStepRunner(@NonNull DrawGridStep step){
+        this.step = step;
+    }
+
+    @Override
+    public void close() {
+
+    }
+
+    @Override
+    public PipelineStep getPipelineStep() {
+        return step;
+    }
+
+    @Override
+    public Data exec(Context ctx, Data data) {
+
+        String imgName = step.imageName();
+        String xName = step.xName();
+        String yName = step.yName();
+
+        if (imgName == null) {
+            String errMultipleKeys = "Image field name was not provided and could not be inferred: multiple image fields exist: %s and %s";
+            String errNoKeys = "Image field name was not provided and could not be inferred: no image fields exist";
+            imgName = DataUtils.inferField(data, ValueType.IMAGE, false, errMultipleKeys, errNoKeys);
+        }
+
+        if (xName == null || yName == null) {
+            throw new IllegalStateException("xName and yName must be specified in configuration. These should be the name of length 4 List<Double> or List<Long>");
+        }
+
+        if (data.type(xName) != ValueType.LIST || (data.listType(xName) != ValueType.DOUBLE && data.listType(xName) != ValueType.INT64)) {
+            String str = (data.type(xName) == ValueType.LIST ? ", list type " + data.listType(xName).toString() : "");
+            throw new IllegalStateException("xName = \"" + xName + "\" should be a length 4 List<Double> or List<Long>, but is type " + data.type(xName) + str);
+        }
+
+        if (data.type(yName) != ValueType.LIST || (data.listType(yName) != ValueType.DOUBLE && data.listType(yName) != ValueType.INT64)) {
+            String str = (data.type(yName) == ValueType.LIST ? ", list type " + data.listType(yName).toString() : "");
+            throw new IllegalStateException("yName = \"" + yName + "\" should be a length 4 List<Double> or List<Long>, but is type " + data.type(yName) + str);
+        }
+
+
+        Image i = data.getImage(imgName);
+        double[] x = getAsDouble("xName", xName, data);
+        double[] y = getAsDouble("yName", yName, data);
+
+        ConvexHull2D ch = convexHull(x, y);
+
+        Mat m = i.getAs(Mat.class).clone();
+
+        Scalar borderColor = step.borderColor() == null ? Scalar.GREEN : stringToColor(step.borderColor());
+        int borderThickness = step.borderThickness();
+        if(borderThickness <= 0)
+            borderThickness = 1;
+
+        for (Segment s : ch.getLineSegments()) {
+            Vector2D start = s.getStart();
+            Vector2D end = s.getEnd();
+
+            int x1Px = (int) (start.getX() * i.width());
+            int x2Px = (int) (end.getX() * i.width());
+            int y1Px = (int) (start.getY() * i.height());
+            int y2Px = (int) (end.getY() * i.height());
+
+            drawLine(m, borderColor, borderThickness, x1Px, x2Px, y1Px, y2Px);
+        }
+
+        Data out = data.clone();
+        Image outImg = Image.create(m);
+        out.put(imgName, outImg);
+
+        return out;
+    }
+
+    protected void drawLine(Mat m, Scalar color, int thickness, int x1, int x2, int y1, int y2){
+        Point p1 = new Point(x1, y1);
+        Point p2 = new Point(x2, y2);
+        int lineType = 8;
+        int shift = 0;
+        org.bytedeco.opencv.global.opencv_imgproc.line(m, p1, p2, color, thickness, lineType, shift);
+    }
+
+    protected Scalar stringToColor(String s){
+
+        if(s.startsWith("#")){
+            String hex = s.substring(1);
+            Color c = Color.decode(hex);
+            return org.bytedeco.opencv.helper.opencv_core.RGB(c.getRed(), c.getGreen(), c.getBlue());
+        } else if(s.toLowerCase().startsWith("rgb(") && s.endsWith(")")){
+            String sub = s.substring(4, s.length()-1);
+            Preconditions.checkState(sub.matches("\\d+,\\d+,\\d+"), INVALID_COLOR, s);
+            String[] split = sub.split(",");
+            int r = Integer.parseInt(split[0]);
+            int g = Integer.parseInt(split[1]);
+            int b = Integer.parseInt(split[2]);
+            return org.bytedeco.opencv.helper.opencv_core.RGB(r,g,b);
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented");
+        }
+    }
+
+    protected double[] getAsDouble(String label, String xyName, Data data){
+        if(data.listType(xyName) == ValueType.DOUBLE){
+            List<Double> l = data.getListDouble(xyName);
+            Preconditions.checkState(l.size() == 4, label + "=" + xyName + " should be a length 4 list but is length " + l.size());
+            double[] xy = new double[4];
+            for( int j=0; j<4; j++ ){
+                xy[j] = l.get(j);
+            }
+            return xy;
+        } else {
+            throw new UnsupportedOperationException("Not yet implemeted - int64");
+        }
+    }
+
+    protected ConvexHull2D convexHull(double[] x, double[] y){
+        List<Vector2D> vList = new ArrayList<>(4);
+        for(int i=0; i<4; i++ ){
+            vList.add(new Vector2D(x[i], y[i]));
+        }
+        return new MonotoneChain().generate(vList);
+    }
+}

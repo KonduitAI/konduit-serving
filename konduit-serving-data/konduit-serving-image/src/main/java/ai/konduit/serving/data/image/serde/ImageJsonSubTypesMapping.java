@@ -18,8 +18,8 @@
 
 package ai.konduit.serving.data.image.serde;
 
-import ai.konduit.serving.data.image.step.draw.DrawBoundingBoxStep;
-import ai.konduit.serving.data.image.step.extract.ExtractBoundingBoxStep;
+import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
+import ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.serde.JsonSubType;

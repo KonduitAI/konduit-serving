@@ -120,4 +120,10 @@ public class ProtoData extends JData {
         return retVal;
     }
 
+    @Override
+    public Data clone(){
+        Data ret = empty();
+        ret.merge(true, this);
+        return ret;
+    }
 }

@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.extract;
+package ai.konduit.serving.data.image.step.bb.extract;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;

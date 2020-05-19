@@ -20,7 +20,7 @@ package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
-import ai.konduit.serving.data.image.step.extract.ExtractBoundingBoxStep;
+import ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
