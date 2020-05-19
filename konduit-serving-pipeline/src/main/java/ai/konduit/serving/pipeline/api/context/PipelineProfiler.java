@@ -26,6 +26,7 @@ import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -78,7 +79,8 @@ public class PipelineProfiler implements Profiler {
     public PipelineProfiler(ProfilerConfig profilerConfig) {
         this.profilerConfig = profilerConfig;
         try {
-            this.writer = new BufferedWriter(new FileWriter(profilerConfig.getOutputFile().toString(), false));
+            this.writer = new BufferedWriter(new FileWriter(profilerConfig.getOutputFile().toString(), true));
+            fileSizeGuard();
             this.writer.write("[");     //JSON array open (array close is optional for Chrome profiler format)
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -133,8 +135,11 @@ public class PipelineProfiler implements Profiler {
 
         TraceEvent event = TraceEvent.builder()
                 .name(key)
+                .cat(Collections.singletonList("Step"))
                 .ts(startTime)
                 .ph(TraceEvent.EventType.START)
+                .pid(this.pid)
+                .tid(this.tid)
                 .build();
 
         writeQueue.add(event);
@@ -161,8 +166,11 @@ public class PipelineProfiler implements Profiler {
 
         TraceEvent event = TraceEvent.builder()
                 .name(key)
+                .cat(Collections.singletonList("Step"))
                 .ts(endTime)
                 .ph(TraceEvent.EventType.END)
+                .pid(this.pid)
+                .tid(this.tid)
                 .build();
 
         writeQueue.add(event);
