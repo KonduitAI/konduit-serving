@@ -47,7 +47,7 @@ public class PipelineProfilerTest {
     public TemporaryFolder testDir = new TemporaryFolder();
 
     @Test
-    public void testProfilingEvents() throws IOException, InterruptedException {
+    public void testProfilingEvents() throws IOException {
 
         AtomicInteger count1 = new AtomicInteger();
         AtomicInteger count2 = new AtomicInteger();
@@ -77,6 +77,35 @@ public class PipelineProfilerTest {
         assertEquals("LoggingPipelineStepRunner", events[2].getName());
         assertEquals("LoggingPipelineStepRunner", events[3].getName());
         assertEquals("Runner", events[4].getName());
+    }
+
+    @Test
+    public void testProfilingLogRotation() throws IOException {
+
+        AtomicInteger count1 = new AtomicInteger();
+        AtomicInteger count2 = new AtomicInteger();
+        Pipeline p = SequencePipeline.builder()
+                .add(new CallbackPipelineStep(d -> count1.getAndIncrement()))
+                .add(LoggingPipelineStep.builder().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO).build())
+                .add(new CallbackPipelineStep(d -> count2.getAndIncrement()))
+                .build();
+
+        PipelineExecutor pe = p.executor();
+
+        Data d = Data.singleton("someDouble", 1.0);
+        d.put("someKey", "someValue");
+
+        File dir = testDir.newFolder();
+        File logFile = new File(dir, "test.json");
+        System.out.println(logFile.toPath().toString());
+        ProfilerConfig profilerConfig = new ProfilerConfig();
+        profilerConfig.setOutputFile(Paths.get(logFile.toURI()));
+        profilerConfig.setSplitSize(10);
+        Profiler profiler = new PipelineProfiler(profilerConfig);
+        pe.profilerConfig(profiler);
+        for (int i = 0; i < 100; ++i) {
+            pe.exec(d);
+        }
     }
 
     @Test

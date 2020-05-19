@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.nd4j.common.base.Preconditions;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,18 +72,24 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
         Context ctx = null; //TODO
         Data current = data;
         String saved = StringUtils.EMPTY;
-        for(PipelineStepRunner psr : runners){
-            if (profiler.profilerEnabled()) {
-                saved = psr.name();
-                profiler.eventStart(saved);
+        try {
+            for (PipelineStepRunner psr : runners) {
+                if (profiler.profilerEnabled()) {
+                    saved = psr.name();
+                    profiler.eventStart(saved);
+                }
+                current = psr.exec(ctx, current);
+                if (profiler.profilerEnabled()) {
+                    profiler.eventEnd(psr.name());
+                }
             }
-            current = psr.exec(ctx, current);
-            if (profiler.profilerEnabled()) {
-                profiler.eventEnd(psr.name());
+            if (profiler.profilerEnabled() && ((PipelineProfiler) profiler).isLogActive()) {
+                profiler.eventEnd(saved);
             }
         }
-        if (profiler.profilerEnabled() && ((PipelineProfiler)profiler).isLogActive()) {
-            profiler.eventEnd(saved);
+        catch (IOException e) {
+            log.error("I/O failure in SequencePipelineExecutor", e);
+            throw new RuntimeException(e);
         }
         return current;
     }

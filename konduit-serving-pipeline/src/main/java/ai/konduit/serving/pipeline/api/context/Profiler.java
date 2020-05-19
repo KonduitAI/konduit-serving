@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.pipeline.api.context;
 
+import java.io.IOException;
+
 /**
  * The Profiler interface is used within each PipelineStep (technically, within each {@link ai.konduit.serving.pipeline.api.step.PipelineStepRunner})
  * for performance analysis and debugging purposes.
@@ -65,12 +67,12 @@ public interface Profiler {
     /**
      * Start the timer for the event with the specified key.
      */
-    void eventStart(String key);
+    void eventStart(String key) throws IOException;
 
     /**
      * End the timer for the event with the specified key.
      * Should be called some time after {@link #eventStart(String)}
      */
-    void eventEnd(String key);
+    void eventEnd(String key) throws IOException;
 
 }

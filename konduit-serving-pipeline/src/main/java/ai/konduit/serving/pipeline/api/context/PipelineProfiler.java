@@ -18,6 +18,7 @@ package ai.konduit.serving.pipeline.api.context;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.nd4j.common.io.StringUtils;
 import org.nd4j.common.primitives.AtomicBoolean;
 import org.nd4j.shade.jackson.databind.ObjectMapper;
@@ -25,6 +26,7 @@ import org.nd4j.shade.jackson.databind.ObjectMapper;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -72,17 +74,19 @@ public class PipelineProfiler implements Profiler {
     }
 
     private void fileSizeGuard() throws IOException {
+        System.out.println("Size is " + Files.size(profilerConfig.getOutputFile()));
         if (Files.size(profilerConfig.getOutputFile()) > profilerConfig.getSplitSize()) {
             Path currentFile = profilerConfig.getOutputFile();
-            String baseName = currentFile.getFileName().toString();
-            String parts[] = baseName.split("_");
+            String baseName = FilenameUtils.removeExtension(currentFile.getFileName().toString());
+            /*String parts[] = baseName.split("_");
             int num = 1;
             if (parts.length > 1) {
                 num = Integer.parseInt(parts[1]) + 1;
-            }
-            Path backup = Paths.get(currentFile.getFileName() + "_" + String.valueOf(num) + ".json");
+            }*/
+            Path backup = Paths.get(currentFile.getParent() + FileSystems.getDefault().getSeparator() +
+                    baseName + "_" + String.valueOf(System.currentTimeMillis()) + ".json");
             Files.move(currentFile, backup);
-            Files.createFile(profilerConfig.getOutputFile());
+            Files.createFile(currentFile);
         }
     }
 
@@ -90,7 +94,6 @@ public class PipelineProfiler implements Profiler {
         this.profilerConfig = profilerConfig;
         try {
             this.writer = new BufferedWriter(new FileWriter(profilerConfig.getOutputFile().toString(), true));
-            fileSizeGuard();
             this.writer.write("[");     //JSON array open (array close is optional for Chrome profiler format)
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -139,7 +142,8 @@ public class PipelineProfiler implements Profiler {
     }
 
     @Override
-    public void eventStart(String key) {
+    public void eventStart(String key) throws IOException {
+        fileSizeGuard();
         logActive = true;
         startTime = System.nanoTime() / 1000;
 
@@ -156,7 +160,7 @@ public class PipelineProfiler implements Profiler {
     }
 
     @Override
-    public void eventEnd(String key) {
+    public void eventEnd(String key) throws IOException {
         if (logActive) {
             while ((!writeQueue.isEmpty() || writing.get()) && fileWritingThread.isAlive()) {
                 try {
@@ -172,6 +176,7 @@ public class PipelineProfiler implements Profiler {
             }
         }
         logActive = false;
+        fileSizeGuard();
         endTime = System.nanoTime() / 1000;
 
         TraceEvent event = TraceEvent.builder()
