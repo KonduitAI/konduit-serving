@@ -30,11 +30,16 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.event.Level;
 
+@RunWith(VertxUnitRunner.class)
+@Ignore("Remove this ignore statement after implementing the mqtt module.") // todo
 public class InferenceVerticleMqttTest {
     static InferenceConfiguration configuration;
     static Vertx vertx;
