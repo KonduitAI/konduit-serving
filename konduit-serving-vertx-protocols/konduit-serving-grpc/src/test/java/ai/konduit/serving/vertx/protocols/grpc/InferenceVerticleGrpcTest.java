@@ -25,9 +25,9 @@ import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
 import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
-import ai.konduit.serving.vertx.config.InferenceDeploymentResult;
 import ai.konduit.serving.vertx.config.ServerProtocol;
 import ai.konduit.serving.vertx.protocols.grpc.api.InferenceGrpc;
+import ai.konduit.serving.vertx.protocols.grpc.test.FailureTestingPipelineStep;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.ManagedChannel;
 import io.vertx.core.DeploymentOptions;
@@ -38,17 +38,22 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.grpc.VertxChannelBuilder;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.event.Level;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @RunWith(VertxUnitRunner.class)
 public class InferenceVerticleGrpcTest {
 
     static InferenceConfiguration configuration;
     static Vertx vertx;
-    static InferenceDeploymentResult inferenceDeploymentResult;
+    static ManagedChannel channel;
+    static InferenceGrpc.InferenceVertxStub inferenceVertxStub;
+    public static AtomicBoolean causeFailure = new AtomicBoolean();
 
     @BeforeClass
     public static void setUp(TestContext testContext) {
@@ -56,6 +61,7 @@ public class InferenceVerticleGrpcTest {
                 .protocol(ServerProtocol.GRPC)
                 .pipeline(SequencePipeline.builder()
                         .add(LoggingPipelineStep.builder().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR).build())
+                        .add(new FailureTestingPipelineStep())
                         .build())
                 .build();
 
@@ -66,7 +72,14 @@ public class InferenceVerticleGrpcTest {
                 configuration,
                 handler -> {
                     if(handler.succeeded()) {
-                        inferenceDeploymentResult = handler.result();
+                        channel = VertxChannelBuilder
+                                .forAddress(vertx, "localhost", handler.result().getActualPort())
+                                .usePlaintext(true)
+                                .build();
+
+                        // Get a stub to use for interacting with the inference service
+                        inferenceVertxStub = InferenceGrpc.newVertxStub(channel);
+
                         async.complete();
                     } else {
                         testContext.fail(handler.cause());
@@ -74,15 +87,14 @@ public class InferenceVerticleGrpcTest {
                 });
     }
 
-    @Test
-    public void testGrpcServer(TestContext testContext) throws InvalidProtocolBufferException {
-        ManagedChannel channel = VertxChannelBuilder
-                .forAddress(vertx, "localhost", inferenceDeploymentResult.getActualPort())
-                .usePlaintext(true)
-                .build();
+    @Before
+    public void before(){
+        causeFailure.set(false);
+    }
 
-        // Get a stub to use for interacting with the remote service
-        InferenceGrpc.InferenceVertxStub stub = InferenceGrpc.newVertxStub(channel);
+    @Test
+    public void testGrpcServerPass(TestContext testContext) throws InvalidProtocolBufferException {
+        causeFailure.set(false);
 
         Data input = JData.singleton("key", "value");
         DataScheme request = DataScheme.parseFrom(input.asBytes());
@@ -90,7 +102,7 @@ public class InferenceVerticleGrpcTest {
         Async async = testContext.async();
 
         // Call the remote service
-        stub.predict(request, ar -> {
+        inferenceVertxStub.predict(request, ar -> {
             if (ar.succeeded()) {
                 testContext.assertEquals(input, Data.fromBytes(ar.result().toByteArray()));
                 async.complete();
@@ -100,8 +112,28 @@ public class InferenceVerticleGrpcTest {
         });
     }
 
+    @Test
+    public void testGrpcServerFail(TestContext testContext) throws InvalidProtocolBufferException {
+        causeFailure.set(true);
+
+        Data input = JData.singleton("key", "value");
+        DataScheme request = DataScheme.parseFrom(input.asBytes());
+
+        Async async = testContext.async();
+
+        // Call the remote service
+        inferenceVertxStub.predict(request, ar -> {
+            if (ar.succeeded()) {
+                testContext.fail("This should fail due to 'causeFailure' being 'true'");
+            } else {
+                async.complete();
+            }
+        });
+    }
+
     @AfterClass
     public static void tearDown(TestContext testContext) {
+        channel.shutdownNow();
         vertx.close(testContext.asyncAssertSuccess());
     }
 

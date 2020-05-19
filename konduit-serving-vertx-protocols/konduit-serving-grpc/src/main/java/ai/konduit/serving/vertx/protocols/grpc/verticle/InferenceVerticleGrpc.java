@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.data.ProtoData;
 import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme;
 import ai.konduit.serving.vertx.protocols.grpc.api.InferenceGrpc;
+import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
 import io.grpc.stub.StreamObserver;
 import io.vertx.core.Promise;
@@ -36,6 +37,26 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
+        int port;
+
+        String portEnvValue = System.getenv(EnvironmentConstants.KONDUIT_SERVING_PORT);
+        if (portEnvValue != null) {
+            try {
+                port = Integer.parseInt(portEnvValue);
+            } catch (NumberFormatException exception) {
+                log.error("Environment variable \"{}={}\" isn't a valid port number.",
+                        EnvironmentConstants.KONDUIT_SERVING_PORT, portEnvValue);
+                startPromise.fail(exception);
+                return;
+            }
+        } else {
+            port = inferenceConfiguration.getPort();
+        }
+
+        if (port < 0 || port > 0xFFFF) {
+            startPromise.fail(new Exception("Valid port range is 0 <= port <= 65535. The given port was " + port));
+            return;
+        }
 
         VertxServer rpcServer = VertxServerBuilder
                 .forAddress(vertx, inferenceConfiguration.getHost(), inferenceConfiguration.getPort())
@@ -47,6 +68,7 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
                             responseObserver.onNext(DataScheme.parseFrom(output.asBytes()));
                             responseObserver.onCompleted();
                         } catch (Throwable throwable) {
+                            log.error("Failed to process the pipeline with the input data", throwable);
                             responseObserver.onError(throwable);
                         }
                     }
@@ -64,8 +86,8 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
                             .deploymentOptions()
                             .setConfig(new JsonObject(inferenceConfiguration.toJson()));
 
-                    log.info("Inference server is listening on host: '{}'", inferenceConfiguration.getHost());
-                    log.info("Inference server started on port {} with {} pipeline steps", actualPort, pipeline.size());
+                    log.info("Inference gRPC server is listening on host: '{}'", inferenceConfiguration.getHost());
+                    log.info("Inference gRPC server started on port {} with {} pipeline steps", actualPort, pipeline.size());
                     startPromise.complete();
                 } catch (Throwable throwable) {
                     startPromise.fail(throwable);
