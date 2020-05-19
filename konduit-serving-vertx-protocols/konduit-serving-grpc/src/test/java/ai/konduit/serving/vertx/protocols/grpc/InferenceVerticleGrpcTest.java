@@ -87,10 +87,13 @@ public class InferenceVerticleGrpcTest {
         Data input = JData.singleton("key", "value");
         DataScheme request = DataScheme.parseFrom(input.asBytes());
 
+        Async async = testContext.async();
+
         // Call the remote service
         stub.predict(request, ar -> {
             if (ar.succeeded()) {
                 testContext.assertEquals(input, Data.fromBytes(ar.result().toByteArray()));
+                async.complete();
             } else {
                 testContext.fail(ar.cause());
             }
