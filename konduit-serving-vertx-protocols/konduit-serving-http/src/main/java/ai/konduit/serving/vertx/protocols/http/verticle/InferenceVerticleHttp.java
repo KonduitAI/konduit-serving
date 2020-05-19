@@ -67,10 +67,9 @@ public class InferenceVerticleHttp extends InferenceVerticle {
 
         vertx.createHttpServer()
                 .requestHandler(createRouter())
-                .exceptionHandler(Throwable::printStackTrace)
+                .exceptionHandler(throwable -> log.error("Could not start HTTP server", throwable))
                 .listen(port, inferenceConfiguration.getHost(), handler -> {
                     if (handler.failed()) {
-                        log.error("Could not start HTTP server");
                         startPromise.fail(handler.cause());
                     } else {
                         int actualPort = handler.result().actualPort();
@@ -84,8 +83,8 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                             log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.getHost());
                             log.info("Inference HTTP server started on port {} with {} pipeline steps", actualPort, pipeline.size());
                             startPromise.complete();
-                        } catch (Exception exception) {
-                            startPromise.fail(exception);
+                        } catch (Throwable throwable) {
+                            startPromise.fail(throwable);
                         }
                     }
                 });
@@ -105,7 +104,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                     int statusCode = failureHandler.statusCode();
 
                     if (statusCode == 404) {
-                        log.warn("404 at route " + failureHandler.request().path());
+                        log.warn("404 at route {}" + failureHandler.request().path());
                     } else if (failureHandler.failed()) {
                         if (throwable != null) {
                             log.error("Request failed with cause ", throwable);

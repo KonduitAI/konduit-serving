@@ -36,7 +36,7 @@ import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 @AllArgsConstructor
 public class InferenceHttpApi {
 
-    PipelineExecutor pipelineExecutor;
+    protected final PipelineExecutor pipelineExecutor;
 
     private Data extractData(String contentType, RoutingContext ctx) {
         try {
@@ -74,7 +74,7 @@ public class InferenceHttpApi {
         try {
             output = pipelineExecutor.exec(input);
         } catch (Exception exception) {
-            throw new KonduitServingHttpException(HttpApiErrorCode.PIPELINE_PROCESSING_ERROR, exception.toString());
+            throw new KonduitServingHttpException(HttpApiErrorCode.PIPELINE_PROCESSING_ERROR, exception);
         }
 
         if(accept.contains(APPLICATION_JSON.toString())) {
@@ -86,7 +86,7 @@ public class InferenceHttpApi {
             ctx.response()
                     .setStatusCode(200)
                     .putHeader(CONTENT_TYPE, APPLICATION_OCTET_STREAM.toString())
-                    .end(Buffer.buffer(output.toProtoData().asBytes()));
+                    .end(Buffer.buffer(output.asBytes()));
         } else {
             throw new KonduitServingHttpException(HttpApiErrorCode.INVALID_ACCEPT_HEADER,
                     String.format("Invalid Accept header %s. Should be one of [application/json, application/octet-stream]", accept));
