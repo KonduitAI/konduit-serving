@@ -32,6 +32,7 @@
 
     <modules>
         <module>konduit-serving-http</module>
+        <module>konduit-serving-grpc</module>
     </modules>
 
     <dependencies>

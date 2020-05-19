@@ -73,8 +73,8 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                         log.error("Could not start HTTP server");
                         startPromise.fail(handler.cause());
                     } else {
-                        HttpServer resultantHttpServer = handler.result();
-                        inferenceConfiguration.setPort(resultantHttpServer.actualPort());
+                        int actualPort = handler.result().actualPort();
+                        inferenceConfiguration.setPort(actualPort);
 
                         try {
                             ((ContextInternal) context).getDeployment()
@@ -82,7 +82,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                                     .setConfig(new JsonObject(inferenceConfiguration.toJson()));
 
                             log.info("Inference server is listening on host: '{}'", inferenceConfiguration.getHost());
-                            log.info("Inference server started on port {} with {} pipeline steps", port, pipeline.size());
+                            log.info("Inference server started on port {} with {} pipeline steps", actualPort, pipeline.size());
                             startPromise.complete();
                         } catch (Exception exception) {
                             startPromise.fail(exception);

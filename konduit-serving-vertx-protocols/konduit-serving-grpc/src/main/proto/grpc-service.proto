@@ -1,0 +1,21 @@
+
+syntax = "proto3";
+
+import "ai/konduit/serving/pipeline/api/protobuf/data.proto";
+
+package ai.konduit.serving;
+option java_package = "ai.konduit.serving.vertx.protocols.grpc.api";
+option java_outer_classname = "GrpcService";
+option java_multiple_files = true;
+
+// The main grpc service definition.
+service Api {
+  // predicts an output
+  rpc predict (DataScheme) returns (DataScheme) {}
+}
+
+// The error response structure when an error happens.
+message ErrorResponse {
+  string errorCode = 1;
+  string errorMessage = 2;
+}
