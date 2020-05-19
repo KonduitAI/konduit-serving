@@ -24,8 +24,6 @@
                 </dependency>
             </dependencies>
         </profile>
-
-
         <profile>
             <id>pmml</id>
             <dependencies>
@@ -36,7 +34,6 @@
                 </dependency>
             </dependencies>
         </profile>
-
         <profile>
             <id>tensorflow</id>
             <dependencies>
@@ -47,8 +44,6 @@
                 </dependency>
             </dependencies>
         </profile>
-
-
         <profile>
             <id>cpu</id>
             <activation>
@@ -65,7 +60,6 @@
                 </dependency>
             </dependencies>
         </profile>
-
         <profile>
             <id>jetson-nano</id>
             <dependencies>
@@ -76,8 +70,6 @@
                 </dependency>
             </dependencies>
         </profile>
-
-
         <profile>
             <id>gpu</id>
             <activation>
@@ -94,7 +86,6 @@
                 </dependency>
             </dependencies>
         </profile>
-
         <profile>
             <id>python</id>
             <dependencies>
@@ -106,7 +97,6 @@
             </dependencies>
         </profile>
     </profiles>
-
 
     <dependencies>
         <dependency>
@@ -125,7 +115,5 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
     </dependencies>
-
 </project>

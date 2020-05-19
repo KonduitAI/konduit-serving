@@ -61,7 +61,9 @@ import java.util.List;
  * in {@link PipelineExecutioner}
  *
  * @author Adam Gibson
+ * @deprecated To be removed - https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 @Slf4j
 public class InferenceVerticle extends BaseRoutableVerticle {
 

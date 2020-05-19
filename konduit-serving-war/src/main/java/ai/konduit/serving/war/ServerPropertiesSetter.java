@@ -1,7 +1,7 @@
 package ai.konduit.serving.war;
 
 import lombok.extern.slf4j.Slf4j;
-import org.nd4j.linalg.io.ClassPathResource;
+import org.nd4j.common.io.ClassPathResource;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;

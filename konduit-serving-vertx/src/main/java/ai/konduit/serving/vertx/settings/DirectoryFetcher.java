@@ -16,23 +16,21 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.settings;
+package ai.konduit.serving.vertx.settings;
 
-import ai.konduit.serving.settings.constants.Constants;
-import ai.konduit.serving.settings.constants.EnvironmentConstants;
-import ai.konduit.serving.settings.constants.PropertiesConstants;
+import ai.konduit.serving.vertx.settings.constants.Constants;
+import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
+import ai.konduit.serving.vertx.settings.constants.PropertiesConstants;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.nd4j.shade.guava.base.Strings;
 
-import java.nio.file.Paths;
 import java.io.File;
+import java.nio.file.Paths;
 
 /**
  * This class is responsible for fetching different directories for konduit-serving
- * @deprecated To be removed - https://github.com/KonduitAI/konduit-serving/issues/298
  */
-@Deprecated
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DirectoryFetcher {
 

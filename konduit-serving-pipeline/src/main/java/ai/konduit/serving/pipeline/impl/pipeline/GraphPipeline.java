@@ -46,4 +46,9 @@ public class GraphPipeline implements Pipeline {
     public PipelineExecutor executor() {
         return new GraphPipelineExecutor(this);
     }
+
+    @Override
+    public int size() {
+        return steps != null ? steps.size() : 0;
+    }
 }

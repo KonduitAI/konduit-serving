@@ -16,18 +16,15 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.settings.constants;
+package ai.konduit.serving.vertx.settings.constants;
 
-import io.vertx.ext.web.handler.BodyHandler;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 /**
  * This class contains important constants for different system properties
  * for konduit-serving.
- * @deprecated To be removed - https://github.com/KonduitAI/konduit-serving/issues/298
  */
-@Deprecated
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PropertiesConstants {
 
@@ -51,7 +48,7 @@ public class PropertiesConstants {
     public static final String COMMAND_LOGS_DIR = "konduit.command.logs.dir";
 
     /**
-     * Sets the directory where the file uploads are kept for Vertx {@link BodyHandler}
+     * Sets the directory where the file uploads are kept for Vertx BodyHandler
      */
     public static final String FILE_UPLOADS_DIR = "konduit.file.uploads.dir";
 }

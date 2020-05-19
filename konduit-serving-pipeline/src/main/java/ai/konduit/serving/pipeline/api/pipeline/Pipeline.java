@@ -54,4 +54,9 @@ public interface Pipeline extends TextConfig, Serializable {
         return ObjectMappers.fromYaml(yaml, Pipeline.class);
     }
 
+    /**
+     * For keeping the size/count of the number of steps/levels inside the pipeline configuration
+     * @return number of steps in the pipeline configuration
+     */
+    int size();
 }

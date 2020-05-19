@@ -40,6 +40,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @deprecated To be removed - https://github.com/KonduitAI/konduit-serving/issues/298
+ */
+@Deprecated
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
