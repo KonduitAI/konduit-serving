@@ -28,15 +28,27 @@ import io.vertx.core.spi.VerticleFactory;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static ai.konduit.serving.vertx.config.ServerProtocol.*;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DeployKonduitServing {
     public static final String SERVICE_PREFIX = "konduit";
     public static final String INFERENCE_SERVICE_IDENTIFIER = SERVICE_PREFIX + ":ai.konduit.serving:inference";
+    protected static final Map<ServerProtocol, String> PROTOCOL_SERVICE_MAP = new EnumMap<>(ServerProtocol.class);
+
+    static {
+        // Service classes that corresponds to the ServerProtocol enums
+        PROTOCOL_SERVICE_MAP.put(HTTP, "ai.konduit.serving.vertx.protocols.http.verticle.InferenceVerticleHttp");
+        PROTOCOL_SERVICE_MAP.put(GRPC, "ai.konduit.serving.vertx.protocols.grpc.verticle.InferenceVerticleGrpc");
+        PROTOCOL_SERVICE_MAP.put(MQTT, "ai.konduit.serving.vertx.protocols.mqtt.verticle.InferenceVerticleMqtt");
+    }
 
     public static Vertx deploy(VertxOptions vertxOptions,
                               DeploymentOptions deploymentOptions,
@@ -53,38 +65,46 @@ public class DeployKonduitServing {
 
             @Override
             public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
-                    String protocolName = verticleName.substring(verticleName.lastIndexOf(':') + 1);
-
-                    try {
-                        switch (ServerProtocol.valueOf(protocolName.toUpperCase())) {
-                            case HTTP:
-                                return createVerticleFromClassName("ai.konduit.serving.vertx.protocols.http.verticle.InferenceVerticleHttp");
-                            case GRPC:
-                                return createVerticleFromClassName("ai.konduit.serving.vertx.protocols.grpc.verticle.InferenceVerticleGrpc");
-                            case MQTT:
-                                return createVerticleFromClassName("ai.konduit.serving.vertx.protocols.mqtt.verticle.InferenceVerticleMqtt");
-                            default:
-                                throw new IllegalStateException(
-                                        String.format("Invalid service type %s. Possible values are: %s",
-                                                protocolName,
-                                                Arrays.toString(ServerProtocol.values())
-                                        )
-                                );
-                        }
-                    } catch (ClassNotFoundException classNotFoundException) {
-                        // todo: write plus log a meaningful message and throw exception
-                        throw new IllegalStateException();
-                    }
+                return createInferenceVerticleFromProtocolName(verticleName.substring(verticleName.lastIndexOf(':') + 1));
             }
 
-            private Verticle createVerticleFromClassName(String className) throws Exception {
-                return (Verticle) ClassLoader.getSystemClassLoader()
-                        .loadClass(className)
-                        .getConstructor().newInstance();
+            private Verticle createInferenceVerticleFromProtocolName(String protocolName) throws Exception {
+                ServerProtocol serverProtocol = ServerProtocol.valueOf(protocolName.toUpperCase());
+                if(PROTOCOL_SERVICE_MAP.containsKey(serverProtocol)) {
+                    try {
+                        return (Verticle) ClassLoader.getSystemClassLoader()
+                                .loadClass(PROTOCOL_SERVICE_MAP.get(serverProtocol))
+                                .getConstructor().newInstance();
+                    } catch (ClassNotFoundException classNotFoundException) {
+                        throw new IllegalStateException(
+                                String.format("Missing classes for protocol service %s. Make sure the binaries has included the '%s' module.",
+                                        protocolName,
+                                        "konduit-serving-" + serverProtocol.name().toLowerCase())
+                        );
+                    }
+                } else {
+                    throw new IllegalStateException(
+                            String.format("No inference service found for type: %s. Available service types are: [%s]",
+                                    protocolName,
+                                    StringUtils.join(PROTOCOL_SERVICE_MAP.keySet(), ", ")
+                            )
+                    );
+                }
             }
         });
 
-        JsonObject jsonConfiguration = new JsonObject(inferenceConfiguration.toJson());
+        JsonObject jsonConfiguration;
+
+        try {
+            jsonConfiguration = new JsonObject(inferenceConfiguration.toJson());
+        } catch (Throwable throwable) {
+            log.error("Failed while converting inference configuration to a json string." +
+                    "Possible causes could be missing classes for pipeline steps.", throwable);
+            eventHandler.handle(Future.failedFuture(throwable));
+            vertx.close();
+            return vertx;
+        }
+
         deploymentOptions.setConfig(jsonConfiguration);
 
         vertx.deployVerticle(INFERENCE_SERVICE_IDENTIFIER + ":" +

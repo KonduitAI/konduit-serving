@@ -18,8 +18,6 @@
 
 package ai.konduit.serving.vertx.protocols.http.api;
 
-import lombok.Data;
-
 /**
  * This class represents the exceptions which occurs when the inference HTTP API fails at some point
  */
@@ -29,6 +27,13 @@ public class KonduitServingHttpException extends IllegalStateException {
      * The error response object associated with the excpetion.
      */
     private final ErrorResponse errorResponse;
+
+    public KonduitServingHttpException(HttpApiErrorCode errorCode, Throwable throwable) {
+        super(throwable);
+        errorResponse = ErrorResponse.builder().errorCode(errorCode)
+                .errorMessage(throwable.getMessage() != null ? throwable.getMessage() : throwable.toString())
+                .build();
+    }
 
     public KonduitServingHttpException(HttpApiErrorCode errorCode, String errorMessage) {
         super(String.format("Error Code: %s%n Error Message: %s", errorCode.name(), errorMessage));
