@@ -31,13 +31,16 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.nd4j.shade.jackson.core.JsonProcessingException;
+import org.nd4j.shade.jackson.databind.ObjectMapper;
 import org.slf4j.event.Level;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.Assert.assertEquals;
 
 public class PipelineProfilerTest {
     @Rule
@@ -59,17 +62,31 @@ public class PipelineProfilerTest {
         Data d = Data.singleton("someDouble", 1.0);
         d.put("someKey", "someValue");
 
-        File logFile = testDir.newFile();
+        File dir = testDir.newFolder();
+        File logFile = new File(dir, "test.json");
         System.out.println(logFile.toPath().toString());
         ProfilerConfig profilerConfig = new ProfilerConfig();
-        profilerConfig.setOutputFile(Paths.get(testDir.newFile().toURI()));
+        profilerConfig.setOutputFile(Paths.get(logFile.toURI()));
         Profiler profiler = new PipelineProfiler(profilerConfig);
         pe.profilerConfig(profiler);
         pe.exec(d);
         TraceEvent[] events = ((PipelineProfiler)profiler).readEvents(logFile);
-        for (val event : events) {
-            System.out.println(event);
-        }
+        assertEquals(5, events.length);
+        assertEquals("Runner", events[0].getName());
+        assertEquals("Runner", events[1].getName());
+        assertEquals("LoggingPipelineStepRunner", events[2].getName());
+        assertEquals("LoggingPipelineStepRunner", events[3].getName());
+        assertEquals("Runner", events[4].getName());
+    }
 
+    @Test
+    public void testEventsJson() throws JsonProcessingException {
+        String content = "[{\"name\":\"Runner\",\"cat\":[\"Step\"],\"ts\":507986437484,\"pid\":20272,\"tid\":1,\"ph\":\"START\"},\n" +
+                "{\"name\":\"LoggingPipelineStepRunner\",\"cat\":[\"Step\"],\"ts\":507986438897,\"pid\":20272,\"tid\":1,\"ph\":\"START\"},\n" +
+                "{\"name\":\"LoggingPipelineStepRunner\",\"cat\":[\"Step\"],\"ts\":507986538818,\"pid\":20272,\"tid\":1,\"ph\":\"END\"},\n" +
+                "{\"name\":\"Runner\",\"cat\":[\"Step\"],\"ts\":507986538851,\"pid\":20272,\"tid\":1,\"ph\":\"START\"}]";
+        TraceEvent[] events = new ObjectMapper().readValue(content, TraceEvent[].class);
+        assertEquals("Runner", events[0].getName());
+        assertEquals("LoggingPipelineStepRunner", events[2].getName());
     }
 }

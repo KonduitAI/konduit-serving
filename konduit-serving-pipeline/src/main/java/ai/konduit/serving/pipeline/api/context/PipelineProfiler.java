@@ -188,6 +188,9 @@ public class PipelineProfiler implements Profiler {
 
     public TraceEvent[] readEvents(File file) throws IOException {
         String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        content = StringUtils.trimTrailingWhitespace(content);
+        if (content.endsWith(","))
+            content = content.substring(0, content.length()-1) + "]";
         if (StringUtils.isEmpty(content))
             return new TraceEvent[0];
         TraceEvent[] events = json.readValue(content, TraceEvent[].class);
