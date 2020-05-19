@@ -55,12 +55,12 @@ public class TestGridSteps {
 //                        .gridColor("blue")
                         .coordsArePixels(false)
                         .grid1(3)
-                        .grid2(4)
+                        .grid2(10)
                         .xName("x")
                         .yName("y")
                         .imageName("image")
-                        .borderThickness(4)
-                        .gridThickness(2)
+                        .borderThickness(10)
+                        .gridThickness(4)
                     .build())
                 .add(new ShowImagePipelineStep("image", "Display", null, null))
                 .build();
@@ -69,7 +69,7 @@ public class TestGridSteps {
 
         exec.exec(in);
 
-        Thread.sleep(100000);
+        Thread.sleep(1000000);
     }
 
     @Test

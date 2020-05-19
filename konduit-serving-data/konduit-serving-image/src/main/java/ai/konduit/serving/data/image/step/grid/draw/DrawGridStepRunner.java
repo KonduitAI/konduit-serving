@@ -111,7 +111,10 @@ public class DrawGridStepRunner implements PipelineStepRunner {
         if(borderThickness <= 0)
             borderThickness = 1;
 
-        for (Segment s : ch.getLineSegments()) {
+
+
+        Segment[] segments = ch.getLineSegments();
+        for (Segment s : segments) {
             Vector2D start = s.getStart();
             Vector2D end = s.getEnd();
 
@@ -122,6 +125,13 @@ public class DrawGridStepRunner implements PipelineStepRunner {
 
             drawLine(m, borderColor, borderThickness, x1Px, x2Px, y1Px, y2Px);
         }
+
+        Scalar gridColor = step.gridColor() == null ? borderColor : stringToColor(step.gridColor());
+        int gridThickness = step.gridThickness();
+        if(gridThickness <= 0)
+            gridThickness = 1;
+
+        drawGrid(m, gridColor, gridThickness, segments, x, y);
 
         Data out = data.clone();
         Image outImg = Image.create(m);
@@ -136,6 +146,82 @@ public class DrawGridStepRunner implements PipelineStepRunner {
         int lineType = 8;
         int shift = 0;
         org.bytedeco.opencv.global.opencv_imgproc.line(m, p1, p2, color, thickness, lineType, shift);
+    }
+
+    protected void drawGrid(Mat m, Scalar color, int thickness, Segment[] segments, double[] x, double[] y) {
+        Segment grid1Segment1 = null;
+
+        for (Segment s : segments) {
+            Vector2D start = s.getStart();
+            Vector2D end = s.getEnd();
+            if (grid1Segment1 == null &&
+                    (start.getX() == x[0] && end.getX() == x[1]) ||
+                    (start.getX() == x[1] && end.getX() == x[0])) {
+                grid1Segment1 = s;
+            }
+        }
+
+        Segment grid1Segment2 = null;
+        Segment grid2Segment1 = null;
+        Segment grid2Segment2 = null;
+        for (Segment s : segments) {
+            if (s == grid1Segment1)
+                continue;
+            if (!grid1Segment1.getStart().equals(s.getStart()) &&
+                    !grid1Segment1.getStart().equals(s.getEnd()) &&
+                    !grid1Segment1.getEnd().equals(s.getStart()) &&
+                    !grid1Segment1.getEnd().equals(s.getEnd())) {
+                grid1Segment2 = s;
+            } else if (grid2Segment1 == null) {
+                grid2Segment1 = s;
+            } else {
+                grid2Segment2 = s;
+            }
+        }
+
+        drawGridLines(m, grid1Segment1, grid1Segment2, step.grid1(), color, thickness);
+        drawGridLines(m, grid2Segment1, grid2Segment2, step.grid2(), color, thickness);
+    }
+
+    protected void drawGridLines(Mat m, Segment s1, Segment s2, int num, Scalar color, int thickness){
+        double x1, x2, x3, x4, y1, y2, y3, y4;
+        if(s1.getStart().getX() <= s1.getEnd().getX()){
+            x1 = s1.getStart().getX();
+            x2 = s1.getEnd().getX();
+            y1 = s1.getStart().getY();
+            y2 = s1.getEnd().getY();
+        } else {
+            x1 = s1.getEnd().getX();
+            x2 = s1.getStart().getX();
+            y1 = s1.getEnd().getY();
+            y2 = s1.getStart().getY();
+        }
+
+        if(s2.getStart().getX() <= s2.getEnd().getX()){
+            x3 = s2.getStart().getX();
+            x4 = s2.getEnd().getX();
+            y3 = s2.getStart().getY();
+            y4 = s2.getEnd().getY();
+        } else {
+            x3 = s2.getEnd().getX();
+            x4 = s2.getStart().getX();
+            y3 = s2.getEnd().getY();
+            y4 = s2.getStart().getY();
+        }
+
+
+        for( int j=1; j<num; j++ ){
+            double frac = j / (double)num;
+            double deltaX1 = x2-x1;
+            double deltaX2 = x4-x3;
+            double deltaY1 = y2-y1;
+            double deltaY2 = y4-y3;
+            int x1Px = (int) (m.cols() * (x1 + frac * deltaX1));
+            int x2Px = (int) (m.cols() * (x3 + frac * deltaX2));
+            int y1Px = (int) (m.rows() * (y1 + frac * deltaY1));
+            int y2Px = (int) (m.rows() * (y3 + frac * deltaY2));
+            drawLine(m, color, thickness, x1Px, x2Px, y1Px, y2Px);
+        }
     }
 
     protected Scalar stringToColor(String s){
