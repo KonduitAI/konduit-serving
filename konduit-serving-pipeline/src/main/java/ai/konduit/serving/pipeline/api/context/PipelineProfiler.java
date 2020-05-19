@@ -26,6 +26,8 @@ import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -71,7 +73,15 @@ public class PipelineProfiler implements Profiler {
 
     private void fileSizeGuard() throws IOException {
         if (Files.size(profilerConfig.getOutputFile()) > profilerConfig.getSplitSize()) {
-            Files.delete(profilerConfig.getOutputFile());
+            Path currentFile = profilerConfig.getOutputFile();
+            String baseName = currentFile.getFileName().toString();
+            String parts[] = baseName.split("_");
+            int num = 1;
+            if (parts.length > 1) {
+                num = Integer.parseInt(parts[1]) + 1;
+            }
+            Path backup = Paths.get(currentFile.getFileName() + "_" + String.valueOf(num) + ".json");
+            Files.move(currentFile, backup);
             Files.createFile(profilerConfig.getOutputFile());
         }
     }
