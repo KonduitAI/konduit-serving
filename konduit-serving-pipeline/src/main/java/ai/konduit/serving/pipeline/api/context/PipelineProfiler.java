@@ -51,6 +51,7 @@ public class PipelineProfiler implements Profiler {
     @Getter
     private boolean logActive;
     private ProfilerConfig profilerConfig;
+    private Path currentLog;
 
     private long getProcessId() {
         // Note: may fail in some JVM implementations
@@ -74,26 +75,36 @@ public class PipelineProfiler implements Profiler {
     }
 
     private void fileSizeGuard() throws IOException {
-        System.out.println("Size is " + Files.size(profilerConfig.getOutputFile()));
-        if (Files.size(profilerConfig.getOutputFile()) > profilerConfig.getSplitSize()) {
-            Path currentFile = profilerConfig.getOutputFile();
-            String baseName = FilenameUtils.removeExtension(currentFile.getFileName().toString());
-            /*String parts[] = baseName.split("_");
+        if ((profilerConfig.getSplitSize() > 0) &&
+            (Files.size(profilerConfig.getOutputFile()) > profilerConfig.getSplitSize())) {
+            String baseName = FilenameUtils.removeExtension(currentLog.getFileName().toString());
             int num = 1;
+            String counted = org.apache.commons.lang3.StringUtils.EMPTY;
+            String[] parts = baseName.split("_");
             if (parts.length > 1) {
-                num = Integer.parseInt(parts[1]) + 1;
-            }*/
-            Path backup = Paths.get(currentFile.getParent() + FileSystems.getDefault().getSeparator() +
-                    baseName + "_" + String.valueOf(System.currentTimeMillis()) + ".json");
-            Files.move(currentFile, backup);
-            Files.createFile(currentFile);
+                counted = parts[0] + "_" + (Integer.parseInt(parts[1]) + 1);
+            }
+            else {
+                counted = baseName + "_" + num;
+            }
+            Path nextFile = Paths.get(currentLog.getParent() + FileSystems.getDefault().getSeparator() +
+                    counted + ".json");
+            Files.createFile(nextFile);
+            try {
+                this.writer = new BufferedWriter(new FileWriter(nextFile.toString(), true));
+                this.writer.write("[");     //JSON array open (array close is optional for Chrome profiler format)
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            this.currentLog = nextFile;
         }
     }
 
     public PipelineProfiler(ProfilerConfig profilerConfig) {
         this.profilerConfig = profilerConfig;
+        this.currentLog = profilerConfig.getOutputFile();
         try {
-            this.writer = new BufferedWriter(new FileWriter(profilerConfig.getOutputFile().toString(), true));
+            this.writer = new BufferedWriter(new FileWriter(this.currentLog.toString(), true));
             this.writer.write("[");     //JSON array open (array close is optional for Chrome profiler format)
         } catch (IOException e) {
             throw new RuntimeException(e);
