@@ -152,6 +152,7 @@ public class DrawGridStepRunner implements PipelineStepRunner {
     protected void drawGrid(Mat m, Scalar color, int thickness, Segment[] segments, double[] x, double[] y) {
         Segment grid1Segment1 = null;
 
+        //Work out the
         for (Segment s : segments) {
             Vector2D start = s.getStart();
             Vector2D end = s.getEnd();
@@ -160,6 +161,20 @@ public class DrawGridStepRunner implements PipelineStepRunner {
                     (start.getX() == x[1] && end.getX() == x[0])) {
                 grid1Segment1 = s;
             }
+        }
+
+        if(grid1Segment1 == null){
+            StringBuilder sb = new StringBuilder();
+            sb.append("Invalid order for grid points:");
+            for( int i=0; i<4; i++ ){
+                if(i > 0)
+                    sb.append(",");
+                sb.append(" (").append(x[i]).append(",").append(y[i]).append(")");
+            }
+            sb.append(" - first two points are on opposite corners of the grid, hence defining grid1 relative to this is impossible." +
+                    " Box coordinates must be defined such that (x[0],y[0]) and (x[1],y[1]) are adjacent");
+
+            throw new IllegalStateException(sb.toString());
         }
 
         Segment grid1Segment2 = null;
