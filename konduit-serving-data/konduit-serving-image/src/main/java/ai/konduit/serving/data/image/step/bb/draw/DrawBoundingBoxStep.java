@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.draw;
+package ai.konduit.serving.data.image.step.bb.draw;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -42,7 +42,7 @@ import java.util.Map;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class DrawBoundingBoxStep implements PipelineStep {
-    public static final String DEFAULT_COLOR = "green";
+    public static final String DEFAULT_COLOR = "lime";
 
     public enum Scale {NONE, AT_LEAST, AT_MOST}
 
@@ -76,6 +76,7 @@ public class DrawBoundingBoxStep implements PipelineStep {
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
         //Without setting defaults here again like this, the fields would actually be null
         this.scale = Scale.NONE;
+        this.lineThickness = 1;
     }
 
 }

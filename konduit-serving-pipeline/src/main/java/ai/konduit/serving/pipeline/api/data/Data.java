@@ -139,6 +139,7 @@ public interface Data {
     boolean hasMetaData();
     Data getMetaData();
     void setMetaData(Data data);
+    Data clone();
 
     // Serialization routines
     default void save(File toFile) throws IOException {

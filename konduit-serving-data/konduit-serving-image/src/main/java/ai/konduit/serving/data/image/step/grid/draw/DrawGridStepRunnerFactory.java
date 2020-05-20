@@ -16,22 +16,27 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.extract;
+package ai.konduit.serving.data.image.step.grid.draw;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import org.nd4j.common.base.Preconditions;
 
-public class ExtractBoundingBoxStepRunnerFactory implements PipelineStepRunnerFactory {
+public class DrawGridStepRunnerFactory implements PipelineStepRunnerFactory {
     @Override
     public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof ExtractBoundingBoxStep;
+        return pipelineStep instanceof DrawGridStep || pipelineStep instanceof DrawFixedGridStep;
     }
 
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new ExtractBoundingBoxStepRunner((ExtractBoundingBoxStep) pipelineStep);
+        if(pipelineStep instanceof DrawGridStep){
+            return new DrawGridStepRunner((DrawGridStep) pipelineStep);
+        } else {
+            return new DrawGridStepRunner((DrawFixedGridStep) pipelineStep);
+        }
+
     }
 }

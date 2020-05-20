@@ -16,32 +16,22 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.util;
+package ai.konduit.serving.data.image.step.bb.draw;
 
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.opencv_java;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import org.nd4j.common.base.Preconditions;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-public class OpenCVUtil {
-
-    private OpenCVUtil(){ }
-
-
-    private static final AtomicBoolean opencvLoaded = new AtomicBoolean();
-
-    /**
-     *
-     */
-    public static synchronized void ensureOpenCVLoaded(){
-        if(opencvLoaded.get())
-            return;
-
-        /*
-        Call Loader.load(opencv_java.class) before using the API in the org.opencv namespace.
-         */
-        Loader.load(opencv_java.class);
-
+public class DrawBoundingBoxStepRunnerFactory implements PipelineStepRunnerFactory {
+    @Override
+    public boolean canRun(PipelineStep pipelineStep) {
+        return pipelineStep instanceof DrawBoundingBoxStep;
     }
 
+    @Override
+    public PipelineStepRunner create(PipelineStep pipelineStep) {
+        Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
+        return new DrawBoundingBoxStepRunner((DrawBoundingBoxStep) pipelineStep);
+    }
 }
