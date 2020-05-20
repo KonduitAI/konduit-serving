@@ -72,24 +72,18 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
         Context ctx = null; //TODO
         Data current = data;
         String saved = StringUtils.EMPTY;
-        try {
-            for (PipelineStepRunner psr : runners) {
-                if (profiler.profilerEnabled()) {
-                    saved = psr.name();
-                    profiler.eventStart(saved);
-                }
-                current = psr.exec(ctx, current);
-                if (profiler.profilerEnabled()) {
-                    profiler.eventEnd(psr.name());
-                }
-            }
-            if (profiler.profilerEnabled() && ((PipelineProfiler) profiler).isLogActive()) {
-                profiler.eventEnd(saved);
-            }
+        for (PipelineStepRunner psr : runners) {
+           if (profiler.profilerEnabled()) {
+              saved = psr.name();
+              profiler.eventStart(saved);
+           }
+           current = psr.exec(ctx, current);
+           if (profiler.profilerEnabled()) {
+               profiler.eventEnd(psr.name());
+           }
         }
-        catch (IOException e) {
-            log.error("I/O failure in SequencePipelineExecutor", e);
-            throw new RuntimeException(e);
+        if (profiler.profilerEnabled() && ((PipelineProfiler) profiler).isLogActive()) {
+          profiler.eventEnd(saved);
         }
         return current;
     }

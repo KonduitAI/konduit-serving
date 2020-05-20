@@ -67,12 +67,12 @@ public interface Profiler {
     /**
      * Start the timer for the event with the specified key.
      */
-    void eventStart(String key) throws IOException;
+    void eventStart(String key);
 
     /**
      * End the timer for the event with the specified key.
      * Should be called some time after {@link #eventStart(String)}
      */
-    void eventEnd(String key) throws IOException;
+    void eventEnd(String key);
 
 }

@@ -37,5 +37,5 @@ public class TraceEvent {
     private long ts;
     private long pid;
     private long tid;
-    EventType ph;
+    private EventType ph;
 }

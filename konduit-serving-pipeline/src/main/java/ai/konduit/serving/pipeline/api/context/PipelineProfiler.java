@@ -128,6 +128,7 @@ public class PipelineProfiler implements Profiler {
 
             public void runHelper() throws Exception {
                 while (true) {
+                    fileSizeGuard();
                     TraceEvent te = writeQueue.take();    //Blocking
                     writing.set(true);
                     try {
@@ -152,8 +153,7 @@ public class PipelineProfiler implements Profiler {
     }
 
     @Override
-    public void eventStart(String key) throws IOException {
-        fileSizeGuard();
+    public void eventStart(String key) {
         logActive = true;
         startTime = System.nanoTime() / 1000;
 
@@ -170,7 +170,7 @@ public class PipelineProfiler implements Profiler {
     }
 
     @Override
-    public void eventEnd(String key) throws IOException {
+    public void eventEnd(String key) {
         if (logActive) {
             while ((!writeQueue.isEmpty() || writing.get()) && fileWritingThread.isAlive()) {
                 try {
@@ -186,7 +186,6 @@ public class PipelineProfiler implements Profiler {
             }
         }
         logActive = false;
-        fileSizeGuard();
         endTime = System.nanoTime() / 1000;
 
         TraceEvent event = TraceEvent.builder()
@@ -201,14 +200,14 @@ public class PipelineProfiler implements Profiler {
         writeQueue.add(event);
     }
 
-    public TraceEvent[] readEvents(File file) throws IOException {
+    public static TraceEvent[] readEvents(File file) throws IOException {
         String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
         content = StringUtils.trimTrailingWhitespace(content);
         if (content.endsWith(","))
             content = content.substring(0, content.length()-1) + "]";
         if (StringUtils.isEmpty(content))
             return new TraceEvent[0];
-        TraceEvent[] events = json.readValue(content, TraceEvent[].class);
+        TraceEvent[] events = new ObjectMapper().readValue(content, TraceEvent[].class);
         return events;
     }
 }
