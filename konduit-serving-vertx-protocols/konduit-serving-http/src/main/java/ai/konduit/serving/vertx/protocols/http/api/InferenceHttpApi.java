@@ -20,6 +20,7 @@ package ai.konduit.serving.vertx.protocols.http.api;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
 import lombok.AllArgsConstructor;

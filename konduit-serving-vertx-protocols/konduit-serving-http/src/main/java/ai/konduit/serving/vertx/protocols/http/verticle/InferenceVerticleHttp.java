@@ -72,16 +72,16 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                     if (handler.failed()) {
                         startPromise.fail(handler.cause());
                     } else {
-                        HttpServer resultantHttpServer = handler.result();
-                        inferenceConfiguration.setPort(resultantHttpServer.actualPort());
+                        int actualPort = handler.result().actualPort();
+                        inferenceConfiguration.setPort(actualPort);
 
                         try {
                             ((ContextInternal) context).getDeployment()
                                     .deploymentOptions()
                                     .setConfig(new JsonObject(inferenceConfiguration.toJson()));
 
-                            log.info("Inference server is listening on host: '{}'", inferenceConfiguration.getHost());
-                            log.info("Inference server started on port {} with {} pipeline steps", port, pipeline.size());
+                            log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.getHost());
+                            log.info("Inference HTTP server started on port {} with {} pipeline steps", actualPort, pipeline.size());
                             startPromise.complete();
                         } catch (Throwable throwable) {
                             startPromise.fail(throwable);

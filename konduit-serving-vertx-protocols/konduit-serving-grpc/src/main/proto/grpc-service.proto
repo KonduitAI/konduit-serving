@@ -1,0 +1,14 @@
+
+syntax = "proto3";
+
+import "ai/konduit/serving/pipeline/api/protobuf/data.proto";
+
+package ai.konduit.serving;
+option java_package = "ai.konduit.serving.vertx.protocols.grpc.api";
+option java_outer_classname = "GrpcService";
+
+// The main grpc service definition.
+service Inference {
+  // predicts an output
+  rpc predict (DataScheme) returns (DataScheme) {}
+}

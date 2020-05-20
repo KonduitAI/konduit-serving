@@ -25,6 +25,7 @@ import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
 import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.InferenceDeploymentResult;
+import ai.konduit.serving.vertx.config.ServerProtocol;
 import ai.konduit.serving.vertx.protocols.http.api.ErrorResponse;
 import ai.konduit.serving.vertx.protocols.http.test.FailureTestingPipelineStep;
 import com.jayway.restassured.http.ContentType;
@@ -60,6 +61,7 @@ public class InferenceVerticleHttpTest {
     @BeforeClass
     public static void setUp(TestContext testContext) {
         configuration = InferenceConfiguration.builder()
+                .protocol(ServerProtocol.HTTP)
                 .pipeline(SequencePipeline.builder()
                         .add(LoggingPipelineStep.builder().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR).build())
                         .add(new FailureTestingPipelineStep())

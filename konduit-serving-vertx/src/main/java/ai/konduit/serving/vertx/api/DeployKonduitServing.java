@@ -120,7 +120,8 @@ public class DeployKonduitServing {
 
                 vertx.close();
             } else {
-                log.info("Deployed server with configuration \n{}",
+                log.info("Deployed {} server with configuration \n{}",
+                        inferenceConfiguration.getProtocol(),
                         jsonConfiguration.encodePrettily());
 
                 if (eventHandler != null) {
