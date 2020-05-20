@@ -41,7 +41,7 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
 
     private SequencePipeline pipeline;
     private List<PipelineStepRunner> runners;
-    private Profiler profiler;
+    private ProfilerConfig profilerConfig;
 
     public SequencePipelineExecutor(@NonNull SequencePipeline p){
         this.pipeline = p;
@@ -67,11 +67,21 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
         return runners;
     }
 
+	// TODO: review profiler lifetime
+    private static Profiler profiler;
+    private static Profiler createProfiler(ProfilerConfig profilerConfig) {
+        if (profiler == null) {
+            profiler = new PipelineProfiler(profilerConfig);
+        }
+        return profiler;
+    }
+
     @Override
     public Data exec(Data data) {
         Context ctx = null; //TODO
         Data current = data;
         String saved = StringUtils.EMPTY;
+        Profiler profiler = createProfiler(profilerConfig);
         for (PipelineStepRunner psr : runners) {
            if (profiler.profilerEnabled()) {
               saved = psr.name();
@@ -94,7 +104,7 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
     }
 
     @Override
-    public void profilerConfig(Profiler profiler) {
-        this.profiler = profiler;
+    public void profilerConfig(ProfilerConfig profilerConfig) {
+        this.profilerConfig = profilerConfig;
     }
 }

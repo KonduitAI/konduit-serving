@@ -67,10 +67,10 @@ public class PipelineProfilerTest {
         System.out.println(logFile.toPath().toString());
         ProfilerConfig profilerConfig = new ProfilerConfig();
         profilerConfig.setOutputFile(Paths.get(logFile.toURI()));
-        Profiler profiler = new PipelineProfiler(profilerConfig);
-        pe.profilerConfig(profiler);
+        pe.profilerConfig(profilerConfig);
         pe.exec(d);
-        TraceEvent[] events = ((PipelineProfiler)profiler).readEvents(logFile);
+
+        TraceEvent[] events = PipelineProfiler.readEvents(logFile);
         assertEquals(5, events.length);
         assertEquals("Runner", events[0].getName());
         assertEquals("Runner", events[1].getName());
@@ -101,9 +101,8 @@ public class PipelineProfilerTest {
         ProfilerConfig profilerConfig = new ProfilerConfig();
         profilerConfig.setOutputFile(Paths.get(logFile.toURI()));
         profilerConfig.setSplitSize(10);
-        Profiler profiler = new PipelineProfiler(profilerConfig);
-        pe.profilerConfig(profiler);
-        for (int i = 0; i < 10; ++i) {
+        pe.profilerConfig(profilerConfig);
+        for (int i = 0; i < 100; ++i) {
             pe.exec(d);
         }
         // Assume no race condition or I/O failures if we are here.

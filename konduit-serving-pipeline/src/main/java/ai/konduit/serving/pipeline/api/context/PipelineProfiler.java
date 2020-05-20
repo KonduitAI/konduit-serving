@@ -75,7 +75,7 @@ public class PipelineProfiler implements Profiler {
 
     private void fileSizeGuard() throws IOException {
         if ((profilerConfig.getSplitSize() > 0) &&
-            (Files.size(profilerConfig.getOutputFile()) > profilerConfig.getSplitSize())) {
+            (Files.size(currentLog) > profilerConfig.getSplitSize())) {
             String baseName = FilenameUtils.removeExtension(currentLog.getFileName().toString());
             int num = 1;
             String counted = org.apache.commons.lang3.StringUtils.EMPTY;
@@ -89,13 +89,13 @@ public class PipelineProfiler implements Profiler {
             Path nextFile = Paths.get(currentLog.getParent() + FileSystems.getDefault().getSeparator() +
                     counted + ".json");
             Files.createFile(nextFile);
+            this.currentLog = nextFile;
             try {
                 this.writer = new BufferedWriter(new FileWriter(nextFile.toString(), true));
                 this.writer.write("[");     //JSON array open (array close is optional for Chrome profiler format)
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            this.currentLog = nextFile;
         }
     }
 

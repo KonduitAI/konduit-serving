@@ -1,3 +1,4 @@
+
 /* ******************************************************************************
  * Copyright (c) 2020 Konduit K.K.
  *
@@ -80,7 +81,7 @@ public interface PipelineExecutor {
     Logger getLogger();
 
     /**
-     * Profiling
+     * Set profiling config.
      */
-    void profilerConfig(Profiler profiler);
+    void profilerConfig(ProfilerConfig profilerConfig);
 }
