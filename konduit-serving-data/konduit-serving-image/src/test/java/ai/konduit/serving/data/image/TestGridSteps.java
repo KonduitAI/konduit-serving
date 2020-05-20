@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image;
 
+import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -195,6 +196,39 @@ public class TestGridSteps {
                 } else {
                     assertEquals(imgOutExp, imgOut2);
                 }
+
+                //Also test fixed grid step:
+                double[] xV = new double[]{xD[order[0]], xD[order[1]], xD[order[2]], xD[order[3]]};
+                double[] yV = new double[]{yD[order[0]], yD[order[1]], yD[order[2]], yD[order[3]]};
+                Pipeline p3 = SequencePipeline.builder()
+                        .add(DrawFixedGridStep.builder()
+                                .borderColor("green")
+                                .gridColor("blue")
+                                .coordsArePixels(pixelCoords)
+                                .grid1(grid1)
+                                .grid2(grid2)
+                                .x(xV)
+                                .y(yV)
+                                .imageName("image")
+                                .borderThickness(10)
+                                .gridThickness(4)
+                                .build())
+                        //.add(new ShowImagePipelineStep("image", "FIXED - ACTUAL - " + Arrays.toString(order) + " - pixelCoords=" + pixelCoords, null, null))
+                        .build();
+                Data outFixed = p3.executor().exec(in);
+                Image imgFixed = outFixed.getImage("image");
+                if (pixelCoords) {
+                    //Tiny rounding error - images are not exactly (bit for bit) identical - but are correct
+                    //Max 10 pixels differ by more than value of 32 for r,g,b channels combined
+                    assertApproxEqual(imgOutExp, imgFixed, 32, 10);
+                } else {
+                    assertEquals(imgOutExp, imgFixed);
+                }
+
+                String json = p2.toJson();
+                String jsonF = p3.toJson();
+                assertEquals(p2, Pipeline.fromJson(json));
+                assertEquals(p3, Pipeline.fromJson(jsonF));
             }
         }
     }

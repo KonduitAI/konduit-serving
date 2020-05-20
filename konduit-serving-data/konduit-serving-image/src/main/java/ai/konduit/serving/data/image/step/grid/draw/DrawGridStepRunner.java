@@ -56,9 +56,16 @@ public class DrawGridStepRunner implements PipelineStepRunner {
 
 
     protected final DrawGridStep step;
+    protected final DrawFixedGridStep fStep;
 
     public DrawGridStepRunner(@NonNull DrawGridStep step){
         this.step = step;
+        this.fStep = null;
+    }
+
+    public DrawGridStepRunner(@NonNull DrawFixedGridStep step){
+        this.step = null;
+        this.fStep = step;
     }
 
     @Override
@@ -68,15 +75,16 @@ public class DrawGridStepRunner implements PipelineStepRunner {
 
     @Override
     public PipelineStep getPipelineStep() {
-        return step;
+        if(step != null)
+            return step;
+        return fStep;
     }
 
     @Override
     public Data exec(Context ctx, Data data) {
+        boolean fixed = fStep != null;
 
-        String imgName = step.imageName();
-        String xName = step.xName();
-        String yName = step.yName();
+        String imgName = fixed ? fStep.imageName() : step.imageName();
 
         if (imgName == null) {
             String errMultipleKeys = "Image field name was not provided and could not be inferred: multiple image fields exist: %s and %s";
@@ -84,31 +92,47 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             imgName = DataUtils.inferField(data, ValueType.IMAGE, false, errMultipleKeys, errNoKeys);
         }
 
-        if (xName == null || yName == null) {
-            throw new IllegalStateException("xName and yName must be specified in configuration. These should be the name of length 4 List<Double> or List<Long>");
-        }
-
-        if (data.type(xName) != ValueType.LIST || (data.listType(xName) != ValueType.DOUBLE && data.listType(xName) != ValueType.INT64)) {
-            String str = (data.type(xName) == ValueType.LIST ? ", list type " + data.listType(xName).toString() : "");
-            throw new IllegalStateException("xName = \"" + xName + "\" should be a length 4 List<Double> or List<Long>, but is type " + data.type(xName) + str);
-        }
-
-        if (data.type(yName) != ValueType.LIST || (data.listType(yName) != ValueType.DOUBLE && data.listType(yName) != ValueType.INT64)) {
-            String str = (data.type(yName) == ValueType.LIST ? ", list type " + data.listType(yName).toString() : "");
-            throw new IllegalStateException("yName = \"" + yName + "\" should be a length 4 List<Double> or List<Long>, but is type " + data.type(yName) + str);
-        }
-
-
         Image i = data.getImage(imgName);
-        double[] x = getAsDouble("xName", xName, data);
-        double[] y = getAsDouble("yName", yName, data);
+        double[] x;
+        double[] y;
+
+        if(fixed){
+            x = fStep.x();
+            y = fStep.y();
+        } else {
+            String xName = step.xName();
+            String yName = step.yName();
+            if (xName == null || yName == null) {
+                throw new IllegalStateException("xName and yName must be specified in configuration. These should be the name of length 4 List<Double> or List<Long>");
+            }
+
+            if (data.type(xName) != ValueType.LIST || (data.listType(xName) != ValueType.DOUBLE && data.listType(xName) != ValueType.INT64)) {
+                String str = (data.type(xName) == ValueType.LIST ? ", list type " + data.listType(xName).toString() : "");
+                throw new IllegalStateException("xName = \"" + xName + "\" should be a length 4 List<Double> or List<Long>, but is type " + data.type(xName) + str);
+            }
+
+            if (data.type(yName) != ValueType.LIST || (data.listType(yName) != ValueType.DOUBLE && data.listType(yName) != ValueType.INT64)) {
+                String str = (data.type(yName) == ValueType.LIST ? ", list type " + data.listType(yName).toString() : "");
+                throw new IllegalStateException("yName = \"" + yName + "\" should be a length 4 List<Double> or List<Long>, but is type " + data.type(yName) + str);
+            }
+
+            x = getAsDouble("xName", xName, data);
+            y = getAsDouble("yName", yName, data);
+        }
 
         ConvexHull2D ch = convexHull(x, y);
 
         Mat m = i.getAs(Mat.class).clone();
 
-        Scalar borderColor = step.borderColor() == null ? ColorUtil.stringToColor(DrawGridStep.DEFAULT_COLOR) : ColorUtil.stringToColor(step.borderColor());
-        int borderThickness = step.borderThickness();
+        Scalar borderColor;
+        int borderThickness;
+        if(fixed){
+            borderColor = fStep.borderColor() == null ? ColorUtil.stringToColor(DrawGridStep.DEFAULT_COLOR) : ColorUtil.stringToColor(fStep.borderColor());
+            borderThickness = fStep.borderThickness();
+        } else {
+            borderColor = step.borderColor() == null ? ColorUtil.stringToColor(DrawGridStep.DEFAULT_COLOR) : ColorUtil.stringToColor(step.borderColor());
+            borderThickness = step.borderThickness();
+        }
         if(borderThickness <= 0)
             borderThickness = 1;
 
@@ -120,7 +144,7 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             Vector2D end = s.getEnd();
 
             int x1Px, x2Px, y1Px, y2Px;
-            if(step.coordsArePixels()){
+            if(fixed && fStep.coordsArePixels() || !fixed && step.coordsArePixels()){
                 x1Px = (int) start.getX();
                 x2Px = (int) end.getX();
                 y1Px = (int) start.getY();
@@ -137,8 +161,16 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             drawLine(m, borderColor, borderThickness, x1Px, x2Px, y1Px, y2Px);
         }
 
-        Scalar gridColor = step.gridColor() == null ? borderColor : ColorUtil.stringToColor(step.gridColor());
-        int gridThickness = step.gridThickness();
+        Scalar gridColor;
+        int gridThickness;
+        if(fixed){
+            gridColor = fStep.gridColor() == null ? borderColor : ColorUtil.stringToColor(fStep.gridColor());
+            gridThickness = fStep.gridThickness();
+        } else {
+            gridColor = step.gridColor() == null ? borderColor : ColorUtil.stringToColor(step.gridColor());
+            gridThickness = step.gridThickness();
+        }
+
         if(gridThickness <= 0)
             gridThickness = 1;
 
@@ -205,8 +237,17 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             }
         }
 
-        drawGridLines(m, grid1Segment1, grid1Segment2, step.grid1(), color, thickness);
-        drawGridLines(m, grid2Segment1, grid2Segment2, step.grid2(), color, thickness);
+        int g1, g2;
+        if(step != null){
+            g1 = step.grid1();
+            g2 = step.grid2();
+        } else {
+            g1 = fStep.grid1();
+            g2 = fStep.grid2();
+        }
+
+        drawGridLines(m, grid1Segment1, grid1Segment2, g1, color, thickness);
+        drawGridLines(m, grid2Segment1, grid2Segment2, g2, color, thickness);
     }
 
     protected void drawGridLines(Mat m, Segment s1, Segment s2, int num, Scalar color, int thickness){
@@ -243,7 +284,7 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             double deltaY1 = y2-y1;
             double deltaY2 = y4-y3;
             int x1Px, x2Px, y1Px, y2Px;
-            if(step.coordsArePixels()){
+            if((step != null && step.coordsArePixels()) || (fStep != null && fStep.coordsArePixels())){
                 x1Px = (int) (x1 + frac * deltaX1);
                 x2Px = (int) (x3 + frac * deltaX2);
                 y1Px = (int) (y1 + frac * deltaY1);

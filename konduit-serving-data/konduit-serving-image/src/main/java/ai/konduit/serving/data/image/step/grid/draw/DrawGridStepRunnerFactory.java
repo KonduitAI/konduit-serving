@@ -26,12 +26,17 @@ import org.nd4j.common.base.Preconditions;
 public class DrawGridStepRunnerFactory implements PipelineStepRunnerFactory {
     @Override
     public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof DrawGridStep;
+        return pipelineStep instanceof DrawGridStep || pipelineStep instanceof DrawFixedGridStep;
     }
 
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new DrawGridStepRunner((DrawGridStep) pipelineStep);
+        if(pipelineStep instanceof DrawGridStep){
+            return new DrawGridStepRunner((DrawGridStep) pipelineStep);
+        } else {
+            return new DrawGridStepRunner((DrawFixedGridStep) pipelineStep);
+        }
+
     }
 }

@@ -25,15 +25,8 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * Draw a grid on the specified image, based on the x/y coordinates of the corners, and the number of segments within
- * the grid in both directions.<br>
- * The 4 corner X coordinates come from {@code Data.getListDouble(xName)} and the 4 corner Y coordinates come from
- * {@code Data.getListDouble(yName)}.<br>
- * Note 1: The order of the the X/Y coordinates does not matter, other than grid1 value corresponding to the number of
- * segments between the (x[0],y[0]) and (x[1],y[1]) corners.<br>
- * The colors and line thicknesses can be configured.
- * <p>
- * See also {@link DrawFixedGridStep}
+ * As per {@link DrawGridStep} but the x/y location values are hardcoded into the configuration, istead of coming
+ * dynamically from the input Data instance
  *
  * @author Alex Black
  */
@@ -41,12 +34,12 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
-public class DrawGridStep implements PipelineStep {
+public class DrawFixedGridStep implements PipelineStep {
     public static final String DEFAULT_COLOR = "lime";
 
     private String imageName;               //If null: just find any image
-    private String xName;                   //Name of the List<Long> or List<Double> of length 4, specifying X coordinates in any order
-    private String yName;                   //Name of the List<Long> or List<Double> of length 4, specifying Y coordinates in any order (that matches X order)
+    private double[] x;                     //length 4, specifying X coordinates in any order
+    private double[] y;                     //length 4, specifying Y coordinates in any order (that matches X order)
     private int grid1;                      //Number of grid segments between (x[0],y[0]) and (x[1],y[1])
     private int grid2;                      //Number of grid segments in the other direction
     private boolean coordsArePixels;        //If true: Lists are in pixels, not 0 to 1
@@ -56,7 +49,7 @@ public class DrawGridStep implements PipelineStep {
     private int borderThickness = 1;
     private Integer gridThickness;          //If null: same thickness as border
 
-    public DrawGridStep() {
+    public DrawFixedGridStep() {
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
         //Without setting defaults here again like this, the fields would actually be null or 0 etc
         this.borderThickness = 1;
