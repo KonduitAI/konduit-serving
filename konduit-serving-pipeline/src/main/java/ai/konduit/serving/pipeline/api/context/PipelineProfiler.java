@@ -91,11 +91,28 @@ public class PipelineProfiler implements Profiler {
             Files.createFile(nextFile);
             this.currentLog = nextFile;
             try {
+                this.writer.flush();
+                this.writer.close();
                 this.writer = new BufferedWriter(new FileWriter(nextFile.toString(), true));
                 this.writer.write("[");     //JSON array open (array close is optional for Chrome profiler format)
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    public void waitWriter() {
+        while ((!writeQueue.isEmpty() || writing.get()) && fileWritingThread.isAlive()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        try {
+            writer.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -135,6 +152,7 @@ public class PipelineProfiler implements Profiler {
                         String j = json.writeValueAsString(te);
                         writer.append(j);
                         writer.append(",\n");
+                        writer.flush();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     } finally {
@@ -171,8 +189,8 @@ public class PipelineProfiler implements Profiler {
 
     @Override
     public void eventEnd(String key) {
-        if (logActive) {
-            while ((!writeQueue.isEmpty() || writing.get()) && fileWritingThread.isAlive()) {
+        //if (logActive) {
+            /*while ((!writeQueue.isEmpty() || writing.get()) && fileWritingThread.isAlive()) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -183,8 +201,8 @@ public class PipelineProfiler implements Profiler {
                 writer.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
-            }
-        }
+            }*/
+        //}
         logActive = false;
         endTime = System.nanoTime() / 1000;
 

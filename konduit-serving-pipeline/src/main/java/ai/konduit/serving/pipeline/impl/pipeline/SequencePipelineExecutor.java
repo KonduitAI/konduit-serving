@@ -95,6 +95,7 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
         if (profiler.profilerEnabled() && ((PipelineProfiler) profiler).isLogActive()) {
           profiler.eventEnd(saved);
         }
+        ((PipelineProfiler)profiler).waitWriter();
         return current;
     }
 

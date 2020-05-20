@@ -47,7 +47,7 @@ public class PipelineProfilerTest {
     public TemporaryFolder testDir = new TemporaryFolder();
 
     @Test
-    public void testProfilingEvents() throws IOException {
+    public void testProfilingEvents() throws IOException, InterruptedException {
 
         AtomicInteger count1 = new AtomicInteger();
         AtomicInteger count2 = new AtomicInteger();
@@ -69,9 +69,8 @@ public class PipelineProfilerTest {
         profilerConfig.setOutputFile(Paths.get(logFile.toURI()));
         pe.profilerConfig(profilerConfig);
         pe.exec(d);
-
         TraceEvent[] events = PipelineProfiler.readEvents(logFile);
-        assertEquals(5, events.length);
+        assertEquals(6, events.length);
         assertEquals("Runner", events[0].getName());
         assertEquals("Runner", events[1].getName());
         assertEquals("LoggingPipelineStepRunner", events[2].getName());
