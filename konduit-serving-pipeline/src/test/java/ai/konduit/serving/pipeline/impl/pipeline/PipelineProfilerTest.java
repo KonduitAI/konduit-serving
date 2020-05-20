@@ -103,17 +103,19 @@ public class PipelineProfilerTest {
         profilerConfig.setSplitSize(10);
         Profiler profiler = new PipelineProfiler(profilerConfig);
         pe.profilerConfig(profiler);
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < 10; ++i) {
             pe.exec(d);
         }
+        // Assume no race condition or I/O failures if we are here.
     }
 
     @Test
     public void testEventsJson() throws JsonProcessingException {
-        String content = "[{\"name\":\"Runner\",\"cat\":[\"Step\"],\"ts\":507986437484,\"pid\":20272,\"tid\":1,\"ph\":\"START\"},\n" +
-                "{\"name\":\"LoggingPipelineStepRunner\",\"cat\":[\"Step\"],\"ts\":507986438897,\"pid\":20272,\"tid\":1,\"ph\":\"START\"},\n" +
-                "{\"name\":\"LoggingPipelineStepRunner\",\"cat\":[\"Step\"],\"ts\":507986538818,\"pid\":20272,\"tid\":1,\"ph\":\"END\"},\n" +
-                "{\"name\":\"Runner\",\"cat\":[\"Step\"],\"ts\":507986538851,\"pid\":20272,\"tid\":1,\"ph\":\"START\"}]";
+        String content = "[{\"name\":\"Runner\",\"cat\":\"START\",\"ts\":577532080904,\"pid\":17104,\"tid\":1,\"ph\":\"B\"},\n" +
+                "{\"name\":\"Runner\",\"cat\":\"END\",\"ts\":577532194829,\"pid\":17104,\"tid\":1,\"ph\":\"E\"},\n" +
+                "{\"name\":\"LoggingPipelineStepRunner\",\"cat\":\"START\",\"ts\":577532194878,\"pid\":17104,\"tid\":1,\"ph\":\"B\"},\n" +
+                "{\"name\":\"LoggingPipelineStepRunner\",\"cat\":\"END\",\"ts\":577532195804,\"pid\":17104,\"tid\":1,\"ph\":\"E\"},\n" +
+                "{\"name\":\"Runner\",\"cat\":\"START\",\"ts\":577532195829,\"pid\":17104,\"tid\":1,\"ph\":\"B\"}]";
         TraceEvent[] events = new ObjectMapper().readValue(content, TraceEvent[].class);
         assertEquals("Runner", events[0].getName());
         assertEquals("LoggingPipelineStepRunner", events[2].getName());

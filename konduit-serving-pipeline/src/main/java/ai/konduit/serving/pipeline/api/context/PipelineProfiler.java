@@ -30,7 +30,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -160,9 +159,9 @@ public class PipelineProfiler implements Profiler {
 
         TraceEvent event = TraceEvent.builder()
                 .name(key)
-                .cat(Collections.singletonList("Step"))
+                .cat("START")
                 .ts(startTime)
-                .ph(TraceEvent.EventType.START)
+                .ph(TraceEvent.EventType.B)
                 .pid(this.pid)
                 .tid(this.tid)
                 .build();
@@ -192,9 +191,9 @@ public class PipelineProfiler implements Profiler {
 
         TraceEvent event = TraceEvent.builder()
                 .name(key)
-                .cat(Collections.singletonList("Step"))
+                .cat("END")
                 .ts(endTime)
-                .ph(TraceEvent.EventType.END)
+                .ph(TraceEvent.EventType.E)
                 .pid(this.pid)
                 .tid(this.tid)
                 .build();

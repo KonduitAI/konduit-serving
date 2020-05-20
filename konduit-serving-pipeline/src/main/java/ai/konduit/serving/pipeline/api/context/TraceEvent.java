@@ -29,11 +29,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TraceEvent {
-    public static enum EventType {
-        START, END;
+    public enum EventType {
+        B,E
     }
     private String name;
-    private List<String> cat;
+    private String cat;
     private long ts;
     private long pid;
     private long tid;
