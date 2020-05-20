@@ -37,9 +37,8 @@ public class DrawGridStep implements PipelineStep {
     private String imageName;       //If null: just find any image
     private String xName;           //Name of the List<Long> or List<Double> of length 4, specifying X coordinates in any order
     private String yName;           //Name of the List<Long> or List<Double> of length 4, specifying Y coordinates in any order (that matches X order)
-    //TODO ambiguous - which order?
-    private int grid1;              //Number of grid segments in X direction
-    private int grid2;              //Number of grid segments in Y direction
+    private int grid1;              //Number of grid segments between (x[0],y[0]) and (x[1],y[1])
+    private int grid2;              //Number of grid segments in the other direction
     private boolean coordsArePixels;        //If true: Lists are in pixels, not 0 to 1
     private String borderColor;
     private String gridColor;

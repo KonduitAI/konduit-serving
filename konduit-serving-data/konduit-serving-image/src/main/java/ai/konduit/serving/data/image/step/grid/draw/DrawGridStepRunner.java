@@ -119,10 +119,20 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             Vector2D start = s.getStart();
             Vector2D end = s.getEnd();
 
-            int x1Px = (int) (start.getX() * i.width());
-            int x2Px = (int) (end.getX() * i.width());
-            int y1Px = (int) (start.getY() * i.height());
-            int y2Px = (int) (end.getY() * i.height());
+            int x1Px, x2Px, y1Px, y2Px;
+            if(step.coordsArePixels()){
+                x1Px = (int) start.getX();
+                x2Px = (int) end.getX();
+                y1Px = (int) start.getY();
+                y2Px = (int) end.getY();
+            } else {
+                x1Px = (int) (start.getX() * i.width());
+                x2Px = (int) (end.getX() * i.width());
+                y1Px = (int) (start.getY() * i.height());
+                y2Px = (int) (end.getY() * i.height());
+            }
+
+
 
             drawLine(m, borderColor, borderThickness, x1Px, x2Px, y1Px, y2Px);
         }
@@ -232,10 +242,18 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             double deltaX2 = x4-x3;
             double deltaY1 = y2-y1;
             double deltaY2 = y4-y3;
-            int x1Px = (int) (m.cols() * (x1 + frac * deltaX1));
-            int x2Px = (int) (m.cols() * (x3 + frac * deltaX2));
-            int y1Px = (int) (m.rows() * (y1 + frac * deltaY1));
-            int y2Px = (int) (m.rows() * (y3 + frac * deltaY2));
+            int x1Px, x2Px, y1Px, y2Px;
+            if(step.coordsArePixels()){
+                x1Px = (int) (x1 + frac * deltaX1);
+                x2Px = (int) (x3 + frac * deltaX2);
+                y1Px = (int) (y1 + frac * deltaY1);
+                y2Px = (int) (y3 + frac * deltaY2);
+            } else {
+                x1Px = (int) (m.cols() * (x1 + frac * deltaX1));
+                x2Px = (int) (m.cols() * (x3 + frac * deltaX2));
+                y1Px = (int) (m.rows() * (y1 + frac * deltaY1));
+                y2Px = (int) (m.rows() * (y3 + frac * deltaY2));
+            }
             drawLine(m, color, thickness, x1Px, x2Px, y1Px, y2Px);
         }
     }
