@@ -33,7 +33,7 @@ import java.util.List;
 @AllArgsConstructor
 public class SSDToBoundingBoxRunner implements PipelineStepRunner {
 
-    private SSDToBoundingBoxStep step;
+    protected final SSDToBoundingBoxStep step;
 
     @Override
     public void close() {
@@ -48,7 +48,7 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
     @Override
     public Data exec(Context ctx, Data data) {
 
-        double threshold = 0.5;
+        double threshold = step.threshold();
 
         String key = "detection_boxes";     //TODO
         String prob = "detection_scores";
