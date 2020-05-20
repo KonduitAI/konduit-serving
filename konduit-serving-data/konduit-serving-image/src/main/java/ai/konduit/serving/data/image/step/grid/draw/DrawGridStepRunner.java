@@ -20,6 +20,7 @@ package ai.konduit.serving.data.image.step.grid.draw;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -106,7 +107,7 @@ public class DrawGridStepRunner implements PipelineStepRunner {
 
         Mat m = i.getAs(Mat.class).clone();
 
-        Scalar borderColor = step.borderColor() == null ? Scalar.GREEN : stringToColor(step.borderColor());
+        Scalar borderColor = step.borderColor() == null ? ColorUtil.stringToColor(DrawGridStep.DEFAULT_COLOR) : ColorUtil.stringToColor(step.borderColor());
         int borderThickness = step.borderThickness();
         if(borderThickness <= 0)
             borderThickness = 1;
@@ -126,7 +127,7 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             drawLine(m, borderColor, borderThickness, x1Px, x2Px, y1Px, y2Px);
         }
 
-        Scalar gridColor = step.gridColor() == null ? borderColor : stringToColor(step.gridColor());
+        Scalar gridColor = step.gridColor() == null ? borderColor : ColorUtil.stringToColor(step.gridColor());
         int gridThickness = step.gridThickness();
         if(gridThickness <= 0)
             gridThickness = 1;
@@ -221,25 +222,6 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             int y1Px = (int) (m.rows() * (y1 + frac * deltaY1));
             int y2Px = (int) (m.rows() * (y3 + frac * deltaY2));
             drawLine(m, color, thickness, x1Px, x2Px, y1Px, y2Px);
-        }
-    }
-
-    protected Scalar stringToColor(String s){
-
-        if(s.startsWith("#")){
-            String hex = s.substring(1);
-            Color c = Color.decode(hex);
-            return org.bytedeco.opencv.helper.opencv_core.RGB(c.getRed(), c.getGreen(), c.getBlue());
-        } else if(s.toLowerCase().startsWith("rgb(") && s.endsWith(")")){
-            String sub = s.substring(4, s.length()-1);
-            Preconditions.checkState(sub.matches("\\d+,\\d+,\\d+"), INVALID_COLOR, s);
-            String[] split = sub.split(",");
-            int r = Integer.parseInt(split[0]);
-            int g = Integer.parseInt(split[1]);
-            int b = Integer.parseInt(split[2]);
-            return org.bytedeco.opencv.helper.opencv_core.RGB(r,g,b);
-        } else {
-            throw new UnsupportedOperationException("Not yet implemented");
         }
     }
 

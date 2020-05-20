@@ -18,10 +18,8 @@
 
 package ai.konduit.serving.data.image;
 
-import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
-import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -33,8 +31,6 @@ import org.nd4j.common.resources.Resources;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TestGridSteps {
 
@@ -51,8 +47,8 @@ public class TestGridSteps {
 
         Pipeline p = SequencePipeline.builder()
                 .add(DrawGridStep.builder()
-//                        .borderColor("yellow")
-//                        .gridColor("blue")
+                        .borderColor("green")
+                        .gridColor("blue")
                         .coordsArePixels(false)
                         .grid1(3)
                         .grid2(10)
@@ -74,6 +70,35 @@ public class TestGridSteps {
 
     @Test
     public void testOrders(){
+        //The order in which we provide the points should make zero difference - except for the grid1 / grid2 order
+        int numOrders = 4 * 3 * 2;
+
+        int[][] orders = new int[numOrders][4];
+        int x=0;
+        for( int i=0; i<4; i++ ){
+            for( int j=0; j<4; j++ ){
+                if(j == i)
+                    continue;
+                for( int k=0; k<4; k++ ){
+                    if(k == i || k == j)
+                        continue;
+
+                    orders[x][0] = i;
+                    orders[x][1] = j;
+                    orders[x][2] = k;
+                    for( int l=0; l<4; l++ ){
+                        if(i != l && j != l && k != l){
+                            orders[x][3] = l;
+                            break;
+                        }
+                    }
+
+                    System.out.println(x + " - " + Arrays.toString(orders[x]));
+                    x++;
+                }
+            }
+        }
+
 
 
     }

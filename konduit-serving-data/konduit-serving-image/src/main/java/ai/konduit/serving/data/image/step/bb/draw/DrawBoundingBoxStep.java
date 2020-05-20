@@ -42,7 +42,7 @@ import java.util.Map;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class DrawBoundingBoxStep implements PipelineStep {
-    public static final String DEFAULT_COLOR = "green";
+    public static final String DEFAULT_COLOR = "lime";
 
     public enum Scale {NONE, AT_LEAST, AT_MOST}
 

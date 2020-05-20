@@ -32,7 +32,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class DrawGridStep implements PipelineStep {
-    public static final String DEFAULT_COLOR = "green";
+    public static final String DEFAULT_COLOR = "lime";
 
     private String imageName;       //If null: just find any image
     private String xName;           //Name of the List<Long> or List<Double> of length 4, specifying X coordinates in any order

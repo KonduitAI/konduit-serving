@@ -18,7 +18,6 @@
 
 package ai.konduit.serving.data.image.format;
 
-import ai.konduit.serving.data.image.util.OpenCVUtil;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.exception.DataConversionException;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
@@ -35,10 +34,6 @@ import java.util.UUID;
 public class JavaCVImageConverters {
 
     private JavaCVImageConverters(){ }
-
-    static {
-        OpenCVUtil.ensureOpenCVLoaded();
-    }
 
     public static class FrameToMatConverter extends JavaImageConverters.BaseConverter {
         protected OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
