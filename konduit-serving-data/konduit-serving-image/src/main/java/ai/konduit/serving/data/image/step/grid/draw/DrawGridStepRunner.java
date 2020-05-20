@@ -18,11 +18,8 @@
 
 package ai.konduit.serving.data.image.step.grid.draw;
 
-import ai.konduit.serving.data.image.convert.ImageToNDArray;
-import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
-import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.ValueType;
@@ -36,22 +33,13 @@ import org.apache.commons.math3.geometry.euclidean.twod.hull.ConvexHull2D;
 import org.apache.commons.math3.geometry.euclidean.twod.hull.MonotoneChain;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import org.bytedeco.opencv.opencv_core.Size;
 import org.nd4j.common.base.Preconditions;
 
-import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class DrawGridStepRunner implements PipelineStepRunner {
-
-    protected static final String INVALID_COLOR = "Invalid color: Must be in one of the following formats: hex/HTML - #788E87, " +
-            "RGB - rgb(128,0,255), or a color such as \"green\", etc - got \"%s\"";
-
 
 
 
