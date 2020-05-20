@@ -278,6 +278,7 @@ public class TestTensorFlowStep {
 
     @Test @Ignore   //To be run manually due to need for webcam and frame output
     public void testPersonDetection() throws Exception {
+        //Pretrained model source: https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models
 
         String fileUrl = "https://drive.google.com/u/0/uc?id=1c1mdTxUwN7C3noDajzNnEP1m2_yVBcD1&export=download";
         File testDir = TestUtils.testResourcesStorageDir();
