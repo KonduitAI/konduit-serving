@@ -325,6 +325,7 @@ public class TestTensorFlowStep {
 
         //Post process SSD outputs to BoundingBox objects
         GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
+                .threshold(0.6)
                 .outputName("img_bbox")
                 .build());
 
