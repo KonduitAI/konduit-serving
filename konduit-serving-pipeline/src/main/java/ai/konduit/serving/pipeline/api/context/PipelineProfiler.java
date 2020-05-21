@@ -30,6 +30,10 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -51,6 +55,8 @@ public class PipelineProfiler implements Profiler {
     private boolean logActive;
     private ProfilerConfig profilerConfig;
     private Path currentLog;
+
+    private Set<String> open = new HashSet<>();
 
     private long getProcessId() {
         // Note: may fail in some JVM implementations
@@ -74,8 +80,8 @@ public class PipelineProfiler implements Profiler {
     }
 
     private void fileSizeGuard() throws IOException {
-        if ((profilerConfig.getSplitSize() > 0) &&
-            (Files.size(currentLog) > profilerConfig.getSplitSize())) {
+        if ((profilerConfig.splitSize() > 0) &&
+            (Files.size(currentLog) > profilerConfig.splitSize())) {
             String baseName = FilenameUtils.removeExtension(currentLog.getFileName().toString());
             int num = 1;
             String counted = org.apache.commons.lang3.StringUtils.EMPTY;
@@ -104,7 +110,7 @@ public class PipelineProfiler implements Profiler {
     public void waitWriter() {
         while ((!writeQueue.isEmpty() || writing.get()) && fileWritingThread.isAlive()) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -118,7 +124,7 @@ public class PipelineProfiler implements Profiler {
 
     public PipelineProfiler(ProfilerConfig profilerConfig) {
         this.profilerConfig = profilerConfig;
-        this.currentLog = profilerConfig.getOutputFile();
+        this.currentLog = profilerConfig.outputFile();
         try {
             this.writer = new BufferedWriter(new FileWriter(this.currentLog.toString(), true));
             this.writer.write("[");     //JSON array open (array close is optional for Chrome profiler format)
@@ -185,24 +191,11 @@ public class PipelineProfiler implements Profiler {
                 .build();
 
         writeQueue.add(event);
+        open.add(key);
     }
 
     @Override
     public void eventEnd(String key) {
-        //if (logActive) {
-            /*while ((!writeQueue.isEmpty() || writing.get()) && fileWritingThread.isAlive()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            try {
-                writer.flush();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }*/
-        //}
         logActive = false;
         endTime = System.nanoTime() / 1000;
 
@@ -216,7 +209,24 @@ public class PipelineProfiler implements Profiler {
                 .build();
 
         writeQueue.add(event);
+        open.remove(key);
     }
+
+    @Override
+    public void flushBlocking() {
+        waitWriter();
+    }
+
+    @Override
+    public void closeAll() {
+        if(open.size() > 0){
+            List<String> l = new ArrayList<>(open);
+            for(String s : l){
+                eventEnd(s);
+            }
+        }
+    }
+
 
     public static TraceEvent[] readEvents(File file) throws IOException {
         String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);

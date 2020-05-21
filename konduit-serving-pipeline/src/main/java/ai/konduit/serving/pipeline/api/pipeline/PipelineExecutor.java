@@ -84,4 +84,6 @@ public interface PipelineExecutor {
      * Set profiling config.
      */
     void profilerConfig(ProfilerConfig profilerConfig);
+
+    Profiler profiler();
 }

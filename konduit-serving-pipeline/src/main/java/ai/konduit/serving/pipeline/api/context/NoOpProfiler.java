@@ -29,4 +29,14 @@ public class NoOpProfiler implements Profiler {
     @Override
     public void eventEnd(String key) {
     }
+
+    @Override
+    public void flushBlocking() {
+
+    }
+
+    @Override
+    public void closeAll() {
+
+    }
 }

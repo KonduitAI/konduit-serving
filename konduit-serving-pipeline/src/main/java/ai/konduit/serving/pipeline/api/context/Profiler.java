@@ -75,4 +75,14 @@ public interface Profiler {
      */
     void eventEnd(String key);
 
+    /**
+     * Block until the profiler writing of results has been completed
+     */
+    void flushBlocking();
+
+    /**
+     * Close all currently open events (if any)
+     * i.e., call eventEnd for any keys where an eventStart has been called but not a corresponding eventEnd
+     */
+    void closeAll();
 }

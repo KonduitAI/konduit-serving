@@ -15,24 +15,17 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.pipeline;
 
-import ai.konduit.serving.pipeline.api.context.Context;
-import ai.konduit.serving.pipeline.api.context.PipelineProfiler;
-import ai.konduit.serving.pipeline.api.context.Profiler;
-import ai.konduit.serving.pipeline.api.context.ProfilerConfig;
+import ai.konduit.serving.pipeline.api.context.*;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
-import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
-import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
-import ai.konduit.serving.pipeline.registry.PipelineRegistry;
+import ai.konduit.serving.pipeline.impl.context.DefaultContext;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.nd4j.common.base.Preconditions;
 import org.slf4j.Logger;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,15 +35,16 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
     private SequencePipeline pipeline;
     private List<PipelineStepRunner> runners;
     private ProfilerConfig profilerConfig;
+    private Profiler profiler = new NoOpProfiler();
 
-    public SequencePipelineExecutor(@NonNull SequencePipeline p){
+    public SequencePipelineExecutor(@NonNull SequencePipeline p) {
         this.pipeline = p;
 
         //Initialize
         runners = new ArrayList<>();
         List<PipelineStep> steps = p.getSteps();
 
-        for(PipelineStep ps : steps){
+        for (PipelineStep ps : steps) {
             PipelineStepRunner r = getRunner(ps);
             runners.add(r);
         }
@@ -67,35 +61,22 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
         return runners;
     }
 
-	// TODO: review profiler lifetime
-    private static Profiler profiler;
-    private static Profiler createProfiler(ProfilerConfig profilerConfig) {
-        if (profiler == null) {
-            profiler = new PipelineProfiler(profilerConfig);
-        }
-        return profiler;
-    }
-
     @Override
     public Data exec(Data data) {
-        Context ctx = null; //TODO
+        Context ctx = new DefaultContext(null, profiler);
+
         Data current = data;
-        String saved = StringUtils.EMPTY;
-        Profiler profiler = createProfiler(profilerConfig);
         for (PipelineStepRunner psr : runners) {
-           if (profiler.profilerEnabled()) {
-              saved = psr.name();
-              profiler.eventStart(saved);
-           }
-           current = psr.exec(ctx, current);
-           if (profiler.profilerEnabled()) {
-               profiler.eventEnd(psr.name());
-           }
+            String name = psr.name();
+            profiler.eventStart(name);
+
+            current = psr.exec(ctx, current);
+
+            profiler.eventEnd(name);
+
+            //Ensure that the step didn't open but not close any profiles
+            profiler.closeAll();
         }
-        if (profiler.profilerEnabled() && ((PipelineProfiler) profiler).isLogActive()) {
-          profiler.eventEnd(saved);
-        }
-        ((PipelineProfiler)profiler).waitWriter();
         return current;
     }
 
@@ -107,5 +88,15 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
     @Override
     public void profilerConfig(ProfilerConfig profilerConfig) {
         this.profilerConfig = profilerConfig;
+        if (profilerConfig != null) {
+            this.profiler = new PipelineProfiler(profilerConfig);
+        } else {
+            this.profiler = new NoOpProfiler();
+        }
+    }
+
+    @Override
+    public Profiler profiler() {
+        return profiler;
     }
 }

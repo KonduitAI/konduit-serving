@@ -192,4 +192,9 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
     public void profilerConfig(ProfilerConfig profilerConfig) {
 		this.profilerConfig = profilerConfig;
     }
+
+    @Override
+    public Profiler profiler() {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 }

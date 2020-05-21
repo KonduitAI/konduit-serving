@@ -16,16 +16,29 @@
 package ai.konduit.serving.pipeline.api.context;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
+import java.io.File;
 import java.nio.file.Path;
 
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(fluent = true)
 public class ProfilerConfig {
     @Getter
     private Path outputFile;
     @Getter
     private long splitSize;
+
+    public ProfilerConfig outputFile(File f){
+        this.outputFile = f.toPath();
+        return this;
+    }
+
+    public ProfilerConfig outputFile(Path p){
+        this.outputFile = p;
+        return this;
+    }
 }
