@@ -38,11 +38,13 @@ import lombok.experimental.Accessors;
  * If {@code aspectRatio} is set, the smaller dimension will be increased to keep the aspect ratio correct. Note this may crop
  * outside the image border
  * @author Alex Black
+ * @see CropFixedGridStep
  */
 @Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 public class CropGridStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "crops";
 
@@ -53,8 +55,8 @@ public class CropGridStep implements PipelineStep {
     private int grid2;                      //Number of grid segments in the other direction
     private boolean coordsArePixels;        //If true: Lists are in pixels, not 0 to 1
     private String boundingBoxName;
-    private boolean outputCoordinates = false;
-    private boolean keepOtherFields = false;
+    private boolean outputCoordinates;
+    private boolean keepOtherFields;
     private Double aspectRatio;
     private String outputName;
 }

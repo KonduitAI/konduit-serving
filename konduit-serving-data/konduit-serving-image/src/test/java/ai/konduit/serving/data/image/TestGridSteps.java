@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image;
 
+import ai.konduit.serving.data.image.step.grid.crop.CropFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.crop.CropGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
@@ -27,6 +28,7 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -269,7 +271,6 @@ public class TestGridSteps {
 
 
     @Test
-//    @Ignore   //To be run manually
     public void testCropGridStep() throws Exception {
 
         File f = Resources.asFile("data/shelves.png");
@@ -280,14 +281,27 @@ public class TestGridSteps {
         int g1 = 4;
         int g2 = 2;
 
+        for(boolean fixed : new boolean[]{false, true}) {
         for (boolean px : new boolean[]{false, true}) {
             Data in = Data.singleton("image", i);
-            if(px) {
-                in.putListDouble("x", Arrays.asList(0.015*i.width(), 0.04*i.width(), 0.815*i.width(), 0.795*i.width()));
-                in.putListDouble("y", Arrays.asList(0.33*i.height(), 0.70*i.height(), 0.42*i.height(), 0.83*i.height()));
+            double[] x = null;
+            double[] y = null;
+            if(!fixed) {
+                if (px) {
+                    in.putListDouble("x", Arrays.asList(0.015 * i.width(), 0.04 * i.width(), 0.815 * i.width(), 0.795 * i.width()));
+                    in.putListDouble("y", Arrays.asList(0.33 * i.height(), 0.70 * i.height(), 0.42 * i.height(), 0.83 * i.height()));
+                } else {
+                    in.putListDouble("x", Arrays.asList(0.015, 0.04, 0.815, 0.795));
+                    in.putListDouble("y", Arrays.asList(0.33, 0.70, 0.42, 0.83));
+                }
             } else {
-                in.putListDouble("x", Arrays.asList(0.015, 0.04, 0.815, 0.795));
-                in.putListDouble("y", Arrays.asList(0.33, 0.70, 0.42, 0.83));
+                if(px) {
+                    x = new double[]{0.015 * i.width(), 0.04 * i.width(), 0.815 * i.width(), 0.795 * i.width()};
+                    y = new double[]{0.33 * i.height(), 0.70 * i.height(), 0.42 * i.height(), 0.83 * i.height()};
+                } else {
+                    x = new double[]{0.015, 0.04, 0.815, 0.795};
+                    y = new double[]{0.33, 0.70, 0.42, 0.83};
+                }
             }
             in.put("key", "value");
 
@@ -295,59 +309,99 @@ public class TestGridSteps {
                 for (boolean keep : new boolean[]{false, true}) {
                     for(boolean bb : new boolean[]{false, true}) {
 
+                        PipelineStep s;
+                        PipelineStep draw;
+                        if(fixed){
+                            s = CropFixedGridStep.builder()
+                                    .coordsArePixels(false)
+                                    .grid1(g1)
+                                    .grid2(g2)
+                                    .x(x)
+                                    .y(y)
+                                    .imageName("image")
+                                    .keepOtherFields(keep)
+                                    .outputName(outName ? "output" : null)
+                                    .boundingBoxName(bb ? "bbox" : null)
+                                    .coordsArePixels(px)
+                                    //.aspectRatio(1.0)
+                                    .build();
 
-                        Pipeline p = SequencePipeline.builder()
-                                .add(DrawGridStep.builder()
-                                        .borderColor("green")
-                                        .gridColor("blue")
-                                        .coordsArePixels(false)
-                                        .grid1(g1)
-                                        .grid2(g2)
-                                        .xName("x")
-                                        .yName("y")
-                                        .imageName("image")
-                                        .borderThickness(4)
-                                        .gridThickness(2)
-                                        .build())
-                                //.add(new ShowImagePipelineStep().imageName("image").height(null).width(null))
-                                .add(CropGridStep.builder()
-                                        .coordsArePixels(false)
-                                        .grid1(g1)
-                                        .grid2(g2)
-                                        .xName("x")
-                                        .yName("y")
-                                        .imageName("image")
-                                        .keepOtherFields(keep)
-                                        .outputName(outName ? "output" : null)
-                                        .boundingBoxName(bb ? "bbox" : null)
-                                        .coordsArePixels(px)
-                                        //.aspectRatio(1.0)
-                                        .build())
-                                //.add(new ShowImagePipelineStep().imageName(outName ? "output" : CropGridStep.DEFAULT_OUTPUT_NAME).displayName("Display").width(null).height(null).allowMultiple(true))
-                                .build();
-
-                        PipelineExecutor exec = p.executor();
-
-                        Data out = exec.exec(in);
-                        List<Image> l = out.getListImage(outName ? "output" : CropGridStep.DEFAULT_OUTPUT_NAME);
-                        assertEquals(g1 * g2, l.size());
-
-                        if (keep) {
-                            assertTrue(out.has("key"));
-                            assertEquals("value", out.getString("key"));
+                            draw = DrawFixedGridStep.builder()
+                                    .borderColor("green")
+                                    .gridColor("blue")
+                                    .coordsArePixels(false)
+                                    .grid1(g1)
+                                    .grid2(g2)
+                                    .x(x)
+                                    .y(y)
+                                    .imageName("image")
+                                    .borderThickness(4)
+                                    .gridThickness(2)
+                                    .build();
                         } else {
-                            assertFalse(out.has("key"));
+                            s = CropGridStep.builder()
+                                    .coordsArePixels(false)
+                                    .grid1(g1)
+                                    .grid2(g2)
+                                    .xName("x")
+                                    .yName("y")
+                                    .imageName("image")
+                                    .keepOtherFields(keep)
+                                    .outputName(outName ? "output" : null)
+                                    .boundingBoxName(bb ? "bbox" : null)
+                                    .coordsArePixels(px)
+                                    //.aspectRatio(1.0)
+                                    .build();
+
+                            draw = DrawGridStep.builder()
+                                    .borderColor("green")
+                                    .gridColor("blue")
+                                    .coordsArePixels(false)
+                                    .grid1(g1)
+                                    .grid2(g2)
+                                    .xName("x")
+                                    .yName("y")
+                                    .imageName("image")
+                                    .borderThickness(4)
+                                    .gridThickness(2)
+                                    .build();
                         }
 
-                        if (bb) {
-                            assertTrue(out.has("bbox"));
-                            List<BoundingBox> lbb = out.getListBoundingBox("bbox");
-                            assertEquals(g1 * g2, lbb.size());
-                        } else {
-                            assertFalse(out.has("bbox"));
-                        }
+
+                            Pipeline p = SequencePipeline.builder()
+                                    .add(draw)
+                                    //.add(new ShowImagePipelineStep().imageName("image").height(null).width(null))
+                                    .add(s)
+                                    //.add(new ShowImagePipelineStep().imageName(outName ? "output" : CropGridStep.DEFAULT_OUTPUT_NAME).displayName("Display").width(null).height(null).allowMultiple(true))
+                                    .build();
+
+                            PipelineExecutor exec = p.executor();
+
+                            Data out = exec.exec(in);
+                            List<Image> l = out.getListImage(outName ? "output" : CropGridStep.DEFAULT_OUTPUT_NAME);
+                            assertEquals(g1 * g2, l.size());
+
+                            if (keep) {
+                                assertTrue(out.has("key"));
+                                assertEquals("value", out.getString("key"));
+                            } else {
+                                assertFalse(out.has("key"));
+                            }
+
+                            if (bb) {
+                                assertTrue(out.has("bbox"));
+                                List<BoundingBox> lbb = out.getListBoundingBox("bbox");
+                                assertEquals(g1 * g2, lbb.size());
+                            } else {
+                                assertFalse(out.has("bbox"));
+                            }
+
+                            String json = p.toJson();
+                            Pipeline p2 = Pipeline.fromJson(json);
+                            assertEquals(p, p2);
 
 //                        Thread.sleep(1000000);
+                        }
                     }
                 }
             }

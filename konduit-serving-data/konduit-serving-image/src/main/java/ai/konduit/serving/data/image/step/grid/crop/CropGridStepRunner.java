@@ -118,19 +118,19 @@ public class CropGridStepRunner implements PipelineStepRunner {
         Pair<List<Image>,List<BoundingBox>> p = cropGrid(m, segments, x, y);
 
         Data out;
-        if(step.keepOtherFields()){
+        if(step != null ? step.keepOtherFields() : fStep.keepOtherFields()){
             out = data.clone();
         } else {
             out = Data.empty();
         }
 
-        String outName = step.outputName();
+        String outName = (step != null ? step.outputName() : fStep.outputName());
         if(outName == null)
             outName = CropGridStep.DEFAULT_OUTPUT_NAME;
         out.putListImage(outName, p.getFirst());
 
-        if(step.boundingBoxName() != null){
-            out.putListBoundingBox(step.boundingBoxName(), p.getSecond());
+        if(step != null ? step.boundingBoxName() != null : fStep.boundingBoxName() != null){
+            out.putListBoundingBox(step != null ? step.boundingBoxName() : fStep.boundingBoxName(), p.getSecond());
         }
 
         return out;
@@ -237,7 +237,7 @@ public class CropGridStepRunner implements PipelineStepRunner {
             y4 = ty3;
         }
 
-        if(step.coordsArePixels()){
+        if(step != null ? step.coordsArePixels() : fStep.coordsArePixels()){
             x1 /= m.cols();
             x2 /= m.cols();
             x3 /= m.cols();
@@ -250,7 +250,7 @@ public class CropGridStepRunner implements PipelineStepRunner {
 
 
         List<Image> out = new ArrayList<>();
-        List<BoundingBox> bbox = step.boundingBoxName() != null ? new ArrayList<>() : null;
+        List<BoundingBox> bbox = (step != null ? step.boundingBoxName() != null : fStep.boundingBoxName() != null) ? new ArrayList<>() : null;
         for( int i=0; i<g1; i++ ){
 
             //x1, x2, x3, x4, y1, y2, y3, y4 - these represent the corner dimensions of the current row
@@ -292,9 +292,9 @@ public class CropGridStepRunner implements PipelineStepRunner {
                 int w = maxX-minX;
                 int h = maxY-minY;
 
-                if(step.aspectRatio() != null){
+                if((step != null && step.aspectRatio() != null) || (fStep != null && fStep.aspectRatio() != null)){
                     double currAr = w / (double)h;
-                    double ar = step.aspectRatio();
+                    double ar = step != null ? step.aspectRatio() : fStep.aspectRatio();
                     if(ar < currAr){
                         //Need to increase height dimension to give desired AR
                         int newH = (int) (w / ar);
