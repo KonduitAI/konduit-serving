@@ -37,7 +37,7 @@ import java.util.Arrays;
 
 public class TestDrawSegmentation {
 
-    private final boolean show = true;   //Set to true to visualize
+    private final boolean show = false;   //Set to true to visualize
 
     @Test
     public void testDrawSegment() throws Exception {
