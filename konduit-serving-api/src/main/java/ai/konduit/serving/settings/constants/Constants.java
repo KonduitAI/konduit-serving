@@ -23,7 +23,9 @@ import lombok.NoArgsConstructor;
 
 /**
  * This class contains important keys for different operations inside konduit-serving
+ * @deprecated To be removed - https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Constants {
 

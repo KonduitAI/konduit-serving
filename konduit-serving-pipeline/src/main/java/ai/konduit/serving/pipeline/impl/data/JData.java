@@ -30,8 +30,8 @@ public class JData implements Data {
     private Map<String, Value> dataMap = new LinkedHashMap<>();
     private Data metaData;
 
-    private static final String VALUE_NOT_FOUND_TEXT = "Value not found for key %s";
-    private static final String VALUE_HAS_WRONG_TYPE_TEXT = "Value has wrong type for key %s: requested type %s, actual type %s";
+    private static final String VALUE_NOT_FOUND_TEXT = "Value not found for key \"%s\"";
+    private static final String VALUE_HAS_WRONG_TYPE_TEXT = "Value has wrong type for key \"%s\": requested type %s, actual type %s";
 
     public Map<String, Value> getDataMap() {
         return dataMap;
@@ -527,5 +527,12 @@ public class JData implements Data {
         public JData build() {
             return instance;
         }
+    }
+
+    @Override
+    public Data clone(){
+        Data ret = empty();
+        ret.merge(true, this);
+        return ret;
     }
 }

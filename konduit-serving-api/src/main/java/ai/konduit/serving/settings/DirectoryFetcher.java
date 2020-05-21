@@ -30,7 +30,9 @@ import java.io.File;
 
 /**
  * This class is responsible for fetching different directories for konduit-serving
+ * @deprecated To be removed - https://github.com/KonduitAI/konduit-serving/issues/298
  */
+@Deprecated
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DirectoryFetcher {
 

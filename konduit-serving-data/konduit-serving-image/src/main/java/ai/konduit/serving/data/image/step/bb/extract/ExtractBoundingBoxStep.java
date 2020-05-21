@@ -16,66 +16,52 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.draw;
+package ai.konduit.serving.data.image.step.bb.extract;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.util.Map;
 
 /**
  *
- * Scale:
- * <ul>
- *     <li>NONE: No scaling</li>
- *     <li>AT_LEAST: Scale up if necessary, so H >= scaleH and W >= scaleW</li>
- *     <li>AT_MOST: Scale down if necessary, so H <= scaleH and W <= scaleW</li>
- * </ul>
+ * ExtractBoundingBoxStep: Given one or more bounding boxes, and an input image, extract from the input region an image
+ * that corresponds to the bounding box region.<br>
+ * i.e.: output as images the input image region covered by the bounding boxes<br>
+ * Note: supports both {@code BoundingBox} and {@code List<BoundingBox>} fields. If the input is as single value,
+ * the output will be a single value; if the input is a list, the output will be a list.<br>
+ * <br>
+ * Note: If the aspect ratio field is set, the image cropping will increase the smaller dimension to ensure the cropped
+ * image complies with the requested aspect ratio.<br>
+ * <br>
+ * Note: If resizeH and resizeW are specified, the cropped images will be resized to the specified size
  *
  */
 @Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
-public class DrawBoundingBoxStep implements PipelineStep {
-    public static final String DEFAULT_COLOR = "green";
-
-    public enum Scale {NONE, AT_LEAST, AT_MOST}
-
+public class ExtractBoundingBoxStep implements PipelineStep {
     private String imageName;       //If null: just find any image
     private String bboxName;       //If null: just find any BB's
-    private boolean drawLabel;
-    private boolean drawProbability;
-    private Map<String,String> classColors;
-    private String color;
+    private String outputName;
     @Builder.Default
-    private int lineThickness = 1;
-    @Builder.Default
-    private Scale scale = Scale.NONE;
-    private int resizeH;
-    private int resizeW;
+    private boolean keepOtherFields = true;
+    private Double aspectRatio = null;
+    private Integer resizeH;
+    private Integer resizeW;
 
     //Used to account for the fact that ImageToNDArray can crop images
     private ImageToNDArrayConfig imageToNDArrayConfig;
-    private boolean drawCropRegion = false;
-    private String cropRegionColor;
 
-    /*
-    Other things could add:
-    - Upscale? (or minimum resolution, or always scale) - also aspect ratio part...
-    - Text size
-    - Text font
-    - Line width
-     */
-
-    public DrawBoundingBoxStep(){
+    public ExtractBoundingBoxStep() {
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null
-        this.scale = Scale.NONE;
+        //Without setting defaults here again like this, the boolean default would be false
+        keepOtherFields = true;
     }
-
 }

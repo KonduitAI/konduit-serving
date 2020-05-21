@@ -16,10 +16,11 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.draw;
+package ai.konduit.serving.data.image.step.bb.draw;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -27,6 +28,7 @@ import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.util.DataUtils;
 import lombok.NonNull;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -40,9 +42,6 @@ import java.util.List;
 import java.util.Map;
 
 public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
-
-    protected static final String INVALID_COLOR = "Invalid color: Must be in one of the following formats: hex/HTML - #788E87, " +
-            "RGB - rgb(128,0,255), or a color such as \"green\", etc - got \"%s\"";
 
 
 
@@ -66,8 +65,21 @@ public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
     @Override
     public Data exec(Context ctx, Data data) {
 
-        String imgName = step.imageName();      //TODO find if null
-        String bboxName = step.bboxName();      //TODO find if null
+        String imgName = step.imageName();
+        String bboxName = step.bboxName();
+
+        if(imgName == null){
+            String errMultipleKeys = "Image field name was not provided and could not be inferred: multiple image fields exist: %s and %s";
+            String errNoKeys = "Image field name was not provided and could not be inferred: no image fields exist";
+            imgName = DataUtils.inferField(data, ValueType.IMAGE, false, errMultipleKeys, errNoKeys);
+        }
+
+        if(bboxName == null){
+            String errMultipleKeys = "Bounding box field name was not provided and could not be inferred: multiple bounding box fields exist: %s and %s";
+            String errNoKeys = "Bounding box field name was not provided and could not be inferred: no bounding box fields exist";
+            bboxName = DataUtils.inferField(data, ValueType.BOUNDING_BOX, false, errMultipleKeys, errNoKeys);
+        }
+
 
         Image i = data.getImage(imgName);
         ValueType vt = data.type(bboxName);
@@ -106,23 +118,21 @@ public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
             } else {
                 if (cc != null && bb.label() != null && cc.containsKey(bb.label())){
                     String s = cc.get(bb.label());
-                    color = stringToColor(s);
+                    color = ColorUtil.stringToColor(s);
                 } else if(dc != null){
-                    color = stringToColor(dc);
+                    color = ColorUtil.stringToColor(dc);
                 } else {
                     color = Scalar.GREEN;
                 }
             }
-
-            //TODO ACCOUNT FOR ORIGINAL IMAGE CROP
 
             double x1 = Math.min(bb.x1(), bb.x2());
             double y1 = Math.min(bb.y1(), bb.y2());
 
             int x = (int)(x1 * scaled.cols());
             int y = (int)(y1 * scaled.rows());
-            int h = (int)(bb.height() * scaled.rows());
-            int w = (int)(bb.width() * scaled.cols());
+            int h = (int) Math.round(bb.height() * scaled.rows());
+            int w = (int)Math.round(bb.width() * scaled.cols());
             Rect r = new Rect(x, y, w, h);
             org.bytedeco.opencv.global.opencv_imgproc.rectangle(scaled, r, color, thickness, 8, 0);
         }
@@ -135,7 +145,7 @@ public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
                 //No color specified - use default color
                 color = Scalar.BLUE;
             } else {
-                color = stringToColor(step.cropRegionColor());
+                color = ColorUtil.stringToColor(step.cropRegionColor());
             }
 
             int x = (int)(bb.x1() * scaled.cols());
@@ -147,25 +157,6 @@ public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
         }
 
         return Data.singleton(imgName, Image.create(scaled));
-    }
-
-    protected Scalar stringToColor(String s){
-
-        if(s.startsWith("#")){
-            String hex = s.substring(1);
-            Color c = Color.decode(hex);
-            return org.bytedeco.opencv.helper.opencv_core.RGB(c.getRed(), c.getGreen(), c.getBlue());
-        } else if(s.toLowerCase().startsWith("rgb(") && s.endsWith(")")){
-            String sub = s.substring(4, s.length()-1);
-            Preconditions.checkState(sub.matches("\\d+,\\d+,\\d+"), INVALID_COLOR, s);
-            String[] split = sub.split(",");
-            int r = Integer.parseInt(split[0]);
-            int g = Integer.parseInt(split[1]);
-            int b = Integer.parseInt(split[2]);
-            return org.bytedeco.opencv.helper.opencv_core.RGB(r,g,b);
-        } else {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
     }
 
     protected Mat scaleIfRequired(Mat m){

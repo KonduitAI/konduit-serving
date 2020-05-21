@@ -32,12 +32,12 @@ public class ShowImagePipelineStep implements PipelineStep {
     @Builder.Default
     private String displayName = "Image";
     @Builder.Default
-    private int width = 1280;
+    private Integer width = 1280;
     @Builder.Default
-    private int height = 720;
+    private Integer height = 720;
 
     public ShowImagePipelineStep(@JsonProperty("imageName") String imageName, @JsonProperty("displayName") String displayName,
-                                 @JsonProperty("width") int width, @JsonProperty("height") int height){
+                                 @JsonProperty("width") Integer width, @JsonProperty("height") Integer height){
         this.imageName = imageName;
         this.displayName = displayName;
         this.width = width;

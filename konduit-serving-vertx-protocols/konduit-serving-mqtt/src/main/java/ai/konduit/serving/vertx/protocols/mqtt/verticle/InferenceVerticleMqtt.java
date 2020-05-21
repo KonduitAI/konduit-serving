@@ -16,22 +16,15 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.draw;
+package ai.konduit.serving.vertx.protocols.mqtt.verticle;
 
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
-import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
-import org.nd4j.common.base.Preconditions;
+import ai.konduit.serving.vertx.verticle.InferenceVerticle;
+import io.vertx.core.Promise;
 
-public class DrawBoundingBoxStepRunnerFactory implements PipelineStepRunnerFactory {
-    @Override
-    public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof DrawBoundingBoxStep;
-    }
+public class InferenceVerticleMqtt extends InferenceVerticle {
 
     @Override
-    public PipelineStepRunner create(PipelineStep pipelineStep) {
-        Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new DrawBoundingBoxStepRunner((DrawBoundingBoxStep) pipelineStep);
+    public void start(Promise<Void> startPromise) {
+        // todo: implement the mqtt server start here.
     }
 }

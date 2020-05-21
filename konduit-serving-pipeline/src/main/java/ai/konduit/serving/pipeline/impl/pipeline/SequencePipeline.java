@@ -44,6 +44,11 @@ public class SequencePipeline implements Pipeline {
         return new SequencePipelineExecutor(this);
     }
 
+    @Override
+    public int size() {
+        return steps != null ? steps.size() : 0;
+    }
+
     public static Builder builder(){
         return new Builder();
     }
@@ -60,4 +65,6 @@ public class SequencePipeline implements Pipeline {
             return new SequencePipeline(steps);
         }
     }
+
+
 }

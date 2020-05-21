@@ -43,6 +43,8 @@
         <module>konduit-serving-models</module>
         <module>konduit-serving-io</module>
         <module>konduit-serving-data</module>
+        <module>konduit-serving-vertx</module>
+        <module>konduit-serving-vertx-protocols</module>
     </modules>
 
     <name>konduit-serving</name>
@@ -94,7 +96,7 @@
         <micrometer.version>1.2.0</micrometer.version>
         <netty.version>4.1.48.Final</netty.version>
         <arrow.version>0.15.1</arrow.version>
-        <dl4j.version>1.0.0-SNAPSHOT</dl4j.version>
+        <dl4j.version>1.0.0-beta7</dl4j.version>
         <datavec.version>${dl4j.version}</datavec.version>
         <nd4j.version>${dl4j.version}</nd4j.version>
         <slf4j.version>1.7.26</slf4j.version>
@@ -153,10 +155,28 @@
         <guava.version>20.0</guava.version>
         <maven-git-commit-plugin.version>2.2.2</maven-git-commit-plugin.version>
         <fastutil.version>8.1.1</fastutil.version>
+        <protobuf.version>3.8.0</protobuf.version>
+        <error_prone_annotations.version>2.3.3</error_prone_annotations.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>${error_prone_annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.code.gson</groupId>
+                        <artifactId>gson</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>it.unimi.dsi</groupId>
                 <artifactId>fastutil</artifactId>
@@ -609,7 +629,6 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
-
     </distributionManagement>
 
 

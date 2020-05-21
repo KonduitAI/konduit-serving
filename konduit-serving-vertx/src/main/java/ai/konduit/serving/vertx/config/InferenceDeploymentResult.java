@@ -16,32 +16,14 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.util;
+package ai.konduit.serving.vertx.config;
 
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.opencv_java;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-public class OpenCVUtil {
-
-    private OpenCVUtil(){ }
-
-
-    private static final AtomicBoolean opencvLoaded = new AtomicBoolean();
-
-    /**
-     *
-     */
-    public static synchronized void ensureOpenCVLoaded(){
-        if(opencvLoaded.get())
-            return;
-
-        /*
-        Call Loader.load(opencv_java.class) before using the API in the org.opencv namespace.
-         */
-        Loader.load(opencv_java.class);
-
-    }
-
+@Data
+@AllArgsConstructor
+public class InferenceDeploymentResult {
+    private int actualPort;
+    private String deploymentId;
 }
