@@ -16,22 +16,19 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.extract;
+package ai.konduit.serving.pipeline.impl.context;
 
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
-import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
-import org.nd4j.common.base.Preconditions;
+import ai.konduit.serving.pipeline.api.context.Context;
+import ai.konduit.serving.pipeline.api.context.Metrics;
+import ai.konduit.serving.pipeline.api.context.Profiler;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
-public class ExtractBoundingBoxStepRunnerFactory implements PipelineStepRunnerFactory {
-    @Override
-    public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof ExtractBoundingBoxStep;
-    }
-
-    @Override
-    public PipelineStepRunner create(PipelineStep pipelineStep) {
-        Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new ExtractBoundingBoxStepRunner((ExtractBoundingBoxStep) pipelineStep);
-    }
+@AllArgsConstructor
+@Data
+@Accessors(fluent = true)
+public class DefaultContext implements Context {
+    private final Metrics metrics;
+    private final Profiler profiler;
 }

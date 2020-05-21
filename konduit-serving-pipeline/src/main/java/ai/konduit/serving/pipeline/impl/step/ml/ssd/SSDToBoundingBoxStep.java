@@ -37,6 +37,9 @@ public class SSDToBoundingBoxStep implements PipelineStep {
     protected boolean keepOtherValues = true;
 
     @Builder.Default
+    protected double threshold = 0.5;
+
+    @Builder.Default
     protected String outputName = DEFAULT_OUTPUT_NAME;
 
     public SSDToBoundingBoxStep(){
@@ -44,6 +47,7 @@ public class SSDToBoundingBoxStep implements PipelineStep {
         //Without setting defaults here again like this, the fields would actually be null
         this.keepOtherValues = true;
         this.outputName = DEFAULT_OUTPUT_NAME;
+        this.threshold = 0.5;
     }
 
 }

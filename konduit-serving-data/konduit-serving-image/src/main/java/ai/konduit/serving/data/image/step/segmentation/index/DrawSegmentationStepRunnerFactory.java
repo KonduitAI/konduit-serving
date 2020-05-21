@@ -16,22 +16,24 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.draw;
+package ai.konduit.serving.data.image.step.segmentation.index;
 
+import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
+import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import org.nd4j.common.base.Preconditions;
 
-public class DrawBoundingBoxStepRunnerFactory implements PipelineStepRunnerFactory {
+public class DrawSegmentationStepRunnerFactory implements PipelineStepRunnerFactory {
     @Override
     public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof DrawBoundingBoxStep;
+        return pipelineStep instanceof DrawSegmentationStep;
     }
 
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new DrawBoundingBoxStepRunner((DrawBoundingBoxStep) pipelineStep);
+        return new DrawSegmentationStepRunner((DrawSegmentationStep)pipelineStep);
     }
 }

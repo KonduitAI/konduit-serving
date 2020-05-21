@@ -28,6 +28,8 @@ import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
 import org.nd4j.common.base.Preconditions;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ShowImageStepRunner implements PipelineStepRunner {
@@ -37,7 +39,7 @@ public class ShowImageStepRunner implements PipelineStepRunner {
 
     private ShowImagePipelineStep step;
     private boolean initialized;
-    private CanvasFrame canvas;
+    private List<CanvasFrame> canvas;
 
     public ShowImageStepRunner(ShowImagePipelineStep step){
         this.step = step;
@@ -56,42 +58,77 @@ public class ShowImageStepRunner implements PipelineStepRunner {
 
     @Override
     public synchronized Data exec(Context ctx, Data data) {
-        String name = step.getImageName();
+        String name = step.imageName();
         if(name == null)
             name = tryInferName(data);
 
+        boolean allowMultiple = step.allowMultiple();
         boolean isSingle = data.has(name) && data.type(name) == ValueType.IMAGE;
-        boolean isSingleList = data.has(name) && data.type(name) == ValueType.LIST && data.listType(name) == ValueType.IMAGE
-                && data.getListImage(name).size() == 1;
+        boolean validList = data.has(name) && data.type(name) == ValueType.LIST && data.listType(name) == ValueType.IMAGE
+                && (allowMultiple || data.getListImage(name).size() == 1);
 
-        Preconditions.checkState(isSingle || isSingleList, "Data does not have image value (or size 1 List<Image>) for name \"%s\" - data keys = %s",
-                name, data.keys());
 
-        Image i;
-        if(isSingle){
-            i = data.getImage(name);
+        if(allowMultiple){
+            Preconditions.checkState(isSingle || validList,
+                    "Data does not have Image value or List<Image> for name \"%s\" - data keys = %s", name, data.keys());
         } else {
-            i = data.getListImage(name).get(0);
+            Preconditions.checkState(isSingle || validList,
+                    "Data does not have image value (or size 1 List<Image>, given ShowImagePipeline) for name \"%s\" - data keys = %s",
+                    name, data.keys());
         }
-        Frame f = i.getAs(Frame.class);
+
+        List<Image> l;
+        if(isSingle)
+            l = Collections.singletonList(data.getImage(name));
+        else
+            l = data.getListImage(name);
 
         if(!initialized)
             init();
 
-        canvas.showImage(f);
-        if(step.getWidth() == null || step.getHeight() == null || step.getWidth() == 0 || step.getHeight() == 0){
-            canvas.setCanvasSize(Math.max(MIN_WIDTH, i.width()), Math.max(MIN_HEIGHT, i.height()));
+        if(isSingle){
+            Image i = l.get(0);
+            Frame f = i.getAs(Frame.class);
+            canvas.get(0).showImage(f);
+            if(step.width() == null || step.height() == null || step.width() == 0 || step.height() == 0){
+                canvas.get(0).setCanvasSize(Math.max(MIN_WIDTH, i.width()), Math.max(MIN_HEIGHT, i.height()));
+            }
+        } else {
+            if(!initialized)
+                init();
+
+            for( int i=0; i<l.size(); i++ ){
+                Image img = l.get(i);
+                Frame f = img.getAs(Frame.class);
+
+                if(canvas.size() <= i)
+                    canvas.add(newFrame(step.displayName() + "_" + i));
+
+
+                CanvasFrame cf = canvas.get(i);
+                cf.showImage(f);
+                if(step.width() == null || step.height() == null || step.width() == 0 || step.height() == 0){
+                    cf.setCanvasSize(Math.max(MIN_WIDTH, img.width()), Math.max(MIN_HEIGHT, img.height()));
+                }
+            }
         }
+
 
         return data;
     }
 
-    protected synchronized void init(){
-        canvas = new CanvasFrame(step.getDisplayName());
-        int w = (step.getWidth() == null || step.getWidth() == 0) ? MIN_WIDTH : step.getWidth();
-        int h = (step.getHeight() == null || step.getHeight() == 0) ? MIN_HEIGHT : step.getHeight();
-        canvas.setCanvasSize(w, h);
+    protected synchronized void init() {
+        canvas = new ArrayList<>();
+        canvas.add(newFrame(step.displayName()));
         initialized = true;
+    }
+
+    protected CanvasFrame newFrame(String name){
+        CanvasFrame cf = new CanvasFrame(name);
+        int w = (step.width() == null || step.width() == 0) ? MIN_WIDTH : step.width();
+        int h = (step.height() == null || step.height() == 0) ? MIN_HEIGHT : step.height();
+        cf.setCanvasSize(w, h);
+        return cf;
     }
 
     protected String tryInferName(Data d){

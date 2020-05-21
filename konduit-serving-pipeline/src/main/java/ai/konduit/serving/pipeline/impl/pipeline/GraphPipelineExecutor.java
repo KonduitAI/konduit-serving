@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline;
 
+import ai.konduit.serving.pipeline.api.context.Profiler;
+import ai.konduit.serving.pipeline.api.context.ProfilerConfig;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -41,6 +43,7 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
     private final GraphPipeline pipeline;
     private Map<String,PipelineStepRunner> runners;
     private Map<String,List<String>> inputsFor;     //Key: a step. Value: The steps that this is an input for: i.e., key -> X exists
+    private ProfilerConfig profilerConfig;
 
     public GraphPipelineExecutor(GraphPipeline pipeline){
         this.pipeline = pipeline;
@@ -183,5 +186,15 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
     @Override
     public Logger getLogger() {
         return log;
+    }
+
+    @Override
+    public void profilerConfig(ProfilerConfig profilerConfig) {
+		this.profilerConfig = profilerConfig;
+    }
+
+    @Override
+    public Profiler profiler() {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 }

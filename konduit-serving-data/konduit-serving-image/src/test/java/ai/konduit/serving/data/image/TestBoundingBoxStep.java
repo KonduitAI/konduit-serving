@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.data.image;
 
-import ai.konduit.serving.data.image.step.draw.DrawBoundingBoxStep;
+import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -66,7 +66,7 @@ public class TestBoundingBoxStep {
                         .classColors(classColors)
 
                     .build())
-                .add(new ShowImagePipelineStep("image", "Display", 256, 256))
+                .add(new ShowImagePipelineStep("image", "Display", 256, 256, false))
                 .build();
 
         PipelineExecutor exec = p.executor();

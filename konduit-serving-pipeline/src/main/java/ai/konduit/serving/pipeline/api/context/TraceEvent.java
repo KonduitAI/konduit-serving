@@ -15,33 +15,27 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
+package ai.konduit.serving.pipeline.api.context;
 
-package ai.konduit.serving.data.image.util;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.opencv_java;
+import java.util.List;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-public class OpenCVUtil {
-
-    private OpenCVUtil(){ }
-
-
-    private static final AtomicBoolean opencvLoaded = new AtomicBoolean();
-
-    /**
-     *
-     */
-    public static synchronized void ensureOpenCVLoaded(){
-        if(opencvLoaded.get())
-            return;
-
-        /*
-        Call Loader.load(opencv_java.class) before using the API in the org.opencv namespace.
-         */
-        Loader.load(opencv_java.class);
-
+@Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class TraceEvent {
+    public enum EventType {
+        B,E
     }
-
+    private String name;
+    private String cat;
+    private long ts;
+    private long pid;
+    private long tid;
+    private EventType ph;
 }
