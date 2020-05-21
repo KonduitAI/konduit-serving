@@ -366,7 +366,7 @@ public class TestTensorFlowStep {
 
 
     @Test @Ignore   //To be run manually due to need for webcam and frame output
-    public void testImageSegmenation() throws Exception {
+    public void testImageSegmentation() throws Exception {
         //Pretrained model source:https://github.com/tensorflow/models/blob/master/research/deeplab/g3doc/model_zoo.md#model-details
 
         String fileUrl = "http://download.tensorflow.org/models/deeplabv3_mnv2_dm05_pascal_trainval_2018_10_01.tar.gz";
