@@ -24,6 +24,7 @@ import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
+import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
@@ -51,6 +52,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep.*;
 import static org.junit.Assert.assertEquals;
 
 @Slf4j
@@ -97,7 +99,7 @@ public class TestTensorFlowStep {
                 .build());
 
         //Run image in TF model
-        GraphStep tf = i2n.then("tf", TensorFlowPipelineStep.builder()
+        GraphStep tf = i2n.then("tf", builder()
                 .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
                 .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
                 .modelUri(f.toURI().toString())      //Face detection model
@@ -180,7 +182,7 @@ public class TestTensorFlowStep {
                         .config(c)
                         .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
                     .build())
-                .add(TensorFlowPipelineStep.builder()
+                .add(builder()
                         .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
                         .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
                         .modelUri(f.toURI().toString())      //Face detection model
@@ -246,7 +248,7 @@ public class TestTensorFlowStep {
                 .add(ImageToNDArrayStep.builder()
                         .config(c)
                         .build())
-                .add(TensorFlowPipelineStep.builder()
+                .add(builder()
                         .modelUri(f.toURI().toString())
                         .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
                         .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
@@ -279,14 +281,16 @@ public class TestTensorFlowStep {
     public void testPersonDetection() throws Exception {
         //Pretrained model source: https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models
 
-        String fileUrl = "https://drive.google.com/u/0/uc?id=1c1mdTxUwN7C3noDajzNnEP1m2_yVBcD1&export=download";
+        String fileUrl = "http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz";
         File testDir = TestUtils.testResourcesStorageDir();
         File saveDir = new File(testDir, "konduit-serving-tensorflow/persondetection");
         File f = new File(saveDir, "frozen_inference_graph.pb");
 
         if (!f.exists()) {
-            log.info("Downloading model: {} -> {}", fileUrl, f.getAbsolutePath());
-            FileUtils.copyURLToFile(new URL(fileUrl), f);
+            log.info("Downloading model: {} -> {}", fileUrl, saveDir.getAbsolutePath());
+            File archive = new File(saveDir, "ssd_mobilenet_v1_coco_2018_01_28.tar.gz");
+            FileUtils.copyURLToFile(new URL(fileUrl), archive);
+            ArchiveUtils.tarGzExtractSingleFile(archive,f, "ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb");
             log.info("Download complete");
         }
 
@@ -317,7 +321,7 @@ public class TestTensorFlowStep {
                 .build());
 
         //Run image in TF model
-        GraphStep tf = i2n.then("tf", TensorFlowPipelineStep.builder()
+        GraphStep tf = i2n.then("tf", builder()
                 .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
                 .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
                 .modelUri(f.toURI().toString())      //Face detection model
@@ -325,7 +329,6 @@ public class TestTensorFlowStep {
 
         //Post process SSD outputs to BoundingBox objects
         GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
-                .threshold(0.6)
                 .outputName("img_bbox")
                 .build());
 
@@ -359,4 +362,91 @@ public class TestTensorFlowStep {
             exec.exec(in);
         }
     }
+
+
+
+    @Test @Ignore   //To be run manually due to need for webcam and frame output
+    public void testImageSegmentation() throws Exception {
+        //Pretrained model source:https://github.com/tensorflow/models/blob/master/research/deeplab/g3doc/model_zoo.md#model-details
+
+        String fileUrl = "http://download.tensorflow.org/models/deeplabv3_mnv2_dm05_pascal_trainval_2018_10_01.tar.gz";
+        File testDir = TestUtils.testResourcesStorageDir();
+        File saveDir = new File(testDir, "konduit-serving-tensorflow/image-segmentation");
+        File f = new File(saveDir, "frozen_inference_graph.pb");
+
+        if (!f.exists()) {
+            log.info("Downloading model: {} -> {}", fileUrl, saveDir.getAbsolutePath());
+            File archive = new File(saveDir, "image_segmentation.tar.gz");
+            FileUtils.copyURLToFile(new URL(fileUrl), archive);
+            ArchiveUtils.tarGzExtractSingleFile(archive,f, "deeplabv3_mnv2_dm05_pascal_trainval/frozen_inference_graph.pb");
+            log.info("Download complete");
+        }
+
+        GraphBuilder b = new GraphBuilder();
+        GraphStep input = b.input();
+
+        //Capture frame from webcam
+        GraphStep camera = input.then("camera", FrameCapturePipelineStep.builder()
+                .camera(0)
+                .outputKey("image")
+                .build());
+
+        //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
+        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+                .height(300)
+                .width(300)
+                .channelLayout(NDChannelLayout.RGB)
+                .includeMinibatchDim(true)
+                .format(NDFormat.CHANNELS_LAST)
+                .dataType(NDArrayType.UINT8)
+                .normalization(null)
+                .build();
+
+        GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
+                .config(c)
+                .keys(Arrays.asList("image"))
+                .outputNames(Arrays.asList("ImageTensor")) //TODO varargs builder method
+                .build());
+
+        //Run image in TF model
+        GraphStep tf = i2n.then("tf", builder()
+                .inputNames(Collections.singletonList("ImageTensor"))      //TODO varargs builder method
+                .outputNames(Arrays.asList("SemanticPredictions"))
+                .modelUri(f.toURI().toString())
+                .build());
+
+
+
+        //Merge camera image with bounding boxes
+        GraphStep merged = camera.mergeWith("img_segmentation", tf);
+
+        //Draw bounding boxes on the image
+        GraphStep drawer = merged.then("drawer", DrawSegmentationStep.builder()
+                .image("image")
+                .segmentArray("SemanticPredictions")
+                .opacity(0.5)
+                .outputName("out")
+                .build());
+
+
+
+        //Show image in Java frame
+        GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
+                .displayName("image segmentation")
+                .imageName("out")
+                .build());
+
+
+        GraphPipeline p = b.build(show);
+
+
+        PipelineExecutor exec = p.executor();
+
+        Data in = Data.empty();
+        for( int i=0; i<1000; i++ ){
+            exec.exec(in);
+        }
+    }
+
+
 }
