@@ -1,3 +1,4 @@
+
 /* ******************************************************************************
  * Copyright (c) 2020 Konduit K.K.
  *
@@ -15,6 +16,8 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.api.pipeline;
 
+import ai.konduit.serving.pipeline.api.context.Profiler;
+import ai.konduit.serving.pipeline.api.context.ProfilerConfig;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import org.slf4j.Logger;
@@ -76,4 +79,11 @@ public interface PipelineExecutor {
      * Get the logger used by this PipelineExecutor
      */
     Logger getLogger();
+
+    /**
+     * Set profiling config.
+     */
+    void profilerConfig(ProfilerConfig profilerConfig);
+
+    Profiler profiler();
 }
