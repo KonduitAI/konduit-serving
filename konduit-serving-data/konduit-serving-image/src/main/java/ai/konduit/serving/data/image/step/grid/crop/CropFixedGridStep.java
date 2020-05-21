@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.grid.draw;
+package ai.konduit.serving.data.image.step.grid.crop;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * As per {@link DrawGridStep} but the x/y location values are hardcoded into the configuration, instead of coming
+ * As per {@link CropGridStep} but the x/y location values are hardcoded into the configuration, instead of coming
  * dynamically from the input Data instance
  *
  * @author Alex Black
@@ -34,7 +34,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
-public class DrawFixedGridStep implements PipelineStep {
+public class CropFixedGridStep implements PipelineStep {
     public static final String DEFAULT_COLOR = "lime";
 
     private String imageName;               //If null: just find any image
@@ -49,7 +49,7 @@ public class DrawFixedGridStep implements PipelineStep {
     private int borderThickness = 1;
     private Integer gridThickness;          //If null: same thickness as border
 
-    public DrawFixedGridStep() {
+    public CropFixedGridStep() {
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
         //Without setting defaults here again like this, the fields would actually be null or 0 etc
         this.borderThickness = 1;

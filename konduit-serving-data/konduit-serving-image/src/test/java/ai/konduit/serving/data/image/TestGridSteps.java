@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image;
 
+import ai.konduit.serving.data.image.step.grid.crop.CropGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
@@ -33,6 +34,7 @@ import org.nd4j.common.resources.Resources;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -63,7 +65,7 @@ public class TestGridSteps {
                         .borderThickness(10)
                         .gridThickness(4)
                     .build())
-                .add(new ShowImagePipelineStep("image", "Display", null, null))
+                .add(new ShowImagePipelineStep("image", "Display", null, null, false))
                 .build();
 
         PipelineExecutor exec = p.executor();
@@ -264,4 +266,51 @@ public class TestGridSteps {
         assertTrue(msg, countDifferent < maxPixelsDifferent);
     }
 
+
+
+    @Test
+//    @Ignore   //To be run manually
+    public void testCropGridStep() throws Exception {
+
+        File f = Resources.asFile("data/shelves.png");
+        Image i = Image.create(f);
+
+        Data in = Data.singleton("image", i);
+        in.putListDouble("x", Arrays.asList(0.015, 0.04, 0.815, 0.795));
+        in.putListDouble("y", Arrays.asList(0.33, 0.70, 0.42, 0.83));
+
+
+        Pipeline p = SequencePipeline.builder()
+                .add(DrawGridStep.builder()
+                        .borderColor("green")
+                        .gridColor("blue")
+                        .coordsArePixels(false)
+                        .grid1(4)
+                        .grid2(2)
+                        .xName("x")
+                        .yName("y")
+                        .imageName("image")
+                        .borderThickness(4)
+                        .gridThickness(2)
+                        .build())
+                .add(new ShowImagePipelineStep().imageName("image").height(null).width(null))
+                .add(CropGridStep.builder()
+                        .coordsArePixels(false)
+                        .grid1(4)
+                        .grid2(2)
+                        .xName("x")
+                        .yName("y")
+                        .imageName("image")
+                        .build())
+                .add(new ShowImagePipelineStep().imageName("crops").displayName("Display").width(null).height(null).allowMultiple(true))
+                .build();
+
+        PipelineExecutor exec = p.executor();
+
+        Data out = exec.exec(in);
+//        List<Image> l = out.getListImage("crops");
+//        assertEquals(12, l.size());
+
+        Thread.sleep(1000000);
+    }
 }

@@ -21,10 +21,13 @@ package ai.konduit.serving.data.image.step.show;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 @Data
 @Builder
+@Accessors(fluent = true)
 public class ShowImagePipelineStep implements PipelineStep {
 
     @Builder.Default
@@ -35,13 +38,25 @@ public class ShowImagePipelineStep implements PipelineStep {
     private Integer width = 1280;
     @Builder.Default
     private Integer height = 720;
+    private boolean allowMultiple = false;
 
     public ShowImagePipelineStep(@JsonProperty("imageName") String imageName, @JsonProperty("displayName") String displayName,
-                                 @JsonProperty("width") Integer width, @JsonProperty("height") Integer height){
+                                 @JsonProperty("width") Integer width, @JsonProperty("height") Integer height,
+                                 @JsonProperty("allowMultiple") boolean allowMultiple){
         this.imageName = imageName;
         this.displayName = displayName;
         this.width = width;
         this.height = height;
+        this.allowMultiple = allowMultiple;
+    }
+
+    public ShowImagePipelineStep(){
+        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
+        //Without setting defaults here again like this, the fields would actually be null
+        this.imageName = "image";
+        this.displayName = displayName();
+        this.width = 1280;
+        this.height = 720;
     }
 
 
