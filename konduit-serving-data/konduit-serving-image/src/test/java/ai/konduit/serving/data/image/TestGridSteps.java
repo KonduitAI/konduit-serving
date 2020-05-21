@@ -22,6 +22,7 @@ import ai.konduit.serving.data.image.step.grid.crop.CropGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -36,12 +37,12 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TestGridSteps {
 
-    @Test @Ignore   //To be run manually
+    @Test
+    @Ignore   //To be run manually
     public void testDrawGridStep() throws Exception {
 
         File f = Resources.asFile("data/mona_lisa.png");
@@ -64,7 +65,7 @@ public class TestGridSteps {
                         .imageName("image")
                         .borderThickness(10)
                         .gridThickness(4)
-                    .build())
+                        .build())
                 .add(new ShowImagePipelineStep("image", "Display", null, null, false))
                 .build();
 
@@ -81,20 +82,20 @@ public class TestGridSteps {
         int numOrders = 4 * 3 * 2;
 
         int[][] orders = new int[numOrders][4];
-        int x=0;
-        for( int i=0; i<4; i++ ){
-            for( int j=0; j<4; j++ ){
-                if(j == i)
+        int x = 0;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (j == i)
                     continue;
-                for( int k=0; k<4; k++ ){
-                    if(k == i || k == j)
+                for (int k = 0; k < 4; k++) {
+                    if (k == i || k == j)
                         continue;
 
                     orders[x][0] = i;
                     orders[x][1] = j;
                     orders[x][2] = k;
-                    for( int l=0; l<4; l++ ){
-                        if(i != l && j != l && k != l){
+                    for (int l = 0; l < 4; l++) {
+                        if (i != l && j != l && k != l) {
                             orders[x][3] = l;
                             break;
                         }
@@ -133,7 +134,7 @@ public class TestGridSteps {
         Data out = exec.exec(in);
         Image imgOutExp = out.getImage("image");
 
-        for(boolean pixelCoords : new boolean[]{false, true}) {
+        for (boolean pixelCoords : new boolean[]{false, true}) {
 
             for (int[] order : orders) {
                 if ((order[0] == 0 && order[1] == 3) || (order[0] == 3 && order[1] == 0) ||
@@ -235,15 +236,15 @@ public class TestGridSteps {
         }
     }
 
-    protected void assertApproxEqual(Image i1, Image i2, int differenceThreshold, int maxPixelsDifferent){
+    protected void assertApproxEqual(Image i1, Image i2, int differenceThreshold, int maxPixelsDifferent) {
         BufferedImage bi1 = i1.getAs(BufferedImage.class);
         BufferedImage bi2 = i2.getAs(BufferedImage.class);
 
         int countDifferent = 0;
         int h = bi1.getHeight();
         int w = bi2.getWidth();
-        for( int i=0; i<h; i++ ){
-            for( int j=0; j<w; j++ ){
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
                 int rgb1 = bi1.getRGB(j, i);
                 int rgb2 = bi2.getRGB(j, i);
 
@@ -254,18 +255,17 @@ public class TestGridSteps {
                 int g2 = (rgb1 & 0b000000001111111100000000) >> 8;
                 int b2 = rgb1 & 0b000000000000000011111111;
 
-                int difference = Math.abs(r1-r2) + Math.abs(g1-g2) + Math.abs(b1-b2);
+                int difference = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
 
-                if(difference > differenceThreshold){
+                if (difference > differenceThreshold) {
                     countDifferent++;
                 }
             }
         }
 
-        String msg = countDifferent + " of " + (h*w) + " pixels differ by more than theshold=" + differenceThreshold;
+        String msg = countDifferent + " of " + (h * w) + " pixels differ by more than theshold=" + differenceThreshold;
         assertTrue(msg, countDifferent < maxPixelsDifferent);
     }
-
 
 
     @Test
@@ -275,42 +275,84 @@ public class TestGridSteps {
         File f = Resources.asFile("data/shelves.png");
         Image i = Image.create(f);
 
-        Data in = Data.singleton("image", i);
-        in.putListDouble("x", Arrays.asList(0.015, 0.04, 0.815, 0.795));
-        in.putListDouble("y", Arrays.asList(0.33, 0.70, 0.42, 0.83));
 
 
-        Pipeline p = SequencePipeline.builder()
-                .add(DrawGridStep.builder()
-                        .borderColor("green")
-                        .gridColor("blue")
-                        .coordsArePixels(false)
-                        .grid1(4)
-                        .grid2(2)
-                        .xName("x")
-                        .yName("y")
-                        .imageName("image")
-                        .borderThickness(4)
-                        .gridThickness(2)
-                        .build())
-                .add(new ShowImagePipelineStep().imageName("image").height(null).width(null))
-                .add(CropGridStep.builder()
-                        .coordsArePixels(false)
-                        .grid1(4)
-                        .grid2(2)
-                        .xName("x")
-                        .yName("y")
-                        .imageName("image")
-                        .build())
-                .add(new ShowImagePipelineStep().imageName("crops").displayName("Display").width(null).height(null).allowMultiple(true))
-                .build();
+        int g1 = 4;
+        int g2 = 2;
 
-        PipelineExecutor exec = p.executor();
+        for (boolean px : new boolean[]{false, true}) {
+            Data in = Data.singleton("image", i);
+            if(px) {
+                in.putListDouble("x", Arrays.asList(0.015*i.width(), 0.04*i.width(), 0.815*i.width(), 0.795*i.width()));
+                in.putListDouble("y", Arrays.asList(0.33*i.height(), 0.70*i.height(), 0.42*i.height(), 0.83*i.height()));
+            } else {
+                in.putListDouble("x", Arrays.asList(0.015, 0.04, 0.815, 0.795));
+                in.putListDouble("y", Arrays.asList(0.33, 0.70, 0.42, 0.83));
+            }
+            in.put("key", "value");
 
-        Data out = exec.exec(in);
-//        List<Image> l = out.getListImage("crops");
-//        assertEquals(12, l.size());
+            for(boolean outName : new boolean[]{false, true}) {
+                for (boolean keep : new boolean[]{false, true}) {
+                    for(boolean bb : new boolean[]{false, true}) {
 
-        Thread.sleep(1000000);
+
+                        Pipeline p = SequencePipeline.builder()
+                                .add(DrawGridStep.builder()
+                                        .borderColor("green")
+                                        .gridColor("blue")
+                                        .coordsArePixels(false)
+                                        .grid1(g1)
+                                        .grid2(g2)
+                                        .xName("x")
+                                        .yName("y")
+                                        .imageName("image")
+                                        .borderThickness(4)
+                                        .gridThickness(2)
+                                        .build())
+                                //.add(new ShowImagePipelineStep().imageName("image").height(null).width(null))
+                                .add(CropGridStep.builder()
+                                        .coordsArePixels(false)
+                                        .grid1(g1)
+                                        .grid2(g2)
+                                        .xName("x")
+                                        .yName("y")
+                                        .imageName("image")
+                                        .keepOtherFields(keep)
+                                        .outputName(outName ? "output" : null)
+                                        .boundingBoxName(bb ? "bbox" : null)
+                                        .coordsArePixels(px)
+                                        //.aspectRatio(1.0)
+                                        .build())
+                                //.add(new ShowImagePipelineStep().imageName(outName ? "output" : CropGridStep.DEFAULT_OUTPUT_NAME).displayName("Display").width(null).height(null).allowMultiple(true))
+                                .build();
+
+                        PipelineExecutor exec = p.executor();
+
+                        Data out = exec.exec(in);
+                        List<Image> l = out.getListImage(outName ? "output" : CropGridStep.DEFAULT_OUTPUT_NAME);
+                        assertEquals(g1 * g2, l.size());
+
+                        if (keep) {
+                            assertTrue(out.has("key"));
+                            assertEquals("value", out.getString("key"));
+                        } else {
+                            assertFalse(out.has("key"));
+                        }
+
+                        if (bb) {
+                            assertTrue(out.has("bbox"));
+                            List<BoundingBox> lbb = out.getListBoundingBox("bbox");
+                            assertEquals(g1 * g2, lbb.size());
+                        } else {
+                            assertFalse(out.has("bbox"));
+                        }
+
+//                        Thread.sleep(1000000);
+                    }
+                }
+            }
+        }
+
+//        Thread.sleep(1000000);
     }
 }

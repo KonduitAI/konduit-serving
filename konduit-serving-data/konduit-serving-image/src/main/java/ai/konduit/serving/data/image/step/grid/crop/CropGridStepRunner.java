@@ -20,6 +20,7 @@ package ai.konduit.serving.data.image.step.grid.crop;
 
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
+import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.ValueType;
@@ -36,6 +37,7 @@ import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.primitives.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,21 +114,29 @@ public class CropGridStepRunner implements PipelineStepRunner {
         ConvexHull2D ch = convexHull(x, y);
 
         Mat m = i.getAs(Mat.class);
-
-
-        Vector2D[] corners = ch.getVertices();
-
-
         Segment[] segments = ch.getLineSegments();
-        List<Image> l = cropGrid(m, segments, x, y);
+        Pair<List<Image>,List<BoundingBox>> p = cropGrid(m, segments, x, y);
 
-        Data out = data.clone();
-        out.putListImage("crops", l);
+        Data out;
+        if(step.keepOtherFields()){
+            out = data.clone();
+        } else {
+            out = Data.empty();
+        }
+
+        String outName = step.outputName();
+        if(outName == null)
+            outName = CropGridStep.DEFAULT_OUTPUT_NAME;
+        out.putListImage(outName, p.getFirst());
+
+        if(step.boundingBoxName() != null){
+            out.putListBoundingBox(step.boundingBoxName(), p.getSecond());
+        }
 
         return out;
     }
 
-    protected List<Image> cropGrid(Mat m, Segment[] segments, double[] x, double[] y) {
+    protected Pair<List<Image>,List<BoundingBox>> cropGrid(Mat m, Segment[] segments, double[] x, double[] y) {
         Segment grid1Segment1 = null;
 
         //Work out the
@@ -172,7 +182,7 @@ public class CropGridStepRunner implements PipelineStepRunner {
             }
         }
 
-        int g1, g2;
+        double g1, g2;
         if(step != null){
             g1 = step.grid1();
             g2 = step.grid2();
@@ -227,45 +237,36 @@ public class CropGridStepRunner implements PipelineStepRunner {
             y4 = ty3;
         }
 
+        if(step.coordsArePixels()){
+            x1 /= m.cols();
+            x2 /= m.cols();
+            x3 /= m.cols();
+            x4 /= m.cols();
+            y1 /= m.rows();
+            y2 /= m.rows();
+            y3 /= m.rows();
+            y4 /= m.rows();
+        }
 
-
-
-//        double dX1 = (x2-x1)/g1;
-//        double dX2 = (x4-x3)/g1;
-//        double dY1 = (y2-y1)/g2;
-//        double dY2 = (y4-y3)/g2;
-
-        double dX1 = (x2-x1)/g2;
-        double dX2 = (x4-x3)/g2;
-        double dY1 = (y2-y1)/g1;
-        double dY2 = (y4-y3)/g1;
 
         List<Image> out = new ArrayList<>();
+        List<BoundingBox> bbox = step.boundingBoxName() != null ? new ArrayList<>() : null;
         for( int i=0; i<g1; i++ ){
 
-            int bx1 = (int) (m.cols() * (x1 + i*dX1));
-            int bx2 = (int) (m.cols() * (x1 + (i+1)*dX1));
-            int by1 = (int) (m.rows() * (y1 + i*dY1));
-            int by2 = (int) (m.rows() * (y1 + (i+1)*dY1));
-
-            int bx3 = (int) (m.cols() * (x3 + i*dX2));
-            int bx4 = (int) (m.cols() * (x3 + (i+1)*dX2));
-            int by3 = (int) (m.rows() * (y3 + i*dY2));
-            int by4 = (int) (m.rows() * (y3 + (i+1)*dY2));
+            //x1, x2, x3, x4, y1, y2, y3, y4 - these represent the corner dimensions of the current row
+            // within the overall grid
+            int bx1 = (int) (m.cols() * fracBetween (i/g1, x1, x2));
+            int bx2 = (int) (m.cols() * fracBetween((i+1)/g1, x1, x2));
+            int by1 = (int) (m.rows() * fracBetween (i/g1, y1, y2));
+            int by2 = (int) (m.rows() * fracBetween((i+1)/g1, y1, y2));
+            int bx3 = (int) (m.cols() * fracBetween (i/g1, x3, x4));
+            int bx4 = (int) (m.cols() * fracBetween((i+1)/g1, x3, x4));
+            int by3 = (int) (m.rows() * fracBetween (i/g1, y3, y4));
+            int by4 = (int) (m.rows() * fracBetween((i+1)/g1, y3, y4));
 
             for( int j=0; j<g2; j++ ){
-                //Now, we need to segment again, to get the grid square
-                double sg1 = 1.0 / g1;
+                //Now, we need to segment the row, to get the grid square
                 double sg2 = 1.0 / g2;
-//                int ax1 = (int) (bx1 + j * sg2 * (bx2-bx1));
-//                int ax2 = (int) (bx1 + j * sg2 * (bx2-bx1));
-//                int ay1 = (int) (by1 + j * sg1 * (by2-by1));
-//                int ay2 = (int) (by1 + j * sg1 * (by2-by1));
-//
-//                int ax3 = (int) (bx1 + (j+1) * sg2 * (bx3-bx1));
-//                int ax4 = (int) (bx1 + (j+1) * sg2 * (bx4-bx2));
-//                int ay3 = (int) (by1 + (j+1) * sg1 * (by3-by1));
-//                int ay4 = (int) (by1 + (j+1) * sg1 * (by4-by2));
 
                 double[] t1 = fracBetween(j*sg2, bx1, by1, bx3, by3);
                 int ax1 = (int) t1[0];
@@ -283,12 +284,6 @@ public class CropGridStepRunner implements PipelineStepRunner {
                 int ax4 = (int) t4[0];
                 int ay4 = (int) t4[1];
 
-                //For now, we'll select the square around these:
-//                int minX = min(bx1, bx2, bx3, bx4);
-//                int maxX = max(bx1, bx2, bx3, bx4);
-//                int minY = min(by1, by2, by3, by4);
-//                int maxY = max(by1, by2, by3, by4);
-
                 int minX = min(ax1, ax2, ax3, ax4);
                 int maxX = max(ax1, ax2, ax3, ax4);
                 int minY = min(ay1, ay2, ay3, ay4);
@@ -296,14 +291,55 @@ public class CropGridStepRunner implements PipelineStepRunner {
 
                 int w = maxX-minX;
                 int h = maxY-minY;
+
+                if(step.aspectRatio() != null){
+                    double currAr = w / (double)h;
+                    double ar = step.aspectRatio();
+                    if(ar < currAr){
+                        //Need to increase height dimension to give desired AR
+                        int newH = (int) (w / ar);
+                        minY -= (newH-h)/2;
+                        h = newH;
+                    } else if(ar > currAr){
+                        //Need ot increase width dimension to give desired AR
+                        int newW = (int) (h * ar);
+                        minX -= (newW-w)/2;
+                        w = newW;
+                    }
+                }
+
+                //Make sure bounds are inside image. TODO handle this differently for aspect ratio preserving?
+                if(minX < 0){
+                    w += minX;
+                    minX = 0;
+                }
+                if(minX + w > m.cols()){
+                    w = m.cols() - minX;
+                }
+                if(minY < 0){
+                    h += minY;
+                    minY = 0;
+                }
+                if(minY + h > m.rows()){
+                    h = m.rows() - minY;
+                }
+
+
                 Rect r = new Rect(minX, minY, w, h);
                 Mat crop = m.apply(r);
                 out.add(Image.create(crop));
+
+                if(bbox != null){
+                    bbox.add(BoundingBox.createXY(minX / (double)m.cols(), (minX + w)/ (double)m.cols(), minY/ (double)m.rows(), (minY + h)/ (double)m.rows()));
+                }
             }
         }
 
+        return Pair.of(out, bbox);
+    }
 
-        return out;
+    private double fracBetween(double frac, double a, double b){
+        return a + frac * (b-a);
     }
 
     private double[] fracBetween(double frac, double x1, double y1, double x2, double y2){

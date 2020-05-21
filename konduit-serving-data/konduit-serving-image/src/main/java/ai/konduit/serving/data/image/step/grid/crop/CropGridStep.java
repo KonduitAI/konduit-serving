@@ -33,9 +33,10 @@ import lombok.experimental.Accessors;
  * Note that the output depends on the configuration.
  * Always returned: {@code List<Image>} - the cropped images from the grid<br>
  * Returned if {@code outputCoordinates=true}: two {@code List<Long>}s - the box coordinates (0,0), ..., (grid1-1, grid2-1)<br>
- * Returned if {@code outputBoxes=true}: one {@code List<BoundingBox>} - the crop bounding boxes, (0,0), (0,1), ..., (grid1-1, grid2-1)<br>
+ * Returned if {@code boundingBoxName != null}: one {@code List<BoundingBox>} - the crop bounding boxes, (0,0), (0,1), ..., (grid1-1, grid2-1)<br>
  * See also {@link CropFixedGridStep}<br>
- *
+ * If {@code aspectRatio} is set, the smaller dimension will be increased to keep the aspect ratio correct. Note this may crop
+ * outside the image border
  * @author Alex Black
  */
 @Builder
@@ -43,20 +44,17 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class CropGridStep implements PipelineStep {
+    public static final String DEFAULT_OUTPUT_NAME = "crops";
+
     private String imageName;               //If null: just find any image
     private String xName;                   //Name of the List<Long> or List<Double> of length 4, specifying X coordinates in any order
     private String yName;                   //Name of the List<Long> or List<Double> of length 4, specifying Y coordinates in any order (that matches X order)
     private int grid1;                      //Number of grid segments between (x[0],y[0]) and (x[1],y[1])
     private int grid2;                      //Number of grid segments in the other direction
     private boolean coordsArePixels;        //If true: Lists are in pixels, not 0 to 1
-    @Builder.Default
-    private boolean outputLocations = true;
+    private String boundingBoxName;
     private boolean outputCoordinates = false;
     private boolean keepOtherFields = false;
-
-    public CropGridStep() {
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null or 0 etc
-        this.outputLocations = true;
-    }
+    private Double aspectRatio;
+    private String outputName;
 }
