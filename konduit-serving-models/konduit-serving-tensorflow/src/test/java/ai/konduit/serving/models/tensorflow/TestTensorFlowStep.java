@@ -22,9 +22,9 @@ import ai.konduit.serving.camera.step.capture.FrameCapturePipelineStep;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
-import ai.konduit.serving.data.image.step.draw.DrawBoundingBoxStep;
-import ai.konduit.serving.data.image.step.extract.ExtractBoundingBoxStep;
+import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
+import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
@@ -281,14 +281,16 @@ public class TestTensorFlowStep {
     public void testPersonDetection() throws Exception {
         //Pretrained model source: https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models
 
-        String fileUrl = "https://drive.google.com/u/0/uc?id=1c1mdTxUwN7C3noDajzNnEP1m2_yVBcD1&export=download";
+        String fileUrl = "http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz";
         File testDir = TestUtils.testResourcesStorageDir();
         File saveDir = new File(testDir, "konduit-serving-tensorflow/persondetection");
         File f = new File(saveDir, "frozen_inference_graph.pb");
 
         if (!f.exists()) {
-            log.info("Downloading model: {} -> {}", fileUrl, f.getAbsolutePath());
-            FileUtils.copyURLToFile(new URL(fileUrl), f);
+            log.info("Downloading model: {} -> {}", fileUrl, saveDir.getAbsolutePath());
+            File archive = new File(saveDir, "ssd_mobilenet_v1_coco_2018_01_28.tar.gz");
+            FileUtils.copyURLToFile(new URL(fileUrl), archive);
+            ArchiveUtils.tarGzExtractSingleFile(archive,f, "ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb");
             log.info("Download complete");
         }
 
@@ -391,8 +393,8 @@ public class TestTensorFlowStep {
 
         //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
         ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
-                .height(300)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
-                .width(300)   // size origin
+                .height(300)
+                .width(300)
                 .channelLayout(NDChannelLayout.RGB)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
@@ -408,33 +410,30 @@ public class TestTensorFlowStep {
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("image"))      //TODO varargs builder method
+                .inputNames(Collections.singletonList("ImageTensor"))      //TODO varargs builder method
                 .outputNames(Arrays.asList("SemanticPredictions"))
                 .modelUri(f.toURI().toString())
                 .build());
 
-        //Post process SSD outputs to BoundingBox objects
-        GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
-                .outputName("img_bbox")
-                .build());
+
 
         //Merge camera image with bounding boxes
-        GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
+        GraphStep merged = camera.mergeWith("img_segmentation", tf);
 
         //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", DrawBoundingBoxStep.builder()
-                .imageName("image")
-                .bboxName("img_bbox")
-                .lineThickness(2)
-                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
-                .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
+        GraphStep drawer = merged.then("drawer", DrawSegmentationStep.builder()
+                .image("image")
+                .segmentArray("SemanticPredictions")
+                .opacity(0.5)
+                .outputName("out")
                 .build());
+
 
 
         //Show image in Java frame
         GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
-                .displayName("person detection")
-                .imageName("image")
+                .displayName("image segmentation")
+                .imageName("out")
                 .build());
 
 
