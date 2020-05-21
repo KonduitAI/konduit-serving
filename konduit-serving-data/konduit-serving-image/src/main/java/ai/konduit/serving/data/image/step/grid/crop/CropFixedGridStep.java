@@ -16,43 +16,37 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.grid.draw;
+package ai.konduit.serving.data.image.step.grid.crop;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
- * As per {@link DrawGridStep} but the x/y location values are hardcoded into the configuration, instead of coming
+ * As per {@link CropGridStep} but the x/y location values are hardcoded into the configuration, instead of coming
  * dynamically from the input Data instance
  *
  * @author Alex Black
+ * @see CropGridStep
  */
 @Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
-public class DrawFixedGridStep implements PipelineStep {
-    public static final String DEFAULT_COLOR = "lime";
-
+@NoArgsConstructor
+public class CropFixedGridStep implements PipelineStep {
     private String imageName;               //If null: just find any image
     private double[] x;                     //length 4, specifying X coordinates in any order
     private double[] y;                     //length 4, specifying Y coordinates in any order (that matches X order)
     private int grid1;                      //Number of grid segments between (x[0],y[0]) and (x[1],y[1])
     private int grid2;                      //Number of grid segments in the other direction
     private boolean coordsArePixels;        //If true: Lists are in pixels, not 0 to 1
-    private String borderColor;
-    private String gridColor;
-    @Builder.Default
-    private int borderThickness = 1;
-    private Integer gridThickness;          //If null: same thickness as border
-
-    public DrawFixedGridStep() {
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null or 0 etc
-        this.borderThickness = 1;
-    }
-
+    private String boundingBoxName;
+    private boolean outputCoordinates;
+    private boolean keepOtherFields;
+    private Double aspectRatio;
+    private String outputName;
 }

@@ -20,6 +20,8 @@ package ai.konduit.serving.data.image.serde;
 
 import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
 import ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep;
+import ai.konduit.serving.data.image.step.grid.crop.CropFixedGridStep;
+import ai.konduit.serving.data.image.step.grid.crop.CropGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
@@ -41,6 +43,8 @@ public class ImageJsonSubTypesMapping implements JsonSubTypesMapping {
         l.add(new JsonSubType("EXTRACT_BOUNDING_BOX", ExtractBoundingBoxStep.class, PipelineStep.class));
         l.add(new JsonSubType("DRAW_GRID", DrawGridStep.class, PipelineStep.class));
         l.add(new JsonSubType("DRAW_FIXED_GRID", DrawFixedGridStep.class, PipelineStep.class));
+        l.add(new JsonSubType("CROP_GRID", CropGridStep.class, PipelineStep.class));
+        l.add(new JsonSubType("CROP_FIXED_GRID", CropFixedGridStep.class, PipelineStep.class));
         return l;
     }
 }

@@ -16,10 +16,11 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.grid.draw;
+package ai.konduit.serving.data.image.step.grid.crop;
 
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
+import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.ValueType;
@@ -33,25 +34,27 @@ import org.apache.commons.math3.geometry.euclidean.twod.hull.ConvexHull2D;
 import org.apache.commons.math3.geometry.euclidean.twod.hull.MonotoneChain;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
+import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.primitives.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DrawGridStepRunner implements PipelineStepRunner {
+public class CropGridStepRunner implements PipelineStepRunner {
 
 
 
-    protected final DrawGridStep step;
-    protected final DrawFixedGridStep fStep;
+    protected final CropGridStep step;
+    protected final CropFixedGridStep fStep;
 
-    public DrawGridStepRunner(@NonNull DrawGridStep step){
+    public CropGridStepRunner(@NonNull CropGridStep step){
         this.step = step;
         this.fStep = null;
     }
 
-    public DrawGridStepRunner(@NonNull DrawFixedGridStep step){
+    public CropGridStepRunner(@NonNull CropFixedGridStep step){
         this.step = null;
         this.fStep = step;
     }
@@ -110,76 +113,30 @@ public class DrawGridStepRunner implements PipelineStepRunner {
 
         ConvexHull2D ch = convexHull(x, y);
 
-        Mat m = i.getAs(Mat.class).clone();
-
-        Scalar borderColor;
-        int borderThickness;
-        if(fixed){
-            borderColor = fStep.borderColor() == null ? ColorUtil.stringToColor(DrawGridStep.DEFAULT_COLOR) : ColorUtil.stringToColor(fStep.borderColor());
-            borderThickness = fStep.borderThickness();
-        } else {
-            borderColor = step.borderColor() == null ? ColorUtil.stringToColor(DrawGridStep.DEFAULT_COLOR) : ColorUtil.stringToColor(step.borderColor());
-            borderThickness = step.borderThickness();
-        }
-        if(borderThickness <= 0)
-            borderThickness = 1;
-
-
-
+        Mat m = i.getAs(Mat.class);
         Segment[] segments = ch.getLineSegments();
-        for (Segment s : segments) {
-            Vector2D start = s.getStart();
-            Vector2D end = s.getEnd();
+        Pair<List<Image>,List<BoundingBox>> p = cropGrid(m, segments, x, y);
 
-            int x1Px, x2Px, y1Px, y2Px;
-            if(fixed && fStep.coordsArePixels() || !fixed && step.coordsArePixels()){
-                x1Px = (int) start.getX();
-                x2Px = (int) end.getX();
-                y1Px = (int) start.getY();
-                y2Px = (int) end.getY();
-            } else {
-                x1Px = (int) (start.getX() * i.width());
-                x2Px = (int) (end.getX() * i.width());
-                y1Px = (int) (start.getY() * i.height());
-                y2Px = (int) (end.getY() * i.height());
-            }
-
-
-
-            drawLine(m, borderColor, borderThickness, x1Px, x2Px, y1Px, y2Px);
-        }
-
-        Scalar gridColor;
-        int gridThickness;
-        if(fixed){
-            gridColor = fStep.gridColor() == null ? borderColor : ColorUtil.stringToColor(fStep.gridColor());
-            gridThickness = fStep.gridThickness();
+        Data out;
+        if(step != null ? step.keepOtherFields() : fStep.keepOtherFields()){
+            out = data.clone();
         } else {
-            gridColor = step.gridColor() == null ? borderColor : ColorUtil.stringToColor(step.gridColor());
-            gridThickness = step.gridThickness();
+            out = Data.empty();
         }
 
-        if(gridThickness <= 0)
-            gridThickness = 1;
+        String outName = (step != null ? step.outputName() : fStep.outputName());
+        if(outName == null)
+            outName = CropGridStep.DEFAULT_OUTPUT_NAME;
+        out.putListImage(outName, p.getFirst());
 
-        drawGrid(m, gridColor, gridThickness, segments, x, y);
-
-        Data out = data.clone();
-        Image outImg = Image.create(m);
-        out.put(imgName, outImg);
+        if(step != null ? step.boundingBoxName() != null : fStep.boundingBoxName() != null){
+            out.putListBoundingBox(step != null ? step.boundingBoxName() : fStep.boundingBoxName(), p.getSecond());
+        }
 
         return out;
     }
 
-    protected void drawLine(Mat m, Scalar color, int thickness, int x1, int x2, int y1, int y2){
-        Point p1 = new Point(x1, y1);
-        Point p2 = new Point(x2, y2);
-        int lineType = 8;
-        int shift = 0;
-        org.bytedeco.opencv.global.opencv_imgproc.line(m, p1, p2, color, thickness, lineType, shift);
-    }
-
-    protected void drawGrid(Mat m, Scalar color, int thickness, Segment[] segments, double[] x, double[] y) {
+    protected Pair<List<Image>,List<BoundingBox>> cropGrid(Mat m, Segment[] segments, double[] x, double[] y) {
         Segment grid1Segment1 = null;
 
         //Work out the
@@ -225,7 +182,7 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             }
         }
 
-        int g1, g2;
+        double g1, g2;
         if(step != null){
             g1 = step.grid1();
             g2 = step.grid2();
@@ -234,34 +191,37 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             g2 = fStep.grid2();
         }
 
-        drawGridLines(m, grid1Segment1, grid1Segment2, g1, color, thickness);
-        drawGridLines(m, grid2Segment1, grid2Segment2, g2, color, thickness);
-    }
+        /*
+        At this point
+        grid1Segment1 is the grid1 left side of the grid area
+        grid1Segment2 is the grid1 right side of the grid area
+        grid2Segment1 is the top side of the grid area
+        grid2Segment2 is the bottom side of the grid area
+         */
 
-    protected void drawGridLines(Mat m, Segment s1, Segment s2, int num, Scalar color, int thickness){
+        //Corner coordinates
         double x1, x2, x3, x4, y1, y2, y3, y4;
-        if(s1.getStart().getX() <= s1.getEnd().getX()){
-            x1 = s1.getStart().getX();
-            x2 = s1.getEnd().getX();
-            y1 = s1.getStart().getY();
-            y2 = s1.getEnd().getY();
+        if(grid1Segment1.getStart().getX() <= grid1Segment1.getEnd().getX()){
+            x1 = grid1Segment1.getStart().getX();
+            x2 = grid1Segment1.getEnd().getX();
+            y1 = grid1Segment1.getStart().getY();
+            y2 = grid1Segment1.getEnd().getY();
         } else {
-            x1 = s1.getEnd().getX();
-            x2 = s1.getStart().getX();
-            y1 = s1.getEnd().getY();
-            y2 = s1.getStart().getY();
+            x1 = grid1Segment1.getEnd().getX();
+            x2 = grid1Segment1.getStart().getX();
+            y1 = grid1Segment1.getEnd().getY();
+            y2 = grid1Segment1.getStart().getY();
         }
-
-        if(s2.getStart().getX() <= s2.getEnd().getX()){
-            x3 = s2.getStart().getX();
-            x4 = s2.getEnd().getX();
-            y3 = s2.getStart().getY();
-            y4 = s2.getEnd().getY();
+        if(grid1Segment2.getStart().getX() <= grid1Segment2.getEnd().getX()){
+            x3 = grid1Segment2.getStart().getX();
+            x4 = grid1Segment2.getEnd().getX();
+            y3 = grid1Segment2.getStart().getY();
+            y4 = grid1Segment2.getEnd().getY();
         } else {
-            x3 = s2.getEnd().getX();
-            x4 = s2.getStart().getX();
-            y3 = s2.getEnd().getY();
-            y4 = s2.getStart().getY();
+            x3 = grid1Segment2.getEnd().getX();
+            x4 = grid1Segment2.getStart().getX();
+            y3 = grid1Segment2.getEnd().getY();
+            y4 = grid1Segment2.getStart().getY();
         }
 
         boolean s1XMostIsTop = y1 < y2;
@@ -277,27 +237,123 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             y4 = ty3;
         }
 
-
-        for( int j=1; j<num; j++ ){
-            double frac = j / (double)num;
-            double deltaX1 = x2-x1;
-            double deltaX2 = x4-x3;
-            double deltaY1 = y2-y1;
-            double deltaY2 = y4-y3;
-            int x1Px, x2Px, y1Px, y2Px;
-            if((step != null && step.coordsArePixels()) || (fStep != null && fStep.coordsArePixels())){
-                x1Px = (int) (x1 + frac * deltaX1);
-                x2Px = (int) (x3 + frac * deltaX2);
-                y1Px = (int) (y1 + frac * deltaY1);
-                y2Px = (int) (y3 + frac * deltaY2);
-            } else {
-                x1Px = (int) (m.cols() * (x1 + frac * deltaX1));
-                x2Px = (int) (m.cols() * (x3 + frac * deltaX2));
-                y1Px = (int) (m.rows() * (y1 + frac * deltaY1));
-                y2Px = (int) (m.rows() * (y3 + frac * deltaY2));
-            }
-            drawLine(m, color, thickness, x1Px, x2Px, y1Px, y2Px);
+        if(step != null ? step.coordsArePixels() : fStep.coordsArePixels()){
+            x1 /= m.cols();
+            x2 /= m.cols();
+            x3 /= m.cols();
+            x4 /= m.cols();
+            y1 /= m.rows();
+            y2 /= m.rows();
+            y3 /= m.rows();
+            y4 /= m.rows();
         }
+
+
+        List<Image> out = new ArrayList<>();
+        List<BoundingBox> bbox = (step != null ? step.boundingBoxName() != null : fStep.boundingBoxName() != null) ? new ArrayList<>() : null;
+        for( int i=0; i<g1; i++ ){
+
+            //x1, x2, x3, x4, y1, y2, y3, y4 - these represent the corner dimensions of the current row
+            // within the overall grid
+            int bx1 = (int) (m.cols() * fracBetween (i/g1, x1, x2));
+            int bx2 = (int) (m.cols() * fracBetween((i+1)/g1, x1, x2));
+            int by1 = (int) (m.rows() * fracBetween (i/g1, y1, y2));
+            int by2 = (int) (m.rows() * fracBetween((i+1)/g1, y1, y2));
+            int bx3 = (int) (m.cols() * fracBetween (i/g1, x3, x4));
+            int bx4 = (int) (m.cols() * fracBetween((i+1)/g1, x3, x4));
+            int by3 = (int) (m.rows() * fracBetween (i/g1, y3, y4));
+            int by4 = (int) (m.rows() * fracBetween((i+1)/g1, y3, y4));
+
+            for( int j=0; j<g2; j++ ){
+                //Now, we need to segment the row, to get the grid square
+                double sg2 = 1.0 / g2;
+
+                double[] t1 = fracBetween(j*sg2, bx1, by1, bx3, by3);
+                int ax1 = (int) t1[0];
+                int ay1 = (int) t1[1];
+
+                double[] t2 = fracBetween((j+1)*sg2, bx2, by2, bx4, by4);
+                int ax2 = (int) t2[0];
+                int ay2 = (int) t2[1];
+
+                double[] t3 = fracBetween((j+1)*sg2, bx1, by1, bx3, by3);
+                int ax3 = (int) t3[0];
+                int ay3 = (int) t3[1];
+
+                double[] t4 = fracBetween((j+1)*sg2, bx2, by2, bx4, by4);
+                int ax4 = (int) t4[0];
+                int ay4 = (int) t4[1];
+
+                int minX = min(ax1, ax2, ax3, ax4);
+                int maxX = max(ax1, ax2, ax3, ax4);
+                int minY = min(ay1, ay2, ay3, ay4);
+                int maxY = max(ay1, ay2, ay3, ay4);
+
+                int w = maxX-minX;
+                int h = maxY-minY;
+
+                if((step != null && step.aspectRatio() != null) || (fStep != null && fStep.aspectRatio() != null)){
+                    double currAr = w / (double)h;
+                    double ar = step != null ? step.aspectRatio() : fStep.aspectRatio();
+                    if(ar < currAr){
+                        //Need to increase height dimension to give desired AR
+                        int newH = (int) (w / ar);
+                        minY -= (newH-h)/2;
+                        h = newH;
+                    } else if(ar > currAr){
+                        //Need ot increase width dimension to give desired AR
+                        int newW = (int) (h * ar);
+                        minX -= (newW-w)/2;
+                        w = newW;
+                    }
+                }
+
+                //Make sure bounds are inside image. TODO handle this differently for aspect ratio preserving?
+                if(minX < 0){
+                    w += minX;
+                    minX = 0;
+                }
+                if(minX + w > m.cols()){
+                    w = m.cols() - minX;
+                }
+                if(minY < 0){
+                    h += minY;
+                    minY = 0;
+                }
+                if(minY + h > m.rows()){
+                    h = m.rows() - minY;
+                }
+
+
+                Rect r = new Rect(minX, minY, w, h);
+                Mat crop = m.apply(r);
+                out.add(Image.create(crop));
+
+                if(bbox != null){
+                    bbox.add(BoundingBox.createXY(minX / (double)m.cols(), (minX + w)/ (double)m.cols(), minY/ (double)m.rows(), (minY + h)/ (double)m.rows()));
+                }
+            }
+        }
+
+        return Pair.of(out, bbox);
+    }
+
+    private double fracBetween(double frac, double a, double b){
+        return a + frac * (b-a);
+    }
+
+    private double[] fracBetween(double frac, double x1, double y1, double x2, double y2){
+        return new double[]{
+                x1 + frac * (x2-x1),
+                y1 + frac * (y2-y1)};
+    }
+
+    private int min(int a, int b, int c, int d){
+        return Math.min(Math.min(a, b), Math.min(c, d));
+    }
+
+    private int max(int a, int b, int c, int d){
+        return Math.max(Math.max(a, b), Math.max(c, d));
     }
 
     protected double[] getAsDouble(String label, String xyName, Data data){

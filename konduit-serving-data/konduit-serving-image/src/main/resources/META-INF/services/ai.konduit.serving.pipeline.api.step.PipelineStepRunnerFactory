@@ -20,3 +20,4 @@ ai.konduit.serving.data.image.step.show.ShowImageStepRunnerFactory
 ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStepRunnerFactory
 ai.konduit.serving.data.image.step.grid.draw.DrawGridStepRunnerFactory
 ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStepRunnerFactory
+ai.konduit.serving.data.image.step.grid.crop.CropGridStepRunnerFactory
