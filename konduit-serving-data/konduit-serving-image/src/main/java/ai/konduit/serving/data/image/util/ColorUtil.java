@@ -22,39 +22,54 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.nd4j.common.base.Preconditions;
 
 import java.awt.*;
+import java.util.Random;
 
 public class ColorUtil {
 
     public static final String INVALID_COLOR = "Invalid color: Must be in one of the following formats: hex/HTML - #788E87, " +
             "RGB - rgb(128,0,255), or a HTML color name such as \"green\" (https://en.wikipedia.org/wiki/Web_colors#HTML_color_names) - got \"%s\"";
 
-    private ColorUtil(){ }
+    private ColorUtil() {
+    }
 
-    public static Scalar stringToColor(String s){
-
-        if(s.startsWith("#")){
+    /**
+     * Convert a color to a Scalar in one of 3 formats:<br>
+     * hex/HTML - {@code #788E87}<br>
+     * RGB - "rgb(128,0,255)"<br>
+     * A HTML color name such as "green" (https://en.wikipedia.org/wiki/Web_colors#HTML_color_names)<br>
+     * @param s Color name
+     * @return Color
+     */
+    public static Scalar stringToColor(String s) {
+        if (s.startsWith("#")) {
             String hex = s.substring(1);
             Color c = Color.decode(hex);
             return org.bytedeco.opencv.helper.opencv_core.RGB(c.getRed(), c.getGreen(), c.getBlue());
-        } else if(s.toLowerCase().startsWith("rgb(") && s.endsWith(")")){
-            String sub = s.substring(4, s.length()-1);
+        } else if (s.toLowerCase().startsWith("rgb(") && s.endsWith(")")) {
+            String sub = s.substring(4, s.length() - 1);
             Preconditions.checkState(sub.matches("\\d+,\\d+,\\d+"), INVALID_COLOR, s);
             String[] split = sub.split(",");
             int r = Integer.parseInt(split[0]);
             int g = Integer.parseInt(split[1]);
             int b = Integer.parseInt(split[2]);
-            return org.bytedeco.opencv.helper.opencv_core.RGB(r,g,b);
+            return org.bytedeco.opencv.helper.opencv_core.RGB(r, g, b);
         } else {
             Scalar sc = getColorHTML(s);
-            if(sc == null){
+            if (sc == null) {
                 throw new UnsupportedOperationException(String.format(INVALID_COLOR, s));
             }
             return sc;
         }
     }
 
-    public static Scalar getColorHTML(String name){
-        switch (name.toLowerCase()){
+    /**
+     * Get a color from the 16 HTML color names (not case sensitive):
+     * while, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuscia, purple.
+     * Returns null for any not found colors
+     * @return The color name as a Scalar, or null if not found
+     */
+    public static Scalar getColorHTML(String name) {
+        switch (name.toLowerCase()) {
             case "white":
                 return org.bytedeco.opencv.helper.opencv_core.RGB(255, 255, 255);
             case "silver":
@@ -89,6 +104,16 @@ public class ColorUtil {
                 return org.bytedeco.opencv.helper.opencv_core.RGB(0x80, 0x00, 0x80);
         }
         return null;
+    }
+
+    /**
+     * Regenate a random color using the specified RGN
+     *
+     * @param rng RNG to use
+     * @return Random color
+     */
+    public static Scalar randomColor(Random rng) {
+        return org.bytedeco.opencv.helper.opencv_core.RGB(rng.nextInt(255), rng.nextInt(255), rng.nextInt(255));
     }
 
 

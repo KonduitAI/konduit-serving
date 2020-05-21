@@ -21,39 +21,43 @@ package ai.konduit.serving.data.image;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.nd4j.common.resources.Resources;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 
+import java.io.File;
 import java.util.Arrays;
 
 public class TestDrawSegmentation {
 
+    private final boolean show = true;   //Set to true to visualize
+
     @Test
-    @Ignore
     public void testDrawSegment() throws Exception {
-
-
-        Pipeline p = SequencePipeline.builder()
+        SequencePipeline.Builder b = SequencePipeline.builder()
                 .add(DrawSegmentationStep.builder()
                         .image(null)
                         .segmentArray("class_idxs")
                         .outputName("out")
                         .classColors(Arrays.asList("red", "green", "blue"))
-                        .build())
-                .add(ShowImagePipelineStep.builder()
-                        .displayName("Segment")
-                        .imageName("out")
-                        .width(256)
-                        .height(256)
-                        .build())
-                .build();
+                        .build());
+
+        if(show) {
+                b.add(ShowImagePipelineStep.builder()
+                    .displayName("Segment")
+                    .imageName("out")
+                    .width(256)
+                    .height(256)
+                    .build());
+        }
+        Pipeline p = b.build();
 
         //Segmentation indices array: [minibatch, height, width] - values are integers,
         INDArray arr = Nd4j.create(DataType.INT32, 1, 64, 64);                                              //Red background
@@ -64,7 +68,45 @@ public class TestDrawSegmentation {
 
         p.executor().exec(d);
 
-        Thread.sleep(100000);
+        if(show)
+            Thread.sleep(100000);
     }
 
+    @Test
+    public void testDrawSegmentOpacity() throws Exception {
+        SequencePipeline.Builder b = SequencePipeline.builder()
+                .add(DrawSegmentationStep.builder()
+                        .image("image")
+                        .segmentArray("class_idxs")
+                        .outputName("out")
+                        .classColors(Arrays.asList("red", "green"))     //2 colors for 3 classes -> should auto generate the 3rd
+                        .opacity(0.5)
+                        .backgroundClass(0)     //Don't draw background color if this is set
+                        .build());
+        if (show) {
+            b.add(ShowImagePipelineStep.builder()
+                    .displayName("Segment")
+                    .imageName("out")
+                    .width(535)
+                    .height(800)
+                    .build());
+        }
+        Pipeline p = b.build();
+
+        File f = Resources.asFile("data/mona_lisa_535x800.png");
+        Image i = Image.create(f);
+
+        //Segmentation indices array: [minibatch, height, width] - values are integers,
+        INDArray arr = Nd4j.create(DataType.INT32, 1, 800, 535);                                            //Red background
+        arr.get(NDArrayIndex.point(0), NDArrayIndex.interval(300, 600), NDArrayIndex.interval(200, 500)).assign(1);     //Green square in middle
+        arr.get(NDArrayIndex.point(0), NDArrayIndex.interval(500, 800), NDArrayIndex.interval(300, 535)).assign(2);     //Blue square in bottom right
+
+        Data d = Data.singleton("class_idxs", NDArray.create(arr));
+        d.put("image", i);
+
+        p.executor().exec(d);
+
+        if(show)
+            Thread.sleep(100000);
+    }
 }
