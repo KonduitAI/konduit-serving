@@ -15,22 +15,22 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
-
 package ai.konduit.serving.pipeline.api.context;
 
-/**
- * Metrics are used to record values, for debugging and visualization.
- *
- * Instances of the Metrics interface are available within a PipelineStepRunner's exec method via the {@link Context#metrics()}
- * method.
- *
- * @author Alex Black
- */
-public interface Metrics {
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
-    Counter counter(String id);
+public interface Timer {
 
-    Timer timer(String id);
+    public static class Sample {
 
-    Gauge gauge(String id, double number);
+    }
+
+    void record(Duration duration);
+
+    void record(long duration, TimeUnit timeUnit);
+
+    Timer.Sample start();
+
+    void stop(Timer.Sample ts);
 }
