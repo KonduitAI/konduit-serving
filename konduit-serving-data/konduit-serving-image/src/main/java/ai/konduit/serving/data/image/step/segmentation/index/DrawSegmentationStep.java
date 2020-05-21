@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.segmentation.index;
 
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -58,5 +59,6 @@ public class DrawSegmentationStep implements PipelineStep {
     private String outputName;
     private Double opacity;         //0 to 1
     private Integer backgroundClass;
+    private ImageToNDArrayConfig imageToNDArrayConfig;
 
 }

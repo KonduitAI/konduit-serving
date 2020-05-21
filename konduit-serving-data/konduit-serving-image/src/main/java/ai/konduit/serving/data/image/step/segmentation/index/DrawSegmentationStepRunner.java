@@ -18,19 +18,19 @@
 
 package ai.konduit.serving.data.image.step.segmentation.index;
 
+import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.api.data.NDArrayType;
+import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import lombok.NonNull;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
 import org.nd4j.common.base.Preconditions;
 import org.opencv.core.CvType;
 
@@ -77,6 +77,7 @@ public class DrawSegmentationStepRunner implements PipelineStepRunner {
         Mat drawOn;
         String imgName = step.image();
 
+        boolean resizeRequired = false;
         if (imgName == null) {
             drawOn = new Mat((int) shape[1], (int) shape[2], CvType.CV_8UC3);       //8 bits per chanel RGB
             drawingOnImage = false;
@@ -84,12 +85,27 @@ public class DrawSegmentationStepRunner implements PipelineStepRunner {
             Image i = data.getImage(imgName);
             int iH = i.height();
             int iW = i.width();
-            Preconditions.checkState(iH == shape[1] && iW == shape[2], "Image and segment indices array dimensions do not match:" +
-                    " expected segment indices array with shape [1, height, width] - got array with shape %s and image with h=%s, w=%s", shape, iH, iW);
 
-            drawOn = new Mat();
-            i.getAs(Mat.class).clone().convertTo(drawOn, CvType.CV_8UC3);
-            drawingOnImage = true;
+            double arImg = iW / (double)iH;
+            double arSegment = shape[2] / (double)shape[1];
+
+            if(iH != shape[1] && iW != shape[2]) {
+                if(arImg == arSegment){
+                    //OK
+                    resizeRequired = true;
+                } else {
+                    resizeRequired = true;
+//                    wasCropped = true;
+                    Preconditions.checkState(step.imageToNDArrayConfig() != null, "Image and segment indices array dimensions do not match in terms" +
+                            " of aspect ratio, and no ImageToNDArrayConfig was provided. Expected segment indices array with shape [1, height, width] - got array with shape %s and image with h=%s, w=%s", shape, iH, iW);
+                }
+                drawOn = new Mat((int) shape[1], (int) shape[2], CvType.CV_8UC3);       //8 bits per chanel RGB
+                drawingOnImage = false;
+            } else {
+                drawOn = new Mat();
+                i.getAs(Mat.class).clone().convertTo(drawOn, CvType.CV_8UC3);
+                drawingOnImage = true;
+            }
         }
 
         SerializedNDArray nd = segmentArr.getAs(SerializedNDArray.class);
@@ -164,6 +180,33 @@ public class DrawSegmentationStepRunner implements PipelineStepRunner {
                     idx.put(idxB + 2, colorsR[classIdx]);
                 }
             }
+        }
+
+        if(resizeRequired){
+            Image im = data.getImage(imgName);
+            BoundingBox bb = ImageToNDArray.getCropRegion(im, step.imageToNDArrayConfig());
+            int oH = (int) (bb.height() * im.height());
+            int oW = (int) (bb.width() * im.width());
+            int x1 = (int) (bb.x1() * im.width());
+            int y1 = (int) (bb.y1() * im.height());
+
+            Mat resized = new Mat();
+            org.bytedeco.opencv.global.opencv_imgproc.resize(drawOn, resized, new Size(oW, oH));
+
+            //Now that we've resized - need to apply to the original image...
+            //Note that to use accumulateWeighted we need to use a float type - method doesn't support integer types
+            Mat resizedFloat = new Mat();
+            resized.convertTo(resizedFloat, CvType.CV_32FC3);
+
+
+            Mat asFloat = new Mat();
+            im.getAs(Mat.class).convertTo(asFloat, CvType.CV_32FC3);
+            Mat subset = asFloat.apply(new Rect(x1, y1, oW, oH));
+            double opacity = step.opacity();
+            org.bytedeco.opencv.global.opencv_imgproc.accumulateWeighted(resized, subset, opacity);
+            Mat out = new Mat();
+            asFloat.convertTo(out, CvType.CV_8UC3);
+            drawOn = out;
         }
 
 
