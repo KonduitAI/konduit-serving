@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ******************************************************************************/
-package ai.konduit.serving.models.deeplearning4j.step;
+package ai.konduit.serving.models.samediff.step;
 
-import ai.konduit.serving.models.deeplearning4j.DL4JConfiguration;
+import ai.konduit.serving.models.samediff.SameDiffConfig;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -29,21 +29,17 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
-public class DL4JModelPipelineStep extends BaseModelPipelineStep<DL4JConfiguration> {
+public class SameDiffModelPipelineStep extends BaseModelPipelineStep<SameDiffConfig> {
 
-    private List<String> inputNames;        //Mainly for ComputationGraph with multiple inputs - map Data keys to ComputationGraph outputs
     private List<String> outputNames;       //Mainly for ComputationGraph with multiple outputs - map INDArray[] to Data keys
 
-    public DL4JModelPipelineStep(String modelUri, DL4JConfiguration config) {
+    public SameDiffModelPipelineStep(String modelUri, SameDiffConfig config) {
         super(modelUri, config);
     }
 
-    public DL4JModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("config") DL4JConfiguration config,
-                                 @JsonProperty("inputNames") List<String> inputNames, @JsonProperty("outputNames") List<String> outputNames){
+    public SameDiffModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("config") SameDiffConfig config,
+                                     @JsonProperty("outputNames") List<String> outputNames){
         super(modelUri, config);
-        this.inputNames = inputNames;
         this.outputNames = outputNames;
     }
-
-
 }
