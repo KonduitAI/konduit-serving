@@ -165,8 +165,37 @@ public class PipelineProfilerTest {
         assertEquals(14, lines.length);
     }
 
+    @Test
+    public void testProfilerNotEnabled() throws Exception {
+        //Simply sanity check on when profiler is not enabled but called within a pipeline step
+        PipelineRegistry.registerStepRunnerFactory(new TestStepFactory());
+
+        for(boolean setNull : new boolean[]{false, true}) {
+            Pipeline p = SequencePipeline.builder()
+                    .add(new TestStep(new String[]{"x", "y"}))
+                    .add(new TestStep(new String[]{"a", "b", "c"}))
+                    .build();
+
+            Data in = Data.singleton("someKey", "someValue");
+
+            PipelineExecutor exec = p.executor();
+            if(setNull){
+                File dir = testDir.newFolder();
+                File f = new File(dir, "profiler.json");
+                exec.profilerConfig(new ProfilerConfig().outputFile(f));
+
+
+                exec.exec(in);
+                exec.profilerConfig(null);
+            }
+
+            exec.exec(in);
+        }
+    }
+
     @AllArgsConstructor
     private static class TestStep implements PipelineStep {
+
         private String[] toOpen;
     }
 
