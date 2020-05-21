@@ -88,7 +88,7 @@ public class SameDiffPipelineStepRunner implements PipelineStepRunner {
             m.put(s, data.getNDArray(s).getAs(INDArray.class));
         }
 
-        List<String> outNames = step.getOutputNames();
+        List<String> outNames = step.outputNames();
         Preconditions.checkState(outNames != null && !outNames.isEmpty(), "No output names were provided in the SameDiffModelPipelineStep configuration");
 
         Map<String,INDArray> out = sd.output(m, outNames);

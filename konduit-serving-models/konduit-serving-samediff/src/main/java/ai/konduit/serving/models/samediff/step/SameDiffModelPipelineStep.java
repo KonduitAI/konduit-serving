@@ -19,6 +19,7 @@ import ai.konduit.serving.models.samediff.SameDiffConfig;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -27,6 +28,7 @@ import java.util.List;
 @SuperBuilder
 @Data
 @EqualsAndHashCode(callSuper = true)
+@Accessors(fluent = true)
 public class SameDiffModelPipelineStep extends BaseModelPipelineStep<SameDiffConfig> {
 
     private List<String> outputNames;       //Mainly for ComputationGraph with multiple outputs - map INDArray[] to Data keys
