@@ -20,6 +20,7 @@ package ai.konduit.serving.models.samediff;
 
 import ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep;
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
@@ -63,6 +64,7 @@ public class TestSameDiffServing {
 
         File dir = testDir.newFolder();
         File f = new File(dir, "samediff.bin");
+        sd.save(f, false);
 
         Pipeline p = SequencePipeline.builder()
                 .add(SameDiffModelPipelineStep.builder()
@@ -73,7 +75,7 @@ public class TestSameDiffServing {
 
         PipelineExecutor exec = p.executor();
 
-        Data d = Data.singleton("in", inArr);
+        Data d = Data.singleton("in", NDArray.create(inArr));
 
         Data dOut = exec.exec(d);
 

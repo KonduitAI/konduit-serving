@@ -16,6 +16,7 @@
 package ai.konduit.serving.models.samediff.serde;
 
 import ai.konduit.serving.models.samediff.SameDiffConfig;
+import ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep;
 import ai.konduit.serving.models.samediff.step.SameDiffPipelineStepRunner;
 import ai.konduit.serving.pipeline.api.Configuration;
 import ai.konduit.serving.pipeline.api.serde.JsonSubType;
@@ -32,7 +33,7 @@ public class SameDiffJsonSubTypesMapping implements JsonSubTypesMapping {
     public List<JsonSubType> getSubTypesMapping() {
 
         List<JsonSubType> l = new ArrayList<>();
-        l.add(new JsonSubType("SAMEDIFF", SameDiffPipelineStepRunner.class, PipelineStep.class));
+        l.add(new JsonSubType("SAMEDIFF", SameDiffModelPipelineStep.class, PipelineStep.class));
         l.add(new JsonSubType("SAMEDIFF_CONFIG", SameDiffConfig.class, Configuration.class));
 
         return l;
