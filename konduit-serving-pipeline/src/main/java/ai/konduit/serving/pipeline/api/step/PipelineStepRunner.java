@@ -55,4 +55,11 @@ public interface PipelineStepRunner extends Closeable {
         }
         return out;
     }
+
+    /**
+     * Get name of the current runner for logging
+     */
+    default String name(){
+        return getClass().getSimpleName();
+    }
 }
