@@ -18,13 +18,21 @@
 package ai.konduit.serving.pipeline.impl.pipeline.context;
 
 import ai.konduit.serving.pipeline.api.context.*;
+import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
+import ai.konduit.serving.pipeline.impl.util.CallbackPipelineStep;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.event.Level;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class MetricsTest {
 
@@ -52,5 +60,30 @@ public class MetricsTest {
     public void testTimer() {
         Timer timer = m.timer("test");
         timer.record(30, TimeUnit.MILLISECONDS);
+        long ret = timer.stop();
+        assertTrue(ret > 0);
+    }
+
+    @Test
+    public void testPipelineMetrics() {
+        AtomicInteger count1 = new AtomicInteger();
+        AtomicInteger count2 = new AtomicInteger();
+
+        PipelineStep step1 = new CallbackPipelineStep(d -> count1.getAndIncrement());
+        PipelineStep step2 = LoggingPipelineStep.builder().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO).build();
+        PipelineStep step3 = new CallbackPipelineStep(d -> count2.getAndIncrement());
+
+        Pipeline p = SequencePipeline.builder()
+                .add(step1)
+                .add(step2)
+                .add(step3)
+                .build();
+
+
+        String id = p.id().toString() + "." + step1.toString() + ".test";
+        Timer timer = m.timer(id);
+        timer.record(30, TimeUnit.MILLISECONDS);
+        long ret = timer.stop();
+        assertTrue(ret > 0);
     }
 }

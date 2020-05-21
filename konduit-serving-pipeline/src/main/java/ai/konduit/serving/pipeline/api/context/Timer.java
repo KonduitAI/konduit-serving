@@ -22,15 +22,9 @@ import java.util.concurrent.TimeUnit;
 
 public interface Timer {
 
-    public static class Sample {
-
-    }
-
     void record(Duration duration);
 
     void record(long duration, TimeUnit timeUnit);
 
-    Timer.Sample start();
-
-    void stop(Timer.Sample ts);
+    long stop();
 }

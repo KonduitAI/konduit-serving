@@ -18,6 +18,7 @@
 package ai.konduit.serving.pipeline.api.context;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
@@ -40,12 +41,7 @@ public class PipelineTimer implements Timer {
     }
 
     @Override
-    public Sample start() {
-        return null;
-    }
-
-    @Override
-    public void stop(Sample ts) {
-
+    public long stop() {
+        return io.micrometer.core.instrument.Timer.start().stop(mmTimer);
     }
 }

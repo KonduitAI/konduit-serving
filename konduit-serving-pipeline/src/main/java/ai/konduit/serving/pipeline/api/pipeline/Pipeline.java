@@ -25,6 +25,7 @@ import lombok.NonNull;
 import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * A Pipeline object represents the configuration of a machine learning pipeline - including zero or more machine learning
@@ -59,4 +60,12 @@ public interface Pipeline extends TextConfig, Serializable {
      * @return number of steps in the pipeline configuration
      */
     int size();
+
+    /**
+     * Pipeline ID as input for metrics system
+     * @return random UUID
+     */
+    default UUID id() {
+        return UUID.randomUUID();
+    }
 }
