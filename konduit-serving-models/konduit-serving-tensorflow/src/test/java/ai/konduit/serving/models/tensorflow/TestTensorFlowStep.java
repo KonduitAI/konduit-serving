@@ -426,6 +426,8 @@ public class TestTensorFlowStep {
                 .segmentArray("SemanticPredictions")
                 .opacity(0.5)
                 .outputName("out")
+                .imageToNDArrayConfig(c)
+                .backgroundClass(0)
                 .build());
 
 

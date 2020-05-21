@@ -28,6 +28,7 @@ import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import lombok.NonNull;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.nd4j.common.base.Preconditions;
@@ -76,7 +77,6 @@ public class DrawSegmentationStepRunner implements PipelineStepRunner {
         Mat drawOn;
         String imgName = step.image();
 
-        boolean wasCropped = false;
         boolean resizeRequired = false;
         if (imgName == null) {
             drawOn = new Mat((int) shape[1], (int) shape[2], CvType.CV_8UC3);       //8 bits per chanel RGB
@@ -95,7 +95,7 @@ public class DrawSegmentationStepRunner implements PipelineStepRunner {
                     resizeRequired = true;
                 } else {
                     resizeRequired = true;
-                    wasCropped = true;
+//                    wasCropped = true;
                     Preconditions.checkState(step.imageToNDArrayConfig() != null, "Image and segment indices array dimensions do not match in terms" +
                             " of aspect ratio, and no ImageToNDArrayConfig was provided. Expected segment indices array with shape [1, height, width] - got array with shape %s and image with h=%s, w=%s", shape, iH, iW);
                 }
@@ -194,17 +194,19 @@ public class DrawSegmentationStepRunner implements PipelineStepRunner {
             org.bytedeco.opencv.global.opencv_imgproc.resize(drawOn, resized, new Size(oW, oH));
 
             //Now that we've resized - need to apply to the original image...
-            //TODO there should be a method to do this!
+            //Note that to use accumulateWeighted we need to use a float type - method doesn't support integer types
+            Mat resizedFloat = new Mat();
+            resized.convertTo(resizedFloat, CvType.CV_32FC3);
 
-            org.bytedeco.opencv.global.opencv_imgproc.accumulateWeighted(resized, drawOn, step.opacity());
 
-            //Note images are HWC format, BGR
-//            for( int i=0; i<oH; i++){
-//                for( int j=0; j<oW; j++ ){
-//                    int bOrig =
-//                }
-//            }
-
+            Mat asFloat = new Mat();
+            im.getAs(Mat.class).convertTo(asFloat, CvType.CV_32FC3);
+            Mat subset = asFloat.apply(new Rect(x1, y1, oW, oH));
+            double opacity = step.opacity();
+            org.bytedeco.opencv.global.opencv_imgproc.accumulateWeighted(resized, subset, opacity);
+            Mat out = new Mat();
+            asFloat.convertTo(out, CvType.CV_8UC3);
+            drawOn = out;
         }
 
 
