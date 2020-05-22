@@ -1,11 +1,11 @@
 # Add Graph-Based Pipelines
 
 ## Status
-PROPOSED
+ACCEPTED - 22/05/2020
 
-Proposed by: Alex Black (14-05-2020)
+Proposed by: Alex Black (14/05/2020)
 
-Discussed with: ___
+Discussed with: (no feedback received)
 
 ## Context
 
@@ -32,11 +32,11 @@ For GraphPipeline, there are a two considerations here:
 
 
 
-## Proposal
+## Decision
 
 ### Functionality
 
-GraphPipeline would, like SequencePipeline, have a single Data input and a single Data output. This allows for a number of things including:
+GraphPipeline will, like SequencePipeline, have a single Data input and a single Data output. This allows for a number of things including:
 * Embedding a GraphPipeline within another Pipeline (SequencePipeline or GraphPipeline)
 * Same API and serving methods and serving code for SequencePipeline and GraphPipeline
     - i.e., users don't 
@@ -215,5 +215,3 @@ Example JSON for graph pipelines, with 1 pipeline step (connected to pipeline in
 
 * The "input" / "$input" and "type" / "$type" issue mentioned earlier
 * The multiple N-to-1 types could be non-obvious at first glance (until users read docs)? (merge vs. any vs. combine)
-
-## Discussion
