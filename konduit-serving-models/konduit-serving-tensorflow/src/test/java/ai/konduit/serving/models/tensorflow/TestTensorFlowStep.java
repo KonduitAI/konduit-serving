@@ -45,6 +45,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
 import java.net.URL;
@@ -448,6 +449,61 @@ public class TestTensorFlowStep {
         for( int i=0; i<1000; i++ ){
             exec.exec(in);
         }
+    }
+
+    @Test @Ignore   //To be run manually due to need for webcam and frame output
+    public void testPoseEstimation() throws Exception {
+        //Pretrained model source: https://github.com/ildoonet/tf-pose-estimation
+
+        String fileUrl = "https://github.com/ildoonet/tf-pose-estimation/raw/master/models/graph/mobilenet_v2_small/graph_opt.pb";
+        File testDir = TestUtils.testResourcesStorageDir();
+        File saveDir = new File(testDir, "konduit-serving-tensorflow/pose-estimation");
+        File f = new File(saveDir, "frozen_inference_graph.pb");
+
+        if (!f.exists()) {
+            log.info("Downloading model: {} -> {}", fileUrl, saveDir.getAbsolutePath());
+            FileUtils.copyURLToFile(new URL(fileUrl), f);
+            log.info("Download complete");
+        }
+
+        GraphBuilder b = new GraphBuilder();
+        GraphStep input = b.input();
+
+
+        //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
+        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+                .height(300)
+                .width(300)
+                .channelLayout(NDChannelLayout.RGB)
+                .includeMinibatchDim(true)
+                .format(NDFormat.CHANNELS_LAST)
+                .dataType(NDArrayType.FLOAT)
+                .normalization(null)
+                .build();
+
+        GraphStep i2n = input.then("image2NDArray", ImageToNDArrayStep.builder()
+                .config(c)
+                .keys(Arrays.asList("image"))
+                .outputNames(Arrays.asList("image")) //TODO varargs builder method
+                .build());
+
+        //Run image in TF model
+        GraphStep tf = i2n.then("tf", builder()
+                .inputNames(Collections.singletonList("image"))      //TODO varargs builder method
+                .outputNames(Arrays.asList("Openpose/concat_stage7"))
+                .modelUri(f.toURI().toString())
+                .build());
+
+
+        GraphPipeline p = b.build(tf);
+        PipelineExecutor exec = p.executor();
+
+        File imageFile = Resources.asFile("data/pose_detection_test_image.jpg");
+        Image i = Image.create(imageFile);
+        Data in = Data.singleton("image", i);
+        Data out = exec.exec(in);
+        INDArray arr = out.getNDArray("Openpose/concat_stage7").getAs(INDArray.class);
+        System.out.println(arr);
     }
 
 
