@@ -24,9 +24,9 @@ import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
+import ai.konduit.serving.data.image.step.pose.openpose.DrawOpenPoseStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
-import ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -46,6 +46,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 
 import java.io.File;
 import java.net.URL;
@@ -494,8 +495,14 @@ public class TestTensorFlowStep {
                 .modelUri(f.toURI().toString())
                 .build());
 
+        GraphStep merge = tf.mergeWith("merge", input);
 
-        GraphPipeline p = b.build(tf);
+        GraphStep draw = merge.then("draw", new DrawOpenPoseStep().i2nConfig(c));
+
+        GraphStep show = draw.then("show", new ShowImagePipelineStep());
+
+
+        GraphPipeline p = b.build(show);
         PipelineExecutor exec = p.executor();
 
         File imageFile = Resources.asFile("data/pose_detection_test_image.jpg");
@@ -503,7 +510,19 @@ public class TestTensorFlowStep {
         Data in = Data.singleton("image", i);
         Data out = exec.exec(in);
         INDArray arr = out.getNDArray("Openpose/concat_stage7").getAs(INDArray.class);
-        System.out.println(arr);
+        System.out.println(arr.shapeInfoToString());
+//        System.out.println(arr);
+
+
+//        INDArray arr2 = arr.get(NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.all(), NDArrayIndex.point(0));
+//        System.out.println(arr2.toStringFull());
+//
+//        INDArray argmax = arr2.argMax();
+//        int idx = argmax.getInt(0);
+//        double max = arr2.getDouble(idx);
+//        System.out.println(idx + " - " + max);
+
+        Thread.sleep(1000000);
     }
 
 
