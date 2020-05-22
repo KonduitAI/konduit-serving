@@ -65,7 +65,7 @@ public interface Pipeline extends TextConfig, Serializable {
      * Pipeline ID as input for metrics system
      * @return random UUID
      */
-    default UUID id() {
-        return UUID.randomUUID();
+    default String id() {
+        return UUID.randomUUID().toString();
     }
 }

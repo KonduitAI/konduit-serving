@@ -17,23 +17,39 @@
  */
 package ai.konduit.serving.pipeline.api.context;
 
+import lombok.Setter;
+
 public class PipelineMetrics implements Metrics {
+    private String pipelineName;
+    @Setter
+    private String instanceName = "default";
+    @Setter
+    private String stepName = "default";
+
+    public PipelineMetrics(String name) {
+        this.pipelineName = name;
+    }
+
+    private String assembleId(String id) {
+        String effectiveId = pipelineName + "." + instanceName + "." + stepName + "." + id;
+        return effectiveId;
+    }
 
     @Override
     public Counter counter(String id) {
-        Counter counter = new PipelineCounter(id);
+        Counter counter = new PipelineCounter(assembleId(id));
         return counter;
     }
 
     @Override
     public Timer timer(String id) {
-        Timer timer = new PipelineTimer(id);
+        Timer timer = new PipelineTimer(assembleId(id));
         return timer;
     }
 
     @Override
     public Gauge gauge(String id, double number) {
-        Gauge gauge = new PipelineGauge(id, number);
+        Gauge gauge = new PipelineGauge(assembleId(id), number);
         return gauge;
     }
 }

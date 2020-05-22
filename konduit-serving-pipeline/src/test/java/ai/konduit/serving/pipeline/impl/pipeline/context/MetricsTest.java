@@ -40,7 +40,7 @@ public class MetricsTest {
 
     @Before
     public void setUp() {
-        m = new PipelineMetrics();
+        m = new PipelineMetrics("testPipeline");
     }
 
     @Test
@@ -79,9 +79,7 @@ public class MetricsTest {
                 .add(step3)
                 .build();
 
-
-        String id = p.id().toString() + "." + step1.toString() + ".test";
-        Timer timer = m.timer(id);
+        Timer timer = m.timer("test.timer");
         timer.record(30, TimeUnit.MILLISECONDS);
         long ret = timer.stop();
         assertTrue(ret > 0);
