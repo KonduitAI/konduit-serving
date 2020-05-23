@@ -18,17 +18,42 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class MergeStep extends BaseMergeStep {
+public class BaseMergeStep extends BaseGraphStep {
+    protected List<GraphStep> steps;
 
-    public MergeStep(GraphBuilder b, List<GraphStep> steps, String name){
-        super(b, steps, name);
+    public BaseMergeStep(GraphBuilder b, List<GraphStep> steps, String name){
+        super(b, name);
+        this.steps = steps;
     }
 
+    @Override
+    public String input() {
+        throw new UnsupportedOperationException("Multiple inputs for MergeStep");
+    }
+
+    @Override
+    public List<String> inputs() {
+        return steps.stream().map(GraphStep::name).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasStep() {
+        return false;
+    }
+
+    @Override
+    public PipelineStep getStep() {
+        throw new UnsupportedOperationException("MergeStep does not have a PipelineStep associated with it");
+    }
 }

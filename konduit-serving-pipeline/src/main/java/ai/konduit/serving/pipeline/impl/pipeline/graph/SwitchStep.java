@@ -18,17 +18,46 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import lombok.*;
+import lombok.experimental.Accessors;
 
+import java.util.Collections;
 import java.util.List;
 
-@AllArgsConstructor
+@Data
 @EqualsAndHashCode(callSuper = true)
-public class MergeStep extends BaseMergeStep {
+@AllArgsConstructor
+@NoArgsConstructor
+@Accessors(fluent = true)
+public class SwitchStep extends BaseGraphStep {
 
-    public MergeStep(GraphBuilder b, List<GraphStep> steps, String name){
-        super(b, steps, name);
+    protected String inStep;
+    protected SwitchFn switchFn;
+
+    public SwitchStep(GraphBuilder b, String name, String inStep, SwitchFn switchFn){
+        super(b, name);
+        this.inStep = inStep;
+        this.switchFn = switchFn;
     }
 
+    @Override
+    public String input() {
+        return inStep;
+    }
+
+    @Override
+    public List<String> inputs() {
+        return Collections.singletonList(inStep);
+    }
+
+    @Override
+    public boolean hasStep() {
+        return false;
+    }
+
+    @Override
+    public PipelineStep getStep() {
+        return null;
+    }
 }

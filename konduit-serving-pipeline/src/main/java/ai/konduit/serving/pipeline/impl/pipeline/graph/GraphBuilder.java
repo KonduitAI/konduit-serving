@@ -19,12 +19,10 @@
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.util.SwitchOutput;
 import org.nd4j.common.base.Preconditions;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GraphBuilder {
 
@@ -34,6 +32,27 @@ public class GraphBuilder {
 
     public GraphStep input(){
         return input;
+    }
+
+    public GraphStep[] switchOp(String name, SwitchFn fn, GraphStep step){
+        int nOut = fn.numOutputs();
+
+        SwitchStep swStep = new SwitchStep(this, name, step.name(), fn);
+        add(swStep);
+
+        GraphStep[] out = new GraphStep[nOut];
+        for( int i=0; i<nOut; i++ ){
+            String oName = name + "_" + i;
+            out[i] = new SwitchOutput(this, oName, name, i);
+            add(out[i]);
+        }
+        return out;
+    }
+
+    public GraphStep any(String name, GraphStep... steps){
+        GraphStep g = new AnyStep(this, Arrays.asList(steps), name);
+        add(g);
+        return g;
     }
 
     //Package private

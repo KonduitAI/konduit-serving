@@ -18,17 +18,12 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import ai.konduit.serving.pipeline.api.data.Data;
 
-import java.util.List;
+public interface SwitchFn {
 
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class MergeStep extends BaseMergeStep {
+    int numOutputs();
 
-    public MergeStep(GraphBuilder b, List<GraphStep> steps, String name){
-        super(b, steps, name);
-    }
+    int selectOutput(Data data);
 
 }

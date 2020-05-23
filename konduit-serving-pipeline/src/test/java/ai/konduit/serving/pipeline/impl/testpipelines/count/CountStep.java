@@ -16,19 +16,24 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.pipeline.graph;
+package ai.konduit.serving.pipeline.impl.testpipelines.count;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.registry.PipelineRegistry;
 
-import java.util.List;
+import java.util.function.Consumer;
 
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class MergeStep extends BaseMergeStep {
+@lombok.Data
+public class CountStep implements PipelineStep {
 
-    public MergeStep(GraphBuilder b, List<GraphStep> steps, String name){
-        super(b, steps, name);
+    static {
+        PipelineRegistry.registerStepRunnerFactory(new CountPipelineFactory());
+    }
+
+    public int count;
+
+    public CountStep(){
     }
 
 }

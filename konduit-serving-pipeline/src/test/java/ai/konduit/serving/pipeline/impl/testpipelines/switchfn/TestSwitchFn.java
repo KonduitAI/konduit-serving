@@ -16,19 +16,22 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.pipeline.graph;
+package ai.konduit.serving.pipeline.impl.testpipelines.switchfn;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
 
-import java.util.List;
+public class TestSwitchFn implements SwitchFn {
 
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class MergeStep extends BaseMergeStep {
+    public int branch;
 
-    public MergeStep(GraphBuilder b, List<GraphStep> steps, String name){
-        super(b, steps, name);
+    @Override
+    public int numOutputs() {
+        return 2;
     }
 
+    @Override
+    public int selectOutput(Data data) {
+        return branch;
+    }
 }

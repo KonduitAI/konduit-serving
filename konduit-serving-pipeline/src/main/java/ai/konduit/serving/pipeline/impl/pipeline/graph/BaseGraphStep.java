@@ -18,17 +18,31 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.Collections;
 import java.util.List;
 
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class MergeStep extends BaseMergeStep {
+@Data
+@NoArgsConstructor
+@JsonIgnoreProperties("builder")
+public abstract class BaseGraphStep implements GraphStep {
+    protected GraphBuilder builder;
+    protected String name;
 
-    public MergeStep(GraphBuilder b, List<GraphStep> steps, String name){
-        super(b, steps, name);
+
+    @Override
+    public String name() {
+        return name;
     }
 
+    @Override
+    public GraphBuilder builder() {
+        return builder;
+    }
 }

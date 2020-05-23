@@ -16,41 +16,49 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.pipeline.graph;
+package ai.konduit.serving.pipeline.impl.pipeline.graph.util;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import lombok.*;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.BaseGraphStep;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.util.Collections;
 import java.util.List;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-public class StandardGraphStep extends BaseGraphStep {
-    private GraphBuilder builder;
-    private PipelineStep step;
-    private String name;
-    private String input;
+@Accessors(fluent = true)
+public class SwitchOutput extends BaseGraphStep {
 
-    public StandardGraphStep(GraphBuilder builder, PipelineStep step, String name, String input) {
-        super(builder, name);
-        this.step = step;
-        this.input = input;
+    private final int outputNum;
+    private final String switchName;
+
+    public SwitchOutput(GraphBuilder b, String name, String switchName, int outputNum){
+        super(b, name);
+        this.switchName = switchName;
+        this.outputNum = outputNum;
     }
+
 
     @Override
     public String input() {
-        return input;
+        return switchName;
     }
 
     @Override
     public List<String> inputs() {
-        return Collections.singletonList(input);
+        return Collections.singletonList(input());
     }
 
     @Override
     public boolean hasStep() {
-        return true;
+        return false;
+    }
+
+    @Override
+    public PipelineStep getStep() {
+        return null;
     }
 }

@@ -25,9 +25,8 @@ import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.MergeStep;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.StandardGraphStep;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.*;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.util.SwitchOutput;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +69,7 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
                 runners.put(e.getKey(), r);
             }
 
-            if(g instanceof MergeStep){
+            if(g instanceof MergeStep || g instanceof SwitchStep || g instanceof AnyStep){
                 runners.put(e.getKey(), null);
             }
         }
@@ -115,19 +114,36 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
         while(!canExec.isEmpty()){
             String next = canExec.remove();
 
-//            log.info("Executing step: {}", next);
+            log.info("Executing step: {}", next);
 
             canExecSet.remove(next);
             GraphStep gs = m.get(next);
             List<String> inputs = gs.inputs();
 
-            Data stepOut;
-            if(gs instanceof MergeStep){
+            int switchOut = -1;
+            Data stepOut = null;
+            if(gs instanceof MergeStep) {
                 stepOut = Data.empty();
-                for( String s : inputs){
+                for (String s : inputs) {
                     Data d = stepOutputData.get(s);
                     stepOut.merge(false, d);
                 }
+            } else if(gs instanceof SwitchStep) {
+                SwitchStep s = (SwitchStep)gs;
+                Data inData = stepOutputData.get(inputs.get(0));
+                switchOut = s.switchFn().selectOutput(inData);
+                stepOut = inData;
+            } else if(gs instanceof AnyStep) {
+                List<String> stepInputs = gs.inputs();
+                for (String s : stepInputs) {
+                    if (stepOutputData.containsKey(s)) {
+                        stepOut = stepOutputData.get(s);
+                        break;
+                    }
+                }
+                System.out.println();
+            } else if(gs instanceof SwitchOutput){
+                stepOut = stepOutputData.get(gs.input());
             } else if(gs instanceof StandardGraphStep){
                 Preconditions.checkState(inputs.size() == 1, "PipelineSteps should only have 1 input: got inputs %s", inputs);;
                 if (inputs.size() != 1 && !GraphPipeline.INPUT_KEY.equals(next))
@@ -160,12 +176,34 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
                 if(stepOutputData.containsKey(s))
                     continue;
 
-                List<String> stepInputs = steps.get(s).inputs();
-                boolean allSeen = true;
-                for(String inName : stepInputs ){
-                    if(!stepOutputData.containsKey(inName)){
-                        allSeen = false;
-                        break;
+                GraphStep currStep = steps.get(s);
+                List<String> stepInputs = currStep.inputs();
+                boolean allSeen;
+                if(currStep instanceof SwitchOutput) {
+                    allSeen = false;
+                    SwitchOutput so = (SwitchOutput) currStep;
+                    String switchIn = so.input();
+                    if (switchIn.equals(next) && so.outputNum() == switchOut) {
+                        //Just executed the switch this iteration
+                        allSeen = true;
+                    }
+                } else if(currStep instanceof AnyStep ){
+                    //Can execute the Any step if at least one of the inputs are available
+                    allSeen = false;
+                    for (String inName : stepInputs) {
+                        if (stepOutputData.containsKey(inName)) {
+                            allSeen = true;
+                            break;
+                        }
+                    }
+                } else {
+                    //StandardPipelineStep, MergeStep
+                    allSeen = true;
+                    for (String inName : stepInputs) {
+                        if (!stepOutputData.containsKey(inName)) {
+                            allSeen = false;
+                            break;
+                        }
                     }
                 }
 
