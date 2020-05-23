@@ -37,10 +37,10 @@ public class PipelineCoreSubtypesMapping implements JsonSubTypesMapping {
         l.add(new JsonSubType("SSD_TO_BBOX", SSDToBoundingBoxStep.class, PipelineStep.class));
 
         //Graph pipeline
-        l.add(new JsonSubType("MERGE", MergeStep.class, GraphStep.class));
-        l.add(new JsonSubType("ANY", AnyStep.class, GraphStep.class));
-        l.add(new JsonSubType("SWITCH", SwitchStep.class, GraphStep.class));
-        l.add(new JsonSubType("SWITCH_OUTPUT", SwitchOutput.class, GraphStep.class));
+        l.add(new JsonSubType(GraphConstants.GRAPH_MERGE_JSON_KEY, MergeStep.class, GraphStep.class));
+        l.add(new JsonSubType(GraphConstants.GRAPH_ANY_JSON_KEY, AnyStep.class, GraphStep.class));
+        l.add(new JsonSubType(GraphConstants.GRAPH_SWITCH_JSON_KEY, SwitchStep.class, GraphStep.class));
+        l.add(new JsonSubType(GraphConstants.GRAPH_SWITCH_OUTPUT_JSON_KEY, SwitchOutput.class, GraphStep.class));
 
         //Graph pipeline switch functions
         l.add(new JsonSubType("INT_SWITCH", DataIntSwitchFn.class, SwitchFn.class));

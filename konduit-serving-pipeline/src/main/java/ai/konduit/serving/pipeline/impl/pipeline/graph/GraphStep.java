@@ -20,18 +20,21 @@ package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.impl.pipeline.serde.GraphStepDeserializer;
 import ai.konduit.serving.pipeline.impl.pipeline.serde.GraphStepSerializer;
-import org.nd4j.common.base.Preconditions;
+import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @JsonSerialize(using = GraphStepSerializer.class)
+@JsonDeserialize(using = GraphStepDeserializer.class)
 public interface GraphStep extends TextConfig {
 
     String name();
+
+    void name(String name);
 
     GraphBuilder builder();
 
@@ -45,16 +48,18 @@ public interface GraphStep extends TextConfig {
 
 
     default GraphStep then(String name, PipelineStep step) {
-        GraphStep s = new StandardGraphStep(builder(), step, name, this.name());;
+        GraphStep s = new PipelineGraphStep(builder(), step, name, this.name());;
         builder().add(s);
         return s;
     }
 
 
     default GraphStep mergeWith(String name, GraphStep... steps) {
-        List<GraphStep> allSteps = new ArrayList<>();
-        allSteps.add(this);
-        Collections.addAll(allSteps, steps);
+        List<String> allSteps = new ArrayList<>();
+        allSteps.add(this.name());
+        for(GraphStep g : steps){
+            allSteps.add(g.name());
+        }
 
         MergeStep out = new MergeStep(builder(), allSteps, name);
         builder().add(out);

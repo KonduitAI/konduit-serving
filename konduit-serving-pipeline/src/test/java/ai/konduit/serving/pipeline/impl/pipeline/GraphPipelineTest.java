@@ -106,7 +106,7 @@ public class GraphPipelineTest {
         Pipeline p = b.build(merge);
         GraphPipeline gp = (GraphPipeline)p;
 
-        Map<String,GraphStep> s = gp.getSteps();
+        Map<String,GraphStep> s = gp.steps();
         assertTrue(s.containsKey("step1"));
         assertTrue(s.containsKey("step2"));
         assertTrue(s.containsKey("merge"));

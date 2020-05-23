@@ -45,7 +45,7 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
     public GraphPipelineExecutor(GraphPipeline pipeline){
         this.pipeline = pipeline;
 
-        Map<String, GraphStep> steps = pipeline.getSteps();
+        Map<String, GraphStep> steps = pipeline.steps();
 
         inputsFor = new HashMap<>();
         for(Map.Entry<String, GraphStep> e : steps.entrySet()){
@@ -92,7 +92,7 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
         Map<String,Data> stepOutputData = new HashMap<>();
         stepOutputData.put(GraphPipeline.INPUT_KEY, in);
 
-        Map<String,GraphStep> m = pipeline.getSteps();
+        Map<String,GraphStep> m = pipeline.steps();
 
         for(Map.Entry<String, GraphStep> e : m.entrySet()){
             List<String> inputs = e.getValue().inputs();
@@ -112,7 +112,7 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
         while(!canExec.isEmpty()){
             String next = canExec.remove();
 
-            log.info("Executing step: {}", next);
+            log.trace("Executing step: {}", next);
 
             canExecSet.remove(next);
             GraphStep gs = m.get(next);
@@ -142,7 +142,7 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
                 System.out.println();
             } else if(gs instanceof SwitchOutput){
                 stepOut = stepOutputData.get(gs.input());
-            } else if(gs instanceof StandardGraphStep){
+            } else if(gs instanceof PipelineGraphStep){
                 Preconditions.checkState(inputs.size() == 1, "PipelineSteps should only have 1 input: got inputs %s", inputs);;
                 if (inputs.size() != 1 && !GraphPipeline.INPUT_KEY.equals(next))
                     throw new IllegalStateException("Execution of steps with numInputs != 1 is not supported: " + next + ".numInputs=" + inputs.size());
@@ -158,7 +158,7 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
             if(stepOut == null)
                 throw new IllegalStateException("Got null output from step \"" + next + "\"");
 
-            if(next.equals(pipeline.getOutputStepName())){
+            if(next.equals(pipeline.outputStep())){
                 out = stepOut;
                 break;
             }
@@ -167,7 +167,7 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
 
             //Check what can now be executed
             //TODO This should be optimized
-            Map<String, GraphStep> steps = pipeline.getSteps();
+            Map<String, GraphStep> steps = pipeline.steps();
             for(String s : steps.keySet()){
                 if(canExecSet.contains(s))
                     continue;

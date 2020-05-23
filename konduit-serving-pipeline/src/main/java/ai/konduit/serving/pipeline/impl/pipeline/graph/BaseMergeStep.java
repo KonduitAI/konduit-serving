@@ -30,9 +30,9 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class BaseMergeStep extends BaseGraphStep {
-    protected List<GraphStep> steps;
+    protected List<String> steps;
 
-    public BaseMergeStep(GraphBuilder b, List<GraphStep> steps, String name){
+    public BaseMergeStep(GraphBuilder b, List<String> steps, String name){
         super(b, name);
         this.steps = steps;
     }
@@ -44,7 +44,7 @@ public class BaseMergeStep extends BaseGraphStep {
 
     @Override
     public List<String> inputs() {
-        return steps.stream().map(GraphStep::name).collect(Collectors.toList());
+        return steps;
     }
 
     @Override

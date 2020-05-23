@@ -18,28 +18,29 @@ package ai.konduit.serving.pipeline.impl.pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.StandardGraphStep;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
+import org.nd4j.shade.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Map;
 
 /**
  * A pipeline with a graph structure - possibly including conditional operations, etc
  *
- * TODO THIS IS A PLACEHOLDER
  */
 @Data
+@Accessors(fluent = true)
+@JsonPropertyOrder({"outputStep", "steps"})
 public class GraphPipeline implements Pipeline {
     public static final String INPUT_KEY = "input";
 
     private final Map<String, GraphStep> steps;
-    private final String outputStepName;
+    private final String outputStep;
 
-    public GraphPipeline(@JsonProperty("steps") Map<String, GraphStep> steps, String outputStepName){
-        //TODO JSON needs rewriting here...
+    public GraphPipeline(@JsonProperty("steps") Map<String, GraphStep> steps, @JsonProperty("outputStep") String outputStep){
         this.steps = steps;
-        this.outputStepName = outputStepName;
+        this.outputStep = outputStep;
     }
 
     @Override

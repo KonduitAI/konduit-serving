@@ -18,22 +18,16 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+public class GraphConstants {
 
-import java.util.List;
+    private GraphConstants(){ }
 
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class MergeStep extends BaseMergeStep {
+    public static final String INPUT_KEY = "@input";
+    public static final String TYPE_KEY = "@type";
 
-    public MergeStep(GraphBuilder b, List<String> steps, String name){
-        super(b, steps, name);
-    }
-
-    @Override
-    public String toString(){
-        return "Merge(\"" + String.join("\",\"", inputs()) + "\")";
-    }
+    public static final String GRAPH_MERGE_JSON_KEY = "MERGE";
+    public static final String GRAPH_ANY_JSON_KEY = "ANY";
+    public static final String GRAPH_SWITCH_JSON_KEY = "SWITCH";
+    public static final String GRAPH_SWITCH_OUTPUT_JSON_KEY = "SWITCH_OUTPUT";
 
 }

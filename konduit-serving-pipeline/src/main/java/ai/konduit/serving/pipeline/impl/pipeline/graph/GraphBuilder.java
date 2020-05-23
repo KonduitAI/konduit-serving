@@ -49,7 +49,11 @@ public class GraphBuilder {
     }
 
     public GraphStep any(String name, GraphStep... steps){
-        GraphStep g = new AnyStep(this, Arrays.asList(steps), name);
+        List<String> l = new ArrayList<>();
+        for(GraphStep g : steps){
+            l.add(g.name());
+        }
+        GraphStep g = new AnyStep(this, l, name);
         add(g);
         return g;
     }

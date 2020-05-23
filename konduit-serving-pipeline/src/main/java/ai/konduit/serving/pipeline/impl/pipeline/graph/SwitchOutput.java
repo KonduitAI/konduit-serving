@@ -19,16 +19,15 @@
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.BaseGraphStep;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.util.Collections;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
 public class SwitchOutput extends BaseGraphStep {
 
@@ -60,5 +59,10 @@ public class SwitchOutput extends BaseGraphStep {
     @Override
     public PipelineStep getStep() {
         return null;
+    }
+
+    @Override
+    public String toString(){
+        return "SwitchOutput(\"" + input() + "\"," + outputNum + ")";
     }
 }

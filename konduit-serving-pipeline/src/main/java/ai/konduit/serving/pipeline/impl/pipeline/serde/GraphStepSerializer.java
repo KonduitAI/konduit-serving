@@ -22,7 +22,12 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.*;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchOutput;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
+import org.nd4j.shade.jackson.annotation.JsonPropertyOrder;
+import org.nd4j.shade.jackson.annotation.JsonUnwrapped;
 import org.nd4j.shade.jackson.core.JsonGenerator;
 import org.nd4j.shade.jackson.databind.JsonSerializer;
 import org.nd4j.shade.jackson.databind.SerializerProvider;
@@ -32,34 +37,31 @@ import java.util.List;
 import java.util.Map;
 
 public class GraphStepSerializer extends JsonSerializer<GraphStep> {
-    public static final String INPUT_KEY = "@input";
-    public static final String TYPE_KEY = "@type";
 
     @Override
     public void serialize(GraphStep gs, JsonGenerator jg, SerializerProvider sp) throws IOException {
         Map<Class<?>,String> names = ObjectMappers.getSubtypeNames();
         String stepJsonType = names.get(gs.getClass());
-        Preconditions.checkState(gs instanceof StandardGraphStep || stepJsonType != null, "No JSON name for %s", gs);
+        Preconditions.checkState(gs instanceof PipelineGraphStep || stepJsonType != null, "No JSON name for %s", gs);
 
         String name = gs.name();
 
-        jg.writeStartObject(name);
+//        jg.writeStartObject(name);
         if(gs.hasStep()){
             //PipelineStep (StandardGraphStep) only
             PipelineStep s = gs.getStep();
-            //Serialize in default format, but add "@input" field
+
+            String type = names.get(s.getClass());
             String input = gs.input();
-            jg.writeFieldName(INPUT_KEY);
-            jg.writeString(input);
-            //Write all other fields
-
-
+            StepSerializationHelper w = new StepSerializationHelper(type, input, s);
+            jg.writeObject(w);
         } else {
-            jg.writeFieldName(TYPE_KEY);
+            jg.writeStartObject(name);
+            jg.writeFieldName(GraphConstants.TYPE_KEY);
             jg.writeString(stepJsonType);
 
             List<String> inputs = gs.inputs();
-            jg.writeFieldName(INPUT_KEY);
+            jg.writeFieldName(GraphConstants.INPUT_KEY);
             if(inputs.size() == 1){
                 jg.writeString(inputs.get(0));
             } else {
@@ -72,22 +74,33 @@ public class GraphStepSerializer extends JsonSerializer<GraphStep> {
 
             //Write all other fields
             //TODO maybe there's a better way... But GraphSteps don't really need to be user extensible or anything
-            if(gs instanceof AnyStep || gs instanceof MergeStep){
-                //No other field s to write
-            } else if(gs instanceof SwitchStep){
+            if(gs instanceof SwitchStep){
                 SwitchStep ss = (SwitchStep)gs;
                 SwitchFn fn = ss.switchFn();
                 jg.writeFieldName("switchFn");
                 jg.writeObject(fn);
             } else if(gs instanceof SwitchOutput){
                 SwitchOutput so = (SwitchOutput)gs;
-                jg.writeFieldName("switchName");
-                jg.writeString(so.switchName());
                 jg.writeFieldName("outputNum");
                 jg.writeNumber(so.outputNum());
             }
+            //For AnyStep and MergeStep: No other fields to write (just need type and name)
+
+            jg.writeEndObject();
         }
 
-        jg.writeEndObject();
+//        jg.writeEndObject();
+    }
+
+    @Data
+    @AllArgsConstructor
+    @JsonPropertyOrder({"@type", "@input"})
+    protected static class StepSerializationHelper {
+        @JsonProperty("@type")
+        private String _typeAliasField_;
+        @JsonProperty("@input")
+        private String _inputAliasField_;
+        @JsonUnwrapped
+        private PipelineStep step;
     }
 }

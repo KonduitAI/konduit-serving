@@ -19,9 +19,7 @@
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Collections;
@@ -31,6 +29,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties("builder")
+@EqualsAndHashCode(exclude = {"builder"})
 public abstract class BaseGraphStep implements GraphStep {
     protected GraphBuilder builder;
     protected String name;
@@ -39,6 +38,11 @@ public abstract class BaseGraphStep implements GraphStep {
     @Override
     public String name() {
         return name;
+    }
+
+    @Override
+    public void name(@NonNull String name){
+        this.name = name;
     }
 
     @Override

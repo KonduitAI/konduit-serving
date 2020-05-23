@@ -18,12 +18,21 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 public class AnyStep extends BaseMergeStep {
 
-    public AnyStep(GraphBuilder b, List<GraphStep> steps, String name){
+    public AnyStep(GraphBuilder b, List<String> steps, String name){
         super(b, steps, name);
+    }
+
+    @Override
+    public String toString(){
+        return "Any(\"" + String.join("\",\"", inputs()) + "\")";
     }
 
 }

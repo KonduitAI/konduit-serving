@@ -60,4 +60,9 @@ public class SwitchStep extends BaseGraphStep {
     public PipelineStep getStep() {
         return null;
     }
+
+    @Override
+    public String toString(){
+        return "Switch(fn=" + switchFn + ",inputs=" + inputs() + ")";
+    }
 }
