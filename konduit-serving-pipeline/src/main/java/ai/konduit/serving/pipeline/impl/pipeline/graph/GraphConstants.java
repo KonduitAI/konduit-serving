@@ -16,29 +16,24 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.testpipelines.callback;
+package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.serde.JsonSubType;
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.impl.testpipelines.count.CountStep;
-import ai.konduit.serving.pipeline.registry.PipelineRegistry;
-import ai.konduit.serving.pipeline.util.ObjectMappers;
+/**
+ * Contants for serializing GraphPipeline instances
+ *
+ * @author Alex Black
+ */
+public class GraphConstants {
 
-import java.util.Collections;
-import java.util.function.Consumer;
-
-@lombok.Data
-public class CallbackStep implements PipelineStep {
-
-    static {
-        PipelineRegistry.registerStepRunnerFactory(new CallbackPipelineFactory());
+    private GraphConstants() {
     }
 
-    private final Consumer<Data> consumer;
+    public static final String INPUT_KEY = "@input";
+    public static final String TYPE_KEY = "@type";
 
-    public CallbackStep(Consumer<Data> consumer){
-        this.consumer = consumer;
-    }
+    public static final String GRAPH_MERGE_JSON_KEY = "MERGE";
+    public static final String GRAPH_ANY_JSON_KEY = "ANY";
+    public static final String GRAPH_SWITCH_JSON_KEY = "SWITCH";
+    public static final String GRAPH_SWITCH_OUTPUT_JSON_KEY = "SWITCH_OUTPUT";
 
 }

@@ -19,51 +19,54 @@
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
- * An Input node for {@link GraphBuilder}
+ * The SwitchStep forwards the input Data instance to only one of N data instances, using a provided {@link SwitchFn}
+ * This can be used to implement conditional operations.
+ * Usually this is used in conjunction with an AnyStep: i.e., input -> Switch -> (left branch, right branch) -> Any<br>
+ *
  * @author Alex Black
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"builder"})
-public class Input implements GraphStep {
+@NoArgsConstructor
+@Accessors(fluent = true)
+public class SwitchStep extends BaseGraphStep {
 
-    private final GraphBuilder builder;
+    protected String inStep;
+    protected SwitchFn switchFn;
 
-    @Override
-    public String name() {
-        return GraphPipeline.INPUT_KEY;
-    }
-
-    @Override
-    public void name(String name) {
-        throw new UnsupportedOperationException("Setting name not supported for Input GraphStep");
-    }
-
-    @Override
-    public GraphBuilder builder() {
-        return builder;
+    /**
+     * @param b        GraphBuilder
+     * @param name     Name of this node
+     * @param inStep   Name of the input node
+     * @param switchFn Switch function to use to decide which output to forward the input to
+     */
+    public SwitchStep(GraphBuilder b, String name, String inStep, SwitchFn switchFn) {
+        super(b, name);
+        this.inStep = inStep;
+        this.switchFn = switchFn;
     }
 
     @Override
     public int numInputs() {
-        return 0;
+        return 1;
     }
 
     @Override
     public String input() {
-        return null;
+        return inStep;
     }
 
     @Override
     public List<String> inputs() {
-        return Collections.emptyList();
+        return Collections.singletonList(inStep);
     }
 
     @Override
@@ -73,11 +76,11 @@ public class Input implements GraphStep {
 
     @Override
     public PipelineStep getStep() {
-        throw new UnsupportedOperationException("Input does not have a PipelineStep associated with it");
+        return null;
     }
 
     @Override
-    public String toString(){
-        return "Input()";
+    public String toString() {
+        return "Switch(fn=" + switchFn + ",inputs=" + inputs() + ")";
     }
 }

@@ -16,29 +16,33 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.testpipelines.callback;
+package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.serde.JsonSubType;
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.impl.testpipelines.count.CountStep;
-import ai.konduit.serving.pipeline.registry.PipelineRegistry;
-import ai.konduit.serving.pipeline.util.ObjectMappers;
+import lombok.*;
+import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
 
-import java.util.Collections;
-import java.util.function.Consumer;
+@AllArgsConstructor
+@Data
+@NoArgsConstructor
+@JsonIgnoreProperties("builder")
+@EqualsAndHashCode(exclude = {"builder"})
+public abstract class BaseGraphStep implements GraphStep {
+    protected GraphBuilder builder;
+    protected String name;
 
-@lombok.Data
-public class CallbackStep implements PipelineStep {
 
-    static {
-        PipelineRegistry.registerStepRunnerFactory(new CallbackPipelineFactory());
+    @Override
+    public String name() {
+        return name;
     }
 
-    private final Consumer<Data> consumer;
-
-    public CallbackStep(Consumer<Data> consumer){
-        this.consumer = consumer;
+    @Override
+    public void name(@NonNull String name){
+        this.name = name;
     }
 
+    @Override
+    public GraphBuilder builder() {
+        return builder;
+    }
 }

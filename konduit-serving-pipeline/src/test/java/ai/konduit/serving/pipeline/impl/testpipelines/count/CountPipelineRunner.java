@@ -16,29 +16,35 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.testpipelines.callback;
+package ai.konduit.serving.pipeline.impl.testpipelines.count;
 
+import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.impl.testpipelines.count.CountStep;
-import ai.konduit.serving.pipeline.registry.PipelineRegistry;
-import ai.konduit.serving.pipeline.util.ObjectMappers;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import lombok.NonNull;
 
-import java.util.Collections;
-import java.util.function.Consumer;
+public class CountPipelineRunner implements PipelineStepRunner {
 
-@lombok.Data
-public class CallbackStep implements PipelineStep {
+    private final CountStep step;
 
-    static {
-        PipelineRegistry.registerStepRunnerFactory(new CallbackPipelineFactory());
+    public CountPipelineRunner(@NonNull CountStep step){
+        this.step = step;
     }
 
-    private final Consumer<Data> consumer;
+    @Override
+    public void close() {
 
-    public CallbackStep(Consumer<Data> consumer){
-        this.consumer = consumer;
     }
 
+    @Override
+    public PipelineStep getPipelineStep() {
+        return step;
+    }
+
+    @Override
+    public Data exec(Context ctx, Data data) {
+        step.count++;
+        return data;
+    }
 }

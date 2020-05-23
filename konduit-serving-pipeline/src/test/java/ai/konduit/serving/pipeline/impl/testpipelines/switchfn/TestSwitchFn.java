@@ -16,47 +16,24 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.pipeline.graph;
+package ai.konduit.serving.pipeline.impl.testpipelines.switchfn;
 
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NonNull;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
+import lombok.EqualsAndHashCode;
 
-import java.util.Collections;
-import java.util.List;
+@EqualsAndHashCode
+public class TestSwitchFn implements SwitchFn {
 
-@AllArgsConstructor
-@Data
-public class StandardGraphStep implements GraphStep {
-    private GraphBuilder builder;
-    private PipelineStep step;
-    private String name;
-    private String input;
-
+    public int branch;
 
     @Override
-    public String name() {
-        return name;
+    public int numOutputs() {
+        return 2;
     }
 
     @Override
-    public GraphBuilder builder() {
-        return builder;
-    }
-
-    @Override
-    public String input() {
-        return input;
-    }
-
-    @Override
-    public List<String> inputs() {
-        return Collections.singletonList(input);
-    }
-
-    @Override
-    public boolean hasStep() {
-        return true;
+    public int selectOutput(Data data) {
+        return branch;
     }
 }

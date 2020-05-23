@@ -18,28 +18,40 @@ package ai.konduit.serving.pipeline.impl.pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.StandardGraphStep;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
+import org.nd4j.shade.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Map;
 
 /**
- * A pipeline with a graph structure - possibly including conditional operations, etc
+ * A pipeline with a graph structure - possibly including conditional operations, etc.
+ * Use {@link ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder} to construct new instances:
+ * Usage:
+ * <pre>
+ * {@code
+ * GraphBuilder b = new GraphBuilder();
+ * GraphStep input = b.input();
+ * GraphStep output = input.then("myStep", ...);
+ * Pipeline p = b.build(output);
+ * }</pre>
  *
- * TODO THIS IS A PLACEHOLDER
+ * @author Alex Black
+ * @see SequencePipeline
  */
 @Data
+@Accessors(fluent = true)
+@JsonPropertyOrder({"outputStep", "steps"})
 public class GraphPipeline implements Pipeline {
     public static final String INPUT_KEY = "input";
 
     private final Map<String, GraphStep> steps;
-    private final String outputStepName;
+    private final String outputStep;
 
-    public GraphPipeline(@JsonProperty("steps") Map<String, GraphStep> steps, String outputStepName){
-        //TODO JSON needs rewriting here...
+    public GraphPipeline(@JsonProperty("steps") Map<String, GraphStep> steps, @JsonProperty("outputStep") String outputStep){
         this.steps = steps;
-        this.outputStepName = outputStepName;
+        this.outputStep = outputStep;
     }
 
     @Override

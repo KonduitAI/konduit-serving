@@ -19,51 +19,37 @@
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * An Input node for {@link GraphBuilder}
- * @author Alex Black
- */
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"builder"})
-public class Input implements GraphStep {
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public abstract class BaseMergeStep extends BaseGraphStep {
+    protected List<String> steps;
 
-    private final GraphBuilder builder;
-
-    @Override
-    public String name() {
-        return GraphPipeline.INPUT_KEY;
-    }
-
-    @Override
-    public void name(String name) {
-        throw new UnsupportedOperationException("Setting name not supported for Input GraphStep");
-    }
-
-    @Override
-    public GraphBuilder builder() {
-        return builder;
+    public BaseMergeStep(GraphBuilder b, List<String> steps, String name){
+        super(b, name);
+        this.steps = steps;
     }
 
     @Override
     public int numInputs() {
-        return 0;
+        return steps.size();
     }
 
     @Override
     public String input() {
-        return null;
+        throw new UnsupportedOperationException("Multiple inputs for MergeStep");
     }
 
     @Override
     public List<String> inputs() {
-        return Collections.emptyList();
+        return steps;
     }
 
     @Override
@@ -73,11 +59,6 @@ public class Input implements GraphStep {
 
     @Override
     public PipelineStep getStep() {
-        throw new UnsupportedOperationException("Input does not have a PipelineStep associated with it");
-    }
-
-    @Override
-    public String toString(){
-        return "Input()";
+        throw new UnsupportedOperationException("MergeStep does not have a PipelineStep associated with it");
     }
 }

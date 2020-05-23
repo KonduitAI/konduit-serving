@@ -27,6 +27,9 @@ import java.util.List;
 
 /**
  * SequencePipeline is a simple stack of pipeline steps - the output of one is fed into the next
+ *
+ * @author Alex Black
+ * @see GraphPipeline
  */
 @Data
 public class SequencePipeline implements Pipeline {

@@ -82,6 +82,8 @@ public class ObjectMappers {
             ret.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         }
 
+        ret.configure(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS, false);
+
         //Configure subtypes - via service loader from other modules
         List<JsonSubType> l = getAllSubtypes();
         for(JsonSubType t : l){
@@ -179,5 +181,34 @@ public class ObjectMappers {
         out.addAll(manuallyRegisteredSubtypes);
 
         return out;
+    }
+
+    public static List<JsonSubType> getSubtypesOf(Class<?> c){
+        List<JsonSubType> all = getAllSubtypes();
+        List<JsonSubType> out = new ArrayList<>();
+        for(JsonSubType j : all){
+            if(j.getConfigInterface() == c){
+                out.add(j);
+            }
+        }
+        return out;
+    }
+
+    public static Map<Class<?>, String> getSubtypeNames(){
+        List<JsonSubType> all = getAllSubtypes();
+        Map<Class<?>,String> m = new HashMap<>();
+        for(JsonSubType j : all){
+            m.put(j.getSubtype(), j.getName());
+        }
+        return m;
+    }
+
+    public static JsonSubType findSubtypeByName(String name){
+        for(JsonSubType type : getAllSubtypes()){
+            if(type.getName().equals(name)){
+                return type;
+            }
+        }
+        return null;
     }
 }

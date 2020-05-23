@@ -16,29 +16,24 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.testpipelines.callback;
+package ai.konduit.serving.pipeline.impl.testpipelines.count;
 
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.impl.testpipelines.count.CountStep;
-import ai.konduit.serving.pipeline.registry.PipelineRegistry;
-import ai.konduit.serving.pipeline.util.ObjectMappers;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import org.nd4j.common.base.Preconditions;
 
-import java.util.Collections;
-import java.util.function.Consumer;
+public class CountPipelineFactory implements PipelineStepRunnerFactory {
 
-@lombok.Data
-public class CallbackStep implements PipelineStep {
 
-    static {
-        PipelineRegistry.registerStepRunnerFactory(new CallbackPipelineFactory());
+    @Override
+    public boolean canRun(PipelineStep step) {
+        return step instanceof CountStep;
     }
 
-    private final Consumer<Data> consumer;
-
-    public CallbackStep(Consumer<Data> consumer){
-        this.consumer = consumer;
+    @Override
+    public PipelineStepRunner create(PipelineStep step) {
+        Preconditions.checkState(canRun(step));
+        return new CountPipelineRunner((CountStep) step);
     }
-
 }

@@ -19,65 +19,57 @@
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
+import org.nd4j.shade.jackson.annotation.JsonUnwrapped;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
- * An Input node for {@link GraphBuilder}
+ * A {@link GraphStep} that contains a {@link PipelineStep}
+ *
  * @author Alex Black
  */
-@AllArgsConstructor
-@EqualsAndHashCode(exclude = {"builder"})
-public class Input implements GraphStep {
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@JsonIgnoreProperties("builder")
+public class PipelineGraphStep extends BaseGraphStep {
+    private GraphBuilder builder;
+    @JsonUnwrapped
+    private PipelineStep step;
+    private String name;
+    private String input;
 
-    private final GraphBuilder builder;
-
-    @Override
-    public String name() {
-        return GraphPipeline.INPUT_KEY;
-    }
-
-    @Override
-    public void name(String name) {
-        throw new UnsupportedOperationException("Setting name not supported for Input GraphStep");
-    }
-
-    @Override
-    public GraphBuilder builder() {
-        return builder;
+    public PipelineGraphStep(GraphBuilder builder, PipelineStep step, String name, String input) {
+        super(builder, name);
+        this.step = step;
+        this.input = input;
     }
 
     @Override
     public int numInputs() {
-        return 0;
+        return 1;
     }
 
     @Override
     public String input() {
-        return null;
+        return input;
     }
 
     @Override
     public List<String> inputs() {
-        return Collections.emptyList();
+        return Collections.singletonList(input);
     }
 
     @Override
     public boolean hasStep() {
-        return false;
+        return true;
     }
 
     @Override
-    public PipelineStep getStep() {
-        throw new UnsupportedOperationException("Input does not have a PipelineStep associated with it");
-    }
-
-    @Override
-    public String toString(){
-        return "Input()";
+    public String toString() {
+        return step.toString();
     }
 }

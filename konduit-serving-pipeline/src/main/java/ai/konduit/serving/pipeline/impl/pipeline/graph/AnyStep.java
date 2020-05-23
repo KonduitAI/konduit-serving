@@ -16,29 +16,29 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.testpipelines.callback;
+package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.serde.JsonSubType;
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.impl.testpipelines.count.CountStep;
-import ai.konduit.serving.pipeline.registry.PipelineRegistry;
-import ai.konduit.serving.pipeline.util.ObjectMappers;
+import lombok.EqualsAndHashCode;
 
-import java.util.Collections;
-import java.util.function.Consumer;
+import java.util.List;
 
-@lombok.Data
-public class CallbackStep implements PipelineStep {
+/**
+ * AnyStep forwards the first available input to the output.
+ * Usually used in conjunction with a Switch step - i.e., input -> Switch -> (left branch, right branch) -> Any<br>
+ * If more than one of the inputs is available, the output is undefined (could be any of the inputs)
+ *
+ * @author Alex Black
+ */
+@EqualsAndHashCode(callSuper = true)
+public class AnyStep extends BaseMergeStep {
 
-    static {
-        PipelineRegistry.registerStepRunnerFactory(new CallbackPipelineFactory());
+    public AnyStep(GraphBuilder b, List<String> steps, String name) {
+        super(b, steps, name);
     }
 
-    private final Consumer<Data> consumer;
-
-    public CallbackStep(Consumer<Data> consumer){
-        this.consumer = consumer;
+    @Override
+    public String toString() {
+        return "Any(\"" + String.join("\",\"", inputs()) + "\")";
     }
 
 }

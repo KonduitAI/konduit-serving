@@ -19,12 +19,14 @@ import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import org.nd4j.shade.jackson.core.JsonParseException;
 import org.nd4j.shade.jackson.core.JsonParser;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 import org.nd4j.shade.jackson.core.TreeNode;
 import org.nd4j.shade.jackson.databind.DeserializationContext;
 import org.nd4j.shade.jackson.databind.deser.std.StdDeserializer;
+import org.nd4j.shade.jackson.databind.node.TextNode;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -47,18 +49,20 @@ public class PipelineDeserializer extends StdDeserializer<Pipeline> {
             PipelineStep[] steps = jp.getCodec().treeToValue(n, PipelineStep[].class);
             return new SequencePipeline(Arrays.asList(steps));
         } else if(n.isObject()){
-            Map<String,PipelineStep> map = new LinkedHashMap<>();
+            Map<String, GraphStep> map = new LinkedHashMap<>();
 
             Iterator<String> f = n.fieldNames();
             while(f.hasNext()) {
                 String s = f.next();
                 TreeNode pn = n.get(s);
-                PipelineStep ps = jp.getCodec().treeToValue(pn, PipelineStep.class);
-                map.put(s, ps);
+                GraphStep step = jp.getCodec().treeToValue(pn, GraphStep.class);
+                step.name(s);
+                map.put(s, step);
             }
 
-//            return new GraphPipeline(map);
-            throw new UnsupportedOperationException("Not yet (re)implemented: Graph pipeline deserialization");
+            String outputStep = ((TextNode)tn.get("outputStep")).asText();
+
+            return new GraphPipeline(map, outputStep);
         } else {
             throw new JsonParseException(jp, "Unable to deserialize Pipeline: Invalid JSON/YAML? Pipeline is neither a SequencePipeline or a GraphPipeline");
         }
