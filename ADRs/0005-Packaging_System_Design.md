@@ -55,7 +55,7 @@ The goals of this packaging proposal are as follows:
 
 **Proposal Overview**
 
-This proposal has 4 parts:
+This proposal has a number of parts:
 1. A Konduit Serving build configuration format
 2. A build tool (on top of Maven) that utilizes the configuration format to actually perform the required build
 3. UI and command line tools for creating a build configuration for a given Pipeline configuration
@@ -149,17 +149,62 @@ la64 = Linux ARM - arm64
 
 ### Part 4 - Build UI
 
-The 
+The Build UI would be a simple UI (nothing fancy or feature rich) that focused on doing two things:  
+(a) Guiding users through the configuration process for their pipeline  
+    The main goal here is to show the user what the required modules are for serving their pipeline, and the options they have for customing the deployment (target platform, selected model runner, etc)  
+(b) Creating the configuration file (though this would be implemented in the back-end)  
+(c) Triggering the build based on the generated configuration file  
+
+Users should be able to load a previously-created build configuration file (partially or completely specified) as a starting point for their pipeline build.  
+
+
+At a later date, we may add a way to visualize and create pipeline configurations using this UI also. If we were to look at that, it would be after a separate ADR.
+
+
+Starting and stopping the build UI should be straightforward (assuming the user has Konduit Python package or similar installed):
+```
+> konduit-build-ui
+
+Konduit Serving build UI launched at: https://localhost:9123/
+Use ctrl+c to exit
+```
+
+The workflow would for the user would be something like:
+1. Select the Konduit Serving pipeline to deploy
+2. Select the deployment environment(s) - OS, CPU architecture, CPU vs. GPU, AVX support or not, etc
+3. Select the pipeline step runners (if multiple are available)  
+   Example: when running a TensorFlow model - whether to use TF, SameDiff, TVM, etc
+4. Optionally add custom Java code, Python code, and dependencies  
+   Again, Java code/dependencies will be as simple as specifying the GAV coordinates.  
+   Python packaging and dependencies is TBD, but may be something like a directory + a requirements.txt
+5. Optionally, embed files/resources (including the model file)
+6. Select packaging (uberjar, docker, exe, etc)  
+   Each selected option should then show configuration
+7. Click "verify" to check all options and produce a final report
+   Check dependencies, produce final file size, etc
+8. Execute build
+
+At any point the user would be able to save the current configuration as a YAML/JSON file (and load it back in later).
+
+
+At each stage, we would only allow the user to select options that are consistent with previous choices (with other options still visible but grayed out).
+
+
+For step 2, at a later date we may introduce device profiles ("Raspberry pi 4B", "Jetson Nano", "Generic Linux x86_64", and possibly even common cloud VMs) to reduce the amount of knowledge/configuration required to create the pipeline.
 
 
 ### Part 5 - Pipeline Analysis and Module Selection
 
-An important component of both the CLI and UI would be determining what modules
+An important component of both the CLI and UI would be determining what Konduit Serving modules need to be included to execute a pipeline - and what options are available (i.e., which runners could be used to execute the steps contained within).
 
-### 
+In the near-term, we could add something to (semi-automatically) track/aggregate execution support/capabilities across all modules - i.e., we'd build a mapping between module names (or rather, PipelineStepRunners) and the PipelineStep (configurations) they can run.
 
 
-### Part 7: Custom/External Java Code and Dependencies
+One thing to keep in mind is extensibility - for example, we might have custom pipeline steps available via a "Konduit Serving Hub" - code and dependencies for those custom pipeline steps could be pulled in automatically. However this should not substantially alter the basic approach for doing analysis/module selection.
+
+
+
+### Part 6: Custom/External Java Code and Dependencies
 
 In some pipelines, a user will want to write custom Java code - for example custom pipeline steps, metrics, etc.
 Some of this custom Java code will have dependencies (direct and transitive) that also need to be included.
@@ -177,6 +222,14 @@ i.e., "clone, install, add to Konduit Serving deployment" would be doable in jus
 This "install and provide GAV" approach should also work fine for OSGi-based builds/deployments in the future.
 
 ### Future ADRs
+
+There are a number of aspects of this packaging system that would need to be worked out in future ADRs.
+These might include:
+* The configuration format
+* UI design
+* Custom Python code (and dependency) embedding
+* Architecture compatibility checking for dependencies with native code (i.e., "if I include dependency X, will it actually work on ARM64, PPC64le, etc?")
+* File/resource embedding
 
 
 ## Consequences 
