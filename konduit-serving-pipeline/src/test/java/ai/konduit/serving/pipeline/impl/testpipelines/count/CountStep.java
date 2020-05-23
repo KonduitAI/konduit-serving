@@ -19,9 +19,12 @@
 package ai.konduit.serving.pipeline.impl.testpipelines.count;
 
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
 
+import java.util.Collections;
 import java.util.function.Consumer;
 
 @lombok.Data
@@ -29,6 +32,7 @@ public class CountStep implements PipelineStep {
 
     static {
         PipelineRegistry.registerStepRunnerFactory(new CountPipelineFactory());
+        ObjectMappers.registerSubtypes(Collections.singletonList(new JsonSubType("COUNT_STEP", CountStep.class, PipelineStep.class)));
     }
 
     public int count;

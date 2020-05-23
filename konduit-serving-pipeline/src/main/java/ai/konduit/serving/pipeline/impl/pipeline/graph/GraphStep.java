@@ -18,14 +18,18 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
+import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.impl.pipeline.serde.GraphStepSerializer;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public interface GraphStep {
+@JsonSerialize(using = GraphStepSerializer.class)
+public interface GraphStep extends TextConfig {
 
     String name();
 

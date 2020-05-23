@@ -18,7 +18,11 @@ package ai.konduit.serving.pipeline.impl.serde;
 import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.serde.JsonSubTypesMapping;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.*;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataIntSwitchFn;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataStringSwitchFn;
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
+import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +34,18 @@ public class PipelineCoreSubtypesMapping implements JsonSubTypesMapping {
     public List<JsonSubType> getSubTypesMapping() {
         List<JsonSubType> l = new ArrayList<>();
         l.add(new JsonSubType("LOGGING", LoggingPipelineStep.class, PipelineStep.class));
+        l.add(new JsonSubType("SSD_TO_BBOX", SSDToBoundingBoxStep.class, PipelineStep.class));
+
+        //Graph pipeline
+        l.add(new JsonSubType("MERGE", MergeStep.class, GraphStep.class));
+        l.add(new JsonSubType("ANY", AnyStep.class, GraphStep.class));
+        l.add(new JsonSubType("SWITCH", SwitchStep.class, GraphStep.class));
+        l.add(new JsonSubType("SWITCH_OUTPUT", SwitchOutput.class, GraphStep.class));
+
+        //Graph pipeline switch functions
+        l.add(new JsonSubType("INT_SWITCH", DataIntSwitchFn.class, SwitchFn.class));
+        l.add(new JsonSubType("STRING_SWITCH", DataStringSwitchFn.class, SwitchFn.class));
+
 
         return l;
     }

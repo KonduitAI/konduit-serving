@@ -18,9 +18,14 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
+import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.data.Data;
+import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
-public interface SwitchFn {
+import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
+
+@JsonTypeInfo(use = NAME, property = "@type")
+public interface SwitchFn extends TextConfig {
 
     int numOutputs();
 

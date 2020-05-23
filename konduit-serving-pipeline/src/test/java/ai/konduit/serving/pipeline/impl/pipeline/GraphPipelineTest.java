@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
+import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
@@ -30,12 +31,11 @@ import ai.konduit.serving.pipeline.impl.testpipelines.callback.CallbackStep;
 import ai.konduit.serving.pipeline.impl.testpipelines.count.CountStep;
 import ai.konduit.serving.pipeline.impl.testpipelines.fn.FunctionStep;
 import ai.konduit.serving.pipeline.impl.testpipelines.switchfn.TestSwitchFn;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
 import org.junit.Test;
+import org.nd4j.shade.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
@@ -127,6 +127,7 @@ public class GraphPipelineTest {
 
     @Test
     public void testSwitchAny(){
+        ObjectMappers.registerSubtypes(Collections.singletonList(new JsonSubType("TEST_SWITCH_FN", TestSwitchFn.class, SwitchFn.class)));
 
         GraphBuilder b = new GraphBuilder();
         GraphStep input = b.input();
@@ -175,6 +176,12 @@ public class GraphPipelineTest {
 
         Data outRight2 = exec2.exec(in);
         assertEquals(outRight, outRight2);
+    }
+
+    @Test
+    public void testSwitchFunctions(){
+
+
     }
 
     @Test

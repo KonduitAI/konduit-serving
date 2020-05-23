@@ -19,7 +19,6 @@
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.util.SwitchOutput;
 import org.nd4j.common.base.Preconditions;
 
 import java.util.*;

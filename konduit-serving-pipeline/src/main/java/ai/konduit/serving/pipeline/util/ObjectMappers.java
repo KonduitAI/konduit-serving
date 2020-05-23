@@ -180,4 +180,24 @@ public class ObjectMappers {
 
         return out;
     }
+
+    public static List<JsonSubType> getSubtypesOf(Class<?> c){
+        List<JsonSubType> all = getAllSubtypes();
+        List<JsonSubType> out = new ArrayList<>();
+        for(JsonSubType j : all){
+            if(j.getConfigInterface() == c){
+                out.add(j);
+            }
+        }
+        return out;
+    }
+
+    public static Map<Class<?>, String> getSubtypeNames(){
+        List<JsonSubType> all = getAllSubtypes();
+        Map<Class<?>,String> m = new HashMap<>();
+        for(JsonSubType j : all){
+            m.put(j.getSubtype(), j.getName());
+        }
+        return m;
+    }
 }
