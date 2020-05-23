@@ -26,6 +26,11 @@ import org.nd4j.shade.jackson.annotation.JsonUnwrapped;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A {@link GraphStep} that contains a {@link PipelineStep}
+ *
+ * @author Alex Black
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -44,6 +49,11 @@ public class PipelineGraphStep extends BaseGraphStep {
     }
 
     @Override
+    public int numInputs() {
+        return 1;
+    }
+
+    @Override
     public String input() {
         return input;
     }
@@ -59,7 +69,7 @@ public class PipelineGraphStep extends BaseGraphStep {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return step.toString();
     }
 }

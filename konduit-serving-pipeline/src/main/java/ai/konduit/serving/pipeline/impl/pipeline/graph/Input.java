@@ -26,6 +26,10 @@ import lombok.EqualsAndHashCode;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * An Input node for {@link GraphBuilder}
+ * @author Alex Black
+ */
 @AllArgsConstructor
 @EqualsAndHashCode(exclude = {"builder"})
 public class Input implements GraphStep {
@@ -45,6 +49,11 @@ public class Input implements GraphStep {
     @Override
     public GraphBuilder builder() {
         return builder;
+    }
+
+    @Override
+    public int numInputs() {
+        return 0;
     }
 
     @Override

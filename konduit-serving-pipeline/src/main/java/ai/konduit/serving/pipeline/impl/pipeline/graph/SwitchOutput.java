@@ -26,6 +26,11 @@ import lombok.experimental.Accessors;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * SwitchOutput simply represents one output branch of a {@link SwitchStep}
+ *
+ * @author Alex Black
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
@@ -34,12 +39,23 @@ public class SwitchOutput extends BaseGraphStep {
     private final int outputNum;
     private final String switchName;
 
+    /**
+     * @param b          GraphBuilder
+     * @param name       Name of the output node
+     * @param switchName Name of the Switch node that this SwitchOutput represents the output for
+     * @param outputNum  Output number of the SwitchStep that this is for
+     */
     public SwitchOutput(GraphBuilder b, String name, String switchName, int outputNum){
         super(b, name);
         this.switchName = switchName;
         this.outputNum = outputNum;
     }
 
+
+    @Override
+    public int numInputs() {
+        return 1;
+    }
 
     @Override
     public String input() {

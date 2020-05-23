@@ -23,7 +23,14 @@ import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
 import lombok.experimental.Accessors;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+/**
+ * A {@link SwitchFn} that selects the output based on a integer values from the Data instance.
+ * The specified field name must be an integer value between 0 and numOutputs inclusive
+ *
+ * @author Alex Black
+ */
 @lombok.Data
 @Accessors(fluent = true)
 public class DataIntSwitchFn implements SwitchFn {
@@ -31,7 +38,8 @@ public class DataIntSwitchFn implements SwitchFn {
     private final int numOutputs;
     private final String fieldName;
 
-    public DataIntSwitchFn(int numOutputs, String fieldName){
+    public DataIntSwitchFn(@JsonProperty("numOutputs") int numOutputs, @JsonProperty("fieldName") String fieldName){
+        Preconditions.checkState(numOutputs > 0, "Number of outputs must be positive, got %s", numOutputs);
         this.numOutputs = numOutputs;
         this.fieldName = fieldName;
     }

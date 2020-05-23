@@ -36,6 +36,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A custom serializer for GraphSteps
+ *
+ * @author Alex Black
+ */
 public class GraphStepSerializer extends JsonSerializer<GraphStep> {
 
     @Override
@@ -46,7 +51,6 @@ public class GraphStepSerializer extends JsonSerializer<GraphStep> {
 
         String name = gs.name();
 
-//        jg.writeStartObject(name);
         if(gs.hasStep()){
             //PipelineStep (StandardGraphStep) only
             PipelineStep s = gs.getStep();
@@ -88,10 +92,9 @@ public class GraphStepSerializer extends JsonSerializer<GraphStep> {
 
             jg.writeEndObject();
         }
-
-//        jg.writeEndObject();
     }
 
+    //Wrapper/helper class to inject "@type" and "@input" fields into the PipelineStep json
     @Data
     @AllArgsConstructor
     @JsonPropertyOrder({"@type", "@input"})

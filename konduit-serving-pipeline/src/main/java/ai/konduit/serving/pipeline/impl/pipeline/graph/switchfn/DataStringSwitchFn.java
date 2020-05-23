@@ -23,18 +23,30 @@ import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
 import lombok.experimental.Accessors;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.Map;
 
+/**
+ * A {@link SwitchFn} that selects the output based a String value from the Data instance.<br>
+ * The specified field name must be a String value, and must be present in the provided map.<br>
+ * For example, if the map has values {("x", 0), ("y", 1)} then if  Data.getString(fieldName) is "x", the input
+ * is forwarded to output 0. If it is "y" the output is forwarded to output 1. If it is any other value, an exception
+ * is thrown.
+ *
+ * @author Alex Black
+ */
 @lombok.Data
 @Accessors(fluent = true)
 public class DataStringSwitchFn implements SwitchFn {
 
     private final int numOutputs;
     private final String fieldName;
-    private final Map<String,Integer> map;
+    private final Map<String, Integer> map;
 
-    public DataStringSwitchFn(int numOutputs, String fieldName, Map<String,Integer> map){
+    public DataStringSwitchFn(@JsonProperty("numOutputs") int numOutputs, @JsonProperty("fieldName") String fieldName,
+                              @JsonProperty("map") Map<String, Integer> map) {
+        Preconditions.checkState(numOutputs > 0, "Number of outputs must be positive, got %s", numOutputs);
         this.numOutputs = numOutputs;
         this.fieldName = fieldName;
         this.map = map;

@@ -29,6 +29,11 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An executor for {@link SequencePipeline}s
+ *
+ * @author Alex Black
+ */
 @Slf4j
 public class SequencePipelineExecutor extends BasePipelineExecutor {
 

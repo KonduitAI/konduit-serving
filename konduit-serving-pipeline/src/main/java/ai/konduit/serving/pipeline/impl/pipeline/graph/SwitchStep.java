@@ -25,6 +25,13 @@ import lombok.experimental.Accessors;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * The SwitchStep forwards the input Data instance to only one of N data instances, using a provided {@link SwitchFn}
+ * This can be used to implement conditional operations.
+ * Usually this is used in conjunction with an AnyStep: i.e., input -> Switch -> (left branch, right branch) -> Any<br>
+ *
+ * @author Alex Black
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
@@ -35,10 +42,21 @@ public class SwitchStep extends BaseGraphStep {
     protected String inStep;
     protected SwitchFn switchFn;
 
-    public SwitchStep(GraphBuilder b, String name, String inStep, SwitchFn switchFn){
+    /**
+     * @param b        GraphBuilder
+     * @param name     Name of this node
+     * @param inStep   Name of the input node
+     * @param switchFn Switch function to use to decide which output to forward the input to
+     */
+    public SwitchStep(GraphBuilder b, String name, String inStep, SwitchFn switchFn) {
         super(b, name);
         this.inStep = inStep;
         this.switchFn = switchFn;
+    }
+
+    @Override
+    public int numInputs() {
+        return 1;
     }
 
     @Override
@@ -62,7 +80,7 @@ public class SwitchStep extends BaseGraphStep {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "Switch(fn=" + switchFn + ",inputs=" + inputs() + ")";
     }
 }

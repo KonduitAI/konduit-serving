@@ -29,12 +29,17 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class BaseMergeStep extends BaseGraphStep {
+public abstract class BaseMergeStep extends BaseGraphStep {
     protected List<String> steps;
 
     public BaseMergeStep(GraphBuilder b, List<String> steps, String name){
         super(b, name);
         this.steps = steps;
+    }
+
+    @Override
+    public int numInputs() {
+        return steps.size();
     }
 
     @Override

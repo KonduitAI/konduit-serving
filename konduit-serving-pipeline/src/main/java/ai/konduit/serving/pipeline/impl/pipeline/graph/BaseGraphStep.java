@@ -18,12 +18,8 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.*;
 import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
-
-import java.util.Collections;
-import java.util.List;
 
 @AllArgsConstructor
 @Data

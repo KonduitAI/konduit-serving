@@ -35,6 +35,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A custom JSON deserializer for deserializing {@link GraphStep}s
+ *
+ * @author Alex Black
+ */
 public class GraphStepDeserializer extends StdDeserializer<GraphStep> {
 
 
@@ -57,8 +62,7 @@ public class GraphStepDeserializer extends StdDeserializer<GraphStep> {
                 "required module may not be on the classpath", st);
 
         if(PipelineStep.class.isAssignableFrom(st.getConfigInterface())){
-            //Deserialize as PipelineStep, then wrap in a StandardGraphStep
-
+            //Deserialize as PipelineStep, then wrap in a PipelineGraphStep
             PipelineStep ps = jp.getCodec().treeToValue(tn, PipelineStep.class);
             String input = ((TextNode)inputNode).asText();;
             return new PipelineGraphStep(null, ps, null, input);

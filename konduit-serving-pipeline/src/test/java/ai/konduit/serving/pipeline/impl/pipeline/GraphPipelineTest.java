@@ -27,6 +27,8 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataIntSwitchFn;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataStringSwitchFn;
 import ai.konduit.serving.pipeline.impl.testpipelines.callback.CallbackStep;
 import ai.konduit.serving.pipeline.impl.testpipelines.count.CountStep;
 import ai.konduit.serving.pipeline.impl.testpipelines.fn.FunctionStep;
@@ -132,7 +134,6 @@ public class GraphPipelineTest {
         GraphBuilder b = new GraphBuilder();
         GraphStep input = b.input();
 
-        AtomicInteger branch = new AtomicInteger();
         TestSwitchFn fn = new TestSwitchFn();
         GraphStep[] sw = b.switchOp("switch", fn, input);
         assertEquals(2, sw.length);
@@ -180,13 +181,74 @@ public class GraphPipelineTest {
 
     @Test
     public void testSwitchFunctions(){
+        for(boolean str : new boolean[]{false, true}) {
+
+            GraphBuilder b = new GraphBuilder();
+            GraphStep input = b.input();
+
+            SwitchFn fn;
+            if(str){
+                Map<String,Integer> m = new HashMap<>();
+                m.put("first", 0);
+                m.put("second", 1);
+                fn = new DataStringSwitchFn(2, "string", m);
+            } else {
+                fn = new DataIntSwitchFn(2, "int");
+            }
+            GraphStep[] sw = b.switchOp("switch", fn, input);
+            assertEquals(2, sw.length);
+            GraphStep left = sw[0];
+            GraphStep right = sw[1];
+
+            CountStep leftCount = new CountStep();
+            CountStep rightCount = new CountStep();
+            GraphStep lOut = left.then("testLeft", leftCount);
+            GraphStep rOut = right.then("testRight", rightCount);
+
+            GraphStep any = b.any("any", lOut, rOut);
+
+            Pipeline p = b.build(any);
 
 
-    }
+            PipelineExecutor exec = p.executor();
 
-    @Test
-    public void testCombine(){
+            Data in = Data.singleton("k", "v");
 
+            //Test left branch
+            if(str){
+                in.put("string", "first");
+            } else {
+                in.put("int", 0);
+            }
+            Data outLeft = exec.exec(in);
+            assertEquals(in, outLeft);
+            assertEquals(1, leftCount.count);
+            assertEquals(0, rightCount.count);
 
+            //Test right branch
+            if(str){
+                in.put("string", "second");
+            } else {
+                in.put("int", 1);
+            }
+            leftCount.count = 0;
+            Data outRight = exec.exec(in);
+            assertEquals(in, outRight);
+            assertEquals(0, leftCount.count);
+            assertEquals(1, rightCount.count);
+
+            String json = p.toJson();
+            System.out.println(json);
+            Pipeline fromJson = Pipeline.fromJson(json);
+
+            assertEquals(p, fromJson);
+
+            PipelineExecutor exec2 = fromJson.executor();
+            Data outLeft2 = exec2.exec(in);
+            assertEquals(outLeft, outLeft2);
+
+            Data outRight2 = exec2.exec(in);
+            assertEquals(outRight, outRight2);
+        }
     }
 }

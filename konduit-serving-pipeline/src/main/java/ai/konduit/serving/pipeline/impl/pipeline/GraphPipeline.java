@@ -26,8 +26,19 @@ import org.nd4j.shade.jackson.annotation.JsonPropertyOrder;
 import java.util.Map;
 
 /**
- * A pipeline with a graph structure - possibly including conditional operations, etc
+ * A pipeline with a graph structure - possibly including conditional operations, etc.
+ * Use {@link ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder} to construct new instances:
+ * Usage:
+ * <pre>
+ * {@code
+ * GraphBuilder b = new GraphBuilder();
+ * GraphStep input = b.input();
+ * GraphStep output = input.then("myStep", ...);
+ * Pipeline p = b.build(output);
+ * }</pre>
  *
+ * @author Alex Black
+ * @see SequencePipeline
  */
 @Data
 @Accessors(fluent = true)

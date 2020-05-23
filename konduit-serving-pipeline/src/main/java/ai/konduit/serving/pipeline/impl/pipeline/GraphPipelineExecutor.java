@@ -33,6 +33,11 @@ import org.slf4j.Logger;
 
 import java.util.*;
 
+/**
+ * An executer for {@link GraphPipeline} instances
+ *
+ * @author Alex Black
+ */
 @Slf4j
 @AllArgsConstructor
 public class GraphPipelineExecutor extends BasePipelineExecutor {

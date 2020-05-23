@@ -19,19 +19,25 @@
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
 import java.util.List;
 
+/**
+ * AnyStep forwards the first available input to the output.
+ * Usually used in conjunction with a Switch step - i.e., input -> Switch -> (left branch, right branch) -> Any<br>
+ * If more than one of the inputs is available, the output is undefined (could be any of the inputs)
+ *
+ * @author Alex Black
+ */
 @EqualsAndHashCode(callSuper = true)
 public class AnyStep extends BaseMergeStep {
 
-    public AnyStep(GraphBuilder b, List<String> steps, String name){
+    public AnyStep(GraphBuilder b, List<String> steps, String name) {
         super(b, steps, name);
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "Any(\"" + String.join("\",\"", inputs()) + "\")";
     }
 

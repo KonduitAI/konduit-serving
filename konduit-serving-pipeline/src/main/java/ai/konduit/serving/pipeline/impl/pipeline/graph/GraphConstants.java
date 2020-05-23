@@ -18,9 +18,15 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
+/**
+ * Contants for serializing GraphPipeline instances
+ *
+ * @author Alex Black
+ */
 public class GraphConstants {
 
-    private GraphConstants(){ }
+    private GraphConstants() {
+    }
 
     public static final String INPUT_KEY = "@input";
     public static final String TYPE_KEY = "@type";

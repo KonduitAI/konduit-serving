@@ -23,16 +23,23 @@ import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+/**
+ * Merge the output of the input GraphSteps together<br>
+ * This means that during execution, the output Data instances of all the steps are combined together into a single Data
+ * instance.
+ *
+ * @author Alex Black
+ */
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class MergeStep extends BaseMergeStep {
 
-    public MergeStep(GraphBuilder b, List<String> steps, String name){
+    public MergeStep(GraphBuilder b, List<String> steps, String name) {
         super(b, steps, name);
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "Merge(\"" + String.join("\",\"", inputs()) + "\")";
     }
 
