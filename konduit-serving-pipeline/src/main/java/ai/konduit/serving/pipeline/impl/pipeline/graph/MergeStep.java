@@ -18,46 +18,29 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * Merge the output of the input GraphSteps together<br>
+ * This means that during execution, the output Data instances of all the steps are combined together into a single Data
+ * instance.
+ *
+ * @author Alex Black
+ */
 @AllArgsConstructor
-public class MergeStep implements GraphStep {
+@EqualsAndHashCode(callSuper = true)
+public class MergeStep extends BaseMergeStep {
 
-    private GraphBuilder builder;
-    private List<GraphStep> steps;
-    private String name;
-
-    @Override
-    public String name() {
-        return name;
+    public MergeStep(GraphBuilder b, List<String> steps, String name) {
+        super(b, steps, name);
     }
 
     @Override
-    public GraphBuilder builder() {
-        return builder;
+    public String toString() {
+        return "Merge(\"" + String.join("\",\"", inputs()) + "\")";
     }
 
-    @Override
-    public String input() {
-        throw new UnsupportedOperationException("Multiple inputs for MergeStep");
-    }
-
-    @Override
-    public List<String> inputs() {
-        return steps.stream().map(GraphStep::name).collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean hasStep() {
-        return false;
-    }
-
-    @Override
-    public PipelineStep getStep() {
-        throw new UnsupportedOperationException("MergeStep does not have a PipelineStep associated with it");
-    }
 }

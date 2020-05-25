@@ -81,7 +81,15 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     @Override
     public void close() {
+        try {
+            if (net != null) {
+                net.close();
+            } else {
+                graph.close();
+            }
+        } catch (Throwable t){
 
+        }
     }
 
     @Override
@@ -105,7 +113,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
                 out = net.output(arr);
             }
 
-            String outName = step.getOutputNames() == null || step.getOutputNames().isEmpty() ? DEFAULT_OUT_NAME_SINGLE : step.getOutputNames().get(0);
+            String outName = step.outputNames() == null || step.outputNames().isEmpty() ? DEFAULT_OUT_NAME_SINGLE : step.outputNames().get(0);
 
             return Data.singleton(outName, NDArray.create(out));
         } else {
@@ -114,10 +122,10 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
                 input = new INDArray[]{getOnlyArray(data)};
             } else {
                 //TODO make configurable input names/order
-                if (step.getInputNames() != null) {
+                if (step.inputNames() != null) {
                     input = new INDArray[numInputs];
                     int i = 0;
-                    for (String s : step.getInputNames()) {
+                    for (String s : step.inputNames()) {
                         input[i++] = (INDArray) data.getNDArray(s).get();      //TODO FIX NDARRAY
                     }
                 } else {
@@ -143,9 +151,8 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
             //Work out output names
             List<String> outNames;
-            if (step.getOutputNames() != null) {
-                outNames = step.getOutputNames();
-                ;
+            if (step.outputNames() != null) {
+                outNames = step.outputNames();
             } else {
                 if (out.length == 1) {
                     outNames = Collections.singletonList(DEFAULT_OUT_NAME_SINGLE);

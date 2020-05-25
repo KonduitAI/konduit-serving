@@ -25,7 +25,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * As per {@link DrawGridStep} but the x/y location values are hardcoded into the configuration, istead of coming
+ * As per {@link DrawGridStep} but the x/y location values are hardcoded into the configuration, instead of coming
  * dynamically from the input Data instance
  *
  * @author Alex Black

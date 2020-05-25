@@ -21,11 +21,17 @@ package ai.konduit.serving.pipeline.impl.pipeline.graph;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * An Input node for {@link GraphBuilder}
+ * @author Alex Black
+ */
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"builder"})
 public class Input implements GraphStep {
 
     private final GraphBuilder builder;
@@ -36,8 +42,18 @@ public class Input implements GraphStep {
     }
 
     @Override
+    public void name(String name) {
+        throw new UnsupportedOperationException("Setting name not supported for Input GraphStep");
+    }
+
+    @Override
     public GraphBuilder builder() {
         return builder;
+    }
+
+    @Override
+    public int numInputs() {
+        return 0;
     }
 
     @Override
@@ -58,5 +74,10 @@ public class Input implements GraphStep {
     @Override
     public PipelineStep getStep() {
         throw new UnsupportedOperationException("Input does not have a PipelineStep associated with it");
+    }
+
+    @Override
+    public String toString(){
+        return "Input()";
     }
 }

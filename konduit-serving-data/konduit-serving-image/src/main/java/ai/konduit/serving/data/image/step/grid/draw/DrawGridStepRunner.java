@@ -264,6 +264,19 @@ public class DrawGridStepRunner implements PipelineStepRunner {
             y4 = s2.getStart().getY();
         }
 
+        boolean s1XMostIsTop = y1 < y2;
+        boolean s2XMostIsTop = y3 < y4;
+
+        if(s1XMostIsTop != s2XMostIsTop){
+            //Need to swap
+            double tx3 = x3;
+            double ty3 = y3;
+            x3 = x4;
+            y3 = y4;
+            x4 = tx3;
+            y4 = ty3;
+        }
+
 
         for( int j=1; j<num; j++ ){
             double frac = j / (double)num;
