@@ -9,9 +9,9 @@ Discussed with:
 
 ## Context
 
-Konduit Serving is a complex modular software package intended to be deployed in a number of different configurations, in multiple packaging formats.
+Konduit Serving is a complex modular tool intended to be deployed in a number of different configurations, in multiple packaging formats.
 
-For any given model/pipeline, the deployment/packaging scenarios can vary widely. For example, a user might want to deploy a Konduit Serving TensorFlow model in one of these configurations (and many more):
+For any given model/pipeline, the deployment/packaging scenarios can vary widely. For example, a user might want to deploy a TensorFlow model via Konduit Serving in one of these configurations (and many more):
 * Docker image packaging using TensorFlow + CUDA 10.1 on an Linux ARM64 system, with serving via HTTP/REST
 * A self-contained .exe (with embedded JVM) using SameDiff TensorFlow import to run the model on CPU, on a Windows x86 + AVX2 system with Intel MKL + MKLDNN (OneDNN) included, with serving being performed via gRPC
 
@@ -27,29 +27,29 @@ The other packaging options are executed by adding different profiles.
 This approach has got us quite far in terms of packaging (enabling flexible packaging options including uber-JARs, Docker, WARs, DEB/RPMs, tar files and .exe files), we are running up against the limits of this approach.
 
 Specifically, this approach has the following problems:
-* The combination of options available to users is only going to continue to grow (too many profiles and combinations for devs/users)
+* The combination of options available to users is only going to continue to grow (too many profiles and combinations for devs/users to know about and understand)
 * Some combinations are difficult or impossible using just profiles and properties (for example, building a binary for both Windows and Linux, but not Mac or PPC etc)
 * It is easy to leave performance on the table - i.e., using ND4J/SameDiff/TensorFlow etc binaries built without AVX support
-* Many incompatibilities will only become apparent at runtime (example: build for a CUDA version only to find that TensorFlow only releases one CUDA version and hence we have a runtime problem)
+* Many incompatibilities will only become apparent at runtime (example: build for a CUDA 10.x version only to find that TensorFlow only releases with CUDA 10.y and hence we have a runtime problem)
 * Now (with the Data/API rewrite) configuration and execution is separate; the one configuration can be run many different ways. For example, a TensorFlow model could be run with TensorFlow, SameDiff, TVM, or (possibly automated) conversion ONNX, etc. This will be challenging to support via a "profiles and properties" build approach.
 * Usability issues: For example, users need to know a lot about the different profiles, configuration, etc to get an optimal (or even functional) deployment - or even know what is possible.
     - An example of this: the user might build an uber-JAR without the PMML profile being enabled, only to discover their JAR can't run their pipeline (that has a PMML model)
-* Packaging of custom code, dependencies and other assets (inc. model) is difficult
+* Packaging of custom code, dependencies and other assets (inc. model, vocabulary files etc) is difficult or impossible at present
 
 
 ## Proposal
 
-The scope of this proposal is limited to the creation/packaging of a Konduit Serving uberjar, which may be deployed in many forms (Docker, RPM, WAR, etc)
+The scope of this proposal is limited to the creation/packaging of a Konduit Serving uberjar, which may be deployed in many forms (Docker, RPM, WAR, etc).  
 Note that non-Java packaging/deployments of pipelines is out of scope (i.e., deploy a pure C++ binary); OSGi support is relevant but only in scope to the extent that an OSGi-based system could work with (or build on top of) the functionality described in this proposal.
 
-**Proposal Goals*
+**Proposal Goals**
 
 The goals of this packaging proposal are as follows:
 1. To retain and enhance the existing deployment options - uber-jar, docker, WAR, .exe, etc
 2. Enable greater flexibility in the build/deployment configuration
 3. To enable custom Java and Python code (and dependencies) to be easily included in a deployment
 4. To improve usability and reliability of packaging, in the following ways
-    - Remove the reliance on Maven profiles and properties (at least as the only option)
+    - Remove the reliance on Maven profiles and properties (at least as the only option) for executing builds
     - Automate the selection (or recommendation) of modules to include for a given pipeline (i.e., look at pipeline config, find what's necessary/useful to include)
     - Add validation and checking for common pitfalls such as dependency issues (incompatible with CPU architecture, wrong CUDA version, etc)
     - Make it clear to the user what requirements (in terms of hardware and software), if any, need to be satisfied on the deployment system (requires CUDA 10.1, Java 8+, etc)
@@ -57,13 +57,13 @@ The goals of this packaging proposal are as follows:
 **Proposal Overview**
 
 This proposal has a number of parts:
-1. A build tool (on top of Maven) that utilizes a configuration format to actually perform the required build
+1. A build tool (on top of Maven, via pom.xml generation) that utilizes a configuration format to actually perform the required build
 2. A Konduit Serving build configuration format
-3. UI and command line tools for creating a build configuration for a given Pipeline configuration (and then if necessary triggering a build based on the generated build configuration file)
+3. UI and command line tools for creating a build configuration for user's Pipeline (and then if necessary triggering a build based on the generated build configuration file)
 4. A system for packaging custom Java code and dependencies
 
 Note that for usability, where possible we'll make it so the user doesn't have to be aware of the build configuration file - for example, a simple CLI might be used to configure and execute a build. The CLI would generate the configuration, and pass it to the build tool, without the user being aware of the configuration file.
-However, for advanced users and use cases (such as system administrators, devops, etc) we will allow the configuration file to be written or modified directly.
+However, for advanced users and use cases (such as system administrators, devops, etc) we will allow the configuration file to be written or modified directly, outside of the CLI/UI workflows that most users will use.
 
 
 ### Part 1 - Build Tool
@@ -84,20 +84,18 @@ This generated pom.xml file will include:
     * Logging etc dependencies
 * If necessary, a `<dependencyManagement>` section
 * A simple `<properties>` section, for the source encoding (UTF-8) and Java version
-* A `<build><plugins>` section
+* A `<build><plugins>` section, containing:
     * Always included plugins for tasks such as enforcing dependency convergence
     * One or more plugins for each deployment type. For example, maven-shade-plugin for building uber-jars, and dockerfile-maven-plugin for building docker images
 
-One consequence is that all of the "packaging" modules would be removed, in favor of a single `konduit-serving-build` module.
+One consequence is that all of the "packaging" modules would be removed, in favor of a single `konduit-serving-build` module. i.e., `konduit-serving-docker`, `konduit-serving-rpm`, `konduit-serving-uberjar` etc will no longer exist.
 
-In the future, we will likely allow the build tool to create multiple different artifacts based on one configuration file - i.e., one uberjar for each of a users' target platforms (for example 3 JAR files, one for each of Linux x86, Linux armhf, Windows x86).
+In the future, we will likely allow the build tool to create multiple different artifacts based on one configuration file - i.e., one uberjar for each of a users' target platforms (to output for example 3 separate JAR files, one for each of Linux x86, Linux armhf, Windows x86).
 
-
-An alternative design would be to attempt to use profiles and properties, however this seems much less flexible and harder to understand/maintain especially when things go wrong.
 
 ### Part 2 - Configuration File
 
-The configuration file should provide information necessary to determine for the build (via generated pom.xml file), the set of:
+The configuration file should provide information necessary to determine for the build (via a generated pom.xml file), the set of:
 - direct dependencies
 - plugins
 - properties and profiles
@@ -129,7 +127,7 @@ The command line style will provide the information necessary to produce the con
 konduit-build myPipeline.json --modules tensorflow,nd4j,image --deploy docker --docker.config "name=x,version=y" --incudeJava "com.company:mylibrary:1.0.0"
 ```
 
-The Wizard style of CLI use will guide users through selecting the options for their pipeline. This will be implementation after the "command line" style of use.
+The Wizard style of CLI use will guide users through selecting the options for their pipeline. In terms of implementation priority, this will be implementation after the "command line" style of use.
 Again the specifics of the design need to be worked out, but it is suggested that usage will look something like the following
 
 ```
@@ -153,16 +151,16 @@ la64 = Linux ARM - arm64
 ...
 ```
 
-The "wizard" style would then output (a) the "command line style" command line for what they entered, and optionally (b) the configuration file; it would then execute the build based on the configuration.
+The "wizard" style would then output (a) the "command line style" command for what they entered, and optionally (b) the configuration file; it would then execute the build based on the configuration.
 
 
 ### Part 4 - Build UI
 
 The Build UI would be a simple, single-page UI (nothing fancy or feature rich in the near term) that focused on doing three things:  
-(a) Guiding users through the configuration process for their pipeline  
+1. Guiding users through the configuration process for their pipeline  
     The main goal here is to show the user what the required modules are for serving their pipeline, and the options they have for customing the deployment (target platform, selected model runner, configure each step, etc)  
-(b) Creating the configuration file (though this would be implemented in the back-end based on what the user selects via the UI)  
-(c) Triggering the build based on the generated configuration file  
+2. Creating the configuration file (though this would be implemented in the back-end based on what the user selects via the UI)  
+3. Triggering the build based on the generated configuration file  
 
 Users should be able to load a previously-created build configuration file (partially or completely specified) as a starting point for their pipeline build.  
 
@@ -187,11 +185,11 @@ The UI workflow would for the user would be something like:
 5. Optionally add custom Java code, Python code, and dependencies  
    Again, Java code/dependencies will be as simple as specifying the GAV coordinates of the user's project.  
    Python packaging and dependencies is TBD, but may be something like a directory + a requirements.txt
-6. Optionally, embed files/resources (including the model file if required)
+6. Optionally, embed files/resources in the deployment artifact (including the model file if required)
 7. Select packaging (uberjar, docker, exe, etc)  
    Each selected option should then show configuration relevant to that packaging
-8. Click "verify" to check all options and produce a final report
-   This would check dependencies, estimate final file size, etc
+8. Click "verify" to check all options and produce a final report  
+   This would check dependencies, estimate final file size, verify binary compatibility, etc
 9. If necessary, prompt the user for any things they need to explicitly approve (for example, if necessary, accepting licenses for any 3rd party software to be bundled)
 10. Click "Build" to execute the build, which would pass the configuration to the build tool to create the final artifacts (uber-jar(s), docker images, etc)
 
@@ -201,7 +199,7 @@ At any point the user would be able to save the current configuration as a YAML/
 At each stage, we would only allow the user to select options that are consistent with previous choices (with other options still visible but grayed out).
 
 
-For step 2, regarding the "device profiles" idea - these would allow users to select things like ("Raspberry pi 4B", "Jetson Nano", "Generic Linux x86_64", and possibly even common cloud VMs) to reduce the amount of knowledge/configuration required to create the pipeline.
+For step 3, regarding the "device profiles" idea - these would allow users to select things like ("Raspberry pi 4B", "Jetson Nano", "Generic Linux x86_64", and possibly even common cloud VMs) to reduce the amount of knowledge/configuration required to create the pipeline.
 
 
 ### Part 5 - Pipeline Analysis and Module Selection
@@ -213,7 +211,7 @@ A basic version should not be especially difficult, with the idea that we would 
 A more advanced version that actually checks the configuration would be added at a later date (i.e., SameDiffPipelineStepRunner can run _most_ but not _all_ TensorFlow models - so we'll check this at configuration time).
 
 
-One thing to keep in mind is extensibility - for example, we might have custom pipeline steps available via a "Konduit Serving Hub" - code/dependencies for these custom pipeline steps could be pulled in automatically. However this should not substantially alter the basic approach for doing analysis/module selection.
+One thing to keep in mind is extensibility - for example, one day we might have custom pipeline steps available via a "Konduit Serving Hub" - code/dependencies for these custom pipeline steps could be pulled in automatically. However this should not substantially alter the basic approach for doing analysis/module selection (in principle simply adding an external web lookup step to determine what can run a given step).
 
 
 
@@ -249,9 +247,8 @@ ADRs may or may not need to be produced for the following components:
 
 ### Advantages
 
-* We get a flexible and powerful build system that should enable most/all of our Java-based packaging needs
-    - Including improved configuration options for users
-* Improved build reliability via compatibility checks built into the system (move problems from run time to build/configuration time)
+* We get a flexible and powerful build system that should enable most/all of our Java-based packaging needs, including improved configuration options/control vs. the current profiles/properties approach
+* Improved build reliability via compatibility checks built into the system (move some problems from run time to build/configuration time)
 * Improved usability via guiding users through available and compatible options (via CLI or UI)
 * Easier debugging of builds (we can see the exact generated standalone pom.xml - no need to work backwards when something goes wrong to try and figure out exactly what was included from where)
   
@@ -260,6 +257,7 @@ ADRs may or may not need to be produced for the following components:
 * Some checks will be difficult to implement, and may not be possible to always perform reliably
     - For example: does arbitrary Python library X work on ARM64?
 * Adds yet another configuration file/format for (some) users to know about and learn
+* The proposed "custom Java packaging via a Maven project/install" might not work as well for Gradle and SBT users? (however an analogous workflow for Gradle/SBT could be added added)
 
 ## Discussion
 
