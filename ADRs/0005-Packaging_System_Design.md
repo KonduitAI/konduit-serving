@@ -3,9 +3,9 @@
 ## Status
 PROPOSED
 
-Proposed by: Alex Black (25-05-2020)
+Proposed by: Alex Black (25/05/2020)
 
-Discussed with: 
+Discussed with: Sam, Paul
 
 ## Context
 
@@ -35,6 +35,7 @@ Specifically, this approach has the following problems:
 * Usability issues: For example, users need to know a lot about the different profiles, configuration, etc to get an optimal (or even functional) deployment - or even know what is possible.
     - An example of this: the user might build an uber-JAR without the PMML profile being enabled, only to discover their JAR can't run their pipeline (that has a PMML model)
 * Packaging of custom code, dependencies and other assets (inc. model, vocabulary files etc) is difficult or impossible at present
+* Building Konduit Serving requires cloning the main source code repo (though we hide this and do it automatically in the case of Python CLI-based source builds)
 
 
 ## Proposal
@@ -46,9 +47,10 @@ Note that non-Java packaging/deployments of pipelines is out of scope (i.e., dep
 
 The goals of this packaging proposal are as follows:
 1. To retain and enhance the existing deployment options - uber-jar, docker, WAR, .exe, etc
-2. Enable greater flexibility in the build/deployment configuration
-3. To enable custom Java and Python code (and dependencies) to be easily included in a deployment
-4. To improve usability and reliability of packaging, in the following ways
+2. Remove the reliance on "build from source" for constructing Konduit Serving artifacts
+3. Enable greater flexibility in the build/deployment configuration
+4. To enable custom Java and Python code (and dependencies) to be easily included in a deployment
+5. To improve usability and reliability of packaging, in the following ways
     - Remove the reliance on Maven profiles and properties (at least as the only option) for executing builds
     - Automate the selection (or recommendation) of modules to include for a given pipeline (i.e., look at pipeline config, find what's necessary/useful to include)
     - Add validation and checking for common pitfalls such as dependency issues (incompatible with CPU architecture, wrong CUDA version, etc)
@@ -92,6 +94,7 @@ One consequence is that all of the "packaging" modules would be removed, in favo
 
 In the future, we will likely allow the build tool to create multiple different artifacts based on one configuration file - i.e., one uberjar for each of a users' target platforms (to output for example 3 separate JAR files, one for each of Linux x86, Linux armhf, Windows x86).
 
+From a usability perspective, note that most users usually won't interact with this build tool directly, instead only touching (or being aware) of the UI/CLI layer on top of it. 
 
 ### Part 2 - Configuration File
 
@@ -260,4 +263,55 @@ ADRs may or may not need to be produced for the following components:
 * The proposed "custom Java packaging via a Maven project/install" might not work as well for Gradle and SBT users? (however an analogous workflow for Gradle/SBT could be added added)
 
 ## Discussion
+
+> We should consider basing this tool on Gradle. May be a better match for this than Maven and is easier to extend if necessary.
+
+Alex will look into Gradle as an option before closing this ADR.
+Also Gradle may be beneficial if/when we deploy to Android (though there are many other issues for Android deployments to consider beyond just Maven/Gradle).
+
+Note however that the pom.xml/build.gradle won't be generated then reused for long-lived projects or anything, instead being generated just before the build from our config.
+So usability, user experience and IDE support shouldn't matter for Maven vs. Gradle.
+
+One benefit is that Alex (who will be either building or overseeing this) and the KS team generally has more Maven experience.
+
+Also: it's not necessarily an either-or decision: we could have both Maven and Gradle build tool implementations, or switch at a later date (without users really being aware of the switch).
+
+Gradle has a pom.xml file generator also which might provide another option here.
+
+> Can we make this build tool "live inside" the parent build tool?
+
+The motivation for this is to enable users to access the Konduit Serving build functionality without any external installation.  
+Though `pip install konduit-serving` as a way to get the build tool will probably serve the average Python developer/data scientist OK, it won't be ideal for JVM-based developers. For them, perhaps a Maven plugin or Gradle task would provide good usability:
+```
+mvn ai.konduit.serving:for-pipeline foo-bar.yaml
+gradle doWhateverINeed
+```
+
+The ability to do do Konduit Serving builds with only a JVM and Maven or Gradle installed, nothing else.  
+Again, it's not either or - we can potentially do both.
+
+Alternative one-liners for getting set up with the Konduit Serving build tools include:  
+* `sudo apt-get install konduit-serving`  (for Linux users)  
+* A `konduit-buildw` script (i.e., wrapper script like Maven and Gradle wrappers, `mvnw` and `gradlew`)
+
+
+> Who is actually going to build Konduit Serving from Source?
+
+Few people. Using this build tool would not require or even encourage building from source. Given it's just generating a pom.xml/build.gradle it will work with release versions too without a local copy of the source.
+
+
+> Who is the target audience for the build tool?
+
+Most users usually won't interact with this build tool directly, instead only touching (or being aware) of the UI/CLI layer on top of it. 
+The target of the whole package of functionality (CLI+UI+build tool etc) will be pretty much any KS user who needs more than standard "off-the-shelf" model serving. i.e., anyone who needs custom code/dependencies, or needs to customize the build for specific hardware or to use a specific execution framework, etc.
+
+Down the line I see us expanding this to allow other packaging for other deployment targets (like helping people deploy on android) too.
+
+
+> Do we expect every single user of Konduit Serving to be building a special build for their deployment?
+
+No, but that's kind of tangential to the proposal. There's nothing stopping us from having off-the-shelf builds/artifacts for common scenarios (linux/win/mac TF CPU, for example) with or without this tool, either distributed directly (via docker hub, or whatever) or simply as a "simple"/default build option.
+
+One day we'll provide OSGi-based deployments too, which will allow for automatic/runtime download and installation of modules and dependencies also.
+
 
