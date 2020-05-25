@@ -35,7 +35,7 @@ Specifically, this approach has the following problems:
 * Usability issues: For example, users need to know a lot about the different profiles, configuration, etc to get an optimal (or even functional) deployment - or even know what is possible.
     - An example of this: the user might build an uber-JAR without the PMML profile being enabled, only to discover their JAR can't run their pipeline (that has a PMML model)
 * Packaging of custom code, dependencies and other assets (inc. model, vocabulary files etc) is difficult or impossible at present
-* Building Konduit Serving requires cloning the main source code repo (though we hide this and do it automatically in the case of Python CLI-based source builds)
+* Building Konduit Serving artifacts (Uber-JARs, docker images, etc) requires cloning the main source code repo (though we hide this and do it automatically in the case of Python CLI-based source builds)
 
 
 ## Proposal
