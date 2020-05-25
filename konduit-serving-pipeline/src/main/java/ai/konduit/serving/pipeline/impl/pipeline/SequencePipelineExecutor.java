@@ -37,6 +37,7 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
     private ProfilerConfig profilerConfig;
     private Profiler profiler = new NoOpProfiler();
     private Metrics metrics;
+    private Context ctx;
 
     public SequencePipelineExecutor(@NonNull SequencePipeline p) {
         this.pipeline = p;
@@ -64,8 +65,10 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
 
     @Override
     public Data exec(Data data) {
-        metrics = new PipelineMetrics(pipeline.id());
-        Context ctx = new DefaultContext(metrics, profiler);
+        if (ctx == null) {
+            metrics = new PipelineMetrics(pipeline.id());
+            ctx = new DefaultContext(metrics, profiler);
+        }
 
         Data current = data;
         for (PipelineStepRunner psr : runners) {

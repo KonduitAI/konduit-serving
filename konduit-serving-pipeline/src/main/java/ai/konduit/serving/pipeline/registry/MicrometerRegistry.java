@@ -15,32 +15,12 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
-package ai.konduit.serving.pipeline.api.context;
+package ai.konduit.serving.pipeline.registry;
 
-import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-
-public class PipelineTimer implements Timer {
-    io.micrometer.core.instrument.Timer mmTimer;
-
-    public PipelineTimer(String id) {
-        mmTimer = MicrometerRegistry.getRegistry().timer(id);
-    }
-
-    @Override
-    public void record(Duration duration) {
-        mmTimer.record(duration);
-    }
-
-    @Override
-    public void record(long duration, TimeUnit timeUnit) {
-        mmTimer.record(duration, timeUnit);
-    }
-
-    @Override
-    public long stop() {
-        return io.micrometer.core.instrument.Timer.start().stop(mmTimer);
+public class MicrometerRegistry {
+    public static io.micrometer.core.instrument.MeterRegistry getRegistry() {
+        return io.micrometer.core.instrument.Metrics.globalRegistry.add(new SimpleMeterRegistry());
     }
 }

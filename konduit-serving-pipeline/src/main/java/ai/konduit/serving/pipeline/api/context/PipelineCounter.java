@@ -17,14 +17,14 @@
  */
 package ai.konduit.serving.pipeline.api.context;
 
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
 
 public class PipelineCounter implements Counter {
 
     private io.micrometer.core.instrument.Counter mmCounter;
 
     public PipelineCounter(String id) {
-        mmCounter = io.micrometer.core.instrument.Counter.builder(id).register(new SimpleMeterRegistry());
+        mmCounter = io.micrometer.core.instrument.Counter.builder(id).register(MicrometerRegistry.getRegistry());
     }
 
     @Override

@@ -17,6 +17,7 @@
  */
 package ai.konduit.serving.pipeline.api.context;
 
+import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
@@ -31,7 +32,7 @@ public class PipelineGauge implements Gauge {
             public double applyAsDouble(Double value) {
                 return value;
             }
-        }).register(new SimpleMeterRegistry());
+        }).register(MicrometerRegistry.getRegistry());
     }
 
     public PipelineGauge(String id, List<?> list) {

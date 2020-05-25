@@ -45,7 +45,7 @@ public class MetricsTest {
 
     @Test
     public void testCounter() {
-        Counter counter = m.counter("test");
+        Counter counter = m.counter("counter.test");
         counter.increment();
         counter.increment(10.0);
     }
@@ -58,7 +58,7 @@ public class MetricsTest {
 
     @Test
     public void testTimer() {
-        Timer timer = m.timer("test");
+        Timer timer = m.timer("timer.test");
         timer.record(30, TimeUnit.MILLISECONDS);
         long ret = timer.stop();
         assertTrue(ret > 0);
