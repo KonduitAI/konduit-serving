@@ -18,8 +18,12 @@
 
 package ai.konduit.serving.build.config;
 
+import ai.konduit.serving.build.steps.RunnerInfo;
+import ai.konduit.serving.build.steps.StepId;
+import ai.konduit.serving.build.util.ModuleUtils;
+import ai.konduit.serving.build.validation.ValidationFailure;
+import ai.konduit.serving.build.validation.ValidationResult;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,10 +34,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Getter
 @Setter
@@ -50,13 +51,13 @@ public class Config {
 
     //Konduit serving modules to include - "konduit-serving-tensorflow" etc
     private List<Serving> serving = Collections.singletonList(Serving.HTTP);
-    private List<KSModule> modules;
+    private List<Module> modules;
 
     private List<Deployment> deployments;
 
     public Config(@JsonProperty("pipelinePath") String pipelinePath, @JsonProperty("ksVersion") String ksVersion,
                   @JsonProperty("metadata") Metadata metadata, @JsonProperty("target") Target target,
-                  @JsonProperty("serving") List<Serving> serving, @JsonProperty("modules") List<KSModule> modules,
+                  @JsonProperty("serving") List<Serving> serving, @JsonProperty("modules") List<Module> modules,
                   @JsonProperty("deployments") List<Deployment> deployments){
         this.pipelinePath = pipelinePath;
         this.ksVersion = ksVersion;
@@ -67,12 +68,12 @@ public class Config {
         this.deployments = deployments;
     }
 
-    public Config modules(List<KSModule> modules){
+    public Config modules(List<Module> modules){
         this.modules = modules;
         return this;
     }
 
-    public Config modules(KSModule... modules){
+    public Config modules(Module... modules){
         this.modules = Arrays.asList(modules);
         return this;
     }
@@ -95,6 +96,20 @@ public class Config {
     public Config deployments(Deployment... deployments){
         this.deployments = Arrays.asList(deployments);
         return this;
+    }
+
+
+    public ValidationResult validate(){
+
+        //First: check that we have a module for every step in the pipeline
+        Map<StepId, List<RunnerInfo>> canRunWith = ModuleUtils.runnersForFile(new File(pipelinePath));
+
+        List<ValidationFailure> failures = new ArrayList<>();
+
+
+        //Check Target compatibility (OS/arch etc)
+
+        return new ValidationResult(failures);
     }
 
 

@@ -38,12 +38,15 @@ public class TestConfig {
                         .timestamp("2020/05/26 12:00:00"))
                 .target(new Target(Target.OS.LINUX, Target.Type.CPU, Target.Arch.x86))
                 .serving(Serving.HTTP, Serving.GRPC)
-                .modules(KSModule.PIPELINE,
-                        KSModule.TENSORFLOW)
-                .deployments(new UberJarDeployment().outputDir(""));
+                .modules(Module.PIPELINE,
+                        Module.TENSORFLOW)
+                .deployments(new UberJarDeployment().outputDir("/my/output/dir").jarName("my.jar"));
 
         String json = c.toJson();
         String yaml = c.toYaml();
+
+        System.out.println(json);
+        System.out.println(yaml);
 
         Config cJ = Config.fromJson(json);
         Config cY = Config.fromYaml(yaml);

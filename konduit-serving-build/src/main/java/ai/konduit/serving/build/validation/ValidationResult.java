@@ -16,26 +16,27 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.build.config;
+package ai.konduit.serving.build.validation;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
+@AllArgsConstructor
 @Data
 @Accessors(fluent = true)
-public class KSModule {
+public class ValidationResult {
 
-    public static final KSModule PIPELINE = new KSModule("konduit-serving-pipeline");
-    public static final KSModule DL4J = new KSModule("konduit-serving-deeplearning4j");
-    public static final KSModule SAMEDIFF = new KSModule("konduit-serving-samediff");
-    public static final KSModule TENSORFLOW = new KSModule("konduit-serving-tensorflow");
+    private final List<ValidationFailure> failures;
 
-
-    private final String name;
-
-    public KSModule(@JsonProperty("name") String name){
-        this.name = name;
+    public boolean ok(){
+        return failures.isEmpty();
     }
+
+    public boolean failed(){
+        return !ok();
+    }
+
 }
