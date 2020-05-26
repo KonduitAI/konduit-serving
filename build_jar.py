@@ -62,7 +62,7 @@ if __name__ == "__main__":
         "--cuda-version", "-cv",
         type=str,
         default="10.2",
-        choices=["10.0", "10.1", "10.2"],
+        choices=["10.0", "10.1", "10.1-redist", "10.2", "10.2-redist"],
         help="Specifies the CUDA version to compile when `--chip == gpu`",
     )
 
