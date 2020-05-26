@@ -46,7 +46,6 @@
         <module>konduit-serving-vertx</module>
         <module>konduit-serving-vertx-protocols</module>
         <module>konduit-serving-metrics</module>
-        <module>konduit-serving-metrics/konduit-serving-prometheus</module>
     </modules>
 
     <name>konduit-serving</name>

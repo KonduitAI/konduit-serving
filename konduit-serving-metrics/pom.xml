@@ -11,5 +11,7 @@
 
     <artifactId>konduit-serving-metrics</artifactId>
     <packaging>pom</packaging>
-
+    <modules>
+        <module>konduit-serving-prometheus</module>
+    </modules>
 </project>

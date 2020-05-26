@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.vertx.protocols.http.verticle;
 
+import ai.konduit.serving.pipeline.impl.metrics.DefaultMetricsProvider;
+import ai.konduit.serving.pipeline.impl.metrics.MetricsProvider;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import ai.konduit.serving.vertx.protocols.http.api.ErrorResponse;
 import ai.konduit.serving.vertx.protocols.http.api.HttpApiErrorCode;
@@ -26,6 +28,7 @@ import ai.konduit.serving.vertx.protocols.http.api.KonduitServingHttpException;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.impl.ContextInternal;
@@ -34,6 +37,8 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.ServiceLoader;
 
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM;
@@ -94,6 +99,17 @@ public class InferenceVerticleHttp extends InferenceVerticle {
         InferenceHttpApi inferenceHttpApi = new InferenceHttpApi(pipelineExecutor);
 
         Router inferenceRouter = Router.router(vertx);
+        MetricsProvider metricsProvider = new DefaultMetricsProvider();
+        inferenceRouter.get("/metrics").handler((Handler<RoutingContext>) metricsProvider.getEndpoint())
+                .failureHandler(failureHandler -> {
+                    if (failureHandler.failure() != null) {
+                        log.error("Failed to scrape metrics", failureHandler.failure());
+                    }
+
+                    failureHandler.response()
+                            .setStatusCode(500)
+                            .end(failureHandler.failure().toString());
+                });
 
         inferenceRouter.post().handler(BodyHandler.create()
                 .setUploadsDirectory(DirectoryFetcher.getFileUploadsDir().getAbsolutePath())

@@ -21,6 +21,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.nd4j.common.io.CollectionUtils;
 
 @Slf4j
 public class MicrometerRegistry {
@@ -31,7 +32,7 @@ public class MicrometerRegistry {
     }
 
     public static io.micrometer.core.instrument.MeterRegistry getRegistry() {
-        if (registries.isEmpty()) {
+        if (CollectionUtils.isEmpty(registries)) {
             return io.micrometer.core.instrument.Metrics.globalRegistry;
         }
         if (registries.size() > 1) {

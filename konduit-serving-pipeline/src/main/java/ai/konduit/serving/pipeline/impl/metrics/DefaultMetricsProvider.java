@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.metrics;
 
+import ai.konduit.serving.metrics.prometheus.PrometheusMetricsHandler;
 import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -26,6 +27,6 @@ public class DefaultMetricsProvider implements MetricsProvider {
 
     @Override
     public Object getEndpoint() {
-        return null;
+        return new PrometheusMetricsHandler();
     }
 }
