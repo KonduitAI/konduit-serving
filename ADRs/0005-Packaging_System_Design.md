@@ -1,7 +1,7 @@
 # Konduit Serving Packaging System
 
 ## Status
-PROPOSED
+ACCEPTED 26/05/2020
 
 Proposed by: Alex Black (25/05/2020)
 
@@ -41,7 +41,7 @@ Specifically, this approach has the following problems:
 ## Proposal
 
 The scope of this proposal is limited to the creation/packaging of a Konduit Serving uberjar, which may be deployed in many forms (Docker, RPM, WAR, etc).  
-Note that non-Java packaging/deployments of pipelines is out of scope (i.e., deploy a pure C++ binary); OSGi support is relevant but only in scope to the extent that an OSGi-based system could work with (or build on top of) the functionality described in this proposal.
+Note that non-Java packaging/deployments of pipelines is out of scope (i.e., deploy a pure C++ binary); OSGi support is relevant but only in scope to the extent that an OSGi-based system could work with (or is build on top of) the functionality described in this proposal.
 
 **Proposal Goals**
 
@@ -59,14 +59,13 @@ The goals of this packaging proposal are as follows:
 **Proposal Overview**
 
 This proposal has a number of parts:
-1. A build tool (on top of Maven, via pom.xml generation) that utilizes a configuration format to actually perform the required build
+1. A build tool (on top of Gradle, via build.gradle.kts generation) that utilizes a configuration format to actually perform the required build
 2. A Konduit Serving build configuration format
 3. UI and command line tools for creating a build configuration for user's Pipeline (and then if necessary triggering a build based on the generated build configuration file)
 4. A system for packaging custom Java code and dependencies
 
 Note that for usability, where possible we'll make it so the user doesn't have to be aware of the build configuration file - for example, a simple CLI might be used to configure and execute a build. The CLI would generate the configuration, and pass it to the build tool, without the user being aware of the configuration file.
 However, for advanced users and use cases (such as system administrators, devops, etc) we will allow the configuration file to be written or modified directly, outside of the CLI/UI workflows that most users will use.
-
 
 ### Part 1 - Build Tool
 
@@ -76,19 +75,19 @@ Note that the term "build tool" may not be an ideal name, as the proposed tool i
 Note also that in principle (though this is not proposed for right now) we can have multiple build tools for creating the final artifacts from these  - i.e., the configuration (definition) and the build tool (build execution) are separate.
 Until (if) we look at pure C++ deployments, the main possible use for a second build tool would be for OSGi-based deployments. However, this would still be Maven based.
 
-The proposed build tool will generate (and then execute via Maven) a pom.xml file based on the configuration file.
+The proposed build tool will generate (and then execute via Gradle) a build.gradle.kts file based on the configuration file.
 Similar to the current "modules and profiles" approach, we will continue to use Maven plugins for the actual packaging - i.e., creation of uberjars, etc.
 
-This generated pom.xml file will include:
-* A `<dependencies>` section, listing the direct dependencies:
+This generated build.gradle.kts file will include:
+* A repositories section - `repositories { mavenCentral() }`
+* A plugin section -  `plugins { java }`
+* A `dependencies { ... }` section, listing the direct dependencies:
     * The required konduit serving modules - konduit-serving-tensorflow, konduit-serving-nd4j, etc
     * Any "native library" / "backend" dependencies (ND4J native/CUDA backends, for example)
     * Logging etc dependencies
-* If necessary, a `<dependencyManagement>` section
-* A simple `<properties>` section, for the source encoding (UTF-8) and Java version
-* A `<build><plugins>` section, containing:
-    * Always included plugins for tasks such as enforcing dependency convergence
-    * One or more plugins for each deployment type. For example, maven-shade-plugin for building uber-jars, and dockerfile-maven-plugin for building docker images
+* Properties: `sourceCompatibility = 1.8`, `targetCompatibility = 1.8`
+* 
+* Any other sections as necessary for creating the other types of artifacts (docker images, WAR files, etc) and utility tasks (enforcing dependency convergence, etc)
 
 One consequence is that all of the "packaging" modules would be removed, in favor of a single `konduit-serving-build` module. i.e., `konduit-serving-docker`, `konduit-serving-rpm`, `konduit-serving-uberjar` etc will no longer exist.
 
@@ -96,9 +95,23 @@ In the future, we will likely allow the build tool to create multiple different 
 
 From a usability perspective, note that most users usually won't interact with this build tool directly, instead only touching (or being aware) of the UI/CLI layer on top of it. 
 
+**Gradle vs. Maven**
+
+In the near term, either tool (Gradle or Maven) should be adequate for implementing this proposal build tool.  
+Maven has the advantage of being something the team currently has more experience with.  
+
+However, Gradle seems to have the edge in two respects:
+(a) build speed/performance - https://gradle.org/maven-vs-gradle/
+(b) extensibility/flexibility (including coding directly in the build.gradle file)
+
+The plan is to proceed with Gradle, and if it results in any major blockes we either switch to (or add in parallel) an implementation based on Maven.
+
+As for Gradle - we will use Kotlin instead of Groovy for the generated build files; in practice it won't make much difference (the build configuration is _generated_ not _written by hand_) but Kotlin does provide benefits over Groovy such as better IDE support (due to static typing) hence we get the benefit of auto-completion, easy navigation to source, easier refactoring, etc if we need to work with the generated build.gradle.kts files directly.
+
+
 ### Part 2 - Configuration File
 
-The configuration file should provide information necessary to determine for the build (via a generated pom.xml file), the set of:
+The configuration file should provide information necessary to determine for the build (via a generated build.gradle.kts file), the set of:
 - direct dependencies
 - plugins
 - properties and profiles
@@ -253,7 +266,7 @@ ADRs may or may not need to be produced for the following components:
 * We get a flexible and powerful build system that should enable most/all of our Java-based packaging needs, including improved configuration options/control vs. the current profiles/properties approach
 * Improved build reliability via compatibility checks built into the system (move some problems from run time to build/configuration time)
 * Improved usability via guiding users through available and compatible options (via CLI or UI)
-* Easier debugging of builds (we can see the exact generated standalone pom.xml - no need to work backwards when something goes wrong to try and figure out exactly what was included from where)
+* Easier debugging of builds (we can see the exact generated standalone pom.build.gradle.kts - no need to work backwards when something goes wrong to try and figure out exactly what was included from where)
   
 ### Disadvantages
 
@@ -266,7 +279,8 @@ ADRs may or may not need to be produced for the following components:
 
 > We should consider basing this tool on Gradle. May be a better match for this than Maven and is easier to extend if necessary.
 
-Alex will look into Gradle as an option before closing this ADR.
+Decision - use Gradle not Maven. (originally the ADR proposed to use Maven)
+
 Also Gradle may be beneficial if/when we deploy to Android (though there are many other issues for Android deployments to consider beyond just Maven/Gradle).
 
 Note however that the pom.xml/build.gradle won't be generated then reused for long-lived projects or anything, instead being generated just before the build from our config.
