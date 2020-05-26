@@ -18,12 +18,43 @@
 package ai.konduit.serving.pipeline.registry;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.util.*;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MicrometerRegistry {
+    private static List<io.micrometer.core.instrument.MeterRegistry> registries;
+
     static {
         io.micrometer.core.instrument.Metrics.globalRegistry.add(new SimpleMeterRegistry());
     }
+
     public static io.micrometer.core.instrument.MeterRegistry getRegistry() {
-        return io.micrometer.core.instrument.Metrics.globalRegistry;
+        if (registries.isEmpty()) {
+            return io.micrometer.core.instrument.Metrics.globalRegistry;
+        }
+        if (registries.size() > 1) {
+            log.info("Loaded {} MeterRegistry instances. Loading the first one.", registries.size());
+        }
+        return registries.get(0);
+    }
+
+    public static void initRegistries() {
+
+        ServiceLoader<io.micrometer.core.instrument.MeterRegistry> sl =
+                ServiceLoader.load(io.micrometer.core.instrument.MeterRegistry.class);
+
+        Iterator<io.micrometer.core.instrument.MeterRegistry> iterator = sl.iterator();
+        while(iterator.hasNext()){
+            registries.add(iterator.next());
+        }
+    }
+
+    public static void registerRegistries(@NonNull io.micrometer.core.instrument.MeterRegistry registry) {
+        if (registries == null) {
+            initRegistries();
+        }
+        registries.add(registry);
     }
 }
