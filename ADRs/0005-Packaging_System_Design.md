@@ -86,8 +86,7 @@ This generated build.gradle.kts file will include:
     * Any "native library" / "backend" dependencies (ND4J native/CUDA backends, for example)
     * Logging etc dependencies
 * Properties: `sourceCompatibility = 1.8`, `targetCompatibility = 1.8`
-* 
-* Any other sections as necessary for creating the other types of artifacts (docker images, WAR files, etc) and utility tasks (enforcing dependency convergence, etc)
+* Any other sections as necessary for creating the build artifacts (docker images, WAR files, etc) and utility tasks (enforcing dependency convergence, etc)
 
 One consequence is that all of the "packaging" modules would be removed, in favor of a single `konduit-serving-build` module. i.e., `konduit-serving-docker`, `konduit-serving-rpm`, `konduit-serving-uberjar` etc will no longer exist.
 
@@ -100,9 +99,9 @@ From a usability perspective, note that most users usually won't interact with t
 In the near term, either tool (Gradle or Maven) should be adequate for implementing this proposal build tool.  
 Maven has the advantage of being something the team currently has more experience with.  
 
-However, Gradle seems to have the edge in two respects:
-(a) build speed/performance - https://gradle.org/maven-vs-gradle/
-(b) extensibility/flexibility (including coding directly in the build.gradle file)
+However, Gradle seems to have the edge in two respects:  
+(a) build speed/performance - https://gradle.org/maven-vs-gradle/  
+(b) extensibility/flexibility (including coding directly in the build.gradle file)  
 
 The plan is to proceed with Gradle, and if it results in any major blockes we either switch to (or add in parallel) an implementation based on Maven.
 
