@@ -47,10 +47,22 @@
     <properties>
         <base.classifier.name>${spin.version}-${javacpp.platform}-${chip}</base.classifier.name>
         <classifier.name>${base.classifier.name}</classifier.name>
+        <cuda.tag>${cuda.version}</cuda.tag>
     </properties>
 
-
     <profiles>
+        <profile>
+            <id>cuda-10.1-redist</id>
+            <properties>
+                <cuda.tag>${cuda.version}-redist</cuda.tag>
+            </properties>
+        </profile>
+        <profile>
+            <id>cuda-10.2-redist</id>
+            <properties>
+                <cuda.tag>${cuda.version}-redist</cuda.tag>
+            </properties>
+        </profile>
         <profile>
             <id>gpu</id>
             <activation>
@@ -60,7 +72,7 @@
                 </property>
             </activation>
             <properties>
-                <classifier.name>${base.classifier.name}-cuda-${cuda.version}</classifier.name>
+                <classifier.name>${base.classifier.name}-cuda-${cuda.tag}</classifier.name>
             </properties>
         </profile>
         <profile>

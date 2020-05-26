@@ -22,6 +22,26 @@
 
     <profiles>
         <profile>
+            <id>cuda-10.1-redist</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>cuda-platform-redist</artifactId>
+                    <version>10.1-7.6-1.5.2</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>cuda-10.2-redist</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>cuda-platform-redist</artifactId>
+                    <version>10.2-7.6-1.5.3</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
             <id>arm</id>
             <activation>
                 <property>

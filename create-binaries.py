@@ -14,21 +14,21 @@
 #   * SPDX-License-Identifier: Apache-2.0
 #   ******************************************************************************/
 
+import io
 import os
 import re
 import sys
 import requests
 import argparse
 import itertools
-from time import time
+from time import time, sleep
 from datetime import datetime
 from hurry.filesize import size
 from requests.auth import HTTPBasicAuth
 from subprocess import check_output, Popen, PIPE, STDOUT
 
-
 valid_platforms = {"windows-x86_64", "linux-x86_64", "macosx-x86_64", "linux-armhf"}
-valid_chips = {"cpu", "arm", "cuda-10.0", "cuda-10.1", "cuda-10.2"}
+valid_chips = {"cpu", "arm", "cuda-10.0", "cuda-10.1", "cuda-10.1-redist", "cuda-10.2", "cuda-10.2-redist"}
 valid_spins = {"minimal", "python", "pmml", "all"}
 
 target_directory = "builds"
@@ -40,6 +40,59 @@ if not os.path.isdir(target_directory):
 
 if not os.path.isdir(logs_directory):
     os.mkdir(logs_directory)
+
+
+class CancelledError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+        Exception.__init__(self, msg)
+
+    def __str__(self):
+        return self.msg
+
+    __repr__ = __str__
+
+
+class BufferReader(io.BytesIO):
+    def __init__(self, buf=b'',
+                 callback=None,
+                 cb_args=(),
+                 cb_kwargs=None):
+        self._callback = callback
+        self._cb_args = cb_args
+        self._cb_kwargs = {} if cb_kwargs is None else cb_kwargs
+        self._progress = 0
+        self._len = len(buf)
+        io.BytesIO.__init__(self, buf)
+
+    def __len__(self):
+        return self._len
+
+    def read(self, n=-1):
+        chunk = io.BytesIO.read(self, n)
+        self._progress += int(len(chunk))
+        self._cb_kwargs.update({
+            'total_size': self._len,
+            'total_read': self._progress
+        })
+        if self._callback:
+            try:
+                self._callback(*self._cb_args, **self._cb_kwargs)
+            except Exception:  # catches exception from the callback
+                raise CancelledError('The upload was cancelled.')
+        return chunk
+
+
+def progress(total_size=None, total_read=None):
+    if total_read >= total_size:
+        sys.stdout.write('\r')
+        sys.stdout.flush()
+    else:
+        bars = 50
+        completed = int(total_read / total_size * bars)
+        sys.stdout.write('\rUploading: [{}{}]'.format('█' * completed, '.' * (bars - completed)) +
+                         "{:<20}".format(" ({}/{})".format(size(total_read), size(total_size))))
+        sys.stdout.flush()
 
 
 def get_chip(chip):
@@ -56,25 +109,6 @@ def get_cuda_version(chip):
         return "10.2"
     else:
         return split[1]
-
-
-def read_in_chunks(file_path, chunk_size=65536 * 10):
-    length = os.path.getsize(file_path)
-    total_read = 0
-    bars = 50
-    with open(file_path, 'rb') as file_object:
-        while True:
-            read_data = file_object.read(chunk_size)
-            if not read_data:
-                break
-            else:
-                total_read += len(read_data)
-            yield read_data
-
-            completed = int(total_read / length * bars)
-            sys.stdout.write('\rUploading: [{}{}]'.format('█' * completed, '.' * (bars - completed)) +
-                             "{:<20}".format(" ({}/{})".format(size(total_read), size(length))))
-            sys.stdout.flush()
 
 
 if __name__ == "__main__":
@@ -214,18 +248,18 @@ if __name__ == "__main__":
                                       enumerate(skipped_artifact_names)]
 
     if len(skipped_artifact_names_indexed) > 0:
-        print("\nSkipped following {} artifacts due to CUDA not available for 'macosx-x86_64'\n---\n{}"
+        print("\nSkipped following {} artifact(s) due to CUDA not available for 'macosx-x86_64'\n---\n{}"
               .format(len(skipped_artifact_names_indexed),
                       "\n".join(skipped_artifact_names_indexed)))
 
     if len(artifact_names_indexed) > 0:
-        print("---\nThe following {} artifacts will be created at location: {}\n---\n{}"
+        print("---\nThe following {} artifact(s) will be created at location: {}\n---\n{}"
               .format(len(artifact_names),
                       os.path.abspath(target_directory),
                       "\n".join(artifact_names_indexed)))
     else:
-        print("---\nNo artifacts can be generated with the given inputs. See the skipped artifacts to verify if the "
-              "expected artifacts are skipped.\n")
+        print("---\nNo artifacts can be generated with the given inputs. See the skipped artifacts abive to verify if "
+              "the expected artifacts are skipped.\n")
         exit()
 
     for index, artifact in enumerate(artifact_permutations):
@@ -287,7 +321,8 @@ if __name__ == "__main__":
 
                 print("Binary created at: {}\nElapsed time: {}".format(os.path.abspath(output_path),
                                                                        "{:02d}:{:02d} mins".format(int(elapsed_time[0]),
-                                                                                                   int(elapsed_time[1]))))
+                                                                                                   int(elapsed_time[
+                                                                                                           1]))))
                 print("STATS: {} | {}".format(size(os.path.getsize(output_path)),
                                               datetime.fromtimestamp(os.path.getmtime(output_path))
                                               .strftime("%Y-%m-%d %I:%M %p")))
@@ -297,31 +332,84 @@ if __name__ == "__main__":
             if upload:
                 release_id = "25710929"
                 base_release_url = "https://api.github.com/repos/KonduitAI/konduit-serving/releases"
-                release_response = requests.get("{}/{}".format(base_release_url, release_id))
-
-                assets = release_response.json()["assets"]
-                old_asset = [asset for asset in assets if asset["name"] == artifact_name]
-                if len(old_asset) > 0:
-                    old_asset_id = old_asset[0]["id"]
+                release_response = requests.get("{}/{}/assets".format(base_release_url, release_id))
+                if not release_response.status_code == 200:
+                    print("Fetching release data failed:\nPath: {}\nStatus Code: {}\nDetails: {}"
+                          .format(release_response.url,
+                                  release_response.status_code,
+                                  release_response.text))
                 else:
-                    old_asset_id = -1
+                    assets = release_response.json()
+                    old_asset = [asset for asset in assets if asset["name"] == artifact_name]
+                    if len(old_asset) > 0:
+                        old_asset_id = old_asset[0]["id"]
+                    else:
+                        old_asset_id = -1
 
-                if old_asset_id != -1:
-                    requests.delete("{}/assets/{}".format(base_release_url, old_asset_id), auth=auth)
+                    do_upload = old_asset_id == -1
 
-                requests.post("{}/releases/{}/assets?name={}"
-                              .format(base_release_url,
-                                      release_id,
-                                      output_path),
-                              data=read_in_chunks(output_path),
-                              headers={'Content-Type': 'application/octet-stream'},
-                              auth=auth)
+                    if old_asset_id != -1:
+                        '''
+                        Old assets takes time to refesh before they are deleted. So if there's a 404 we'll recheck the
+                        asset id
+                        '''
+                        while True:
+                            delete_response = requests.delete("{}/assets/{}".format(base_release_url, old_asset_id),
+                                                              auth=auth)
+                            if not delete_response.status_code == 204:
+                                if not delete_response.status_code == 404:
+                                    print("Deleting old artifacts failed:\nPath: {}\nStatus Code: {}\nDetails: {}"
+                                          .format(delete_response.url,
+                                                  delete_response.status_code,
+                                                  delete_response.text))
+                                    do_upload = False
+                                    break
+                                else:
+                                    release_response = requests.get("{}/{}/assets".format(base_release_url, release_id))
+                                    if not release_response.status_code == 200:
+                                        print("Fetching release data failed:\nPath: {}\nStatus Code: {}\nDetails: {}"
+                                              .format(release_response.url,
+                                                      release_response.status_code,
+                                                      release_response.text))
+                                        break
+                                    else:
+                                        assets = release_response.json()
+                                        old_asset = [asset for asset in assets if asset["name"] == artifact_name]
+                                        if len(old_asset) > 0:
+                                            old_asset_id = old_asset[0]["id"]
+                                        else:
+                                            old_asset_id = -1
+                                            do_upload = True
+                                            break
+                            else:
+                                do_upload = True
+                                break
+                            sleep(1)
 
-                sys.stdout.write('\r')
-                sys.stdout.flush()
+                    if do_upload:
+                        with open(output_path, 'rb') as upload_file:
+                            body = BufferReader(upload_file.read(), progress)
 
-                print("Uploaded {filename} at URL: " +
-                      "https://github.com/KonduitAI/konduit-serving/releases/download/cli_base/{filename}"
-                      .format(filename=artifact_name))
+                            upload_response = requests.post("{}/{}/assets?name={}"
+                                                            .format(base_release_url,
+                                                                    release_id,
+                                                                    artifact_name).replace("api.", "uploads."),
+                                                            data=body,
+                                                            headers={
+                                                                'Content-Type': 'application/octet-stream',
+                                                                'Content-Length': str(os.path.getsize(output_path))
+                                                            },
+                                                            auth=auth)
+
+                            if upload_response.status_code == 201:
+                                print("Uploaded {filename} at URL: " +
+                                      "https://github.com/KonduitAI/konduit-serving/releases"
+                                      "/download/cli_base/{filename}"
+                                      .format(filename=artifact_name))
+                            else:
+                                print("Upload failed:\nPath: {}\nStatus Code: {}\nDetails: {}"
+                                      .format(upload_response.url,
+                                              upload_response.status_code,
+                                              upload_response.text))
 
     print("Done!")

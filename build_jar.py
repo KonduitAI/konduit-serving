@@ -118,6 +118,11 @@ if __name__ == "__main__":
             command.append("-Dcuda.javacpp.version=10.0-7.4-1.5")
         elif args.cuda_version == "10.1":
             command.append("-Dcuda.javacpp.version=10.1-7.6-1.5.2")
+        elif args.cuda_version == "10.1-redist":
+            command.append("-Pcuda-10.1-redist")
+            command.append("-Dcuda.javacpp.version=10.1-7.6-1.5.2")
+        elif args.cuda_version == "10.2-redist":
+            command.append("-Pcuda-10.2-redist")
 
     if args.options:
         for option in args.options:
