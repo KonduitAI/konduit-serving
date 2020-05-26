@@ -38,8 +38,7 @@ public class TestConfig {
                         .timestamp("2020/05/26 12:00:00"))
                 .target(new Target(Target.OS.LINUX, Target.Type.CPU, Target.Arch.x86))
                 .serving(Serving.HTTP, Serving.GRPC)
-                .modules(Module.PIPELINE,
-                        Module.TENSORFLOW)
+                .modules(Module.PIPELINE)
                 .deployments(new UberJarDeployment().outputDir("/my/output/dir").jarName("my.jar"));
 
         String json = c.toJson();
