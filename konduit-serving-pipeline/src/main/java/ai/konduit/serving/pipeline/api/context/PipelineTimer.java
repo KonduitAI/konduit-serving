@@ -18,12 +18,15 @@
 package ai.konduit.serving.pipeline.api.context;
 
 import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 public class PipelineTimer implements Timer {
-    io.micrometer.core.instrument.Timer mmTimer;
+    @Getter
+    private io.micrometer.core.instrument.Timer mmTimer;
 
     public PipelineTimer(String id) {
         mmTimer = MicrometerRegistry.getRegistry().timer(id);
@@ -40,7 +43,17 @@ public class PipelineTimer implements Timer {
     }
 
     @Override
-    public long stop() {
-        return io.micrometer.core.instrument.Timer.start().stop(mmTimer);
+    public Timer.Sample start() {
+        io.micrometer.core.instrument.Timer.Sample sample = io.micrometer.core.instrument.Timer.start();
+        return new Sample(sample);
+    }
+
+    @AllArgsConstructor
+    public static class Sample implements Timer.Sample {
+        private io.micrometer.core.instrument.Timer.Sample mmSample;
+
+        public long stop(Timer timer) {
+            return mmSample.stop(((PipelineTimer)timer).getMmTimer());
+        }
     }
 }

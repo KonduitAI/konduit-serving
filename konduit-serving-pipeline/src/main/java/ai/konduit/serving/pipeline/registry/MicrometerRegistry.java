@@ -20,7 +20,10 @@ package ai.konduit.serving.pipeline.registry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 public class MicrometerRegistry {
+    static {
+        io.micrometer.core.instrument.Metrics.globalRegistry.add(new SimpleMeterRegistry());
+    }
     public static io.micrometer.core.instrument.MeterRegistry getRegistry() {
-        return io.micrometer.core.instrument.Metrics.globalRegistry.add(new SimpleMeterRegistry());
+        return io.micrometer.core.instrument.Metrics.globalRegistry;
     }
 }

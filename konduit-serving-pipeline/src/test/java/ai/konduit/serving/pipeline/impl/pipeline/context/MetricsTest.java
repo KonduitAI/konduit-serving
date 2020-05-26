@@ -60,7 +60,8 @@ public class MetricsTest {
     public void testTimer() {
         Timer timer = m.timer("timer.test");
         timer.record(30, TimeUnit.MILLISECONDS);
-        long ret = timer.stop();
+        Timer.Sample sample = timer.start();
+        long ret = sample.stop(timer);
         assertTrue(ret > 0);
     }
 
@@ -81,7 +82,7 @@ public class MetricsTest {
 
         Timer timer = m.timer("test.timer");
         timer.record(30, TimeUnit.MILLISECONDS);
-        long ret = timer.stop();
+        long ret = timer.start().stop(timer);
         assertTrue(ret > 0);
     }
 }

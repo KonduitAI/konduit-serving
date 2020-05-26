@@ -36,7 +36,7 @@ public class PipelineGauge implements Gauge {
     }
 
     public PipelineGauge(String id, List<?> list) {
-        mmGauge = io.micrometer.core.instrument.Gauge.builder(id, list, List::size).register(new SimpleMeterRegistry());
+        mmGauge = io.micrometer.core.instrument.Gauge.builder(id, list, List::size).register(MicrometerRegistry.getRegistry());
     }
 
     public double value() {
