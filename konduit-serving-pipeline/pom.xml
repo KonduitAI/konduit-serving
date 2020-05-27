@@ -81,19 +81,6 @@
             <artifactId>micrometer-core</artifactId>
             <version>1.2.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-web</artifactId>
-            <version>${vertx-stack.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-prometheus</artifactId>
-            <version>${project.version}</version>
-            <type>pom</type>
-        </dependency>
     </dependencies>
 
     <build>

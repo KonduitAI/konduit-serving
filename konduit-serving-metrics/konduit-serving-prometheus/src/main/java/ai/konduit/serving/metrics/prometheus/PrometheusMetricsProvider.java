@@ -13,13 +13,13 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ******************************************************************************/
-package ai.konduit.serving.pipeline.impl.metrics;
+package ai.konduit.serving.metrics.prometheus;
 
-import ai.konduit.serving.metrics.prometheus.PrometheusMetricsHandler;
 import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.vertx.core.spi.metrics.MetricsProvider;
 
-public class DefaultMetricsProvider implements MetricsProvider {
+public class PrometheusMetricsProvider implements MetricsProvider {
     @Override
     public MeterRegistry getRegistry() {
         return MicrometerRegistry.getRegistry();
@@ -27,6 +27,6 @@ public class DefaultMetricsProvider implements MetricsProvider {
 
     @Override
     public Object getEndpoint() {
-        return new PrometheusMetricsHandler();
+        return io.vertx.micrometer.PrometheusScrapingHandler.create();
     }
 }
