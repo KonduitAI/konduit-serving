@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.build.generator;
+package ai.konduit.serving.build.build;
 
 import ai.konduit.serving.build.config.Config;
 import ai.konduit.serving.build.config.Deployment;
@@ -26,9 +26,9 @@ import org.nd4j.common.base.Preconditions;
 import java.io.File;
 import java.util.List;
 
-public class GradleGenerator {
+public class GradleBuild {
 
-    public static void generateGradle(File outputDir, Config config){
+    public static void generateGradleBuildFiles(File outputDir, Config config){
 
         //Add gradlew
 
@@ -46,7 +46,12 @@ public class GradleGenerator {
         throw new UnsupportedOperationException("Gradle generation: Not yet implemented");
     }
 
-    public void runGradleBuild(File directory){
+    public static void runGradleBuild(File directory){
+        //Check for build.gradle.kts, properties
+        //Check for gradlew/gradlew.bat
+
+        //Execute gradlew
+
 
         throw new UnsupportedOperationException("Not yet implemented");
     }

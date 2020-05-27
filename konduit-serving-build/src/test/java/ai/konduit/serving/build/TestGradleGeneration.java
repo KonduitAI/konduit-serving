@@ -21,13 +21,10 @@ package ai.konduit.serving.build;
 import ai.konduit.serving.build.config.*;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
-import ai.konduit.serving.build.generator.GradleGenerator;
+import ai.konduit.serving.build.build.GradleBuild;
 import ai.konduit.serving.models.deeplearning4j.DL4JConfiguration;
 import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
-import ai.konduit.serving.models.samediff.SameDiffConfig;
-import ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
@@ -66,7 +63,7 @@ public class TestGradleGeneration {
                 .serving(Serving.HTTP)
                 .deployments(new UberJarDeployment().outputDir(uberJarDir.getAbsolutePath()).jarName("my.jar"));
 
-        GradleGenerator.generateGradle(gradeDir, c);
+        GradleBuild.generateGradleBuildFiles(gradeDir, c);
 
         //Check for gradlew and gradlew.bat
 
@@ -86,8 +83,8 @@ public class TestGradleGeneration {
         //TODO
 
         //Actually run the build
-        //TODO this might not be doable in a unit test (unless all modules has been installed to local maven repo first)
-        GradleGenerator.generateGradle(gradeDir, c);
+        //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
+        GradleBuild.runGradleBuild(gradeDir);
 
         //Check output JAR exists
         File expUberJar = new File(uberJarDir, "my.jar");

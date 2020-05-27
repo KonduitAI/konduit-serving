@@ -54,15 +54,14 @@ We will introduce the following classes in konduit-serving-build:
   We will have a mechanism to check/look up if a dependency has native/target-specific code -  NativeDependencyRegistry
 * **NativeDependency**: Represents the targets a dependency supports  
   Note that NativeDependency internally has a Dependency, and also a `Set<Target>`
-* **Target**: Represents an operating system + architecture + device  
-  For example: (linux + x86_avx2 + cpu), (windows + x86 + CUDA), etc
+* **Target**: Represents an operating system + CPU architecture + device. Devices represent compute accelerators such as a GPU
+  but do not include CPUs. If a device is not specified, cpu-only execution is assumed.   
+  For example: (linux + x86_avx2), (windows + x86 + CUDA 10.0), etc
+* **NativeDependencyRegistry**: Used to get information about whether a given dependency has any native library (or otherwise
+  platform specific code) or not - and if so, what deployment targets it supports.
+  Exactly how this will be implemented remains to be determined. Right now we have a placeholder that just hardcodes this 
+  information for some common dependencies.
 
-
-
-**NativeDependencyRegistry**: Used to get information about whether a given dependency has any native library (or otherwise
-platform specific code) or not - and if so, what deployment targets it supports.
-Exactly how this will be implemented remains to be determined. Right now we have a placeholder that just hardcodes this 
-information for some common dependencies.
 
 ### Dependency Recommendation/Selection Mechanism
 
@@ -76,3 +75,13 @@ at the "all of" / "one of" requirements, and looks at the current set of depende
 added to satisfy the requirements for that platform.
 Where there is no valid way to satisfy the requirements (for example, native library X simply doesn't support CPU architecture Y)
 we will return null.
+
+This "what dependencies do we need" aspect is implemented using the **DependencyAddition** interface and the 
+`DependencyRequirement.suggestDependencies(Target, Collection<Dependency>)` method (which suggests what dependencies must/could
+be added, taking into account what is already present for the build).
+
+### Build Execution
+
+According to the current design, build execution is split into two parts:
+* Gradle file generation - `GradleBuild.generateGradleBuildFiles`, and
+* Build execution - `GradleBuild.runGradleBuild`
