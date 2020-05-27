@@ -17,12 +17,14 @@ package ai.konduit.serving.metrics.prometheus;
 
 import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.vertx.core.spi.metrics.MetricsProvider;
 
 public class PrometheusMetricsProvider implements MetricsProvider {
     @Override
     public MeterRegistry getRegistry() {
-        return MicrometerRegistry.getRegistry();
+        return new PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     }
 
     @Override
