@@ -20,18 +20,19 @@ package ai.konduit.serving.build.dependencies;
 
 import ai.konduit.serving.build.config.Target;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @AllArgsConstructor
-public class All implements DependencyRequirement {
+@Data
+@Accessors(fluent = true)
+public class AllRequirement implements DependencyRequirement {
     private final String name;
     private Set<Dependency> set;
 
-    public All(String name, Dependency... dependencies){
+    public AllRequirement(String name, Dependency... dependencies){
         this.name = name;
         this.set = new HashSet<>(Arrays.asList(dependencies));
     }
@@ -66,5 +67,42 @@ public class All implements DependencyRequirement {
                 return false;
         }
         return true;
+    }
+
+    @Override
+    public List<DependencyAddition> suggestDependencies(Target target, Collection<Dependency> currDeps) {
+        if(satisfiedBy(target, currDeps))
+            return null;
+
+        //We need ALL of the requirements to be satisfied (considering native code + target)
+        Set<Dependency> notFound = new HashSet<>();
+        for (Dependency need : set) {
+            boolean matchFound = false;
+            for (Dependency d : currDeps) {
+                if (need.equals(d)) {
+                    //GAV(C) match, but maybe it's a native dependency, and platform doesn't match
+                    if (need.isNativeDependency()) {
+                        NativeDependency nd = need.getNativeDependency();
+                        if (nd.supports(target)) {
+                            matchFound = true;
+                            break;
+                        }
+                    } else {
+                        //Pure Java dependency
+                        matchFound = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!matchFound){
+                notFound.add(need);
+            }
+        }
+
+        if(notFound.isEmpty())
+            return null;
+
+        return Collections.singletonList(new AllAddition(new ArrayList<>(notFound), this));
     }
 }

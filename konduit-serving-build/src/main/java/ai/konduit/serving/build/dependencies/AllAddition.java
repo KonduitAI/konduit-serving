@@ -16,17 +16,34 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.build.steps;
+package ai.konduit.serving.build.dependencies;
 
-import ai.konduit.serving.build.config.Module;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-@Data
+import java.util.List;
+
 @AllArgsConstructor
+@Data
 @Accessors(fluent = true)
-public class RunnerInfo {
-    private String runnerClass;
-    private Module module;
+public class AllAddition implements DependencyAddition {
+
+    private List<Dependency> add;
+    private DependencyRequirement forReq;
+
+    @Override
+    public Type type() {
+        return Type.ALL_OF;
+    }
+
+    @Override
+    public List<Dependency> toAdd() {
+        return add;
+    }
+
+    @Override
+    public DependencyRequirement forRequirement() {
+        return forReq;
+    }
 }

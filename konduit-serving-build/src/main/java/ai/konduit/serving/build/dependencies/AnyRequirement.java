@@ -20,18 +20,19 @@ package ai.konduit.serving.build.dependencies;
 
 import ai.konduit.serving.build.config.Target;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @AllArgsConstructor
-public class Any implements DependencyRequirement {
+@Data
+@Accessors(fluent = true)
+public class AnyRequirement implements DependencyRequirement {
     private final String name;
     private final Set<Dependency> set;
 
-    public Any(String name, Dependency... dependencies) {
+    public AnyRequirement(String name, Dependency... dependencies) {
         this.name = name;
         set = new HashSet<>(Arrays.asList(dependencies));
     }
@@ -61,5 +62,30 @@ public class Any implements DependencyRequirement {
             }
         }
         return false;
+    }
+
+    @Override
+    public List<DependencyAddition> suggestDependencies(Target target, Collection<Dependency> currentDeps) {
+        if(satisfiedBy(target, currentDeps))
+            return null;
+
+        //If not already satisfied, it means that none of the dependencies are available
+        //But we still have to filter by what can run on this target
+        List<Dependency> out = new ArrayList<>();
+        for(Dependency d : set){
+            if(d.isNativeDependency()){
+                NativeDependency nd = d.getNativeDependency();
+                if(nd.supports(target)){
+                    out.add(d);
+                }
+            } else {
+                out.add(d);
+            }
+        }
+
+        if(out.isEmpty())
+            return null;
+
+        return Collections.singletonList(new AnyAddition(out, this));
     }
 }

@@ -41,15 +41,18 @@ public class NativeDependencyRegistry {
     }
 
     static {
+        //These are dependencies that can only run on a specific target
         put(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64"), Target.LINUX_X86, Target.LINUX_X86_AVX2, Target.LINUX_X86_AVX512);
         put(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64-avx2"), Target.LINUX_X86_AVX2, Target.LINUX_X86_AVX512);
         put(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64-avx512"), Target.LINUX_X86_AVX512);
         put(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "windows-x86_64"), Target.WINDOWS_X86, Target.WINDOWS_X86_AVX2);
         put(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "windows-x86_64-avx2"), Target.WINDOWS_X86_AVX2);
+
+        //CUDA
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-beta7", null), Target.LINUX_CUDA_10_0);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-beta7", null), Target.LINUX_CUDA_10_1);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.2", "1.0.0-beta7", null), Target.LINUX_CUDA_10_2);
     }
-
-
-
 
     public static boolean isNativeDependency(Dependency d){
         return map.containsKey(d);

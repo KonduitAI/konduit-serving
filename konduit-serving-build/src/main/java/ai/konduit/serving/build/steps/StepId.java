@@ -18,6 +18,13 @@
 
 package ai.konduit.serving.build.steps;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+@AllArgsConstructor
+@Data
+@Accessors(fluent = true)
 public class StepId {
 
     private int number;

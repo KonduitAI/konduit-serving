@@ -20,11 +20,11 @@ package ai.konduit.serving.build;
 
 import ai.konduit.serving.build.config.Module;
 import ai.konduit.serving.build.config.Target;
-import ai.konduit.serving.build.dependencies.Dependency;
-import ai.konduit.serving.build.dependencies.ModuleRequirements;
+import ai.konduit.serving.build.dependencies.*;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -63,12 +63,26 @@ public class TestRequirements {
         List<Dependency> someDep = Arrays.asList(new Dependency("org.slf4j", "slf4j-api", "1.7.26", null));
         List<Dependency> nd4jNoClassifier = Arrays.asList(someDep.get(0),
                 new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null));
+        List<Dependency> withNd4j = Arrays.asList(someDep.get(0),
+                new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null),
+                new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")
+        );
 
-        req.suggestDependencies(Target.LINUX_X86, someDep);
-        req.suggestDependencies(Target.LINUX_X86, nd4jNoClassifier);
+        List<DependencyAddition> l1 = req.suggestDependencies(Target.LINUX_X86, someDep);
+        List<DependencyAddition> l2 = req.suggestDependencies(Target.LINUX_X86, nd4jNoClassifier);
+        List<DependencyAddition> l3 = req.suggestDependencies(Target.LINUX_X86, withNd4j);
 
+        assertEquals(2, l1.size()); //Should be nd4j-native, and nd4j-native:linux-x86_64
+        assertEquals(1, l2.size()); //Should just be classifier
+        assertNull(l3);     //No additions required
 
+        List<DependencyRequirement> reqs = req.getReqs();
+        List<DependencyAddition> l1Exp = Arrays.asList(
+                new AllAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null)), reqs.get(0)),
+                new AllAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), reqs.get(1)));
+        assertEquals(l1Exp, l1);
 
-        fail("Not implemented");
+        List<DependencyAddition> l2Exp = Collections.singletonList(new AllAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), reqs.get(1)));
+        assertEquals(l2Exp, l2);
     }
 }

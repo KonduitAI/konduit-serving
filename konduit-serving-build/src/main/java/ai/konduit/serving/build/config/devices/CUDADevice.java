@@ -16,17 +16,14 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.build.steps;
+package ai.konduit.serving.build.config.devices;
 
-import ai.konduit.serving.build.config.Module;
+import ai.konduit.serving.build.config.ComputeDevice;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.experimental.Accessors;
 
-@Data
 @AllArgsConstructor
-@Accessors(fluent = true)
-public class RunnerInfo {
-    private String runnerClass;
-    private Module module;
+@Data
+public class CUDADevice implements ComputeDevice {
+    private String cudaVersion;
 }

@@ -25,41 +25,25 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
-import java.util.Collections;
-import java.util.List;
-
 @Data
 @Accessors(fluent = true)
 public class Module {
     //TODO these requirements should probably be defined somewhere else!
-    public static final Module PIPELINE = new Module("konduit-serving-pipeline", null, null);
-    public static final Module DL4J = new Module("konduit-serving-deeplearning4j", DependencyRequirement.ND4J_BACKEND_REQ, null);
-//    public static final Module SAMEDIFF = new Module("konduit-serving-samediff");
+    public static final Module PIPELINE = new Module("konduit-serving-pipeline", ksModule("konduit-serving-pipeline"), null, null);
+    public static final Module DL4J = new Module("konduit-serving-deeplearning4j", ksModule("konduit-serving-deeplearning4j"), DependencyRequirement.ND4J_BACKEND_REQ, null);
+    public static final Module SAMEDIFF = new Module("konduit-serving-samediff", ksModule("konduit-serving-samediff"), DependencyRequirement.ND4J_BACKEND_REQ, null);
 //    public static final Module TENSORFLOW = new Module("konduit-serving-tensorflow");
 
-    //TODO we should do this
-    public Module forName(String name){
-        String origName = name;
-        if(!name.startsWith("konduit-serving-"))
-            name = "konduit-serving-" + name;
-
-        switch (name){
-            case "konduit-serving-pipeline":
-                return PIPELINE;
-            case "konduit-serving-deeplearning4j":
-                return DL4J;
-            default:
-                throw new RuntimeException();
-        }
-    }
-
     private final String name;
+    private final Dependency dependency;
     private final ModuleRequirements dependencyRequirements;
     private final ModuleRequirements dependencyOptional;
 
-    public Module(@JsonProperty("name") String name, @JsonProperty("dependencyRequirements") ModuleRequirements dependencyRequirements,
+    public Module(@JsonProperty("name") String name, @JsonProperty("dependency") Dependency dependency,
+                  @JsonProperty("dependencyRequirements") ModuleRequirements dependencyRequirements,
                   @JsonProperty("dependencyOptional") ModuleRequirements dependencyOptional){
         this.name = name;
+        this.dependency = dependency;
         this.dependencyRequirements = dependencyRequirements;
         this.dependencyOptional = dependencyOptional;
     }
@@ -74,5 +58,10 @@ public class Module {
 
     public Object dependenciesOptional(){
         return dependencyOptional;
+    }
+
+    protected static Dependency ksModule(String name){
+        //TODO don't hardcode versions
+        return new Dependency("ai.konduit.serving", name, "0.1.0-SNAPSHOT", null);
     }
 }

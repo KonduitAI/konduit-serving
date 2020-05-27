@@ -22,8 +22,7 @@ import ai.konduit.serving.build.config.Target;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -39,12 +38,24 @@ public class ModuleRequirements {
         return true;
     }
 
-    public Object suggestDependencies(Target target, Collection<Dependency> currentDeps){
+    public List<DependencyAddition> suggestDependencies(Target target, Collection<Dependency> currentDeps){
         if(satisfiedBy(target, currentDeps))
             return null;
 
+        Set<Dependency> currDepSet = new HashSet<>(currentDeps);
 
-        throw new UnsupportedOperationException("Not yet implemented");
+        List<DependencyAddition> l = new ArrayList<>();
+        for(DependencyRequirement r : reqs ){
+            if(r.satisfiedBy(target, currentDeps))
+                continue;
+
+            //This requirement is not satisfied...
+            l.addAll(r.suggestDependencies(target, currentDeps));
+        }
+
+        //TODO we should filter for duplicates
+
+        return l;
     }
 
 }

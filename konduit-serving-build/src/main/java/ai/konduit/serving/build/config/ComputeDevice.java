@@ -16,17 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.build.steps;
+package ai.konduit.serving.build.config;
 
-import ai.konduit.serving.build.config.Module;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
-@Data
-@AllArgsConstructor
-@Accessors(fluent = true)
-public class RunnerInfo {
-    private String runnerClass;
-    private Module module;
+public interface ComputeDevice {
 }

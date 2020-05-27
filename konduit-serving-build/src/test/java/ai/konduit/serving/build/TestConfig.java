@@ -36,7 +36,7 @@ public class TestConfig {
                         .author("User Name")
                         .buildVersion("1.0.0")
                         .timestamp("2020/05/26 12:00:00"))
-                .target(new Target(Target.OS.LINUX, Target.Type.CPU, Target.Arch.x86))
+                .target(new Target(Target.OS.LINUX, Target.Arch.x86, null))
                 .serving(Serving.HTTP, Serving.GRPC)
                 .modules(Module.PIPELINE)
                 .deployments(new UberJarDeployment().outputDir("/my/output/dir").jarName("my.jar"));

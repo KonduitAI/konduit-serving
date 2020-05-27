@@ -16,17 +16,19 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.build.steps;
+package ai.konduit.serving.build.dependencies;
 
-import ai.konduit.serving.build.config.Module;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import java.util.List;
 
-@Data
-@AllArgsConstructor
-@Accessors(fluent = true)
-public class RunnerInfo {
-    private String runnerClass;
-    private Module module;
+public interface DependencyAddition {
+    enum Type {ALL_OF, ONE_OF}
+
+    Type type();
+
+    List<Dependency> toAdd();
+
+    DependencyRequirement forRequirement();
+
+
+
 }

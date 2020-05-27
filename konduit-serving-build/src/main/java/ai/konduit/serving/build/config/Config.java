@@ -18,6 +18,9 @@
 
 package ai.konduit.serving.build.config;
 
+import ai.konduit.serving.build.dependencies.Dependency;
+import ai.konduit.serving.build.dependencies.DependencyAddition;
+import ai.konduit.serving.build.dependencies.ModuleRequirements;
 import ai.konduit.serving.build.steps.RunnerInfo;
 import ai.konduit.serving.build.steps.StepId;
 import ai.konduit.serving.build.util.ModuleUtils;
@@ -28,7 +31,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.io.File;
@@ -40,6 +45,7 @@ import java.util.*;
 @Setter
 @Accessors(fluent = true)
 @NoArgsConstructor
+@Slf4j
 public class Config {
 
     private String pipelinePath;
@@ -186,6 +192,67 @@ public class Config {
         } catch (IOException e){
             throw new RuntimeException("Error reading YAML file configuration: " + f.getAbsolutePath(), e);
         }
+    }
+
+
+    public List<Module> resolveModules(){
+        Preconditions.checkState(pipelinePath != null && !pipelinePath.isEmpty(), "Pipeline past must be set before attempting" +
+                " to resolve requide modules for it");
+        Set<Module> modules = new LinkedHashSet<>();
+        modules.add(Module.PIPELINE);       //Always include core API
+
+        Map<StepId, List<RunnerInfo>> m = ModuleUtils.runnersForFile(new File(pipelinePath));
+        for(Map.Entry<StepId, List<RunnerInfo>> e : m.entrySet()){
+            List<RunnerInfo> runners = e.getValue();
+            if(runners.size() > 1){
+                //TODO fix this - properly handle the case where one step can be executed by more than 1 runner
+                log.warn("More than one possible runner, selecting first: {}, {}", e.getKey(), runners);
+            }
+            Module mod = runners.get(0).module();
+            modules.add(mod);
+        }
+        //TODO what if user has set modules already, and they want extra modules for some reason?
+        this.modules = new ArrayList<>(modules);
+        return this.modules;
+    }
+
+    public List<Dependency> resolveDependencies(){
+        resolveModules();
+
+        Set<Dependency> deps = new LinkedHashSet<>();
+
+        //First: go through the modules needed to run this pipeline, and add those module dependencies
+        for(Module m : modules){
+            deps.add(m.dependency());
+        }
+
+        //Second: go through each module, and work out what optional dependencies (nd4j backends, etc) we must add
+        for(Module m : modules){
+            ModuleRequirements req = m.dependenciesRequired();
+            if(req == null)     //Module doesn't have any configurable required dependencies
+                continue;
+
+            if(!req.satisfiedBy(target, deps)){
+                List<DependencyAddition> l = req.suggestDependencies(target, deps);
+                if(l != null){
+                    for( DependencyAddition da : l){
+                        if(da.type() == DependencyAddition.Type.ALL_OF){
+                            deps.addAll(da.toAdd());
+                        } else {
+                            //Any of
+                            List<Dependency> toAdd = da.toAdd();
+                            if(toAdd.size() > 1){
+                                //TODO we'll work out a better solution to this in the future... for now, just warn
+                                log.warn("Multiple possible dependencies for requirement, picking first: {} - {}", req, toAdd);
+                            }
+                            deps.add(toAdd.get(0));
+                        }
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(deps);
     }
 
 }
