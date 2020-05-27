@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.models.tensorflow.step;
 
+import ai.konduit.serving.models.tensorflow.util.TensorFlowUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -26,6 +27,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.bytedeco.tensorflow.TF_Graph;
 import org.nd4j.common.base.Preconditions;
 import org.tensorflow.Graph;
 import org.tensorflow.SavedModelBundle;
@@ -38,6 +40,11 @@ import java.util.List;
 
 @Slf4j
 public class TensorFlowStepRunner implements PipelineStepRunner {
+
+    static {
+        TensorFlowUtil.ensureNativeLibrariesLoaded();
+    }
+
 
     private final TensorFlowPipelineStep step;
     private Graph graph;

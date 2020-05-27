@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 public class TestArrayConversion {
 
     @Test
-    public void testConversion(){
+    public void testConversion() throws Exception {
 
         for(NDArrayType t : new NDArrayType[]{
                 NDArrayType.DOUBLE,

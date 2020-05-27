@@ -21,12 +21,18 @@ package ai.konduit.serving.models.tensorflow.format;
 import ai.konduit.serving.models.tensorflow.util.TensorFlowUtil;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
+import org.bytedeco.tensorflow.TF_Graph;
 import org.tensorflow.DataType;
 import org.tensorflow.Tensor;
 
 import java.util.Arrays;
 
 public class TFNDArray extends BaseNDArray<Tensor> {
+
+    static {
+        TensorFlowUtil.ensureNativeLibrariesLoaded();
+    }
+
     public TFNDArray(Tensor array) {
         super(array);
     }

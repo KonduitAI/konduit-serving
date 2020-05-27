@@ -19,8 +19,11 @@
 package ai.konduit.serving.models.tensorflow.util;
 
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
+import org.bytedeco.tensorflow.TF_Graph;
 import org.tensorflow.DataType;
 import org.tensorflow.types.UInt8;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TensorFlowUtil {
 
@@ -74,6 +77,15 @@ public class TensorFlowUtil {
                 return NDArrayType.BOOL;
             default:
                 throw new UnsupportedOperationException("Unknown TF type: " + dataType);
+        }
+    }
+
+    private static final AtomicBoolean loaded = new AtomicBoolean();
+    public static void ensureNativeLibrariesLoaded(){
+        if(!loaded.get()){
+            //Ensure TF binaries are loaded
+            TF_Graph.newGraph().close();
+            loaded.set(true);
         }
     }
 

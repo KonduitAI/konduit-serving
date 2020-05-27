@@ -34,10 +34,16 @@ import java.nio.ByteOrder;
 
 public class TensorFlowConverters {
 
+    static {
+        TensorFlowUtil.ensureNativeLibrariesLoaded();
+    }
+
     private TensorFlowConverters(){ }
 
     @AllArgsConstructor
     public static class SerializedToTensorFlowConverter implements NDArrayConverter {
+        static { TensorFlowUtil.ensureNativeLibrariesLoaded(); }
+
         @Override
         public boolean canConvert(NDArray from, NDArrayFormat to) {
             return canConvert(from, to.formatType());
@@ -74,6 +80,7 @@ public class TensorFlowConverters {
 
     @AllArgsConstructor
     public static class TensorFlowToSerializedConverter implements NDArrayConverter {
+        static { TensorFlowUtil.ensureNativeLibrariesLoaded(); }
         @Override
         public boolean canConvert(NDArray from, NDArrayFormat to) {
             return canConvert(from, to.formatType());

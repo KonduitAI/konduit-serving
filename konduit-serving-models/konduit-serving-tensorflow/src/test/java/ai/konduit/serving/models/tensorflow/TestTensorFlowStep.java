@@ -26,7 +26,6 @@ import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
-import ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -52,7 +51,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep.*;
+import static ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep.builder;
 import static org.junit.Assert.assertEquals;
 
 @Slf4j
@@ -154,7 +153,6 @@ public class TestTensorFlowStep {
 
     @Test
     public void testFrozenModel() throws Exception {
-
         //Pretrained model source: https://github.com/yeephycho/tensorflow-face-detection
         String fileUrl = "https://drive.google.com/uc?export=download&id=0B5ttP5kO_loUdWZWZVVrN2VmWFk";
         File testDir = TestUtils.testResourcesStorageDir();

@@ -31,9 +31,34 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.tensorflow</groupId>
+            <groupId>org.bytedeco</groupId>
             <artifactId>tensorflow</artifactId>
-            <version>1.15.0</version>
+            <version>1.15.2-1.5.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>tensorflow</artifactId>
+            <version>1.15.2-1.5.3</version>
+            <classifier>${javacpp.platform}</classifier>
+        </dependency>
+
+        <!-- NOTE: Clearly mkl-dnn will NOT work for non-x86 systems. These should be in a property, but profile activation
+          for tests doesn't seem to work... putting these in a profile with <activation><property><name>os.arch</name><value>x86_64</value></property></activation>
+          does not work (profile is not activated according to mvn help:active-profiles, or by mvn dependency:tree, or during tests (unsatisfied link errors)
+          even though the os.arch==x86_64 system property is definitely set, according to approach used here: https://florianlr.wordpress.com/2012/04/24/16/
+         -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>mkl-dnn</artifactId>
+            <version>${mkl-dnn.javacpp.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>mkl-dnn</artifactId>
+            <version>${mkl-dnn.javacpp.version}</version>
+            <classifier>${javacpp.platform}</classifier>
         </dependency>
 
         <dependency>
@@ -90,6 +115,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-
 </project>
