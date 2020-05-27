@@ -18,7 +18,6 @@
 
 package ai.konduit.serving.vertx.protocols.http.verticle;
 
-import ai.konduit.serving.pipeline.impl.metrics.DefaultMetricsProvider;
 import ai.konduit.serving.pipeline.impl.metrics.MetricsProvider;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import ai.konduit.serving.vertx.protocols.http.api.ErrorResponse;
@@ -108,6 +107,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
             metricsProvider = iterator.next();
         }
         if (metricsProvider != null && metricsProvider.getEndpoint() != null) {
+            log.info("MetricsProvider implementation detected");
             inferenceRouter.get("/metrics").handler((Handler<RoutingContext>) metricsProvider.getEndpoint())
                     .failureHandler(failureHandler -> {
                         if (failureHandler.failure() != null) {
