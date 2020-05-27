@@ -104,6 +104,10 @@ public class Config {
         return this;
     }
 
+    public List<Deployment> deployments(){
+        return deployments;
+    }
+
 
     public ValidationResult validate(){
 

@@ -19,18 +19,31 @@
 package ai.konduit.serving.build.generator;
 
 import ai.konduit.serving.build.config.Config;
+import ai.konduit.serving.build.config.Deployment;
+import ai.konduit.serving.build.dependencies.Dependency;
+import org.nd4j.common.base.Preconditions;
 
 import java.io.File;
+import java.util.List;
 
 public class GradleGenerator {
 
-    public void generateGradle(File outputDir, Config config){
+    public static void generateGradle(File outputDir, Config config){
 
         //Add gradlew
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
 
-        throw new UnsupportedOperationException("Not yet implemented");
+        List<Dependency> dependencies = config.resolveDependencies();
+        List<Deployment> deployments = config.deployments();
+
+        Preconditions.checkState(!deployments.isEmpty(), "No deployments were specified");
+
+        System.out.println("Dependencies: " + dependencies);
+        System.out.println("Deployments: " + deployments);
+
+
+        throw new UnsupportedOperationException("Gradle generation: Not yet implemented");
     }
 
     public void runGradleBuild(File directory){

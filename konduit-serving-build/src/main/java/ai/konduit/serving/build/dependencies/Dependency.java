@@ -46,4 +46,8 @@ public class Dependency {
         Preconditions.checkState(isNativeDependency(), "Can only get NativeDependency information if the depnedency has native code");
         return NativeDependencyRegistry.getNativeDependency(this);
     }
+
+    public String gavString(){
+        return groupId + ":" + artifactId + ":" + version + (classifier == null ? "" : ":" + classifier);
+    }
 }
