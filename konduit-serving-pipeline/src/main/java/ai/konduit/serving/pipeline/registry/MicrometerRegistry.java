@@ -17,23 +17,27 @@
  */
 package ai.konduit.serving.pipeline.registry;
 
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import java.util.*;
-import lombok.NonNull;
+import ai.konduit.serving.pipeline.impl.metrics.MetricsProvider;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.common.io.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ServiceLoader;
 
 @Slf4j
 public class MicrometerRegistry {
     private static List<io.micrometer.core.instrument.MeterRegistry> registries;
 
     static {
-        io.micrometer.core.instrument.Metrics.globalRegistry.add(new SimpleMeterRegistry());
+        initRegistries();
     }
 
     public static io.micrometer.core.instrument.MeterRegistry getRegistry() {
         if (CollectionUtils.isEmpty(registries)) {
-            return io.micrometer.core.instrument.Metrics.globalRegistry;
+            initRegistries();
         }
         if (registries.size() > 1) {
             log.info("Loaded {} MeterRegistry instances. Loading the first one.", registries.size());
@@ -42,20 +46,18 @@ public class MicrometerRegistry {
     }
 
     public static void initRegistries() {
-
-        ServiceLoader<io.micrometer.core.instrument.MeterRegistry> sl =
-                ServiceLoader.load(io.micrometer.core.instrument.MeterRegistry.class);
-
-        Iterator<io.micrometer.core.instrument.MeterRegistry> iterator = sl.iterator();
+        if(registries == null) {
+            registries = new ArrayList<>();
+        } else {
+            registries.clear();
+        }
+        ServiceLoader<MetricsProvider> sl = ServiceLoader.load(MetricsProvider.class);
+        Iterator<MetricsProvider> iterator = sl.iterator();
         while(iterator.hasNext()){
-            registries.add(iterator.next());
+            MetricsProvider r = iterator.next();
+            MeterRegistry reg = r.getRegistry();
+            registries.add(reg);
+            io.micrometer.core.instrument.Metrics.globalRegistry.add(reg);
         }
-    }
-
-    public static void registerRegistries(@NonNull io.micrometer.core.instrument.MeterRegistry registry) {
-        if (registries == null) {
-            initRegistries();
-        }
-        registries.add(registry);
     }
 }

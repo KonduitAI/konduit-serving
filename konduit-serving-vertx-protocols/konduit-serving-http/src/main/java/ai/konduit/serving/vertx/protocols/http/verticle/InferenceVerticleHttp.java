@@ -19,6 +19,7 @@
 package ai.konduit.serving.vertx.protocols.http.verticle;
 
 import ai.konduit.serving.pipeline.impl.metrics.MetricsProvider;
+import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import ai.konduit.serving.vertx.protocols.http.api.ErrorResponse;
 import ai.konduit.serving.vertx.protocols.http.api.HttpApiErrorCode;
@@ -36,6 +37,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.micrometer.MicrometerMetricsOptions;
+import io.vertx.micrometer.VertxPrometheusOptions;
+import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Iterator;
@@ -106,9 +110,16 @@ public class InferenceVerticleHttp extends InferenceVerticle {
         if (iterator.hasNext()){
             metricsProvider = iterator.next();
         }
-        if (metricsProvider != null && metricsProvider.getEndpoint() != null) {
-            log.info("MetricsProvider implementation detected");
-            inferenceRouter.get("/metrics").handler((Handler<RoutingContext>) metricsProvider.getEndpoint())
+
+        Object endpoint = metricsProvider == null ? null : metricsProvider.getEndpoint();
+        if (endpoint != null) {
+            log.info("MetricsProvider implementation detected, adding endpoint /metrics");
+            MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
+                    .setMicrometerRegistry(MicrometerRegistry.getRegistry())
+                    .setPrometheusOptions(new VertxPrometheusOptions().setEnabled(true));
+            BackendRegistries.setupBackend(micrometerMetricsOptions);
+
+            inferenceRouter.get("/metrics").handler((Handler<RoutingContext>) endpoint)
                     .failureHandler(failureHandler -> {
                         if (failureHandler.failure() != null) {
                             log.error("Failed to scrape metrics", failureHandler.failure());
@@ -119,6 +130,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                                 .end(failureHandler.failure().toString());
                     });
         }
+
         inferenceRouter.post().handler(BodyHandler.create()
                 .setUploadsDirectory(DirectoryFetcher.getFileUploadsDir().getAbsolutePath())
                 .setDeleteUploadedFilesOnEnd(true)

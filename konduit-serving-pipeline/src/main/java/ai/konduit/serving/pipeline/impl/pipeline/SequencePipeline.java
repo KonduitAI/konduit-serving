@@ -24,6 +24,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * SequencePipeline is a simple stack of pipeline steps - the output of one is fed into the next
@@ -36,6 +37,8 @@ public class SequencePipeline implements Pipeline {
 
     @Getter
     private List<PipelineStep> steps;
+
+    private String id;
 
     public SequencePipeline(@JsonProperty("steps") List<PipelineStep> steps) {
         this.steps = steps;
@@ -50,6 +53,13 @@ public class SequencePipeline implements Pipeline {
     @Override
     public int size() {
         return steps != null ? steps.size() : 0;
+    }
+
+    @Override
+    public String id() {
+        if(id == null)
+            id = UUID.randomUUID().toString().substring(0, 8);
+        return id;
     }
 
     public static Builder builder(){

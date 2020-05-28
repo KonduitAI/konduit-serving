@@ -24,6 +24,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 import org.nd4j.shade.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * A pipeline with a graph structure - possibly including conditional operations, etc.
@@ -48,6 +49,7 @@ public class GraphPipeline implements Pipeline {
 
     private final Map<String, GraphStep> steps;
     private final String outputStep;
+    private String id;
 
     public GraphPipeline(@JsonProperty("steps") Map<String, GraphStep> steps, @JsonProperty("outputStep") String outputStep){
         this.steps = steps;
@@ -62,5 +64,12 @@ public class GraphPipeline implements Pipeline {
     @Override
     public int size() {
         return steps != null ? steps.size() : 0;
+    }
+
+    @Override
+    public String id() {
+        if(id == null)
+            id = UUID.randomUUID().toString().substring(0, 8);
+        return id;
     }
 }
