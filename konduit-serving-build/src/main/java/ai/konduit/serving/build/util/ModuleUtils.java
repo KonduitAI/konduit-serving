@@ -105,19 +105,22 @@ public class ModuleUtils {
         }
     }
 
-    public Map<String,RunnerInfo> pipelineClassToRunnerClass(){
-        File f = new ClassPathResource("META-INF/konduit-serving/PipelineStepRunnerMeta").getFile();
+    public static Map<String,RunnerInfo> pipelineClassToRunnerClass(){
         String s;
         try {
+            File f = new ClassPathResource("META-INF/konduit-serving/PipelineStepRunnerMeta").getFile();
             s = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
         } catch (IOException e){
             throw new RuntimeException(e);
         }
         String[] lines = s.split("\n");
+        Map<String,RunnerInfo> out = new HashMap<>();
         for(String line : lines){
             String[] split = line.split(",");
-//            RunnerInfo info = new RunnerInfo(split[1], split[2]);
+            RunnerInfo info = new RunnerInfo(split[1], Module.forName(split[2]));
+            out.put(split[0], info);
         }
+        return out;
     }
 
 }

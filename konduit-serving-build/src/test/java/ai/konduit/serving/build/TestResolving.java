@@ -21,6 +21,8 @@ package ai.konduit.serving.build;
 import ai.konduit.serving.build.config.*;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
+import ai.konduit.serving.build.steps.RunnerInfo;
+import ai.konduit.serving.build.util.ModuleUtils;
 import ai.konduit.serving.models.deeplearning4j.DL4JConfiguration;
 import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
 import ai.konduit.serving.models.samediff.SameDiffConfig;
@@ -36,11 +38,24 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class TestResolving {
 
     @Rule
     public TemporaryFolder testDir = new TemporaryFolder();
+
+    @Test
+    public void testRunnerInfoLoading(){
+        Map<String, RunnerInfo> runners = ModuleUtils.pipelineClassToRunnerClass();
+        assertTrue(runners.containsKey("ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep"));
+        assertEquals("konduit-serving-image", runners.get("ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep").module().name());
+        assertEquals("konduit-serving-deeplearning4j", runners.get("ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep").module().name());
+
+        assertFalse(runners.isEmpty());
+    }
 
     @Test
     public void testBasicResolving() throws Exception {

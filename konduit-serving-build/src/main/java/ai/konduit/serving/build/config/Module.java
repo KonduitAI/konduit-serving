@@ -32,7 +32,11 @@ public class Module {
     public static final Module PIPELINE = new Module("konduit-serving-pipeline", ksModule("konduit-serving-pipeline"), null, null);
     public static final Module DL4J = new Module("konduit-serving-deeplearning4j", ksModule("konduit-serving-deeplearning4j"), DependencyRequirement.ND4J_BACKEND_REQ, null);
     public static final Module SAMEDIFF = new Module("konduit-serving-samediff", ksModule("konduit-serving-samediff"), DependencyRequirement.ND4J_BACKEND_REQ, null);
-//    public static final Module TENSORFLOW = new Module("konduit-serving-tensorflow");
+    //TODO DEPENDENCIES FOR THESE
+    public static final Module TENSORFLOW = new Module("konduit-serving-samediff", ksModule("konduit-serving-samediff"), null, null);
+    public static final Module IMAGE = new Module("konduit-serving-image", ksModule("konduit-serving-image"), null, null);
+    public static final Module CAMERA = new Module("konduit-serving-image", ksModule("konduit-serving-camera"), null, null);
+
 
     private final String name;
     private final Dependency dependency;
@@ -63,5 +67,25 @@ public class Module {
     protected static Dependency ksModule(String name){
         //TODO don't hardcode versions
         return new Dependency("ai.konduit.serving", name, "0.1.0-SNAPSHOT", null);
+    }
+
+    //TODO we'll collect this info automatically if possible...
+    public static Module forName(String moduleName){
+        switch (moduleName){
+            case "konduit-serving-pipeline":
+                return PIPELINE;
+            case "konduit-serving-deeplearning4j":
+                return DL4J;
+            case "konduit-serving-samediff":
+                return SAMEDIFF;
+            case "konduit-serving-tensorflow":
+                return TENSORFLOW;
+            case "konduit-serving-image":
+                return IMAGE;
+            case "konduit-serving-camera":
+                return CAMERA;
+            default:
+                throw new RuntimeException("Module not implemented yet: " + moduleName);
+        }
     }
 }
