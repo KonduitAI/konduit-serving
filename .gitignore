@@ -27,7 +27,6 @@ target/
 .idea/
 
 unzip/
-*target*
 **/target/**
 ..bfg-report
 # Vert.xA
