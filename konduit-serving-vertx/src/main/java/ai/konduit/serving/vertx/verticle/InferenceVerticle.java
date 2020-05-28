@@ -21,11 +21,19 @@ package ai.konduit.serving.vertx.verticle;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
+import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.ContextInternal;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public abstract class InferenceVerticle extends AbstractVerticle {
@@ -57,6 +65,31 @@ public abstract class InferenceVerticle extends AbstractVerticle {
             });
         } else {
             stopPromise.complete();
+        }
+    }
+
+    protected long getPid() {
+        return Long.parseLong(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
+    }
+
+    protected void saveInspectionDataIfRequired(long pid) {
+        try {
+            File processConfigFile = new File(DirectoryFetcher.getServersDataDir(), pid + ".data");
+            String inferenceConfigurationJson = ((ContextInternal) context).getDeployment()
+                    .deploymentOptions().getConfig().encodePrettily();
+
+            if(processConfigFile.exists()) {
+                if(!FileUtils.readFileToString(processConfigFile, StandardCharsets.UTF_8).contains(inferenceConfigurationJson)) {
+                    FileUtils.writeStringToFile(processConfigFile, inferenceConfigurationJson, StandardCharsets.UTF_8);
+                }
+            } else {
+                FileUtils.writeStringToFile(processConfigFile, inferenceConfigurationJson, StandardCharsets.UTF_8);
+                log.info("Writing inspection data at '{}' with configuration: \n{}", processConfigFile.getAbsolutePath(),
+                        inferenceConfiguration.toJson());
+            }
+            processConfigFile.deleteOnExit();
+        } catch (IOException exception) {
+            log.error("Unable to save konduit server inspection information", exception);
         }
     }
 }
