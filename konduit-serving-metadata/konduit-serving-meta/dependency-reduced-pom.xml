@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <artifactId>konduit-serving-metadata</artifactId>
+    <groupId>ai.konduit.serving</groupId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>konduit-serving-meta</artifactId>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>${maven-shade-plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <includes>
+                    <include>META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun</include>
+                  </includes>
+                  <excludes>
+                    <exclude>*.*</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer>
+                  <resource>META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun</resource>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <shadedArtifactAttached>false</shadedArtifactAttached>
+          <createDependencyReducedPom>true</createDependencyReducedPom>
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+            </filter>
+          </filters>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo />
+                <unzip />
+                <echo />
+                <move />
+                <echo />
+                <jar />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+

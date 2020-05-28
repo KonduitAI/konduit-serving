@@ -23,6 +23,7 @@ import ai.konduit.serving.build.steps.RunnerInfo;
 import ai.konduit.serving.build.steps.StepId;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import org.apache.commons.io.FileUtils;
+import org.nd4j.common.io.ClassPathResource;
 
 import java.io.File;
 import java.io.IOException;
@@ -101,6 +102,21 @@ public class ModuleUtils {
                 return Module.SAMEDIFF;
             default:
                 throw new RuntimeException("Not implemented module mapping for: " + jsonType);
+        }
+    }
+
+    public Map<String,RunnerInfo> pipelineClassToRunnerClass(){
+        File f = new ClassPathResource("META-INF/konduit-serving/PipelineStepRunnerMeta").getFile();
+        String s;
+        try {
+            s = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+        String[] lines = s.split("\n");
+        for(String line : lines){
+            String[] split = line.split(",");
+//            RunnerInfo info = new RunnerInfo(split[1], split[2]);
         }
     }
 

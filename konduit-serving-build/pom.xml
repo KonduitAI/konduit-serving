@@ -37,6 +37,12 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-meta</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- TODO we should remove this dependency if possible - it shouldn't be needed (other than util methods) -->
         <dependency>
             <groupId>ai.konduit.serving</groupId>
