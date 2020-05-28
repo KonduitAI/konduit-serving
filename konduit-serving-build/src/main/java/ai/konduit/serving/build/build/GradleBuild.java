@@ -21,29 +21,61 @@ package ai.konduit.serving.build.build;
 import ai.konduit.serving.build.config.Config;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.dependencies.Dependency;
+import ai.konduit.serving.build.deployments.UberJarDeployment;
+import lombok.Builder;
+import org.apache.commons.io.FileUtils;
 import org.nd4j.common.base.Preconditions;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 
 public class GradleBuild {
 
-    public static void generateGradleBuildFiles(File outputDir, Config config){
+    public static void
+
+    generateGradleBuildFiles(File outputDir, Config config) throws IOException {
 
         //Add gradlew
+        //gradle wrapper --gradle-version ${gradle.version}
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
 
+        StringBuilder kts = new StringBuilder();
         List<Dependency> dependencies = config.resolveDependencies();
+        if (!dependencies.isEmpty()) {
+            kts.append("dependencies {").append("\n");
+        }
+        for (Dependency dep : dependencies) {
+            kts.append("\tapi('" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "')").
+                    append("\n");
+            kts.append("\timplementation('" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "')").
+                    append("\n");
+        }
+        if (!dependencies.isEmpty()) {
+            kts.append("}").append("\n");
+        }
+
         List<Deployment> deployments = config.deployments();
+        if (!deployments.isEmpty())
+            kts.append("jar {").append("\n");
+        for (Deployment deployment : deployments) {
+            if (deployment instanceof UberJarDeployment) {
+                kts.append("\tarchiveName '" + ((UberJarDeployment)deployment).jarName() + "')").append("\n");
+            }
+        }
+        if (!deployments.isEmpty())
+            kts.append("}").append("\n");
+        System.out.println(kts.toString());
 
         Preconditions.checkState(!deployments.isEmpty(), "No deployments were specified");
 
         System.out.println("Dependencies: " + dependencies);
         System.out.println("Deployments: " + deployments);
 
-
-        throw new UnsupportedOperationException("Gradle generation: Not yet implemented");
+        File ktsFile = new File(outputDir, "build.gradle.kts");
+        FileUtils.writeStringToFile(ktsFile, kts.toString(), Charset.defaultCharset());
     }
 
     public static void runGradleBuild(File directory){
