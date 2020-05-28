@@ -22,7 +22,9 @@ import ai.konduit.serving.build.config.Module;
 import ai.konduit.serving.build.steps.RunnerInfo;
 import ai.konduit.serving.build.steps.StepId;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.common.io.ClassPathResource;
 
 import java.io.File;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+@Slf4j
 public class ModuleUtils {
 
     private ModuleUtils(){ }
@@ -90,16 +93,14 @@ public class ModuleUtils {
     }
 
     public static Module moduleForJsonType(String jsonType){
-        //TODO we'll also do this properly - again, just a temporary hack
-        //Not hardcoded here, properly extensible, etc
-        switch (jsonType){
-            case "DEEPLEARNING4J":
-                return Module.DL4J;
-            case "SAMEDIFF":
-                return Module.SAMEDIFF;
-            default:
-                throw new RuntimeException("Not implemented module mapping for: " + jsonType);
+        Map<String,List<RunnerInfo>> map = jsonNameToRunnerClass();
+        Preconditions.checkState(map.containsKey(jsonType), "No JSON subtype known for: %s", jsonType);
+
+        List<RunnerInfo> l = map.get(jsonType);
+        if(l.size() > 1){
+            log.warn("More than 1 runner available for JSON type {} - returning first", jsonType);
         }
+        return l.get(0).module();
     }
 
     public static Map<String,RunnerInfo> pipelineClassToRunnerClass(){
