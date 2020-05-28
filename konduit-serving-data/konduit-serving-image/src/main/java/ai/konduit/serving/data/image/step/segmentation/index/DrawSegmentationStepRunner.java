@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.segmentation.index;
 
+import ai.konduit.serving.annotation.CanRun;
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
@@ -41,6 +42,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+@CanRun(value = DrawSegmentationStep.class, moduleName = "konduit-serving-image")
 public class DrawSegmentationStepRunner implements PipelineStepRunner {
 
     protected final DrawSegmentationStep step;

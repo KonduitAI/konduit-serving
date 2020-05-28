@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.grid.crop;
 
+import ai.konduit.serving.annotation.CanRun;
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
@@ -42,9 +43,8 @@ import org.nd4j.common.primitives.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
+@CanRun(value = CropGridStep.class, moduleName = "konduit-serving-image")
 public class CropGridStepRunner implements PipelineStepRunner {
-
-
 
     protected final CropGridStep step;
     protected final CropFixedGridStep fStep;

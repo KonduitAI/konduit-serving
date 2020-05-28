@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.bb.draw;
 
+import ai.konduit.serving.annotation.CanRun;
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.util.ColorUtil;
@@ -40,11 +41,8 @@ import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
+@CanRun(value = DrawBoundingBoxStep.class, moduleName = "konduit-serving-image")
 public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
-
-
-
 
     protected final DrawBoundingBoxStep step;
 
