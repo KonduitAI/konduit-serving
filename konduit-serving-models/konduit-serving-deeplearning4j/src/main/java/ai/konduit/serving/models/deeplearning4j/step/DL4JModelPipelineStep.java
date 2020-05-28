@@ -15,8 +15,10 @@
  ******************************************************************************/
 package ai.konduit.serving.models.deeplearning4j.step;
 
+import ai.konduit.serving.annotation.JsonName;
 import ai.konduit.serving.models.deeplearning4j.DL4JConfiguration;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -29,6 +31,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
+@JsonName(jsonName = "DEEPLEARNING4J", subclassOf = PipelineStep.class)
 public class DL4JModelPipelineStep extends BaseModelPipelineStep<DL4JConfiguration> {
 
     private List<String> inputNames;        //Mainly for ComputationGraph with multiple inputs - map Data keys to ComputationGraph outputs

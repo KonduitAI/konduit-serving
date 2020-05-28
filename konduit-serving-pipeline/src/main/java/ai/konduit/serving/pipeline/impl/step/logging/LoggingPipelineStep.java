@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.step.logging;
 
+import ai.konduit.serving.annotation.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +29,7 @@ import org.slf4j.event.Level;
  */
 @Data
 @Builder
+@JsonName(jsonName = "LOGGING", subclassOf = PipelineStep.class)
 public class LoggingPipelineStep implements PipelineStep {
 
     public enum Log { KEYS, KEYS_AND_VALUES }

@@ -16,24 +16,29 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.build;
+package ai.konduit.serving.annotation;
 
-import org.apache.commons.io.FileUtils;
-import org.nd4j.common.io.ClassPathResource;
-import org.nd4j.common.resources.Resources;
+import javax.annotation.processing.Filer;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
+import java.io.Writer;
+import java.util.List;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
+public class AnnotationUtils {
 
-public class Temp {
+    private AnnotationUtils(){ }
 
-    public static void main(String[] args) throws Exception {
-//        File f = Resources.asFile("META-INF/konduit-serving/ai.konduit.serving.annotations.CanRun");
-//        File f = new ClassPathResource("META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun").getFile();
-        File f = new ClassPathResource("META-INF/konduit-serving/PipelineStepRunnerMeta").getFile();
-        System.out.println(f.getAbsolutePath());
-        String s = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
-        System.out.println(s);
+    public static void writeFile(Filer filer, Class<?> c, List<String> lines){
+        try {
+            String outputFile = "META-INF/konduit-serving/" + c.getName();
+            FileObject file = filer.createResource(StandardLocation.CLASS_OUTPUT, "", outputFile);
+
+            try (Writer w = file.openWriter()) {
+                w.write(String.join("\n", lines));
+            }
+
+        } catch (Throwable t) {
+            throw new RuntimeException("Error in annotation processing", t);
+        }
     }
-
 }

@@ -104,6 +104,7 @@
                                     <artifact>*:*</artifact>
                                     <includes>
                                         <include>META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun</include>
+                                        <include>META-INF/konduit-serving/ai.konduit.serving.annotation.JsonName</include>
                                     </includes>
                                     <excludes>
                                         <exclude>*.*</exclude>
@@ -115,6 +116,10 @@
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun</resource>
                                 </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/konduit-serving/ai.konduit.serving.annotation.JsonName</resource>
+                                </transformer>
                             </transformers>
                         </configuration>
                     </execution>
@@ -123,7 +128,8 @@
 
             <!-- Rename the aggregated META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun to META-INF/konduit-serving/PipelineStepRunnerMeta
                  Unfortunately, this won't be executed by IntelliJ hence for konduit-serving-build to work properly we need to ignore
-                 konduit-serving-meta and rely on the maven installed JAR -->
+                 konduit-serving-meta and rely on the maven installed JAR.
+                 Yes this is kind of ugly - suggestions on a better approach are welcome! -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -139,6 +145,8 @@
                                 <echo message="rename file: META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun" />
                                 <move file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun"
                                       tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/PipelineStepRunnerMeta" />
+                                <move file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.JsonName"
+                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/JsonNameMapping" />
                                 <echo message="jar back" />
                                 <jar destfile="${project.build.directory}/${artifactId}-${version}.jar" basedir="${project.build.directory}/unpacked" />
                             </target>

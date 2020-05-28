@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.show;
 
+import ai.konduit.serving.annotation.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +29,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @Data
 @Builder
 @Accessors(fluent = true)
+@JsonName(jsonName = "SHOW_IMAGE", subclassOf = PipelineStep.class)
 public class ShowImagePipelineStep implements PipelineStep {
 
     @Builder.Default

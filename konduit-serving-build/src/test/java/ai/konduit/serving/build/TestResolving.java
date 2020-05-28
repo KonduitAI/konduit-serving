@@ -53,8 +53,16 @@ public class TestResolving {
         assertTrue(runners.containsKey("ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep"));
         assertEquals("konduit-serving-image", runners.get("ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep").module().name());
         assertEquals("konduit-serving-deeplearning4j", runners.get("ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep").module().name());
+    }
 
-        assertFalse(runners.isEmpty());
+    @Test
+    public void testJsonRunnerMappingLoading(){
+        Map<String, List<RunnerInfo>> runners = ModuleUtils.jsonNameToRunnerClass();
+        assertTrue(runners.containsKey("DEEPLEARNING4J"));
+        assertEquals(1, runners.get("DEEPLEARNING4J").size());
+        RunnerInfo ri = runners.get("DEEPLEARNING4J").get(0);
+        assertEquals("konduit-serving-deeplearning4j", ri.module().name());
+        assertTrue(runners.containsKey("IMAGE_TO_NDARRAY"));
     }
 
     @Test

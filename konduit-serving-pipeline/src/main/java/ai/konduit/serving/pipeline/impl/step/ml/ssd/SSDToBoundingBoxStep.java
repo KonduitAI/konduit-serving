@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.step.ml.ssd;
 
+import ai.konduit.serving.annotation.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +29,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@JsonName(jsonName = "SSD_TO_BBOX", subclassOf = PipelineStep.class)
 public class SSDToBoundingBoxStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";
 

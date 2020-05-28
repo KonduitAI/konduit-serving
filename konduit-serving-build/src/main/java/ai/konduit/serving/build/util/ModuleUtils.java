@@ -28,10 +28,7 @@ import org.nd4j.common.io.ClassPathResource;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ModuleUtils {
 
@@ -116,9 +113,31 @@ public class ModuleUtils {
         String[] lines = s.split("\n");
         Map<String,RunnerInfo> out = new HashMap<>();
         for(String line : lines){
-            String[] split = line.split(",");
+            String[] split = line.split(",");       //Format: pipelineClass,runnerClass,module - i.e., "this type of pipeline step (in specified module) can be run by this type of runner"
             RunnerInfo info = new RunnerInfo(split[1], Module.forName(split[2]));
             out.put(split[0], info);
+        }
+        return out;
+    }
+
+    public static Map<String,List<RunnerInfo>> jsonNameToRunnerClass(){
+        String s;
+        try {
+            File f = new ClassPathResource("META-INF/konduit-serving/JsonNameMapping").getFile();
+            s = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+
+        Map<String,RunnerInfo> c2Runner = pipelineClassToRunnerClass();
+
+        String[] lines = s.split("\n");
+        Map<String,List<RunnerInfo>> out = new HashMap<>();
+        for(String line : lines){
+            String[] split = line.split(",");            //Format: json_name,class_name,interface_name
+            RunnerInfo info = c2Runner.get(split[1]);
+            List<RunnerInfo> l = out.computeIfAbsent(split[0], k -> new ArrayList<>());
+            l.add(info);
         }
         return out;
     }

@@ -17,6 +17,7 @@
  */
 package ai.konduit.serving.camera.step.capture;
 
+import ai.konduit.serving.annotation.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +25,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 @Builder
 @Data
+@JsonName(jsonName = "FRAME_CAPTURE", subclassOf = PipelineStep.class)
 public class FrameCapturePipelineStep implements PipelineStep {
 
     @Builder.Default

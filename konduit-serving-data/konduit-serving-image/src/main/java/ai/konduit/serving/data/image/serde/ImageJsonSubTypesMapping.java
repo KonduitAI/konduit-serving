@@ -25,6 +25,7 @@ import ai.konduit.serving.data.image.step.grid.crop.CropGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
+import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.serde.JsonSubTypesMapping;
@@ -45,6 +46,7 @@ public class ImageJsonSubTypesMapping implements JsonSubTypesMapping {
         l.add(new JsonSubType("DRAW_FIXED_GRID", DrawFixedGridStep.class, PipelineStep.class));
         l.add(new JsonSubType("CROP_GRID", CropGridStep.class, PipelineStep.class));
         l.add(new JsonSubType("CROP_FIXED_GRID", CropFixedGridStep.class, PipelineStep.class));
+        l.add(new JsonSubType("DRAW_SEGMENTATION", DrawSegmentationStep.class, PipelineStep.class));
         return l;
     }
 }

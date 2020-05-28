@@ -18,8 +18,10 @@
 
 package ai.konduit.serving.models.tensorflow.step;
 
+import ai.konduit.serving.annotation.JsonName;
 import ai.konduit.serving.models.tensorflow.TensorFlowConfiguration;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
@@ -28,6 +30,7 @@ import java.util.List;
 
 @Data
 @SuperBuilder
+@JsonName(jsonName = "TENSORFLOW", subclassOf = PipelineStep.class)
 public class TensorFlowPipelineStep extends BaseModelPipelineStep<TensorFlowConfiguration> {
 
     private List<String> inputNames;

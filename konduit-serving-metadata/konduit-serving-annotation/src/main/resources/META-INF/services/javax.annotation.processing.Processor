@@ -17,3 +17,4 @@
 #
 
 ai.konduit.serving.annotation.CanRunProcessor
+ai.konduit.serving.annotation.JsonNameProcessor
