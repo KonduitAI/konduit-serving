@@ -40,7 +40,7 @@ import org.nd4j.common.primitives.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
-@CanRun(value = CropGridStep.class, moduleName = "konduit-serving-image")
+@CanRun(CropGridStep.class)
 public class CropGridStepRunner implements PipelineStepRunner {
 
     protected final CropGridStep step;

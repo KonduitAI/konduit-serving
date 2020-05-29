@@ -31,7 +31,7 @@ import org.nd4j.common.primitives.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
-@CanRun(value = ImageToNDArrayStep.class, moduleName = "konduit-serving-image")
+@CanRun(ImageToNDArrayStep.class)
 public class ImageToNDArrayStepRunner implements PipelineStepRunner {
 
     protected final ImageToNDArrayStep step;

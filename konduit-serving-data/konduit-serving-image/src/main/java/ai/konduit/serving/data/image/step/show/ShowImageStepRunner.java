@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@CanRun(value = ShowImagePipelineStep.class, moduleName = "konduit-serving-image")
+@CanRun(ShowImagePipelineStep.class)
 public class ShowImageStepRunner implements PipelineStepRunner {
 
     private static final int MIN_HEIGHT = 64;

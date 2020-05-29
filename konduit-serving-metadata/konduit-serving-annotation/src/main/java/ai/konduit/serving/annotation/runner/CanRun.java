@@ -24,5 +24,4 @@ package ai.konduit.serving.annotation.runner;
  */
 public @interface CanRun {
     Class<?>[] value();
-    String moduleName();        //TODO If possible, this should be inferred automatically
 }

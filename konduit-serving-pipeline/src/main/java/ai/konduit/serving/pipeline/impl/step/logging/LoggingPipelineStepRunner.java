@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 
 @Slf4j
-@CanRun(value = LoggingPipelineStep.class, moduleName = "konduit-serving-pipeline")
+@CanRun(LoggingPipelineStep.class)
 public class LoggingPipelineStepRunner implements PipelineStepRunner {
 
     private final LoggingPipelineStep step;

@@ -41,7 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-@CanRun(value = DrawSegmentationStep.class, moduleName = "konduit-serving-image")
+@CanRun(DrawSegmentationStep.class)
 public class DrawSegmentationStepRunner implements PipelineStepRunner {
 
     protected final DrawSegmentationStep step;

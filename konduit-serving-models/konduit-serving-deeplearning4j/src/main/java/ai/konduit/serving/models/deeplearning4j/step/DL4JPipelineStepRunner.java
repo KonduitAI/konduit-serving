@@ -35,7 +35,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
-@CanRun(value = DL4JModelPipelineStep.class, moduleName = "konduit-serving-deeplearning4j")
+@CanRun(DL4JModelPipelineStep.class)
 public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     public static final String DEFAULT_OUT_NAME_SINGLE = "default";

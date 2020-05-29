@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@CanRun(value = ExtractBoundingBoxStep.class, moduleName = "konduit-serving-image")
+@CanRun(ExtractBoundingBoxStep.class)
 public class ExtractBoundingBoxStepRunner implements PipelineStepRunner {
 
     protected final ExtractBoundingBoxStep step;

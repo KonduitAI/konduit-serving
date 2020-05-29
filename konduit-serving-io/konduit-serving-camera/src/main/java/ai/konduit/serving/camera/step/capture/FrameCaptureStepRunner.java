@@ -30,7 +30,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameGrabber;
 
 @Slf4j
-@CanRun(value = FrameCapturePipelineStep.class, moduleName = "konduit-serving-camera")
+@CanRun(FrameCapturePipelineStep.class)
 public class FrameCaptureStepRunner implements PipelineStepRunner {
 
     protected final FrameCapturePipelineStep step;

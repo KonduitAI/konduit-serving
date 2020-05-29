@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
-@CanRun(value = SSDToBoundingBoxStep.class, moduleName = "konduit-serving-pipeline")
+@CanRun(SSDToBoundingBoxStep.class)
 public class SSDToBoundingBoxRunner implements PipelineStepRunner {
 
     protected final SSDToBoundingBoxStep step;

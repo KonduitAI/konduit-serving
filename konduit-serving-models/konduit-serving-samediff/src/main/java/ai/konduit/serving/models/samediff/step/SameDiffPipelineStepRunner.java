@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@CanRun(value = SameDiffModelPipelineStep.class, moduleName = "konduit-serving-samediff")
+@CanRun(SameDiffModelPipelineStep.class)
 public class SameDiffPipelineStepRunner implements PipelineStepRunner {
 
     public static final String DEFAULT_OUT_NAME_SINGLE = "default";

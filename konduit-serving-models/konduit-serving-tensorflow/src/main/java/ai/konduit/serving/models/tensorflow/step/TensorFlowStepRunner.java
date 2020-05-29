@@ -38,7 +38,7 @@ import java.net.URI;
 import java.util.List;
 
 @Slf4j
-@CanRun(value = TensorFlowPipelineStep.class, moduleName = "konduit-serving-tensorflow")
+@CanRun(TensorFlowPipelineStep.class)
 public class TensorFlowStepRunner implements PipelineStepRunner {
 
     private final TensorFlowPipelineStep step;

@@ -40,7 +40,7 @@ import org.nd4j.common.base.Preconditions;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-@CanRun(value = DrawBoundingBoxStep.class, moduleName = "konduit-serving-image")
+@CanRun(DrawBoundingBoxStep.class)
 public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
 
     protected final DrawBoundingBoxStep step;
