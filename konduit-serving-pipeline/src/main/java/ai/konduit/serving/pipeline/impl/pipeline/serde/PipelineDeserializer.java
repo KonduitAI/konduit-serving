@@ -44,10 +44,14 @@ public class PipelineDeserializer extends StdDeserializer<Pipeline> {
     public Pipeline deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
         TreeNode tn = jp.readValueAsTree();
         TreeNode n = tn.get("steps");
+        String id = null;
+        if(tn.get("id") != null){
+            id = ((TextNode)tn.get("id")).asText();
+        }
 
         if(n.isArray()){
             PipelineStep[] steps = jp.getCodec().treeToValue(n, PipelineStep[].class);
-            return new SequencePipeline(Arrays.asList(steps));
+            return new SequencePipeline(Arrays.asList(steps), id);
         } else if(n.isObject()){
             Map<String, GraphStep> map = new LinkedHashMap<>();
 
@@ -62,7 +66,7 @@ public class PipelineDeserializer extends StdDeserializer<Pipeline> {
 
             String outputStep = ((TextNode)tn.get("outputStep")).asText();
 
-            return new GraphPipeline(map, outputStep);
+            return new GraphPipeline(map, outputStep, id);
         } else {
             throw new JsonParseException(jp, "Unable to deserialize Pipeline: Invalid JSON/YAML? Pipeline is neither a SequencePipeline or a GraphPipeline");
         }

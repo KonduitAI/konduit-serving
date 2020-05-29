@@ -19,12 +19,17 @@ package ai.konduit.serving.pipeline.api.context;
 
 import lombok.Setter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class PipelineMetrics implements Metrics {
     private String pipelineName;
     @Setter
     private String instanceName = "default";
     @Setter
     private String stepName = "default";
+
+    private Map<String,PipelineGauge> gaugeMap = new HashMap<>();
 
     public PipelineMetrics(String name) {
         this.pipelineName = name;
@@ -49,7 +54,9 @@ public class PipelineMetrics implements Metrics {
 
     @Override
     public Gauge gauge(String id, double number) {
-        Gauge gauge = new PipelineGauge(assembleId(id), number);
-        return gauge;
+        String s = assembleId(id);
+        PipelineGauge pg = gaugeMap.computeIfAbsent(s, k -> new PipelineGauge(k, number));
+        pg.set(number);
+        return pg;
     }
 }

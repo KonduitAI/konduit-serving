@@ -45,6 +45,7 @@
         <module>konduit-serving-data</module>
         <module>konduit-serving-vertx</module>
         <module>konduit-serving-vertx-protocols</module>
+        <module>konduit-serving-metrics</module>
     </modules>
 
     <name>konduit-serving</name>

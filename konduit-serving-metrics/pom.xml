@@ -16,39 +16,19 @@
   ~  * SPDX-License-Identifier: Apache-2.0
   ~  ******************************************************************************/
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>konduit-serving-vertx-protocols</artifactId>
+        <artifactId>konduit-serving</artifactId>
         <groupId>ai.konduit.serving</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>konduit-serving-http</artifactId>
-
-    <dependencies>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-web</artifactId>
-            <version>${vertx-stack.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-micrometer-metrics</artifactId>
-            <version>${vertx-stack.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.micrometer</groupId>
-                    <artifactId>micrometer-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.hdrhistogram</groupId>
-                    <artifactId>HdrHistogram</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-    </dependencies>
+    <artifactId>konduit-serving-metrics</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>konduit-serving-prometheus</module>
+    </modules>
 </project>
