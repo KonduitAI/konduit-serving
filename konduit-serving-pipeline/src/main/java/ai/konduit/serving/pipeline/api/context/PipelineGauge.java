@@ -15,22 +15,28 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
-
 package ai.konduit.serving.pipeline.api.context;
 
-/**
- * Metrics are used to record values, for debugging and visualization.
- *
- * Instances of the Metrics interface are available within a PipelineStepRunner's exec method via the {@link Context#metrics()}
- * method.
- *
- * @author Alex Black
- */
-public interface Metrics {
+import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
+import org.nd4j.common.primitives.AtomicDouble;
 
-    Counter counter(String id);
+public class PipelineGauge implements Gauge {
 
-    Timer timer(String id);
+    private io.micrometer.core.instrument.Gauge mmGauge;
+    private AtomicDouble d;
 
-    Gauge gauge(String id, double number);
+    public PipelineGauge(String id, double value) {
+        d = new AtomicDouble(value);
+        mmGauge = io.micrometer.core.instrument.Gauge
+                .builder(id, d, AtomicDouble::get)
+                .register(MicrometerRegistry.getRegistry());
+    }
+
+    public void set(double set){
+        d.set(set);
+    }
+
+    public double value() {
+        return mmGauge.value();
+    }
 }

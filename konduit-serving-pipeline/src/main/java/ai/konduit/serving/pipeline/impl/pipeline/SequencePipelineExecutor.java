@@ -41,6 +41,8 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
     private List<PipelineStepRunner> runners;
     private ProfilerConfig profilerConfig;
     private Profiler profiler = new NoOpProfiler();
+    private Metrics metrics;
+    private Context ctx;
 
     public SequencePipelineExecutor(@NonNull SequencePipeline p) {
         this.pipeline = p;
@@ -68,12 +70,17 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
 
     @Override
     public Data exec(Data data) {
-        Context ctx = new DefaultContext(null, profiler);
+        if (ctx == null) {
+            metrics = new PipelineMetrics(pipeline.id());
+            ctx = new DefaultContext(metrics, profiler);
+        }
 
         Data current = data;
         for (PipelineStepRunner psr : runners) {
             String name = psr.name();
             profiler.eventStart(name);
+            ((PipelineMetrics)metrics).setInstanceName(name);
+            ((PipelineMetrics)metrics).setStepName(psr.getPipelineStep().name());
 
             current = psr.exec(ctx, current);
 

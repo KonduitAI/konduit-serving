@@ -37,6 +37,8 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @JsonTypeInfo(use = NAME, property = "@type")
 public interface PipelineStep extends TextConfig, Serializable {
 
-
+    default String name() {
+        return getClass().getSimpleName();
+    }
 }
 
