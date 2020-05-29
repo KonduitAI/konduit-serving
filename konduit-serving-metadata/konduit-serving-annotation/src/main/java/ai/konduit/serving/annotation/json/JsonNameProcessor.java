@@ -16,7 +16,9 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.annotation;
+package ai.konduit.serving.annotation.json;
+
+import ai.konduit.serving.annotation.AnnotationUtils;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -25,7 +27,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.*;
 
-@SupportedAnnotationTypes("ai.konduit.serving.annotation.JsonName")
+@SupportedAnnotationTypes("ai.konduit.serving.annotation.json.JsonName")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class JsonNameProcessor extends AbstractProcessor {
 

@@ -16,16 +16,15 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.annotation;
+package ai.konduit.serving.annotation.runner;
+
+import ai.konduit.serving.annotation.AnnotationUtils;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
-import java.io.Writer;
 import java.util.*;
 
 /**
@@ -35,13 +34,13 @@ import java.util.*;
  * able to run a particular instance of this type of PipelineStep due to some configuration or versioning issue (but it
  * must be able to run _some_ of these types of PipelineStep instances)
  * <br>
- * During processing, this processor writes a "META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun" file
+ * During processing, this processor writes a "META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun" file
  * with content like: ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep,ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStepRunner<br>
  * which should be interpreted as "LoggingPipelineStep can be run by LoggingPipelineStepRunner"
  *
  * @author Alex Black
  */
-@SupportedAnnotationTypes("ai.konduit.serving.annotation.CanRun")
+@SupportedAnnotationTypes("ai.konduit.serving.annotation.runner.CanRun")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class CanRunProcessor extends AbstractProcessor {
 

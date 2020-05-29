@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.models.deeplearning4j.step;
 
-import ai.konduit.serving.annotation.CanRun;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.models.deeplearning4j.step;
 
-import ai.konduit.serving.annotation.JsonName;
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.models.deeplearning4j.DL4JConfiguration;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;

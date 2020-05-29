@@ -16,13 +16,13 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.annotation;
+package ai.konduit.serving.models.samediff;
 
-/**
- * Defines the PipelineStep instance(s) that this PipelineStepRunner can execute<br>
- * Also includes the name of the module that the
- */
-public @interface CanRun {
-    Class<?>[] value();
-    String moduleName();        //TODO If possible, this should be inferred automatically
+import ai.konduit.serving.annotation.module.InheritRequiredDependencies;
+import ai.konduit.serving.annotation.module.ModuleInfo;
+
+@ModuleInfo("konduit-serving-samediff")
+@InheritRequiredDependencies("konduit-serving-nd4j")
+public class SameDiffModuleInfo {
+    private SameDiffModuleInfo(){ }
 }
