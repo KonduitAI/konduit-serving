@@ -105,6 +105,7 @@
                                     <includes>
                                         <include>META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun</include>
                                         <include>META-INF/konduit-serving/ai.konduit.serving.annotation.json.JsonName</include>
+                                        <include>META-INF/konduit-serving/ai.konduit.serving.annotation.module.RequiresDependencies</include>
                                     </includes>
                                     <excludes>
                                         <exclude>*.*</exclude>
@@ -144,9 +145,11 @@
                                 <unzip src="${project.build.directory}/${artifactId}-${version}.jar" dest="${project.build.directory}/unpacked/" />
                                 <echo message="rename file: META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun" />
                                 <move file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun"
-                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/PipelineStepRunnerMeta" />
+                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/PipelineStepRunner" />
                                 <move file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.json.JsonName"
                                       tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/JsonNameMapping" />
+                                <move file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.module.RequiresDependencies"
+                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/ModuleRequiresDependencies" />
                                 <echo message="jar back" />
                                 <jar destfile="${project.build.directory}/${artifactId}-${version}.jar" basedir="${project.build.directory}/unpacked" />
                             </target>

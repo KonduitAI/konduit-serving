@@ -32,13 +32,12 @@ import ai.konduit.serving.annotation.module.RequiresDependencies;
                 @Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.2", ver = "1.0.0-beta7")}),
         //ND4J backend classifier - need ONE of these
         @Requires({@Dependency(gId = "org.nd4j", aId = "nd4j-native", ver = "1.0.0-beta7", classifier = {
-                "linux-x86_64", "linux-x86_64-avx2", "linux-x86_64-avx512",
-                "linux-ppc64le", "linux-arm64", "linux-armhf",
+                "linux-x86_64", "linux-x86_64-avx2", "linux-x86_64-avx512", "linux-ppc64le", "linux-arm64", "linux-armhf",
                 "windows-x86_64", "windows-x86_64-avx2",
                 "macosx-x86_64", "macosx-x86_64-avx2"}),        //TODO 2020/05/29 AB - Not including android classifiers here as we don't yet support that for KS
-                @Dependency(gId = "org.nd4j", aId = "nd4j-native", ver = "1.0.0-beta7", classifier = {
-                        "linux-x86_64", "linux-ppc64le", "linux-arm64",
-                        "windows-x86_64"})})
+                @Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.0", ver = "1.0.0-beta7", classifier = {"linux-x86_64", "linux-ppc64le", "linux-arm64","windows-x86_64"}),
+                @Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.1", ver = "1.0.0-beta7", classifier = {"linux-x86_64", "linux-ppc64le", "linux-arm64","windows-x86_64"}),
+                @Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.2", ver = "1.0.0-beta7", classifier = {"linux-x86_64", "linux-ppc64le", "linux-arm64","windows-x86_64"})})
 })
 public class Nd4jModuleInfo {
     private Nd4jModuleInfo(){ }

@@ -109,6 +109,9 @@ public class CanRunProcessor extends AbstractProcessor {
     }
 
     protected void writeFile(){
+        if(toWrite.isEmpty())           //Can be empty if @ModuleInfo exists but no runners
+            return;
+
         Filer filer = processingEnv.getFiler();
         List<String> toWrite2 = new ArrayList<>();
         for(String s : toWrite){
