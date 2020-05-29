@@ -24,22 +24,14 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 @Builder
 @Data
-public class FrameCapturePipelineStep implements PipelineStep {
+public class VideoFrameCaptureStep implements PipelineStep {
 
-    @Builder.Default
-    private int camera = 0;         //TODO add other (more robust) ways to select camera
-    @Builder.Default
-    private int width = 640;
-    @Builder.Default
-    private int height = 480;
+    private String filePath;
     @Builder.Default
     private String outputKey = "image";
 
-    public FrameCapturePipelineStep(@JsonProperty("camera") int camera, @JsonProperty("width") int width,
-                                    @JsonProperty("height") int height, @JsonProperty("outputKey") String outputKey){
-        this.camera = camera;
-        this.width = width;
-        this.height = height;
+    public VideoFrameCaptureStep(@JsonProperty("filePath") String filePath, @JsonProperty("outputKey") String outputKey){
+        this.filePath = filePath;
         this.outputKey = outputKey;
     }
 

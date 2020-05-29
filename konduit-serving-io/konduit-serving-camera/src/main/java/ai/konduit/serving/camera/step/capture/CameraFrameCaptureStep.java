@@ -18,25 +18,29 @@
 package ai.konduit.serving.camera.step.capture;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
-import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
-import org.nd4j.common.base.Preconditions;
+import lombok.Builder;
+import lombok.Data;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
-public class FrameCaptureStepRunnerFactory implements PipelineStepRunnerFactory {
-    @Override
-    public boolean canRun(PipelineStep pipelineStep) {
-        return (pipelineStep instanceof CameraFrameCaptureStep)
-                || (pipelineStep instanceof VideoFrameCaptureStep);
+@Builder
+@Data
+public class CameraFrameCaptureStep implements PipelineStep {
+
+    @Builder.Default
+    private int camera = 0;         //TODO add other (more robust) ways to select camera
+    @Builder.Default
+    private int width = 640;
+    @Builder.Default
+    private int height = 480;
+    @Builder.Default
+    private String outputKey = "image";
+
+    public CameraFrameCaptureStep(@JsonProperty("camera") int camera, @JsonProperty("width") int width,
+                                  @JsonProperty("height") int height, @JsonProperty("outputKey") String outputKey){
+        this.camera = camera;
+        this.width = width;
+        this.height = height;
+        this.outputKey = outputKey;
     }
 
-    @Override
-    public PipelineStepRunner create(PipelineStep step) {
-        Preconditions.checkState(canRun(step), "Unable to run pipeline step of type %s", step.getClass());
-
-        if(step instanceof CameraFrameCaptureStep){
-            return new FrameCaptureStepRunner((CameraFrameCaptureStep) step);
-        }else{
-            return new FrameCaptureStepRunner((VideoFrameCaptureStep) step);
-        }
-    }
 }
