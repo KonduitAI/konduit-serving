@@ -33,23 +33,29 @@ import java.util.List;
 
 public class GradleBuild {
 
-    public static void
+    public static void generateGradleBuildFiles(File outputDir, Config config) throws IOException {
 
-    generateGradleBuildFiles(File outputDir, Config config) throws IOException {
+        File gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew")));
+        if (gradlewResource.exists())
+            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
 
-        //Add gradlew
-        //gradle wrapper --gradle-version ${gradle.version}
+        gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew.bat")));
+        if (gradlewResource.exists())
+            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
 
         StringBuilder kts = new StringBuilder();
+        kts.append("apply plugin: 'java'").append("\n");
+        kts.append("\trepositories {").append("\n").append("mavenCentral()\n").append("}\n");
+
         List<Dependency> dependencies = config.resolveDependencies();
         if (!dependencies.isEmpty()) {
             kts.append("dependencies {").append("\n");
         }
         for (Dependency dep : dependencies) {
-            kts.append("\tapi('" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "')").
-                    append("\n");
+            /*kts.append("\tapi('" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "')").
+                    append("\n");*/
             kts.append("\timplementation('" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "')").
                     append("\n");
         }
@@ -59,10 +65,12 @@ public class GradleBuild {
 
         List<Deployment> deployments = config.deployments();
         if (!deployments.isEmpty())
-            kts.append("jar {").append("\n");
+            kts.append("task uberjar(type: Jar, dependsOn: [':compileJava', ':processResources']) {\n" +
+                    "\tfrom files(sourceSets.main.output.classesDir)\n").append("\n");
         for (Deployment deployment : deployments) {
             if (deployment instanceof UberJarDeployment) {
                 kts.append("\tarchiveName '" + ((UberJarDeployment)deployment).jarName() + "')").append("\n");
+                kts.append("manifest {\nattributes 'Main-Class': '" + ((UberJarDeployment)deployment).artifactId() + "'}").append("\n");
             }
         }
         if (!deployments.isEmpty())
