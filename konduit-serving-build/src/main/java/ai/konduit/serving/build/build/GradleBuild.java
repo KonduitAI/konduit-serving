@@ -33,12 +33,15 @@ import java.util.List;
 
 public class GradleBuild {
 
-    public static void
+    public static void generateGradleBuildFiles(File outputDir, Config config) throws IOException {
 
-    generateGradleBuildFiles(File outputDir, Config config) throws IOException {
+        File gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew")));
+        if (gradlewResource.exists())
+            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
 
-        //Add gradlew
-        //gradle wrapper --gradle-version ${gradle.version}
+        gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew.bat")));
+        if (gradlewResource.exists())
+            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
 
