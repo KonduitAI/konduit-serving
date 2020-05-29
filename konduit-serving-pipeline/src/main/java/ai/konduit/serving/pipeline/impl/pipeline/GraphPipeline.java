@@ -51,9 +51,12 @@ public class GraphPipeline implements Pipeline {
     private final String outputStep;
     private String id;
 
-    public GraphPipeline(@JsonProperty("steps") Map<String, GraphStep> steps, @JsonProperty("outputStep") String outputStep){
+    public GraphPipeline(@JsonProperty("steps") Map<String, GraphStep> steps,
+                         @JsonProperty("outputStep") String outputStep,
+                         @JsonProperty("id") String id){
         this.steps = steps;
         this.outputStep = outputStep;
+        this.id = id;
     }
 
     @Override

@@ -19,6 +19,7 @@ package ai.konduit.serving.pipeline.registry;
 
 import ai.konduit.serving.pipeline.impl.metrics.MetricsProvider;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.common.io.CollectionUtils;
 
@@ -45,7 +46,7 @@ public class MicrometerRegistry {
         return registries.get(0);
     }
 
-    public static void initRegistries() {
+    public static synchronized void initRegistries() {
         if(registries == null) {
             registries = new ArrayList<>();
         } else {
@@ -58,6 +59,11 @@ public class MicrometerRegistry {
             MeterRegistry reg = r.getRegistry();
             registries.add(reg);
             io.micrometer.core.instrument.Metrics.globalRegistry.add(reg);
+        }
+
+        if(registries.isEmpty()){
+            //Nothing found via ServiceLoader
+            registries.add(new SimpleMeterRegistry());
         }
     }
 }

@@ -40,8 +40,9 @@ public class SequencePipeline implements Pipeline {
 
     private String id;
 
-    public SequencePipeline(@JsonProperty("steps") List<PipelineStep> steps) {
+    public SequencePipeline(@JsonProperty("steps") List<PipelineStep> steps, @JsonProperty("id") String id) {
         this.steps = steps;
+        this.id = id;
     }
 
 
@@ -68,14 +69,20 @@ public class SequencePipeline implements Pipeline {
 
     public static class Builder {
         protected List<PipelineStep> steps = new ArrayList<>();
+        private String id;
 
         public Builder add(PipelineStep step){
             this.steps.add(step);
             return this;
         }
 
+        public Builder id(String id){
+            this.id = id;
+            return this;
+        }
+
         public SequencePipeline build(){
-            return new SequencePipeline(steps);
+            return new SequencePipeline(steps, id);
         }
     }
 
