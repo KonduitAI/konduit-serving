@@ -16,9 +16,10 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.build.dependencies;
+package ai.konduit.serving.build.dependencies.nativedep;
 
 import ai.konduit.serving.build.config.Target;
+import ai.konduit.serving.build.dependencies.Dependency;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.nd4j.common.base.Preconditions;

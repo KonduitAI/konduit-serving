@@ -19,6 +19,7 @@
 package ai.konduit.serving.build.dependencies;
 
 import ai.konduit.serving.build.config.Target;
+import ai.konduit.serving.build.dependencies.nativedep.NativeDependency;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;

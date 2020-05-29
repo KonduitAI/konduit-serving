@@ -32,9 +32,11 @@ import java.util.List;
 import java.util.Set;
 
 @SupportedAnnotationTypes({"ai.konduit.serving.annotation.module.ModuleInfo",
-        "ai.konduit.serving.annotation.module.RequiresDependencies"})
+        "ai.konduit.serving.annotation.module.RequiresDependencies",
+        "ai.konduit.serving.annotation.module.InheritRequiredDependencies"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class RequiresDependenciesProcessor extends AbstractProcessor {
+    public static final String INHERIT_MODULE_PREFIX = "inherit:";
 
     private String moduleName;
     private List<String> toWrite = new ArrayList<>();
@@ -49,6 +51,7 @@ public class RequiresDependenciesProcessor extends AbstractProcessor {
             }
             writeFile();
         } else {
+            //Get module name
             if(moduleName == null){
                 Collection<? extends Element> c = env.getElementsAnnotatedWith(ModuleInfo.class);
                 List<TypeElement> types = ElementFilter.typesIn(c);
@@ -58,13 +61,10 @@ public class RequiresDependenciesProcessor extends AbstractProcessor {
                 }
             }
 
+            //Get the dependency requirements for the module from @RequiredDependencies
             Collection<? extends Element> c = env.getElementsAnnotatedWith(RequiresDependencies.class);
             List<TypeElement> l = ElementFilter.typesIn(c);
             for(TypeElement annotation : l){
-
-                List<? extends Element> enclosed = annotation.getEnclosedElements();
-                Element elem = annotation.getEnclosingElement();
-
                 Requires[] requires = annotation.getAnnotation(RequiresDependencies.class).value();
 
                 for (Requires require : requires) {
@@ -94,9 +94,15 @@ public class RequiresDependenciesProcessor extends AbstractProcessor {
                 }
             }
 
-
+            //Get the inherited dependency requirements for the module from @InheritRequiredDependencies
+            c = env.getElementsAnnotatedWith(InheritRequiredDependencies.class);
+            l = ElementFilter.typesIn(c);
+            for(TypeElement annotation : l) {
+                String inheritFrom = annotation.getAnnotation(InheritRequiredDependencies.class).value();
+                toWrite.add(INHERIT_MODULE_PREFIX + inheritFrom);
+            }
         }
-        return true;
+        return false;   //Allow other processors to process ModuleInfo
     }
 
     private static String process(String g, String a, String v, String[] cl, Req r){
@@ -120,7 +126,7 @@ public class RequiresDependenciesProcessor extends AbstractProcessor {
 
     protected void writeFile(){
         if(toWrite.isEmpty())           //Can be empty if @ModuleInfo exists but no required dependencies
-            return;
+            toWrite.add("{}");          //Means "no requirements"
 
         Filer filer = processingEnv.getFiler();
         List<String> toWrite2 = new ArrayList<>();

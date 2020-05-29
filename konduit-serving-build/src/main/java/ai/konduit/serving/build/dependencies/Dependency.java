@@ -18,10 +18,12 @@
 
 package ai.konduit.serving.build.dependencies;
 
+import ai.konduit.serving.build.dependencies.nativedep.NativeDependency;
 import ai.konduit.serving.build.dependencies.nativedep.NativeDependencyRegistry;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 @Data
 @Accessors(fluent = true)
@@ -31,7 +33,12 @@ public class Dependency {
     private final String version;
     private final String classifier;
 
-    public Dependency(String groupId, String artifactId, String version, String classifier){
+    public Dependency(String groupId, String artifactId, String version){
+        this(groupId, artifactId, version, null);
+    }
+
+    public Dependency(@JsonProperty("groupId") String groupId, @JsonProperty("artifactId") String artifactId,
+                      @JsonProperty("version") String version, @JsonProperty("classifier") String classifier){
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;

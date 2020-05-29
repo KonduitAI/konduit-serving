@@ -121,6 +121,10 @@
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>META-INF/konduit-serving/ai.konduit.serving.annotation.json.JsonName</resource>
                                 </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/konduit-serving/ai.konduit.serving.annotation.module.RequiresDependencies</resource>
+                                </transformer>
                             </transformers>
                         </configuration>
                     </execution>

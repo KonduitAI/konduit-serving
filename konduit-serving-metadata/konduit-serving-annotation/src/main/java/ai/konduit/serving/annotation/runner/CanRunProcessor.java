@@ -105,7 +105,7 @@ public class CanRunProcessor extends AbstractProcessor {
             }
         }
 
-        return true;
+        return false;   //Allow other processors to process ModuleInfo
     }
 
     protected void writeFile(){

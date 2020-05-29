@@ -21,14 +21,16 @@ package ai.konduit.serving.build.dependencies;
 import ai.konduit.serving.build.config.Target;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.util.*;
 
 @Data
 @AllArgsConstructor
+@Accessors(fluent = true)
 public class ModuleRequirements {
 
-    private final List<DependencyRequirement> reqs;
+    private List<DependencyRequirement> reqs;
 
     public boolean satisfiedBy(Target target, Collection<Dependency> currentDeps){
         for(DependencyRequirement req : reqs){
@@ -41,8 +43,6 @@ public class ModuleRequirements {
     public List<DependencyAddition> suggestDependencies(Target target, Collection<Dependency> currentDeps){
         if(satisfiedBy(target, currentDeps))
             return null;
-
-        Set<Dependency> currDepSet = new HashSet<>(currentDeps);
 
         List<DependencyAddition> l = new ArrayList<>();
         for(DependencyRequirement r : reqs ){

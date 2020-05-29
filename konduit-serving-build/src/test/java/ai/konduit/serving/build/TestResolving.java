@@ -69,7 +69,7 @@ public class TestResolving {
     public void testBasicResolving() throws Exception {
 
         for(int testNum=0; testNum <=1; testNum++ ) {
-            for(Target t : new Target[]{Target.LINUX_X86, Target.LINUX_X86_AVX2, Target.WINDOWS_X86}) {
+            for(Target t : new Target[]{Target.LINUX_X86, Target.LINUX_X86_AVX2, Target.WINDOWS_X86, Target.LINUX_CUDA_10_2}) {
 
                 PipelineStep step;
                 if (testNum == 0) {

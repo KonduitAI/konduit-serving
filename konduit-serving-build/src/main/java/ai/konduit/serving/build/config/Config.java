@@ -21,6 +21,7 @@ package ai.konduit.serving.build.config;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.dependencies.DependencyAddition;
 import ai.konduit.serving.build.dependencies.ModuleRequirements;
+import ai.konduit.serving.build.dependencies.nativedep.NativeDependency;
 import ai.konduit.serving.build.steps.RunnerInfo;
 import ai.konduit.serving.build.steps.StepId;
 import ai.konduit.serving.build.util.ModuleUtils;
@@ -245,12 +246,62 @@ public class Config {
                         } else {
                             //Any of
                             List<Dependency> toAdd = da.toAdd();
-                            if(toAdd.size() > 1){
-                                //TODO we'll work out a better solution to this in the future... for now, just warn
-                                //For example, x86 vs. AVX2 vs. AVX512
-                                log.warn("Multiple possible dependencies for requirement, picking first: {} - {}", req, toAdd);
+                            if(toAdd.size() == 1) {
+                                deps.add(toAdd.get(0));
+                            } else if(toAdd.size() > 1){
+
+                                //Perhaps this is due to classifiers - both x86 and avx2 for example
+                                boolean allSameExClassifier = true;
+                                Dependency first = toAdd.get(0);
+                                for( int i=1; i<toAdd.size(); i++ ){
+                                    Dependency d = toAdd.get(1);
+                                    allSameExClassifier = first.groupId().equals(d.groupId()) &&
+                                            first.artifactId().equals(d.artifactId()) &&
+                                            first.version().equals(d.version()) &&
+                                            (first.classifier() != null && d.classifier() != null);
+                                    if(!allSameExClassifier){
+                                        break;
+                                    }
+                                }
+                                boolean resolved = false;
+                                if(allSameExClassifier){
+                                    boolean allNative = true;
+                                    for(Dependency d : toAdd){
+                                        if(!d.isNativeDependency()){
+                                            allNative = false;
+                                            break;
+                                        }
+                                    }
+                                    if(allNative){
+                                        //Now just select the dependency that matches our target...
+
+                                        for(Dependency d : toAdd){
+                                            NativeDependency nd = d.getNativeDependency();
+                                            Set<Target> supported = nd.getSupportedTargets();
+                                            //Just because it SUPPORTS this target, doesn't mean it's optimal...
+                                            boolean noneLower = true;
+                                            for(Target t : supported){
+                                                Target.Arch a = t.arch();
+                                                if(a.isCompatibleWith(target.arch()) && t.arch().lowerThan(target.arch())){
+                                                    noneLower = false;
+                                                    break;
+                                                }
+                                            }
+                                            if(noneLower){
+                                                deps.add(d);
+                                                resolved = true;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if(!resolved) {
+                                    //TODO Currently both nd4j-native and nd4j-cuda-10.x can be recommended when the target is CUDA
+                                    //TODO we'll work out a better solution to this in the future... for now, just warn
+                                    log.warn("Multiple possible dependencies for requirement, picking first: {} - {}", req, toAdd);
+                                    deps.add(toAdd.get(0));
+                                }
                             }
-                            deps.add(toAdd.get(0));
                         }
                     }
                 }
