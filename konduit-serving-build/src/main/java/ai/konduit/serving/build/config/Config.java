@@ -247,6 +247,7 @@ public class Config {
                             List<Dependency> toAdd = da.toAdd();
                             if(toAdd.size() > 1){
                                 //TODO we'll work out a better solution to this in the future... for now, just warn
+                                //For example, x86 vs. AVX2 vs. AVX512
                                 log.warn("Multiple possible dependencies for requirement, picking first: {} - {}", req, toAdd);
                             }
                             deps.add(toAdd.get(0));

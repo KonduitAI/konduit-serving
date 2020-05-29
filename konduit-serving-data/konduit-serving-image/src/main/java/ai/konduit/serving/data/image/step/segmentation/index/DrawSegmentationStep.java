@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.segmentation.index;
 
+import ai.konduit.serving.annotation.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
@@ -49,6 +50,7 @@ import java.util.List;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@JsonName(jsonName = "DRAW_SEGMENTATION", subclassOf = PipelineStep.class)
 public class DrawSegmentationStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "image";
     public static final double DEFAULT_OPACITY = 0.5;

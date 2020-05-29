@@ -22,16 +22,17 @@ import ai.konduit.serving.build.config.Module;
 import ai.konduit.serving.build.steps.RunnerInfo;
 import ai.konduit.serving.build.steps.StepId;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.io.ClassPathResource;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+@Slf4j
 public class ModuleUtils {
 
     private ModuleUtils(){ }
@@ -92,16 +93,54 @@ public class ModuleUtils {
     }
 
     public static Module moduleForJsonType(String jsonType){
-        //TODO we'll also do this properly - again, just a temporary hack
-        //Not hardcoded here, properly extensible, etc
-        switch (jsonType){
-            case "DEEPLEARNING4J":
-                return Module.DL4J;
-            case "SAMEDIFF":
-                return Module.SAMEDIFF;
-            default:
-                throw new RuntimeException("Not implemented module mapping for: " + jsonType);
+        Map<String,List<RunnerInfo>> map = jsonNameToRunnerClass();
+        Preconditions.checkState(map.containsKey(jsonType), "No JSON subtype known for: %s", jsonType);
+
+        List<RunnerInfo> l = map.get(jsonType);
+        if(l.size() > 1){
+            log.warn("More than 1 runner available for JSON type {} - returning first", jsonType);
         }
+        return l.get(0).module();
+    }
+
+    public static Map<String,RunnerInfo> pipelineClassToRunnerClass(){
+        String s;
+        try {
+            File f = new ClassPathResource("META-INF/konduit-serving/PipelineStepRunnerMeta").getFile();
+            s = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+        String[] lines = s.split("\n");
+        Map<String,RunnerInfo> out = new HashMap<>();
+        for(String line : lines){
+            String[] split = line.split(",");       //Format: pipelineClass,runnerClass,module - i.e., "this type of pipeline step (in specified module) can be run by this type of runner"
+            RunnerInfo info = new RunnerInfo(split[1], Module.forName(split[2]));
+            out.put(split[0], info);
+        }
+        return out;
+    }
+
+    public static Map<String,List<RunnerInfo>> jsonNameToRunnerClass(){
+        String s;
+        try {
+            File f = new ClassPathResource("META-INF/konduit-serving/JsonNameMapping").getFile();
+            s = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+
+        Map<String,RunnerInfo> c2Runner = pipelineClassToRunnerClass();
+
+        String[] lines = s.split("\n");
+        Map<String,List<RunnerInfo>> out = new HashMap<>();
+        for(String line : lines){
+            String[] split = line.split(",");            //Format: json_name,class_name,interface_name
+            RunnerInfo info = c2Runner.get(split[1]);
+            List<RunnerInfo> l = out.computeIfAbsent(split[0], k -> new ArrayList<>());
+            l.add(info);
+        }
+        return out;
     }
 
 }

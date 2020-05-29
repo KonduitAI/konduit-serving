@@ -51,7 +51,7 @@ public class TestJsonYaml {
     public void testJsonYamlSimpleGraph(){
         fail("Not yet re-implemented");
         Map<String, PipelineStep> m = Collections.singletonMap("logging", LoggingPipelineStep.builder().build());
-        Pipeline p = new GraphPipeline(null, null);
+        Pipeline p = new GraphPipeline(null, null, "myGraphPipeline");
 
         String json = p.toJson();
         Pipeline pJson = Pipeline.fromJson(json);

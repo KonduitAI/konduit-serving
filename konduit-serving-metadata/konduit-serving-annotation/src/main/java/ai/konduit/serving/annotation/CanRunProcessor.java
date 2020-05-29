@@ -53,7 +53,6 @@ public class CanRunProcessor extends AbstractProcessor {
             writeFile();
         } else {
             //Collect info for writing at end
-
             Collection<? extends Element> c = env.getElementsAnnotatedWith(CanRun.class);
             List<TypeElement> types = ElementFilter.typesIn(c);
             Element canRunElement = processingEnv.getElementUtils().getTypeElement(CanRun.class.getName());
@@ -86,7 +85,7 @@ public class CanRunProcessor extends AbstractProcessor {
                 String moduleName = annotation.getAnnotation(CanRun.class).moduleName();
 
                 for(String s : values) {
-                    toWrite.add(s + "," + annotation.toString() + "," + moduleName);   //Format: pipelineClass,runnerClass - i.e., "this type of pipeline step can be run by this type of runner"
+                    toWrite.add(s + "," + annotation.toString() + "," + moduleName);   //Format: pipelineClass,runnerClass,module - i.e., "this type of pipeline step (in specified module) can be run by this type of runner"
                 }
             }
         }
@@ -96,24 +95,6 @@ public class CanRunProcessor extends AbstractProcessor {
 
     protected void writeFile(){
         Filer filer = processingEnv.getFiler();
-        try {
-
-            String outputFile = "META-INF/konduit-serving/" + CanRun.class.getName();
-            FileObject file = filer.createResource(StandardLocation.CLASS_OUTPUT, "", outputFile);
-
-            try (Writer w = file.openWriter()) {
-                boolean first = true;
-                for(String s : toWrite){
-                    if(!first)
-                        w.write("\n");
-                    w.write(s);
-                    first = false;
-                }
-            }
-
-        } catch (Throwable t) {
-            t.printStackTrace();
-            throw new RuntimeException("Error in annotation processing", t);
-        }
+        AnnotationUtils.writeFile(filer, CanRun.class, toWrite);
     }
 }

@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.grid.crop;
 
+import ai.konduit.serving.annotation.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,6 +38,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonName(jsonName = "CROP_FIXED_GRID", subclassOf = PipelineStep.class)
 public class CropFixedGridStep implements PipelineStep {
     private String imageName;               //If null: just find any image
     private double[] x;                     //length 4, specifying X coordinates in any order

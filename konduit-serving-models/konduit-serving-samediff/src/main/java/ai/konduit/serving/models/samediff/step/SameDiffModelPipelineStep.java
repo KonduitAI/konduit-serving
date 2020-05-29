@@ -15,8 +15,10 @@
  ******************************************************************************/
 package ai.konduit.serving.models.samediff.step;
 
+import ai.konduit.serving.annotation.JsonName;
 import ai.konduit.serving.models.samediff.SameDiffConfig;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -29,6 +31,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
+@JsonName(jsonName = "SAMEDIFF", subclassOf = PipelineStep.class)
 public class SameDiffModelPipelineStep extends BaseModelPipelineStep<SameDiffConfig> {
 
     private List<String> outputNames;       //Mainly for ComputationGraph with multiple outputs - map INDArray[] to Data keys

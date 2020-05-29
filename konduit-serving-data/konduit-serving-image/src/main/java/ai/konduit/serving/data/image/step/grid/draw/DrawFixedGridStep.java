@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.grid.draw;
 
+import ai.konduit.serving.annotation.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,6 +35,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@JsonName(jsonName = "DRAW_FIXED_GRID", subclassOf = PipelineStep.class)
 public class DrawFixedGridStep implements PipelineStep {
     public static final String DEFAULT_COLOR = "lime";
 

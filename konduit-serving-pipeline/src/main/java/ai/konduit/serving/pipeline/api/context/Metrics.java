@@ -28,6 +28,9 @@ package ai.konduit.serving.pipeline.api.context;
  */
 public interface Metrics {
 
+    Counter counter(String id);
 
+    Timer timer(String id);
 
+    Gauge gauge(String id, double number);
 }
