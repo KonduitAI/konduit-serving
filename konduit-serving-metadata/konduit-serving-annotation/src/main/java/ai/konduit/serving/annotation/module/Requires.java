@@ -16,24 +16,14 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.build.dependencies;
+package ai.konduit.serving.annotation.module;
 
-import ai.konduit.serving.build.config.Target;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import org.nd4j.common.base.Preconditions;
+public @interface Requires {
+    Dependency[] value();
+    Req requires() default Req.ANY;
 
-import java.util.Set;
 
-@AllArgsConstructor
-@Data
-public class NativeDependency {
-
-    private final Dependency dependency;
-    private final Set<Target> supportedTargets;
-
-    public boolean supports(Target target){
-        return supportedTargets.contains(target);
+    @interface List {
+        Requires[] value();
     }
-
 }

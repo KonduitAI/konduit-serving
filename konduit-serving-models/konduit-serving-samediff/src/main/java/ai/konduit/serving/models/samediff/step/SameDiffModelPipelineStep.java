@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.models.samediff.step;
 
-import ai.konduit.serving.annotation.JsonName;
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.models.samediff.SameDiffConfig;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;

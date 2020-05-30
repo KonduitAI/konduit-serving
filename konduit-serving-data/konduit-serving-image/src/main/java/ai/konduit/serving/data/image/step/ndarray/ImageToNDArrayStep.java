@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.data.image.step.ndarray;
 
-import ai.konduit.serving.annotation.JsonName;
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Builder;

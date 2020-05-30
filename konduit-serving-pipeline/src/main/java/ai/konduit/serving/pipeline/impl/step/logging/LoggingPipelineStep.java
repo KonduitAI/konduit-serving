@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.step.logging;
 
-import ai.konduit.serving.annotation.JsonName;
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Builder;
 import lombok.Data;

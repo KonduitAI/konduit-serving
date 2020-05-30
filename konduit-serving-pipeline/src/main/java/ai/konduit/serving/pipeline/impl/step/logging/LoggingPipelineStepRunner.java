@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.step.logging;
 
-import ai.konduit.serving.annotation.CanRun;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 
 @Slf4j
-@CanRun(value = LoggingPipelineStep.class, moduleName = "konduit-serving-pipeline")
+@CanRun(LoggingPipelineStep.class)
 public class LoggingPipelineStepRunner implements PipelineStepRunner {
 
     private final LoggingPipelineStep step;

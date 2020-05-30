@@ -103,8 +103,9 @@
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <includes>
-                                        <include>META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun</include>
-                                        <include>META-INF/konduit-serving/ai.konduit.serving.annotation.JsonName</include>
+                                        <include>META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun</include>
+                                        <include>META-INF/konduit-serving/ai.konduit.serving.annotation.json.JsonName</include>
+                                        <include>META-INF/konduit-serving/ai.konduit.serving.annotation.module.RequiresDependenciesAll</include>
                                     </includes>
                                     <excludes>
                                         <exclude>*.*</exclude>
@@ -114,11 +115,15 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun</resource>
+                                    <resource>META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun</resource>
                                 </transformer>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/konduit-serving/ai.konduit.serving.annotation.JsonName</resource>
+                                    <resource>META-INF/konduit-serving/ai.konduit.serving.annotation.json.JsonName</resource>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/konduit-serving/ai.konduit.serving.annotation.module.RequiresDependenciesAll</resource>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -126,7 +131,7 @@
                 </executions>
             </plugin>
 
-            <!-- Rename the aggregated META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun to META-INF/konduit-serving/PipelineStepRunnerMeta
+            <!-- Rename the aggregated META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun to META-INF/konduit-serving/PipelineStepRunnerMeta
                  Unfortunately, this won't be executed by IntelliJ hence for konduit-serving-build to work properly we need to ignore
                  konduit-serving-meta and rely on the maven installed JAR.
                  Yes this is kind of ugly - suggestions on a better approach are welcome! -->
@@ -142,11 +147,13 @@
                             <target>
                                 <echo message="unjar" />
                                 <unzip src="${project.build.directory}/${artifactId}-${version}.jar" dest="${project.build.directory}/unpacked/" />
-                                <echo message="rename file: META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun" />
-                                <move file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun"
-                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/PipelineStepRunnerMeta" />
-                                <move file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.JsonName"
+                                <echo message="rename file: META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun" />
+                                <move file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun"
+                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/PipelineStepRunner" />
+                                <move file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.json.JsonName"
                                       tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/JsonNameMapping" />
+                                <move file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.module.RequiresDependenciesAll"
+                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/ModuleRequiresDependencies" />
                                 <echo message="jar back" />
                                 <jar destfile="${project.build.directory}/${artifactId}-${version}.jar" basedir="${project.build.directory}/unpacked" />
                             </target>

@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.step.ml.ssd;
 
-import ai.konduit.serving.annotation.JsonName;
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

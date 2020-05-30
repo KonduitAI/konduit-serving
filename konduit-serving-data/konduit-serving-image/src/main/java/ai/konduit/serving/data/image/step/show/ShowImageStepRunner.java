@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.data.image.step.show;
 
-import ai.konduit.serving.annotation.CanRun;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@CanRun(value = ShowImagePipelineStep.class, moduleName = "konduit-serving-image")
+@CanRun(ShowImagePipelineStep.class)
 public class ShowImageStepRunner implements PipelineStepRunner {
 
     private static final int MIN_HEIGHT = 64;

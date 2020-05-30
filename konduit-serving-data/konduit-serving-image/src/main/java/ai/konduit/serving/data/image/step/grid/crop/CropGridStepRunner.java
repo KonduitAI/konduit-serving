@@ -18,8 +18,7 @@
 
 package ai.konduit.serving.data.image.step.grid.crop;
 
-import ai.konduit.serving.annotation.CanRun;
-import ai.konduit.serving.data.image.util.ColorUtil;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -34,16 +33,14 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.geometry.euclidean.twod.hull.ConvexHull2D;
 import org.apache.commons.math3.geometry.euclidean.twod.hull.MonotoneChain;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.common.primitives.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@CanRun(value = CropGridStep.class, moduleName = "konduit-serving-image")
+@CanRun(CropGridStep.class)
 public class CropGridStepRunner implements PipelineStepRunner {
 
     protected final CropGridStep step;

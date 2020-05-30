@@ -19,6 +19,7 @@
 package ai.konduit.serving.build.dependencies;
 
 import ai.konduit.serving.build.config.Target;
+import ai.konduit.serving.build.dependencies.nativedep.NativeDependency;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -31,6 +32,10 @@ import java.util.*;
 public class AnyRequirement implements DependencyRequirement {
     private final String name;
     private final Set<Dependency> set;
+
+    public AnyRequirement(String name, List<Dependency> dependencies) {
+        this(name, new HashSet<>(dependencies));
+    }
 
     public AnyRequirement(String name, Dependency... dependencies) {
         this.name = name;

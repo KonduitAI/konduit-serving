@@ -37,6 +37,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,10 +67,12 @@ public class TestResolving {
     }
 
     @Test
-    public void testBasicResolving() throws Exception {
+    public void testResolvingDL4JSameDiff() throws Exception {
+        //Specify the target - (OS + arch + device) and work out what dependencies we should include
 
         for(int testNum=0; testNum <=1; testNum++ ) {
-            for(Target t : new Target[]{Target.LINUX_X86, Target.LINUX_X86_AVX2, Target.WINDOWS_X86}) {
+            for(Target t : new Target[]{Target.LINUX_X86, Target.LINUX_X86_AVX2, Target.LINUX_X86_AVX512, Target.WINDOWS_X86, Target.WINDOWS_X86_AVX2,
+                    Target.LINUX_CUDA_10_2, Target.LINUX_CUDA_10_1, Target.LINUX_CUDA_10_0, Target.WINDOWS_CUDA_10_2, Target.WINDOWS_CUDA_10_1, Target.WINDOWS_CUDA_10_0}) {
 
                 PipelineStep step;
                 if (testNum == 0) {
@@ -77,7 +80,7 @@ public class TestResolving {
                     System.out.println("----- DL4J - " + t + " -----");
                 } else {
                     step = new SameDiffModelPipelineStep("file://some/model/path.fb", new SameDiffConfig());
-                    System.out.println("----- SameDiff - " + t + " -----");
+                    //System.out.println("----- SameDiff - " + t + " -----");
                 }
 
                 Pipeline p = SequencePipeline.builder()
@@ -102,12 +105,67 @@ public class TestResolving {
                         .deployments(new UberJarDeployment().outputDir("/my/output/dir").jarName("my.jar"));
 
 
-                List<Dependency> deps = c.resolveDependencies();
-                for (Dependency d : deps) {
-                    System.out.println(d);
+                List<Dependency> resolvedDeps = c.resolveDependencies();
+                if(testNum == 0) {
+                    for (Dependency d : resolvedDeps) {
+                        System.out.println(d);
+                    }
                 }
 
-                System.out.println("\n\n");
+                String ksVersion = "0.1.0-SNAPSHOT";
+                List<Dependency> expectedDeps = new ArrayList<>();
+                expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-pipeline", ksVersion));
+                if(testNum == 0){
+                    //DL4J
+                    expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-deeplearning4j", ksVersion));
+                } else {
+                    //SameDiff
+                    expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-samediff", ksVersion));
+                }
+
+                String ossVer = "1.0.0-beta7";
+                if(t.equals(Target.LINUX_X86)){
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer));
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer, "linux-x86_64"));
+                } else if(t.equals(Target.LINUX_X86_AVX2)){
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer));
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer, "linux-x86_64-avx2"));
+                } else if(t.equals(Target.LINUX_X86_AVX512)){
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer));
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer, "linux-x86_64-avx512"));
+                } else if(t.equals(Target.WINDOWS_X86)){
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer));
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer, "windows-x86_64"));
+                } else if(t.equals(Target.WINDOWS_X86_AVX2)){
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer));
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer, "windows-x86_64-avx2"));
+                } else if(t.equals(Target.LINUX_CUDA_10_2)){
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer));
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer, "linux-x86_64"));
+                } else if(t.equals(Target.LINUX_CUDA_10_1)){
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer));
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer, "linux-x86_64"));
+                } else if(t.equals(Target.LINUX_CUDA_10_0)){
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer));
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer, "linux-x86_64"));
+                } else if(t.equals(Target.WINDOWS_CUDA_10_2)){
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer));
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer, "windows-x86_64"));
+                } else if(t.equals(Target.WINDOWS_CUDA_10_1)){
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer));
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer, "windows-x86_64"));
+                } else if(t.equals(Target.WINDOWS_CUDA_10_0)){
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer));
+                    expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer, "windows-x86_64"));
+                } else {
+                    throw new UnsupportedOperationException(t.toString());
+                }
+
+                assertEquals(expectedDeps, resolvedDeps);
+
+                if (testNum == 0) {
+                    System.out.println();
+                }
             }
         }
 

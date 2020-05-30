@@ -16,5 +16,6 @@
 #  ******************************************************************************/
 #
 
-ai.konduit.serving.annotation.CanRunProcessor
-ai.konduit.serving.annotation.JsonNameProcessor
+ai.konduit.serving.annotation.runner.CanRunProcessor
+ai.konduit.serving.annotation.json.JsonNameProcessor
+ai.konduit.serving.annotation.module.RequiresDependenciesProcessor

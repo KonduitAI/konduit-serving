@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.models.samediff.step;
 
-import ai.konduit.serving.annotation.CanRun;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@CanRun(value = SameDiffModelPipelineStep.class, moduleName = "konduit-serving-samediff")
+@CanRun(SameDiffModelPipelineStep.class)
 public class SameDiffPipelineStepRunner implements PipelineStepRunner {
 
     public static final String DEFAULT_OUT_NAME_SINGLE = "default";

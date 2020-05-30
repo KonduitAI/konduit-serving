@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.data.image.step.bb.draw;
 
-import ai.konduit.serving.annotation.CanRun;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.util.ColorUtil;
@@ -37,11 +37,10 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.nd4j.common.base.Preconditions;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-@CanRun(value = DrawBoundingBoxStep.class, moduleName = "konduit-serving-image")
+@CanRun(DrawBoundingBoxStep.class)
 public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
 
     protected final DrawBoundingBoxStep step;

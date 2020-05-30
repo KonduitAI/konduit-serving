@@ -17,7 +17,7 @@
  */
 package ai.konduit.serving.camera.step.capture;
 
-import ai.konduit.serving.annotation.CanRun;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -30,7 +30,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameGrabber;
 
 @Slf4j
-@CanRun(value = FrameCapturePipelineStep.class, moduleName = "konduit-serving-camera")
+@CanRun(FrameCapturePipelineStep.class)
 public class FrameCaptureStepRunner implements PipelineStepRunner {
 
     protected final FrameCapturePipelineStep step;

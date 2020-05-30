@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.data.image.step.segmentation.index;
 
-import ai.konduit.serving.annotation.CanRun;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
@@ -28,7 +28,6 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import lombok.NonNull;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
-import org.bytedeco.javacpp.indexer.UIntIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -42,7 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-@CanRun(value = DrawSegmentationStep.class, moduleName = "konduit-serving-image")
+@CanRun(DrawSegmentationStep.class)
 public class DrawSegmentationStepRunner implements PipelineStepRunner {
 
     protected final DrawSegmentationStep step;

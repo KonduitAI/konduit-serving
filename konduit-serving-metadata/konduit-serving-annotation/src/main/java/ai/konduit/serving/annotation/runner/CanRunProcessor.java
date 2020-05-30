@@ -16,16 +16,16 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.annotation;
+package ai.konduit.serving.annotation.runner;
+
+import ai.konduit.serving.annotation.AnnotationUtils;
+import ai.konduit.serving.annotation.module.ModuleInfo;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
-import java.io.Writer;
 import java.util.*;
 
 /**
@@ -35,23 +35,38 @@ import java.util.*;
  * able to run a particular instance of this type of PipelineStep due to some configuration or versioning issue (but it
  * must be able to run _some_ of these types of PipelineStep instances)
  * <br>
- * During processing, this processor writes a "META-INF/konduit-serving/ai.konduit.serving.annotation.CanRun" file
+ * During processing, this processor writes a "META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun" file
  * with content like: ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep,ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStepRunner<br>
  * which should be interpreted as "LoggingPipelineStep can be run by LoggingPipelineStepRunner"
  *
  * @author Alex Black
  */
-@SupportedAnnotationTypes("ai.konduit.serving.annotation.CanRun")
+@SupportedAnnotationTypes({"ai.konduit.serving.annotation.runner.CanRun", "ai.konduit.serving.annotation.module.ModuleInfo"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class CanRunProcessor extends AbstractProcessor {
 
     private List<String> toWrite = new ArrayList<>();
+    private String moduleName;
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
+
         if(env.processingOver()){
+            if(moduleName == null){
+                throw new IllegalStateException("No class in this module is annotated with @ModuleInfo - a class with " +
+                        "@ModuleInfo(\"your-module-name\" should be added to the module that has the @CanRun(...) annotation");
+            }
             writeFile();
         } else {
+            if(moduleName == null){
+                Collection<? extends Element> c = env.getElementsAnnotatedWith(ModuleInfo.class);
+                List<TypeElement> types = ElementFilter.typesIn(c);
+                for(TypeElement te : types){
+                    moduleName = te.getAnnotation(ModuleInfo.class).value();
+                    break;
+                }
+            }
+
             //Collect info for writing at end
             Collection<? extends Element> c = env.getElementsAnnotatedWith(CanRun.class);
             List<TypeElement> types = ElementFilter.typesIn(c);
@@ -82,19 +97,26 @@ public class CanRunProcessor extends AbstractProcessor {
                     }
                 }
 
-                String moduleName = annotation.getAnnotation(CanRun.class).moduleName();
-
-                for(String s : values) {
-                    toWrite.add(s + "," + annotation.toString() + "," + moduleName);   //Format: pipelineClass,runnerClass,module - i.e., "this type of pipeline step (in specified module) can be run by this type of runner"
+                if(values != null) {
+                    for (String s : values) {
+                        toWrite.add(s + "," + annotation.toString());   //Format: pipelineClass,runnerClass,module - i.e., "this type of pipeline step (in specified module) can be run by this type of runner"
+                    }
                 }
             }
         }
 
-        return true;
+        return false;   //Allow other processors to process ModuleInfo
     }
 
     protected void writeFile(){
+        if(toWrite.isEmpty())           //Can be empty if @ModuleInfo exists but no runners
+            return;
+
         Filer filer = processingEnv.getFiler();
-        AnnotationUtils.writeFile(filer, CanRun.class, toWrite);
+        List<String> toWrite2 = new ArrayList<>();
+        for(String s : toWrite){
+            toWrite2.add(s + "," + moduleName);
+        }
+        AnnotationUtils.writeFile(filer, CanRun.class, toWrite2);
     }
 }

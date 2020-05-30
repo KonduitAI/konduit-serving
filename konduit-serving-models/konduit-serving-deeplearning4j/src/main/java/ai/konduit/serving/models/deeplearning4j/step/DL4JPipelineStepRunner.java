@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.models.deeplearning4j.step;
 
-import ai.konduit.serving.annotation.CanRun;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -35,7 +35,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
-@CanRun(value = DL4JModelPipelineStep.class, moduleName = "konduit-serving-deeplearning4j")
+@CanRun(DL4JModelPipelineStep.class)
 public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     public static final String DEFAULT_OUT_NAME_SINGLE = "default";

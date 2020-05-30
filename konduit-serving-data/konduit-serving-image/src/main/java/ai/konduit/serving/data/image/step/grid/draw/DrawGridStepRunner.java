@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.data.image.step.grid.draw;
 
-import ai.konduit.serving.annotation.CanRun;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -40,7 +40,7 @@ import org.nd4j.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 
-@CanRun(value = DrawGridStep.class, moduleName = "konduit-serving-image")
+@CanRun(DrawGridStep.class)
 public class DrawGridStepRunner implements PipelineStepRunner {
 
     protected final DrawGridStep step;

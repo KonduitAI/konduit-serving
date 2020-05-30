@@ -52,7 +52,7 @@ public class ModuleUtils {
     }
 
     public static Map<StepId, List<RunnerInfo>> runnersForJson(String json){
-        System.out.println(json);
+        //System.out.println(json);
 
         Map<StepId, List<RunnerInfo>> out = new HashMap<>();
 
@@ -106,7 +106,7 @@ public class ModuleUtils {
     public static Map<String,RunnerInfo> pipelineClassToRunnerClass(){
         String s;
         try {
-            File f = new ClassPathResource("META-INF/konduit-serving/PipelineStepRunnerMeta").getFile();
+            File f = new ClassPathResource("META-INF/konduit-serving/PipelineStepRunner").getFile();
             s = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
         } catch (IOException e){
             throw new RuntimeException(e);

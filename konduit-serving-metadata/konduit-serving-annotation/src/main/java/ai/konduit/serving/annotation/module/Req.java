@@ -16,9 +16,9 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.annotation;
+package ai.konduit.serving.annotation.module;
 
-public @interface JsonName {
-    String jsonName();
-    Class<?> subclassOf();      //TODO this will be removed - we should be able to work it out automatically!
+public enum Req {
+    ALL,
+    ANY
 }

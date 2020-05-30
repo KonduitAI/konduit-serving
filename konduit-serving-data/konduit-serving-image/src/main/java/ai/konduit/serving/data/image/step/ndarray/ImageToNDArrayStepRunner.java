@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.data.image.step.ndarray;
 
-import ai.konduit.serving.annotation.CanRun;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.*;
@@ -31,7 +31,7 @@ import org.nd4j.common.primitives.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
-@CanRun(value = ImageToNDArrayStep.class, moduleName = "konduit-serving-image")
+@CanRun(ImageToNDArrayStep.class)
 public class ImageToNDArrayStepRunner implements PipelineStepRunner {
 
     protected final ImageToNDArrayStep step;
