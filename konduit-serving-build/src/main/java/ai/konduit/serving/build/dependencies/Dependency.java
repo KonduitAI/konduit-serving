@@ -57,4 +57,9 @@ public class Dependency {
     public String gavString(){
         return groupId + ":" + artifactId + ":" + version + (classifier == null ? "" : ":" + classifier);
     }
+
+    @Override
+    public String toString(){
+        return "Dependency(" + gavString() + ")";
+    }
 }

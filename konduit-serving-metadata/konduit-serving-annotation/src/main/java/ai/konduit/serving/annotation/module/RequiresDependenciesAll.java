@@ -19,9 +19,10 @@
 package ai.konduit.serving.annotation.module;
 
 /**
- * Inherit the required dependencies from the specified module (by name, for example: konduit-serving-nd4j), instead of
- * defining the {@link RequiresDependenciesAll} section with the same content
+ * Dependencies that are required by this module in order to execute
+ * Note these are dependencies other than the ones already included in the module's Maven dependencies
+ * For example, backends (CPU or GPU) for ND4J, CPU or GPU native dependencies for Tensorflow, etc.
  */
-public @interface InheritRequiredDependencies {
-    String value();
+public @interface RequiresDependenciesAll {
+    Requires[] value();
 }

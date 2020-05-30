@@ -33,6 +33,10 @@ public class AllRequirement implements DependencyRequirement {
     private final String name;
     private Set<Dependency> set;
 
+    public AllRequirement(String name, List<Dependency> dependencies) {
+        this(name, new HashSet<>(dependencies));
+    }
+
     public AllRequirement(String name, Dependency... dependencies){
         this.name = name;
         this.set = new HashSet<>(Arrays.asList(dependencies));
@@ -97,7 +101,16 @@ public class AllRequirement implements DependencyRequirement {
             }
 
             if(!matchFound){
-                notFound.add(need);
+                if(need.isNativeDependency()){
+                    //Don't suggest a native dependency that can't be run on this target, even if it's a requirement for
+                    // other targets that it _does_ run on
+                    NativeDependency nd = need.getNativeDependency();
+                    if(nd.supports(target)){
+                        notFound.add(need);
+                    }
+                } else {
+                    notFound.add(need);
+                }
             }
         }
 

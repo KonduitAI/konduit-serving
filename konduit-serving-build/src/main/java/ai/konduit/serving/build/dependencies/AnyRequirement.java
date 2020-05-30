@@ -33,6 +33,10 @@ public class AnyRequirement implements DependencyRequirement {
     private final String name;
     private final Set<Dependency> set;
 
+    public AnyRequirement(String name, List<Dependency> dependencies) {
+        this(name, new HashSet<>(dependencies));
+    }
+
     public AnyRequirement(String name, Dependency... dependencies) {
         this.name = name;
         set = new HashSet<>(Arrays.asList(dependencies));

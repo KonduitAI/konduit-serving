@@ -52,7 +52,7 @@ public class ModuleUtils {
     }
 
     public static Map<StepId, List<RunnerInfo>> runnersForJson(String json){
-        System.out.println(json);
+        //System.out.println(json);
 
         Map<StepId, List<RunnerInfo>> out = new HashMap<>();
 

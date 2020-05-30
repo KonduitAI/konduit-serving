@@ -19,7 +19,6 @@
 package ai.konduit.serving.annotation.module;
 
 import ai.konduit.serving.annotation.AnnotationUtils;
-import ai.konduit.serving.annotation.runner.CanRun;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -32,7 +31,8 @@ import java.util.List;
 import java.util.Set;
 
 @SupportedAnnotationTypes({"ai.konduit.serving.annotation.module.ModuleInfo",
-        "ai.konduit.serving.annotation.module.RequiresDependencies",
+        "ai.konduit.serving.annotation.module.RequiresDependenciesAny",
+        "ai.konduit.serving.annotation.module.RequiresDependenciesAll",
         "ai.konduit.serving.annotation.module.InheritRequiredDependencies"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class RequiresDependenciesProcessor extends AbstractProcessor {
@@ -61,11 +61,11 @@ public class RequiresDependenciesProcessor extends AbstractProcessor {
                 }
             }
 
-            //Get the dependency requirements for the module from @RequiredDependencies
-            Collection<? extends Element> c = env.getElementsAnnotatedWith(RequiresDependencies.class);
+            //Get the dependency requirements for the module from @RequiredDependenciesAll
+            Collection<? extends Element> c = env.getElementsAnnotatedWith(RequiresDependenciesAll.class);
             List<TypeElement> l = ElementFilter.typesIn(c);
             for(TypeElement annotation : l){
-                Requires[] requires = annotation.getAnnotation(RequiresDependencies.class).value();
+                Requires[] requires = annotation.getAnnotation(RequiresDependenciesAll.class).value();
 
                 for (Requires require : requires) {
                     Dependency[] deps = require.value();
@@ -93,6 +93,52 @@ public class RequiresDependenciesProcessor extends AbstractProcessor {
                     toWrite.add(s);
                 }
             }
+
+            //Get the dependency requirements for the module from @RequiredDependenciesAny
+            //Encode as module_name,{{Requires},{Requires},...}
+            c = env.getElementsAnnotatedWith(RequiresDependenciesAny.class);
+            l = ElementFilter.typesIn(c);
+            for(TypeElement annotation : l){
+                Requires[] requires = annotation.getAnnotation(RequiresDependenciesAny.class).value();
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("{");
+                boolean first = true;
+                for (Requires require : requires) {
+                    if(!first)
+                        sb.append(",");
+
+                    Dependency[] deps = require.value();
+                    Req req = require.requires();
+
+                    List<String> depsStrList = new ArrayList<>();
+                    for(Dependency d : deps){
+                        //g:a:v:(any or all of classifiers)
+                        String g = d.gId();
+                        String a = d.aId();
+                        String v = d.ver();
+                        String[] cl = d.classifier();
+                        Req r = d.cReq();
+                        depsStrList.add(process(g,a,v,cl,r));
+                    }
+
+                    String s;
+                    if(req == Req.ALL){
+                        s = "[" + String.join(",", depsStrList) + "]";
+                    } else {
+                        //Any
+                        s = "{" + String.join(",", depsStrList) + "}";
+                    }
+
+                    sb.append(s);
+                    first = false;
+                }
+
+                sb.append("}");
+                toWrite.add(sb.toString());
+            }
+
+
 
             //Get the inherited dependency requirements for the module from @InheritRequiredDependencies
             c = env.getElementsAnnotatedWith(InheritRequiredDependencies.class);
@@ -133,6 +179,6 @@ public class RequiresDependenciesProcessor extends AbstractProcessor {
         for(String s : toWrite){
             toWrite2.add(moduleName + "," + s);
         }
-        AnnotationUtils.writeFile(filer, RequiresDependencies.class, toWrite2);
+        AnnotationUtils.writeFile(filer, RequiresDependenciesAll.class, toWrite2);
     }
 }

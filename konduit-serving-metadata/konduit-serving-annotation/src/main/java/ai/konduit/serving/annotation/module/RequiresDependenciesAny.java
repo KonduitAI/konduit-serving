@@ -23,6 +23,6 @@ package ai.konduit.serving.annotation.module;
  * Note these are dependencies other than the ones already included in the module's Maven dependencies
  * For example, backends (CPU or GPU) for ND4J, CPU or GPU native dependencies for Tensorflow, etc.
  */
-public @interface RequiresDependencies {
+public @interface RequiresDependenciesAny {
     Requires[] value();
 }

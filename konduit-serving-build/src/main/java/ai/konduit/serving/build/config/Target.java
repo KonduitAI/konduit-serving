@@ -103,6 +103,9 @@ public class Target {
     public static final Target WINDOWS_X86 = new Target(OS.WINDOWS, Arch.x86, null);
     public static final Target WINDOWS_X86_AVX2 = new Target(OS.WINDOWS, Arch.x86_avx2, null);
 
+    public static final Target MACOSX_X86 = new Target(OS.MACOSX, Arch.x86, null);
+    public static final Target MACOSX_X86_AVX2 = new Target(OS.MACOSX, Arch.x86_avx2, null);
+
     public static final Target LINUX_CUDA_10_0 = new Target(OS.LINUX, Arch.x86, new CUDADevice("10.0"));
     public static final Target LINUX_CUDA_10_1 = new Target(OS.LINUX, Arch.x86, new CUDADevice("10.1"));
     public static final Target LINUX_CUDA_10_2 = new Target(OS.LINUX, Arch.x86, new CUDADevice("10.2"));
@@ -110,6 +113,9 @@ public class Target {
     public static final Target WINDOWS_CUDA_10_1 = new Target(OS.WINDOWS, Arch.x86, new CUDADevice("10.1"));
     public static final Target WINDOWS_CUDA_10_2 = new Target(OS.WINDOWS, Arch.x86, new CUDADevice("10.2"));
 
+    /** Linux, Windows and Mac x86, x86 avx2 and avx512 */
+    public static final Target[] LWM_X86 = new Target[]{LINUX_X86, LINUX_X86_AVX2, LINUX_X86_AVX512, WINDOWS_X86, WINDOWS_X86_AVX2,
+            MACOSX_X86, MACOSX_X86_AVX2};
 
     private OS os;
     private Arch arch;

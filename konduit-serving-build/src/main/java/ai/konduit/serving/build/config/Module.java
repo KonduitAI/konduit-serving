@@ -20,6 +20,7 @@ package ai.konduit.serving.build.config;
 
 import ai.konduit.serving.annotation.module.RequiresDependenciesProcessor;
 import ai.konduit.serving.build.dependencies.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.commons.io.FileUtils;
@@ -99,66 +100,59 @@ public class Module {
             String module = line.substring(0, idx);
             String deps = line.substring(idx+1);
 
-            boolean any;
-            if(deps.startsWith("{")){           //Any of
-                any = true;
-            } else if(deps.startsWith("[")) {    //All of
-                any = false;
-            } else if(deps.startsWith(RequiresDependenciesProcessor.INHERIT_MODULE_PREFIX)){
+            if(deps.startsWith(RequiresDependenciesProcessor.INHERIT_MODULE_PREFIX)){
                 String inheritFrom = deps.substring(RequiresDependenciesProcessor.INHERIT_MODULE_PREFIX.length());
                 inherit.put(module, inheritFrom);
                 continue;
-            } else {
-                throw new IllegalStateException("Cannot load Module info: META-INF/konduit-serving/ModuleRequiresDependencies file format is incorrect");
             }
 
-            //Example format: "org.nd4j:nd4j-native:1.0.0-beta7:{linux-x86_64,linux-x86_64-avx2,linux-x86_64-avx512,linux-ppc64le,linux-arm64,linux-armhf,windows-x86_64,windows-x86_64-avx2,macosx-x86_64,macosx-x86_64-avx2}","org.nd4j:nd4j-cuda-10.0:1.0.0-beta7:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}","org.nd4j:nd4j-cuda-10.1:1.0.0-beta7:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}","org.nd4j:nd4j-cuda-10.2:1.0.0-beta7:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}"
-            deps = deps.substring(1, deps.length()-1);  //Strip first/last bracket
-
-            List<DependencyRequirement> reqs = new ArrayList<>();
-            List<Dependency> depsForReq = new ArrayList<>();
-            if(!deps.isEmpty()) {   //Can be empty if there are no requirements for this module
-                String[] depsSplit = deps.split("\",\"");
-                depsSplit[0] = depsSplit[0].substring(1);   //Remove leading quote
-                depsSplit[depsSplit.length - 1] = depsSplit[depsSplit.length - 1].substring(0, depsSplit[depsSplit.length - 1].length() - 1);   //Remove training quote
-
-
-                for (String d : depsSplit) {
-                    String[] split = d.split(":");
-
-                    if (split.length == 4) {
-                        String classifiers = split[3];
-                        if (classifiers.startsWith("{") || classifiers.startsWith("[")) {
-                            boolean allClassifier = classifiers.startsWith("[");            //{any} vs. [all]
-                            classifiers = classifiers.substring(1, classifiers.length() - 1); //Strip brackets
-                            String[] cs = classifiers.split(",");
-                            List<Dependency> dList = new ArrayList<>();
-                            for (String c : cs) {
-                                dList.add(new Dependency(split[0], split[1], split[2], c));
-                            }
-                            if (allClassifier) {
-                                //All classifiers are needed
-                                throw new UnsupportedOperationException("Not yet implemented");
-                            } else {
-                                //Only one of the classifiers are needed (usual case)
-                                depsForReq.addAll(dList);
-                            }
-                        } else {
-                            //Single classifier
-                            depsForReq.add(new Dependency(split[0], split[1], split[2], classifiers));
-                        }
-                    } else {
-                        //GAV only
-                        depsForReq.add(new Dependency(split[0], split[1], split[2]));
-                    }
-                }
-                reqs.add(new AnyRequirement("", depsForReq.toArray(new Dependency[0])));      //TODO requirement name
-            }
+            //First: need to work out if an "Any of" dependency, or just one instance of an ALL requirement
+            //Note that ALL requirements are on separate lines, whereas ANY are on one line
+            boolean isAny = deps.startsWith("{{") || deps.startsWith("{[");
 
             ModuleRequirements r = null;
-            if(!reqs.isEmpty()){
-                r = new ModuleRequirements(reqs);
+            if(isAny){
+                //Example format: {["org.nd4j:nd4j-native:1.0.0-beta7","org.nd4j:nd4j-native:1.0.0-beta7:{linux-x86_64,...}"],["org.nd4j:nd4j-cuda-10.0:1.0.0-beta7","org.nd4j:nd4j-cuda-10.0:1.0.0-beta7:{linux-x86_64,...}"]}
+                //This should be interpreted to mean: "We need ANY ONE of the [...] blocks, for which we need all of inner dependencies
+                //In this instance, we need nd4j-native AND its classifier - OR - we need nd4j-cuda-10.x AND its classifier
+                String before = deps;
+                deps = deps.substring(1, deps.length()-1);  //Strip first/last bracket
+                List<DependencyRequirement> toCombine = new ArrayList<>();
+                boolean thisAll = deps.startsWith("[");
+                String[] reqSplit = deps.split("[]}],[\\[{]");  //Split on: "],[" or "],{" or "},[" or "},{;
+                reqSplit[0] = reqSplit[0].substring(1); //Strip leading "["
+                reqSplit[reqSplit.length-1] = reqSplit[reqSplit.length-1].substring(0, reqSplit[reqSplit.length-1].length()-1);     //Strip trainig "]"
+                for(String req : reqSplit ){
+                    //req = req.substring(1);     //Strip leading bracket; trailing bracket
+                    if(req.endsWith("]") || req.endsWith("}"))
+                        req = req.substring(0, req.length()-1);
+                    if(req.isEmpty())
+                        continue;       //Shouldn't happen except for malformed annotation (no @Dependency in block)
+
+                    DependencyRequirement parse = parseDependenciesLine(req, !thisAll);
+                    toCombine.add(parse);
+                }
+
+                DependencyRequirement req = new CompositeRequirement(CompositeRequirement.Type.ANY, toCombine);
+                r = new ModuleRequirements(Collections.singletonList(req));
+            } else {
+                //Example format: "org.nd4j:nd4j-native:1.0.0-beta7:{linux-x86_64,linux-x86_64-avx2,linux-x86_64-avx512,linux-ppc64le,linux-arm64,linux-armhf,windows-x86_64,windows-x86_64-avx2,macosx-x86_64,macosx-x86_64-avx2}","org.nd4j:nd4j-cuda-10.0:1.0.0-beta7:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}","org.nd4j:nd4j-cuda-10.1:1.0.0-beta7:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}","org.nd4j:nd4j-cuda-10.2:1.0.0-beta7:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}"
+                //This should be interpreted as "any of the following"
+                deps = deps.substring(1, deps.length()-1);  //Strip first/last bracket
+
+                List<DependencyRequirement> reqs = new ArrayList<>();
+                List<Dependency> depsForReq = new ArrayList<>();
+                if(!deps.isEmpty()) {   //Can be empty if there are no requirements for this module
+                    DependencyRequirement req = parseDependenciesLine(deps, true);
+                    reqs.add(req);
+                }
+
+                if(!reqs.isEmpty()){
+                    r = new ModuleRequirements(reqs);
+                }
             }
+
+
 
             if(modulesInner.containsKey(module)){
                 Module mod = modulesInner.get(module);
@@ -167,7 +161,8 @@ public class Module {
                     mod = new Module(module, ksModule(module), r, null);
                     modulesInner.put(module, mod);
                 } else if(r != null){
-                    reqs.addAll(currReqs);
+                    List<DependencyRequirement> newRews = mod.dependenciesRequired().reqs();
+                    newRews.addAll(currReqs);
                     mod = new Module(module, ksModule(module), r, null);
                     modulesInner.put(module, mod);
                 }
@@ -229,6 +224,140 @@ public class Module {
             }
         }
     }
+
+    protected static DependencyRequirement parseDependenciesLine(String line, boolean any){
+        String[] depsSplit = line.split("\",\"");
+        depsSplit[0] = depsSplit[0].substring(1);   //Remove leading quote
+        depsSplit[depsSplit.length - 1] = depsSplit[depsSplit.length - 1].substring(0, depsSplit[depsSplit.length - 1].length() - 1);   //Remove training quote
+
+        List<DepSet> set = new ArrayList<>();
+        for (String d : depsSplit) {
+            String[] split = d.split(":");
+
+            if (split.length == 4) {
+                String classifiers = split[3];
+                if (classifiers.startsWith("{") || classifiers.startsWith("[")) {
+                    boolean allClassifier = classifiers.startsWith("[");            //{any} vs. [all]
+                    classifiers = classifiers.substring(1, classifiers.length() - 1); //Strip brackets
+                    String[] cs = classifiers.split(",");
+                    List<Dependency> dList = new ArrayList<>();
+                    List<Dependency> classifierSet = new ArrayList<>();
+                    for (String c : cs) {
+                        classifierSet.add(new Dependency(split[0], split[1], split[2], c));
+                    }
+                    if (allClassifier) {
+                        //All classifiers are needed
+                        throw new UnsupportedOperationException("Not yet implemented");
+                    } else {
+                        //Only one of the classifiers are needed (usual case)
+                        set.add(new DepSet(classifierSet));
+                    }
+                } else {
+                    //Single classifier
+                    set.add(new DepSet(Collections.singletonList(new Dependency(split[0], split[1], split[2]))));
+                }
+            } else {
+                //GAV only
+                set.add(new DepSet(Collections.singletonList(new Dependency(split[0], split[1], split[2]))));
+            }
+        }
+
+
+        boolean allSingle = true;
+        for(DepSet s : set){
+            allSingle = s.list.size() == 1;
+            if(!allSingle)
+                break;
+        }
+
+        if(allSingle){
+            //Combine into a single AllRequirement
+            List<Dependency> finalDeps = new ArrayList<>();
+            for(DepSet s : set){
+                finalDeps.addAll(s.list);
+            }
+            return new AllRequirement("", finalDeps);
+        } else {
+            //Combine into a composite requirement
+            List<DependencyRequirement> reqs = new ArrayList<>();
+            for(DepSet s : set){
+                if(s.list.size() == 1){
+                    reqs.add(new AllRequirement("", s.list));
+                } else {
+                    //Multiple classifiers
+                    reqs.add(new AnyRequirement("", s.list));
+                }
+            }
+            return new CompositeRequirement(any ? CompositeRequirement.Type.ANY : CompositeRequirement.Type.ALL, reqs);
+        }
+
+
+//        if(any){
+//            boolean allSingle = true;
+//            for(DepSet s : set){
+//                allSingle = s.list.size() == 1;
+//                if(!allSingle)
+//                    break;
+//            }
+//
+//            if(allSingle){
+//                //Combine into a single AnyRequirement
+//                List<Dependency> finalDeps = new ArrayList<>();
+//                for(DepSet s : set){
+//                    finalDeps.addAll(s.list);
+//                }
+//                return new AnyRequirement("", finalDeps);
+//            } else {
+//                //Combine into a composite requirement
+//                List<DependencyRequirement> reqs = new ArrayList<>();
+//                for(DepSet s : set){
+//                    if(s.list.size() == 1){
+//                        reqs.add(new AllRequirement("", s.list));
+//                    } else {
+//                        //Multiple classifiers
+//                        reqs.add(new AnyRequirement("", s.list));
+//                    }
+//                }
+//                return new CompositeRequirement(CompositeRequirement.Type.ANY, reqs);
+//            }
+//        } else {
+//            boolean allSingle = true;
+//            for(DepSet s : set){
+//                allSingle = s.list.size() == 1;
+//                if(!allSingle)
+//                    break;
+//            }
+//
+//            if(allSingle){
+//                //Combine into a single AllRequirement
+//                List<Dependency> finalDeps = new ArrayList<>();
+//                for(DepSet s : set){
+//                    finalDeps.addAll(s.list);
+//                }
+//                return new AllRequirement("", finalDeps);
+//            } else {
+//                //Combine into a composite requirement
+//                List<DependencyRequirement> reqs = new ArrayList<>();
+//                for(DepSet s : set){
+//                    if(s.list.size() == 1){
+//                        reqs.add(new AllRequirement("", s.list));
+//                    } else {
+//                        //Multiple classifiers
+//                        reqs.add(new AnyRequirement("", s.list));
+//                    }
+//                }
+//                return new CompositeRequirement(CompositeRequirement.Type.ALL, reqs);
+//            }
+//        }
+    }
+
+    @AllArgsConstructor
+    @Data
+    private static class DepSet {
+        private List<Dependency> list;
+    }
+
+
 
     protected static Dependency ksModule(String name){
         //TODO don't hardcode versions

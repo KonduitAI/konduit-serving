@@ -60,6 +60,9 @@ public class NativeDependencyRegistry {
         //These are dependencies that can only run on a specific target
         //TODO - TF, ONNX, etc
 
+        //ND4J native
+        put(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null), Target.LWM_X86);
+
         //CUDA
         put(new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-beta7", null), Target.LINUX_CUDA_10_0, Target.WINDOWS_CUDA_10_0);
         put(new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-beta7", null), Target.LINUX_CUDA_10_1, Target.WINDOWS_CUDA_10_1);
