@@ -37,7 +37,6 @@ import org.nd4j.shade.guava.collect.Streams;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -51,7 +50,7 @@ import static org.junit.Assert.assertThat;
 
 @Slf4j
 @NotThreadSafe
-public class KonduitServingLauncherTestsWithProcesses {
+public class KonduitServingLauncherWithProcessesTest {
 
     private static final String TEST_SERVER_ID = "konduit_serving_test_server";
     private static final String KONDUIT_CLASSPATH = System.getProperty("konduit.test.class.path");

@@ -50,16 +50,28 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Name("config")
-@Summary("A helper command for creating JSON for inference configuration")
-@Description("This command is a utility to create json configurations that can be consumed to start konduit servers.\n\n" +
+@Summary("A helper command for creating boiler plate json/yaml for inference configuration")
+@Description("This command is a utility to create boilerplate json/yaml configurations that can be easily modified to start konduit servers.\n\n" +
         "Example usages:\n" +
         "--------------\n" +
-        "- Prints 'TENSORFLOW' config in pretty format:\n" +
-        "$ konduit config -t TENSORFLOW\n\n" +
-        "- Prints 'IMAGE + DL4J' config in minified format:\n" +
-        "$ konduit config -t IMAGE,DL4J -m\n\n" +
-        "- Saves 'IMAGE + DL4J' config in a 'config.json' file:\n" +
-        "$ konduit config -t IMAGE,DL4J -o config.json\n" +
+        "                      -- FOR SEQUENCES --\n" +
+        "- Prints 'logging -> tensorflow -> logging' config in pretty format:\n" +
+        "$ konduit config -p logging,tensorflow,logging\n\n" +
+        "- Prints 'dl4j -> logging' config in minified format:\n" +
+        "$ konduit config -p dl4j,logging -m\n\n" +
+        "- Saves 'dl4j -> logging' config in a 'config.json' file:\n" +
+        "$ konduit config -p dl4j,logging -o config.json\n\n" +
+        "- Saves 'dl4j -> logging' config in a 'config.yaml' file:\n" +
+        "$ konduit config -p dl4j,logging -y -o config.json\n" +
+        "\n\n                      -- FOR GRAPHS --\n" +
+        "- Generates a config that logs the input(1) then flow them through two \n" +
+        "  tensorflow models(2,3) and merges the output(4):\n" +
+        "$ konduit config -p logging:1,tensorflow:2:1,tensorflow:3:1,merge:4:2+3\n\n" +
+        "- Generates a config that logs the input(1) then channels(2) them through one\n" +
+        "  of the two tensorflow models(3,4) and then selects the output(5) based\n" +
+        "  on the value of the selection integer field 'select'\n" +
+        "$ konduit config -p \n" +
+        "  logging:1,switch:2:1|int:select|tensorflow:3+tensorflow:4,any:5:3+4\n" +
         "--------------")
 public class ConfigCommand extends DefaultCommand {
 
@@ -96,16 +108,23 @@ public class ConfigCommand extends DefaultCommand {
     private boolean yaml;
     private File outputFile;
 
-    @Option(longName = "pipeline", shortName = "p", argName = "config-types", required = true)
-    @Description("A comma-separated list of pipeline steps you want to create boilerplate configuration for. " +
-            "Allowed values are: [logging]. " +
-            "For creating a graph pipeline the list item should be in the format: <step_name>:<step_type>")
+    @Option(longName = "pipeline", shortName = "p", argName = "config", required = true)
+    @Description("A comma-separated list of sequence/graph pipeline steps to create boilerplate configuration from. " +
+            "For sequences, allowed values are: [logging]. " +
+            "For graphs, the list item should be in the format '<step_type>:<step_name>' for root inputs and " +
+            "'<step_type>:<step_name>:<input_name>' for specified input ('<step_type>:<step_name>:<input1_name>+<input2_name>+...' for multiple inputs. Multiple inputs are only applicable to 'merge' and 'any' graph step types). " +
+            "For switch type step the formats are: " +
+            "1: 'switch:<step_name>|int:<field_name>|<step1_type>:<step1_name>+<step2_type>:<step2_name>+...' (for 'int' type switch), " +
+            "2: 'switch:<step_name>:<input_name>|int:<field_name>|<step1_type>:<step1_name>+<step2_type>:<step2_name>+...' (for 'int' type switch with input specified), " +
+            "3: 'switch:<step_name>|string:<field_name>/key1:value1+key2:value2+...|<step1_type>:<step1_name>+<step2_type>:<step2_name>+...' (for 'string' type switch), " +
+            "4: 'switch:<step_name>:<input_name>|string:<field_name>/key1:value1+key2:value2+...|<step1_type>:<step1_name>+<step2_type>:<step2_name>+...' (for 'string' type switch with input specified)." +
+            "See the examples above for the usage.")
     public void setPipeline(String pipelineString) {
         this.pipelineString = pipelineString;
     }
 
     @Option(longName = "minified", shortName = "m", flag = true)
-    @Description("If set, the output json will be printed in a single line, without indentations.")
+    @Description("If set, the output json will be printed in a single line, without indentations. (Ignored for yaml configuration output)")
     public void setMinified(boolean minified) {
         this.minified = minified;
     }
@@ -115,7 +134,7 @@ public class ConfigCommand extends DefaultCommand {
     public void setYaml(boolean yaml) { this.yaml = yaml; }
 
     @Option(longName = "output", shortName = "o", argName = "output-file")
-    @Description("Optional: If set, the generated json will be saved here. Otherwise, it's printed on the console.")
+    @Description("Optional: If set, the generated json/yaml will be saved here. Otherwise, it's printed on the console.")
     public void setOutputFile(String output) {
         outputFile = new File(output);
         if(outputFile.exists()) {

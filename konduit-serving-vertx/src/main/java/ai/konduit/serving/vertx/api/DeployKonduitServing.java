@@ -130,6 +130,7 @@ public class DeployKonduitServing {
                                 .loadClass(PROTOCOL_SERVICE_MAP.get(serverProtocol))
                                 .getConstructor().newInstance();
                     } catch (ClassNotFoundException classNotFoundException) {
+                        vertx.close();
                         throw new IllegalStateException(
                                 String.format("Missing classes for protocol service %s. Make sure the binaries contain the '%s' module.",
                                         protocolName,
@@ -137,6 +138,7 @@ public class DeployKonduitServing {
                         );
                     }
                 } else {
+                    vertx.close();
                     throw new IllegalStateException(
                             String.format("No inference service found for type: %s. Available service types are: [%s]",
                                     protocolName,

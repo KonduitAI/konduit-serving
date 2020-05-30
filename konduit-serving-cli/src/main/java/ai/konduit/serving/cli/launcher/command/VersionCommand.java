@@ -29,7 +29,7 @@ import java.util.Properties;
 
 @Name(value = "version", priority = 1)
 @Summary("Displays konduit-serving version.")
-@Description("Prints the konduit-serving version used by the application.")
+@Description("Prints the konduit-serving version used by the application along with other build details.")
 public class VersionCommand extends DefaultCommand {
 
     private static String version;

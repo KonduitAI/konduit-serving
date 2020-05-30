@@ -46,8 +46,8 @@ import static ai.konduit.serving.cli.launcher.command.KonduitRunCommand.DEFAULT_
         "--------------\n" +
         "- Starts a server in the foreground with an id of 'inf_server' using 'config.json' as configuration file:\n" +
         "$ konduit serve -id inf_server -c config.json\n\n" +
-        "- Starts a server in the background with an id of 'inf_server' using 'config.json' as configuration file:\n" +
-        "$ konduit serve -id inf_server -c config.json -b\n" +
+        "- Starts a server in the background with an id of 'inf_server' using 'config.yaml' as configuration file:\n" +
+        "$ konduit serve -id inf_server -c config.yaml -b\n" +
         "--------------")
 public class ServeCommand extends DefaultCommand {
 
