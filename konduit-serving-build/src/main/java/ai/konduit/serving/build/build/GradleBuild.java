@@ -86,14 +86,21 @@ public class GradleBuild {
         FileUtils.writeStringToFile(ktsFile, kts.toString(), Charset.defaultCharset());
     }
 
-    public static void runGradleBuild(File directory){
+    public static void runGradleBuild(File directory) throws IOException {
         //Check for build.gradle.kts, properties
         //Check for gradlew/gradlew.bat
+        File kts = new File(directory, "build.gradle.kts");
+        if (!kts.exists()) {
+            throw new IllegalStateException("build.gradle.kts doesn't exist");
+        }
+        File gradlew = new File("target/classes/gradlew.bat");
+        if (!gradlew.exists()) {
+            throw new IllegalStateException("gradlew.bat doesn't exist");
+        }
 
         //Execute gradlew
-
-
-        throw new UnsupportedOperationException("Not yet implemented");
+        Runtime rt = Runtime.getRuntime();
+        Process pr = rt.exec(gradlew.getAbsolutePath());
     }
 
 }
