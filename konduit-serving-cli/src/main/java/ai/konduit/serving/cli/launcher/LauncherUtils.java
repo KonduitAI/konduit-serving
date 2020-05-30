@@ -24,12 +24,16 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang3.SystemUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static io.vertx.core.file.impl.FileResolver.CACHE_DIR_BASE_PROP_NAME;
@@ -135,5 +139,28 @@ public class LauncherUtils {
         return output.trim()
                 .replace(System.lineSeparator(), "")
                 .matches("(.*)Dserving.id=" + applicationId);
+    }
+
+    /**
+     * Reads the last n lines from a file
+     * @param file file where the data to be read is.
+     * @param numOfLastLinesToRead the number of last lines to read
+     * @return read lines
+     */
+    public static String readLastLines(File file, int numOfLastLinesToRead) throws IOException {
+        List<String> result = new ArrayList<>();
+
+        try (ReversedLinesFileReader reader = new ReversedLinesFileReader(file, StandardCharsets.UTF_8)) {
+            String line;
+            while ((line = reader.readLine()) != null && result.size() < numOfLastLinesToRead) {
+                result.add(line);
+            }
+        } catch (IOException e) {
+            log.error("Error while reading log file", e);
+            throw e;
+        }
+
+        Collections.reverse(result);
+        return String.join(System.lineSeparator(), result);
     }
 }

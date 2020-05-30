@@ -102,7 +102,7 @@ public class KonduitServingLauncherWithProcessesTest {
         // Running in foreground
         List<String> logs = runAndTailOutput(this::serverStartLogInLine, "serve", "-id", TEST_SERVER_ID, "-c", testAndGetImageConfiguration());
         assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID, STARTED_STRING)));
-        assertThat(runAndGetOutput("logs", TEST_SERVER_ID).split(System.lineSeparator()).length, Matchers.lessThan(logs.size()));
+        assertThat(runAndGetOutput("logs", TEST_SERVER_ID, "-l", "-1").split(System.lineSeparator()).length, Matchers.lessThan(logs.size()));
 
         String inspectOutput = runAndGetOutput("inspect", TEST_SERVER_ID);
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(
@@ -130,8 +130,8 @@ public class KonduitServingLauncherWithProcessesTest {
 
         Thread.sleep(10000);
 
-        List<String> logs = runAndTailOutput(this::serverStartLogInLine, "logs", TEST_SERVER_ID, "-f");
-        assertThat(runAndGetOutput("logs", TEST_SERVER_ID).split(System.lineSeparator()).length,
+        List<String> logs = runAndTailOutput(this::serverStartLogInLine, "logs", TEST_SERVER_ID, "-f", "-l", "-1");
+        assertThat(runAndGetOutput("logs", TEST_SERVER_ID, "-l", "-1").split(System.lineSeparator()).length,
                 Matchers.lessThanOrEqualTo(logs.size()));
 
         String inspectOutput = runAndGetOutput("inspect", TEST_SERVER_ID);
