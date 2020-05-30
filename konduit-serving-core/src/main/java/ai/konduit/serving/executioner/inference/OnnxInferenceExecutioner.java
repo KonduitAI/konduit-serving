@@ -81,6 +81,7 @@ public class OnnxInferenceExecutioner implements
     @Override
     public INDArray[] execute(INDArray[] input) {
         Preconditions.checkNotNull(input, "Inputs must not be null!");
+        Preconditions.checkNotNull(this.model, "Model must not be null!");
         Preconditions.checkState(input.length == this.model.GetInputCount(), "Number of inputs %s did not equal number of model inputs %s!", input.length, model.GetInputCount());
         synchronized (this.model) {
             try (AllocatorWithDefaultOptions allocator = new AllocatorWithDefaultOptions()) {

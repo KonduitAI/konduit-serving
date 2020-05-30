@@ -40,9 +40,15 @@ public class GraphBuilder {
 
     private List<GraphStep> steps = new ArrayList<>();
     private final GraphStep input = new Input(this);
+    private String id;
 
     public GraphStep input() {
         return input;
+    }
+
+    public GraphBuilder id(String id){
+        this.id = id;
+        return this;
     }
 
     public GraphStep[] switchOp(String name, SwitchFn fn, GraphStep step) {
@@ -91,7 +97,7 @@ public class GraphBuilder {
             m.put(g.name(), g);
         }
         m.put(outputStep.name(), outputStep);
-        return new GraphPipeline(m, outputStep.name());
+        return new GraphPipeline(m, outputStep.name(), id);
     }
 
 }

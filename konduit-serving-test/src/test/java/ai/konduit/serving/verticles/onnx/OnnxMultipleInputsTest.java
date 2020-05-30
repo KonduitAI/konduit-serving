@@ -41,6 +41,7 @@ import org.apache.commons.io.FileUtils;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nd4j.linalg.api.buffer.DataBuffer;
@@ -59,6 +60,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 
+@Ignore
 @RunWith(VertxUnitRunner.class)
 @NotThreadSafe
 public class OnnxMultipleInputsTest extends BaseVerticleTest {
