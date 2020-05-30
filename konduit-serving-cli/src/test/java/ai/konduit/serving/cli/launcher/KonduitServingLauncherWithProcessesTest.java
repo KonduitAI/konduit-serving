@@ -243,7 +243,9 @@ public class KonduitServingLauncherWithProcessesTest {
 
         assertEquals(inferenceConfigurationJson, InferenceConfiguration.builder()
                 .pipeline(SequencePipeline.builder()
-                        .add(LoggingPipelineStep.builder().build())
+                        .add(LoggingPipelineStep.builder()
+                                .log(LoggingPipelineStep.Log.KEYS_AND_VALUES)
+                                .build())
                         .build())
                 .build().toJson());
 

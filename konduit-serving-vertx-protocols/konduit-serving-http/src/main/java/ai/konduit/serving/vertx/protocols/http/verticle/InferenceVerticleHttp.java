@@ -28,7 +28,6 @@ import ai.konduit.serving.vertx.protocols.http.api.KonduitServingHttpException;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.impl.ContextInternal;

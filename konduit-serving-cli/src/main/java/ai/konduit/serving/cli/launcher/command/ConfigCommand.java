@@ -92,6 +92,7 @@ public class ConfigCommand extends DefaultCommand {
             "^\\(*switch:(.+)\\|string:(.+)/(.+)\\|([^)]+)\\)*$|" +          // Group: 4,5,6,7
             "^\\(*switch:(.+):(.+)\\|int:(.+)\\|([^)]+)\\)*$|" +               // Group: 8,9,10,11
             "^\\(*switch:(.+):(.+)\\|string:(.+)/(.+)\\|([^)]+)\\)*$");      // Group: 12,13,14,15,16
+
     private enum PipelineStepType {
         CROP_GRID,
         CROP_FIXED_GRID,
@@ -109,6 +110,8 @@ public class ConfigCommand extends DefaultCommand {
         SHOW_IMAGE,
         TENSORFLOW
     }
+
+    protected static final String KONDUIT_SERVING_IMAGE_MODULE = "konduit-serving-image";
 
     private enum SwitchFunctionType {
         INT,
@@ -379,10 +382,9 @@ public class ConfigCommand extends DefaultCommand {
     private PipelineStep getPipelineStep(String type) {
         String moduleName = null;
         Class<?> clazz;
-        String KONDUIT_SERVING_IMAGE_MODULE = "konduit-serving-image";
+
         try {
             switch (PipelineStepType.valueOf(type.toUpperCase())) {
-                // todo: implement other types here
                 case CROP_GRID:
                     moduleName = KONDUIT_SERVING_IMAGE_MODULE;
                     clazz = Class.forName("ai.konduit.serving.data.image.step.grid.crop.CropGridStep");
