@@ -28,6 +28,7 @@ import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataIntSwitchFn;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataStringSwitchFn;
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
+import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Description;
@@ -87,12 +88,26 @@ public class ConfigCommand extends DefaultCommand {
             "\\+(\\(switch.*\\))\\+|" +
             "\\+(\\(switch.*\\))$");
     protected static final Pattern SWITCH_STEP_INNER_PATTERN = Pattern.compile(
-            "^\\(*switch:(.+)\\|int:(.+)\\|([^\\)]+)\\)*$|" +                    // Group: 1,2,3
-            "^\\(*switch:(.+)\\|string:(.+)\\/(.+)\\|([^\\)]+)\\)*$|" +          // Group: 4,5,6,7
-            "^\\(*switch:(.+):(.+)\\|int:(.+)\\|([^\\)]+)\\)*$|" +               // Group: 8,9,10,11
-            "^\\(*switch:(.+):(.+)\\|string:(.+)\\/(.+)\\|([^\\)]+)\\)*$");      // Group: 12,13,14,15,16
+            "^\\(*switch:(.+)\\|int:(.+)\\|([^)]+)\\)*$|" +                    // Group: 1,2,3
+            "^\\(*switch:(.+)\\|string:(.+)/(.+)\\|([^)]+)\\)*$|" +          // Group: 4,5,6,7
+            "^\\(*switch:(.+):(.+)\\|int:(.+)\\|([^)]+)\\)*$|" +               // Group: 8,9,10,11
+            "^\\(*switch:(.+):(.+)\\|string:(.+)/(.+)\\|([^)]+)\\)*$");      // Group: 12,13,14,15,16
     private enum PipelineStepType {
-        LOGGING
+        CROP_GRID,
+        CROP_FIXED_GRID,
+        DL4J,
+        DRAW_BOUNDING_BOX,
+        DRAW_FIXED_GRID,
+        DRAW_GRID,
+        DRAW_SEGMENTATION,
+        EXTRACT_BOUNDING_BOX,
+        FRAME_CAPTURE,
+        IMAGE_TO_NDARRAY,
+        LOGGING,
+        SSD_TO_BOUNDING_BOX,
+        SAMEDIFF,
+        SHOW_IMAGE,
+        TENSORFLOW
     }
 
     private enum SwitchFunctionType {
@@ -110,7 +125,10 @@ public class ConfigCommand extends DefaultCommand {
 
     @Option(longName = "pipeline", shortName = "p", argName = "config", required = true)
     @Description("A comma-separated list of sequence/graph pipeline steps to create boilerplate configuration from. " +
-            "For sequences, allowed values are: [logging]. " +
+            "For sequences, allowed values are: " +
+            "[crop_grid, crop_fixed_grid, dl4j, draw_bounding_box, draw_fixed_grid, draw_grid, " +
+            "draw_segmentation, extract_bounding_box, frame_capture, image_to_ndarray, logging, " +
+            "ssd_to_bounding_box, samediff, show_image, tensorflow]. " +
             "For graphs, the list item should be in the format '<step_type>:<step_name>' for root inputs and " +
             "'<step_type>:<step_name>:<input_name>' for specified input ('<step_type>:<step_name>:<input1_name>+<input2_name>+...' for multiple inputs. Multiple inputs are only applicable to 'merge' and 'any' graph step types). " +
             "For switch type step the formats are: " +
@@ -359,25 +377,155 @@ public class ConfigCommand extends DefaultCommand {
     }
 
     private PipelineStep getPipelineStep(String type) {
+        String moduleName = null;
+        Class<?> clazz;
+        String KONDUIT_SERVING_IMAGE_MODULE = "konduit-serving-image";
         try {
             switch (PipelineStepType.valueOf(type.toUpperCase())) {
                 // todo: implement other types here
+                case CROP_GRID:
+                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    clazz = Class.forName("ai.konduit.serving.data.image.step.grid.crop.CropGridStep");
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, String.class, String.class, int.class, int.class,
+                                    boolean.class, String.class, boolean.class, boolean.class, Double.class, String.class)
+                            .newInstance("image1", "x", "y", 10, 10, true, "box", false, false, 1.33,
+                                    (String) clazz.getField("DEFAULT_OUTPUT_NAME").get(null));
+                case CROP_FIXED_GRID:
+                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    clazz = Class.forName("ai.konduit.serving.data.image.step.grid.crop.CropFixedGridStep");
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, double[].class, double[].class, int.class, int.class,
+                                    boolean.class, String.class, boolean.class, boolean.class, Double.class, String.class)
+                            .newInstance("image2", new double[]{ 1, 2 }, new double[]{ 1, 2 }, 100, 100, true, "box",
+                                    false, false, 1.33, "crop");
+                case DL4J:
+                    moduleName = "konduit-serving-deeplearning4j";
+                    clazz = Class.forName("ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep");
+                    Class<?> dl4jConfigClazz = Class.forName("ai.konduit.serving.models.deeplearning4j.DL4JConfiguration");
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, dl4jConfigClazz, List.class, List.class)
+                            .newInstance("<path_to_model>", dl4jConfigClazz.getConstructor().newInstance(),
+                                    Arrays.asList("1", "2"), Arrays.asList("11", "22"));
+                case DRAW_BOUNDING_BOX:
+                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    clazz = Class.forName("ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep");
+                    Class<?> scaleClass = Class.forName("ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep$Scale");
+                    Class<?> imageToNDArrayConfigClass = Class.forName("ai.konduit.serving.data.image.convert.ImageToNDArrayConfig");
+                    Object imageToNDArrayConfigObject = imageToNDArrayConfigClass.getConstructor().newInstance();
+                    imageToNDArrayConfigObject.getClass().getMethod("height", Integer.class).invoke(imageToNDArrayConfigObject, 100);
+                    imageToNDArrayConfigObject.getClass().getMethod("width", Integer.class).invoke(imageToNDArrayConfigObject, 100);
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, String.class, boolean.class, boolean.class, Map.class,
+                                    String.class, int.class, scaleClass, int.class, int.class,
+                                    imageToNDArrayConfigClass, boolean.class, String.class)
+                            .newInstance("image3", "box", false, false, new HashMap<>(), "blue", 1,
+                                    scaleClass.getField("NONE").get(null), 10, 10,
+                                    imageToNDArrayConfigObject, false, "red");
+                case DRAW_FIXED_GRID:
+                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    clazz = Class.forName("ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep");
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, double[].class, double[].class, int.class, int.class,
+                                    boolean.class, String.class, String.class, int.class, Integer.class)
+                            .newInstance("image4", new double[]{ 1, 2 }, new double[]{ 1, 2 }, 10, 10, true,
+                                    "blue", "red", 1, 1);
+                case DRAW_GRID:
+                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    clazz = Class.forName("ai.konduit.serving.data.image.step.grid.draw.DrawGridStep");
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, String.class, String.class, int.class, int.class,
+                                    boolean.class, String.class, String.class, int.class, Integer.class)
+                            .newInstance("image1", "x", "y", 10, 10, true, "blue", "red", 1, 1);
+                case DRAW_SEGMENTATION:
+                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    clazz = Class.forName("ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep");
+                    Class<?> imageToNDArrayConfigClass1 = Class.forName("ai.konduit.serving.data.image.convert.ImageToNDArrayConfig");
+                    Object imageToNDArrayConfigObject1 = imageToNDArrayConfigClass1.getConstructor().newInstance();
+                    imageToNDArrayConfigObject1.getClass().getMethod("height", Integer.class).invoke(imageToNDArrayConfigObject1, 100);
+                    imageToNDArrayConfigObject1.getClass().getMethod("width", Integer.class).invoke(imageToNDArrayConfigObject1, 100);
+                    return (PipelineStep) clazz
+                            .getConstructor(List.class, String.class, String.class, String.class, Double.class,
+                                    Integer.class, imageToNDArrayConfigClass1)
+                            .newInstance(Arrays.asList("red", "blue"), "[]", "image5", "image6", 0.5, 1,
+                                    imageToNDArrayConfigObject1);
+                case EXTRACT_BOUNDING_BOX:
+                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    clazz = Class.forName("ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep");
+                    Class<?> imageToNDArrayConfigClass2 = Class.forName("ai.konduit.serving.data.image.convert.ImageToNDArrayConfig");
+                    Object imageToNDArrayConfigObject2 = imageToNDArrayConfigClass2.getConstructor().newInstance();
+                    imageToNDArrayConfigObject2.getClass().getMethod("height", Integer.class).invoke(imageToNDArrayConfigObject2, 100);
+                    imageToNDArrayConfigObject2.getClass().getMethod("width", Integer.class).invoke(imageToNDArrayConfigObject2, 100);
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, String.class, String.class, boolean.class, Double.class,
+                                    Integer.class, Integer.class, imageToNDArrayConfigClass2)
+                            .newInstance("image7", "box2", "image8", true, 1.33, 10, 10, imageToNDArrayConfigObject2);
+                case FRAME_CAPTURE:
+                    moduleName = "konduit-serving-camera";
+                    clazz = Class.forName("ai.konduit.serving.camera.step.capture.FrameCapturePipelineStep");
+                    return (PipelineStep) clazz
+                            .getConstructor(int.class, int.class, int.class, String.class)
+                            .newInstance(0, 640, 480, "image");
+                case IMAGE_TO_NDARRAY:
+                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    clazz = Class.forName("ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep");
+                    Class<?> imageToNDArrayConfigClass3 = Class.forName("ai.konduit.serving.data.image.convert.ImageToNDArrayConfig");
+                    Object imageToNDArrayConfigObject3 = imageToNDArrayConfigClass3.getConstructor().newInstance();
+                    imageToNDArrayConfigObject3.getClass().getMethod("height", Integer.class).invoke(imageToNDArrayConfigObject3, 100);
+                    imageToNDArrayConfigObject3.getClass().getMethod("width", Integer.class).invoke(imageToNDArrayConfigObject3, 100);
+                    return (PipelineStep) clazz
+                            .getConstructor(imageToNDArrayConfigClass3, List.class, List.class, boolean.class, boolean.class,
+                                    String.class)
+                            .newInstance(imageToNDArrayConfigObject3, Arrays.asList("key1", "key2"),
+                                    Arrays.asList("output1", "output2"), true, false, "@ImageToNDArrayStepMetadata");
                 case LOGGING:
-                    return logging();
+                    return LoggingPipelineStep.builder()
+                            .log(LoggingPipelineStep.Log.KEYS_AND_VALUES)
+                            .build();
+                case SSD_TO_BOUNDING_BOX:
+                    return SSDToBoundingBoxStep.builder().build();
+                case SAMEDIFF:
+                    moduleName = "konduit-serving-samediff";
+                    clazz = Class.forName("ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep");
+                    Class<?> sameDiffConfigClazz = Class.forName("ai.konduit.serving.models.samediff.SameDiffConfig");
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, sameDiffConfigClazz, List.class)
+                            .newInstance("<path_to_model>", sameDiffConfigClazz.getConstructor().newInstance(),
+                                    Arrays.asList("11", "22"));
+                case SHOW_IMAGE:
+                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    clazz = Class.forName("ai.konduit.serving.data.image.step.show.ShowImagePipelineStep");
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, String.class, Integer.class, Integer.class, boolean.class)
+                            .newInstance("image", "image", 1280, 720, false);
+                case TENSORFLOW:
+                    moduleName = "konduit-serving-tensorflow";
+                    clazz = Class.forName("ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep");
+                    Class<?> tensorflowConfigClazz = Class.forName("ai.konduit.serving.models.tensorflow.TensorFlowConfiguration");
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, tensorflowConfigClazz, List.class, List.class)
+                            .newInstance("<path_to_model>", tensorflowConfigClazz.getConstructor().newInstance(),
+                                    Arrays.asList("1", "2"), Arrays.asList("11", "22"));
                 default:
                     out.format("Invalid step type '%s'. Allowed values are %s%n", type, Arrays.asList(PipelineStepType.values()));
                     System.exit(1);
             }
         } catch (Exception exception) {
-            out.format("Invalid step type '%s'. Allowed values are %s%n", type, Arrays.asList(PipelineStepType.values()));
+            if(exception instanceof ClassNotFoundException) {
+                if(moduleName == null) {
+                    exception.printStackTrace(out);
+                } else {
+                    out.format("Please add '%s' module to the binaries to use " +
+                            "'%s' step type%n", moduleName, type);
+                }
+            } else {
+                exception.printStackTrace(out);
+            }
+
             System.exit(1);
         }
 
         return null;
-    }
-
-    private PipelineStep logging() {
-        return LoggingPipelineStep.builder().build();
     }
 
     private void printOrSave(String output) {
