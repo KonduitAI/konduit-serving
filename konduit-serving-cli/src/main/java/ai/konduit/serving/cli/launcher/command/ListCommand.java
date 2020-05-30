@@ -26,7 +26,6 @@ import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Slf4j
 @Name(value = "list", priority = 1)
 @Summary("Lists the running konduit servers.")
 @Description("List all konduit servers launched through the `serve` command.")
@@ -126,7 +124,8 @@ public class ListCommand extends DefaultCommand {
             hostAndPort = String.format("%s:%s", inferenceConfiguration.getHost(), inferenceConfiguration.getPort());
             status = "started";
         } catch (IOException exception) {
-            log.error("Error occurred while reading server configuration file\n", exception);
+            out.println("Error occurred while reading server configuration file:");
+            exception.printStackTrace(out);
         }
 
         out.format(printFormat, index, id, getServiceType(line), hostAndPort, pid, status);

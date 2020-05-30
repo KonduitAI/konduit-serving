@@ -18,23 +18,36 @@
 
 package ai.konduit.serving.cli.launcher.command;
 
+import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataIntSwitchFn;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataStringSwitchFn;
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
+import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Option;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.launcher.DefaultCommand;
-import lombok.extern.slf4j.Slf4j;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.apache.commons.io.FileUtils;
+import org.nd4j.common.primitives.Pair;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Name("config")
 @Summary("A helper command for creating JSON for inference configuration")
@@ -48,25 +61,47 @@ import java.util.Arrays;
         "- Saves 'IMAGE + DL4J' config in a 'config.json' file:\n" +
         "$ konduit config -t IMAGE,DL4J -o config.json\n" +
         "--------------")
-@Slf4j
 public class ConfigCommand extends DefaultCommand {
 
-    public static final String DEFAULT = "default";
-
-    private enum ConfigType {
+    protected static final Pattern BASIC_STEP_PATTERN = Pattern.compile(
+            "merge:(.+):(.+)$|" +           // Group: 1,2
+            "any:(.+):(.+)$|" +             // Group: 3,4
+            "switch:(.+)\\|.*$|" +          // Group: 5
+            "switch:(.+):(.+)\\|.*$|" +     // Group: 6,7
+            "(.+):(.+)$|" +                 // Group: 8,9
+            "(.+):(.+):(.+)$");             // Group: 10,11,12
+    protected static final Pattern SWITCH_STEP_OUTER_PATTERN = Pattern.compile(
+            "\\|(\\(switch.*\\))+|" +
+            "\\+(\\(switch.*\\))\\+|" +
+            "\\+(\\(switch.*\\))$");
+    protected static final Pattern SWITCH_STEP_INNER_PATTERN = Pattern.compile(
+            "^\\(*switch:(.+)\\|int:(.+)\\|([^\\)]+)\\)*$|" +                    // Group: 1,2,3
+            "^\\(*switch:(.+)\\|string:(.+)\\/(.+)\\|([^\\)]+)\\)*$|" +          // Group: 4,5,6,7
+            "^\\(*switch:(.+):(.+)\\|int:(.+)\\|([^\\)]+)\\)*$|" +               // Group: 8,9,10,11
+            "^\\(*switch:(.+):(.+)\\|string:(.+)\\/(.+)\\|([^\\)]+)\\)*$");      // Group: 12,13,14,15,16
+    private enum PipelineStepType {
         LOGGING
     }
 
-    private String types;
+    private enum SwitchFunctionType {
+        INT,
+        STRING
+    }
+
+    Map<String, String> switchSymbolsMap = new HashMap<>();
+    Map<String, GraphStep> graphStepsGlobalMap = new HashMap<>();
+
+    private String pipelineString;
     private boolean minified;
     private boolean yaml;
     private File outputFile;
 
-    @Option(longName = "types", shortName = "t", argName = "config-types", required = true)
+    @Option(longName = "pipeline", shortName = "p", argName = "config-types", required = true)
     @Description("A comma-separated list of pipeline steps you want to create boilerplate configuration for. " +
-            "Allowed values are: [logging]")
-    public void setTypes(String types) {
-        this.types = types;
+            "Allowed values are: [logging]. " +
+            "For creating a graph pipeline the list item should be in the format: <step_name>:<step_type>")
+    public void setPipeline(String pipelineString) {
+        this.pipelineString = pipelineString;
     }
 
     @Option(longName = "minified", shortName = "m", flag = true)
@@ -85,41 +120,33 @@ public class ConfigCommand extends DefaultCommand {
         outputFile = new File(output);
         if(outputFile.exists()) {
             if(!outputFile.isFile()) {
-                log.error("'{}' is not a valid file location", outputFile);
+                System.out.format("'%s' is not a valid file location%n", outputFile);
             }
         } else {
             try {
                 if(!outputFile.createNewFile()) {
-                    log.error("'{}' is not a valid file location", outputFile);
+                    System.out.format("'%s' is not a valid file location%n", outputFile);
                 }
             } catch (Exception exception) {
-                log.error("Error while creating file: '{}'", outputFile, exception);
+                System.out.format("Error while creating file: '%s'%n", outputFile);
+                exception.printStackTrace();
             }
         }
     }
 
     @Override
     public void run() {
-        SequencePipeline.Builder builder = SequencePipeline.builder();
+        Pipeline pipeline;
 
-        for (String type : types.split(",")) {
-            try {
-                switch (ConfigType.valueOf(type.toUpperCase().trim())) {
-                    case LOGGING:
-                        builder.add(logging());
-                        break;
-                    default:
-                        log.error("Invalid config type '{}'. Allowed values are {}", type, Arrays.asList(ConfigType.values()));
-                        System.exit(1);
-                        return;
-                }
-            } catch (Exception exception) {
-                log.error("Invalid config type '{}'. Allowed values are {}", type, Arrays.asList(ConfigType.values()));
-                System.exit(1);
-            }
+        if(pipelineString.contains(":")) {
+            pipeline = getGraph(pipelineString);
+        } else {
+            pipeline = getSequence(pipelineString);
         }
 
-        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder().pipeline(builder.build()).build();
+        InferenceConfiguration inferenceConfiguration =
+                InferenceConfiguration.builder()
+                        .pipeline(pipeline).build();
 
         if(yaml) {
             printOrSave(inferenceConfiguration.toYaml());
@@ -134,6 +161,202 @@ public class ConfigCommand extends DefaultCommand {
         }
     }
 
+    private SequencePipeline getSequence(String pipelineString) {
+        SequencePipeline.Builder builder = SequencePipeline.builder();
+        for(String stepType : pipelineString.split(",")) {
+            builder.add(getPipelineStep(stepType));
+        }
+        return builder.build();
+    }
+
+    private GraphPipeline getGraph(String pipelineString) {
+        GraphBuilder builder = new GraphBuilder();
+        GraphStep inputGraphStep = builder.input();
+        String stepName = null;    // this will keep track of the last step name in the loop
+        for(String stepInfo : pipelineString.split(",")) {
+            Matcher matcher = BASIC_STEP_PATTERN.matcher(stepInfo);
+            if(matcher.find()) {
+                if(matcher.group(1) != null) {
+                    stepName = matcher.group(1);
+                    List<String> mergeNames = Arrays.asList(matcher.group(2).split("\\+"));
+                    int inputsToMerge = mergeNames.size();
+                    if(inputsToMerge > 1) {
+                        GraphStep first = graphStepsGlobalMap.get(mergeNames.get(0));
+                        graphStepsGlobalMap.put(stepName, first.mergeWith(stepName,
+                                mergeNames.subList(1, inputsToMerge)
+                                        .stream().map(graphStepsGlobalMap::get).toArray(GraphStep[]::new)
+                                )
+                        );
+                    } else {
+                        throw new CLIException(String.format("Graph steps to be merged must be more than 1. " +
+                                "Current it is %s", inputsToMerge));
+                    }
+                } else if(matcher.group(3) != null) {
+                    stepName = matcher.group(3);
+                    List<String> anyNames = Arrays.asList(matcher.group(4).split("\\+"));
+                    int inputsForAny = anyNames.size();
+                    if(inputsForAny > 1) {
+                        graphStepsGlobalMap.put(stepName, builder.any(stepName,
+                                anyNames.stream().map(graphStepsGlobalMap::get).toArray(GraphStep[]::new))
+                        );
+                    } else {
+                        throw new CLIException(String.format("Graph steps for 'any' step must be more than 1. " +
+                                "Current it is %s", inputsForAny));
+                    }
+                } else if(matcher.group(5) != null) {
+                    SwitchStepDetails mainSwitchStepDetails = parseSwitchString(stepInfo);
+                    stepName = mainSwitchStepDetails.getName();
+                    switchStep(builder, stepName, mainSwitchStepDetails.getSteps(),
+                            mainSwitchStepDetails.getSwitchFn(), inputGraphStep);
+                } else if(matcher.group(6) != null) {
+                    SwitchStepDetails mainSwitchStepDetails = parseSwitchString(stepInfo);
+                    stepName = mainSwitchStepDetails.getName();
+                    switchStep(builder, stepName, mainSwitchStepDetails.getSteps(),
+                            mainSwitchStepDetails.getSwitchFn(),
+                            graphStepsGlobalMap.get(mainSwitchStepDetails.inputName));
+                } else if(matcher.group(8) != null) {
+                    String stepType = matcher.group(8);
+                    stepName = matcher.group(9);
+                    graphStepsGlobalMap.put(stepName, inputGraphStep.then(stepName, getPipelineStep(stepType)));
+                } else {
+                    String stepType = matcher.group(10);
+                    stepName = matcher.group(11);
+                    String stepInput = matcher.group(12);
+                    graphStepsGlobalMap.put(stepName,
+                            graphStepsGlobalMap.get(stepInput).then(stepName, getPipelineStep(stepType))
+                    );
+                }
+            } else {
+                throw new CLIException(String.format("Invalid steps format in %s", stepInfo));
+            }
+        }
+        return builder.build(graphStepsGlobalMap.get(stepName));
+    }
+
+    private String symbolize(String switchStepString) {
+        Matcher matcher = SWITCH_STEP_OUTER_PATTERN.matcher(switchStepString);
+        if(matcher.find()) {
+            String symbolId = UUID.randomUUID().toString();
+            String internalSwitchString;
+            if(matcher.group(1) != null) {
+                internalSwitchString = matcher.group(1);
+            } else if(matcher.group(2) != null) {
+                internalSwitchString = matcher.group(2);
+            } else {
+                internalSwitchString = matcher.group(3);
+            }
+            switchSymbolsMap.put(symbolId, internalSwitchString);
+            return switchStepString.replace(internalSwitchString, symbolId);
+        } else {
+            return switchStepString;
+        }
+    }
+
+    private void switchStep(GraphBuilder builder, String name, String[] steps, SwitchFn fn, GraphStep input) {
+        GraphStep[] graphSteps = builder.switchOp(name, fn, input);
+        for(int i = 0; i < steps.length; i++) {
+            String[] stepSplits = steps[i].split(":");
+            String stepType = stepSplits[0];
+            if(switchSymbolsMap.containsKey(stepType)) {
+                SwitchStepDetails switchStepDetails = parseSwitchString(switchSymbolsMap.get(stepType));
+                switchStep(builder,
+                        switchStepDetails.getName(),
+                        switchStepDetails.getSteps(),
+                        switchStepDetails.getSwitchFn(),
+                        graphSteps[i]);
+            } else {
+                String stepName = stepSplits[1];
+                this.graphStepsGlobalMap.put(stepName, graphSteps[i].then(stepName, getPipelineStep(stepType)));
+            }
+        }
+    }
+
+    private SwitchStepDetails parseSwitchString(String switchStepString) {
+        String symbolized = symbolize(switchStepString);
+        Matcher matcher = SWITCH_STEP_INNER_PATTERN.matcher(symbolized);
+        if(matcher.find()) {
+            if(matcher.group(1) != null) {
+                String name = matcher.group(1);
+                String fieldName = matcher.group(2);
+                String[] steps = matcher.group(3).split("\\+");
+                return new SwitchStepDetails(name,
+                        steps,
+                        parseSwitchFunction(steps.length, "int", fieldName, null),
+                        null);
+            } else if (matcher.group(4) != null){
+                String name = matcher.group(4);
+                String fieldName = matcher.group(5);
+                String mappings = matcher.group(6);
+                String[] steps = matcher.group(7).split("\\+");
+                return new SwitchStepDetails(name,
+                        steps,
+                        parseSwitchFunction(steps.length, "string", fieldName, mappings),
+                        null);
+            } else if (matcher.group(8) != null){
+                String name = matcher.group(8);
+                String inputName = matcher.group(9);
+                String fieldName = matcher.group(10);
+                String[] steps = matcher.group(11).split("\\+");
+                return new SwitchStepDetails(name,
+                        steps,
+                        parseSwitchFunction(steps.length, "int", fieldName, null),
+                        inputName);
+            } else {
+                String name = matcher.group(12);
+                String inputName = matcher.group(13);
+                String fieldName = matcher.group(14);
+                String mappings = matcher.group(15);
+                String[] steps = matcher.group(16).split("\\+");
+                return new SwitchStepDetails(name,
+                        steps,
+                        parseSwitchFunction(steps.length, "string", fieldName, mappings),
+                        inputName);
+            }
+        } else {
+            throw new CLIException(String.format("Invalid switch step format in: '%s'", switchStepString));
+        }
+    }
+
+    private SwitchFn parseSwitchFunction(int numberOfOutputs, String type, String fieldName, String mappings) {
+        if(SwitchFunctionType.INT.name().equalsIgnoreCase(type)) {
+            return new DataIntSwitchFn(numberOfOutputs, fieldName);
+        } else if (SwitchFunctionType.STRING.name().equalsIgnoreCase(type)) {
+            if(mappings == null) {
+                throw new CLIException("Mappings should not be null for STRING type switch function");
+            }
+            return new DataStringSwitchFn(numberOfOutputs,
+                    fieldName,
+                    Arrays.stream(mappings.split("\\+"))
+                            .map(split -> {
+                                String[] keyValue = split.split(":");
+                                return new Pair<>(keyValue[0], Integer.parseInt(keyValue[1]));
+                            })
+                            .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
+        } else {
+            throw new CLIException(String.format("Invalid switch function type: %s. Should be one of %s",
+                    type,
+                    Arrays.asList(SwitchFunctionType.values())));
+        }
+    }
+
+    private PipelineStep getPipelineStep(String type) {
+        try {
+            switch (PipelineStepType.valueOf(type.toUpperCase())) {
+                // todo: implement other types here
+                case LOGGING:
+                    return logging();
+                default:
+                    out.format("Invalid step type '%s'. Allowed values are %s%n", type, Arrays.asList(PipelineStepType.values()));
+                    System.exit(1);
+            }
+        } catch (Exception exception) {
+            out.format("Invalid step type '%s'. Allowed values are %s%n", type, Arrays.asList(PipelineStepType.values()));
+            System.exit(1);
+        }
+
+        return null;
+    }
+
     private PipelineStep logging() {
         return LoggingPipelineStep.builder().build();
     }
@@ -146,8 +369,18 @@ public class ConfigCommand extends DefaultCommand {
                 FileUtils.writeStringToFile(outputFile, output, StandardCharsets.UTF_8);
                 out.format("Config file created successfully at %s%n", outputFile.getAbsolutePath());
             } catch (IOException exception) {
-                log.error("Unable to save configuration file to {}", outputFile.getAbsolutePath(), exception);
+                out.format("Unable to save configuration file to %s%n", outputFile.getAbsolutePath());
+                exception.printStackTrace(out);
             }
         }
+    }
+
+    @Data
+    @AllArgsConstructor
+    private class SwitchStepDetails {
+        private String name;
+        private String[] steps;
+        private SwitchFn switchFn;
+        private String inputName;
     }
 }

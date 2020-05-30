@@ -25,7 +25,6 @@ import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
-import lombok.extern.slf4j.Slf4j;
 import org.nd4j.common.io.ClassPathResource;
 
 import java.io.BufferedReader;
@@ -50,7 +49,6 @@ import static ai.konduit.serving.cli.launcher.command.KonduitRunCommand.DEFAULT_
         "- Starts a server in the background with an id of 'inf_server' using 'config.json' as configuration file:\n" +
         "$ konduit serve -id inf_server -c config.json -b\n" +
         "--------------")
-@Slf4j
 public class ServeCommand extends DefaultCommand {
 
     private String id;
@@ -211,7 +209,7 @@ public class ServeCommand extends DefaultCommand {
         cliArguments.forEach(arg -> ExecUtils.addArgument(cmd, arg));
 
         try {
-            log.info("INFO: Running command {}", String.join(" ", cmd));
+            out.format("INFO: Running command %s%n", String.join(" ", cmd));
             builder.command(cmd); // Setting the builder command
             if (redirect) {
                 runAndTailOutput(builder);
@@ -231,19 +229,21 @@ public class ServeCommand extends DefaultCommand {
     }
 
     private void runAndTailOutput(ProcessBuilder builder) throws IOException {
-        try(BufferedReader reader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {
-
-            String line;
-            while (!Thread.currentThread().isInterrupted()) {
-                line = reader.readLine();
-                if (line == null) {
-                    Thread.sleep(100);
+        Process process = builder.start();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            while (process.isAlive()) {
+                if(reader.ready()) {
+                    out.println(reader.readLine());
                 } else {
-                    out.println(line);
+                    Thread.sleep(100);
                 }
             }
         } catch (InterruptedException interruptedException) {
-            log.error("Killing server ({}) process. Reason: {}", id, interruptedException.getMessage());
+            out.format("Killing server (%s) logs%n", id);
+        }
+
+        if (!process.isAlive()) {
+            out.format("Server with id (%s) terminated...%n", id);
         }
     }
 
@@ -272,12 +272,12 @@ public class ServeCommand extends DefaultCommand {
         String defaultLogbackFile = "logback-run_command.xml";
         if (!String.join(" ", cmd).contains(logbackFileProperty)) {
             try {
-                ExecUtils.addArgument(cmd, String.format("-%s=%s", konduitLogsFileProperty,
+                ExecUtils.addArgument(cmd, String.format("-D%s=%s", konduitLogsFileProperty,
                         new File(DirectoryFetcher.getCommandLogsDir(), id + ".log").getAbsolutePath()));
-                ExecUtils.addArgument(cmd, String.format("-%s=%s", logbackFileProperty,
+                ExecUtils.addArgument(cmd, String.format("-D%s=%s", logbackFileProperty,
                         new ClassPathResource(defaultLogbackFile).getFile().getAbsolutePath()));
             } catch (IOException e) {
-                e.printStackTrace();
+                e.printStackTrace(out);
             }
         }
     }

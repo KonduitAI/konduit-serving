@@ -81,7 +81,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
 
                             long pid = getPid();
 
-                            saveInspectionDataIfRequired(getPid());
+                            saveInspectionDataIfRequired(pid);
 
                             // Periodically checks for configuration updates and save them.
                             vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));

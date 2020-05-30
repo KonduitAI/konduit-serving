@@ -21,7 +21,6 @@ package ai.konduit.serving.cli.launcher.command;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -33,7 +32,6 @@ import java.util.regex.Pattern;
 
 import static ai.konduit.serving.cli.launcher.LauncherUtils.isProcessExists;
 
-@Slf4j
 @Name(value = "stop", priority = 1)
 @Summary("Stop a running konduit server")
 @Description("This command stops a konduit server started with the `serve` command. The command requires the " +

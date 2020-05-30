@@ -114,7 +114,7 @@ public class DeployKonduitServing {
         vertx.registerVerticleFactory(new VerticleFactory() {
             @Override
             public String prefix() {
-                return INFERENCE_SERVICE_IDENTIFIER;
+                return SERVICE_PREFIX;
             }
 
             @Override
@@ -131,7 +131,7 @@ public class DeployKonduitServing {
                                 .getConstructor().newInstance();
                     } catch (ClassNotFoundException classNotFoundException) {
                         throw new IllegalStateException(
-                                String.format("Missing classes for protocol service %s. Make sure the binaries has included the '%s' module.",
+                                String.format("Missing classes for protocol service %s. Make sure the binaries contain the '%s' module.",
                                         protocolName,
                                         "konduit-serving-" + serverProtocol.name().toLowerCase())
                         );

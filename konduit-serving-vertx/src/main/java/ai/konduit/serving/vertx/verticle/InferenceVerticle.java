@@ -50,6 +50,15 @@ public abstract class InferenceVerticle extends AbstractVerticle {
         inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
         pipeline = inferenceConfiguration.getPipeline();
         pipelineExecutor = pipeline.executor();
+
+        log.info("\n\n" +
+                "██   ██  ██████  ███    ██ ██████  ██    ██ ██ ████████   ██   ██    ██   ██    \n" +
+                "██  ██  ██    ██ ████   ██ ██   ██ ██    ██ ██    ██      ██  ██     ██  ██     \n" +
+                "█████   ██    ██ ██ ██  ██ ██   ██ ██    ██ ██    ██      █████      █████      \n" +
+                "██  ██  ██    ██ ██  ██ ██ ██   ██ ██    ██ ██    ██      ██  ██     ██  ██     \n" +
+                "██   ██  ██████  ██   ████ ██████   ██████  ██    ██      ██   ██ ██ ██   ██ ██ \n");
+
+        log.info("Pending server start, please wait...");
     }
 
     @Override

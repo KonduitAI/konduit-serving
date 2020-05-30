@@ -75,17 +75,14 @@ public class LogsCommand extends DefaultCommand {
                         }
                     }
                 } catch (InterruptedException interruptedException) {
-                    log.error("Interrupting...");
+                    out.println("Interrupting...");
                 }
             } else {
                 out.println(FileUtils.readFileToString(logsFile, StandardCharsets.UTF_8));
             }
         } catch (Exception exception) {
-            if(exception.getMessage() != null) {
-                log.error("Failed to read logs. Reason: {}", exception.getMessage());
-            } else {
-                log.error("Failed to read logs", exception);
-            }
+            out.println("Failed to read logs:");
+            exception.printStackTrace(out);
         }
     }
 }

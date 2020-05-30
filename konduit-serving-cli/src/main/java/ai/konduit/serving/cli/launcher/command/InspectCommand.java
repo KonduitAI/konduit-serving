@@ -20,19 +20,16 @@ package ai.konduit.serving.cli.launcher.command;
 
 import ai.konduit.serving.cli.launcher.LauncherUtils;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
-import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Argument;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.core.spi.launcher.DefaultCommand;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
-@Slf4j
 @Name("inspect")
 @Summary("Inspect the details of a particular konduit server.")
 @Description("Inspect the details of a particular konduit server given an id. To find a list of running servers and their details, use the 'list' command.\n\n" +
@@ -52,7 +49,7 @@ public class InspectCommand extends DefaultCommand {
     }
 
     @Override
-    public void run() throws CLIException {
+    public void run() {
         if(LauncherUtils.isProcessExists(id)) {
             try {
                 out.println(FileUtils.readFileToString(
@@ -60,7 +57,7 @@ public class InspectCommand extends DefaultCommand {
                                         LauncherUtils.getPidFromServerId(id) + ".data"),
                                 StandardCharsets.UTF_8));
             } catch (Exception exception) {
-                log.error("Failed to read configuration file", exception);
+                exception.printStackTrace(out);
             }
         } else {
             out.println("No konduit server exists with an id: " + id);

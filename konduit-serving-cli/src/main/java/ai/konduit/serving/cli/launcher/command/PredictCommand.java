@@ -32,7 +32,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.RequestOptions;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
@@ -77,10 +76,10 @@ public class PredictCommand extends DefaultCommand {
     private static final List<String> VALID_GRPC_OUTPUT_TYPES = Collections.singletonList("binary");
 
     private String id;
-    private ServerProtocol protocol;
+    private ServerProtocol protocol = ServerProtocol.valueOf(DEFAULT_PROTOCOL);
     private String data;
-    private String inputType;
-    private String outputType;
+    private String inputType = DEFAULT_INPUT_TYPE;
+    private String outputType = DEFAULT_OUTPUT_TYPE;
 
     @Argument(index = 0, argName = "server-id")
     @Description("Konduit server id")
@@ -101,7 +100,7 @@ public class PredictCommand extends DefaultCommand {
         if (VALID_INPUT_TYPES.contains(inputType)) {
             this.inputType = inputType;
         } else {
-            out.format("Invalid input type: %s. Should be one of %s%n", inputType, VALID_INPUT_TYPES);
+            System.out.format("Invalid input type: %s. Should be one of %s%n", inputType, VALID_INPUT_TYPES);
             System.exit(1);
         }
     }
@@ -113,7 +112,7 @@ public class PredictCommand extends DefaultCommand {
         if (VALID_OUTPUT_TYPES.contains(outputType)) {
             this.outputType = outputType;
         } else {
-            out.format("Invalid output type: %s. Should be one of %s%n", outputType, VALID_OUTPUT_TYPES);
+            System.out.format("Invalid output type: %s. Should be one of %s%n", outputType, VALID_OUTPUT_TYPES);
             System.exit(1);
         }
     }
@@ -122,9 +121,9 @@ public class PredictCommand extends DefaultCommand {
     @Description("Server Protocol. Choices are: [HTTP,GRPC,MQTT]. Default is: '" + DEFAULT_PROTOCOL + "'")
     public void setProtocol(String protocol) {
         try {
-            this.protocol = ServerProtocol.valueOf(protocol);
+            this.protocol = ServerProtocol.valueOf(protocol.toUpperCase());
         } catch (Exception exception) {
-            out.format("Protocol should be one of %s%n", Arrays.asList(ServerProtocol.values()));
+            System.out.format("Invalid Protocol. Should be one of %s%n", Arrays.asList(ServerProtocol.values()));
             System.exit(1);
         }
     }
@@ -149,20 +148,19 @@ public class PredictCommand extends DefaultCommand {
                         }
 
                         String accept;
-                        if(inputType.contains("json")) {
+                        if(outputType.contains("json")) {
                             accept = APPLICATION_JSON.toString();
                         } else {
                             accept = APPLICATION_OCTET_STREAM.toString();
                         }
 
                         HttpRequest<Buffer> request = WebClient.create(vertx)
-                                .request(HttpMethod.POST,
-                                        new RequestOptions()
-                                                .setHost(inferenceConfiguration.getHost())
-                                                .setPort(inferenceConfiguration.getPort())
-                                                .addHeader(CONTENT_TYPE.toString(), contentType)
-                                                .addHeader(ACCEPT.toString(), accept)
-                                                .setURI("/predict"));
+                                .head(inferenceConfiguration.getPort(),
+                                        inferenceConfiguration.getHost(),
+                                        "/predict")
+                                .putHeader(CONTENT_TYPE.toString(), contentType)
+                                .putHeader(ACCEPT.toString(), accept)
+                                .method(HttpMethod.POST);
 
                         Handler<AsyncResult<HttpResponse<Buffer>>> responseHandler = handler -> {
                             if(handler.succeeded()) {
@@ -176,16 +174,14 @@ public class PredictCommand extends DefaultCommand {
                                 }
                             } else {
                                 out.format("Failed request.%nExecute '%s logs %s' to find the cause.%n",
-                                        ((KonduitServingLauncher) executionContext.launcher()).commandLinePrefix(),
-                                        id);
+                                        ((KonduitServingLauncher) executionContext.launcher()).commandLinePrefix(), id);
                             }
 
                             vertx.close();
                         };
 
-                        if(inputType.contains("file")) {
-                            request.sendBuffer(Buffer.buffer(FileUtils.readFileToByteArray(new File(data))),
-                                    responseHandler);
+                        if (inputType.contains("file")) {
+                            request.sendBuffer(Buffer.buffer(FileUtils.readFileToByteArray(new File(data))), responseHandler);
                         } else {
                             request.sendBuffer(Buffer.buffer(data.getBytes()), responseHandler);
                         }
@@ -194,26 +190,32 @@ public class PredictCommand extends DefaultCommand {
                         if (!VALID_GRPC_INPUT_TYPES.contains(inputType)) {
                             out.format("Invalid input type %s for GRPC protocol valid input types are %s%n",
                                     inputType, VALID_GRPC_INPUT_TYPES);
+                            System.exit(1);
                         }
 
                         if(!VALID_GRPC_OUTPUT_TYPES.contains(outputType)) {
                             out.format("Invalid output type %s for GRPC protocol valid output types are %s%n",
                                     outputType, VALID_GRPC_OUTPUT_TYPES);
+                            System.exit(1);
                         }
 
                         InferenceGrpc.newVertxStub(VertxChannelBuilder
                                 .forAddress(vertx, inferenceConfiguration.getHost(), inferenceConfiguration.getPort())
                                 .usePlaintext(true)
                                 .build())
-                                .predict(DataProtoMessage.DataScheme.parseFrom(data.getBytes()), ar -> {
-                            if (ar.succeeded()) {
-                                out.println(ar.result().toString());
-                            } else {
-                                ar.cause().printStackTrace(out);
-                            }
+                                .predict(DataProtoMessage.DataScheme.parseFrom(
+                                        inputType.contains("file") ?
+                                                FileUtils.readFileToByteArray(new File(data)) :
+                                                data.getBytes()),
+                                        ar -> {
+                                            if (ar.succeeded()) {
+                                                out.println(ar.result().toString());
+                                            } else {
+                                                ar.cause().printStackTrace(out);
+                                            }
 
-                            vertx.close();
-                        });
+                                            vertx.close();
+                                        });
                         break;
                     case MQTT:
                     default:

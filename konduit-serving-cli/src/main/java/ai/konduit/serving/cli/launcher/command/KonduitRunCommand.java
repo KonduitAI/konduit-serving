@@ -18,12 +18,14 @@
 
 package ai.konduit.serving.cli.launcher.command;
 
+import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.RunCommand;
 import io.vertx.core.json.JsonObject;
+import lombok.extern.slf4j.Slf4j;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.io.File;
@@ -34,6 +36,7 @@ import java.util.Scanner;
 
 import static ai.konduit.serving.vertx.api.DeployKonduitServing.INFERENCE_SERVICE_IDENTIFIER;
 
+@Slf4j
 @Name(value = "run", priority = 1)
 @Summary("Runs a konduit server in the foreground.")
 @Description("Runs a konduit server in the foreground.")
@@ -140,10 +143,12 @@ public class KonduitRunCommand extends RunCommand {
     @Override
     protected void deploy() {
         if (INFERENCE_SERVICE_TYPE_NAME.equalsIgnoreCase(serviceType)) {
-            this.setMainVerticle(INFERENCE_SERVICE_IDENTIFIER + ":" + inferenceConfiguration.getProtocol().name().toLowerCase());
+            DeployKonduitServing.registerInferenceVerticleFactory(vertx);
+            super.setMainVerticle(INFERENCE_SERVICE_IDENTIFIER + ":" + inferenceConfiguration.getProtocol().name().toLowerCase());
         } else {
             throw new CLIException(String.format("Unsupported service type %s", serviceType));
         }
-        super.deploy();
+
+        deploy(mainVerticle, vertx, deploymentOptions, res -> {});
     }
 }

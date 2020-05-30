@@ -22,30 +22,8 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>${konduit.logs.file.path}</file>
-        <append>false</append>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
 
-    <logger name="org.apache.catalina.core" level="DEBUG"/>
-    <logger name="org.springframework" level="INFO"/>
-    <logger name="org.deeplearning4j" level="INFO"/>
-    <logger name="org.nd4j" level="INFO"/>
-    <logger name="opennlp.uima.util" level="OFF"/>
-    <logger name="org.apache.uima" level="OFF"/>
-    <logger name="ai.konduit.serving" level="INFO"/>
-    <logger name="io.micrometer" level="INFO"/>
-    <logger name="io.prometheus" level="INFO"/>
-    <logger name="org.apache" level="WARN"/>
-    <logger name="com.sun" level="INFO"/>
-    <logger name="org.eclipse" level="INFO"/>
-    <logger name="org.bytedeco" level="DEBUG"/>
-
-    <root level="INFO">
+    <root level="ERROR">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
     </root>
 </configuration>

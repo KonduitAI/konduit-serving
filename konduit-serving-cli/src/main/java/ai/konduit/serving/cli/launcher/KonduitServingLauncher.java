@@ -19,9 +19,7 @@
 package ai.konduit.serving.cli.launcher;
 
 import ai.konduit.serving.cli.launcher.command.*;
-import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Launcher;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
@@ -43,10 +41,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class KonduitServingLauncher extends Launcher {
 
-    static {
-        LauncherUtils.setCommonVertxProperties();
-    }
-
     @Override
     protected String getDefaultCommand() {
         return "--help";
@@ -54,13 +48,10 @@ public class KonduitServingLauncher extends Launcher {
 
     @Override
     public void beforeStartingVertx(VertxOptions options) {
+        LauncherUtils.setCommonVertxProperties();
+
         options.setMaxEventLoopExecuteTime(60);
         options.setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS);
-    }
-
-    @Override
-    public void afterStartingVertx(Vertx vertx) {
-        DeployKonduitServing.registerInferenceVerticleFactory(vertx);
     }
 
     public static void main(String[] args) {
@@ -88,13 +79,6 @@ public class KonduitServingLauncher extends Launcher {
                 .register(ConfigCommand.class, ConfigCommand::new)
                 .register(InspectCommand.class, InspectCommand::new)
                 .register(LogsCommand.class, LogsCommand::new);
-    }
-
-    @Override
-    public void handleDeployFailed(Vertx vertx, String mainVerticle, DeploymentOptions deploymentOptions, Throwable cause) {
-        log.error("\nFailed to start konduit server.\n");
-
-        super.handleDeployFailed(vertx, mainVerticle, deploymentOptions, cause);
     }
 
     public String commandLinePrefix() {
