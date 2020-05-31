@@ -51,12 +51,12 @@ public abstract class InferenceVerticle extends AbstractVerticle {
         pipeline = inferenceConfiguration.getPipeline();
         pipelineExecutor = pipeline.executor();
 
-        log.info("\n\n" +
-                "██   ██  ██████  ███    ██ ██████  ██    ██ ██ ████████   ██   ██    ██   ██    \n" +
-                "██  ██  ██    ██ ████   ██ ██   ██ ██    ██ ██    ██      ██  ██     ██  ██     \n" +
-                "█████   ██    ██ ██ ██  ██ ██   ██ ██    ██ ██    ██      █████      █████      \n" +
-                "██  ██  ██    ██ ██  ██ ██ ██   ██ ██    ██ ██    ██      ██  ██     ██  ██     \n" +
-                "██   ██  ██████  ██   ████ ██████   ██████  ██    ██      ██   ██ ██ ██   ██ ██ \n");
+        log.info("\n" +
+                "#\n" +
+                "#    |  /   _ \\   \\ |  _ \\  |  | _ _| __ __|    |  /     |  /    \n" +
+                "#    . <   (   | .  |  |  | |  |   |     |      . <      . <     \n" +
+                "#   _|\\_\\ \\___/ _|\\_| ___/ \\__/  ___|   _|     _|\\_\\ _) _|\\_\\ _) \n" +
+                "#\n");
 
         log.info("Pending server start, please wait...");
     }

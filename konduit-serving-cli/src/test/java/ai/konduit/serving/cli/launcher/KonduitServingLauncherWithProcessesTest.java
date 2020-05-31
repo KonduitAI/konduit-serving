@@ -117,6 +117,10 @@ public class KonduitServingLauncherWithProcessesTest {
         Data input = Data.singleton("key", "value");
         String json = new JsonObject(input.toJson()).encode();
 
+        if(SystemUtils.IS_OS_WINDOWS) {
+            json = json.replace("\"", "\\\""); // Escaping \" as windows ProcessBuilder removes quotes for some reason.
+        }
+
         assertEquals(input, Data.fromJson(runAndGetOutput("predict", "-it", "json", TEST_SERVER_ID, json)));
     }
 
@@ -146,6 +150,10 @@ public class KonduitServingLauncherWithProcessesTest {
 
         Data input = Data.singleton("key", "value");
         String json = new JsonObject(input.toJson()).encode();
+
+        if(SystemUtils.IS_OS_WINDOWS) {
+            json = json.replace("\"", "\\\""); // Escaping \" as windows ProcessBuilder removes quotes for some reason.
+        }
 
         assertEquals(input, Data.fromJson(runAndGetOutput("predict", "-it", "json", TEST_SERVER_ID, json)));
     }
