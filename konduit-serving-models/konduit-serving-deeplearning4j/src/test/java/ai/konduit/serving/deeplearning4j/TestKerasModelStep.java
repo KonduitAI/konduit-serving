@@ -52,7 +52,7 @@ public class TestKerasModelStep {
         for(boolean withNamesDefined : new boolean[]{false, true}) {
             Pipeline p = SequencePipeline.builder()
                     .add(KerasModelStep.builder()
-                            .modelUri(f.getAbsolutePath())
+                            .modelUri(f.getPath())
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
                             .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
                             .build())
@@ -85,7 +85,7 @@ public class TestKerasModelStep {
         for(boolean withNamesDefined : new boolean[]{false, true}) {
             Pipeline p = SequencePipeline.builder()
                     .add(KerasModelStep.builder()
-                            .modelUri(f.getAbsolutePath())
+                            .modelUri(f.getPath())
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
                             .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
                             .build())
