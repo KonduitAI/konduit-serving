@@ -30,6 +30,7 @@ import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataStringSwitch
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
+import ai.konduit.serving.vertx.config.ServerProtocol;
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
@@ -58,6 +59,9 @@ import java.util.stream.Collectors;
         "                      -- FOR SEQUENCES --\n" +
         "- Prints 'logging -> tensorflow -> logging' config in pretty format:\n" +
         "$ konduit config -p logging,tensorflow,logging\n\n" +
+        "- Prints 'logging -> tensorflow -> logging' config with gRPC protocol\n" +
+        "  in pretty format:\n" +
+        "$ konduit config -p logging,tensorflow,logging -pr grpc\n\n" +
         "- Prints 'dl4j -> logging' config in minified format:\n" +
         "$ konduit config -p dl4j,logging -m\n\n" +
         "- Saves 'dl4j -> logging' config in a 'config.json' file:\n" +
@@ -121,6 +125,7 @@ public class ConfigCommand extends DefaultCommand {
     Map<String, String> switchSymbolsMap = new HashMap<>();
     Map<String, GraphStep> graphStepsGlobalMap = new HashMap<>();
 
+    private ServerProtocol protocol = ServerProtocol.HTTP;
     private String pipelineString;
     private boolean minified;
     private boolean yaml;
@@ -154,6 +159,18 @@ public class ConfigCommand extends DefaultCommand {
     @Description("Set if you want the output to be a yaml configuration.")
     public void setYaml(boolean yaml) { this.yaml = yaml; }
 
+    @Option(longName = "protocol", shortName = "pr")
+    @Description("Protocol to use with the server. Allowed values are [http, grpc, mqtt]")
+    public void setYaml(String protocol) {
+        try {
+            this.protocol = ServerProtocol.valueOf(protocol.toUpperCase());
+        } catch (Exception exception) {
+            System.out.format("Protocol can only be one of %s. Given %s%n",
+                    Arrays.toString(ServerProtocol.values()), protocol);
+            exception.printStackTrace();
+        }
+    }
+
     @Option(longName = "output", shortName = "o", argName = "output-file")
     @Description("Optional: If set, the generated json/yaml will be saved here. Otherwise, it's printed on the console.")
     public void setOutputFile(String output) {
@@ -186,6 +203,7 @@ public class ConfigCommand extends DefaultCommand {
 
         InferenceConfiguration inferenceConfiguration =
                 InferenceConfiguration.builder()
+                        .protocol(protocol)
                         .pipeline(pipeline).build();
 
         if(yaml) {

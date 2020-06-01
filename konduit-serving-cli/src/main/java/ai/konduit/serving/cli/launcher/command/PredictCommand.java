@@ -171,7 +171,7 @@ public class PredictCommand extends DefaultCommand {
                                 HttpResponse<Buffer> httpResponse = handler.result();
                                 int statusCode = httpResponse.statusCode();
                                 if(statusCode == 200) {
-                                    out.println(handler.result().body());
+                                    out.print(handler.result().body());
                                 } else {
                                     out.format("Request failed with status code: %s%nDetails: %s%n", statusCode,
                                             handler.result().bodyAsString());
@@ -213,7 +213,7 @@ public class PredictCommand extends DefaultCommand {
                                                 data.getBytes()),
                                         ar -> {
                                             if (ar.succeeded()) {
-                                                out.println(ar.result().toString());
+                                                out.print(new String(ar.result().toByteArray()));
                                             } else {
                                                 ar.cause().printStackTrace(out);
                                             }

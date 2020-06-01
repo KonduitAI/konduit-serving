@@ -74,6 +74,15 @@ public class KonduitServingLauncherWithProcessesTest {
     }
 
     @Test
+    public void testPredictCommandWithGrpc() throws IOException, InterruptedException {
+        Data input = Data.singleton("key", "value");
+        runAndTailOutput(this::serverStartLogInLine, "serve", "-id", TEST_SERVER_ID, "-c", runAndGetOutput("config", "-p", "logging", "-m", "-pr", "grpc"));
+        String output = runAndGetOutput("predict", TEST_SERVER_ID, "-it", "binary", "-ot", "binary", "-p", "GRPC",
+                new String(input.asBytes()));
+        assertEquals(input, Data.fromBytes(output.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
     public void testMainHelpAndVersion() throws IOException, InterruptedException {
         String usageString = "Usage: konduit [COMMAND] [OPTIONS] [arg...]";
         String output = runAndGetOutput("--help"); // Testing with '--help'
@@ -213,7 +222,11 @@ public class KonduitServingLauncherWithProcessesTest {
         log.error("Process output: {}", output);
         log.error("Process errors (ignore if none): '{}'", errorOutput);
 
-        return output.trim();
+        if("predict".equals(command[0])) {
+            return output;
+        } else {
+            return output.trim();
+        }
     }
 
     private static Process startProcessFromCommand(String... command) throws IOException {
