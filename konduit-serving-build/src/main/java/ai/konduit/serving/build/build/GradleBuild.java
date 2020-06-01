@@ -26,8 +26,7 @@ import lombok.Builder;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.common.base.Preconditions;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -86,7 +85,7 @@ public class GradleBuild {
         FileUtils.writeStringToFile(ktsFile, kts.toString(), Charset.defaultCharset());
     }
 
-    public static void runGradleBuild(File directory) throws IOException {
+    public static int runGradleBuild(File directory) throws IOException {
         //Check for build.gradle.kts, properties
         //Check for gradlew/gradlew.bat
         File kts = new File(directory, "build.gradle.kts");
@@ -101,6 +100,18 @@ public class GradleBuild {
         //Execute gradlew
         Runtime rt = Runtime.getRuntime();
         Process pr = rt.exec(gradlew.getAbsolutePath());
+        try {
+            pr.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        InputStream error = pr.getErrorStream();
+        InputStreamReader isrerror = new InputStreamReader(error);
+        BufferedReader bre = new BufferedReader(isrerror);
+        String line = "";
+        while ((line = bre.readLine()) != null) {
+            System.out.println(line);
+        }
+        return pr.exitValue();
     }
-
 }
