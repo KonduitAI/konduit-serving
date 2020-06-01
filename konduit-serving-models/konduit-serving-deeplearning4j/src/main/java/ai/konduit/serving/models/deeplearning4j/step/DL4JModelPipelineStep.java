@@ -17,6 +17,8 @@ package ai.konduit.serving.models.deeplearning4j.step;
 
 import ai.konduit.serving.models.deeplearning4j.DL4JConfiguration;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -25,25 +27,19 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-@SuperBuilder
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
-public class DL4JModelPipelineStep extends BaseModelPipelineStep<DL4JConfiguration> {
+@Builder
+public class DL4JModelPipelineStep implements PipelineStep {
 
+    private String modelUri;
     private List<String> inputNames;        //Mainly for ComputationGraph with multiple inputs - map Data keys to ComputationGraph outputs
     private List<String> outputNames;       //Mainly for ComputationGraph with multiple outputs - map INDArray[] to Data keys
 
-    public DL4JModelPipelineStep(String modelUri, DL4JConfiguration config) {
-        super(modelUri, config);
-    }
-
-    public DL4JModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("config") DL4JConfiguration config,
-                                 @JsonProperty("inputNames") List<String> inputNames, @JsonProperty("outputNames") List<String> outputNames){
-        super(modelUri, config);
+    public DL4JModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputNames") List<String> inputNames,
+                                 @JsonProperty("outputNames") List<String> outputNames){
+        this.modelUri = modelUri;
         this.inputNames = inputNames;
         this.outputNames = outputNames;
     }
-
-
 }
