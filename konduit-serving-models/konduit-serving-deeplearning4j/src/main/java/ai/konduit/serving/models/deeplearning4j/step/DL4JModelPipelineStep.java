@@ -15,14 +15,10 @@
  ******************************************************************************/
 package ai.konduit.serving.models.deeplearning4j.step;
 
-import ai.konduit.serving.models.deeplearning4j.DL4JConfiguration;
-import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.List;

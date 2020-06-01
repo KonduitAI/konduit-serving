@@ -18,7 +18,6 @@
 
 package ai.konduit.serving.models.deeplearning4j.step.keras;
 
-import ai.konduit.serving.models.deeplearning4j.DL4JConfiguration;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Builder;
 import lombok.Data;
