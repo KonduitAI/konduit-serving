@@ -65,7 +65,6 @@ public class JsonNameProcessor extends AbstractProcessor {
             //Collect JSON subtype info for writing at end
             Collection<? extends Element> c = env.getElementsAnnotatedWith(JsonName.class);
             List<TypeElement> types = ElementFilter.typesIn(c);
-            Element jnElement = processingEnv.getElementUtils().getTypeElement(JsonName.class.getName());
 
             for (TypeElement annotation : types) {
                 List<? extends TypeMirror> interfaces = annotation.getInterfaces();
