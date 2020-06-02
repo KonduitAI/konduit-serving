@@ -35,7 +35,7 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
         List<BoundingBox> boundingBoxes = data
                 .getListBoundingBox("img_bbox")
                 .stream()
-                .filter(i -> !Arrays.stream(classesToKeep).anyMatch(i.label()::equals))
+                .filter(i -> Arrays.stream(classesToKeep).anyMatch(i.label()::equals))
                 .collect(Collectors.toList());
 
 
