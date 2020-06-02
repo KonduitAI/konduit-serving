@@ -18,25 +18,22 @@
 package ai.konduit.serving.pipeline.api.context;
 
 import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import java.util.List;
-import java.util.function.ToDoubleFunction;
+import org.nd4j.common.primitives.AtomicDouble;
 
 public class PipelineGauge implements Gauge {
 
     private io.micrometer.core.instrument.Gauge mmGauge;
+    private AtomicDouble d;
 
     public PipelineGauge(String id, double value) {
-        mmGauge =  io.micrometer.core.instrument.Gauge.builder(id, value, new ToDoubleFunction<Double>() {
-            @Override
-            public double applyAsDouble(Double value) {
-                return value;
-            }
-        }).register(MicrometerRegistry.getRegistry());
+        d = new AtomicDouble(value);
+        mmGauge = io.micrometer.core.instrument.Gauge
+                .builder(id, d, AtomicDouble::get)
+                .register(MicrometerRegistry.getRegistry());
     }
 
-    public PipelineGauge(String id, List<?> list) {
-        mmGauge = io.micrometer.core.instrument.Gauge.builder(id, list, List::size).register(MicrometerRegistry.getRegistry());
+    public void set(double set){
+        d.set(set);
     }
 
     public double value() {
