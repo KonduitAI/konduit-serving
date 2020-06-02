@@ -25,7 +25,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 @Builder
 @Data
-@JsonName(jsonName = "FRAME_CAPTURE", subclassOf = PipelineStep.class)
+@JsonName("FRAME_CAPTURE")
 public class FrameCapturePipelineStep implements PipelineStep {
 
     @Builder.Default

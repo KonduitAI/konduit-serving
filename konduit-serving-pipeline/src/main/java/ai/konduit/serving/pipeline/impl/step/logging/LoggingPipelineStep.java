@@ -29,7 +29,7 @@ import org.slf4j.event.Level;
  */
 @Data
 @Builder
-@JsonName(jsonName = "LOGGING", subclassOf = PipelineStep.class)
+@JsonName("LOGGING")
 public class LoggingPipelineStep implements PipelineStep {
 
     public enum Log { KEYS, KEYS_AND_VALUES }

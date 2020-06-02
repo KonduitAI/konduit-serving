@@ -29,7 +29,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
-@JsonName(jsonName = "SSD_TO_BBOX", subclassOf = PipelineStep.class)
+@JsonName("SSD_TO_BBOX")
 public class SSDToBoundingBoxStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";
 

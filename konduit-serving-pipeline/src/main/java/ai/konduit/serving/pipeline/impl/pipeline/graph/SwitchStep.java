@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -37,6 +38,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(fluent = true)
+@JsonName(GraphConstants.GRAPH_SWITCH_JSON_KEY)
 public class SwitchStep extends BaseGraphStep {
 
     protected String inStep;

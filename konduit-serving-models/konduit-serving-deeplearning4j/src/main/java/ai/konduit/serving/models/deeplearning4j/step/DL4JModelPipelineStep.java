@@ -31,7 +31,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
-@JsonName(jsonName = "DEEPLEARNING4J", subclassOf = PipelineStep.class)
+@JsonName("DEEPLEARNING4J")
 public class DL4JModelPipelineStep extends BaseModelPipelineStep<DL4JConfiguration> {
 
     private List<String> inputNames;        //Mainly for ComputationGraph with multiple inputs - map Data keys to ComputationGraph outputs

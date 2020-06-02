@@ -44,7 +44,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
-@JsonName(jsonName = "EXTRACT_BOUNDING_BOX", subclassOf = PipelineStep.class)
+@JsonName("EXTRACT_BOUNDING_BOX")
 public class ExtractBoundingBoxStep implements PipelineStep {
     private String imageName;       //If null: just find any image
     private String bboxName;       //If null: just find any BB's

@@ -28,9 +28,13 @@ public class AnnotationUtils {
 
     private AnnotationUtils(){ }
 
-    public static void writeFile(Filer filer, Class<?> c, List<String> lines){
+    public static void writeFile(Filer filer, Class<?> c, List<String> lines) {
+        writeFile(filer, c.getName(), lines);
+    }
+
+    public static void writeFile(Filer filer, String c, List<String> lines){
         try {
-            String outputFile = "META-INF/konduit-serving/" + c.getName();
+            String outputFile = "META-INF/konduit-serving/" + c;
             FileObject file = filer.createResource(StandardLocation.CLASS_OUTPUT, "", outputFile);
 
             try (Writer w = file.openWriter()) {

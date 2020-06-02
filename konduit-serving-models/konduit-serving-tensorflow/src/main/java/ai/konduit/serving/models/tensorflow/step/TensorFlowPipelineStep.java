@@ -30,7 +30,7 @@ import java.util.List;
 
 @Data
 @SuperBuilder
-@JsonName(jsonName = "TENSORFLOW", subclassOf = PipelineStep.class)
+@JsonName("TENSORFLOW")
 public class TensorFlowPipelineStep extends BaseModelPipelineStep<TensorFlowConfiguration> {
 
     private List<String> inputNames;

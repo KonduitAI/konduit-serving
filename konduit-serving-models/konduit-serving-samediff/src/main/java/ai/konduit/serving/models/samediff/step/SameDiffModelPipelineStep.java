@@ -31,7 +31,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
-@JsonName(jsonName = "SAMEDIFF", subclassOf = PipelineStep.class)
+@JsonName("SAMEDIFF")
 public class SameDiffModelPipelineStep extends BaseModelPipelineStep<SameDiffConfig> {
 
     private List<String> outputNames;       //Mainly for ComputationGraph with multiple outputs - map INDArray[] to Data keys

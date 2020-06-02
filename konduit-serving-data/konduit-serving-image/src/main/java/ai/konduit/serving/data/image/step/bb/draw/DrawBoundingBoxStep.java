@@ -42,7 +42,7 @@ import java.util.Map;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
-@JsonName(jsonName = "DRAW_BOUNDING_BOX", subclassOf = PipelineStep.class)
+@JsonName("DRAW_BOUNDING_BOX")
 public class DrawBoundingBoxStep implements PipelineStep {
     public static final String DEFAULT_COLOR = "lime";
 
