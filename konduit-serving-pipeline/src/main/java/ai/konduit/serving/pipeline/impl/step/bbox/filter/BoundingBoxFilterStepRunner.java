@@ -8,7 +8,9 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.AllArgsConstructor;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
@@ -30,17 +32,11 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
     public Data exec(Context ctx, Data data) {
 
         String[] classesToKeep = step.classesToKeep();
-        List<BoundingBox> boundingBoxes = data.getListBoundingBox("img_bbox");
-
-
-        for (BoundingBox bbox : boundingBoxes
-        ) { System.out.println(bbox.label());
-            for (String classToKeep : classesToKeep) {
-                if (!bbox.label().startsWith(classToKeep)) {
-//                    boundingBoxes.remove(bbox); ConcurrentModificationException
-                }
-            }
-        }
+        List<BoundingBox> boundingBoxes = data
+                .getListBoundingBox("img_bbox")
+                .stream()
+                .filter(i -> !Arrays.stream(classesToKeep).anyMatch(i.label()::equals))
+                .collect(Collectors.toList());
 
 
         String outName = step.outputName();
