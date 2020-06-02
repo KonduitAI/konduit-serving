@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.models.deeplearning4j.step;
 
+import ai.konduit.serving.models.deeplearning4j.step.keras.KerasModelStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
@@ -25,14 +26,19 @@ public class DL4JPipelineStepRunnerFactory implements PipelineStepRunnerFactory 
 
     @Override
     public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof DL4JModelPipelineStep;
+        return pipelineStep instanceof DL4JModelPipelineStep || pipelineStep instanceof KerasModelStep;
     }
 
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run pipeline step: %s", pipelineStep.getClass());
 
-        DL4JModelPipelineStep ps = (DL4JModelPipelineStep)pipelineStep;
-        return new DL4JPipelineStepRunner(ps);
+        if(pipelineStep instanceof KerasModelStep){
+            KerasModelStep ps = (KerasModelStep) pipelineStep;
+            return new DL4JPipelineStepRunner(ps);
+        } else {
+            DL4JModelPipelineStep ps = (DL4JModelPipelineStep) pipelineStep;
+            return new DL4JPipelineStepRunner(ps);
+        }
     }
 }
