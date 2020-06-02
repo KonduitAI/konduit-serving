@@ -70,6 +70,7 @@ public class GradleBuild {
             kts.append("tasks.register<Jar>(\"uberJar\") {\n");
         for (Deployment deployment : deployments) {
             if (deployment instanceof UberJarDeployment) {
+                kts.append("\tbaseName = \"" + ((UberJarDeployment)deployment).jarName() + "\"\n");
                 //kts.append("\tarchiveName '(" + ((UberJarDeployment)deployment).jarName() + "')").append("\n");
                 //kts.append("manifest {\nattributes 'Main-Class': '" + ((UberJarDeployment)deployment).artifactId() + "'}").append("\n");
             }
