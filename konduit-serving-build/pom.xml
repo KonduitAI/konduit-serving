@@ -88,6 +88,11 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.gradle</groupId>
+            <artifactId>gradle-tooling-api</artifactId>
+            <version>6.4</version>
+        </dependency>
     </dependencies>
 
     <build>

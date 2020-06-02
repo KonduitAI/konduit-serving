@@ -24,6 +24,8 @@ import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import lombok.Builder;
 import org.apache.commons.io.FileUtils;
+import org.gradle.tooling.GradleConnector;
+import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
 
 import java.io.*;
@@ -45,18 +47,19 @@ public class GradleBuild {
         //Generate build.gradle.kts (and gradle.properties if necessary)
 
         StringBuilder kts = new StringBuilder();
-        kts.append("apply plugin: 'java'").append("\n");
-        kts.append("\trepositories {").append("\n").append("mavenCentral()\n").append("}\n");
+        //kts.append("apply( plugin = 'java')").append("\n");
+        kts.append("plugins {\n\"java\"\n}").append("\n");
+        kts.append("\trepositories {\nmavenCentral()\n}\n");
 
         List<Dependency> dependencies = config.resolveDependencies();
         if (!dependencies.isEmpty()) {
-            kts.append("dependencies {").append("\n");
+            kts.append("dependencies {\n");
         }
         for (Dependency dep : dependencies) {
             /*kts.append("\tapi('" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "')").
                     append("\n");*/
-            kts.append("\timplementation('" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "')").
-                    append("\n");
+            /*kts.append("\timplementation(\"" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "\")").
+                    append("\n");*/
         }
         if (!dependencies.isEmpty()) {
             kts.append("}").append("\n");
@@ -64,12 +67,11 @@ public class GradleBuild {
 
         List<Deployment> deployments = config.deployments();
         if (!deployments.isEmpty())
-            kts.append("task uberjar(type: Jar, dependsOn: [':compileJava', ':processResources']) {\n" +
-                    "\tfrom files(sourceSets.main.output.classesDir)\n").append("\n");
+            kts.append("tasks.register<Jar>(\"uberJar\") {\n");
         for (Deployment deployment : deployments) {
             if (deployment instanceof UberJarDeployment) {
-                kts.append("\tarchiveName '" + ((UberJarDeployment)deployment).jarName() + "')").append("\n");
-                kts.append("manifest {\nattributes 'Main-Class': '" + ((UberJarDeployment)deployment).artifactId() + "'}").append("\n");
+                //kts.append("\tarchiveName '(" + ((UberJarDeployment)deployment).jarName() + "')").append("\n");
+                //kts.append("manifest {\nattributes 'Main-Class': '" + ((UberJarDeployment)deployment).artifactId() + "'}").append("\n");
             }
         }
         if (!deployments.isEmpty())
@@ -85,7 +87,7 @@ public class GradleBuild {
         FileUtils.writeStringToFile(ktsFile, kts.toString(), Charset.defaultCharset());
     }
 
-    public static int runGradleBuild(File directory) throws IOException {
+    public static void runGradleBuild(File directory) throws IOException {
         //Check for build.gradle.kts, properties
         //Check for gradlew/gradlew.bat
         File kts = new File(directory, "build.gradle.kts");
@@ -96,22 +98,15 @@ public class GradleBuild {
         if (!gradlew.exists()) {
             throw new IllegalStateException("gradlew.bat doesn't exist");
         }
-
         //Execute gradlew
-        Runtime rt = Runtime.getRuntime();
-        Process pr = rt.exec(gradlew.getAbsolutePath());
+        ProjectConnection connection = GradleConnector.newConnector()
+                .forProjectDirectory(directory)
+                .connect();
+
         try {
-            pr.waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            connection.newBuild().forTasks("wrapper").run();
+        } finally {
+            connection.close();
         }
-        InputStream error = pr.getErrorStream();
-        InputStreamReader isrerror = new InputStreamReader(error);
-        BufferedReader bre = new BufferedReader(isrerror);
-        String line = "";
-        while ((line = bre.readLine()) != null) {
-            System.out.println(line);
-        }
-        return pr.exitValue();
     }
 }

@@ -84,12 +84,11 @@ public class TestGradleGeneration {
 
         //Actually run the build
         //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
-        int ret = GradleBuild.runGradleBuild(gradeDir);
-        assertTrue(ret == 0);
+        GradleBuild.runGradleBuild(gradeDir);
+
 
         //Check output JAR exists
         File expUberJar = new File(uberJarDir, "my.jar");
         assertTrue(expUberJar.exists());
     }
-
 }

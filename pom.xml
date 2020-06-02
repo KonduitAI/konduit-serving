@@ -771,6 +771,10 @@
                 <updatePolicy>daily</updatePolicy>  <!-- Optional, update daily -->
             </snapshots>
         </repository>
+        <repository>
+            <id>gradle</id>
+            <url>https://repo.gradle.org/gradle/libs-releases-local/</url>
+        </repository>
     </repositories>
 
     <profiles>
