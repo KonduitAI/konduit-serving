@@ -19,6 +19,5 @@
 package ai.konduit.serving.annotation.json;
 
 public @interface JsonName {
-    String jsonName();
-    Class<?> subclassOf();      //TODO this will be removed - we should be able to work it out automatically!
+    String value();
 }

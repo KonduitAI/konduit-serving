@@ -78,11 +78,11 @@ public class TestRequirements {
 
         List<DependencyRequirement> reqs = req.reqs();
         List<DependencyAddition> l1Exp = Arrays.asList(
-                new AllAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null)), reqs.get(0)),
-                new AllAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), reqs.get(1)));
+                new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null)), reqs.get(0)),
+                new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), reqs.get(1)));
         assertEquals(l1Exp, l1);
 
-        List<DependencyAddition> l2Exp = Collections.singletonList(new AllAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), reqs.get(1)));
+        List<DependencyAddition> l2Exp = Collections.singletonList(new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), reqs.get(1)));
         assertEquals(l2Exp, l2);
     }
 }

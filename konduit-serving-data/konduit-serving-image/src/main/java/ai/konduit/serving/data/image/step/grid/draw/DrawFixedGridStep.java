@@ -35,7 +35,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
-@JsonName(jsonName = "DRAW_FIXED_GRID", subclassOf = PipelineStep.class)
+@JsonName("DRAW_FIXED_GRID")
 public class DrawFixedGridStep implements PipelineStep {
     public static final String DEFAULT_COLOR = "lime";
 

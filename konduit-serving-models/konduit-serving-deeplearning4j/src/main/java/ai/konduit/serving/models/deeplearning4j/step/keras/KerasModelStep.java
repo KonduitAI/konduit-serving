@@ -16,40 +16,33 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.step.ml.ssd;
+package ai.konduit.serving.models.deeplearning4j.step.keras;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
-@Builder
+import java.util.List;
+
+//TODO move this to somewhere it can be used for non-DL4J execution
 @Data
 @Accessors(fluent = true)
-@AllArgsConstructor
-@JsonName("SSD_TO_BBOX")
-public class SSDToBoundingBoxStep implements PipelineStep {
-    public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";
+@Builder
+@JsonName("KERAS")
+public class KerasModelStep implements PipelineStep {
 
-    //TODO config
+    private String modelUri;
+    private List<String> inputNames;        //Mainly for ComputationGraph with multiple inputs - map Data keys to ComputationGraph outputs
+    private List<String> outputNames;       //Mainly for ComputationGraph with multiple outputs - map INDArray[] to Data keys
 
-    @Builder.Default
-    protected boolean keepOtherValues = true;
-
-    @Builder.Default
-    protected double threshold = 0.5;
-
-    @Builder.Default
-    protected String outputName = DEFAULT_OUTPUT_NAME;
-
-    public SSDToBoundingBoxStep(){
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null
-        this.keepOtherValues = true;
-        this.outputName = DEFAULT_OUTPUT_NAME;
-        this.threshold = 0.5;
+    public KerasModelStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputNames") List<String> inputNames,
+                                 @JsonProperty("outputNames") List<String> outputNames){
+        this.modelUri = modelUri;
+        this.inputNames = inputNames;
+        this.outputNames = outputNames;
     }
 
 }

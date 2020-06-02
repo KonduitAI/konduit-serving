@@ -28,7 +28,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @Data
 @Builder
 @Accessors(fluent = true)
-@JsonName(jsonName = "SHOW_IMAGE", subclassOf = PipelineStep.class)
+@JsonName("SHOW_IMAGE")
 public class ShowImagePipelineStep implements PipelineStep {
 
     @Builder.Default

@@ -38,7 +38,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonName(jsonName = "CROP_FIXED_GRID", subclassOf = PipelineStep.class)
+@JsonName("CROP_FIXED_GRID")
 public class CropFixedGridStep implements PipelineStep {
     private String imageName;               //If null: just find any image
     private double[] x;                     //length 4, specifying X coordinates in any order

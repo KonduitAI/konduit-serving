@@ -135,6 +135,8 @@ public class ModuleUtils {
         String[] lines = s.split("\n");
         Map<String,List<RunnerInfo>> out = new HashMap<>();
         for(String line : lines){
+            if(line.isEmpty())
+                continue;
             String[] split = line.split(",");            //Format: json_name,class_name,interface_name
             RunnerInfo info = c2Runner.get(split[1]);
             List<RunnerInfo> l = out.computeIfAbsent(split[0], k -> new ArrayList<>());

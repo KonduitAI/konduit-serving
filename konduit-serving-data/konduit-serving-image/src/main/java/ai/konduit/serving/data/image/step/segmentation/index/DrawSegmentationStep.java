@@ -50,7 +50,7 @@ import java.util.List;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
-@JsonName(jsonName = "DRAW_SEGMENTATION", subclassOf = PipelineStep.class)
+@JsonName("DRAW_SEGMENTATION")
 public class DrawSegmentationStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "image";
     public static final double DEFAULT_OPACITY = 0.5;

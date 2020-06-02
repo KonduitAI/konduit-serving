@@ -46,7 +46,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonName(jsonName = "CROP_GRID", subclassOf = PipelineStep.class)
+@JsonName("CROP_GRID")
 public class CropGridStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "crops";
 

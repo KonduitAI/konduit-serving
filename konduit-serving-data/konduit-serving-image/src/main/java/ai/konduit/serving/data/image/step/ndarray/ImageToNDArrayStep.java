@@ -56,7 +56,7 @@ import java.util.List;
  */
 @Builder
 @Data
-@JsonName(jsonName = "IMAGE_TO_NDARRAY", subclassOf = PipelineStep.class)
+@JsonName("IMAGE_TO_NDARRAY")
 public class ImageToNDArrayStep implements PipelineStep {
 
     public static final String DEFAULT_METADATA_KEY = "@ImageToNDArrayStepMetadata";
