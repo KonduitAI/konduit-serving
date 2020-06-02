@@ -25,6 +25,7 @@ import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -46,7 +47,12 @@ public class TestKerasModelStep {
     @Test
     public void testSequential() throws IOException {
         File f = Resources.asFile("conv1d_k2_s1_d1_cf_same_model.h5");
-        String path = f.getPath();
+        File dir = testDir.newFolder();
+        File modelFile = new File(dir, "model.h5");
+        FileUtils.copyFile(f, modelFile);;
+        String path = modelFile.toURI().toString();
+
+
 
         INDArray arr = Nd4j.rand(DataType.FLOAT, 1, 3, 10);
 
@@ -80,7 +86,10 @@ public class TestKerasModelStep {
     @Test
     public void testFunctional() throws Exception {
         File f = Resources.asFile("lstm_functional_tf_keras_2.h5");
-        String path = f.getPath();
+        File dir = testDir.newFolder();
+        File modelFile = new File(dir, "model.h5");
+        FileUtils.copyFile(f, modelFile);;
+        String path = modelFile.toURI().toString();
 
         INDArray arr = Nd4j.rand(DataType.FLOAT, 1, 10, 4);
 

@@ -124,7 +124,6 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
                 u = new File(uri).toURI();
             } catch (Throwable t) {
                 t.printStackTrace();
-                ;
             }
         }
 
