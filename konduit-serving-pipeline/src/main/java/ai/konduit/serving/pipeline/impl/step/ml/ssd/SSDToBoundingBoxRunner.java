@@ -18,7 +18,6 @@
 
 package ai.konduit.serving.pipeline.impl.step.ml.ssd;
 
-import ai.konduit.serving.output.adapter.SSDOutputAdapter;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -26,8 +25,10 @@ import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import io.micrometer.core.instrument.util.IOUtils;
 import lombok.AllArgsConstructor;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,8 @@ import java.util.List;
 public class SSDToBoundingBoxRunner implements PipelineStepRunner {
 
     protected final SSDToBoundingBoxStep step;
+    protected final String[] COCO_CLASSES_LABELS = new String[]{"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "street sign", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "hat", "backpack", "umbrella", "shoe", "eye glasses", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "plate", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "mirror", "dining table", "window", "desk", "toilet", "door", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "blender", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush", "hair brush"};
+
 
     @Override
     public void close() {
@@ -64,7 +67,7 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
         float[][] lArr = lND.getAs(float[][].class);
         System.out.println(lND);
         List<BoundingBox> l = new ArrayList<>();
-        for(int i=0; i<bArr[0].length; i++ ){
+        for (int i = 0; i < bArr[0].length; i++) {
             //SSD order usually: [y1, x1, y2, x2]
             double y1 = bArr[0][i][0];
             double x1 = bArr[0][i][1];
@@ -72,23 +75,22 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
             double x2 = bArr[0][i][3];
             double p = pArr[0][i];
             float label = lArr[0][0];
-            if(p >= threshold) {
-                // TODO add SSDOutputAdapter to parse classes as text not by their index
-                l.add(BoundingBox.createXY(x1, x2, y1, y2, Float.toString(label), p));
+            if (p >= threshold) {
+                l.add(BoundingBox.createXY(x1, x2, y1, y2, COCO_CLASSES_LABELS[(int) label - 1], p));
             }
         }
 
         //TODO copy other data to output
 
         String outName = step.outputName();
-        if(outName == null)
+        if (outName == null)
             outName = SSDToBoundingBoxStep.DEFAULT_OUTPUT_NAME;
 
         Data d = Data.singletonList(outName, l, ValueType.BOUNDING_BOX);
 
-        if(step.keepOtherValues()){
-            for(String s : data.keys()){
-                if(!key.equals(s) && !prob.equals(s)){
+        if (step.keepOtherValues()) {
+            for (String s : data.keys()) {
+                if (!key.equals(s) && !prob.equals(s)) {
                     d.copyFrom(s, data);
                 }
             }

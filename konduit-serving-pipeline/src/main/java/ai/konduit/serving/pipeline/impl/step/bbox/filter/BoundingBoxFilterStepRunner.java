@@ -32,14 +32,14 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
         String[] classesToKeep = step.classesToKeep();
         List<BoundingBox> boundingBoxes = data.getListBoundingBox("img_bbox");
 
-//       bbox has .label as null. why?
+
         for (BoundingBox bbox : boundingBoxes
         ) { System.out.println(bbox.label());
-//            for (String classToKeep : classesToKeep) {
-//                if (!bbox.label().startsWith(classToKeep)) {
-//                    boundingBoxes.remove(bbox);
-//                }
-//            }
+            for (String classToKeep : classesToKeep) {
+                if (!bbox.label().startsWith(classToKeep)) {
+//                    boundingBoxes.remove(bbox); ConcurrentModificationException
+                }
+            }
         }
 
 
