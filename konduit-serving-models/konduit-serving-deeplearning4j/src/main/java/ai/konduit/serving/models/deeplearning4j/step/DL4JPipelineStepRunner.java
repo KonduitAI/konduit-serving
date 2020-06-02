@@ -58,7 +58,8 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
         File f = getFile(step.modelUri());
         KerasModelBuilder b;
         try{
-            b = new KerasModel().modelBuilder().modelHdf5Filename(f.getAbsolutePath())
+            String path = f.isAbsolute() ? f.getAbsolutePath() : f.getPath();
+            b = new KerasModel().modelBuilder().modelHdf5Filename(path)
                     .enforceTrainingConfig(false);
         } catch (IOException e){
             throw new ModelLoadingException("Failed to load Keras model", e);
