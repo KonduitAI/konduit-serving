@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.step.ml.ssd;
 
+import ai.konduit.serving.output.adapter.SSDOutputAdapter;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -52,13 +53,16 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
 
         String key = "detection_boxes";     //TODO
         String prob = "detection_scores";
+        String labels = "detection_classes";
 
         NDArray bND = data.getNDArray(key);
         NDArray pND = data.getNDArray(prob);
+        NDArray lND = data.getNDArray(labels);
 
         float[][][] bArr = bND.getAs(float[][][].class);        //Batch, num, xy
         float[][] pArr = pND.getAs(float[][].class);            //Batch, num
-
+        float[][] lArr = lND.getAs(float[][].class);
+        System.out.println(lND);
         List<BoundingBox> l = new ArrayList<>();
         for(int i=0; i<bArr[0].length; i++ ){
             //SSD order usually: [y1, x1, y2, x2]
@@ -67,8 +71,10 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
             double y2 = bArr[0][i][2];
             double x2 = bArr[0][i][3];
             double p = pArr[0][i];
+            float label = lArr[0][0];
             if(p >= threshold) {
-                l.add(BoundingBox.createXY(x1, x2, y1, y2, null, p));
+                // TODO add SSDOutputAdapter to parse classes as text not by their index
+                l.add(BoundingBox.createXY(x1, x2, y1, y2, Float.toString(label), p));
             }
         }
 

@@ -30,18 +30,17 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
     public Data exec(Context ctx, Data data) {
 
         String[] classesToKeep = step.classesToKeep();
-        System.out.println(data);
         List<BoundingBox> boundingBoxes = data.getListBoundingBox("img_bbox");
 
 //       bbox has .label as null. why?
-//        for (BoundingBox bbox : boundingBoxes
-//        ) {
+        for (BoundingBox bbox : boundingBoxes
+        ) { System.out.println(bbox.label());
 //            for (String classToKeep : classesToKeep) {
 //                if (!bbox.label().startsWith(classToKeep)) {
 //                    boundingBoxes.remove(bbox);
 //                }
 //            }
-//        }
+        }
 
 
         String outName = step.outputName();

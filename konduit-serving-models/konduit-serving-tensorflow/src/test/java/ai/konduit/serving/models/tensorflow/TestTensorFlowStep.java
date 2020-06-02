@@ -507,7 +507,7 @@ public class TestTensorFlowStep {
                 .outputName("img_bbox")
                 .build());
 
-        String[] classesToKeep = new String[]{"animal", "vehicle"};
+        String[] classesToKeep = new String[]{"1"}; // exclude person bbox (in coco 1 is id of person classlabel)
 
         //Post process SSD outputs to BoundingBox objects
         GraphStep bboxFilter = ssdProc.then("filtered_bbox", BoundingBoxFilterStep.builder()
