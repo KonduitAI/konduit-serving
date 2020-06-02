@@ -22,7 +22,6 @@ import ai.konduit.serving.build.config.*;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import ai.konduit.serving.build.build.GradleBuild;
-import ai.konduit.serving.models.deeplearning4j.DL4JConfiguration;
 import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
@@ -46,7 +45,7 @@ public class TestGradleGeneration {
     public void testBasicGeneration() throws Exception {
 
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", new DL4JConfiguration()))
+                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
                 .build();
 
         File dir = testDir.newFolder();

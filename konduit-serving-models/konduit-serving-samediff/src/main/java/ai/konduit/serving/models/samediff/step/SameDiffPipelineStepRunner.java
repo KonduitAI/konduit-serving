@@ -47,7 +47,7 @@ public class SameDiffPipelineStepRunner implements PipelineStepRunner {
 
         //TODO DON'T ASSUME LOCAL FILE URI!
 
-        String uri = step.getModelUri();
+        String uri = step.modelUri();
         Preconditions.checkState(uri != null && !uri.isEmpty(), "No model URI was provided (model URI was null or empty)");
         URI u = URI.create(uri);
         File f = new File(u);
@@ -58,7 +58,7 @@ public class SameDiffPipelineStepRunner implements PipelineStepRunner {
         try {
             sd = SameDiff.load(f, false);
         } catch (Throwable e) {
-            throw new ModelLoadingException("Failed to load SameDiff model from URI " + step.getModelUri(), e);
+            throw new ModelLoadingException("Failed to load SameDiff model from URI " + step.modelUri(), e);
         }
     }
 

@@ -29,20 +29,15 @@ import java.util.List;
 
 @SuperBuilder
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
 @JsonName("SAMEDIFF")
-public class SameDiffModelPipelineStep extends BaseModelPipelineStep<SameDiffConfig> {
+public class SameDiffModelPipelineStep implements PipelineStep {
 
+    private String modelUri;
     private List<String> outputNames;       //Mainly for ComputationGraph with multiple outputs - map INDArray[] to Data keys
 
-    public SameDiffModelPipelineStep(String modelUri, SameDiffConfig config) {
-        super(modelUri, config);
-    }
-
-    public SameDiffModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("config") SameDiffConfig config,
-                                     @JsonProperty("outputNames") List<String> outputNames){
-        super(modelUri, config);
+    public SameDiffModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("outputNames") List<String> outputNames){
+        this.modelUri = modelUri;
         this.outputNames = outputNames;
     }
 }

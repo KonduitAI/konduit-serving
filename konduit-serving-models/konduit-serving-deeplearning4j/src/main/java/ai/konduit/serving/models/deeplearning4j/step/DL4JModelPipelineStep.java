@@ -17,6 +17,7 @@ package ai.konduit.serving.models.deeplearning4j.step;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
@@ -26,6 +27,7 @@ import java.util.List;
 @Data
 @Accessors(fluent = true)
 @JsonName("DEEPLEARNING4J")
+@Builder
 public class DL4JModelPipelineStep implements PipelineStep {
 
     private String modelUri;
