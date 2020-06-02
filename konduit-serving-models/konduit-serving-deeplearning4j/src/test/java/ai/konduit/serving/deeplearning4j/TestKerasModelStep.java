@@ -46,13 +46,14 @@ public class TestKerasModelStep {
     @Test
     public void testSequential() throws IOException {
         File f = Resources.asFile("conv1d_k2_s1_d1_cf_same_model.h5");
+        String path = f.getPath();
 
         INDArray arr = Nd4j.rand(DataType.FLOAT, 1, 3, 10);
 
         for(boolean withNamesDefined : new boolean[]{false, true}) {
             Pipeline p = SequencePipeline.builder()
                     .add(KerasModelStep.builder()
-                            .modelUri(f.getPath())
+                            .modelUri(path)
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
                             .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
                             .build())
@@ -79,13 +80,14 @@ public class TestKerasModelStep {
     @Test
     public void testFunctional() throws Exception {
         File f = Resources.asFile("lstm_functional_tf_keras_2.h5");
+        String path = f.getPath();
 
         INDArray arr = Nd4j.rand(DataType.FLOAT, 1, 10, 4);
 
         for(boolean withNamesDefined : new boolean[]{false, true}) {
             Pipeline p = SequencePipeline.builder()
                     .add(KerasModelStep.builder()
-                            .modelUri(f.getPath())
+                            .modelUri(path)
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
                             .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
                             .build())
