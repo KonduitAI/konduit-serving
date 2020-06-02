@@ -36,7 +36,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
 @JsonName(GraphConstants.GRAPH_SWITCH_OUTPUT_JSON_KEY)
-public class SwitchOutput extends BaseGraphStep {
+public class SwitchOutput extends BaseGraphStep implements GraphStep {
 
     private final int outputNum;
     private final String switchName;

@@ -34,7 +34,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @JsonName(GraphConstants.GRAPH_MERGE_JSON_KEY)
-public class MergeStep extends BaseMergeStep {
+public class MergeStep extends BaseMergeStep implements GraphStep {
 
     public MergeStep(GraphBuilder b, List<String> steps, String name) {
         super(b, steps, name);

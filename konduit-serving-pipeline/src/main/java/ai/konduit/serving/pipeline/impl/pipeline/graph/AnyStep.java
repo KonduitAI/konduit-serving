@@ -32,7 +32,7 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @JsonName(GraphConstants.GRAPH_ANY_JSON_KEY)
-public class AnyStep extends BaseMergeStep {
+public class AnyStep extends BaseMergeStep implements GraphStep {
 
     public AnyStep(GraphBuilder b, List<String> steps, String name) {
         super(b, steps, name);

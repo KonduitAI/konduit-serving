@@ -39,7 +39,7 @@ import java.util.List;
 @NoArgsConstructor
 @Accessors(fluent = true)
 @JsonName(GraphConstants.GRAPH_SWITCH_JSON_KEY)
-public class SwitchStep extends BaseGraphStep {
+public class SwitchStep extends BaseGraphStep implements GraphStep {
 
     protected String inStep;
     protected SwitchFn switchFn;

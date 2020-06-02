@@ -39,6 +39,7 @@ import java.util.*;
 public class JsonNameProcessor extends AbstractProcessor {
     private static final String PIPELINE_STEP = "ai.konduit.serving.pipeline.api.step.PipelineStep";
     private static final String SWITCH_FN = "ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn";
+    private static final String GRAPH_STEP = "ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep";
 
     private List<String> toWrite = new ArrayList<>();
     private List<JsonSubType> subTypes = new ArrayList<>();
@@ -71,7 +72,7 @@ public class JsonNameProcessor extends AbstractProcessor {
                 if(interfaces != null && !interfaces.isEmpty()){
                     for(TypeMirror t : interfaces){
                         String str = t.toString();
-                        if(PIPELINE_STEP.equals(str) || SWITCH_FN.equals(str)){
+                        if(PIPELINE_STEP.equals(str) || SWITCH_FN.equals(str) || GRAPH_STEP.equals(str)){
                             String jn = annotation.getAnnotation(JsonName.class).value();
                             toWrite.add(jn + "," + annotation.toString() + "," + str);      //Format: json_name,class_name,interface_name
                             subTypes.add(new JsonSubType(jn, annotation.toString(), str));
