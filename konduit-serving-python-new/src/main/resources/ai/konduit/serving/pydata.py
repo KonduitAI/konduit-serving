@@ -2,11 +2,11 @@ from PIL.Image import Image
 import numpy as np
 
 class BoundingBox(object):
-    def __init__(self, cx, cy, width, height, label='', probability=1.):
+    def __init__(self, cx, cy, height, width, label='', probability=1.):
         self.cx = cx
         self.cy = cy
-        self.width = width
         self.height = height
+        self.width = width
         self.label = label
         self.probability = probability
 
@@ -16,11 +16,11 @@ class BoundingBox(object):
         cy = 0.5 * (y1 + y2)
         w = x2 - x1
         h = y2 - y1
-        return cls(cx, cy, w, h, label, probability)
+        return cls(cx, cy, h, w, label, probability)
 
     @classmethod
-    def fromCWH(cls, cx, cy, width, height, label='', probability=1.):
-        return cls(cx, cy, width, height, label, probability)
+    def fromCWH(cls, cx, cy, height, width, label='', probability=1.):
+        return cls(cx, cy, height, width, label, probability)
 
 
 class Data(object):
@@ -30,13 +30,17 @@ class Data(object):
         if isinstance(item, atomic_types):
             pass
         elif isinstance(item, (list, tuple)):
-            for subitem in item:
-                if not isinstance(subitem, atomic_types):
-                    if isinstance(subitem, (list, tuple)):
-                        raise Exception("Nested lists/tuples are not supported.")
-                    else:
-                        types_str = ', '.join([tp.__name__ for tp in atomic_types])
-                        raise Exception("Unsupported type: " + type(subitem).__name__ + ". Supported types are: " + types_str + ".")
+            if not item:
+                raise Exception("Empty list not allowed.")
+            if len(set(map(type, item))) > 1:
+                raise Exception("All items in list should have same type.")
+            subitem = item[0]
+            if not isinstance(subitem, atomic_types):
+                if isinstance(subitem, (list, tuple)):
+                    raise Exception("Nested lists/tuples are not supported.")
+                else:
+                    types_str = ', '.join([tp.__name__ for tp in atomic_types])
+                    raise Exception("Unsupported type: " + type(subitem).__name__ + ". Supported types are: " + types_str + ".")
         else:
             types_str = ', '.join([tp.__name__ for tp in atomic_types])
             raise Exception("Unsupported type: " + type(item).__name__ + ". Supported types are: " + types_str + ".")
