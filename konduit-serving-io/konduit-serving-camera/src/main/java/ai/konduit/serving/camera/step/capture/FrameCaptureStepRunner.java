@@ -30,7 +30,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameGrabber;
 
 @Slf4j
-@CanRun(FrameCapturePipelineStep.class)
+@CanRun(CameraFrameCaptureStep.class)
 public class FrameCaptureStepRunner implements PipelineStepRunner {
 
     protected final PipelineStep step;
