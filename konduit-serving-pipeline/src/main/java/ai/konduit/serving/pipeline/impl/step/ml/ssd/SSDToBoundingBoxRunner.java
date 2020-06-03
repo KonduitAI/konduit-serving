@@ -75,11 +75,11 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
             double x2 = bArr[0][i][3];
             double p = pArr[0][i];
             float label = lArr[0][0];
-            if (step.COCO_CLASSES_LABELS.length > 0 && (int) label > step.COCO_CLASSES_LABELS.length){
-                throw new ArrayIndexOutOfBoundsException(String.format("Predicted label index was %s but only %s labels were provided", (int) label, step.COCO_CLASSES_LABELS.length));
+            if (step.classLabels.length > 0 && (int) label > step.classLabels.length){
+                throw new ArrayIndexOutOfBoundsException(String.format("Predicted label index was %s but only %s labels were provided", (int) label, step.classLabels.length));
             }
             if (p >= threshold) {
-                l.add(BoundingBox.createXY(x1, x2, y1, y2, !ArrayUtils.isEmpty(step.COCO_CLASSES_LABELS) ? step.COCO_CLASSES_LABELS[(int) label - 1] : "no label provided", p));
+                l.add(BoundingBox.createXY(x1, x2, y1, y2, !ArrayUtils.isEmpty(step.classLabels) ? step.classLabels[(int) label - 1] : "no label provided", p));
             }
         }
 

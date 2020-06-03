@@ -43,6 +43,7 @@ public class BoundingBoxFilterStep implements PipelineStep {
     @Builder.Default
     protected String outputName = DEFAULT_OUTPUT_NAME;
 
+
     public BoundingBoxFilterStep(){
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
         //Without setting defaults here again like this, the fields would actually be null

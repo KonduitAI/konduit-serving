@@ -23,16 +23,22 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
-import lombok.AllArgsConstructor;
+import ai.konduit.serving.pipeline.util.DataUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.nd4j.shade.guava.base.Preconditions;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
 public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
 
     protected final BoundingBoxFilterStep step;
+
+    public BoundingBoxFilterStepRunner(BoundingBoxFilterStep step) {
+        this.step = step;
+        Preconditions.checkArgument(!ArrayUtils.isEmpty(this.step.classesToKeep),"Seems you forgets to set the classes to keep.");
+    };
 
     @Override
     public void close() {
@@ -51,6 +57,11 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
         String prob = "detection_scores";
         String labels = "detection_classes";
 
+        String inputName = step.inputName();
+        if(inputName == null){
+            String err = "No input name was set in the BoundingBoxFilterStep configuration and input name could not be guessed based on type";
+            DataUtils.inferField(data, ValueType.BOUNDING_BOX, true, err + " (multiple keys)", err + " (no List<BoundingBox> values)");
+        }
         String[] classesToKeep = step.classesToKeep();
         List<BoundingBox> boundingBoxes = data
                 .getListBoundingBox(step.inputName)
@@ -67,7 +78,7 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
 
         if (step.keepOtherValues()) {
             for (String s : data.keys()) {
-                if (!key.equals(s) && !prob.equals(s) &&!labels.equals(s)) {
+                if (!key.equals(s) && !prob.equals(s) &&!labels.equals(s) && !step.inputName.equals(s)) {
                     d.copyFrom(s, data);
                 }
             }
