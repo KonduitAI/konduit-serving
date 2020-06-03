@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 @Description("This command is a utility to create boilerplate json/yaml configurations that can be conveniently modified to start konduit servers.\n\n" +
         "Example usages:\n" +
         "--------------\n" +
-        "                     -- FOR SEQUENCES PIPELINES--\n" +
+        "                     -- FOR SEQUENCE PIPELINES--\n" +
         "- Prints 'logging -> tensorflow -> logging' config in pretty format:\n" +
         "$ konduit config -p logging,tensorflow,logging\n\n" +
         "- Prints 'logging -> tensorflow -> logging' config with gRPC protocol\n" +
@@ -65,7 +65,7 @@ import java.util.stream.Collectors;
         "$ konduit config -p dl4j,logging -y -o config.json\n" +
 
 
-        "\n\n                  -- FOR GRAPHS PIPELINES --\n" +
+        "\n\n                  -- FOR GRAPH PIPELINES --\n" +
         "- Generates a config that logs the input(1) then flow them through two \n" +
         "  tensorflow models(2,3) and merges the output(4):\n" +
         "$ konduit config -p 1=logging(input),2=tensorflow(1),3=tensorflow(1),4=merge(2,3)\n\n" +
