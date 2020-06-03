@@ -24,10 +24,7 @@ import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.extern.slf4j.Slf4j;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.bytedeco.javacv.OpenCVFrameGrabber;
+import org.bytedeco.javacv.*;
 
 @Slf4j
 @CanRun(CameraFrameCaptureStep.class)
