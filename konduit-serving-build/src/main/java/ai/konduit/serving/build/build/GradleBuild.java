@@ -58,8 +58,12 @@ public class GradleBuild {
             kts.append("dependencies {\n");
         }
         for (Dependency dep : dependencies) {
-            kts.append("\timplementation(\"" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "\")").
-                    append("\n");
+            if (dep.classifier() == null)
+                kts.append("\timplementation(\"" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "\")").
+                        append("\n");
+            else
+                kts.append("\timplementation(\"" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + ":" + dep.classifier() + "\")").
+                        append("\n");
         }
         if (!dependencies.isEmpty()) {
             kts.append("}").append("\n");
