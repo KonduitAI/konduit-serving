@@ -64,7 +64,7 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
         }
         String[] classesToKeep = step.classesToKeep();
         List<BoundingBox> boundingBoxes = data
-                .getListBoundingBox(step.inputName)
+                .getListBoundingBox(inputName)
                 .stream()
                 .filter(i -> Arrays.stream(classesToKeep).anyMatch(i.label()::equals))
                 .collect(Collectors.toList());
@@ -78,7 +78,7 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
 
         if (step.keepOtherValues()) {
             for (String s : data.keys()) {
-                if (!key.equals(s) && !prob.equals(s) &&!labels.equals(s) && !step.inputName.equals(s)) {
+                if (!key.equals(s) && !prob.equals(s) &&!labels.equals(s) && !inputName.equals(s)) {
                     d.copyFrom(s, data);
                 }
             }
