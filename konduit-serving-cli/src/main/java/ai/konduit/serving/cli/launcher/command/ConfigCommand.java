@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 
 @Name("config")
 @Summary("A helper command for creating boiler plate json/yaml for inference configuration")
-@Description("This command is a utility to create boilerplate json/yaml configurations that can be easily modified to start konduit servers.\n\n" +
+@Description("This command is a utility to create boilerplate json/yaml configurations that can be conveniently modified to start konduit servers.\n\n" +
         "Example usages:\n" +
         "--------------\n" +
         "                      -- FOR SEQUENCES --\n" +
@@ -63,15 +63,21 @@ import java.util.stream.Collectors;
         "$ konduit config -p dl4j,logging -o config.json\n\n" +
         "- Saves 'dl4j -> logging' config in a 'config.yaml' file:\n" +
         "$ konduit config -p dl4j,logging -y -o config.json\n" +
+
+
         "\n\n                      -- FOR GRAPHS --\n" +
         "- Generates a config that logs the input(1) then flow them through two \n" +
         "  tensorflow models(2,3) and merges the output(4):\n" +
-        "$ konduit config -p logging:1,tensorflow:2:1,tensorflow:3:1,merge:4:2+3\n\n" +
+        "$ konduit config -p 1=logging(input),2=tensorflow(1),3=tensorflow(1),4=merge(2,3)\n\n" +
         "- Generates a config that logs the input(1) then channels(2) them through one\n" +
         "  of the two tensorflow models(3,4) and then selects the output(5) based\n" +
         "  on the value of the selection integer field 'select'\n" +
-        "$ konduit config -p \n" +
-        "  logging:1,switch:2:1|int:select|tensorflow:3+tensorflow:4,any:5:3+4\n" +
+        "$ konduit config -p 1=logging(input),[2_1,2_2]=switch(int,select,1),3=tensorflow(2_1),4=tensorflow(2_2),5=any(3,4)\n\n" +
+        "- Generates a config that logs the input(1) then channels(2) them through one\n" +
+        "  of the two tensorflow models(3,4) and then selects the output(5) based\n" +
+        "  on the value of the selection string field 'select' in the selection map \n" +
+        "  (x:0,y:1).\n" +
+        "$ konduit config -p 1=logging(input),[2_1,2_2]=switch(string,select,x:0,y:1,1),3=tensorflow(2_1),4=tensorflow(2_2),5=any(3,4)\n" +
         "--------------")
 public class ConfigCommand extends DefaultCommand {
 
@@ -125,21 +131,21 @@ public class ConfigCommand extends DefaultCommand {
     private boolean minified;
     private boolean yaml;
     private File outputFile;
-
     @Option(longName = "pipeline", shortName = "p", argName = "config", required = true)
     @Description("A comma-separated list of sequence/graph pipeline steps to create boilerplate configuration from. " +
             "For sequences, allowed values are: " +
             "[crop_grid, crop_fixed_grid, dl4j, draw_bounding_box, draw_fixed_grid, draw_grid, " +
             "draw_segmentation, extract_bounding_box, frame_capture, image_to_ndarray, logging, " +
             "ssd_to_bounding_box, samediff, show_image, tensorflow]. " +
-            "For graphs, the list item should be in the format '<step_type>:<step_name>' for root inputs and " +
-            "'<step_type>:<step_name>:<input_name>' for specified input ('<step_type>:<step_name>:<input1_name>+<input2_name>+...' for multiple inputs. Multiple inputs are only applicable to 'merge' and 'any' graph step types). " +
-            "For switch type step the formats are: " +
-            "1: 'switch:<step_name>|int:<field_name>|<step1_type>:<step1_name>+<step2_type>:<step2_name>+...' (for 'int' type switch), " +
-            "2: 'switch:<step_name>:<input_name>|int:<field_name>|<step1_type>:<step1_name>+<step2_type>:<step2_name>+...' (for 'int' type switch with input specified), " +
-            "3: 'switch:<step_name>|string:<field_name>/key1:value1+key2:value2+...|<step1_type>:<step1_name>+<step2_type>:<step2_name>+...' (for 'string' type switch), " +
-            "4: 'switch:<step_name>:<input_name>|string:<field_name>/key1:value1+key2:value2+...|<step1_type>:<step1_name>+<step2_type>:<step2_name>+...' (for 'string' type switch with input specified)." +
-            "See the examples above for the usage.")
+            "For graphs, the list item should be in the format '<output>=<type>(<inputs>)' or " +
+            "'[outputs]=switch(<inputs>)' for switches. The pre-defined root input is named, 'input'. " +
+            "Examples are ==> " +
+            "Pipeline step: 'a=tensorflow(input),b=dl4j(input)' " +
+            "Merge Step: 'c=merge(a,b)' " +
+            "Switch Step (int): '[d1,d2,d3]=switch(int,select,input)' " +
+            "Switch Step (string): '[d1,d2,d3]=switch(string,select,x:1,y:2,z:3,input)'" +
+            "Any Step: 'e=any(d1,d2,d3)' " +
+            "See the examples above for more usage information.")
     public void setPipeline(String pipelineString) {
         this.pipelineString = pipelineString;
     }
