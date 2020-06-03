@@ -73,4 +73,16 @@ public class CompositeRequirement implements DependencyRequirement {
         }
         return l;
     }
+
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(type.toString()).append("(");
+        List<String> l = new ArrayList<>();
+        for(DependencyRequirement d : reqs)
+            l.add(d.toString());
+        sb.append(String.join(",", l));
+        sb.append(")");
+        return sb.toString();
+    }
 }

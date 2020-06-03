@@ -64,6 +64,8 @@ public class GradleBuild {
 
 
         List<Deployment> deployments = config.deployments();
+        Preconditions.checkState(deployments != null, "No deployments (uberjar, docker, etc) were specified for the build");
+
         if (!deployments.isEmpty())
             kts.append("tasks.register<Jar>(\"uberJar\") {\n");
         for (Deployment deployment : deployments) {

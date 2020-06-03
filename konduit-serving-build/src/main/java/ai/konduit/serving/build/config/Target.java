@@ -33,16 +33,25 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 public class Target {
     public enum OS {LINUX, WINDOWS, MACOSX, ANDROID;
         public static OS forName(String s){
+            if("MAC".equalsIgnoreCase(s) || "OSX".equalsIgnoreCase(s)){
+                return MACOSX;
+            }
+
             return valueOf(s.toUpperCase());
         }
     }
     public enum Arch {x86, x86_avx2, x86_avx512, armhf, arm64, ppc64le;
         public static Arch forName(String s){
             switch (s.toLowerCase()) {
+                case "x86":
                 case "x86_64":
                     return Arch.x86;
+                case "x86_avx2":
+                case "x86-avx2":
                 case "x86_64-avx2":
                     return Arch.x86_avx2;
+                case "x86_avx512":
+                case "x86-avx512":
                 case "x86_64-avx512":
                     return Arch.x86_avx512;
                 case "arm64":
