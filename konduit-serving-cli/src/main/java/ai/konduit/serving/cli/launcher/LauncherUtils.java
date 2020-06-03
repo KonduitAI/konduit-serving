@@ -125,7 +125,7 @@ public class LauncherUtils {
             System.exit(1);
         }
 
-        return output.matches("(.*)\\s+-Dserving\\.id=" + applicationId + "\\s*$");
+        return output.trim().endsWith("Dserving.id=" + applicationId);
     }
 
     /**
