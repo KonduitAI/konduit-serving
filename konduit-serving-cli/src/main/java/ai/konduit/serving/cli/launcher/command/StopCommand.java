@@ -170,6 +170,7 @@ public class StopCommand extends DefaultCommand {
             e.printStackTrace(out);
         } catch (Exception e) {
             e.printStackTrace(out);
+            out.println("Failed to get process ID.");
         }
         return null;
     }

@@ -77,19 +77,8 @@ public class LauncherUtils {
                 cmd.add("ps ax | grep \"serving.id=" + serverId + "$\"");
             }
 
-            String[] outputSplits = IOUtils.toString(
-                    new InputStreamReader(
-                            new ProcessBuilder(cmd).start().getInputStream())).replace(System.lineSeparator(), "")
-                    .trim().split(" ");
-
-            String pid;
-            if(ExecUtils.isWindows()) {
-                pid = outputSplits[outputSplits.length -1].trim();
-            } else {
-                pid = outputSplits[0].trim();
-            }
-
-            return Integer.parseInt(pid);
+            return Integer.parseInt(extractPidFromLine(IOUtils.toString(new InputStreamReader(
+                    new ProcessBuilder(cmd).start().getInputStream())).replace(System.lineSeparator(), "")));
         } catch (Exception exception) {
             log.error("Failed to fetch pid from server id", exception);
             System.exit(1);
@@ -136,9 +125,7 @@ public class LauncherUtils {
             System.exit(1);
         }
 
-        return output.trim()
-                .replace(System.lineSeparator(), "")
-                .matches("(.*)Dserving.id=" + applicationId);
+        return output.matches("(.*)\\s+-Dserving\\.id=" + applicationId + "\\s*$");
     }
 
     /**
