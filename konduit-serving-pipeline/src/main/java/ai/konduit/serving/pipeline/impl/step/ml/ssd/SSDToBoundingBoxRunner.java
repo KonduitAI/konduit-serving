@@ -54,51 +54,89 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
     public Data exec(Context ctx, Data data) {
 
         double threshold = step.threshold();
-
         String key = "detection_boxes";     //TODO
         String prob = "detection_scores";
-        String labels = "detection_classes";
-
         NDArray bND = data.getNDArray(key);
         NDArray pND = data.getNDArray(prob);
-        NDArray lND = data.getNDArray(labels);
-
         float[][][] bArr = bND.getAs(float[][][].class);        //Batch, num, xy
         float[][] pArr = pND.getAs(float[][].class);            //Batch, num
-        float[][] lArr = lND.getAs(float[][].class);
-        List<BoundingBox> l = new ArrayList<>();
-        for (int i = 0; i < bArr[0].length; i++) {
-            //SSD order usually: [y1, x1, y2, x2]
-            double y1 = bArr[0][i][0];
-            double x1 = bArr[0][i][1];
-            double y2 = bArr[0][i][2];
-            double x2 = bArr[0][i][3];
-            double p = pArr[0][i];
-            float label = lArr[0][0];
-            if (step.classLabels.length > 0 && (int) label > step.classLabels.length){
-                throw new ArrayIndexOutOfBoundsException(String.format("Predicted label index was %s but only %s labels were provided", (int) label, step.classLabels.length));
-            }
-            if (p >= threshold) {
-                l.add(BoundingBox.createXY(x1, x2, y1, y2, !ArrayUtils.isEmpty(step.classLabels) ? step.classLabels[(int) label - 1] : "no label provided", p));
-            }
-        }
 
-        //TODO copy other data to output
+        if (step.classLabels != null) {
 
-        String outName = step.outputName();
-        if (outName == null)
-            outName = SSDToBoundingBoxStep.DEFAULT_OUTPUT_NAME;
 
-        Data d = Data.singletonList(outName, l, ValueType.BOUNDING_BOX);
+            String labels = "detection_classes";
+            NDArray lND = data.getNDArray(labels);
+            float[][] lArr = lND.getAs(float[][].class);
 
-        if (step.keepOtherValues()) {
-            for (String s : data.keys()) {
-                if (!key.equals(s) && !prob.equals(s)) {
-                    d.copyFrom(s, data);
+            List<BoundingBox> l = new ArrayList<>();
+            for (int i = 0; i < bArr[0].length; i++) {
+                //SSD order usually: [y1, x1, y2, x2]
+                double y1 = bArr[0][i][0];
+                double x1 = bArr[0][i][1];
+                double y2 = bArr[0][i][2];
+                double x2 = bArr[0][i][3];
+                double p = pArr[0][i];
+
+
+                float label = lArr[0][0];
+                if (step.classLabels.length > 0 && (int) label > step.classLabels.length) {
+                    throw new ArrayIndexOutOfBoundsException(String.format("Predicted label index was %s but only %s labels were provided", (int) label, step.classLabels.length));
+                }
+                if (p >= threshold) {
+                    l.add(BoundingBox.createXY(x1, x2, y1, y2, !ArrayUtils.isEmpty(step.classLabels) ? step.classLabels[(int) label - 1] : "no label provided", p));
                 }
             }
-        }
 
-        return d;
+            //TODO copy other data to output
+
+            String outName = step.outputName();
+            if (outName == null)
+                outName = SSDToBoundingBoxStep.DEFAULT_OUTPUT_NAME;
+
+            Data d = Data.singletonList(outName, l, ValueType.BOUNDING_BOX);
+
+            if (step.keepOtherValues()) {
+                for (String s : data.keys()) {
+                    if (!key.equals(s) && !prob.equals(s)) {
+                        d.copyFrom(s, data);
+                    }
+                }
+            }
+
+            return d;
+        } else {
+
+            List<BoundingBox> l = new ArrayList<>();
+            for (int i = 0; i < bArr[0].length; i++) {
+                //SSD order usually: [y1, x1, y2, x2]
+                double y1 = bArr[0][i][0];
+                double x1 = bArr[0][i][1];
+                double y2 = bArr[0][i][2];
+                double x2 = bArr[0][i][3];
+                double p = pArr[0][i];
+                if (p >= threshold) {
+                    l.add(BoundingBox.createXY(x1, x2, y1, y2, null, p));
+                }
+            }
+
+            //TODO copy other data to output
+
+            String outName = step.outputName();
+            if (outName == null)
+                outName = SSDToBoundingBoxStep.DEFAULT_OUTPUT_NAME;
+
+            Data d = Data.singletonList(outName, l, ValueType.BOUNDING_BOX);
+
+            if (step.keepOtherValues()) {
+                for (String s : data.keys()) {
+                    if (!key.equals(s) && !prob.equals(s)) {
+                        d.copyFrom(s, data);
+                    }
+                }
+            }
+
+            return d;
+        }
     }
 }
+
