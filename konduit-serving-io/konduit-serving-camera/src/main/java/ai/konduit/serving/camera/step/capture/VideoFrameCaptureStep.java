@@ -22,6 +22,13 @@ import lombok.Builder;
 import lombok.Data;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+/**
+ * VideoFrameCaptureStep extracts a single frame from a video each time inference is called.
+ * The video path is hardcoded
+ *
+ * Note that at present this makes it only practically useful for testing/demo purposes.
+ * Other options for loading the video will be specified at a later date: https://github.com/KonduitAI/konduit-serving/issues/350
+ */
 @Builder
 @Data
 public class VideoFrameCaptureStep implements PipelineStep {
