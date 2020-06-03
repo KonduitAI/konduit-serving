@@ -38,6 +38,12 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.gradle</groupId>
+            <artifactId>gradle-tooling-api</artifactId>
+            <version>6.4</version>
+        </dependency>
+
+        <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-meta</artifactId>
             <version>${project.version}</version>
@@ -59,6 +65,12 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>1.78</version>
         </dependency>
 
         <!-- Test dependencies -->
@@ -87,11 +99,6 @@
             <artifactId>konduit-serving-samediff</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.gradle</groupId>
-            <artifactId>gradle-tooling-api</artifactId>
-            <version>6.4</version>
         </dependency>
     </dependencies>
 

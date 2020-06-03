@@ -24,22 +24,33 @@ import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.extern.slf4j.Slf4j;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.bytedeco.javacv.OpenCVFrameGrabber;
+import org.bytedeco.javacv.*;
 
 @Slf4j
-@CanRun(FrameCapturePipelineStep.class)
+@CanRun(CameraFrameCaptureStep.class)
 public class FrameCaptureStepRunner implements PipelineStepRunner {
 
-    protected final FrameCapturePipelineStep step;
+    protected final PipelineStep step;
+    protected final String outputKey;
     protected boolean initialized;
     protected FrameGrabber grabber;
     protected OpenCVFrameConverter.ToIplImage converter;
+    private Runnable init;
 
-    public FrameCaptureStepRunner(FrameCapturePipelineStep step){
+    public FrameCaptureStepRunner(CameraFrameCaptureStep step){
+        this.outputKey = step.getOutputKey();
         this.step = step;
+        init = () -> {
+            this.initOpenCVFrameGrabber(step);
+        };
+    }
+
+    public FrameCaptureStepRunner(VideoFrameCaptureStep step){
+        this.outputKey = step.getOutputKey();
+        this.step = step;
+        init = () -> {
+            this.initFFmpegFrameGrabber(step);
+        };
     }
 
     @Override
@@ -63,18 +74,18 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
     @Override
     public synchronized Data exec(Context ctx, Data data) {
         if(!initialized)
-            init();
+            init.run();
 
         try {
             Frame frame = grabber.grab();
             Image i = Image.create(frame);
-            return Data.singleton(step.getOutputKey(), i);
+            return Data.singleton(outputKey, i);
         } catch (Throwable t){
             throw new RuntimeException("Error getting frame", t);
         }
     }
 
-    protected void init(){
+    protected void initOpenCVFrameGrabber(CameraFrameCaptureStep step){
         grabber = new OpenCVFrameGrabber(step.getCamera());
         converter = new OpenCVFrameConverter.ToIplImage();
 
@@ -85,7 +96,21 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
         try {
             grabber.start();
         } catch (Throwable t){
-            log.error("Failed to start video frame grabber with stape {}", step);
+            log.error("Failed to start video frame grabber with step {}", step);
+            throw new RuntimeException("Failed to start video frame grabber", t);
+        }
+
+        initialized = true;
+    }
+
+    protected void initFFmpegFrameGrabber(VideoFrameCaptureStep step){
+        grabber = new FFmpegFrameGrabber(step.getFilePath());
+        converter = new OpenCVFrameConverter.ToIplImage();
+
+        try {
+            grabber.start();
+        } catch (Throwable t){
+            log.error("Failed to start video frame grabber with step {}", step);
             throw new RuntimeException("Failed to start video frame grabber", t);
         }
 

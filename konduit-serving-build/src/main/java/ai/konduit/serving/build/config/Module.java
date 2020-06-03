@@ -66,10 +66,6 @@ public class Module {
         throw new UnsupportedOperationException();
     }
 
-    public ModuleRequirements dependenciesRequired(){
-        return dependencyRequirements;
-    }
-
     public Object dependenciesOptional(){
         return dependencyOptional;
     }
@@ -77,6 +73,19 @@ public class Module {
     public static Module forName(String moduleName){
         Preconditions.checkState(MODULES.containsKey(moduleName), "No module with name \"%s\" is known", moduleName);
         return MODULES.get(moduleName);
+    }
+
+    public static Module forShortName(String moduleShortName){
+        String name = "konduit-serving-" + moduleShortName;
+        return forName(name);
+    }
+
+    public boolean moduleExistsForName(String module, boolean shortName){
+        if(shortName){
+            return MODULES.containsKey("konduit-serving-" + module);
+        } else {
+            return MODULES.containsKey(module);
+        }
     }
 
 
@@ -156,12 +165,12 @@ public class Module {
 
             if(modulesInner.containsKey(module)){
                 Module mod = modulesInner.get(module);
-                List<DependencyRequirement> currReqs = mod.dependenciesRequired().reqs();
+                List<DependencyRequirement> currReqs = mod.dependencyRequirements().reqs();
                 if(currReqs == null){
                     mod = new Module(module, ksModule(module), r, null);
                     modulesInner.put(module, mod);
                 } else if(r != null){
-                    List<DependencyRequirement> newRews = mod.dependenciesRequired().reqs();
+                    List<DependencyRequirement> newRews = mod.dependencyRequirements().reqs();
                     newRews.addAll(currReqs);
                     mod = new Module(module, ksModule(module), r, null);
                     modulesInner.put(module, mod);
@@ -196,7 +205,7 @@ public class Module {
                             mod = new Module(m, ksModule(m), fromM.dependencyRequirements(), fromM.dependencyOptional());
                             modulesInner.put(m, mod);
                         } else {
-                            ModuleRequirements reqs = mod.dependenciesRequired();
+                            ModuleRequirements reqs = mod.dependencyRequirements();
                             List<DependencyRequirement> toAdd = fromM.dependencyRequirements().reqs();
                             List<DependencyRequirement> l = reqs.reqs();
                             if (toAdd != null) {

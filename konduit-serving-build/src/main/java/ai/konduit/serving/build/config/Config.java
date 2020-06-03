@@ -222,6 +222,7 @@ public class Config {
     }
 
     public List<Dependency> resolveDependencies(){
+        Preconditions.checkState(target != null, "Cannot resolve dependencies: No target has been set");
         resolveModules();
 
         Set<Dependency> deps = new LinkedHashSet<>();
@@ -233,7 +234,7 @@ public class Config {
 
         //Second: go through each module, and work out what optional dependencies (nd4j backends, etc) we must add
         for(Module m : modules){
-            ModuleRequirements req = m.dependenciesRequired();
+            ModuleRequirements req = m.dependencyRequirements();
             if(req == null)     //Module doesn't have any configurable required dependencies
                 continue;
 

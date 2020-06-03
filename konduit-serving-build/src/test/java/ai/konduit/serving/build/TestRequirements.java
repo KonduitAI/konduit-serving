@@ -37,7 +37,7 @@ public class TestRequirements {
         //Check that DL4J module has ND4J backend...
         Module dl4j = Module.DL4J;
 
-        ModuleRequirements req = dl4j.dependenciesRequired();
+        ModuleRequirements req = dl4j.dependencyRequirements();
 
         List<Dependency> someDep = Arrays.asList(new Dependency("org.slf4j", "slf4j-api", "1.7.26", null));
         List<Dependency> nd4jNoClassifier = Arrays.asList(someDep.get(0),
@@ -59,7 +59,7 @@ public class TestRequirements {
     public void testRecommendations(){
         Module dl4j = Module.DL4J;
 
-        ModuleRequirements req = dl4j.dependenciesRequired();
+        ModuleRequirements req = dl4j.dependencyRequirements();
         List<Dependency> someDep = Arrays.asList(new Dependency("org.slf4j", "slf4j-api", "1.7.26", null));
         List<Dependency> nd4jNoClassifier = Arrays.asList(someDep.get(0),
                 new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null));
