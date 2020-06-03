@@ -31,7 +31,13 @@ import lombok.experimental.Accessors;
 public class SSDToBoundingBoxStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";
 
+
+
+
     //TODO config
+
+    @Builder.Default
+    protected String[] COCO_CLASSES_LABELS = new String[]{};
 
     @Builder.Default
     protected boolean keepOtherValues = true;
@@ -48,6 +54,7 @@ public class SSDToBoundingBoxStep implements PipelineStep {
         this.keepOtherValues = true;
         this.outputName = DEFAULT_OUTPUT_NAME;
         this.threshold = 0.5;
+        this.COCO_CLASSES_LABELS = new String[]{};
     }
 
 }
