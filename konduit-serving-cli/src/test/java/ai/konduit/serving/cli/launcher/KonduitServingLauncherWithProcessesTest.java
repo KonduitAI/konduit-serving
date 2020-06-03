@@ -76,7 +76,9 @@ public class KonduitServingLauncherWithProcessesTest {
     @Test
     public void testPredictCommandWithGrpc() throws IOException, InterruptedException {
         Data input = Data.singleton("key", "value");
-        runAndTailOutput(this::serverStartLogInLine, "serve", "-id", TEST_SERVER_ID, "-c", runAndGetOutput("config", "-p", "logging", "-m", "-pr", "grpc"));
+        String grpcConfig = runAndGetOutput("config", "-p", "logging", "-m", "-pr", "grpc");
+        runAndTailOutput(this::serverStartLogInLine, "serve", "-id", TEST_SERVER_ID, "-c",
+                SystemUtils.IS_OS_WINDOWS ? grpcConfig.replace("\"", "\\\"") : grpcConfig); // Escaping \" as windows ProcessBuilder removes quotes for some reason.
         String output = runAndGetOutput("predict", TEST_SERVER_ID, "-it", "binary", "-ot", "binary", "-p", "GRPC",
                 new String(input.asBytes()));
         assertEquals(input, Data.fromBytes(output.getBytes(StandardCharsets.UTF_8)));
