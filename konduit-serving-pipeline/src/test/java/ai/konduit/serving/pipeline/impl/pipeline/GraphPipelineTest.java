@@ -148,6 +148,7 @@ public class GraphPipelineTest {
         GraphStep any = b.any("any", lOut, rOut);
 
         Pipeline p = b.build(any);
+        p.id();
 
         Data in = Data.singleton("k", "v");
 
@@ -208,6 +209,7 @@ public class GraphPipelineTest {
             GraphStep any = b.any("any", lOut, rOut);
 
             Pipeline p = b.build(any);
+            p.id();
 
 
             PipelineExecutor exec = p.executor();
