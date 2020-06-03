@@ -21,6 +21,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.*;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataIntSwitchFn;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataStringSwitchFn;
+import ai.konduit.serving.pipeline.impl.step.bbox.filter.BoundingBoxFilterStep;
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 
@@ -35,6 +36,7 @@ public class PipelineCoreSubtypesMapping implements JsonSubTypesMapping {
         List<JsonSubType> l = new ArrayList<>();
         l.add(new JsonSubType("LOGGING", LoggingPipelineStep.class, PipelineStep.class));
         l.add(new JsonSubType("SSD_TO_BBOX", SSDToBoundingBoxStep.class, PipelineStep.class));
+        l.add(new JsonSubType("BBOX_FILTER", BoundingBoxFilterStep.class, PipelineStep.class));
 
         //Graph pipeline
         l.add(new JsonSubType(GraphConstants.GRAPH_MERGE_JSON_KEY, MergeStep.class, GraphStep.class));
