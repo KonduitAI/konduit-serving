@@ -22,24 +22,23 @@ import lombok.Builder;
 import lombok.Data;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+/**
+ * VideoFrameCaptureStep extracts a single frame from a video each time inference is called.
+ * The video path is hardcoded
+ *
+ * Note that at present this makes it only practically useful for testing/demo purposes.
+ * Other options for loading the video will be specified at a later date: https://github.com/KonduitAI/konduit-serving/issues/350
+ */
 @Builder
 @Data
-public class FrameCapturePipelineStep implements PipelineStep {
+public class VideoFrameCaptureStep implements PipelineStep {
 
-    @Builder.Default
-    private int camera = 0;         //TODO add other (more robust) ways to select camera
-    @Builder.Default
-    private int width = 640;
-    @Builder.Default
-    private int height = 480;
+    private String filePath;
     @Builder.Default
     private String outputKey = "image";
 
-    public FrameCapturePipelineStep(@JsonProperty("camera") int camera, @JsonProperty("width") int width,
-                                    @JsonProperty("height") int height, @JsonProperty("outputKey") String outputKey){
-        this.camera = camera;
-        this.width = width;
-        this.height = height;
+    public VideoFrameCaptureStep(@JsonProperty("filePath") String filePath, @JsonProperty("outputKey") String outputKey){
+        this.filePath = filePath;
         this.outputKey = outputKey;
     }
 
