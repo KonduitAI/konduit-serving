@@ -45,25 +45,23 @@ public class GradleBuild {
             FileUtils.copyFileToDirectory(gradlewResource, outputDir);
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
-
         StringBuilder kts = new StringBuilder();
-        //kts.append("apply( plugin = 'java')").append("\n");
-        kts.append("plugins {\n\"java\"\n}").append("\n");
-        kts.append("\trepositories {\nmavenCentral()\n}\n");
+
+        kts.append("plugins { java } \n");
+        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\n}\n");
 
         List<Dependency> dependencies = config.resolveDependencies();
         if (!dependencies.isEmpty()) {
             kts.append("dependencies {\n");
         }
         for (Dependency dep : dependencies) {
-            /*kts.append("\tapi('" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "')").
-                    append("\n");*/
-            /*kts.append("\timplementation(\"" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "\")").
-                    append("\n");*/
+            kts.append("\timplementation(\"" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "\")").
+                    append("\n");
         }
         if (!dependencies.isEmpty()) {
             kts.append("}").append("\n");
         }
+
 
         List<Deployment> deployments = config.deployments();
         if (!deployments.isEmpty())
@@ -71,10 +69,17 @@ public class GradleBuild {
         for (Deployment deployment : deployments) {
             if (deployment instanceof UberJarDeployment) {
                 kts.append("\tbaseName = \"" + ((UberJarDeployment)deployment).jarName() + "\"\n");
-                //kts.append("\tarchiveName '(" + ((UberJarDeployment)deployment).jarName() + "')").append("\n");
-                //kts.append("manifest {\nattributes 'Main-Class': '" + ((UberJarDeployment)deployment).artifactId() + "'}").append("\n");
+                String escaped = ((UberJarDeployment)deployment).outputDir().replace("\\","\\\\");
+                kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
             }
         }
+        /*kts.append("archiveClassifier.set(\"uber\")\n");
+        kts.append("from(sourceSets.main.get().output)\n");
+        kts.append("dependsOn(configurations.runtimeClasspath)\n");
+
+        kts.append("from({\n" +
+                "configurations.runtimeClasspath.get().filter { it.name.endsWith(\"jar\") }.map { zipTree(it) }\n" +
+                "})\n");*/
         if (!deployments.isEmpty())
             kts.append("}").append("\n");
         System.out.println(kts.toString());
