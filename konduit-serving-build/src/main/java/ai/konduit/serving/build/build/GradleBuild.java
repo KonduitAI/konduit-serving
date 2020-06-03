@@ -30,6 +30,7 @@ import org.nd4j.common.base.Preconditions;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GradleBuild {
@@ -46,9 +47,11 @@ public class GradleBuild {
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
         StringBuilder kts = new StringBuilder();
-
-        kts.append("plugins { java } \n");
-        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\n}\n");
+        kts.append("import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar\n");
+        kts.append("plugins { java \nid(\"com.github.johnrengelman.shadow\") version \"2.0.4\"\n} \n");
+        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n}\n");
+        kts.append("group = \"ai.konduit\"\n");
+        //kts.append("version = \"1.0-SNAPSHOT\"\n");
 
         List<Dependency> dependencies = config.resolveDependencies();
         if (!dependencies.isEmpty()) {
@@ -65,7 +68,8 @@ public class GradleBuild {
 
         List<Deployment> deployments = config.deployments();
         if (!deployments.isEmpty())
-            kts.append("tasks.register<Jar>(\"uberJar\") {\n");
+            //kts.append("tasks.register<Jar>(\"uberJar\") {\n");
+            kts.append("tasks.withType<ShadowJar> {\n");
         for (Deployment deployment : deployments) {
             if (deployment instanceof UberJarDeployment) {
                 kts.append("\tbaseName = \"" + ((UberJarDeployment)deployment).jarName() + "\"\n");
@@ -73,15 +77,13 @@ public class GradleBuild {
                 kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
             }
         }
-        /*kts.append("archiveClassifier.set(\"uber\")\n");
-        kts.append("from(sourceSets.main.get().output)\n");
-        kts.append("dependsOn(configurations.runtimeClasspath)\n");
-
-        kts.append("from({\n" +
-                "configurations.runtimeClasspath.get().filter { it.name.endsWith(\"jar\") }.map { zipTree(it) }\n" +
-                "})\n");*/
         if (!deployments.isEmpty())
             kts.append("}").append("\n");
+
+        /*kts.append("tasks.withType<ShadowJar> {\n" +
+            "baseName = \"uber\"\n" +
+            "}\n");*/
+
         System.out.println(kts.toString());
 
         Preconditions.checkState(!deployments.isEmpty(), "No deployments were specified");
@@ -110,7 +112,7 @@ public class GradleBuild {
                 .connect();
 
         try {
-            connection.newBuild().forTasks("wrapper").run();
+            connection.newBuild().forTasks("wrapper","shadowJar").run();
         } finally {
             connection.close();
         }
