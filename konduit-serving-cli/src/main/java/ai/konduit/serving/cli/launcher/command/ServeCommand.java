@@ -231,7 +231,7 @@ public class ServeCommand extends DefaultCommand {
     private void runAndTailOutput(ProcessBuilder builder) throws IOException {
         Process process = builder.start();
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            while (!Thread.currentThread().isInterrupted()) {
+            while (LauncherUtils.isProcessExists(id)) {
                 if(reader.ready()) {
                     out.println(reader.readLine());
                 } else {

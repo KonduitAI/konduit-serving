@@ -192,13 +192,13 @@ public class PredictCommand extends DefaultCommand {
                         break;
                     case GRPC:
                         if (!VALID_GRPC_INPUT_TYPES.contains(inputType)) {
-                            out.format("Invalid input type %s for GRPC protocol valid input types are %s%n",
+                            out.format("Invalid input type %s for gRPC protocol valid input types are %s%n",
                                     inputType, VALID_GRPC_INPUT_TYPES);
                             System.exit(1);
                         }
 
                         if(!VALID_GRPC_OUTPUT_TYPES.contains(outputType)) {
-                            out.format("Invalid output type %s for GRPC protocol valid output types are %s%n",
+                            out.format("Invalid output type %s for gRPC protocol valid output types are %s%n",
                                     outputType, VALID_GRPC_OUTPUT_TYPES);
                             System.exit(1);
                         }

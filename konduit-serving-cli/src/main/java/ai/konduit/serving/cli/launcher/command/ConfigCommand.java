@@ -24,24 +24,19 @@ import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataIntSwitchFn;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataStringSwitchFn;
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.ServerProtocol;
-import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Option;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.launcher.DefaultCommand;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.apache.commons.io.FileUtils;
-import org.nd4j.common.primitives.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,22 +75,11 @@ import java.util.stream.Collectors;
         "--------------")
 public class ConfigCommand extends DefaultCommand {
 
-    protected static final Pattern BASIC_STEP_PATTERN = Pattern.compile(
-            "merge:(.+):(.+)$|" +           // Group: 1,2
-            "any:(.+):(.+)$|" +             // Group: 3,4
-            "switch:(.+)\\|.*$|" +          // Group: 5
-            "switch:(.+):(.+)\\|.*$|" +     // Group: 6,7
-            "(.+):(.+)$|" +                 // Group: 8,9
-            "(.+):(.+):(.+)$");             // Group: 10,11,12
-    protected static final Pattern SWITCH_STEP_OUTER_PATTERN = Pattern.compile(
-            "\\|(\\(switch.*\\))+|" +
-            "\\+(\\(switch.*\\))\\+|" +
-            "\\+(\\(switch.*\\))$");
-    protected static final Pattern SWITCH_STEP_INNER_PATTERN = Pattern.compile(
-            "^\\(*switch:(.+)\\|int:(.+)\\|([^)]+)\\)*$|" +                    // Group: 1,2,3
-            "^\\(*switch:(.+)\\|string:(.+)/(.+)\\|([^)]+)\\)*$|" +          // Group: 4,5,6,7
-            "^\\(*switch:(.+):(.+)\\|int:(.+)\\|([^)]+)\\)*$|" +               // Group: 8,9,10,11
-            "^\\(*switch:(.+):(.+)\\|string:(.+)/(.+)\\|([^)]+)\\)*$");      // Group: 12,13,14,15,16
+    protected static final Pattern STEP_PATTERN = Pattern.compile(",?(.+?)=([^,]+?)\\(([^)]+?)\\)");
+    protected static final Pattern NAME_PATTERN = Pattern.compile("([^,]+)");
+    protected static final Pattern SWITCH_WHOLE_OUTPUT_PATTERN = Pattern.compile("\\[(.+)]");
+    protected static final Pattern SWITCH_INPUTS_PATTERN = Pattern.compile("(int|string),([^,]+),(.+)");
+    protected static final Pattern SWITCH_MAP_PATTERN = Pattern.compile("([^,]+):([0-9]+)?");
 
     private enum PipelineStepType {
         CROP_GRID,
@@ -115,14 +99,25 @@ public class ConfigCommand extends DefaultCommand {
         TENSORFLOW
     }
 
-    protected static final String KONDUIT_SERVING_IMAGE_MODULE = "konduit-serving-image";
+    private enum GraphStepType {
+        SWITCH,
+        MERGE,
+        ANY
+    }
 
-    private enum SwitchFunctionType {
+    private static final List<String> reservedKeywords;
+
+    static {
+        reservedKeywords = Arrays.stream(PipelineStepType.values()).map(Enum::name).collect(Collectors.toList());
+        reservedKeywords.addAll(Arrays.stream(GraphStepType.values()).map(Enum::name).collect(Collectors.toList()));
+        reservedKeywords.add("INPUT");
+    }
+
+    private enum SwitchType {
         INT,
         STRING
     }
 
-    Map<String, String> switchSymbolsMap = new HashMap<>();
     Map<String, GraphStep> graphStepsGlobalMap = new HashMap<>();
 
     private ServerProtocol protocol = ServerProtocol.HTTP;
@@ -195,7 +190,7 @@ public class ConfigCommand extends DefaultCommand {
     public void run() {
         Pipeline pipeline;
 
-        if(pipelineString.contains(":")) {
+        if(pipelineString.contains("=")) {
             pipeline = getGraph(pipelineString);
         } else {
             pipeline = getSequence(pipelineString);
@@ -229,172 +224,223 @@ public class ConfigCommand extends DefaultCommand {
 
     private GraphPipeline getGraph(String pipelineString) {
         GraphBuilder builder = new GraphBuilder();
-        GraphStep inputGraphStep = builder.input();
-        String stepName = null;    // this will keep track of the last step name in the loop
-        for(String stepInfo : pipelineString.split(",")) {
-            Matcher matcher = BASIC_STEP_PATTERN.matcher(stepInfo);
-            if(matcher.find()) {
-                if(matcher.group(1) != null) {
-                    stepName = matcher.group(1);
-                    List<String> mergeNames = Arrays.asList(matcher.group(2).split("\\+"));
-                    int inputsToMerge = mergeNames.size();
-                    if(inputsToMerge > 1) {
-                        GraphStep first = graphStepsGlobalMap.get(mergeNames.get(0));
-                        graphStepsGlobalMap.put(stepName, first.mergeWith(stepName,
-                                mergeNames.subList(1, inputsToMerge)
-                                        .stream().map(graphStepsGlobalMap::get).toArray(GraphStep[]::new)
-                                )
-                        );
-                    } else {
-                        throw new CLIException(String.format("Graph steps to be merged must be more than 1. " +
-                                "Current it is %s", inputsToMerge));
+        graphStepsGlobalMap.put("input", builder.input());
+
+        Matcher stepMatcher = STEP_PATTERN.matcher(pipelineString);
+        String lastOutputName = null;
+        int stepIndex = 0;
+        while (stepMatcher.find()) {
+            stepIndex++;
+
+            String outputs = stepMatcher.group(1);
+            String type = stepMatcher.group(2);
+            String inputs = stepMatcher.group(3);
+
+             if (type.equalsIgnoreCase(GraphStepType.SWITCH.name())) {
+                Matcher switchWholeOutputMatcher = SWITCH_WHOLE_OUTPUT_PATTERN.matcher(outputs);
+                if(switchWholeOutputMatcher.find()) {
+                    Matcher switchOutputsMatcher = NAME_PATTERN.matcher(switchWholeOutputMatcher.group(1));
+                    List<String> switchOutputs = new ArrayList<>();
+                    while (switchOutputsMatcher.find()) {
+                        String switchOutputName = switchOutputsMatcher.group(1);
+                        if(reservedKeywords.contains(switchOutputName)) {
+                            out.format("Output name '%s' should be other than one of the reserved keywords: %s%n", switchOutputName, reservedKeywords);
+                            System.exit(1);
+                        } else {
+                            switchOutputs.add(switchOutputsMatcher.group(1));
+                        }
                     }
-                } else if(matcher.group(3) != null) {
-                    stepName = matcher.group(3);
-                    List<String> anyNames = Arrays.asList(matcher.group(4).split("\\+"));
-                    int inputsForAny = anyNames.size();
-                    if(inputsForAny > 1) {
-                        graphStepsGlobalMap.put(stepName, builder.any(stepName,
-                                anyNames.stream().map(graphStepsGlobalMap::get).toArray(GraphStep[]::new))
-                        );
-                    } else {
-                        throw new CLIException(String.format("Graph steps for 'any' step must be more than 1. " +
-                                "Current it is %s", inputsForAny));
+
+                    if(switchOutputs.size() < 2) {
+                        out.format("Switch outputs (%s) should be more than 1%n", switchOutputs.size());
+                        System.exit(1);
                     }
-                } else if(matcher.group(5) != null) {
-                    SwitchStepDetails mainSwitchStepDetails = parseSwitchString(stepInfo);
-                    stepName = mainSwitchStepDetails.getName();
-                    switchStep(builder, stepName, mainSwitchStepDetails.getSteps(),
-                            mainSwitchStepDetails.getSwitchFn(), inputGraphStep);
-                } else if(matcher.group(6) != null) {
-                    SwitchStepDetails mainSwitchStepDetails = parseSwitchString(stepInfo);
-                    stepName = mainSwitchStepDetails.getName();
-                    switchStep(builder, stepName, mainSwitchStepDetails.getSteps(),
-                            mainSwitchStepDetails.getSwitchFn(),
-                            graphStepsGlobalMap.get(mainSwitchStepDetails.inputName));
-                } else if(matcher.group(8) != null) {
-                    String stepType = matcher.group(8);
-                    stepName = matcher.group(9);
-                    graphStepsGlobalMap.put(stepName, inputGraphStep.then(stepName, getPipelineStep(stepType)));
+
+                    Matcher switchInputsMatcher = SWITCH_INPUTS_PATTERN.matcher(inputs);
+                    if(switchInputsMatcher.find()) {
+                        String switchType = switchInputsMatcher.group(1);
+                        String selectField = switchInputsMatcher.group(2);
+                        String otherSwitchInputs = switchInputsMatcher.group(3);
+
+                        if(switchType.equalsIgnoreCase(SwitchType.INT.name())) {
+                            String switchName = String.format("%s_switch_%s", otherSwitchInputs, UUID.randomUUID().toString().substring(0, 8));
+                            if(graphStepsGlobalMap.containsKey(otherSwitchInputs)) {
+                                GraphStep[] switchOutputSteps = builder.switchOp(switchName, new DataIntSwitchFn(switchOutputs.size(), selectField), graphStepsGlobalMap.get(otherSwitchInputs));
+                                for(int i = 0; i < switchOutputs.size(); i++) {
+                                    switchOutputSteps[i].name(switchOutputs.get(i));
+
+                                    if(graphStepsGlobalMap.containsKey(switchOutputSteps[i].name())) {
+                                        out.format("Output '%s' is already defined in a previous step from the current step %s%n",
+                                                switchOutputSteps[i].name(), stepIndex);
+                                        System.exit(1);
+                                    }
+
+                                    graphStepsGlobalMap.put(switchOutputSteps[i].name(), switchOutputSteps[i]);
+                                    lastOutputName = switchOutputs.get(i);
+                                }
+                            } else {
+                                out.format("Undefined input name '%s' for switch step '%s' at step %s. Make sure that the input name '%s' is defined in a previous step%n",
+                                        otherSwitchInputs, stepMatcher.group(), stepIndex, otherSwitchInputs);
+                                System.exit(1);
+                            }
+                        } else {
+                            int lastIndexOfComma = otherSwitchInputs.lastIndexOf(',');
+                            String inputName = otherSwitchInputs.substring(lastIndexOfComma + 1);
+                            if(!graphStepsGlobalMap.containsKey(inputName)) {
+                                out.format("Undefined input name '%s' for switch step '%s' at step %s. Make sure that the input name '%s' is defined in a previous step%n",
+                                        inputName, stepMatcher.group(), stepIndex, inputName);
+                                System.exit(1);
+                            }
+                            String mapInput = otherSwitchInputs.substring(0, lastIndexOfComma);
+                            Matcher switchMapMatcher = SWITCH_MAP_PATTERN.matcher(mapInput);
+                            Map<String, Integer> switchMap = new HashMap<>();
+                            while (switchMapMatcher.find()) {
+                                String key = switchMapMatcher.group(1);
+                                if(switchMap.containsKey(key)) {
+                                    out.format("Switch map key '%s' is already defined%n", key);
+                                    System.exit(1);
+                                }
+
+                                int channel = Integer.parseInt(switchMapMatcher.group(2));
+                                if(channel > switchOutputs.size() - 1) {
+                                    out.format("The switch channel (%s) in the switch map should not be greater " +
+                                            "than the number of switch outputs minus one (%s)%n", channel, switchOutputs.size() - 1);
+                                    System.exit(1);
+                                } else {
+                                    switchMap.put(key, channel);
+                                }
+                            }
+                            if(switchMap.size() != switchOutputs.size()) {
+                                out.format("Switch map size (%s) should be equal to switch outputs size (%s)%n",
+                                        switchMap.size(), switchOutputs.size());
+                                System.exit(1);
+                            }
+                            String switchName = String.format("%s_switch_%s", inputName, UUID.randomUUID().toString().substring(0, 8));
+                            GraphStep[] switchOutputSteps = builder.switchOp(switchName, new DataStringSwitchFn(switchOutputs.size(), selectField, switchMap), graphStepsGlobalMap.get(inputName));
+                            for(int i = 0; i < switchOutputs.size(); i++) {
+                                switchOutputSteps[i].name(switchOutputs.get(i));
+
+                                if(graphStepsGlobalMap.containsKey(switchOutputSteps[i].name())) {
+                                    out.format("Output '%s' is already defined in a previous step from the current step %s%n",
+                                            switchOutputSteps[i].name(), stepIndex);
+                                    System.exit(1);
+                                }
+
+                                graphStepsGlobalMap.put(switchOutputSteps[i].name(), switchOutputSteps[i]);
+                                lastOutputName = switchOutputSteps[i].name();
+                            }
+                        }
+                    } else {
+                        out.format("Invalid switch input pattern '%s' at step %s. The format should be int,<select_field>,<input_name> " +
+                                "or string,<select_field>,<map_keys_and_values>,<input_name>. " +
+                                "Where 'map_keys_and_values' should be in the form of '<key1>:<switch1_number>,<key2>:<switch2_number>,...'.%n" +
+                                "Examples are:%n" +
+                                "---------------------------------%n" +
+                                "01. int,select,input%n" +
+                                "02. string,select,x:0,y:1,input%n" +
+                                "---------------------------------%n",
+                                inputs, stepIndex);
+                        System.exit(1);
+                    }
                 } else {
-                    String stepType = matcher.group(10);
-                    stepName = matcher.group(11);
-                    String stepInput = matcher.group(12);
-                    graphStepsGlobalMap.put(stepName,
-                            graphStepsGlobalMap.get(stepInput).then(stepName, getPipelineStep(stepType))
-                    );
+                    out.format("Invalid switch output pattern '%s' at step %s. Should be a comma-separated list of output names. For example: [s1,s2,...]%n", outputs, stepIndex);
+                    System.exit(1);
                 }
-            } else {
-                throw new CLIException(String.format("Invalid steps format in %s", stepInfo));
-            }
-        }
-        return builder.build(graphStepsGlobalMap.get(stepName));
-    }
+             } else if(type.equalsIgnoreCase(GraphStepType.ANY.name()) || type.equalsIgnoreCase(GraphStepType.MERGE.name())) {
+                 Matcher inputsMatcher = NAME_PATTERN.matcher(inputs);
+                 List<GraphStep> inputGraphSteps = new ArrayList<>();
+                 while (inputsMatcher.find()) {
+                     String inputName = inputsMatcher.group(1);
+                     if(graphStepsGlobalMap.containsKey(inputName)) {
+                         inputGraphSteps.add(graphStepsGlobalMap.get(inputName));
+                     } else {
+                         out.format("Undefined input name '%s' for '%s' step '%s' at step %s. Make sure that the input name '%s' is defined in a previous step%n",
+                                 inputName, type.toLowerCase(), stepMatcher.group(), stepIndex, inputName);
+                         System.exit(1);
+                     }
+                 }
 
-    private String symbolize(String switchStepString) {
-        Matcher matcher = SWITCH_STEP_OUTER_PATTERN.matcher(switchStepString);
-        if(matcher.find()) {
-            String symbolId = UUID.randomUUID().toString();
-            String internalSwitchString;
-            if(matcher.group(1) != null) {
-                internalSwitchString = matcher.group(1);
-            } else if(matcher.group(2) != null) {
-                internalSwitchString = matcher.group(2);
-            } else {
-                internalSwitchString = matcher.group(3);
-            }
-            switchSymbolsMap.put(symbolId, internalSwitchString);
-            return switchStepString.replace(internalSwitchString, symbolId);
-        } else {
-            return switchStepString;
-        }
-    }
+                 if(inputGraphSteps.size() < 2) {
+                     out.format("Number of inputs for '%s' step should be more than 1%n", type.toLowerCase());
+                     System.exit(1);
+                 }
 
-    private void switchStep(GraphBuilder builder, String name, String[] steps, SwitchFn fn, GraphStep input) {
-        GraphStep[] graphSteps = builder.switchOp(name, fn, input);
-        for(int i = 0; i < steps.length; i++) {
-            String[] stepSplits = steps[i].split(":");
-            String stepType = stepSplits[0];
-            if(switchSymbolsMap.containsKey(stepType)) {
-                SwitchStepDetails switchStepDetails = parseSwitchString(switchSymbolsMap.get(stepType));
-                switchStep(builder,
-                        switchStepDetails.getName(),
-                        switchStepDetails.getSteps(),
-                        switchStepDetails.getSwitchFn(),
-                        graphSteps[i]);
-            } else {
-                String stepName = stepSplits[1];
-                this.graphStepsGlobalMap.put(stepName, graphSteps[i].then(stepName, getPipelineStep(stepType)));
-            }
-        }
-    }
+                 if(type.equalsIgnoreCase(GraphStepType.ANY.name())) {
+                     GraphStep anyOutput = builder.any(outputs, inputGraphSteps.toArray(new GraphStep[inputGraphSteps.size()]));
 
-    private SwitchStepDetails parseSwitchString(String switchStepString) {
-        String symbolized = symbolize(switchStepString);
-        Matcher matcher = SWITCH_STEP_INNER_PATTERN.matcher(symbolized);
-        if(matcher.find()) {
-            if(matcher.group(1) != null) {
-                String name = matcher.group(1);
-                String fieldName = matcher.group(2);
-                String[] steps = matcher.group(3).split("\\+");
-                return new SwitchStepDetails(name,
-                        steps,
-                        parseSwitchFunction(steps.length, "int", fieldName, null),
-                        null);
-            } else if (matcher.group(4) != null){
-                String name = matcher.group(4);
-                String fieldName = matcher.group(5);
-                String mappings = matcher.group(6);
-                String[] steps = matcher.group(7).split("\\+");
-                return new SwitchStepDetails(name,
-                        steps,
-                        parseSwitchFunction(steps.length, "string", fieldName, mappings),
-                        null);
-            } else if (matcher.group(8) != null){
-                String name = matcher.group(8);
-                String inputName = matcher.group(9);
-                String fieldName = matcher.group(10);
-                String[] steps = matcher.group(11).split("\\+");
-                return new SwitchStepDetails(name,
-                        steps,
-                        parseSwitchFunction(steps.length, "int", fieldName, null),
-                        inputName);
-            } else {
-                String name = matcher.group(12);
-                String inputName = matcher.group(13);
-                String fieldName = matcher.group(14);
-                String mappings = matcher.group(15);
-                String[] steps = matcher.group(16).split("\\+");
-                return new SwitchStepDetails(name,
-                        steps,
-                        parseSwitchFunction(steps.length, "string", fieldName, mappings),
-                        inputName);
-            }
-        } else {
-            throw new CLIException(String.format("Invalid switch step format in: '%s'", switchStepString));
-        }
-    }
+                     if(graphStepsGlobalMap.containsKey(anyOutput.name())) {
+                         out.format("Output '%s' is already defined in a previous step from the current step %s%n",
+                                 anyOutput.name(), stepIndex);
+                         System.exit(1);
+                     }
 
-    private SwitchFn parseSwitchFunction(int numberOfOutputs, String type, String fieldName, String mappings) {
-        if(SwitchFunctionType.INT.name().equalsIgnoreCase(type)) {
-            return new DataIntSwitchFn(numberOfOutputs, fieldName);
-        } else if (SwitchFunctionType.STRING.name().equalsIgnoreCase(type)) {
-            if(mappings == null) {
-                throw new CLIException("Mappings should not be null for STRING type switch function");
-            }
-            return new DataStringSwitchFn(numberOfOutputs,
-                    fieldName,
-                    Arrays.stream(mappings.split("\\+"))
-                            .map(split -> {
-                                String[] keyValue = split.split(":");
-                                return new Pair<>(keyValue[0], Integer.parseInt(keyValue[1]));
-                            })
-                            .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
-        } else {
-            throw new CLIException(String.format("Invalid switch function type: %s. Should be one of %s",
-                    type,
-                    Arrays.asList(SwitchFunctionType.values())));
+                     graphStepsGlobalMap.put(anyOutput.name(), anyOutput);
+                     lastOutputName = anyOutput.name();
+                 } else {
+                     GraphStep mergeOutput = inputGraphSteps.get(0).mergeWith(outputs, inputGraphSteps.subList(1, inputGraphSteps.size()).toArray(new GraphStep[inputGraphSteps.size() - 1]));
+
+                     if(graphStepsGlobalMap.containsKey(mergeOutput.name())) {
+                         out.format("Output '%s' is already defined in a previous step from the current step %s%n",
+                                 mergeOutput.name(), stepIndex);
+                         System.exit(1);
+                     }
+
+                     graphStepsGlobalMap.put(mergeOutput.name(), mergeOutput);
+                     lastOutputName = mergeOutput.name();
+                 }
+             } else {
+                 if(type.equalsIgnoreCase("input")) {
+                     out.format("The step type cannot be 'input'. Should be either one of the pipeline step types %sor the graph step types %s%n",
+                             Arrays.toString(PipelineStepType.values()), Arrays.toString(GraphStepType.values()));
+                     System.exit(1);
+                 }
+
+                 if(outputs.contains(",")) {
+                     out.format("Number of outputs (%s) in step %s can only be 1%n", outputs.split(",").length, stepIndex);
+                     System.exit(1);
+                 }
+
+                 if(inputs.contains(",")) {
+                     out.format("Number of inputs (%s) in step %s can only be 1%n", outputs.split(",").length, stepIndex);
+                     System.exit(1);
+                 }
+
+                 if(reservedKeywords.contains(outputs)) {
+                     out.format("Output name '%s' should be other than one of the reserved keywords: %s%n", outputs, reservedKeywords);
+                     System.exit(1);
+                 } else {
+                     if(graphStepsGlobalMap.containsKey(inputs)) {
+                         if(Arrays.stream(PipelineStepType.values()).map(Enum::name).collect(Collectors.toList()).contains(type.toUpperCase())) {
+
+                             if(graphStepsGlobalMap.containsKey(outputs)) {
+                                 out.format("Output '%s' is already defined in a previous step from the current step %s%n",
+                                         outputs, stepIndex);
+                                 System.exit(1);
+                             }
+
+                             graphStepsGlobalMap.put(outputs, graphStepsGlobalMap.get(inputs).then(outputs, getPipelineStep(type)));
+                            lastOutputName = outputs;
+                         } else {
+                             out.format("Invalid step type '%s'. Should be either one of the pipeline step types %sor the graph step types %s%n",
+                                     type, Arrays.toString(PipelineStepType.values()), Arrays.toString(GraphStepType.values()));
+                             System.exit(1);
+                         }
+                     } else {
+                         out.format("Undefined input name '%s' for %s step '%s' at step %s. Make sure that the input name '%s' is defined in a previous step%n",
+                                 inputs, type.toLowerCase(), stepMatcher.group(), stepIndex, inputs);
+                         System.exit(1);
+                     }
+                 }
+             }
         }
+
+        if (lastOutputName == null) {
+            out.format("Invalid graph pipeline format %s. Should be a comma-separated list of the format: " +
+                    "'<output>=<type>(<inputs>)' or '[outputs]=switch(<inputs>)' for switches%n", pipelineString);
+            System.exit(1);
+        }
+
+        return builder.build(graphStepsGlobalMap.get(lastOutputName));
     }
 
     private PipelineStep getPipelineStep(String type) {
@@ -404,7 +450,7 @@ public class ConfigCommand extends DefaultCommand {
         try {
             switch (PipelineStepType.valueOf(type.toUpperCase())) {
                 case CROP_GRID:
-                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.grid.crop.CropGridStep");
                     return (PipelineStep) clazz
                             .getConstructor(String.class, String.class, String.class, int.class, int.class,
@@ -412,7 +458,7 @@ public class ConfigCommand extends DefaultCommand {
                             .newInstance("image1", "x", "y", 10, 10, true, "box", false, false, 1.33,
                                     (String) clazz.getField("DEFAULT_OUTPUT_NAME").get(null));
                 case CROP_FIXED_GRID:
-                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.grid.crop.CropFixedGridStep");
                     return (PipelineStep) clazz
                             .getConstructor(String.class, double[].class, double[].class, int.class, int.class,
@@ -428,7 +474,7 @@ public class ConfigCommand extends DefaultCommand {
                             .newInstance("<path_to_model>", dl4jConfigClazz.getConstructor().newInstance(),
                                     Arrays.asList("1", "2"), Arrays.asList("11", "22"));
                 case DRAW_BOUNDING_BOX:
-                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep");
                     Class<?> scaleClass = Class.forName("ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep$Scale");
                     Class<?> imageToNDArrayConfigClass = Class.forName("ai.konduit.serving.data.image.convert.ImageToNDArrayConfig");
@@ -443,7 +489,7 @@ public class ConfigCommand extends DefaultCommand {
                                     scaleClass.getField("NONE").get(null), 10, 10,
                                     imageToNDArrayConfigObject, false, "red");
                 case DRAW_FIXED_GRID:
-                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep");
                     return (PipelineStep) clazz
                             .getConstructor(String.class, double[].class, double[].class, int.class, int.class,
@@ -451,14 +497,14 @@ public class ConfigCommand extends DefaultCommand {
                             .newInstance("image4", new double[]{ 1, 2 }, new double[]{ 1, 2 }, 10, 10, true,
                                     "blue", "red", 1, 1);
                 case DRAW_GRID:
-                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.grid.draw.DrawGridStep");
                     return (PipelineStep) clazz
                             .getConstructor(String.class, String.class, String.class, int.class, int.class,
                                     boolean.class, String.class, String.class, int.class, Integer.class)
                             .newInstance("image1", "x", "y", 10, 10, true, "blue", "red", 1, 1);
                 case DRAW_SEGMENTATION:
-                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep");
                     Class<?> imageToNDArrayConfigClass1 = Class.forName("ai.konduit.serving.data.image.convert.ImageToNDArrayConfig");
                     Object imageToNDArrayConfigObject1 = imageToNDArrayConfigClass1.getConstructor().newInstance();
@@ -470,7 +516,7 @@ public class ConfigCommand extends DefaultCommand {
                             .newInstance(Arrays.asList("red", "blue"), "[]", "image5", "image6", 0.5, 1,
                                     imageToNDArrayConfigObject1);
                 case EXTRACT_BOUNDING_BOX:
-                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep");
                     Class<?> imageToNDArrayConfigClass2 = Class.forName("ai.konduit.serving.data.image.convert.ImageToNDArrayConfig");
                     Object imageToNDArrayConfigObject2 = imageToNDArrayConfigClass2.getConstructor().newInstance();
@@ -487,7 +533,7 @@ public class ConfigCommand extends DefaultCommand {
                             .getConstructor(int.class, int.class, int.class, String.class)
                             .newInstance(0, 640, 480, "image");
                 case IMAGE_TO_NDARRAY:
-                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep");
                     Class<?> imageToNDArrayConfigClass3 = Class.forName("ai.konduit.serving.data.image.convert.ImageToNDArrayConfig");
                     Object imageToNDArrayConfigObject3 = imageToNDArrayConfigClass3.getConstructor().newInstance();
@@ -513,7 +559,7 @@ public class ConfigCommand extends DefaultCommand {
                             .newInstance("<path_to_model>", sameDiffConfigClazz.getConstructor().newInstance(),
                                     Arrays.asList("11", "22"));
                 case SHOW_IMAGE:
-                    moduleName = KONDUIT_SERVING_IMAGE_MODULE;
+                    moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.show.ShowImagePipelineStep");
                     return (PipelineStep) clazz
                             .getConstructor(String.class, String.class, Integer.class, Integer.class, boolean.class)
@@ -538,8 +584,10 @@ public class ConfigCommand extends DefaultCommand {
                     out.format("Please add '%s' module to the binaries to use " +
                             "'%s' step type%n", moduleName, type);
                 }
+            } else if (exception instanceof IllegalArgumentException) {
+                out.format("Invalid step type '%s'. Allowed values are %s%n", type, Arrays.asList(PipelineStepType.values()));
             } else {
-                exception.printStackTrace(out);
+                out.format("No pipeline step found for %s%n", type);
             }
 
             System.exit(1);
@@ -560,14 +608,5 @@ public class ConfigCommand extends DefaultCommand {
                 exception.printStackTrace(out);
             }
         }
-    }
-
-    @Data
-    @AllArgsConstructor
-    private class SwitchStepDetails {
-        private String name;
-        private String[] steps;
-        private SwitchFn switchFn;
-        private String inputName;
     }
 }
