@@ -640,9 +640,85 @@ public class TestTensorFlowStep {
         PipelineExecutor exec = p.executor();
 
         Data in = Data.empty();
-        for( int i=0; i<1000; i++ ){
+        for (int i = 0; i < 1000; i++) {
             exec.exec(in);
         }
 
+    }
 
-}}
+        @Test @Ignore   //To be run manually due to need for webcam and frame output
+        public void testFacialKeyPointsDetection() throws Exception {
+            //Pretrained model source:https://github.com/songhengyang/face_landmark_factory
+
+            String fileUrl = "https://github.com/songhengyang/face_landmark_factory/raw/master/assets/frozen_inference_graph.pb";
+            File testDir = TestUtils.testResourcesStorageDir();
+            File saveDir = new File(testDir, "konduit-serving-tensorflow/face-keypoints-detection");
+            File f = new File(saveDir, "frozen_inference_graph.pb");
+
+            if (!f.exists()) {
+                log.info("Downloading model: {} -> {}", fileUrl, saveDir.getAbsolutePath());
+                FileUtils.copyURLToFile(new URL(fileUrl), f);
+                log.info("Download complete");
+            }
+
+            GraphBuilder b = new GraphBuilder();
+            GraphStep input = b.input();
+
+            //Capture frame from webcam
+            GraphStep camera = input.then("camera", CameraFrameCaptureStep.builder()
+                    .camera(0)
+                    .outputKey("image")
+                    .build());
+
+            //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
+            ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+                    .height(300)
+                    .width(300)
+                    .channelLayout(NDChannelLayout.RGB)
+                    .includeMinibatchDim(true)
+                    .format(NDFormat.CHANNELS_LAST)
+                    .dataType(NDArrayType.UINT8)
+                    .normalization(null)
+                    .build();
+
+            GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
+                    .config(c)
+                    .keys(Arrays.asList("image"))
+                    .outputNames(Arrays.asList("input_image_tensor")) //TODO varargs builder method
+                    .build());
+
+            //Run image in TF model
+            GraphStep tf = i2n.then("tf", builder()
+                    .inputNames(Collections.singletonList("input_image_tensor"))      //TODO varargs builder method
+                    .outputNames(Arrays.asList("logits/BiasAdd"))
+                    .modelUri(f.toURI().toString())
+                    .build());
+
+
+
+            //Merge camera image with bounding boxes
+//        GraphStep merged = camera.mergeWith("img_segmentation", tf);
+
+
+
+
+//        //Show image in Java frame
+//        GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
+//                .displayName("image segmentation")
+//                .imageName("out")
+//                .build());
+
+
+//        GraphPipeline p = b.build(show);
+//
+//
+//        PipelineExecutor exec = p.executor();
+//
+//        Data in = Data.empty();
+//        for( int i=0; i<1000; i++ ){
+//            exec.exec(in);
+//        }
+        }
+
+
+}
