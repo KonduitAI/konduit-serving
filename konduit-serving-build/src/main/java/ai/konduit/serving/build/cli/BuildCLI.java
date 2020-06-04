@@ -216,13 +216,19 @@ public class BuildCLI {
 
         System.out.println("Generating build files...");
         GradleBuild.generateGradleBuildFiles(tempDir, c);
-        System.out.println(" COMPLETE");
+        System.out.println(">> Build file generation complete");
 
         System.out.println("Starting build...");
+        long start = System.currentTimeMillis();
         GradleBuild.runGradleBuild(tempDir);
+        long end = System.currentTimeMillis();
+
 
 
         System.out.println(padTo("Build Complete", '=', width));
+        System.out.println(padRight("Build duration:", ' ', keyWidth) + (end-start)/1000 + " sec");
+        System.out.println(padRight("Output artifacts:", ' ', keyWidth) + deployments.size());
+
         for(Deployment d : deployments){
             System.out.println(" ----- " + d.getClass().getSimpleName() + " -----");
             System.out.println(d.outputString());

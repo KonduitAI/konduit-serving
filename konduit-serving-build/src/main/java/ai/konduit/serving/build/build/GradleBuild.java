@@ -78,7 +78,12 @@ public class GradleBuild {
             kts.append("tasks.withType<ShadowJar> {\n");
         for (Deployment deployment : deployments) {
             if (deployment instanceof UberJarDeployment) {
-                kts.append("\tbaseName = \"" + ((UberJarDeployment)deployment).jarName() + "\"\n");
+                String jarName = ((UberJarDeployment)deployment).jarName();
+                if(jarName.endsWith(".jar")){
+                    jarName = jarName.substring(0, jarName.length()-4);
+                }
+
+                kts.append("\tbaseName = \"" + jarName + "\"\n");
                 String escaped = ((UberJarDeployment)deployment).outputDir().replace("\\","\\\\");
                 kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
             }

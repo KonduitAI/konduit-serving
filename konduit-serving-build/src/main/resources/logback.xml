@@ -27,7 +27,8 @@
         </encoder>
     </appender>
 
-    <logger name="ai.konduit.serving" level="INFO"/>
+    <logger name="ai.konduit.serving" level="INFO"/>\
+    <logger name="org.gradle" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
