@@ -39,6 +39,12 @@ import java.util.*;
 public class Module {
     //TODO these requirements should probably be defined somewhere else!
     public static final Module PIPELINE = new Module("konduit-serving-pipeline", ksModule("konduit-serving-pipeline"), null, null);
+    public static final Module VERTX = new Module("konduit-serving-vertx", ksModule("konduit-serving-vertx"), null, null);
+    public static final Module HTTP = new Module("konduit-serving-http", ksModule("konduit-serving-http"), null, null);
+    public static final Module GRPC = new Module("konduit-serving-grpc", ksModule("konduit-serving-grpc"), null, null);
+    public static final Module MQTT = new Module("konduit-serving-mqtt", ksModule("konduit-serving-mqtt"), null, null);
+
+
     public static final Module DL4J = new Module("konduit-serving-deeplearning4j", ksModule("konduit-serving-deeplearning4j"), DependencyRequirement.ND4J_BACKEND_REQ, null);
     public static final Module SAMEDIFF = new Module("konduit-serving-samediff", ksModule("konduit-serving-samediff"), DependencyRequirement.ND4J_BACKEND_REQ, null);
     //TODO DEPENDENCIES FOR THESE

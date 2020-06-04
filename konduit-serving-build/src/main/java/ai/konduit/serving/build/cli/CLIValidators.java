@@ -100,4 +100,28 @@ public class CLIValidators {
         }
     }
 
+    public static class ServerTypeValidator implements IValueValidator<List<String>> {
+        private static final List<String> VALUES = Arrays.asList(BuildCLI.HTTP, BuildCLI.GRPC);
+
+        @Override
+        public void validate(String name, List<String> value) throws ParameterException {
+            if(value == null || value.isEmpty()){
+                throw new ParameterException("No server type were provided. Valid values are: " + VALUES + " (case insensitive)");
+            }
+
+            for(String s : value){
+                boolean found = false;
+                for(String s2 : VALUES){
+                    if(s2.equalsIgnoreCase(s)){
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) {
+                    throw new ParameterException("Invalid server type specified: \"" + s + "\" - valid values are: " + VALUES + " (case insensitive)");
+                }
+            }
+        }
+    }
+
 }

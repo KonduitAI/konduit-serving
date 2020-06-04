@@ -51,6 +51,12 @@ public interface Deployment {
     void fromProperties(Map<String,String> props);
 
     /**
+     * Validate the deployment configuration before the deployment build is attempted
+     * Used to detect obvious problems such as "output location is not set" etc
+     */
+    DeploymentValidation validate();
+
+    /**
      * Summary output string after the build completes
      * i.e., info about the output after the build has completed
      */

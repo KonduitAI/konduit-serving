@@ -19,6 +19,8 @@
 package ai.konduit.serving.build.deployments;
 
 import ai.konduit.serving.build.config.Deployment;
+import ai.konduit.serving.build.config.DeploymentValidation;
+import ai.konduit.serving.build.config.SimpleDeploymentValidation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -94,10 +96,20 @@ public class UberJarDeployment implements Deployment {
     }
 
     @Override
+    public DeploymentValidation validate() {
+        //TODO we need to validate the actual content - not that it's set. i.e., certain characters can't be used
+        // for groupid, artifacts, version, jar name, etc
+        if(outputDir == null || outputDir.isEmpty()){
+            return new SimpleDeploymentValidation("No output directory is set (property: " + PROP_OUTPUTDIR + ")");
+        }
+        return new SimpleDeploymentValidation();
+    }
+
+    @Override
     public String outputString() {
         File outFile = new File(outputDir, jarName);
         StringBuilder sb = new StringBuilder();
-        sb.append("JAR location:   ").append(outFile.getAbsolutePath()).append("\n");
+        sb.append("JAR location:        ").append(outFile.getAbsolutePath()).append("\n");
         String size;
         if(outFile.exists()){
             long bytes = outFile.length();
@@ -107,8 +119,8 @@ public class UberJarDeployment implements Deployment {
         } else {
             size = "<JAR not found>";
         }
-        sb.append("JAR size:       ").append(size);
-
+        sb.append("JAR size:            ").append(size).append("\n");
+        sb.append("JAR launch command:  java -cp konduit-serving-deployment.jar <TODO args>\n");
         return sb.toString();
     }
 }

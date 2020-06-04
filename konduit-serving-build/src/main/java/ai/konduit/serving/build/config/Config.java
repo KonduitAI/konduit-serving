@@ -205,6 +205,23 @@ public class Config {
                 " to resolve requide modules for it");
         Set<Module> modules = new LinkedHashSet<>();
         modules.add(Module.PIPELINE);       //Always include core API
+        modules.add(Module.VERTX);          //Always include core Vert.x module for serving
+
+        for(Serving s : serving){
+            switch (s){
+                case HTTP:
+                    modules.add(Module.HTTP);
+                    break;
+                case GRPC:
+                    modules.add(Module.GRPC);
+                    break;
+                case MQTT:
+                    modules.add(Module.MQTT);
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown or not supported serving type: " + s);
+            }
+        }
 
         Map<StepId, List<RunnerInfo>> m = ModuleUtils.runnersForFile(new File(pipelinePath));
         for(Map.Entry<StepId, List<RunnerInfo>> e : m.entrySet()){

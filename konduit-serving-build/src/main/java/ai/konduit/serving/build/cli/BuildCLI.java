@@ -45,6 +45,10 @@ public class BuildCLI {
     public static final String DEB = "DEB";
     public static final String TAR = "TAR";
 
+    public static final String HTTP = "HTTP";
+    public static final String GRPC = "GRPC";
+
+
 
     @Parameter(names = {"-p", "--pipeline"})
     private String pipeline;
@@ -74,9 +78,13 @@ public class BuildCLI {
 
     @Parameter(names = {"-dt", "--deploymentType"},
             description = "",
-            validateValueWith = CLIValidators.DeploymentTypeValueValidator.class
-    )
+            validateValueWith = CLIValidators.DeploymentTypeValueValidator.class)
     private List<String> deploymentTypes = Collections.singletonList(Deployment.JAR);
+
+    @Parameter(names = {"-s", "--serverType"},
+            description = "Type of server - HTTP or GRPC (case insensitive)",
+            validateValueWith = CLIValidators.ServerTypeValidator.class)
+    private List<String> serverTypes = Arrays.asList(HTTP, GRPC);
 
 
     public static void main(String... args) throws Exception {
@@ -111,7 +119,7 @@ public class BuildCLI {
             }
         }
 
-
+        //------------------------------------- Build Configuration --------------------------------------
 
         //Print out values
         int width = 96;
@@ -125,7 +133,8 @@ public class BuildCLI {
         if(modules != null){
             System.out.println(padRight("Specified modules:", ' ', keyWidth) + (device == null ? "CPU" : device));
         }
-        System.out.println(padRight("Deployment types:", ' ', keyWidth) + deploymentTypes);
+        System.out.println(padRight("Server type(s):", ' ', keyWidth) + serverTypes);
+        System.out.println(padRight("Deployment type(s):", ' ', keyWidth) + deploymentTypes);
         System.out.println("\n");
 
         List<Deployment> deployments = parseDeployments();
@@ -144,6 +153,7 @@ public class BuildCLI {
 
         System.out.println("\n");
 
+        //--------------------------------------- Validating Build ---------------------------------------
         System.out.println(padTo("Validating Build", '-', width));
 
         if((pipeline == null || pipeline.isEmpty()) && (modules == null || modules.isEmpty())){
@@ -158,13 +168,19 @@ public class BuildCLI {
         Target.Arch a = Target.Arch.forName(arch);
         Target t = new Target(Target.OS.forName(os.get(0)), a, cd);
 
+        //Parse server type
+        List<Serving> serving = new ArrayList<>();
+        for(String s : serverTypes){
+            serving.add(Serving.valueOf(s.toUpperCase()));
+        }
 
 
+        Config c = new Config()
+                .pipelinePath(pipeline)
+                .target(t)
+                .deployments(deployments)
+                .serving(serving);
 
-        Config c = new Config();
-        c.pipelinePath(pipeline);
-        c.target(t);
-        c.deployments(deployments);
         int width2 = 36;
         if(pipeline != null){
             System.out.println("Resolving modules required for pipeline execution...");
@@ -172,9 +188,10 @@ public class BuildCLI {
             for(Module m : resolvedModules){
                 System.out.println("  " + m.name());
             }
+            System.out.println();
 
             List<Dependency> d = c.resolveDependencies();
-            System.out.println("Resolving module optional/configurable dependencies given target: " + t);
+            System.out.println("Resolving module optional/configurable dependencies for deployment target: " + t);
             boolean anyFail = false;
             for(Module m : resolvedModules){
                 ModuleRequirements r = m.dependencyRequirements();
@@ -199,51 +216,71 @@ public class BuildCLI {
                 System.exit(1);
             }
 
+            System.out.println();
+
             if(!d.isEmpty()){
                 System.out.println("Resolved dependencies:");
                 for(Dependency dep : d){
                     System.out.println("  " + dep.gavString());
                 }
             }
+            System.out.println();
+
+            System.out.println("Checking deployment configurations:");
+            boolean anyDeploymentsFailed = false;
+            for(Deployment dep : deployments){
+                DeploymentValidation v = dep.validate();
+                String s = dep.getClass().getSimpleName();
+                String s2 = padRight("  " + s + ":", ' ', width2);
+                System.out.println(s2 + (v.ok() ? "OK" : "FAILED"));
+                if(!v.ok()){
+                    anyDeploymentsFailed = true;
+                    for(String f : v.failureMessages()){
+                        System.out.println("    " + f);
+                    }
+                }
+            }
+
+            if(anyDeploymentsFailed){
+                System.out.println("BUILD FAILED: one or more deployment method configurations failed.");
+                System.out.println("See failure messages above for details");
+                System.exit(1);
+            }
 
             System.out.println("\n>> Validation Passed\n");
         }
 
 
+        //-------------------------------------------- Build ---------------------------------------------
 
-        System.out.println(padTo("Starting Build", '-', width));
+        System.out.println(padTo("Build", '-', width));
         File tempDir = new File(FileUtils.getTempDirectory(), UUID.randomUUID().toString());
 
         System.out.println("Generating build files...");
         GradleBuild.generateGradleBuildFiles(tempDir, c);
-        System.out.println(">> Build file generation complete");
+        System.out.println(">> Build file generation complete\n\n");
 
         System.out.println("Starting build...");
         long start = System.currentTimeMillis();
         GradleBuild.runGradleBuild(tempDir);
         long end = System.currentTimeMillis();
 
+        System.out.println(">> Build complete\n\n");
 
 
-        System.out.println(padTo("Build Complete", '=', width));
+
+
+        System.out.println(padTo("Build Summary", '-', width));
         System.out.println(padRight("Build duration:", ' ', keyWidth) + (end-start)/1000 + " sec");
         System.out.println(padRight("Output artifacts:", ' ', keyWidth) + deployments.size());
+
+        System.out.println();
 
         for(Deployment d : deployments){
             System.out.println(" ----- " + d.getClass().getSimpleName() + " -----");
             System.out.println(d.outputString());
             System.out.println();
         }
-
-
-        /*
-        Also need to check:
-        - that HTTP or GRPC is set (not null)
-        - Output dir for uber-jar is set
-        - At least one deployment type is set
-        - Generally validation for any deployment type
-
-         */
     }
 
     private String padTo(String in, char padChar, int toLength){

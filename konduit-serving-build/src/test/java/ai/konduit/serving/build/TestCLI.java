@@ -23,6 +23,7 @@ import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -30,7 +31,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
-//@Ignore //WIP
+@Ignore //To be run manually, not as part of CI
 public class TestCLI {
 
     @Rule
@@ -49,9 +50,7 @@ public class TestCLI {
 
         BuildCLI.main(
                 "--os", "windows",
-//                "--os", "linux",
                 "--arch", "x86_avx2",
-//                "--arch", "x86_avx512",
                 "-p", f.getAbsolutePath()
         );
 
