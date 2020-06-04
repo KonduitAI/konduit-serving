@@ -57,41 +57,7 @@ public class DeployKonduitServing {
         Vertx vertx = Vertx.vertx(vertxOptions
                 .setMaxEventLoopExecuteTime(10)
                 .setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS));
-        vertx.registerVerticleFactory(new VerticleFactory() {
-            @Override
-            public String prefix() {
-                return SERVICE_PREFIX;
-            }
-
-            @Override
-            public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
-                return createInferenceVerticleFromProtocolName(verticleName.substring(verticleName.lastIndexOf(':') + 1));
-            }
-
-            private Verticle createInferenceVerticleFromProtocolName(String protocolName) throws Exception {
-                ServerProtocol serverProtocol = ServerProtocol.valueOf(protocolName.toUpperCase());
-                if(PROTOCOL_SERVICE_MAP.containsKey(serverProtocol)) {
-                    try {
-                        return (Verticle) ClassLoader.getSystemClassLoader()
-                                .loadClass(PROTOCOL_SERVICE_MAP.get(serverProtocol))
-                                .getConstructor().newInstance();
-                    } catch (ClassNotFoundException classNotFoundException) {
-                        throw new IllegalStateException(
-                                String.format("Missing classes for protocol service %s. Make sure the binaries has included the '%s' module.",
-                                        protocolName,
-                                        "konduit-serving-" + serverProtocol.name().toLowerCase())
-                        );
-                    }
-                } else {
-                    throw new IllegalStateException(
-                            String.format("No inference service found for type: %s. Available service types are: [%s]",
-                                    protocolName,
-                                    StringUtils.join(PROTOCOL_SERVICE_MAP.keySet(), ", ")
-                            )
-                    );
-                }
-            }
-        });
+        registerInferenceVerticleFactory(vertx);
 
         JsonObject jsonConfiguration;
 
@@ -138,5 +104,49 @@ public class DeployKonduitServing {
         });
 
         return vertx;
+    }
+
+    public Map<ServerProtocol, String> getProtocolServiceMap() {
+        return PROTOCOL_SERVICE_MAP;
+    }
+
+    public static void registerInferenceVerticleFactory(Vertx vertx) {
+        vertx.registerVerticleFactory(new VerticleFactory() {
+            @Override
+            public String prefix() {
+                return SERVICE_PREFIX;
+            }
+
+            @Override
+            public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
+                return createInferenceVerticleFromProtocolName(verticleName.substring(verticleName.lastIndexOf(':') + 1));
+            }
+
+            private Verticle createInferenceVerticleFromProtocolName(String protocolName) throws Exception {
+                ServerProtocol serverProtocol = ServerProtocol.valueOf(protocolName.toUpperCase());
+                if(PROTOCOL_SERVICE_MAP.containsKey(serverProtocol)) {
+                    try {
+                        return (Verticle) ClassLoader.getSystemClassLoader()
+                                .loadClass(PROTOCOL_SERVICE_MAP.get(serverProtocol))
+                                .getConstructor().newInstance();
+                    } catch (ClassNotFoundException classNotFoundException) {
+                        vertx.close();
+                        throw new IllegalStateException(
+                                String.format("Missing classes for protocol service %s. Make sure the binaries contain the '%s' module.",
+                                        protocolName,
+                                        "konduit-serving-" + serverProtocol.name().toLowerCase())
+                        );
+                    }
+                } else {
+                    vertx.close();
+                    throw new IllegalStateException(
+                            String.format("No inference service found for type: %s. Available service types are: [%s]",
+                                    protocolName,
+                                    StringUtils.join(PROTOCOL_SERVICE_MAP.keySet(), ", ")
+                            )
+                    );
+                }
+            }
+        });
     }
 }

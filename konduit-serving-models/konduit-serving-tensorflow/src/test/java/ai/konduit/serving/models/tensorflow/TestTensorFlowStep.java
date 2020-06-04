@@ -33,7 +33,6 @@ import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
-import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage;
 import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
@@ -50,12 +49,11 @@ import org.nd4j.common.resources.Resources;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep.*;
+import static ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep.builder;
 import static org.junit.Assert.assertEquals;
 
 @Slf4j
@@ -567,7 +565,7 @@ public class TestTensorFlowStep {
         GraphBuilder b = new GraphBuilder();
         GraphStep input = b.input();
         //Capture frame from webcam
-        GraphStep camera = input.then("camera", FrameCapturePipelineStep.builder()
+        GraphStep camera = input.then("camera", CameraFrameCaptureStep.builder()
                 .camera(0)
                 .outputKey("image")
                 .build());

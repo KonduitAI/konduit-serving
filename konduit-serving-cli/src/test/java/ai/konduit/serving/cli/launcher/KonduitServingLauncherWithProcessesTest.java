@@ -16,38 +16,32 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.launcher;
+package ai.konduit.serving.cli.launcher;
 
-import ai.konduit.serving.InferenceConfiguration;
-import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.output.types.NDArrayOutput;
-import ai.konduit.serving.pipeline.step.ImageLoadingStep;
-import ai.konduit.serving.settings.constants.EnvironmentConstants;
-import ai.konduit.serving.util.LogUtils;
-import ai.konduit.serving.util.ObjectMappers;
-import ch.qos.logback.core.joran.spi.JoranException;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
+import ai.konduit.serving.vertx.config.InferenceConfiguration;
+import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.datavec.image.loader.NativeImageLoader;
 import org.hamcrest.Matchers;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.Timeout;
 import org.nd4j.common.io.ClassPathResource;
-import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.shade.guava.collect.Streams;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -59,19 +53,19 @@ import static org.junit.Assert.assertThat;
 public class KonduitServingLauncherWithProcessesTest {
 
     private static final String TEST_SERVER_ID = "konduit_serving_test_server";
-    private static final String konduit_classpath = System.getProperty("konduit.test.class.path");
-    private static final String system_classpath = System.getProperty("java.class.path");
-    private static final String classpath = konduit_classpath == null ? system_classpath : konduit_classpath;
-
+    private static final String KONDUIT_CLASSPATH = System.getProperty("konduit.test.class.path");
+    private static final String SYSTEM_CLASSPATH = System.getProperty("java.class.path");
+    private static final String CLASSPATH = KONDUIT_CLASSPATH == null ? SYSTEM_CLASSPATH : KONDUIT_CLASSPATH;
+    private static final String STARTED_STRING = "started";
     @Rule
     public Timeout timeout = new Timeout(120, TimeUnit.SECONDS);
 
     @ClassRule
-    public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public static final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @BeforeClass
     public static void beforeClass() {
-        log.info("Using classpath: {}", classpath);
+        log.error("Using classpath: {}", CLASSPATH);
     }
 
     @Before
@@ -80,25 +74,35 @@ public class KonduitServingLauncherWithProcessesTest {
     }
 
     @Test
-    public void testMainHelpAndVersion() throws IOException, InterruptedException {
-        String output = runAndGetOutput("--help"); // Testing with '--help'
-        assertThat(output, Matchers.containsString("Usage: konduit [COMMAND] [OPTIONS] [arg...]"));
-        assertThat(output, Matchers.stringContainsInOrder(getMainCommandNames()));
+    public void testPredictCommandWithGrpc() throws IOException, InterruptedException {
+        Data input = Data.singleton("key", "value");
+        String grpcConfig = runAndGetOutput("config", "-p", "logging", "-m", "-pr", "grpc");
+        runAndTailOutput(this::serverStartLogInLine, "serve", "-id", TEST_SERVER_ID, "-c",
+                SystemUtils.IS_OS_WINDOWS ? grpcConfig.replace("\"", "\\\"") : grpcConfig); // Escaping \" as windows ProcessBuilder removes quotes for some reason.
+        String output = runAndGetOutput("predict", TEST_SERVER_ID, "-it", "binary", "-ot", "binary", "-p", "GRPC",
+                new String(input.asBytes()));
+        assertEquals(input, Data.fromBytes(output.getBytes(StandardCharsets.UTF_8)));
+    }
 
-        output = runAndGetOutput("help"); // Testing with 'help'
-        assertThat(output, Matchers.containsString("Usage: konduit [COMMAND] [OPTIONS] [arg...]"));
+    @Test
+    public void testMainHelpAndVersion() throws IOException, InterruptedException {
+        String usageString = "Usage: konduit [COMMAND] [OPTIONS] [arg...]";
+        String output = runAndGetOutput("--help"); // Testing with '--help'
+        assertThat(output, Matchers.containsString(usageString));
         assertThat(output, Matchers.stringContainsInOrder(getMainCommandNames()));
 
         output = runAndGetOutput("-h"); // Testing with '-h'
-        assertThat(output, Matchers.containsString("Usage: konduit [COMMAND] [OPTIONS] [arg...]"));
+        assertThat(output, Matchers.containsString(usageString));
         assertThat(output, Matchers.stringContainsInOrder(getMainCommandNames()));
 
         Properties gitProperties = new Properties();
-        gitProperties.load(new ClassPathResource("META-INF/konduit-serving-core-git.properties").getInputStream());
+        gitProperties.load(new ClassPathResource("META-INF/konduit-serving-cli-git.properties").getInputStream());
 
-        String matcherString = String.format("Konduit serving version: %s%nCommit hash: %s",
+        String matcherString = String.format("Version: %s%nCommit hash: %s%nCommit time: %s%nBuild time: %s",
                 gitProperties.getProperty("git.build.version"),
-                gitProperties.getProperty("git.commit.id").substring(0, 8));
+                gitProperties.getProperty("git.commit.id").substring(0, 8),
+                gitProperties.getProperty("git.commit.time"),
+                gitProperties.getProperty("git.build.time"));
 
         assertThat(runAndGetOutput("version"), Matchers.containsString(matcherString));
         assertThat(runAndGetOutput("--version"), Matchers.containsString(matcherString));
@@ -108,32 +112,32 @@ public class KonduitServingLauncherWithProcessesTest {
     public void testServeForegroundWorkflow() throws IOException, InterruptedException {
         // Running in foreground
         List<String> logs = runAndTailOutput(this::serverStartLogInLine, "serve", "-id", TEST_SERVER_ID, "-c", testAndGetImageConfiguration());
-        assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID, "started")));
-        assertThat(runAndGetOutput("logs", TEST_SERVER_ID).split(System.lineSeparator()).length, Matchers.lessThan(logs.size()));
+        assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID, STARTED_STRING)));
+        assertThat(runAndGetOutput("logs", TEST_SERVER_ID, "-l", "-1").split(System.lineSeparator()).length, Matchers.lessThan(logs.size()));
 
         String inspectOutput = runAndGetOutput("inspect", TEST_SERVER_ID);
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(
-                inspectOutput.substring(inspectOutput.indexOf("{"))); // Finding the json string
+                inspectOutput.substring(inspectOutput.indexOf('{'))); // Finding the json string
 
         assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID,
                 String.format("%s:%s",
-                        inferenceConfiguration.getServingConfig().getListenHost(),
-                        inferenceConfiguration.getServingConfig().getHttpPort()),
-                "started")));
+                        inferenceConfiguration.getHost(),
+                        inferenceConfiguration.getPort()),
+                STARTED_STRING)));
 
-        String imagePath = new ClassPathResource("/data/5_32x32.png").getFile().getAbsolutePath();
+        Data input = Data.singleton("key", "value");
+        String json = new JsonObject(input.toJson()).encode();
 
-        JsonObject outputJson = new JsonObject(runAndGetOutput("predict", "-it", "IMAGE", TEST_SERVER_ID, imagePath));
-        NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(outputJson.getJsonObject("default").encode(), NDArrayOutput.class);
+        if(SystemUtils.IS_OS_WINDOWS) {
+            json = json.replace("\"", "\\\""); // Escaping \" as windows ProcessBuilder removes quotes for some reason.
+        }
 
-        assertEquals(new NativeImageLoader().asMatrix(imagePath), ndArrayOutput.getNdArray());
+        assertEquals(input, Data.fromJson(runAndGetOutput("predict", "-it", "json", TEST_SERVER_ID, json)));
     }
 
     @Test
     public void testServeBackgroundWorkflow() throws IOException, InterruptedException {
-        Nd4j.create(10, 10);
-
-        // Running in foreground
+        // Running in background
         String configuration = testAndGetImageConfiguration();
         assertThat(runAndGetOutput("serve", "-id", TEST_SERVER_ID, "-c", configuration, "-b"),
                 Matchers.stringContainsInOrder(Arrays.asList("For server status, execute: 'konduit list'",
@@ -141,26 +145,28 @@ public class KonduitServingLauncherWithProcessesTest {
 
         Thread.sleep(10000);
 
-        List<String> logs = runAndTailOutput(this::serverStartLogInLine, "logs", TEST_SERVER_ID, "-f");
-        assertThat(runAndGetOutput("logs", TEST_SERVER_ID).split(System.lineSeparator()).length,
+        List<String> logs = runAndTailOutput(this::serverStartLogInLine, "logs", TEST_SERVER_ID, "-f", "-l", "-1");
+        assertThat(runAndGetOutput("logs", TEST_SERVER_ID, "-l", "-1").split(System.lineSeparator()).length,
                 Matchers.lessThanOrEqualTo(logs.size()));
 
         String inspectOutput = runAndGetOutput("inspect", TEST_SERVER_ID);
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(
-                inspectOutput.substring(inspectOutput.indexOf("{"))); // Finding the json string
+                inspectOutput.substring(inspectOutput.indexOf('{'))); // Finding the json string
 
         assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID,
                 String.format("%s:%s",
-                        inferenceConfiguration.getServingConfig().getListenHost(),
-                        inferenceConfiguration.getServingConfig().getHttpPort()),
-                "started")));
+                        inferenceConfiguration.getHost(),
+                        inferenceConfiguration.getPort()),
+                STARTED_STRING)));
 
-        String imagePath = new ClassPathResource("/data/5_32x32.png").getFile().getAbsolutePath();
+        Data input = Data.singleton("key", "value");
+        String json = new JsonObject(input.toJson()).encode();
 
-        JsonObject outputJson = new JsonObject(runAndGetOutput("predict", "-it", "IMAGE", TEST_SERVER_ID, imagePath));
-        NDArrayOutput ndArrayOutput = ObjectMappers.fromJson(outputJson.getJsonObject("default").encode(), NDArrayOutput.class);
+        if(SystemUtils.IS_OS_WINDOWS) {
+            json = json.replace("\"", "\\\""); // Escaping \" as windows ProcessBuilder removes quotes for some reason.
+        }
 
-        assertEquals(new NativeImageLoader().asMatrix(imagePath), ndArrayOutput.getNdArray());
+        assertEquals(input, Data.fromJson(runAndGetOutput("predict", "-it", "json", TEST_SERVER_ID, json)));
     }
 
     @After
@@ -169,17 +175,15 @@ public class KonduitServingLauncherWithProcessesTest {
     }
 
     @AfterClass
-    public static void afterClass() throws IOException, InterruptedException, JoranException {
-        log.info("\n\nListing running servers. This should report no running servers. If there are any running servers they should be terminated manually." + "\n" +
+    public static void afterClass() throws IOException, InterruptedException {
+        log.error("\n\nListing running servers. This should report no running servers. If there are any running servers they should be terminated manually." + "\n" +
                 "----------------------------------------------------------------------------" +
                 "\n\n" +
                 runAndGetOutput("list") + "\n" +
                 "----------------------------------------------------------------------------");
-
-        LogUtils.setLoggingFromClassPath(); // Resetting logging properties if it was modified by the KonduitServingLauncher commands.
     }
 
-    private List<String> runAndTailOutput(Function<String, Boolean> predicate, String... command) throws IOException, InterruptedException {
+    private List<String> runAndTailOutput(Predicate<String> predicate, String... command) throws IOException, InterruptedException {
         Process process = startProcessFromCommand(command);
         BufferedReader reader =  new BufferedReader(new InputStreamReader(process.getInputStream()));
 
@@ -191,9 +195,9 @@ public class KonduitServingLauncherWithProcessesTest {
             if(line == null) {
                 Thread.sleep(100);
             } else {
-                log.info(line);
+                log.error(line);
                 output.add(line);
-                end = predicate.apply(line);
+                end = predicate.test(line);
             }
         }
 
@@ -212,19 +216,19 @@ public class KonduitServingLauncherWithProcessesTest {
 
         assertEquals(
                 "Process exited with non-zero exit code. Details: \n" +
-                         output + "\n" +
+                        output + "\n" +
                         errorOutput,
                 0, process.waitFor()
         );
 
-        log.info("Process output: {}", output);
-        log.warn("Process errors (ignore if none): '{}'", errorOutput);
+        log.error("Process output: {}", output);
+        log.error("Process errors (ignore if none): '{}'", errorOutput);
 
-        return output.trim();
-    }
-
-    private static InputStream runAndGetInputStream(String... command) throws IOException {
-        return startProcessFromCommand(command).getInputStream();
+        if("predict".equals(command[0])) {
+            return output;
+        } else {
+            return output.trim();
+        }
     }
 
     private static Process startProcessFromCommand(String... command) throws IOException {
@@ -233,7 +237,7 @@ public class KonduitServingLauncherWithProcessesTest {
 
     private static ProcessBuilder getProcessBuilderFromCommand(String... command) {
         List<String> fullCommand = getCommand(command);
-        log.info("Running command (sub): {}", String.join(" ", command));
+        log.error("Running command (sub): {}", String.join(" ", command));
         ProcessBuilder processBuilder = new ProcessBuilder(fullCommand);
         Map<String, String> environment = processBuilder.environment();
         environment.put(EnvironmentConstants.WORKING_DIR, temporaryFolder.getRoot().getAbsolutePath());
@@ -248,7 +252,7 @@ public class KonduitServingLauncherWithProcessesTest {
     private static List<String> getBaseCommand() {
         return Arrays.asList("java",
                 "-cp",
-                classpath,
+                CLASSPATH,
                 "-Dvertx.cli.usage.prefix=konduit",
                 KonduitServingLauncher.class.getCanonicalName());
     }
@@ -258,15 +262,13 @@ public class KonduitServingLauncherWithProcessesTest {
     }
 
     private String testAndGetImageConfiguration() throws IOException, InterruptedException {
-        String inferenceConfigurationJson = runAndGetOutput("config", "-t", "image");
+        String inferenceConfigurationJson = runAndGetOutput("config", "-p", "logging");
 
         assertEquals(inferenceConfigurationJson, InferenceConfiguration.builder()
-                .servingConfig(ServingConfig.builder()
-                        .uploadsDirectory(temporaryFolder.getRoot().getAbsolutePath())
-                        .build())
-                .step(ImageLoadingStep.builder()
-                        .inputName("default")
-                        .outputName("default")
+                .pipeline(SequencePipeline.builder()
+                        .add(LoggingPipelineStep.builder()
+                                .log(LoggingPipelineStep.Log.KEYS_AND_VALUES)
+                                .build())
                         .build())
                 .build().toJson());
 
@@ -278,13 +280,13 @@ public class KonduitServingLauncherWithProcessesTest {
     }
 
     private void stopAllProcesses() throws IOException, InterruptedException {
-        log.info(runAndGetOutput("stop", TEST_SERVER_ID), StandardCharsets.UTF_8);
+        log.error(runAndGetOutput("stop", TEST_SERVER_ID), StandardCharsets.UTF_8);
         Thread.sleep(5000);
         assertThat(runAndGetOutput("list"), Matchers.containsString("No konduit servers found."));
     }
 
     private boolean serverStartLogInLine(String line) {
-        return Pattern.compile("Succeeded in deploying verticle").matcher(line).find();
+        return Pattern.compile("server started on port").matcher(line).find();
     }
 
     private static String getProcessOutput(Process process) throws IOException {

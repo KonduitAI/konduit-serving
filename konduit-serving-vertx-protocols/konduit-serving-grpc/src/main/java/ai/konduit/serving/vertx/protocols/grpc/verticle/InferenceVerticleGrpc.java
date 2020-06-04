@@ -86,6 +86,13 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
                             .deploymentOptions()
                             .setConfig(new JsonObject(inferenceConfiguration.toJson()));
 
+                    long pid = getPid();
+
+                    saveInspectionDataIfRequired(pid);
+
+                    // Periodically checks for configuration updates and save them.
+                    vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
+
                     log.info("Inference gRPC server is listening on host: '{}'", inferenceConfiguration.getHost());
                     log.info("Inference gRPC server started on port {} with {} pipeline steps", actualPort, pipeline.size());
                     startPromise.complete();
