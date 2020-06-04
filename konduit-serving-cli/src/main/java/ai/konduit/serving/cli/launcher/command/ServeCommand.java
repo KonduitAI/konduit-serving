@@ -16,15 +16,16 @@
  * ****************************************************************************
  */
 
-package ai.konduit.serving.launcher.command;
+package ai.konduit.serving.cli.launcher.command;
 
-import ai.konduit.serving.launcher.KonduitServingLauncher;
-import ai.konduit.serving.launcher.LauncherUtils;
+import ai.konduit.serving.cli.launcher.KonduitServingLauncher;
+import ai.konduit.serving.cli.launcher.LauncherUtils;
+import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
-import lombok.extern.slf4j.Slf4j;
+import org.nd4j.common.io.ClassPathResource;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,7 +33,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import static ai.konduit.serving.launcher.command.KonduitRunCommand.DEFAULT_SERVICE;
+import static ai.konduit.serving.cli.launcher.command.KonduitRunCommand.DEFAULT_SERVICE;
 
 @Name("serve")
 @Summary("Start a konduit server application")
@@ -45,10 +46,9 @@ import static ai.konduit.serving.launcher.command.KonduitRunCommand.DEFAULT_SERV
         "--------------\n" +
         "- Starts a server in the foreground with an id of 'inf_server' using 'config.json' as configuration file:\n" +
         "$ konduit serve -id inf_server -c config.json\n\n" +
-        "- Starts a server in the background with an id of 'inf_server' using 'config.json' as configuration file:\n" +
-        "$ konduit serve -id inf_server -c config.json -b\n" +
+        "- Starts a server in the background with an id of 'inf_server' using 'config.yaml' as configuration file:\n" +
+        "$ konduit serve -id inf_server -c config.yaml -b\n" +
         "--------------")
-@Slf4j
 public class ServeCommand extends DefaultCommand {
 
     private String id;
@@ -209,7 +209,7 @@ public class ServeCommand extends DefaultCommand {
         cliArguments.forEach(arg -> ExecUtils.addArgument(cmd, arg));
 
         try {
-            log.info("INFO: Running command {}", String.join(" ", cmd));
+            out.format("INFO: Running command %s%n", String.join(" ", cmd));
             builder.command(cmd); // Setting the builder command
             if (redirect) {
                 runAndTailOutput(builder);
@@ -229,19 +229,21 @@ public class ServeCommand extends DefaultCommand {
     }
 
     private void runAndTailOutput(ProcessBuilder builder) throws IOException {
-        try(BufferedReader reader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {
-
-            String line;
+        Process process = builder.start();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             while (LauncherUtils.isProcessExists(id)) {
-                line = reader.readLine();
-                if (line == null) {
-                    Thread.sleep(100);
+                if(reader.ready()) {
+                    out.println(reader.readLine());
                 } else {
-                    out.println(line);
+                    Thread.sleep(100);
                 }
             }
         } catch (InterruptedException interruptedException) {
-            log.error("Killing server ({}) process. Reason: {}", id, interruptedException.getMessage());
+            out.format("Killing server (%s) logs%n", id);
+        }
+
+        if (!process.isAlive()) {
+            out.format("Server with id (%s) terminated...%n", id);
         }
     }
 
@@ -263,6 +265,20 @@ public class ServeCommand extends DefaultCommand {
             }
         } else {
             Arrays.stream(jvmOptions.split(" ")).forEach(s -> ExecUtils.addArgument(cmd, s));
+        }
+
+        String konduitLogsFileProperty = "konduit.logs.file.path";
+        String logbackFileProperty = "logback.configurationFile";
+        String defaultLogbackFile = "logback-run_command.xml";
+        if (!String.join(" ", cmd).contains(logbackFileProperty)) {
+            try {
+                ExecUtils.addArgument(cmd, String.format("-D%s=%s", konduitLogsFileProperty,
+                        new File(DirectoryFetcher.getCommandLogsDir(), id + ".log").getAbsolutePath()));
+                ExecUtils.addArgument(cmd, String.format("-D%s=%s", logbackFileProperty,
+                        new ClassPathResource(defaultLogbackFile).getFile().getAbsolutePath()));
+            } catch (IOException e) {
+                e.printStackTrace(out);
+            }
         }
     }
 

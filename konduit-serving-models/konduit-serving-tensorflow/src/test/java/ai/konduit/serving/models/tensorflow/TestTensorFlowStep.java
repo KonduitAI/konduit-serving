@@ -37,6 +37,7 @@ import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
+import ai.konduit.serving.pipeline.impl.step.bbox.filter.BoundingBoxFilterStep;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 import ai.konduit.serving.pipeline.util.ArchiveUtils;
 import ai.konduit.serving.pipeline.util.TestUtils;
@@ -52,7 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep.*;
+import static ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep.builder;
 import static org.junit.Assert.assertEquals;
 
 @Slf4j
@@ -545,4 +546,101 @@ public class TestTensorFlowStep {
     }
 
 
-}
+
+    @Test @Ignore   //To be run manually due to need for webcam and frame output
+    public void testBBoxFilter() throws Exception {
+        //Pretrained model source:https://github.com/tensorflow/models/blob/master/research/deeplab/g3doc/model_zoo.md#model-details
+
+        String fileUrl = "https://github.com/kcg2015/Vehicle-Detection-and-Tracking/raw/master/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb";
+        File testDir = TestUtils.testResourcesStorageDir();
+        File saveDir = new File(testDir, "konduit-serving-tensorflow/bbox-filter");
+        File f = new File(saveDir, "frozen_inference_graph.pb");
+
+        if (!f.exists()) {
+            log.info("Downloading model: {} -> {}", fileUrl, f.getAbsolutePath());
+            FileUtils.copyURLToFile(new URL(fileUrl), f);
+            log.info("Download complete");
+        }
+
+        GraphBuilder b = new GraphBuilder();
+        GraphStep input = b.input();
+        //Capture frame from webcam
+        GraphStep camera = input.then("camera", CameraFrameCaptureStep.builder()
+                .camera(0)
+                .outputKey("image")
+                .build());
+
+        //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
+        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+                .height(300)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
+                .width(300)   // size origin
+                .channelLayout(NDChannelLayout.RGB)
+                .includeMinibatchDim(true)
+                .format(NDFormat.CHANNELS_LAST)
+                .dataType(NDArrayType.UINT8)
+                .normalization(null)
+                .build();
+
+        GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
+                .config(c)
+                .keys(Arrays.asList("image"))
+                .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                .build());
+
+        //Run image in TF model
+        GraphStep tf = i2n.then("tf", builder()
+                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
+                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
+                .modelUri(f.toURI().toString())
+                .build());
+
+        //Post process SSD outputs to BoundingBox objects
+        String[] COCO_LABELS = new String[]{"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "street sign", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "hat", "backpack", "umbrella", "shoe", "eye glasses", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "plate", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "mirror", "dining table", "window", "desk", "toilet", "door", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "blender", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush", "hair brush"};
+
+        GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
+                .outputName("img_bbox")
+                .classLabels(SSDToBoundingBoxStep.COCO_LABELS)
+                .build());
+
+        String[] classesToKeep = new String[]{"person", "car"};
+
+        //Post process SSD outputs to BoundingBox objects
+        GraphStep bboxFilter = ssdProc.then("filtered_bbox", BoundingBoxFilterStep.builder()
+                .classesToKeep(classesToKeep)
+                .inputName("img_bbox")
+                .outputName("img_filtered_bbox")
+                .build());
+
+
+        //Merge camera image with bounding boxes
+        GraphStep merged = camera.mergeWith("img_filtered_bbox", bboxFilter);
+
+        //Draw bounding boxes on the image
+        GraphStep drawer = merged.then("drawer", DrawBoundingBoxStep.builder()
+                .imageName("image")
+                .bboxName("img_filtered_bbox")
+                .lineThickness(2)
+                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
+                .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
+                .build());
+
+
+        //Show image in Java frame
+        GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
+                .displayName("bbox filter")
+                .imageName("image")
+                .build());
+
+
+        GraphPipeline p = b.build(show);
+
+
+        PipelineExecutor exec = p.executor();
+
+        Data in = Data.empty();
+        for( int i=0; i<1000; i++ ){
+            exec.exec(in);
+        }
+
+
+}}
