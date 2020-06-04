@@ -86,6 +86,7 @@ public class GradleBuild {
                 kts.append("\tbaseName = \"" + jarName + "\"\n");
                 String escaped = ((UberJarDeployment)deployment).outputDir().replace("\\","\\\\");
                 kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
+                kts.append("mergeServiceFiles()");  //For service loader files
             }
         }
         if (!deployments.isEmpty())
