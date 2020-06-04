@@ -96,7 +96,8 @@ public class ConfigCommand extends DefaultCommand {
         DRAW_GRID,
         DRAW_SEGMENTATION,
         EXTRACT_BOUNDING_BOX,
-        FRAME_CAPTURE,
+        CAMERA_FRAME_CAPTURE,
+        VIDEO_FRAME_CAPTURE,
         IMAGE_TO_NDARRAY,
         LOGGING,
         SSD_TO_BOUNDING_BOX,
@@ -135,8 +136,8 @@ public class ConfigCommand extends DefaultCommand {
     @Description("A comma-separated list of sequence/graph pipeline steps to create boilerplate configuration from. " +
             "For sequences, allowed values are: " +
             "[crop_grid, crop_fixed_grid, dl4j, draw_bounding_box, draw_fixed_grid, draw_grid, " +
-            "draw_segmentation, extract_bounding_box, frame_capture, image_to_ndarray, logging, " +
-            "ssd_to_bounding_box, samediff, show_image, tensorflow]. " +
+            "draw_segmentation, extract_bounding_box, camera_frame_capture, video_frame_capture" +
+            "image_to_ndarray, logging, ssd_to_bounding_box, samediff, show_image, tensorflow]. " +
             "For graphs, the list item should be in the format '<output>=<type>(<inputs>)' or " +
             "'[outputs]=switch(<inputs>)' for switches. The pre-defined root input is named, 'input'. " +
             "Examples are ==> " +
@@ -536,12 +537,18 @@ public class ConfigCommand extends DefaultCommand {
                             .getConstructor(String.class, String.class, String.class, boolean.class, Double.class,
                                     Integer.class, Integer.class, imageToNDArrayConfigClass2)
                             .newInstance("image7", "box2", "image8", true, 1.33, 10, 10, imageToNDArrayConfigObject2);
-                case FRAME_CAPTURE:
+                case CAMERA_FRAME_CAPTURE:
                     moduleName = "konduit-serving-camera";
-                    clazz = Class.forName("ai.konduit.serving.camera.step.capture.FrameCapturePipelineStep");
+                    clazz = Class.forName("ai.konduit.serving.camera.step.capture.CameraFrameCaptureStep");
                     return (PipelineStep) clazz
                             .getConstructor(int.class, int.class, int.class, String.class)
                             .newInstance(0, 640, 480, "image");
+                case VIDEO_FRAME_CAPTURE:
+                    moduleName = "konduit-serving-camera";
+                    clazz = Class.forName("ai.konduit.serving.camera.step.capture.VideoFrameCaptureStep");
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, String.class)
+                            .newInstance("<video_file_path>", "image");
                 case IMAGE_TO_NDARRAY:
                     moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep");
