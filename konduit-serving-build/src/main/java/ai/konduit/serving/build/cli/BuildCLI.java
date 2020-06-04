@@ -16,45 +16,48 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.build;
+package ai.konduit.serving.build.cli;
 
 import ai.konduit.serving.build.build.GradleBuild;
-import ai.konduit.serving.build.config.ComputeDevice;
-import ai.konduit.serving.build.config.Config;
-import ai.konduit.serving.build.config.Module;
-import ai.konduit.serving.build.config.Target;
+import ai.konduit.serving.build.config.*;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.dependencies.DependencyRequirement;
 import ai.konduit.serving.build.dependencies.ModuleRequirements;
+import ai.konduit.serving.build.deployments.UberJarDeployment;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import com.beust.jcommander.*;
-import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 public class BuildCLI {
-    public static final String JAR_DEPLOY = "JAR";
+
+    public static final String JAR = "JAR";
+    public static final String UBERJAR = "UBERJAR";
+    public static final String DOCKER = "DOCKER";
+    public static final String EXE = "EXE";
+    public static final String WAR = "WAR";
+    public static final String RPM = "RPM";
+    public static final String DEB = "DEB";
+    public static final String TAR = "TAR";
+
 
     @Parameter(names = {"-p", "--pipeline"})
     private String pipeline;
 
     @Parameter(names = {"-o", "--os"}, required = true,
             description = "Operating systems to build for. Valid values: {linux, windows, mac} (case insensitive)",
-            validateValueWith = OSValueValidator.class)
+            validateValueWith = CLIValidators.OSValueValidator.class)
     private List<String> os;
 
     @Parameter(names = {"-a", "--arch"},
             description = "The target CPU architecture. Must be one of {x86, x86_avx2, x86_avx512, armhf, arm64, ppc64le}.\n " +
                     "Note that most modern desktops can be built with x86_avx2, which is the default",
-            validateValueWith = ArchValueValidator.class)
+            validateValueWith = CLIValidators.ArchValueValidator.class)
     private String arch = Target.Arch.x86_avx2.toString();
 
     @Parameter(names = {"-d", "--device"},
@@ -65,15 +68,15 @@ public class BuildCLI {
             description = "Names of the Konduit Serving modules to include, as a comma-separated list of values.\nNote that " +
                     "this is not necessary when a pipeline is included (via -p/--pipeline), as the modules will be inferred " +
                     "automatically based on the pipeline contents",
-            validateValueWith = ModuleValueValidator.class
+            validateValueWith = CLIValidators.ModuleValueValidator.class
     )
     private List<String> modules;
 
     @Parameter(names = {"-dt", "--deploymentType"},
             description = "",
-            validateValueWith = DeploymentTypeValueValidator.class
+            validateValueWith = CLIValidators.DeploymentTypeValueValidator.class
     )
-    private List<String> deploymentTypes = Collections.singletonList(JAR_DEPLOY);
+    private List<String> deploymentTypes = Collections.singletonList(Deployment.JAR);
 
 
     public static void main(String... args) throws Exception {
@@ -112,7 +115,7 @@ public class BuildCLI {
 
         //Print out values
         int width = 96;
-        int keyWidth = 24;
+        int keyWidth = 30;
         System.out.println(padTo("Konduit Serving Build Tool", '=', width));
         System.out.println(padTo("Build Configuration", '-', width));
         System.out.println(padRight("Pipeline:", ' ', keyWidth) + (pipeline == null ? "<not specified>" : pipeline));
@@ -125,6 +128,21 @@ public class BuildCLI {
         System.out.println(padRight("Deployment types:", ' ', keyWidth) + deploymentTypes);
         System.out.println("\n");
 
+        List<Deployment> deployments = parseDeployments();
+        for( int i=0; i<deployments.size(); i++ ){
+            Deployment d = deployments.get(i);
+            if(deployments.size() > 1){
+                System.out.println("Deployment " + (i+1) + " of " + deployments.size() + " configuration: " + d.getClass().getSimpleName());
+            } else {
+                System.out.println("Deployment configuration: " + d.getClass().getSimpleName());
+            }
+            Map<String,String> props = d.asProperties();
+            for(Map.Entry<String,String> e : props.entrySet()){
+                System.out.println(padRight("  " + e.getKey() + ":", ' ', keyWidth) + e.getValue());
+            }
+        }
+
+        System.out.println("\n");
 
         System.out.println(padTo("Validating Build", '-', width));
 
@@ -141,9 +159,12 @@ public class BuildCLI {
         Target t = new Target(Target.OS.forName(os.get(0)), a, cd);
 
 
+
+
         Config c = new Config();
         c.pipelinePath(pipeline);
         c.target(t);
+        c.deployments(deployments);
         int width2 = 36;
         if(pipeline != null){
             System.out.println("Resolving modules required for pipeline execution...");
@@ -185,7 +206,7 @@ public class BuildCLI {
                 }
             }
 
-            System.out.println("\nVALIDATION PASSED\n");
+            System.out.println("\n>> Validation Passed\n");
         }
 
 
@@ -193,7 +214,7 @@ public class BuildCLI {
         System.out.println(padTo("Starting Build", '-', width));
         File tempDir = new File(FileUtils.getTempDirectory(), UUID.randomUUID().toString());
 
-        System.out.print("Generating build files...");
+        System.out.println("Generating build files...");
         GradleBuild.generateGradleBuildFiles(tempDir, c);
         System.out.println(" COMPLETE");
 
@@ -202,6 +223,11 @@ public class BuildCLI {
 
 
         System.out.println(padTo("Build Complete", '=', width));
+        for(Deployment d : deployments){
+            System.out.println(" ----- " + d.getClass().getSimpleName() + " -----");
+            System.out.println(d.outputString());
+            System.out.println();
+        }
 
 
         /*
@@ -213,14 +239,6 @@ public class BuildCLI {
 
          */
     }
-//
-//    private static class OSValidator implements IParameterValidator {
-//
-//        @Override
-//        public void validate(String name, String value) throws ParameterException {
-//
-//        }
-//    }
 
     private String padTo(String in, char padChar, int toLength){
         if(in.length() + 2 >= toLength){
@@ -274,55 +292,22 @@ public class BuildCLI {
         return sb.toString();
     }
 
-    public static class OSValueValidator implements IValueValidator<List<String>> {
-        private static final String LINUX = Target.OS.LINUX.toString();
-        private static final String WINDOWS = Target.OS.WINDOWS.toString();
-        private static final String MAC = "MAC";
 
-
-        @Override
-        public void validate(String name, List<String> value) throws ParameterException {
-            for(String s : value){
-                if(!LINUX.equalsIgnoreCase(s) && !WINDOWS.equalsIgnoreCase(s) && !MAC.equalsIgnoreCase(s)){
-                    throw new ParameterException("Invalid operating system: got \"" + s + "\" but must be one or more of {" + LINUX + "," + WINDOWS + "," + MAC + "} (case insensitive)");
-                }
+    public List<Deployment> parseDeployments(){
+        //TODO we need to have configuration
+        List<Deployment> out = new ArrayList<>();
+        for(String s : deploymentTypes){
+            switch (s){
+                case Deployment.JAR:
+                case Deployment.UBERJAR:
+                    File f = new File("");
+                    out.add(new UberJarDeployment(f.getAbsolutePath()));
+                    break;
+                default:
+                    throw new RuntimeException("Deployment type not yet implemented: " + s);
             }
         }
-    }
-
-    public static class ArchValueValidator implements IValueValidator<String> {
-        private static final String X86 = Target.Arch.x86.toString();
-        private static final String X86_AVX2 = Target.Arch.x86_avx2.toString();
-        private static final String X86_AVX512 = Target.Arch.x86_avx512.toString();
-        private static final String ARMHF = Target.Arch.armhf.toString();
-        private static final String ARM64 = Target.Arch.arm64.toString();
-        private static final String PPC64LE = Target.Arch.ppc64le.toString();
-
-
-        @Override
-        public void validate(String name, String s) throws ParameterException {
-            if(!X86.equalsIgnoreCase(s) && !X86_AVX2.equalsIgnoreCase(s) && !X86_AVX512.equalsIgnoreCase(s) &&
-                    !ARMHF.equalsIgnoreCase(s) && !ARM64.equalsIgnoreCase(s) && !PPC64LE.equalsIgnoreCase(s)){
-                throw new ParameterException("Invalid CPU architecture: Got \"" + s + "\" but must be one or more of {" + X86 + ", " + X86_AVX2 +
-                        ", " + X86_AVX512 + ", " + ARMHF + ", " + ARM64 + ", " + PPC64LE + "} (case insensitive)");
-            }
-        }
-    }
-
-    public static class DeploymentTypeValueValidator implements IValueValidator<List<String>> {
-
-        @Override
-        public void validate(String name, List<String> value) throws ParameterException {
-
-        }
-    }
-
-    public static class ModuleValueValidator implements IValueValidator<List<String>> {
-
-        @Override
-        public void validate(String name, List<String> value) throws ParameterException {
-
-        }
+        return out;
     }
 
 }

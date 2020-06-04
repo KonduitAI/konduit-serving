@@ -22,6 +22,9 @@ import ai.konduit.serving.build.deployments.UberJarDeployment;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
@@ -30,5 +33,27 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 })
 @JsonTypeInfo(use = NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 public interface Deployment {
+
+    String JAR = "JAR";
+    String UBERJAR = "UBERJAR";
+    String DOCKER = "DOCKER";
+    String EXE = "EXE";
+    String WAR = "WAR";
+    String RPM = "RPM";
+    String DEB = "DEB";
+    String TAR = "TAR";
+
+
+    List<String> propertyNames();
+
+    Map<String,String> asProperties();
+
+    void fromProperties(Map<String,String> props);
+
+    /**
+     * Summary output string after the build completes
+     * i.e., info about the output after the build has completed
+     */
+    String outputString();
 
 }
