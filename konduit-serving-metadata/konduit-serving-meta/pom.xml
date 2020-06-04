@@ -76,6 +76,69 @@
 
     </dependencies>
 
+
+
+    <!-- Explanation of what is happening here: We are using maven shade + maven ant run plugin to aggregate some metadata
+         from all modules. However, this happens during the packaging phase. Consequently come test phase (no packaging)
+         we don't have these resources and hence tests fail.
+         To handle this, we run a clean/compile/package to create the resources... then we use the maven-dependency-plugin
+         to extract the created JAR contents for use during tests.
+         This is an ugly solution, but it works - it's also used within ND4J for solving essentially the same problem with
+         the shade modules.
+     -->
+    <profiles>
+        <profile>
+            <id>custom-lifecycle</id>
+
+            <activation>
+                <property><name>!skip.custom.lifecycle</name></property>
+            </activation>
+            <build>
+                <plugins>
+
+                    <plugin>
+                        <groupId>org.apache.portals.jetspeed-2</groupId>
+                        <artifactId>jetspeed-mvn-maven-plugin</artifactId>
+                        <version>2.3.1</version>
+                        <executions>
+                            <execution>
+                                <id>compile-and-pack</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>mvn</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.maven.shared</groupId>
+                                <artifactId>maven-invoker</artifactId>
+                                <version>2.2</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <targets combine.children="merge">
+
+                                <target>
+                                    <id>create-shaded-jars</id>
+                                    <dir>@rootdir@/konduit-serving-metadata/konduit-serving-meta/</dir>
+                                    <goals>clean,compile,package</goals>
+                                    <properties>
+                                        <skip.custom.lifecycle>true</skip.custom.lifecycle>
+                                    </properties>
+                                </target>
+
+                            </targets>
+                            <defaultTarget>create-shaded-jars</defaultTarget>
+                        </configuration>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+
     <build>
         <plugins>
             <plugin>
@@ -165,6 +228,38 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <forceCreation>true</forceCreation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>empty-javadoc-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <classifier>javadoc</classifier>
+                            <classesDirectory>${basedir}/javadoc</classesDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>empty-sources-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>sources</classifier>
+                            <classesDirectory>${basedir}/src</classesDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -195,65 +290,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <!-- Explanation of what is happening here: We are using maven shade + maven ant run plugin to aggregate some metadata
-         from all modules. However, this happens during the packaging phase. Consequently come test phase (no packaging)
-         we don't have these resources and hence tests fail.
-         To handle this, we run a clean/compile/package to create the resources... then we use the maven-dependency-plugin
-         to extract the created JAR contents for use during tests.
-         This is an ugly solution, but it works - it's also used within ND4J for solving essentially the same problem with
-         the shade modules.
-     -->
-    <profiles>
-        <profile>
-            <id>custom-lifecycle</id>
-
-            <activation>
-                <property><name>!skip.custom.lifecycle</name></property>
-            </activation>
-            <build>
-                <plugins>
-
-                    <plugin>
-                        <groupId>org.apache.portals.jetspeed-2</groupId>
-                        <artifactId>jetspeed-mvn-maven-plugin</artifactId>
-                        <version>2.3.1</version>
-                        <executions>
-                            <execution>
-                                <id>compile-and-pack</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>mvn</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.apache.maven.shared</groupId>
-                                <artifactId>maven-invoker</artifactId>
-                                <version>2.2</version>
-                            </dependency>
-                        </dependencies>
-                        <configuration>
-                            <targets combine.children="merge">
-
-                                <target>
-                                    <id>create-shaded-jars</id>
-                                    <dir>@rootdir@/konduit-serving-metadata/konduit-serving-meta</dir>
-                                    <goals>clean,compile,package</goals>
-                                    <properties>
-                                        <skip.custom.lifecycle>true</skip.custom.lifecycle>
-                                    </properties>
-                                </target>
-
-                            </targets>
-                            <defaultTarget>create-shaded-jars</defaultTarget>
-                        </configuration>
-                    </plugin>
-
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
 </project>
