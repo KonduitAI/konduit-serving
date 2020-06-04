@@ -208,7 +208,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <echo message="unjar" />
+                                <echo message="unjar ${project.build.directory}/${artifactId}-${version}.jar to ${project.build.directory}/unpacked/" />
                                 <unzip src="${project.build.directory}/${artifactId}-${version}.jar" dest="${project.build.directory}/unpacked/" />
                                 <echo message="rename file: META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun" />
                                 <move file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun"
@@ -224,6 +224,28 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <executions>
+                    <execution>
+                        <id>get names.txt</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <!-- define the command to execute -->
+                            <executable>ls</executable>
+                            <arguments>
+                                <commandlineArgs>-p target/my.zip names.txt > target/names.txt</commandlineArgs>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
