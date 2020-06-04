@@ -179,6 +179,6 @@ public class RequiresDependenciesProcessor extends AbstractProcessor {
         for(String s : toWrite){
             toWrite2.add(moduleName + "," + s);
         }
-        AnnotationUtils.writeFile(filer, RequiresDependenciesAll.class, toWrite2);
+        AnnotationUtils.writeFile(filer, "ai.konduit.serving.annotation.module.RequiresDependencies", toWrite2);
     }
 }
