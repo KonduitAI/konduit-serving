@@ -22,8 +22,18 @@ import ai.konduit.serving.build.config.devices.CUDADevice;
 
 public interface ComputeDevice {
 
-    public static ComputeDevice forName(String name){
-        if(name.toLowerCase().contains("cuda")){
+    String CPU = "CPU";
+    String CUDA_100 = "CUDA_10.0";
+    String CUDA_101 = "CUDA_10.1";
+    String CUDA_102 = "CUDA_10.2";
+
+
+
+
+    static ComputeDevice forName(String name){
+        if(name.toLowerCase().equals(CPU)) {
+
+        }else if(name.toLowerCase().contains("cuda")){
             return CUDADevice.forName(name);
         }
         throw new UnsupportedOperationException("Invalid, unknown, not supported or not yet implemneted device type: " + name);

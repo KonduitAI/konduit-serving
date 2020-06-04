@@ -86,7 +86,7 @@ public class Module {
         return forName(name);
     }
 
-    public boolean moduleExistsForName(String module, boolean shortName){
+    public static boolean moduleExistsForName(String module, boolean shortName){
         if(shortName){
             return MODULES.containsKey("konduit-serving-" + module);
         } else {

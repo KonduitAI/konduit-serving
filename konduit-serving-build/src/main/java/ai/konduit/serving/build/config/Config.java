@@ -85,6 +85,21 @@ public class Config {
         return this;
     }
 
+    public Config addModules(Module... modules){
+        return addModules(Arrays.asList(modules));
+    }
+
+    public Config addModules(List<Module> modules){
+        if(this.modules == null){
+            this.modules = modules;
+        } else {
+            List<Module> newList = new ArrayList<>(this.modules);   //In case currently w e have an immutable list
+            newList.addAll(modules);
+            this.modules = newList;
+        }
+        return this;
+    }
+
     public Config serving(List<Serving> serving){
         this.serving = serving;
         return this;
@@ -199,6 +214,10 @@ public class Config {
         }
     }
 
+    public List<Module> modules(){
+        return modules;
+    }
+
 
     public List<Module> resolveModules(){
         Preconditions.checkState(pipelinePath != null && !pipelinePath.isEmpty(), "Pipeline past must be set before attempting" +
@@ -240,7 +259,8 @@ public class Config {
 
     public List<Dependency> resolveDependencies(){
         Preconditions.checkState(target != null, "Cannot resolve dependencies: No target has been set");
-        resolveModules();
+        if(modules == null || modules.isEmpty())
+            resolveModules();
 
         Set<Dependency> deps = new LinkedHashSet<>();
 

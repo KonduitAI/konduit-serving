@@ -31,7 +31,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
-@Ignore //To be run manually, not as part of CI
+@Ignore //To be run manually, not as part of CI (as it requires all modules to be installed first)
 public class TestCLI {
 
     @Rule
@@ -51,7 +51,8 @@ public class TestCLI {
         BuildCLI.main(
                 "--os", "windows",
                 "--arch", "x86_avx2",
-                "-p", f.getAbsolutePath()
+                "-p", f.getAbsolutePath(),
+                "-m", "konduit-serving-image"
         );
 
     }

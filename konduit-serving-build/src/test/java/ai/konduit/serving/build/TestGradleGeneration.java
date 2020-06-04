@@ -26,6 +26,7 @@ import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -36,6 +37,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
+@Ignore //TO be run manually, not part of CI (as it requires all modules to be installed first)
 public class TestGradleGeneration {
 
     @Rule

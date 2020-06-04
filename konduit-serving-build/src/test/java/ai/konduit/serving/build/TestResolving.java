@@ -100,7 +100,6 @@ public class TestResolving {
                                 .timestamp("2020/05/26 12:00:00"))
                         .target(t)
                         .serving(Serving.HTTP, Serving.GRPC)
-                        .modules(Module.PIPELINE)
                         .deployments(new UberJarDeployment().outputDir("/my/output/dir").jarName("my.jar"));
 
 
@@ -114,6 +113,9 @@ public class TestResolving {
                 String ksVersion = "0.1.0-SNAPSHOT";
                 List<Dependency> expectedDeps = new ArrayList<>();
                 expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-pipeline", ksVersion));
+                expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-vertx", ksVersion));
+                expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-http", ksVersion));
+                expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-grpc", ksVersion));
                 if(testNum == 0){
                     //DL4J
                     expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-deeplearning4j", ksVersion));

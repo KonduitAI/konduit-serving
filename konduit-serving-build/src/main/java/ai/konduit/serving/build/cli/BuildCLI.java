@@ -33,17 +33,21 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/**
+ * Command line interface for performing Konduit Serving builds
+ * Allows the user to build a JAR or artifact such as a docker image suitable for performing inference on a given
+ * pipeline on a given deployment target (defined as an operating system, CPU architecture and optionally compute device).<br>
+ * <br>
+ * For example, can be used to build for any of the following:
+ * * HTTP (REST) server on x86 Windows (CPU), packaged as a stand-alone .exe<br>
+ * * HTTP and GRPC server on CUDA 10.2 + Linux, packaged as a docker image<br>
+ * And many more combinations
+ *
+ *
+ * @author Alex black
+ */
 @Slf4j
 public class BuildCLI {
-
-    public static final String JAR = "JAR";
-    public static final String UBERJAR = "UBERJAR";
-    public static final String DOCKER = "DOCKER";
-    public static final String EXE = "EXE";
-    public static final String WAR = "WAR";
-    public static final String RPM = "RPM";
-    public static final String DEB = "DEB";
-    public static final String TAR = "TAR";
 
     public static final String HTTP = "HTTP";
     public static final String GRPC = "GRPC";
@@ -53,32 +57,28 @@ public class BuildCLI {
     @Parameter(names = {"-p", "--pipeline"})
     private String pipeline;
 
-    @Parameter(names = {"-o", "--os"}, required = true,
-            description = "Operating systems to build for. Valid values: {linux, windows, mac} (case insensitive)",
-            validateValueWith = CLIValidators.OSValueValidator.class)
+    @Parameter(names = {"-o", "--os"}, required = true, validateValueWith = CLIValidators.OSValueValidator.class,
+            description = "Operating systems to build for. Valid values: {linux, windows, mac} (case insensitive)")
     private List<String> os;
 
-    @Parameter(names = {"-a", "--arch"},
+    @Parameter(names = {"-a", "--arch"}, validateValueWith = CLIValidators.ArchValueValidator.class,
             description = "The target CPU architecture. Must be one of {x86, x86_avx2, x86_avx512, armhf, arm64, ppc64le}.\n " +
-                    "Note that most modern desktops can be built with x86_avx2, which is the default",
-            validateValueWith = CLIValidators.ArchValueValidator.class)
+                    "Note that most modern desktops can be built with x86_avx2, which is the default")
     private String arch = Target.Arch.x86_avx2.toString();
 
-    @Parameter(names = {"-d", "--device"},
-            description = "")
+    @Parameter(names = {"-d", "--device"}, validateValueWith = CLIValidators.DeviceValidator.class,
+            description = "Compute device to be used. If not set: artifacts are build for CPU only.\n" +
+                    "Valid values: CPU, CUDA_10.0, CUDA_10.1, CUDA_10.2 (case insensitive)")
     private String device;
 
-    @Parameter(names = {"-m", "--modules"},
+    @Parameter(names = {"-m", "--modules"}, validateValueWith = CLIValidators.ModuleValueValidator.class,
             description = "Names of the Konduit Serving modules to include, as a comma-separated list of values.\nNote that " +
                     "this is not necessary when a pipeline is included (via -p/--pipeline), as the modules will be inferred " +
-                    "automatically based on the pipeline contents",
-            validateValueWith = CLIValidators.ModuleValueValidator.class
-    )
+                    "automatically based on the pipeline contents")
     private List<String> modules;
 
-    @Parameter(names = {"-dt", "--deploymentType"},
-            description = "",
-            validateValueWith = CLIValidators.DeploymentTypeValueValidator.class)
+    @Parameter(names = {"-dt", "--deploymentType"}, validateValueWith = CLIValidators.DeploymentTypeValueValidator.class,
+            description = "The deployment types to use: JAR, DOCKER, EXE, WAR, RPM, DEB or TAR (case insensitive)")
     private List<String> deploymentTypes = Collections.singletonList(Deployment.JAR);
 
     @Parameter(names = {"-s", "--serverType"},
@@ -94,34 +94,9 @@ public class BuildCLI {
     public void exec(String[] args) throws Exception {
         JCommander.newBuilder().addObject(this).build().parse(args);
 
-        Pipeline p = null;
-        if(pipeline != null){
-            File f = new File(pipeline);
-            if(!f.exists() || !f.isFile()){
-                System.out.println("Provided pipeline (via -p or --pipeline) does not exist: " + pipeline);
-                System.exit(1);
-            }
-
-            String s = FileUtils.readFileToString(new File(pipeline), StandardCharsets.UTF_8);
-            try {
-                p = Pipeline.fromJson(s);
-            } catch (Throwable t){
-                try{
-                    p = Pipeline.fromYaml(s);
-                } catch (Throwable t2){
-                    System.out.println("Could not parse Pipeline file as either JSON or YAML");
-                    System.out.println("JSON error:");
-                    t.printStackTrace();
-                    System.out.println("YAML error:");
-                    t2.printStackTrace();
-                    System.exit(1);
-                }
-            }
-        }
-
         //------------------------------------- Build Configuration --------------------------------------
 
-        //Print out values
+        //Print out configuration / values
         int width = 96;
         int keyWidth = 30;
         System.out.println(padTo("Konduit Serving Build Tool", '=', width));
@@ -131,10 +106,10 @@ public class BuildCLI {
         System.out.println(padRight("Target CPU arch.:", ' ', keyWidth) + arch);
         System.out.println(padRight("Target Device:", ' ', keyWidth) + (device == null ? "CPU" : device));
         if(modules != null){
-            System.out.println(padRight("Specified modules:", ' ', keyWidth) + (device == null ? "CPU" : device));
+            System.out.println(padRight("Additional modules:", ' ', keyWidth) + String.join(", ", modules));
         }
-        System.out.println(padRight("Server type(s):", ' ', keyWidth) + serverTypes);
-        System.out.println(padRight("Deployment type(s):", ' ', keyWidth) + deploymentTypes);
+        System.out.println(padRight("Server type(s):", ' ', keyWidth) + String.join(", ", serverTypes));
+        System.out.println(padRight("Deployment type(s):", ' ', keyWidth) + String.join(", ", deploymentTypes));
         System.out.println("\n");
 
         List<Deployment> deployments = parseDeployments();
@@ -189,6 +164,45 @@ public class BuildCLI {
                 System.out.println("  " + m.name());
             }
             System.out.println();
+
+            if(modules != null && !modules.isEmpty()){
+                System.out.println("Additional modules specified:");
+                List<Module> toAdd = new ArrayList<>();
+                boolean anyFailed = false;
+                List<String> failed = new ArrayList<>();
+                for(String s : modules){
+                    boolean e1 = Module.moduleExistsForName(s, false);
+                    boolean e2 = Module.moduleExistsForName(s, true);
+                    if(e1 || e2){
+                        Module m = e1 ? Module.forName(s) : Module.forShortName(s);
+                        if(resolvedModules.contains(m)){
+                            //Already resolved this one
+                            continue;
+                        } else {
+                            System.out.println("  " + m.name());
+                            toAdd.add(m);
+                        }
+                    } else {
+                        anyFailed = true;
+                        System.out.println("  " + s);
+                        failed.add(s);
+                    }
+                }
+                if(anyFailed){
+                    System.out.println("Failed to resolve modules specified via -m/--modules: " + failed);
+                    if(failed.size() == 1){
+                        System.out.println("No module is known with this name: " + failed.get(0) );
+                    } else {
+                        System.out.println("No modules are known with these names: " + failed );
+                    }
+                    System.exit(1);
+                }
+
+                c.addModules(toAdd);
+                resolvedModules = c.modules();
+
+                System.out.println();
+            }
 
             List<Dependency> d = c.resolveDependencies();
             System.out.println("Resolving module optional/configurable dependencies for deployment target: " + t);

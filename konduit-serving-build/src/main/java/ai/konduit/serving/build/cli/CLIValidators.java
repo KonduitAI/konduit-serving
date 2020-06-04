@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.build.cli;
 
+import ai.konduit.serving.build.config.ComputeDevice;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.config.Target;
 import com.beust.jcommander.IValueValidator;
@@ -120,6 +121,26 @@ public class CLIValidators {
                 if(!found) {
                     throw new ParameterException("Invalid server type specified: \"" + s + "\" - valid values are: " + VALUES + " (case insensitive)");
                 }
+            }
+        }
+    }
+
+    public static class DeviceValidator implements IValueValidator<String> {
+
+        @Override
+        public void validate(String name, String value) throws ParameterException {
+            if(value == null || value.isEmpty())
+                return; //EMPTY = CPU
+
+            boolean ok = ComputeDevice.CPU.equalsIgnoreCase(value) ||
+                    ComputeDevice.CUDA_100.equalsIgnoreCase(value) ||
+                    ComputeDevice.CUDA_101.equalsIgnoreCase(value) ||
+                    ComputeDevice.CUDA_102.equalsIgnoreCase(value);
+
+            if(!ok){
+                throw new ParameterException("Invalid device string: must be blank (not set = CPU), or have value " +
+                        ComputeDevice.CPU + ", " + ComputeDevice.CUDA_100 + ", " + ComputeDevice.CUDA_101 + ", " +
+                        ComputeDevice.CUDA_102);
             }
         }
     }
