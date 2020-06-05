@@ -20,7 +20,8 @@ package ai.konduit.serving.build.cli;
 
 import ai.konduit.serving.build.config.ComputeDevice;
 import ai.konduit.serving.build.config.Deployment;
-import ai.konduit.serving.build.config.Target;
+import ai.konduit.serving.build.config.target.Arch;
+import ai.konduit.serving.build.config.target.OS;
 import com.beust.jcommander.IValueValidator;
 import com.beust.jcommander.ParameterException;
 
@@ -33,8 +34,8 @@ public class CLIValidators {
 
 
     public static class OSValueValidator implements IValueValidator<List<String>> {
-        private static final String LINUX = Target.OS.LINUX.toString();
-        private static final String WINDOWS = Target.OS.WINDOWS.toString();
+        private static final String LINUX = OS.LINUX.toString();
+        private static final String WINDOWS = OS.WINDOWS.toString();
         private static final String MAC = "MAC";
 
 
@@ -49,12 +50,12 @@ public class CLIValidators {
     }
 
     public static class ArchValueValidator implements IValueValidator<String> {
-        private static final String X86 = Target.Arch.x86.toString();
-        private static final String X86_AVX2 = Target.Arch.x86_avx2.toString();
-        private static final String X86_AVX512 = Target.Arch.x86_avx512.toString();
-        private static final String ARMHF = Target.Arch.armhf.toString();
-        private static final String ARM64 = Target.Arch.arm64.toString();
-        private static final String PPC64LE = Target.Arch.ppc64le.toString();
+        private static final String X86 = Arch.x86.toString();
+        private static final String X86_AVX2 = Arch.x86_avx2.toString();
+        private static final String X86_AVX512 = Arch.x86_avx512.toString();
+        private static final String ARMHF = Arch.armhf.toString();
+        private static final String ARM64 = Arch.arm64.toString();
+        private static final String PPC64LE = Arch.ppc64le.toString();
 
 
         @Override

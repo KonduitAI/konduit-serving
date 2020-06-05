@@ -19,10 +19,11 @@
 package ai.konduit.serving.build.dependencies.nativedep;
 
 import ai.konduit.serving.build.config.ComputeDevice;
-import ai.konduit.serving.build.config.Target;
+import ai.konduit.serving.build.config.target.Arch;
+import ai.konduit.serving.build.config.target.OS;
+import ai.konduit.serving.build.config.target.Target;
 import ai.konduit.serving.build.config.devices.CUDADevice;
 import ai.konduit.serving.build.dependencies.Dependency;
-import org.apache.commons.lang3.arch.Processor;
 import org.nd4j.common.base.Preconditions;
 
 import java.util.*;
@@ -99,15 +100,15 @@ public class NativeDependencyRegistry {
                 int idx = c.indexOf("-");
                 String osStr = c.substring(0,idx);
                 String archStr = c.substring(idx+1);
-                Target.OS os = Target.OS.forName(osStr);
-                Target.Arch arch = Target.Arch.forName(archStr);
+                OS os = OS.forName(osStr);
+                Arch arch = Arch.forName(archStr);
                 ComputeDevice device = deviceFor(d);
 
                 Preconditions.checkState(arch != null, "Could not infer target architecture for %s", d);
 
-                Target.Arch[] compatibleWith = arch.compatibleWith();
+                Arch[] compatibleWith = arch.compatibleWith();
                 Set<Target> supported = new HashSet<>();
-                for(Target.Arch a : compatibleWith){
+                for(Arch a : compatibleWith){
                     supported.add(new Target(os, a, device));
                 }
 

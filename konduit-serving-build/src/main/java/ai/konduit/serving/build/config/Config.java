@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.build.config;
 
+import ai.konduit.serving.build.config.target.Arch;
+import ai.konduit.serving.build.config.target.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.dependencies.DependencyAddition;
 import ai.konduit.serving.build.dependencies.ModuleRequirements;
@@ -319,7 +321,7 @@ public class Config {
                                             //Just because it SUPPORTS this target, doesn't mean it's optimal...
                                             boolean noneLower = true;
                                             for(Target t : supported){
-                                                Target.Arch a = t.arch();
+                                                Arch a = t.arch();
                                                 if(a.isCompatibleWith(target.arch()) && t.arch().lowerThan(target.arch())){
                                                     noneLower = false;
                                                     break;

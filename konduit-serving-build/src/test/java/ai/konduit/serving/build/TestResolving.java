@@ -19,12 +19,12 @@
 package ai.konduit.serving.build;
 
 import ai.konduit.serving.build.config.*;
+import ai.konduit.serving.build.config.target.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import ai.konduit.serving.build.steps.RunnerInfo;
 import ai.konduit.serving.build.util.ModuleUtils;
 import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
-import ai.konduit.serving.models.samediff.SameDiffConfig;
 import ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;

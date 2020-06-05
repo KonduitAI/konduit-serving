@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.build.dependencies;
 
-import ai.konduit.serving.build.config.Target;
+import ai.konduit.serving.build.config.target.Target;
 
 import java.util.Arrays;
 import java.util.Collection;

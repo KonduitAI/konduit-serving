@@ -19,6 +19,7 @@
 package ai.konduit.serving.build;
 
 import ai.konduit.serving.build.config.*;
+import ai.konduit.serving.build.config.target.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import ai.konduit.serving.build.build.GradleBuild;

@@ -20,17 +20,18 @@ package ai.konduit.serving.build.cli;
 
 import ai.konduit.serving.build.build.GradleBuild;
 import ai.konduit.serving.build.config.*;
+import ai.konduit.serving.build.config.target.Arch;
+import ai.konduit.serving.build.config.target.OS;
+import ai.konduit.serving.build.config.target.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.dependencies.DependencyRequirement;
 import ai.konduit.serving.build.dependencies.ModuleRequirements;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
-import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import com.beust.jcommander.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -64,7 +65,7 @@ public class BuildCLI {
     @Parameter(names = {"-a", "--arch"}, validateValueWith = CLIValidators.ArchValueValidator.class,
             description = "The target CPU architecture. Must be one of {x86, x86_avx2, x86_avx512, armhf, arm64, ppc64le}.\n " +
                     "Note that most modern desktops can be built with x86_avx2, which is the default")
-    private String arch = Target.Arch.x86_avx2.toString();
+    private String arch = Arch.x86_avx2.toString();
 
     @Parameter(names = {"-d", "--device"}, validateValueWith = CLIValidators.DeviceValidator.class,
             description = "Compute device to be used. If not set: artifacts are build for CPU only.\n" +
@@ -140,8 +141,8 @@ public class BuildCLI {
         }
 
         ComputeDevice cd = device == null ? null : ComputeDevice.forName(device);
-        Target.Arch a = Target.Arch.forName(arch);
-        Target t = new Target(Target.OS.forName(os.get(0)), a, cd);
+        Arch a = Arch.forName(arch);
+        Target t = new Target(OS.forName(os.get(0)), a, cd);
 
         //Parse server type
         List<Serving> serving = new ArrayList<>();

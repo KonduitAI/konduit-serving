@@ -19,6 +19,9 @@
 package ai.konduit.serving.build;
 
 import ai.konduit.serving.build.config.*;
+import ai.konduit.serving.build.config.target.Arch;
+import ai.konduit.serving.build.config.target.OS;
+import ai.konduit.serving.build.config.target.Target;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import org.junit.Test;
 
@@ -36,9 +39,9 @@ public class TestConfig {
                         .author("User Name")
                         .buildVersion("1.0.0")
                         .timestamp("2020/05/26 12:00:00"))
-                .target(new Target(Target.OS.LINUX, Target.Arch.x86, null))
+                .target(new Target(OS.LINUX, Arch.x86, null))
                 .serving(Serving.HTTP, Serving.GRPC)
-                .modules(Module.PIPELINE)
+                .modules(Module.forShortName("pipeline"))
                 .deployments(new UberJarDeployment().outputDir("/my/output/dir").jarName("my.jar"));
 
         String json = c.toJson();

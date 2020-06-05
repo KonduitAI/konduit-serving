@@ -19,7 +19,7 @@
 package ai.konduit.serving.build;
 
 import ai.konduit.serving.build.config.Module;
-import ai.konduit.serving.build.config.Target;
+import ai.konduit.serving.build.config.target.Target;
 import ai.konduit.serving.build.dependencies.*;
 import org.junit.Test;
 
