@@ -19,9 +19,9 @@
 package ai.konduit.serving.build.dependencies.nativedep;
 
 import ai.konduit.serving.build.config.ComputeDevice;
-import ai.konduit.serving.build.config.target.Arch;
-import ai.konduit.serving.build.config.target.OS;
-import ai.konduit.serving.build.config.target.Target;
+import ai.konduit.serving.build.config.Arch;
+import ai.konduit.serving.build.config.OS;
+import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.config.devices.CUDADevice;
 import ai.konduit.serving.build.dependencies.Dependency;
 import org.nd4j.common.base.Preconditions;

@@ -18,8 +18,6 @@
 
 package ai.konduit.serving.build.config;
 
-import ai.konduit.serving.build.config.target.Arch;
-import ai.konduit.serving.build.config.target.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.dependencies.DependencyAddition;
 import ai.konduit.serving.build.dependencies.ModuleRequirements;

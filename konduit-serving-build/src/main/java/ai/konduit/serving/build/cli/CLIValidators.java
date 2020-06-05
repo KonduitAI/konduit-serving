@@ -20,8 +20,8 @@ package ai.konduit.serving.build.cli;
 
 import ai.konduit.serving.build.config.ComputeDevice;
 import ai.konduit.serving.build.config.Deployment;
-import ai.konduit.serving.build.config.target.Arch;
-import ai.konduit.serving.build.config.target.OS;
+import ai.konduit.serving.build.config.Arch;
+import ai.konduit.serving.build.config.OS;
 import com.beust.jcommander.IValueValidator;
 import com.beust.jcommander.ParameterException;
 

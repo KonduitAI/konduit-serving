@@ -19,9 +19,9 @@
 package ai.konduit.serving.build;
 
 import ai.konduit.serving.build.config.*;
-import ai.konduit.serving.build.config.target.Arch;
-import ai.konduit.serving.build.config.target.OS;
-import ai.konduit.serving.build.config.target.Target;
+import ai.konduit.serving.build.config.Arch;
+import ai.konduit.serving.build.config.OS;
+import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import org.junit.Test;
 

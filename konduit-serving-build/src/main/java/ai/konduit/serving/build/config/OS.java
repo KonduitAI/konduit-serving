@@ -16,24 +16,14 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.build.dependencies.nativedep;
+package ai.konduit.serving.build.config;
 
-import ai.konduit.serving.build.config.Target;
-import ai.konduit.serving.build.dependencies.Dependency;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+public enum OS {LINUX, WINDOWS, MACOSX, ANDROID;
+    public static OS forName(String s){
+        if("MAC".equalsIgnoreCase(s) || "OSX".equalsIgnoreCase(s)){
+            return MACOSX;
+        }
 
-import java.util.Set;
-
-@AllArgsConstructor
-@Data
-public class NativeDependency {
-
-    private final Dependency dependency;
-    private final Set<Target> supportedTargets;
-
-    public boolean supports(Target target){
-        return supportedTargets.contains(target);
+        return valueOf(s.toUpperCase());
     }
-
 }
