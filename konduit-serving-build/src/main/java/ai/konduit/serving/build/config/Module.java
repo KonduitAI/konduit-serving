@@ -48,7 +48,7 @@ public class Module {
     public static final Module SAMEDIFF = forName("konduit-serving-samediff");
     public static final Module TENSORFLOW = forName("konduit-serving-samediff");
     public static final Module IMAGE = forName("konduit-serving-image");
-    public static final Module CAMERA = forName("konduit-serving-image");
+    public static final Module CAMERA = forName("konduit-serving-camera");
 
     private final String name;
     private final Dependency dependency;
