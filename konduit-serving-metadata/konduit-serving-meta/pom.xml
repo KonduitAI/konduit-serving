@@ -221,7 +221,6 @@
 
             <!-- Disable enforcer plugin dependency convergence for this module (which doesn't actually use the dependencies
              other than to aggregate metadata -->
-            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -238,7 +237,6 @@
                     </execution>
                 </executions>
             </plugin>
-            -->
         </plugins>
     </build>
 </project>
