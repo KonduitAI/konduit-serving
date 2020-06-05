@@ -131,6 +131,40 @@
                     </execution>
                 </executions>
             </plugin>
+
+
+            <!-- Use failsafe not surefire to run tests (to avoid an issue with META-INF/konduit-serving/* files not
+            being picked up by surefire as aggregation normally only happens during package phase. Failsafe seems to pick
+            up these files even when run during test phase (not integration-test phase as it is normally used)-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.0.0-M4</version>
+                <configuration>
+                    <includes>
+                        <include>*</include>
+                        <include>**/*</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

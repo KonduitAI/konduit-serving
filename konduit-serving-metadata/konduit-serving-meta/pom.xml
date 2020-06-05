@@ -198,105 +198,33 @@
                  Unfortunately, this won't be executed by IntelliJ hence for konduit-serving-build to work properly we need to ignore
                  konduit-serving-meta and rely on the maven installed JAR.
                  Yes this is kind of ugly - suggestions on a better approach are welcome! -->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-antrun-plugin</artifactId>-->
-<!--                <version>1.7</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>unpack</id>-->
-<!--                        <phase>package</phase>-->
-<!--                        <configuration>-->
-<!--                            <target>-->
-<!--                                <mkdir dir="${project.build.directory}/unpacked/"/>-->
-<!--                                <echo message="unjar ${project.build.directory}/${artifactId}-${version}.jar to ${project.build.directory}/unpacked/" />-->
-<!--                                <unzip src="${project.build.directory}/${artifactId}-${version}.jar" dest="${project.build.directory}/unpacked/" />-->
-<!--                                <echo message="rename file: META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun" />-->
-<!--                                <move force="true" file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun"-->
-<!--                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/PipelineStepRunner" />-->
-<!--                                <move force="true" file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.json.JsonName"-->
-<!--                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/JsonNameMapping" />-->
-<!--                                <move force="true" file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.module.RequiresDependencies"-->
-<!--                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/ModuleRequiresDependencies" />-->
-<!--                                <echo message="jar back" />-->
-<!--                                <jar destfile="${project.build.directory}/${artifactId}-${version}.jar" basedir="${project.build.directory}/unpacked" />-->
-<!--                            </target>-->
-<!--                        </configuration>-->
-<!--                        <goals>-->
-<!--                            <goal>run</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
-<!--            <plugin>-->
-<!--                <artifactId>exec-maven-plugin</artifactId>-->
-<!--                <groupId>org.codehaus.mojo</groupId>-->
-<!--                <executions>-->
-<!--                    <execution>&lt;!&ndash; Run our version calculation script &ndash;&gt;-->
-<!--                        <id>Version Calculation</id>-->
-<!--                        <phase>generate-sources</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>exec</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <executable>cd ${project.build.directory} jar xf</executable>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
-            <plugin>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <groupId>org.codehaus.mojo</groupId>
-                <executions>
-                    <execution><!-- Run our version calculation script -->
-                        <id>Renaming build artifacts</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>bash</executable>
-<!--                            <commandlineArgs>-c "echo ${project.build.directory}"</commandlineArgs>-->
-<!--                            <commandlineArgs>-c "cd ${project.build.directory} &amp;&amp; mkdir extracted &amp;&amp; java xf ${project.build.directory}/konduit-serving-meta-0.1.0-SNAPSHOT.jar"</commandlineArgs>-->
-                            <commandlineArgs>test.sh</commandlineArgs>
-<!--                            <commandlineArgs>-c "echo pwd"</commandlineArgs>-->
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <forceCreation>true</forceCreation>
-                </configuration>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
                 <executions>
                     <execution>
-                        <id>empty-javadoc-jar</id>
+                        <id>unpack</id>
                         <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
                         <configuration>
-                            <skip>false</skip>
-                            <classifier>javadoc</classifier>
-                            <classesDirectory>${basedir}/javadoc</classesDirectory>
+                            <target>
+                                <mkdir dir="${project.build.directory}/unpacked/"/>
+                                <echo message="unjar ${project.build.directory}/${artifactId}-${version}.jar to ${project.build.directory}/unpacked/" />
+                                <unzip src="${project.build.directory}/${artifactId}-${version}.jar" dest="${project.build.directory}/unpacked/" />
+                                <echo message="rename file: META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun" />
+                                <move force="true" file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun"
+                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/PipelineStepRunner" />
+                                <move force="true" file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.json.JsonName"
+                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/JsonNameMapping" />
+                                <move force="true" file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.module.RequiresDependencies"
+                                      tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/ModuleRequiresDependencies" />
+                                <echo message="jar back" />
+                                <jar destfile="${project.build.directory}/${artifactId}-${version}.jar" basedir="${project.build.directory}/unpacked" />
+                            </target>
                         </configuration>
-                    </execution>
-                    <execution>
-                        <id>empty-sources-jar</id>
-                        <phase>package</phase>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>run</goal>
                         </goals>
-                        <configuration>
-                            <classifier>sources</classifier>
-                            <classesDirectory>${basedir}/src</classesDirectory>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
