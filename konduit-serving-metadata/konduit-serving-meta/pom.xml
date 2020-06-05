@@ -231,12 +231,7 @@
                             <goal>enforce</goal>
                         </goals>
                         <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>[3.3,)</version>
-                                </requireMavenVersion>
-                            </rules>
-                            <fail>true</fail>
+                            <skip>true</skip>
                         </configuration>
                     </execution>
                 </executions>
