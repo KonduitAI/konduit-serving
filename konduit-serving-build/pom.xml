@@ -134,8 +134,12 @@
 
 
             <!-- Use failsafe not surefire to run tests (to avoid an issue with META-INF/konduit-serving/* files not
-            being picked up by surefire as aggregation normally only happens during package phase. Failsafe seems to pick
-            up these files even when run during test phase (not integration-test phase as it is normally used)-->
+            being picked up by surefire as aggregation normally only happens during package phase. Whereas surefire runs
+            in the test phase (which happens before package - so before the metadata files have been created) - failsafe
+            runs in the integration-tests phase.
+            The downside of this approach is that "mvn clean test" won't actually run the konduit-serving-build tests;
+            instead, "mvn clean test integration-test" or "mvn clean integration-test" needs to be used instead
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -157,7 +161,6 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>test</phase>
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>
