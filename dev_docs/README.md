@@ -2,12 +2,13 @@
 
 These docs are designed to explain the architecture of Konduit Serving (for the "new" API as of 05/2020).
 
-See `ADRs/0003-Pipeline-API_Rewrite.md` for background and motivation on the current design.
+See `ADRs/0003-Pipeline-API_Rewrite.md` for background and motivation on the current design.  
+See also: dev_docs/BuildToolReadme.md for details on the Konduit Serving build tool (reading this first is recommended)
 
 ## Core classes:
 
 * Pipeline: An *interface* that defines a `Data -> Data` transformation made up of one or more pipeline steps.
-    - Note: There are 2 types - `SequencePipeline` (a stack of operations) and `GraphPipeline` (WIP - a directed acyclic graph
+    - Note: There are 2 types - `SequencePipeline` (a stack of operations) and `GraphPipeline` (a directed acyclic graph
       possibly including optional branches). Analogous to MultiLayerNetwork/Sequential and ComputationGraph/Functional in DL4J/Keras.
 * PipelineStep: Also an interface defines a `Data -> Data` transformation. Consider these the building blocks for building a Pipeline
     - Model inference, ETL, data transformation, etc are all implemented as a PipelineStep.
@@ -23,18 +24,36 @@ See `ADRs/0003-Pipeline-API_Rewrite.md` for background and motivation on the cur
 
 **Key modules - New API:**
 
-The list below briefly describes those implemented so far (as of 05/05/2020)- there are many more to be added.
+The list below briefly describes those implemented so far (as of 04/06/2020)- there are many more to be added.
 
 * konduit-serving-pipeline: Core API for pipelines and local execution
     * Note: very few dependencies. No ND4J, DataVec, Python, TensorFlow etc in this module. Only Java API and baseline Java functionality.
-* konduit-serving-models: Parent module for each of the model types
-    * konduit-serving-deeplearning4j: Deeplearning4j models.
+* konduit-serving-models: Parent module for each of the neural network model types
+    * konduit-serving-deeplearning4j: Deeplearning4j model support + Keras support (via DL4J Keras import)
+    * konduit-serving-samediff: SameDiff model support (and soon TensorFlow frozen model support)
+    * konduit-serving-tensorflow: TensorFlow Frozen Model and SavedModel support via TensorFlow Java API
+    * (soon) konduit-serving-onnx
+    * (soon) konduit-serving-pmml
 * konduit-serving-data: Parent module for data and datatypes
-    * konduit-serving-nd4j: Mainly NDArray integration/functionality for ND4J
-    * konduit-serving-image: Image conversion functionality using JavaCV; also Image -> NDArray functionality 
+    * konduit-serving-nd4j: Mainly NDArray integration/functionality for ND4J. Used also by deeplearning4j and samediff modules
+    * konduit-serving-image: Image conversion functionality using JavaCV; also Image -> NDArray functionality, and a bunch of utility
+      steps for showing images, drawing segmentation masks on images, drawing/croping from a grid, and drawing bounding boxes
 * konduit-serving-io: Parent module for I/O functionality - sensors, cameras, etc - and maybe later things like HDFS, S3, etc
     * konduit-serving-camera: Steps related to capturing data from device-connected cameras (WIP)
+* konduit-serving-metadata
+    * konduit-serving-meta: collects metadata from all modules - what. More on this later.
+    * konduit-serving-annotations: Annotations: `@JsonName`, `@ModuleInfo`,  `@CanRun` and `@RequiresDependencyAny`, `@RequiresDependencyAll`, `@InheritRequiredDependencies`.
+      More on annotations later, and see also build tool readme.
+* konduit-serving-build: A tool for producing artifacts suitable for serving and execution of pipelines- i.e., uber-jars, docker
+  images, standalone .exe files, deb/rpm files, and more.
+* konduit-serving-metrics/konduit-serving-prometheus: Prometheus-based metrics support (/metrics endpoint)
+* konduit-serving-vertx: Baseline Vert.x serving functionality
+* konduit-serving-vertx-protocols
+    * konduit-serving-http: HTTP serving with Vert.x
+    * konduit-serving-grpc: gRPC serving with Vert.x
+    * konduit-serving-mqtt: (placeholder as of 04/06/2020) MQTT serving with Vert.x
 
+Note that as of 06/2020 the remaining modules will be removed in the near future
 
 **Key design philosophies:**
 
@@ -53,7 +72,8 @@ The list below briefly describes those implemented so far (as of 05/05/2020)- th
     - See PipelineStep section later. But we want to enable one pipeline step (configuration) to be run by different executors.
       For example, a TensorFlow model - as defined by a the exact same TensorFlowStep configuration could be run by any of
       the TensorFlow, SameDiff, or ONNX executors - without any modification to the configuration itself (other than maybe
-      prioritizing which to use if multiple are available).
+      prioritizing which to use if multiple are available).  
+      Put another way: there is a many-to-many relationship between PipelineStep (configuration) and PipelineStepRunner (execution)
 * Suitable for both uber-jar type deployments and OSGi deployment scenarios
 * (Mostly) language agnostic
     - Pipeline JSON/YAML specification is language agnostic: Though the Konduit Serving core is Java-based, the pipeline / pipeline
@@ -70,10 +90,10 @@ The list below briefly describes those implemented so far (as of 05/05/2020)- th
 As noted above - `Pipeline` is an interface that defines a `Data -> Data` transformation. A Pipeline is usually made
 up of multiple separate steps - one or more `PipelineStep` instances.
 
-There are two types of Pipelines (both with the same API - Data in, Data out) - SequencePipeline and GraphPipeline.
-Note that GraphPipeline is still WIP as of 05/05/2020.
+There are two types of Pipelines (both with the same API - Data in, Data out) - SequencePipeline and GraphPipeline.  
+For graph pipelines, see ADRs/0004-Graph_pipelines.md.  
 
-Though the Java API is the same, the difference between the two is:  
+Though the Java API for execution of these is the same, the difference between the two is:  
 (a) internal - GraphPipeline allows branching, and conditional operations  
 (b) JSON/YAML format definition - users define a list for SequencePipeline, or a Map/Dictionary for GraphPipeline
 
@@ -140,7 +160,7 @@ Again, the supported datatypes include: (see `ValueType` enum):
 `JData` is the Java Map-based implementation of the `Data` interface - i.e., literally it has a `Map<String,Value<T>>` internally,
 where `Value<T>` is a trivially simple object to hold objects of different types.
 
-We also have (WIP as of 05/05/2020) a Protobuf-based `Data` implementation - ProtoData that stores data in protobuf form.
+We also have a Protobuf-based `Data` implementation - ProtoData that stores data in protobuf form.
 Protobuf - aka Protocol Buffers - is a widely used binary data serialization format.
 
 
@@ -151,7 +171,7 @@ Why protobuf? 4 reasons
     - considerably faster to encode/decode than formats such as JSON
     - Can allow for zero-copy deserialization in some cases
 * Space efficient - much more so than other formats such as JSON (1-10x depending on the format)
-* Enables gRPC (which we will add later as an alternative to HTTP/REST)
+* Enables gRPC (which Konduit Serving supports as an alternative to HTTP/REST)
 
 A key point regarding Data: Any time we need to do any serialization, network transfers, saving/loading to/from file etc - we will use the
 protobuf format. i.e., the protobuf-based Data implementation is considered the canonical representation for anything other
@@ -163,7 +183,8 @@ convert JData to ProtoData whenever we need to do IPC, serialization or sending 
 
 Similar to how the ProtoData (protobuf) is the canonical format for Data in binary, we will have only one JSON format for
 all Data implementations. i.e., JData, Protodata (or any possible future Data implementation) will all produce the exact
-same JSON/YAML. The implementation for this is still WIP.  
+same JSON/YAML. The JSON ser/de for Data is implemented in the konduit-serving-pipeline classes DataJsonSerializer and
+DataJsonDeserializer.  
 
 ## NDArray and Image
 
@@ -178,15 +199,15 @@ We have 5 main design challenges for implementing NDArray and Image support:
   want to pay the performance overhead. Suppose 2 pipeline steps both produce/use INDArray - why should we pay the
   `INDArray -> SomeFormat -> INDArray` conversion cost?
 
-NDArray and Image are interfaces. The design for NDArray and Image is that they are both just an "object holders and converters".
+NDArray and Image are interfaces. The design for NDArray and Image is that they are both just an "object holders with converters".
 That is, the only thing the user can do is say "give me the content of this NDArray/Image in this format (automatically converting
 if necessary)".
 
 The main downside is that we (as developers) need to define ahead of time format converters - for example, how an INDArray can
-be converted to a `float[][]`, and vice versa. This will require a bit of tedious boilerplate for us - as there are many
+be converted to a `float[][]`, and vice versa. This requires a bit of tedious boilerplate for us - as there are many
 possible conversions to implement.
 
-However, once we have done that, the result should be quite good usability for users:
+However, once we have done that, the result is reasonably good usability:
 ```java
 float[][] myFloatArray = new float[][]{{1,2},{3,4}};
 
@@ -202,10 +223,14 @@ conversion (or performance/memory overhead) would be done. Conversely, for the `
 Note that types are fully extensible - if a user wants to add some other library - it's possible for them to add a few
 classes and converters so that `NDArray.create(someUserCustomType)` and `NDArray.getAs(...)` just works.
 
-Down the line we'll implement multi-step conversion for easy extensibility. That is, suppose the user wants to do `NDArray.create`
-for some custom type X. Instead of having to write conversion for `X -> float[]`, `X -> INDArray` etc etc they will
-simply write `X -> C` where `C` is some standard canonical format.
-We'll probably need/use this anyway for serialization and IPC.
+We also implement simple multi-step conversion for easy extensibility. That is, suppose the user wants to do `NDArray.create`
+for some custom type X. Instead of having to write conversion for `X -> float[]`, `X -> INDArray` etc etc for all possible
+types that Konduit serving supports, they simply need to write two converters:
+* For Images: format to/from PNG
+* For NDArrays: format to/from SerializedNDArray
+
+Then, when no direct X -> Y converter exists, we simply do X -> (PNG/SerializedNDArray) -> Y which will work with any combination
+of types for X and Y. 
 
 
 In practice, this is implemented via instances of the following interfaces:
@@ -216,24 +241,24 @@ In practice, this is implemented via instances of the following interfaces:
 * NDArrayFactory - used in `NDArray.create(Object)`
 * NDArrayFormat - specifies a format with more detail than just a class name (for example, format configuration)
 
-The actual converters and creators are loaded (using Java ServiceLoadear mechanism) and stored in the following classes:
+The actual converters and creators are loaded (using Java ServiceLoader mechanism) and stored in the following classes:
 * ImageConverterRegistry
 * ImageFactoryRegistry
 * NDArrayConverterRegistry
 * NDArrayFactoryRegistry 
 
 
-Serialization and IPC: still WIP. While we are within a single JVM, we don't necessarily need to do any conversion - for
+Serialization and IPC: While we are within a single JVM, we don't necessarily need to do any conversion - for
 example, all of our pipeline steps could use `INDArray` or use `float[][]` etc - that's fine. But what happens when we
 want to save (or transmit over the network) a Data instance? Clearly we need some language-agnostic format for storing
 the NDArray and Image values, no matter what type they are internally at present.  
 For NDArray, this format is straightforward - we store a C-order buffer of values (with some fixed endianness), a type
-enum and a shape array (as `long[]`).  
-For images - it's less obvious what the format - or formats - should be. Though something like JPG format would seem like
+enum and a shape array (as `long[]`). This is implemented in the SerializedNDArray.  
+For images - we currently standardize on PNG format for images. While something like JPG format would seem like
 a reasonable option - one issue is that it is lossy - i.e., there's no guarantee that we'll get the exact same image out
-of serialization as went in (only a close approximation). That might - or might not - matter in different use cases.
-Alternatively, PNG is lossless - but it's size can be significantly larger for 'natural' images (i.e., typical photos)
-that will frequently be fed into a neural network.
+of serialization/conversion as went in (only a close approximation). That might matter for some use cases.
+PNG is lossless, but has the downside of being significantly larger for 'natural' images (i.e., typical photos) that will
+ frequently be fed into a neural network.
 
 
 For JSON serialization, we convert all arrays to SerializedNDArray - that simply stores the type, shape, and the data
@@ -253,23 +278,24 @@ serialization from any format - in a standardized form.
 
 As of 07/05/2020 supported formats for images include:
 * Png
+* Jpg
+* Bmp
 * BufferedImage
 * JavaCV Mat    (konduit-serving-javacv)
 * JavaCV Frame  (konduit-serving-javacv)
-More formats will be added in the future.
+More formats will be added in the future as they are needed.
 
-As of 07/05/2020 supported NDArray formats include:
+As of 04/06/2020 supported NDArray formats include:
 * SerializedNDArray (Konduit Serving serialization/interchange format)
-* float[], float[][], float[][][], float[][][][], float[][][][][]
+* Rank 1 to 5 arrays for all Java primitive types (x[], x[][], x[][][], x[][][][], x[][][][][] where x is any java primitive type - int, long, short, float, etc)
 * INDArray      (konduit-serving-nd4j)
-The full set of Java primitive array types (1d to 5d int[], double[], byte[] etc is planned to be added)
 
 
 ### Image to NDArray
 
-At some point, if we want to make predictions based on an Image, we need to convert it to an NDArray, and likely normalize it.
+If we want to make predictions based on an Image using a neural network, we need to convert it to an NDArray, and likely normalize it.
 
-There are two main classes (both in )
+There are two main classes (both in konduit-serving-image)
 * ImageToNDArrayStep - Image -> NDArray as a pipeline step 
 * ImageToNDArray utility class
 
@@ -305,27 +331,23 @@ How do we do JSON ser/de for configurations if we can't refer to the implementat
 That is, `SameDiffStep.class` obviously won't compile if there isn't a `SameDiffStep` class in that module (or as a dependency).
 And how do we make it user extensible if they want to add their own modules?
 
-The solution is to use a registration + ServiceLoader type approach.  
-That is: in konduit-serving-pipeline we have the `JsonSubType` class (fields: name, subtype, configInterface) and a
-`JsonSubTypesMapping` interface.
-The JsonSubType object should be interpreted as follows: "if a subtype with name *name* appears in some JSON or YAML, we
-should deserialize it to class *subtype*, which is a subtype of *configInterface*".  
-An alternative way of looking at it is that it's the runtime equivalent of this:
-```java
-@JsonSubTypes({ @JsonSubTypes.Type(value = <subtype>, name = <name>)})
-public interface configInterface {
-```
+The practical answer is simple: we have introduced our own `@JsonName("...")` annotation (defined in konduit-serving-annotation)
+These annotations should be placed on things that are intended to be JSON serializable (that have to deal with JSON subtypes)
+PipelineStep implementations being the main use for these annotations.
+For example, placing `@JsonName("MY_STEP")` on a PipelineStep means that it's JSON representation will contain `"@type": "MY_STEP"`
+which will allow us to map back to the Java step.
 
+This custom annotation-based approach is implemented in practice by automatically generating one class and two metadata files:
+1. A class that implements JsonSubTypesMapping
+2. A Java Service Loader file (META-INF/services/ai.konduit.serving.pipeline.api.serde.JsonSubTypesMapping) that points to
+   the class generated in step 1.
+3. A META-INF/konduit-serving/ai.konduit.serving.annotation.json.JsonName file - see the annotations section later.
 
-Each module then implements a single class that implements JsonSubTypesMapping, which returns at runtime the JSON subtype mapping.
+All 3 of these files are generated automatically without the developer's intervention - the developer simply needs to add
+the `@JsonName` annotation (and a `@ModuleInfo` annotation somewhere in the module - more on this in the next section).
 
-Finally, each module also creates a `resources/META-INF/services/ai.konduit.serving.pipeline.api.serde.JsonSubTypesMapping`
-file (with that exact name and path). The content of that file is the fully-qualified class name of the class that
-implements the JsonSubTypesMapping interface.
-This is a Java ServiceLoader file that allows the JsonSubTypesMapping to be discovered at runtime.
-
-For now, we have this ServiceLoader based implementation, though we can use this approach also in an OSGi deployment
-context (which we will be supporting in the future).
+This ServiceLoader based implementation should also be adaptable for use in an OSGi deployment context (which we will be
+supporting in the future).
  
 
 At runtime, the JSON subtypes are loaded (and registered with Jackson) in the ObjectMappers class.
@@ -413,6 +435,7 @@ Bounding boxes are also stored with special keys in either (cx, cy, h, w) format
 special/reserved names to differentiate a bounding box from a Data instance (otherwise the JSON would be ambiguous). 
 
 The full set of protected keys can be found on the Data interface. They include:
+* @type (used for JSON subtype information)
 * @BytesBase64
 * @BytesArray
 * @ImageFormat
@@ -426,6 +449,54 @@ The full set of protected keys can be found on the Data interface. They include:
 
 In practice, Data JSON serialization/deserialization is implemneted in the DataJsonSerializer and DataJsonDeserializer classes. 
 
+## Annotations and Metadata Collection
+
+The konduit-serving-annotation module defines a number of custom annotations:
+* `@JsonName`: Used for defining JSON subtypes. All new PipelineStep implementations should be annotated with this. For example
+   `@JsonName("MY_NEW_STEP")`
+* `@ModuleInfo`: Used to provide the module name at compile time (and if ever necessary, at runtime also). Used mainly in
+  conjunction with the other annotations such as JsonName, RequiresDependencies*, and CanRun.
+* `@CanRun`: Should only ever be used on a PipelineStepRunner. It defines the types of configuration the runner can execute.
+  Used mainly in the build tool to determine what modules we need to include to run a given pipeline.  
+  For example, `@CanRun(MyPipelineStep.class)` or `@CanRun({SomeStep.class,OtherStep.class})`
+* Optional dependency tracking annotations - these are used _only_ for dependencies that aren't included by default in a module.
+  For example, ND4J backend dependencies, or dependencies that are applicable only to specific hardware devices / CPU architectures / OSs.
+    * `@InheritRequiredDependencies(module_name)`: equivalent to "copy the annotations from the specified module". Note that
+      the specified module doesn't need to be listed as an actual dependency of the module with the annotation. i.e., that
+      inheritance is resolved in the build tool module, not at compile time.
+    * `@RequiresDependenciesAll/RequiresDependenciesAny`: Used to specify a set of dependency requrements. i.e., "we need
+      one of these" / "we need all of these".
+    * `@Dependency`: nested only within a `@RequiresDependency*` annotation
+
+For an example of the dependency requirement annotations, see Nd4jModuleInfo.
+See also Javadoc for these annotations.
+
+In practice, these annotations automatically (at compile time) write files on a per-module basis in META-INF/konduit-serving.
+i.e.,:
+* `@JsonName` writes a `META-INF/konduit-serving/ai.konduit.serving.annotation.json.JsonName` file
+* `@CanRun` writes a `META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun` file
+* The remaining annotations (dependency related) get aggregated into a `META-INF/konduit-serving/ai.konduit.serving.annotation.module.RequiresDependencies` file
+
+As a general rule, an average user/developer won't ever be aware of (or need to be aware of) these files or the compile
+time annotation processing. They just provide the dependencies and everything magically works.
+
+
+Separately to the compile time generation, we have a mechanism to automatically aggregate the contents of those 3 `META-INF/konduit-serving/*`
+files. The goal is to make the JSON, "CanRun" and dependency information available to the build tool (i.e., to konduit-serving-build)
+without the need to have every single Konduit Serving module as a dependency within konduit-serving-build.
+This "project-wide" aggregation is implemented in the konduit-serving-meta module (within konduit-serving-metadata parent module).
+The konduit-serving-meta module produces an output JAR only 3 metadata files:
+* `META-INF/konduit-serving/PipelineStepRunner` - the aggregation of all the `@CanRun` metadata files
+* `META-INF/konduit-serving/JsonNameMapping` - the aggregation of all the `@JsonName` metadata files
+* `META-INF/konduit-serving/ModuleRequiresDependencies` - the aggregation of the all the dependency annotation files
+
+In practice this is implemented via (a slight abuse of) the Maven Shade plugin. Essentially, we are building an uber-jar
+of all Konduit Serving modules with everything filtered out except the metadata files.
+konduit-serving-build then depends on konduit-serving-meta, and can load those 3 aggregated files to get the metadata for
+all modules without actually having any of the other modules as a direct dependency, or available at runtime.
+
+For more details on the build system (and these files) see dev_docs/BuildToolReadme.md
+
 
 ## Adding a New Module
 
@@ -437,22 +508,22 @@ So: What is actually involved in adding a new module?
 
 *First*: The new module should have konduit-serving-pipeline as a dependency in order to use the API
 
-If building on some other module, include it also. For example, `kondit-serving-deplearning4j` includes `konduit-serving-nd4j`.
+If building on top of some other module, include it also. For example, `kondit-serving-deplearning4j` includes `konduit-serving-nd4j`.
 
 
 *Second*: If a new PipelineStep is to be added, all of the following are required:
 - Implement the new step, extending the PipelineStep interface
 - (Usually) Add a new PipelineStepRunner, for executing the type of step you have just created
 - (Usually) Add a new PipelineStepRunnerFactory, for creating your new PipelineStepRunner from your new PipelineStep interface
+- Add a `@JsonName(...)` annotation on the new PipelineStep
+- Add a `@CanRun(MyNewPipelineStep.class)` or `@CanRun({MyNewPipelineStep.class, SomeOtherPipelineStep.class})` annotation to the PipelineStepRunnerFactory
 - Assuming a PipelineStepRunner was added, add a `resources/META-INF/services/ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory`
   file, containing the fully-qualified path of your new PipelineStepRunnerFactory 
-- Add a JsonSubTypesMapping implementation in the module as discussed in JSON section above
-- Add a service loader file (JsonSubTypesMapping) as discussed in JSON section above 
 
 See for example: konduit-serving-deeplearning4j
 
 
-*Third*: If a new Image or NDArray format is to be added, all of the following are required:
+*Third*: If a new Image or NDArray format is to be added (less common than new pipeline steps), all of the following are required:
 - Add a new class for holding the Image/NDArray (extending BaseNDArray/BaseImage should suffice)
 - Add NDArrayConverter / ImageConverter implementations to convert between different Image/NDArray formats (see for example NDArrayConverter in konduit-serving-nd4j)
     - For NDArray: the main (strictly required) one is conversion to/from SerializedNDArray - this is necessary for JSON

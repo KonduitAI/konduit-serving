@@ -45,6 +45,8 @@
         <module>konduit-serving-data</module>
         <module>konduit-serving-vertx</module>
         <module>konduit-serving-vertx-protocols</module>
+        <module>konduit-serving-build</module>
+        <module>konduit-serving-metadata</module>
         <module>konduit-serving-cli</module>
         <module>konduit-serving-metrics</module>
     </modules>
@@ -781,6 +783,10 @@
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>  <!-- Optional, update daily -->
             </snapshots>
+        </repository>
+        <repository>
+            <id>gradle</id>
+            <url>https://repo.gradle.org/gradle/libs-releases-local/</url>
         </repository>
     </repositories>
 

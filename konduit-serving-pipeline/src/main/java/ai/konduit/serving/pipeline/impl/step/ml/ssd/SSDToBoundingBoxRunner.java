@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.step.ml.ssd;
 
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
+@CanRun(SSDToBoundingBoxStep.class)
 public class SSDToBoundingBoxRunner implements PipelineStepRunner {
 
     protected final SSDToBoundingBoxStep step;
