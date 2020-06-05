@@ -19,11 +19,13 @@
 package ai.konduit.serving.build.dependencies;
 
 import ai.konduit.serving.build.config.target.Target;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@Data
 public class CompositeRequirement implements DependencyRequirement {
     public enum Type {ANY, ALL}
 

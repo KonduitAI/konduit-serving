@@ -77,12 +77,16 @@ public class TestRequirements {
         assertNull(l3);     //No additions required
 
         List<DependencyRequirement> reqs = req.reqs();
+        CompositeRequirement cs = (CompositeRequirement) reqs.get(0);
+        DependencyRequirement[] creqs = cs.getReqs();
+        CompositeRequirement cs2 = (CompositeRequirement)creqs[0];
+        DependencyRequirement[] creqs2 = cs2.getReqs();
         List<DependencyAddition> l1Exp = Arrays.asList(
-                new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null)), reqs.get(0)),
-                new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), reqs.get(1)));
+                new AllAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null)), creqs2[0]),
+                new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), creqs2[1]));
         assertEquals(l1Exp, l1);
 
-        List<DependencyAddition> l2Exp = Collections.singletonList(new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), reqs.get(1)));
+        List<DependencyAddition> l2Exp = Collections.singletonList(new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), creqs2[1]));
         assertEquals(l2Exp, l2);
     }
 }
