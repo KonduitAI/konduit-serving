@@ -33,12 +33,12 @@ import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
-import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage;
 import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import ai.konduit.serving.pipeline.impl.step.bbox.filter.BoundingBoxFilterStep;
+import ai.konduit.serving.pipeline.impl.step.facial.DrawFacialKeyPointsStep;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 import ai.konduit.serving.pipeline.util.ArchiveUtils;
 import ai.konduit.serving.pipeline.util.TestUtils;
@@ -47,10 +47,10 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -567,7 +567,7 @@ public class TestTensorFlowStep {
         GraphBuilder b = new GraphBuilder();
         GraphStep input = b.input();
         //Capture frame from webcam
-        GraphStep camera = input.then("camera", FrameCapturePipelineStep.builder()
+        GraphStep camera = input.then("camera", CameraFrameCaptureStep.builder()
                 .camera(0)
                 .outputKey("image")
                 .build());
@@ -672,8 +672,8 @@ public class TestTensorFlowStep {
 
             //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
             ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
-                    .height(300)
-                    .width(300)
+                    .height(128)
+                    .width(128)
                     .channelLayout(NDChannelLayout.RGB)
                     .includeMinibatchDim(true)
                     .format(NDFormat.CHANNELS_LAST)
@@ -695,29 +695,32 @@ public class TestTensorFlowStep {
                     .build());
 
 
-
-            //Merge camera image with bounding boxes
-//        GraphStep merged = camera.mergeWith("img_segmentation", tf);
-
-
-
-
-//        //Show image in Java frame
-//        GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
-//                .displayName("image segmentation")
-//                .imageName("out")
-//                .build());
-
-
-//        GraphPipeline p = b.build(show);
+//            //Merge camera image with face keypoints
+            GraphStep merged = camera.mergeWith("facial-keypoints", tf);
 //
-//
-//        PipelineExecutor exec = p.executor();
-//
-//        Data in = Data.empty();
-//        for( int i=0; i<1000; i++ ){
-//            exec.exec(in);
-//        }
+            //Draw face keypoints on the image
+            GraphStep drawer = merged.then("keypoints-drawer", DrawFacialKeyPointsStep.builder()
+                    .image("image")
+                    .landmarkArray("logits/BiasAdd")
+                    .outputName("out")
+                    .build());
+
+           //Show image in Java frame
+            GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
+                    .displayName("facial-keypoints")
+                    .imageName("out")
+                    .build());
+
+
+            GraphPipeline p = b.build(show);
+
+
+            PipelineExecutor exec = p.executor();
+
+            Data in = Data.empty();
+            for( int i=0; i<1000; i++ ){
+                exec.exec(in);
+            }
         }
 
 
