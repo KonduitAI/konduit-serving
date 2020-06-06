@@ -650,14 +650,28 @@ public class TestTensorFlowStep {
         public void testFacialKeyPointsDetection() throws Exception {
             //Pretrained model source:https://github.com/songhengyang/face_landmark_factory
 
+            // keypoint model downloading
             String fileUrl = "https://github.com/songhengyang/face_landmark_factory/raw/master/assets/frozen_inference_graph.pb";
             File testDir = TestUtils.testResourcesStorageDir();
             File saveDir = new File(testDir, "konduit-serving-tensorflow/face-keypoints-detection");
-            File f = new File(saveDir, "frozen_inference_graph.pb");
+            File keypoints_graph = new File(saveDir, "keypoints_detection_frozen_inference_graph.pb");
 
-            if (!f.exists()) {
+            if (!keypoints_graph.exists()) {
                 log.info("Downloading model: {} -> {}", fileUrl, saveDir.getAbsolutePath());
-                FileUtils.copyURLToFile(new URL(fileUrl), f);
+                FileUtils.copyURLToFile(new URL(fileUrl), keypoints_graph);
+                log.info("Download complete");
+            }
+
+            // face bbox model downloading
+            //Pretrained model source: https://github.com/yeephycho/tensorflow-face-detection
+             fileUrl = "https://drive.google.com/u/0/uc?id=0B5ttP5kO_loUdWZWZVVrN2VmWFk&export=download";
+             testDir = TestUtils.testResourcesStorageDir();
+             saveDir = new File(testDir, "konduit-serving-tensorflow/face-keypoints-detection");
+             File face_detector_graph = new File(saveDir, "face_detection_frozen_inference_graph.pb");
+
+            if (!face_detector_graph.exists()) {
+                log.info("Downloading model: {} -> {}", fileUrl, saveDir.getAbsolutePath());
+                FileUtils.copyURLToFile(new URL(fileUrl), face_detector_graph);
                 log.info("Download complete");
             }
 
@@ -670,10 +684,10 @@ public class TestTensorFlowStep {
                     .outputKey("image")
                     .build());
 
-            //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
+
             ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
-                    .height(128)
-                    .width(128)
+                    .height(128)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
+                    .width(128)   // size origin
                     .channelLayout(NDChannelLayout.RGB)
                     .includeMinibatchDim(true)
                     .format(NDFormat.CHANNELS_LAST)
@@ -681,34 +695,52 @@ public class TestTensorFlowStep {
                     .normalization(null)
                     .build();
 
-            GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
+
+            GraphStep i2n = camera.then("image2NDArrayFaceDetectorInference", ImageToNDArrayStep.builder()
+                    .config(c)
+                    .keys(Arrays.asList("image"))
+                    .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                    .build());
+
+            //Run image in TF model
+            GraphStep tf = i2n.then("tf", builder()
+                    .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
+                    .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
+                    .modelUri(face_detector_graph.toURI().toString())
+                    .build());
+
+
+            GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
+                    .outputName("img_bbox")
+                    .build());
+
+            GraphStep i2n2 = camera.then("image2NDArrayKeyPointsInference", ImageToNDArrayStep.builder()
                     .config(c)
                     .keys(Arrays.asList("image"))
                     .outputNames(Arrays.asList("input_image_tensor")) //TODO varargs builder method
                     .build());
 
-            //Run image in TF model
-            GraphStep tf = i2n.then("tf", builder()
-                    .inputNames(Collections.singletonList("input_image_tensor"))      //TODO varargs builder method
+            GraphStep tf_keydetector = i2n2.then("keydetector", builder()
+                    .inputNames(Collections.singletonList("input_image_tensor"))    //TODO varargs builder method
                     .outputNames(Arrays.asList("logits/BiasAdd"))
-                    .modelUri(f.toURI().toString())
+                    .modelUri(keypoints_graph.toURI().toString())
                     .build());
 
+            //  Merge camera image with face keypoints
+            GraphStep merged = camera.mergeWith("facial-keypoints", tf_keydetector);
 
-//            //Merge camera image with face keypoints
-            GraphStep merged = camera.mergeWith("facial-keypoints", tf);
-//
-            //Draw face keypoints on the image
+            // Draw face keypoints on the image
             GraphStep drawer = merged.then("keypoints-drawer", DrawFacialKeyPointsStep.builder()
                     .image("image")
                     .landmarkArray("logits/BiasAdd")
-                    .outputName("out")
+                    .outputName("image")
                     .build());
 
-           //Show image in Java frame
+
+            //Show image in Java frame
             GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
-                    .displayName("facial-keypoints")
-                    .imageName("out")
+                    .displayName("bbox filter")
+                    .imageName("image")
                     .build());
 
 
@@ -718,10 +750,13 @@ public class TestTensorFlowStep {
             PipelineExecutor exec = p.executor();
 
             Data in = Data.empty();
-            for( int i=0; i<1000; i++ ){
+            for (int i = 0; i < 1000; i++) {
                 exec.exec(in);
             }
+
         }
 
-
 }
+
+
+
