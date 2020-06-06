@@ -111,7 +111,7 @@ public interface Data {
     List<Boolean> getListBoolean(String key);
     List<byte[]> getListBytes(String key);
     List<Double> getListDouble(String key);
-    List<Data> getListData(String key);
+    List<List<?>> getListData(String key);
     List<Image> getListImage(String key);
     List<NDArray> getListNDArray(String key);
     List<BoundingBox> getListBoundingBox(String key);

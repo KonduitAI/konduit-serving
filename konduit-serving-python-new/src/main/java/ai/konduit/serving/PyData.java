@@ -17,9 +17,22 @@ import java.util.List;
 public class PyData extends PythonType<Data> {
 
     public static final PyData INSTANCE = new PyData();
+    private static Boolean isPillowInstalled = null;
 
     public PyData() {
         super("Data", Data.class);
+    }
+
+    private static boolean isPillowInstalled() {
+        if (isPillowInstalled == null) {
+            try {
+                Python.importModule("PIL.Image");
+                isPillowInstalled = true;
+            } catch (PythonException pe) {
+                isPillowInstalled = false;
+            }
+        }
+        return isPillowInstalled;
     }
 
     @Override
@@ -50,11 +63,11 @@ public class PyData extends PythonType<Data> {
                     BytePointer bp = PythonTypes.MEMORYVIEW.toJava(val);
                     byte[] jVal = bp.getStringBytes();
                     data.put(strKey, jVal);
-                } else if (Python.isinstance(val, Python.importModule("numpy").attr("ndarray"))) {
+                } else if ( Python.isinstance(val, Python.importModule("numpy").attr("ndarray"))) {
                     INDArray arr = NumpyArray.INSTANCE.toJava(val);
                     NDArray jVal = NDArray.create(arr);
                     data.put(strKey, jVal);
-                } else if (Python.isinstance(val, Python.importModule("PIL.Image").attr("Image"))) {
+                } else if (isPillowInstalled() && Python.isinstance(val, Python.importModule("PIL.Image").attr("Image"))) {
                     // TODO
                     throw new PythonException("Image not supprted yet.");
                 } else if (Python.type(val).attr("__name__").toString().equals("BoundingBox")) {
@@ -107,7 +120,7 @@ public class PyData extends PythonType<Data> {
                             jVal.add(NDArray.create(NumpyArray.INSTANCE.toJava(val.get(i))));
                         }
                         data.putListNDArray(strKey, jVal);
-                    } else if (Python.isinstance(item0, Python.importModule("PIL.Image").attr("Image"))) {
+                    } else if (isPillowInstalled() && Python.isinstance(item0, Python.importModule("PIL.Image").attr("Image"))) {
                         // TODO
                         throw new PythonException("Image not supprted yet.");
                     } else if (Python.type(item0).attr("__name__").toString().equals("BoundingBox")) {
@@ -123,11 +136,13 @@ public class PyData extends PythonType<Data> {
                         }
                         data.putListBoundingBox(strKey, jVal);
                     } else { // Data
-                        List<Data> jVal = new ArrayList<>();
-                        for (int i = 0; i < size; i++) {
-                            jVal.add(toJava(val.get(i)));
-                        }
-                        data.putListData(strKey, jVal);
+
+//                        List<Data> jVal = new ArrayList<>();
+//                        for (int i = 0; i < size; i++) {
+//                            jVal.add(toJava(val.get(i)));
+//                        }
+//                        data.putListData(strKey, jVal);
+                        throw new PythonException("Unsupported type in list: " + Python.type(item0));
                     }
 
                 } else { // Data
@@ -139,23 +154,26 @@ public class PyData extends PythonType<Data> {
         }
     }
 
+
     @Override
     public PythonObject toPython(Data javaObject) throws PythonException {
-        PythonObject dataCls = Python.globals().get("Data");
+        PythonObject dataCls = Python.globals().attr("get").call("Data");
         if (dataCls.isNone()) {
-            try (InputStream is = PythonExecutioner.class
+            String baseCode;
+            try (InputStream is = PyData.class
                     .getResourceAsStream("pydata.py")) {
-                String code = IOUtils.toString(is, StandardCharsets.UTF_8);
-                PythonExecutioner.exec(code);
-                dataCls = Python.globals().get("Data");
-                if (dataCls.isNone()) {
-                    throw new PythonException("Unable to get Data class.");
-                }
+                baseCode = IOUtils.toString(is, StandardCharsets.UTF_8);
             } catch (Exception e) {
-                throw new PythonException("Error reading pydata.py");
+                throw new PythonException("Error reading pydata.py", e);
             }
-
+            PythonExecutioner.exec(baseCode);
+            dataCls = Python.globals().get("Data");
         }
+        if (dataCls.isNone()) {
+            throw new PythonException("Unable to get Data class.");
+        }
+
+
         try (PythonGC gc = PythonGC.watch()) {
             PythonObject data = dataCls.call();
             for (String key : javaObject.keys()) {
@@ -184,27 +202,27 @@ public class PyData extends PythonType<Data> {
                         throw new PythonException("Image not supprted yet.");
                     case LIST:
                         List<PythonObject> list = new ArrayList<>();
-                        switch (javaObject.listType(key)){
+                        switch (javaObject.listType(key)) {
                             case STRING:
                             case INT64:
                             case DOUBLE:
                             case BOOLEAN:
-                                for(Object item: javaObject.getList(key, javaObject.listType(key))){
+                                for (Object item : javaObject.getList(key, javaObject.listType(key))) {
                                     list.add(PythonTypes.convert(item));
                                 }
                                 break;
                             case BYTES:
-                                for (byte[] item: javaObject.getListBytes(key)){
+                                for (byte[] item : javaObject.getListBytes(key)) {
                                     list.add(PythonTypes.MEMORYVIEW.toPython(new BytePointer(item)));
                                 }
                                 break;
                             case NDARRAY:
-                                for(NDArray item: javaObject.getListNDArray(key)){
+                                for (NDArray item : javaObject.getListNDArray(key)) {
                                     list.add(NumpyArray.INSTANCE.toPython(item.getAs(INDArray.class)));
                                 }
                                 break;
                             case BOUNDING_BOX:
-                                for (BoundingBox item: javaObject.getListBoundingBox(key)){
+                                for (BoundingBox item : javaObject.getListBoundingBox(key)) {
                                     list.add(
                                             Python.globals().get("BoundingBox").call(
                                                     item.cx(),
@@ -221,25 +239,20 @@ public class PyData extends PythonType<Data> {
                                 // TODO
                                 throw new PythonException("Image not supprted yet.");
                             case DATA:
-                                for(Data item: javaObject.getListData(key)){
-                                    list.add(toPython(item));
-                                }
-                                break;
-                                default:
-                                    throw new PythonException("Unsupported type in list: " + javaObject.listType(key));
+                            default:
+                                throw new PythonException("Unsupported type in list: " + javaObject.listType(key));
                         }
                         data.set(pyKey, PythonTypes.LIST.toPython(list));
                     case DATA:
                         data.set(pyKey, toPython(javaObject.getData(key)));
                         break;
-                        default:
-                            throw new PythonException("Unsupported type: " + javaObject.type(key));
+                    default:
+                        throw new PythonException("Unsupported type: " + javaObject.type(key));
                 }
             }
             PythonGC.keep(data);
             return data;
         }
-
     }
 
     @Override

@@ -1,5 +1,10 @@
-from PIL.Image import Image
+try:
+    import PIL.Image
+    __PIL_INSTALLED__ = True
+except ImportError:
+    __PIL_INSTALLED__ = False
 import numpy as np
+
 
 class BoundingBox(object):
     def __init__(self, cx, cy, height, width, label='', probability=1.):
@@ -26,7 +31,9 @@ class BoundingBox(object):
 class Data(object):
     @staticmethod
     def _check_type(item):
-        atomic_types = (str, int, float, bool, bytes, memoryview, bytearray, Data, BoundingBox, np.ndarray, Image)
+        atomic_types = (str, int, float, bool, bytes, memoryview, bytearray, Data, BoundingBox, np.ndarray)
+        if __PIL_INSTALLED__:
+            atomic_types += (PIL.Image.Image,)
         if isinstance(item, atomic_types):
             pass
         elif isinstance(item, (list, tuple)):
@@ -35,6 +42,8 @@ class Data(object):
             if len(set(map(type, item))) > 1:
                 raise Exception("All items in list should have same type.")
             subitem = item[0]
+            if isinstance(subitem, Data):
+                raise Exception("Unsupported type in list: Data.")
             if not isinstance(subitem, atomic_types):
                 if isinstance(subitem, (list, tuple)):
                     raise Exception("Nested lists/tuples are not supported.")

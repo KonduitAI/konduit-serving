@@ -9,6 +9,7 @@ import ai.konduit.serving.pipeline.registry.PipelineRegistry;
 import org.eclipse.python4j.PythonJob;
 import org.eclipse.python4j.PythonVariable;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -22,15 +23,41 @@ public class PythonStep implements PipelineStep {
         PipelineRegistry.registerStepRunnerFactory(new Factory());
     }
 
-
-    public PythonStep(String code, String setupMethodName, String runMethodName) {
+    public PythonStep(@Nonnull String code, @Nonnull String setupMethodName, @Nonnull String runMethodName) {
         this.code = code;
         this.setupMethodName = setupMethodName;
         this.runMethodName = runMethodName;
-
-
     }
 
+    public static Builder builder(){
+        return new Builder();
+    }
+
+    public static class Builder{
+        private String code;
+        private String setupMethodName;
+        private String runMethodName;
+
+        public Builder code(String code){
+            this.code  = code;
+            return this;
+        }
+
+        public Builder setupMethod(String setupMethodName){
+            this.setupMethodName = setupMethodName;
+            return this;
+        }
+
+        public Builder runMethod(String runMethodName){
+            this.runMethodName = runMethodName;
+            return this;
+        }
+
+        public PythonStep build(){
+            return new PythonStep(code, setupMethodName, runMethodName);
+        }
+
+    }
     public static class Factory implements PipelineStepRunnerFactory{
 
         @Override
@@ -61,7 +88,7 @@ public class PythonStep implements PipelineStep {
                 runF = "runOrig";
             }
 
-            sb.append("\n").append("run = lambda input: {'output:'").append(runF).append("(input)").append("}");
+            sb.append("\n").append("run = lambda input: {'output':").append(runF).append("(input)").append("}");
             return sb.toString();
         }
 
@@ -73,7 +100,7 @@ public class PythonStep implements PipelineStep {
 
         @Override
         public Data exec(Context ctx, Data input){
-            PythonVariable<Data> pyInput = new PythonVariable<>("input", PyData.INSTANCE, null);
+            PythonVariable<Data> pyInput = new PythonVariable<>("input", PyData.INSTANCE, input);
             PythonVariable<Data> pyOutput = new PythonVariable<>("output", PyData.INSTANCE, null);
             pythonJob.exec(Collections.singletonList(pyInput), Collections.singletonList(pyOutput));
             return pyOutput.getValue();
