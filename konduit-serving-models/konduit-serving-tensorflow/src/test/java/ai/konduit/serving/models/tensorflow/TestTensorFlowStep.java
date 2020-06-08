@@ -698,8 +698,8 @@ public class TestTensorFlowStep {
 
             GraphStep i2n = camera.then("image2NDArrayFaceDetectorInference", ImageToNDArrayStep.builder()
                     .config(c)
-                    .keys(Arrays.asList("image"))
-                    .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                    .keys(Arrays.asList("image","image"))
+                    .outputNames(Arrays.asList("image_tensor","input_image_tensor")) //TODO varargs builder method
                     .build());
 
             //Run image in TF model
@@ -714,26 +714,20 @@ public class TestTensorFlowStep {
                     .outputName("img_bbox")
                     .build());
 
-            GraphStep i2n2 = camera.then("image2NDArrayKeyPointsInference", ImageToNDArrayStep.builder()
-                    .config(c)
-                    .keys(Arrays.asList("image"))
-                    .outputNames(Arrays.asList("input_image_tensor")) //TODO varargs builder method
-                    .build());
 
-            GraphStep tf_keydetector = i2n2.then("keydetector", builder()
+            GraphStep tf_keydetector = i2n.then("keydetector", builder()
                     .inputNames(Collections.singletonList("input_image_tensor"))    //TODO varargs builder method
                     .outputNames(Arrays.asList("logits/BiasAdd"))
                     .modelUri(keypoints_graph.toURI().toString())
                     .build());
 
             //  Merge camera image with face keypoints
-            GraphStep merged = camera.mergeWith("facial-keypoints", tf_keydetector);
+            GraphStep merged = camera.mergeWith("facial-keypoints", ssdProc, tf_keydetector);
 
             // Draw face keypoints on the image
             GraphStep drawer = merged.then("keypoints-drawer", DrawFacialKeyPointsStep.builder()
                     .image("image")
                     .landmarkArray("logits/BiasAdd")
-                    .outputName("image")
                     .build());
 
 

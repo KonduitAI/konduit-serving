@@ -19,6 +19,7 @@
 package ai.konduit.serving.pipeline.impl.step.facial;
 
 import ai.konduit.serving.pipeline.api.context.Context;
+import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -26,9 +27,13 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;
 import org.bytedeco.opencv.opencv_core.*;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.opencv.core.CvType;
+
+import java.util.List;
 
 public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
 
@@ -53,31 +58,38 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
     public Data exec(Context ctx, Data data) {
 
 
-        Image image = data.getImage(step.image());
-        long[] shape = new long[]{image.height(),image.width()};
+        Image i = data.getImage(step.image());
+
+        Mat m = i.getAs(Mat.class);
 
 
-        NDArray landmarkArr = data.getNDArray(step.landmarkArray());
-        INDArray marks = getDetectedMarks(landmarkArr);
+        INDArray landmarkArr = getDetectedMarks(data.getNDArray(step.landmarkArray()));
+        List<BoundingBox> faces_bboxes = data.getListBoundingBox("img_bbox");
 
+            for (BoundingBox face_bbox : faces_bboxes) {
 
+                landmarkArr.mul(face_bbox.x2() - face_bbox.x1());
+                landmarkArr = landmarkArr.get(NDArrayIndex.all(), NDArrayIndex.point(0)).add(face_bbox.x1());
+                landmarkArr = landmarkArr.get(NDArrayIndex.all(), NDArrayIndex.point(1)).add(face_bbox.y1());
 
-        boolean drawingOnImage;
-        Mat drawOn;
-        drawOn = new Mat((int) shape[0], (int) shape[1], CvType.CV_8UC3);
-  
-
-
-
+                float[][] marks = landmarkArr.toFloatMatrix();
+                for (int row = 0; row < marks.length; row++) {
+                Point point = new Point((int) marks[row][0] * i.width(), (int) marks[row][1]*i.height());
+                System.out.println(point.x());
+                System.out.println(point.y());
+                org.bytedeco.opencv.global.opencv_imgproc.circle(m, point, 2, Scalar.RED);
+                }
+            }
 
 
 
 
         String outputName = step.outputName();
-        if(outputName == null)
+        if (outputName == null)
             outputName = DrawFacialKeyPointsStep.DEFAULT_OUTPUT_NAME;
 
-        return Data.singleton(outputName, Image.create(drawOn));
+
+        return Data.singleton(outputName, Image.create(m));
 
 
     }
@@ -86,6 +98,12 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
         INDArray landmarkArr = landmark.getAs(INDArray.class);
         return Nd4j.toFlattened(landmarkArr).reshape(-1, 2);
 
-
     }
+
+//    private INDArray drawMarks(INDArray landmark) {
+//        float[][] marks = landmark.toFloatMatrix();
+//    }
+
 }
+
+
