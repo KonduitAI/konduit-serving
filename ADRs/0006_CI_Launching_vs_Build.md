@@ -174,18 +174,3 @@ to deploy on in practice.
   However, we can still use uber-jar style deployments instead of CLI-style deployments in this scenario
 
 
-
-
-
-
-
-
-
-
-* No uber-jar building when launchi
-    - Much faster launches (especially when )
-    - No additional space required for uber-jars
-    - 
-
-
-### Disadvantages
