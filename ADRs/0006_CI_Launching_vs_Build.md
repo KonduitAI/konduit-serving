@@ -109,32 +109,28 @@ Use <some_command> to set default profile or pass "-p <profile>" when launching 
 Launching server using default device profile "CUDA_10.2"
 Acquiring dependencies... done
 
-<usual Koanduti Serving launch info>
+<usual Konduit Serving launch info>
 ```
 
-Note that users need only 2 lines here to go from a brand new system to hosting a model server using the optimal hardware.
-Furthermore, other than downloading dependencies, there is no slow "build uberjar" step that delays the launching of the
-server by 30-120 seconds.
+Note that users need only 2 lines here to go from a brand new system (no KS install) to hosting a model server using the
+ optimal hardware/configuration for that device (i.e., CUDA, or highest supported AVX level for x86 systems, etc).
+Furthermore there is no slow "build uberjar" step that delays the launching of the server by 30-120 seconds, on top of
+dependency downloading.
 
 ### Launching for the "Deployment Artifact" case 
 
-This "manifest JAR" approach can likely be used 
+This "manifest JAR" approach can likely be used in other situations:
 
-* Docker: Could use either uber-JAR or switching to an assembly-JAR style  
-* RPM and DEB:
-* Stand-alone .exe: Continue to use uber-JAR approach 
+* Docker: Could use either uber-JAR or switching to an assembly-JAR style (i.e., embed the original/unmodified dependency
+  JARs instead of an uberjar)  
+* RPM and DEB: As per docker
+* Stand-alone .exe: Continue to use uber-JAR approach
+
+If we decide an assembly-JAR style approach is useful for these deployment artifacts, we can implement that at a later date.
  
-
-Open question: Why do we even need uberjars??
-Can we do everything we need via this "gradle cache" (or an assembly jar) approach?
--> Docker images could just include the JARs. Does an uberjar actually help here?
-In fact it has the downside of being limited to only one 
-
-Do "fixed" deployments even make sense? i.e., we can only ever run this pipeline (or ones with the exact same modules) with it.
-"Minimal size for this deployment" does make sense, yes. But why not just resolve the extra dependencies automatically
-if the user tries to run something else with it?
-
-Also, in principle we can add extra depnedencies on top of an uberjar... it's not super elegant, but it should work.
+Also, in principle we can add extra dependencies on top of an uberjar... it may not be an especially elegant design, but
+combining uber-jars with 'extra' classpath dependencies may be possible if we ever really need it. However that won't
+be something we support for now
 
 ### Detecting Hardware and Creating Profiles
 
