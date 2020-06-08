@@ -23,7 +23,6 @@ import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
-import lombok.Builder;
 import org.apache.commons.io.FileUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
@@ -38,6 +37,20 @@ public class GradleBuild {
 
     public static void generateGradleBuildFiles(File outputDir, Config config) throws IOException {
 
+        //TODO We need a proper solution for this!
+        //For now - the problem with the creation of a manifest (only) JAR is that the "tasks.withType(Jar::class)" gets
+        // put into the uber-jar.
+        boolean uberjar = false;
+        boolean classpathMF = false;
+        for(Deployment d : config.deployments()){
+            uberjar |= d instanceof UberJarDeployment;
+            classpathMF = (d instanceof ClassPathDeployment && ((ClassPathDeployment) d).type() == ClassPathDeployment.Type.JAR_MANIFEST);
+        }
+        Preconditions.checkState(uberjar != classpathMF || !uberjar, "Unable to create both a classpath manifest (ClassPathDeployment)" +
+                " and uber-JAR deployment at once");
+
+
+
         File gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew")));
         if (gradlewResource.exists())
             FileUtils.copyFileToDirectory(gradlewResource, outputDir);
@@ -48,8 +61,28 @@ public class GradleBuild {
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
         StringBuilder kts = new StringBuilder();
-        kts.append("import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar\n");
-        kts.append("plugins { java \nid(\"com.github.johnrengelman.shadow\") version \"2.0.4\"\n} \n");
+        //kts.append("import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar\n");
+        for(Deployment d : config.deployments()){
+            List<String> imports = d.gradleImports();
+            if(imports != null && !imports.isEmpty()){
+                for(String s : imports) {
+                    kts.append("import ").append(s).append("\n");
+                }
+            }
+        }
+
+
+        kts.append("plugins { java \n");
+        for(Deployment d : config.deployments()){
+            List<GradlePlugin> gi = d.gradlePlugins();
+            if(gi != null && !gi.isEmpty()){
+                for(GradlePlugin g : gi) {
+                    kts.append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
+                }
+            }
+        }
+        kts.append("\n}")
+            .append("\n");
         kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n}\n");
         kts.append("group = \"ai.konduit\"\n");
         //kts.append("version = \"1.0-SNAPSHOT\"\n");
@@ -109,7 +142,7 @@ public class GradleBuild {
         FileUtils.writeStringToFile(ktsFile, kts.toString(), Charset.defaultCharset());
     }
 
-    public static void runGradleBuild(File directory) throws IOException {
+    public static void runGradleBuild(File directory, Config config) throws IOException {
         //Check for build.gradle.kts, properties
         //Check for gradlew/gradlew.bat
         File kts = new File(directory, "build.gradle.kts");
@@ -125,8 +158,17 @@ public class GradleBuild {
                 .forProjectDirectory(directory)
                 .connect();
 
+        List<String> tasks = new ArrayList<>();
+        tasks.add("wrapper");
+        for(Deployment d : config.deployments()){
+            String s = d.gradleTaskName();
+            if(!tasks.contains(s)){
+                tasks.add(s);
+            }
+        }
+
         try {
-            connection.newBuild().setStandardOutput(System.out).setStandardError(System.err).forTasks("wrapper","shadowJar").run();
+            connection.newBuild().setStandardOutput(System.out).setStandardError(System.err).forTasks(tasks.toArray(new String[0])).run();
         } finally {
             connection.close();
         }
@@ -134,7 +176,6 @@ public class GradleBuild {
 
     private static void addClassPathTask(StringBuilder kts, ClassPathDeployment cpd){
         //Adapted from: https://stackoverflow.com/a/54159784
-
         if(cpd.type() == ClassPathDeployment.Type.TEXT_FILE) {
             kts.append("//Task: ClassPathDeployment - writes the absolute path of all JAR files for the build to the specified text file, one per line\n")
                     .append("task(\"writeClassPathToFile\"){\n")
@@ -153,6 +194,19 @@ public class GradleBuild {
                     .append("}\n");
         } else {
             //Write a manifest JAR
+            kts.append("//Write a JAR with a manifest containin the path of all dependencies, but no other content\n")
+                    .append("tasks.withType(Jar::class) {\n")
+                    .append("    manifest {\n")
+                    .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
+                    .append("        attributes[\"Class-Path\"] = configurations.runtimeClasspath.get().getFiles().joinToString(separator=\" \")\n")
+                    .append("    }\n");
+
+            if(cpd.outputFile() != null){
+                String path = cpd.outputFile().replace("\\", "/");
+                kts.append("setProperty(\"archiveFileName\", \"").append(path).append("\")\n");
+            }
+
+            kts.append("}");
         }
     }
 }

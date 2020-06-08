@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.build.deployments;
 
+import ai.konduit.serving.build.build.GradlePlugin;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.config.DeploymentValidation;
 import ai.konduit.serving.build.config.SimpleDeploymentValidation;
@@ -102,5 +103,20 @@ public class ClassPathDeployment implements Deployment {
         }
         sb.append("Number of classpath entries:    ").append(nLines).append("\n");
         return sb.toString();
+    }
+
+    @Override
+    public List<String> gradleImports() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<GradlePlugin> gradlePlugins() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public String gradleTaskName() {
+        return "build";
     }
 }
