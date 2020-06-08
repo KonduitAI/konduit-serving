@@ -712,6 +712,7 @@ public class TestTensorFlowStep {
 
             GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
                     .outputName("img_bbox")
+                    .threshold(0.1)
                     .build());
 
 

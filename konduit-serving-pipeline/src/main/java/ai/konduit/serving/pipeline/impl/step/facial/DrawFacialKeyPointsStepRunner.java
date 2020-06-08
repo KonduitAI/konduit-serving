@@ -61,24 +61,29 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
         Image i = data.getImage(step.image());
 
         Mat m = i.getAs(Mat.class);
+        Mat resized = new Mat();
+        org.bytedeco.opencv.global.opencv_imgproc.resize(m, resized, new Size(i.width(), i.height()));
+
 
 
         INDArray landmarkArr = getDetectedMarks(data.getNDArray(step.landmarkArray()));
         List<BoundingBox> faces_bboxes = data.getListBoundingBox("img_bbox");
 
+            if (!faces_bboxes.isEmpty()) {
             for (BoundingBox face_bbox : faces_bboxes) {
 
-                landmarkArr.mul(face_bbox.x2() - face_bbox.x1());
-                landmarkArr = landmarkArr.get(NDArrayIndex.all(), NDArrayIndex.point(0)).add(face_bbox.x1());
-                landmarkArr = landmarkArr.get(NDArrayIndex.all(), NDArrayIndex.point(1)).add(face_bbox.y1());
+                landmarkArr = landmarkArr.mul(face_bbox.x2() - face_bbox.x1());
+
+//                landmarkArr = landmarkArr.get(NDArrayIndex.all(), NDArrayIndex.point(0)).add(face_bbox.x1());
+//                landmarkArr = landmarkArr.get(NDArrayIndex.all(), NDArrayIndex.point(1)).add(face_bbox.y1());
 
                 float[][] marks = landmarkArr.toFloatMatrix();
                 for (int row = 0; row < marks.length; row++) {
-                Point point = new Point((int) marks[row][0] * i.width(), (int) marks[row][1]*i.height());
-                System.out.println(point.x());
-                System.out.println(point.y());
-                org.bytedeco.opencv.global.opencv_imgproc.circle(m, point, 2, Scalar.RED);
+                Point point = new Point((int) (landmarkArr.getRow(row).toFloatVector()[0] * resized.rows()), (int) (landmarkArr.getRow(row).toFloatVector()[1]*resized.cols()));
+                org.bytedeco.opencv.global.opencv_imgproc.circle(resized,point, 1, Scalar.RED);
                 }
+
+            }
             }
 
 
@@ -89,7 +94,7 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
             outputName = DrawFacialKeyPointsStep.DEFAULT_OUTPUT_NAME;
 
 
-        return Data.singleton(outputName, Image.create(m));
+        return Data.singleton(outputName, Image.create(resized));
 
 
     }
@@ -100,9 +105,6 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
 
     }
 
-//    private INDArray drawMarks(INDArray landmark) {
-//        float[][] marks = landmark.toFloatMatrix();
-//    }
 
 }
 
