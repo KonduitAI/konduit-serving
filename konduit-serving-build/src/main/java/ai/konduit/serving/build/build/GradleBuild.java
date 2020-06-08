@@ -21,6 +21,7 @@ package ai.konduit.serving.build.build;
 import ai.konduit.serving.build.config.Config;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.dependencies.Dependency;
+import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import lombok.Builder;
 import org.apache.commons.io.FileUtils;
@@ -73,11 +74,9 @@ public class GradleBuild {
         List<Deployment> deployments = config.deployments();
         Preconditions.checkState(deployments != null, "No deployments (uberjar, docker, etc) were specified for the build");
 
-        if (!deployments.isEmpty())
-            //kts.append("tasks.register<Jar>(\"uberJar\") {\n");
-            kts.append("tasks.withType<ShadowJar> {\n");
         for (Deployment deployment : deployments) {
             if (deployment instanceof UberJarDeployment) {
+                kts.append("tasks.withType<ShadowJar> {\n");
                 String jarName = ((UberJarDeployment)deployment).jarName();
                 if(jarName.endsWith(".jar")){
                     jarName = jarName.substring(0, jarName.length()-4);
@@ -86,11 +85,12 @@ public class GradleBuild {
                 kts.append("\tbaseName = \"" + jarName + "\"\n");
                 String escaped = ((UberJarDeployment)deployment).outputDir().replace("\\","\\\\");
                 kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
-                kts.append("mergeServiceFiles()");  //For service loader files
+                kts.append("mergeServiceFiles()\n");  //For service loader files
+                kts.append("}").append("\n\n");
+            } else if(deployment instanceof ClassPathDeployment){
+                addClassPathTask(kts, (ClassPathDeployment) deployment);
             }
         }
-        if (!deployments.isEmpty())
-            kts.append("}").append("\n");
 
         /*kts.append("tasks.withType<ShadowJar> {\n" +
             "baseName = \"uber\"\n" +
@@ -102,6 +102,8 @@ public class GradleBuild {
 
         System.out.println("Dependencies: " + dependencies);
         System.out.println("Deployments: " + deployments);
+
+
 
         File ktsFile = new File(outputDir, "build.gradle.kts");
         FileUtils.writeStringToFile(ktsFile, kts.toString(), Charset.defaultCharset());
@@ -124,9 +126,33 @@ public class GradleBuild {
                 .connect();
 
         try {
-            connection.newBuild().forTasks("wrapper","shadowJar").run();
+            connection.newBuild().setStandardOutput(System.out).setStandardError(System.err).forTasks("wrapper","shadowJar").run();
         } finally {
             connection.close();
+        }
+    }
+
+    private static void addClassPathTask(StringBuilder kts, ClassPathDeployment cpd){
+        //Adapted from: https://stackoverflow.com/a/54159784
+
+        if(cpd.type() == ClassPathDeployment.Type.TEXT_FILE) {
+            kts.append("//Task: ClassPathDeployment - writes the absolute path of all JAR files for the build to the specified text file, one per line\n")
+                    .append("task(\"writeClassPathToFile\"){\n")
+                    .append("    var spec2File: Map<String, File> = emptyMap()\n")
+                    .append("    configurations.compileClasspath {\n")
+                    .append("        val s2f: MutableMap<ResolvedModuleVersion, File> = mutableMapOf()\n")
+                    .append("        // https://discuss.gradle.org/t/map-dependency-instances-to-file-s-when-iterating-through-a-configuration/7158\n")
+                    .append("        resolvedConfiguration.resolvedArtifacts.forEach({ ra: ResolvedArtifact ->\n")
+                    .append("            s2f.put(ra.moduleVersion, ra.file)\n").append("        })\n")
+                    .append("        spec2File = s2f.mapKeys({\"${it.key.id.group}:${it.key.id.name}\"})\n")
+                    .append("        spec2File.keys.sorted().forEach({ it -> println(it.toString() + \" -> \" + spec2File.get(it))})\n")
+                    .append("        val sb = StringBuilder()\n")
+                    .append("        spec2File.keys.sorted().forEach({ it -> sb.append(spec2File.get(it)); sb.append(\"\\n\")})\n")
+                    .append("        File(\"").append(cpd.outputFile()).append("\").writeText(sb.toString())\n")
+                    .append("    }\n")
+                    .append("}\n");
+        } else {
+            //Write a manifest JAR
         }
     }
 }

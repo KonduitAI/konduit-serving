@@ -21,6 +21,7 @@ package ai.konduit.serving.build;
 import ai.konduit.serving.build.config.*;
 import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
+import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import ai.konduit.serving.build.build.GradleBuild;
 import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
@@ -52,8 +53,10 @@ public class TestGradleGeneration {
                 .build();
 
         File dir = testDir.newFolder();
+//        File dir = new File("C:/Temp/Gradle");
         File jsonF = new File(dir, "pipeline.json");
         FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
+
 
         File gradeDir = new File(dir, "gradle");
         File uberJarDir = new File(dir, "uberjar");
@@ -63,7 +66,10 @@ public class TestGradleGeneration {
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
                 .serving(Serving.HTTP)
-                .deployments(new UberJarDeployment().outputDir(uberJarDir.getAbsolutePath()).jarName("my.jar"));
+                .deployments(
+                        new UberJarDeployment().outputDir(uberJarDir.getAbsolutePath()).jarName("my.jar"),
+                        new ClassPathDeployment().outputFile("C:/Temp/Gradle/classpath.txt")
+                        );
 
         GradleBuild.generateGradleBuildFiles(gradeDir, c);
 
