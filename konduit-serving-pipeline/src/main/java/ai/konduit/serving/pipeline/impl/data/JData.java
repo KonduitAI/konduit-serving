@@ -488,6 +488,11 @@ public class JData implements Data {
             instance.put(key, data);
             return this;
         }
+        
+        public DataBuilder add(String key, BoundingBox data){
+            instance.put(key, data);
+            return this;
+        }
 
         public DataBuilder addListString(String key, List<String> data) {
             instance.putListString(key, data);
@@ -521,6 +526,11 @@ public class JData implements Data {
 
         public DataBuilder addListNDArray(String key, List<NDArray> data) {
             instance.putListNDArray(key, data);
+            return this;
+        }
+
+        public DataBuilder addListBoundingBox(String key, List<BoundingBox> data) {
+            instance.putListBoundingBox(key, data);
             return this;
         }
 
