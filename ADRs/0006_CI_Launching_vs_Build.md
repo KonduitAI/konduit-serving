@@ -1,11 +1,11 @@
 # CLI Dependencies and Launching
 
 ## Status
-PROPOSED - 08/06/2020
+ACCEPTED - 09/06/2020
 
 Proposed by: Alex Black (08/06/2020)
 
-Discussed with:
+Discussed with: Shams
 
 ## Context
 
@@ -28,7 +28,7 @@ The old API CLI dependency/launching approach for this use case also had/has the
 
 For the CLI-based "deploy right now" use case, an alternative is proposed.
 
-## Proposal
+## Decision
 
 For the "immediate deployment via CLI" scenario, we will not create an uber-jar; instead, we will use the Konduit Serving
 build tool to work out the dependencies we need, download them, and return a list of all dependencies (i.e., a list of JAR file
@@ -157,7 +157,7 @@ to deploy on in practice.
 
 * 2 commands to go from "no Konduit Serving" to "Server Launched"
 * Faster builds (no uber-JAR build)
-* Less disk space (no uber-JARs with redundant )
+* Less disk space (no uber-JARs with redundant copies of dependencies)
 * Easily allows mixing CPU and GPU deployments on the one system
 * No need to distribute "pre-built" binaries
 * A variant of this idea should be adaptable for use with OSGi if/when we need it
