@@ -20,7 +20,6 @@ package ai.konduit.serving.pipeline.impl.serde;
 
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
-import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import org.nd4j.shade.jackson.core.JsonGenerator;
@@ -100,6 +99,10 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
                 case BOUNDING_BOX:
                     BoundingBox bb = data.getBoundingBox(s);
                     writeBB(jg, bb);
+                    break;
+                case POINT:
+                    Point p = data.getPoint(s);
+                    writePoint(jg, p);
                     break;
                 default:
                     throw new IllegalStateException("Value type not yet supported/implemented: " + vt);
@@ -215,6 +218,27 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
         jg.writeEndObject();
     }
 
+    private void writePoint(JsonGenerator jg, Point p) throws IOException {
+        jg.writeStartObject();
+        jg.writeFieldName(Data.RESERVED_KEY_POINT_COORDS);
+        jg.writeStartArray(p.dimensions());
+        for (int i = 0; i < p.dimensions(); i++) {
+            writeDouble(jg, p.get(i));
+        }
+        jg.writeEndArray();
+
+        if(p.label() != null){
+            jg.writeFieldName("label");
+            jg.writeString(p.label());
+        }
+        if(p.probability() != null){
+            jg.writeFieldName("probability");
+            jg.writeNumber(p.probability());
+        }
+
+        jg.writeEndObject();
+    }
+
     private void writeList(JsonGenerator jg, List<?> list, ValueType listType) throws IOException {
         int n = list.size();
         jg.writeStartArray(n);
@@ -268,6 +292,12 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
                 List<BoundingBox> bbList = (List<BoundingBox>)list;
                 for(BoundingBox bb : bbList){
                     writeBB(jg, bb);
+                }
+                break;
+            case POINT:
+                List<Point> pList = (List<Point>)list;
+                for(Point p : pList){
+                    writePoint(jg, p);
                 }
                 break;
             case LIST:

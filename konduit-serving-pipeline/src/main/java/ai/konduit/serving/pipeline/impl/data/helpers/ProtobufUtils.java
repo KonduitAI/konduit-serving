@@ -20,10 +20,6 @@ package ai.konduit.serving.pipeline.impl.data.helpers;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import ai.konduit.serving.pipeline.impl.data.Value;
-
-import java.nio.ByteBuffer;
-import java.util.*;
-
 import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
 import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
@@ -34,6 +30,9 @@ import com.google.protobuf.ByteString;
 import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.nio.ByteBuffer;
+import java.util.*;
 
 public class ProtobufUtils {
 
@@ -160,6 +159,12 @@ public class ProtobufUtils {
             boundingBox = new BBoxXY(pbBox.getX0(), pbBox.getX1(), pbBox.getY0(), pbBox.getY1(),
                     pbBox.getLabel(), pbBox.getProbability());
         return boundingBox;
+    }
+
+    private static Point deserializePoint(DataProtoMessage.Point pbPoint) {
+        double[] coords = pbPoint.getCoordsList().stream().mapToDouble(Double::doubleValue).toArray();
+        Point point = Point.create(coords, pbPoint.getLabel(), pbPoint.getProbability());
+        return point;
     }
 
     private static NDArray deserializeNDArray(DataProtoMessage.NDArray pbArray) {
@@ -473,6 +478,11 @@ public class ProtobufUtils {
                 BoundingBox boundingBox = deserializeBoundingBox(pbBox);
                 retData.put(entry.getKey(), boundingBox);
             }
+            if(item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.POINT.ordinal()) {
+                DataProtoMessage.Point pbPoint = item.getPointValue();
+                Point point = deserializePoint(pbPoint);
+                retData.put(entry.getKey(), point);
+            }
 
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.LIST.ordinal()) {
                 if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.DOUBLE.ordinal()) {
@@ -507,6 +517,14 @@ public class ProtobufUtils {
                         boxes.add(boundingBox);
                     }
                     retData.putListBoundingBox(entry.getKey(), boxes);
+                } else if (item.getListTypeValue() == DataProtoMessage.DataScheme.ValueType.POINT.ordinal()) {
+                    List<DataProtoMessage.Point> pbArrays = item.getListValue().getPList().getListList();
+                    List<Point> points = new ArrayList<>();
+                    for (val pbPoint : pbArrays) {
+                        Point point = deserializePoint(pbPoint);
+                        points.add(point);
+                    }
+                    retData.putListPoint(entry.getKey(), points);
                 }
             }
             if (item.getTypeValue() == DataProtoMessage.DataScheme.ValueType.IMAGE.ordinal()) {

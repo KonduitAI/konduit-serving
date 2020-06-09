@@ -26,6 +26,7 @@ public enum ValueType {
     INT64,
     BOOLEAN,
     BOUNDING_BOX,
+    POINT,
     DATA,
     LIST
 }
