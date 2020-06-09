@@ -725,6 +725,8 @@ public class TestTensorFlowStep {
             //  Merge camera image with face keypoints
             GraphStep merged = camera.mergeWith("facial-keypoints", ssdProc, tf_keydetector);
 
+
+
             // Draw face keypoints on the image
             GraphStep drawer = merged.then("keypoints-drawer", DrawFacialKeyPointsStep.builder()
                     .image("image")

@@ -68,19 +68,25 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
 
         INDArray landmarkArr = getDetectedMarks(data.getNDArray(step.landmarkArray()));
         List<BoundingBox> faces_bboxes = data.getListBoundingBox("img_bbox");
+        double xoffset = 5/m.rows(); // 640/128 = 5
+        double yoffset = 3.75/m.cols(); // 480/128 = 3.75
+
 
             if (!faces_bboxes.isEmpty()) {
             for (BoundingBox face_bbox : faces_bboxes) {
+                BoundingBox ofsetted_bbox = BoundingBox.createXY(face_bbox.x1()+xoffset,face_bbox.x2()+xoffset,face_bbox.y1()+yoffset,face_bbox.y2()+yoffset);
+                System.out.println(ofsetted_bbox.x1());
+                System.out.println(ofsetted_bbox.x2());
+                System.out.println(ofsetted_bbox.y1());
+                System.out.println(ofsetted_bbox.y2());
 
-                landmarkArr = landmarkArr.mul(face_bbox.x2() - face_bbox.x1());
-
-//                landmarkArr = landmarkArr.get(NDArrayIndex.all(), NDArrayIndex.point(0)).add(face_bbox.x1());
-//                landmarkArr = landmarkArr.get(NDArrayIndex.all(), NDArrayIndex.point(1)).add(face_bbox.y1());
+                landmarkArr = landmarkArr.mul(ofsetted_bbox.x2() - ofsetted_bbox.x1());
 
                 float[][] marks = landmarkArr.toFloatMatrix();
                 for (int row = 0; row < marks.length; row++) {
-                Point point = new Point((int) (landmarkArr.getRow(row).toFloatVector()[0] * resized.rows()), (int) (landmarkArr.getRow(row).toFloatVector()[1]*resized.cols()));
+                Point point = new Point((int) ((landmarkArr.getRow(row).toFloatVector()[0]+ofsetted_bbox.x1()) * resized.rows()), (int) ((landmarkArr.getRow(row).toFloatVector()[1]+ofsetted_bbox.y1())*resized.cols()));
                 org.bytedeco.opencv.global.opencv_imgproc.circle(resized,point, 1, Scalar.RED);
+                org.bytedeco.opencv.global.opencv_imgproc.rectangle(resized,new Point((int) (ofsetted_bbox.x1()*resized.rows()),(int) (ofsetted_bbox.y1()*resized.cols())),new Point((int) (ofsetted_bbox.x2()*resized.rows()+xoffset),(int) (ofsetted_bbox.y2()*resized.cols())), Scalar.GREEN);
                 }
 
             }
