@@ -21,9 +21,11 @@ package ai.konduit.serving.models.tensorflow;
 import ai.konduit.serving.camera.step.capture.CameraFrameCaptureStep;
 import ai.konduit.serving.camera.step.capture.VideoFrameCaptureStep;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
+import ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep;
 import ai.konduit.serving.data.image.step.facial.DrawFacialKeyPointsStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
@@ -711,11 +713,36 @@ public class TestTensorFlowStep {
 
             GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
                     .outputName("img_bbox")
+                    .keepOtherValues(true)
                     .threshold(0.1)
                     .build());
 
+            GraphStep extractBBox = ssdProc.then("extracted_bbox", ExtractBoundingBoxStep.builder()
+                    .imageName("image")
+                    .aspectRatio(1.0)
+                    .bboxName("img_bbox")
+                    .imageToNDArrayConfig(c)
+                    .outputName("face_image_bbox")
+                    .build()
+            ) ;
 
-            GraphStep tf_keydetector = i2n.then("keydetector", builder()
+            ImageToNDArrayConfig faceImageConfig = ImageToNDArrayConfig.builder()
+                    .height(128)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
+                    .width(128)   // size origin
+                    .channelLayout(NDChannelLayout.RGB)
+                    .includeMinibatchDim(true)
+                    .format(NDFormat.CHANNELS_LAST)
+                    .dataType(NDArrayType.UINT8)
+                    .normalization(new ImageNormalization(ImageNormalization.Type.SCALE))
+                    .build();
+
+            GraphStep face2n  = extractBBox.then("FaceBBoxtoNDArray", ImageToNDArrayStep.builder()
+                    .config(faceImageConfig)
+                    .keys(Arrays.asList("face_image_bbox"))
+                    .outputNames(Arrays.asList("input_image_tensor")) //TODO varargs builder method
+                    .build());
+
+            GraphStep tf_keydetector = face2n.then("keydetector", builder()
                     .inputNames(Collections.singletonList("input_image_tensor"))    //TODO varargs builder method
                     .outputNames(Arrays.asList("logits/BiasAdd"))
                     .modelUri(keypoints_graph.toURI().toString())
