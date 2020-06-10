@@ -39,6 +39,7 @@ import java.util.List;
 @JsonDeserialize(using = DataJsonDeserializer.class)
 public interface Data {
 
+    String RESERVED_KEY_TYPE = "@type";
     String RESERVED_KEY_BYTES_BASE64 = "@BytesBase64";
     String RESERVED_KEY_BYTES_ARRAY = "@BytesArray";
     String RESERVED_KEY_IMAGE_FORMAT = "@ImageFormat";
@@ -61,8 +62,9 @@ public interface Data {
 
 
 
+
     static List<String> reservedKeywords(){
-        return Arrays.asList(RESERVED_KEY_BYTES_BASE64, RESERVED_KEY_BYTES_ARRAY, RESERVED_KEY_IMAGE_FORMAT,
+        return Arrays.asList(RESERVED_KEY_TYPE, RESERVED_KEY_BYTES_BASE64, RESERVED_KEY_BYTES_ARRAY, RESERVED_KEY_IMAGE_FORMAT,
                 RESERVED_KEY_IMAGE_DATA, RESERVED_KEY_NDARRAY_SHAPE, RESERVED_KEY_NDARRAY_TYPE, RESERVED_KEY_NDARRAY_DATA_BASE64,
                 RESERVED_KEY_NDARRAY_DATA_ARRAY, RESERVED_KEY_METADATA,
                 RESERVED_KEY_BB_X1, RESERVED_KEY_BB_X2, RESERVED_KEY_BB_Y1, RESERVED_KEY_BB_Y2,

@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.models.tensorflow.step;
 
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -37,6 +38,7 @@ import java.net.URI;
 import java.util.List;
 
 @Slf4j
+@CanRun(TensorFlowPipelineStep.class)
 public class TensorFlowStepRunner implements PipelineStepRunner {
 
     private final TensorFlowPipelineStep step;

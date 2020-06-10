@@ -17,6 +17,7 @@
  */
 package ai.konduit.serving.camera.step.capture;
 
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacv.*;
 
 @Slf4j
+@CanRun(CameraFrameCaptureStep.class)
 public class FrameCaptureStepRunner implements PipelineStepRunner {
 
     protected final PipelineStep step;
