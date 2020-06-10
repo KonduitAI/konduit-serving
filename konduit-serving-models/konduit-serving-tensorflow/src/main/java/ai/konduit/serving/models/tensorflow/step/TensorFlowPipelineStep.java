@@ -21,7 +21,6 @@ package ai.konduit.serving.models.tensorflow.step;
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.models.tensorflow.TensorFlowConfiguration;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
