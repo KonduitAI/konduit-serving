@@ -59,6 +59,12 @@ import lombok.experimental.Accessors;
  *         Default: simple scale normalization ([0, 1] range).
  *         Note: If image normalization in null, or ImageNormalization.type == Type.NONE, no normalization is applied.
  *     </li>
+ *     <li><b>listHandling</b>: Only applies in situations such as {@link ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep},
+ *         and only when {@code List<Image>} is passed in instead of {@code Image}. This setting determines what the output
+ *         should be. NONE: Error for {@code List<Image>} input (only single Images are allowed). BATCH: a single output
+ *         NDArray is returned, with the images batched along dimension 0. LIST_OUT: A {@code List<NDArray>} is returned
+ *         instead of a single {@code NDArray} - one entry for each entry in the input {@code List<Image>}.
+ *     </li>
  * </ul>
  *
  * @author Alex Black
@@ -68,6 +74,11 @@ import lombok.experimental.Accessors;
 @Builder
 @AllArgsConstructor
 public class ImageToNDArrayConfig {
+    /**
+     * See {@link ImageToNDArrayConfig} - listHandling field
+     */
+    public static enum ListHandling {NONE, BATCH, LIST_OUT}
+
 
     private Integer height;
     private Integer width;
@@ -83,6 +94,8 @@ public class ImageToNDArrayConfig {
     private NDChannelLayout channelLayout = NDChannelLayout.RGB;
     @Builder.Default
     private ImageNormalization normalization = new ImageNormalization(ImageNormalization.Type.SCALE);
+    @Builder.Default
+    private ListHandling listHandling = ListHandling.NONE;
 
     public ImageToNDArrayConfig() {
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.

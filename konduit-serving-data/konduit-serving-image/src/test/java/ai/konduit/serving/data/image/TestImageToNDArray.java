@@ -1,5 +1,6 @@
 package ai.konduit.serving.data.image;
 
+import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
@@ -19,6 +20,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -317,6 +319,7 @@ public class TestImageToNDArray {
 
         return bi;
     }
+
 
 
     @Test
@@ -635,11 +638,158 @@ public class TestImageToNDArray {
         }
     }
 
+    @Test
+    public void testBatching(){
+
+        Image i1 = Image.create(createConstantImageRgb(64, 64, 255, 0, 0));
+        Image i2 = Image.create(createConstantImageRgb(32, 32, 0, 255, 0));
+        Image i3 = Image.create(createConstantImageRgb(16, 16, 0, 0, 255));
+        //public static BufferedImage createConstantImageRgb(int h, int w, int red, int green, int blue){
+
+        List<Image> inputImages = Arrays.asList(i1, i2, i3);
+        int oH = 48;
+        int oW = 48;
+
+        Data in = Data.singletonList("images", inputImages, ValueType.IMAGE);
+
+        double[] meanRgb = {128, 200, 50};
+        double[] stdRgb = {180, 140, 100};
+
+        for(ImageToNDArrayConfig.ListHandling lh : ImageToNDArrayConfig.ListHandling.values()){
+            for(boolean incMB : new boolean[]{false, true}) {
+                for(ImageNormalization.Type normType : ImageNormalization.Type.values()) {
+                    for (NDFormat f : NDFormat.values()) {
+                        System.out.println(lh + " - incMB=" + incMB + ", normType=" + normType);
+
+                        boolean needsMean = normType == ImageNormalization.Type.SUBTRACT_MEAN || normType == ImageNormalization.Type.STANDARDIZE;
+                        boolean needsStd = normType == ImageNormalization.Type.STANDARDIZE;
+
+                        ImageNormalization norm = new ImageNormalization()
+                                .type(normType)
+                                .meanRgb(needsMean ? meanRgb : null)
+                                .stdRgb(needsStd ? stdRgb : null);
+
+                        Pipeline p = SequencePipeline.builder()
+                                .add(ImageToNDArrayStep.builder()
+                                        .metadata(false)
+                                        .config(ImageToNDArrayConfig.builder()
+                                                .height(oH)
+                                                .width(oW)
+                                                .includeMinibatchDim(incMB)
+                                                .dataType(NDArrayType.FLOAT)
+                                                .normalization(norm)
+                                                .listHandling(lh)
+                                                .format(f)
+                                                .build())
+                                        .keys(Collections.singletonList("images"))
+                                        .outputNames(Collections.singletonList("out"))
+                                        .build())
+                                .build();
+
+                        Pipeline pSingle = SequencePipeline.builder()
+                                .add(ImageToNDArrayStep.builder()
+                                        .metadata(false)
+                                        .config(ImageToNDArrayConfig.builder()
+                                                .height(oH)
+                                                .width(oW)
+                                                .includeMinibatchDim(incMB)
+                                                .dataType(NDArrayType.FLOAT)
+                                                .normalization(norm)
+                                                .listHandling(ImageToNDArrayConfig.ListHandling.NONE)
+                                                .format(f)
+                                                .build())
+                                        .keys(Collections.singletonList("images"))
+                                        .outputNames(Collections.singletonList("out"))
+                                        .build())
+                                .build();
+
+
+                        Data out = null;
+                        try {
+                            out = p.executor().exec(in);
+                        } catch (Throwable t) {
+                            if (lh == ImageToNDArrayConfig.ListHandling.NONE) {
+//                            t.printStackTrace();
+                                String msg = t.getMessage();
+                                assertTrue(msg, msg.contains("NONE") && msg.contains("ListHandling"));
+                                continue;
+                            } else {
+                                throw t;
+                            }
+                        }
+
+
+                        if (lh == ImageToNDArrayConfig.ListHandling.LIST_OUT) {
+                            assertEquals(ValueType.LIST, out.type("out"));
+                            assertEquals(ValueType.NDARRAY, out.listType("out"));
+                            List<NDArray> l = out.getListNDArray("out");
+                            assertEquals(3, l.size());
+                            for (NDArray arr : l) {
+                                if (incMB) {
+                                    if(f == NDFormat.CHANNELS_FIRST){
+                                        assertArrayEquals(new long[]{1,3,oH, oW}, arr.shape());
+                                    } else {
+                                        assertArrayEquals(new long[]{1,oH, oW, 3}, arr.shape());
+                                    }
+                                } else {
+                                    if(f == NDFormat.CHANNELS_FIRST){
+                                        assertArrayEquals(new long[]{3,oH, oW}, arr.shape());
+                                    } else {
+                                        assertArrayEquals(new long[]{oH, oW, 3}, arr.shape());
+                                    }
+                                }
+                            }
+
+                            List<NDArray> outExp = new ArrayList<>();
+                            PipelineExecutor exec = pSingle.executor();
+                            for(Image i : inputImages){
+                                outExp.add(exec.exec(Data.singleton("images", i)).getNDArray("out"));
+                            }
+                            assertEquals(outExp, l);
+                        } else {
+                            //Batch
+                            assertEquals(ValueType.NDARRAY, out.type("out"));
+                            NDArray arr = out.getNDArray("out");
+                            PipelineExecutor exec = pSingle.executor();
+
+                            if(f == NDFormat.CHANNELS_FIRST){
+                                assertArrayEquals(new long[]{3, 3,oH, oW}, arr.shape());
+                            } else {
+                                assertArrayEquals(new long[]{3, oH, oW, 3}, arr.shape());
+                            }
+
+                            if(incMB){
+                                float[][][][] f4 = arr.getAs(float[][][][].class);
+                                int idx = 0;
+                                for(Image i : inputImages){
+                                    float[][][][] f4a = exec.exec(Data.singleton("images", i)).getNDArray("out").getAs(float[][][][].class);
+                                    boolean eq = Arrays.deepEquals(f4[idx++], f4a[0]);
+                                    assertTrue(eq);
+                                }
+                            } else {
+                                float[][][][] f4 = arr.getAs(float[][][][].class);
+                                int idx = 0;
+                                for(Image i : inputImages){
+                                    float[][][] f3 = exec.exec(Data.singleton("images", i)).getNDArray("out").getAs(float[][][].class);
+                                    boolean eq = Arrays.deepEquals(f4[idx++], f3);
+                                    assertTrue(eq);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+    }
+
 
     @Test
     public void testImageNormalizationNonRgb(){
-        //Test image normalization - RGBA, BGRA, GRAYSCALE
+        //TODO Test image normalization - RGBA, BGRA, GRAYSCALE
 
         System.out.println("***** NON-RGB NORMALIZATION NOT YET IMPLEMENTED *****");
     }
+
 }

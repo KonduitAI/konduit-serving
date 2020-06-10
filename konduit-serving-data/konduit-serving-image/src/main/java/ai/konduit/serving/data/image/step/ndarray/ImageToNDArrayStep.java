@@ -24,6 +24,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -83,5 +84,4 @@ public class ImageToNDArrayStep implements PipelineStep {
         this.metadata = metadata;
         this.metadataKey = metadataKey;
     }
-
 }
