@@ -152,18 +152,23 @@ public class ProtobufUtils {
 
     private static BoundingBox deserializeBoundingBox(DataProtoMessage.BoundingBox pbBox) {
         BoundingBox boundingBox = null;
-        if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.CHW)
-            boundingBox = new BBoxCHW(pbBox.getCx(), pbBox.getCy(), pbBox.getH(), pbBox.getW(),
-                    pbBox.getLabel(), pbBox.getProbability());
-        else if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.XY)
-            boundingBox = new BBoxXY(pbBox.getX0(), pbBox.getX1(), pbBox.getY0(), pbBox.getY1(),
-                    pbBox.getLabel(), pbBox.getProbability());
+        String lbl = pbBox.getLabel().isEmpty() ? null : pbBox.getLabel();
+        Double prob = Double.isNaN(pbBox.getProbability()) ? null : pbBox.getProbability();
+        if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.CHW) {
+            boundingBox = new BBoxCHW(pbBox.getCx(), pbBox.getCy(), pbBox.getH(), pbBox.getW(), lbl, prob);
+        } else if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.XY) {
+            boundingBox = new BBoxXY(pbBox.getX0(), pbBox.getX1(), pbBox.getY0(), pbBox.getY1(), lbl, prob);
+        } else {
+            throw new RuntimeException("Unknown bounding box type: " + pbBox.getType());
+        }
         return boundingBox;
     }
 
     private static Point deserializePoint(DataProtoMessage.Point pbPoint) {
         double[] coords = pbPoint.getCoordsList().stream().mapToDouble(Double::doubleValue).toArray();
-        Point point = Point.create(coords, pbPoint.getLabel(), pbPoint.getProbability());
+        String lbl = pbPoint.getLabel().isEmpty() ? null : pbPoint.getLabel();
+        Double prob = Double.isNaN(pbPoint.getProbability()) ? null : pbPoint.getProbability();
+        Point point = Point.create(coords, lbl, prob);
         return point;
     }
 
@@ -301,7 +306,7 @@ public class ProtobufUtils {
                             setW(boundingBox.width()).
                             setLabel(StringUtils.defaultIfEmpty(boundingBox.label(), StringUtils.EMPTY)).
                             setType(DataProtoMessage.BoundingBox.BoxType.CHW).
-                            setProbability(boundingBox.probability()).
+                            setProbability(boundingBox.probability() == null ? Double.NaN : boundingBox.probability()).
                             build();
                 }
                 else if (boundingBox instanceof BBoxXY) {
@@ -310,13 +315,24 @@ public class ProtobufUtils {
                             setY0(boundingBox.y1()).setY1(boundingBox.y2()).
                             setLabel(StringUtils.defaultIfEmpty(boundingBox.label(), StringUtils.EMPTY)).
                             setType(DataProtoMessage.BoundingBox.BoxType.XY).
-                            setProbability(boundingBox.probability()).
+                            setProbability(boundingBox.probability() == null ? Double.NaN : boundingBox.probability()).
                             build();
                 }
                 item = DataProtoMessage.DataScheme.newBuilder().
                         setBoxValue(pbBox).
                         setTypeValue(ValueType.BOUNDING_BOX.ordinal()).
                         build();
+            } else if(value.type() == ValueType.POINT){
+                Point p = (Point)nextItem.getValue().get();
+                DataProtoMessage.Point.Builder b = DataProtoMessage.Point.newBuilder();
+                b.setLabel(StringUtils.defaultIfEmpty(p.label(), StringUtils.EMPTY));
+                b.setProbability(p.probability() == null ? Double.NaN : p.probability());
+                for( int i=0;i <p.dimensions(); i++ )
+                    b.addCoords(p.get(i));
+                item = DataProtoMessage.DataScheme.newBuilder()
+                        .setPointValue(b.build())
+                        .setTypeValue(ValueType.POINT.ordinal())
+                        .build();
             }
             else if (value.type() == ValueType.LIST) {
                 ListValue lv = (ListValue)value;
@@ -435,6 +451,24 @@ public class ProtobufUtils {
                             setListTypeValue(ValueType.BOUNDING_BOX.ordinal()).
                             setTypeValue(ValueType.LIST.ordinal()).
                             build();
+                } else if(lv.elementType() == ValueType.POINT){
+                    List<Point> pts = (List<Point>)nextItem.getValue().get();
+                    List<DataProtoMessage.Point> l = new ArrayList<>();
+                    for(Point p : pts){
+                        DataProtoMessage.Point.Builder b = DataProtoMessage.Point.newBuilder();
+                        b.setLabel(StringUtils.defaultIfEmpty(p.label(), StringUtils.EMPTY));
+                        b.setProbability(p.probability() == null ? Double.NaN : p.probability());
+                        for( int i=0;i <p.dimensions(); i++ )
+                            b.addCoords(p.get(i));
+                        l.add(b.build());
+                    }
+                    DataProtoMessage.PointList toAdd = DataProtoMessage.PointList.newBuilder().addAllList(l).build();
+                    DataProtoMessage.List toAddGen = DataProtoMessage.List.newBuilder().setPList(toAdd).build();
+                    item = DataProtoMessage.DataScheme.newBuilder().
+                            setListValue(toAddGen).
+                            setListTypeValue(ValueType.POINT.ordinal()).
+                            setTypeValue(ValueType.LIST.ordinal()).
+                            build();
                 }
                 else {
                     throw new IllegalStateException("List type is not implemented yet " + lv.elementType());
@@ -546,7 +580,9 @@ public class ProtobufUtils {
         Data retData = dataFromMap(schemeMap);
         Map<String,DataProtoMessage.DataScheme> metadata = dataMap.getMetaDataMap();
         Data jMetaData = dataFromMap(metadata);
-        retData.setMetaData(jMetaData);
+        if(jMetaData != null && jMetaData.size() != 0) {
+            retData.setMetaData(jMetaData);
+        }
         return retData;
     }
 
