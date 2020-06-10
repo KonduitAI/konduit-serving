@@ -24,8 +24,8 @@ import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.DebDeployment;
 import ai.konduit.serving.build.deployments.ExeDeployment;
 import ai.konduit.serving.build.deployments.RpmDeployment;
+import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
-import lombok.Builder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.tooling.GradleConnector;
@@ -39,12 +39,19 @@ import java.util.List;
 
 public class GradleBuild {
 
-    private static List<String> csvTasks = new ArrayList<>();
-
     public static void generateGradleBuildFiles(File outputDir, Config config) throws IOException {
 
-        csvTasks.clear();
-        csvTasks.add("wrapper");
+        //TODO We need a proper solution for this!
+        //For now - the problem with the creation of a manifest (only) JAR is that the "tasks.withType(Jar::class)" gets
+        // put into the uber-jar.
+        boolean uberjar = false;
+        boolean classpathMF = false;
+        for(Deployment d : config.deployments()){
+            uberjar |= d instanceof UberJarDeployment;
+            classpathMF = (d instanceof ClassPathDeployment && ((ClassPathDeployment) d).type() == ClassPathDeployment.Type.JAR_MANIFEST);
+        }
+        Preconditions.checkState(uberjar != classpathMF || !uberjar, "Unable to create both a classpath manifest (ClassPathDeployment)" +
+                " and uber-JAR deployment at once");
 
         File gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew")));
         if (gradlewResource.exists())
@@ -56,7 +63,7 @@ public class GradleBuild {
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
         StringBuilder kts = new StringBuilder();
-        kts.append("import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar\n");
+        /*kts.append("import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar\n");
         kts.append("import edu.sc.seis.launch4j.tasks.DefaultLaunch4jTask\n");
         kts.append("import org.redline_rpm.header.Os\n");
         kts.append("plugins { \n" +
@@ -65,7 +72,29 @@ public class GradleBuild {
                 "\tid(\"nebula.rpm\") version \"8.3.0\" \n" +
                 "\tid(\"nebula.deb\") version \"8.3.0\" \n" +
                 "\tid(\"nebula.ospackage\") version \"8.3.0\" \n" +
-                "\tid(\"edu.sc.seis.launch4j\") version \"2.4.6\"\n}\n");
+                "\tid(\"edu.sc.seis.launch4j\") version \"2.4.6\"\n}\n");*/
+
+        for(Deployment d : config.deployments()){
+            List<String> imports = d.gradleImports();
+            if(imports != null && !imports.isEmpty()){
+                for(String s : imports) {
+                    kts.append("import ").append(s).append("\n");
+                }
+            }
+        }
+
+
+        kts.append("plugins { java \n");
+        for(Deployment d : config.deployments()){
+            List<GradlePlugin> gi = d.gradlePlugins();
+            if(gi != null && !gi.isEmpty()){
+                for(GradlePlugin g : gi) {
+                    kts.append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
+                }
+            }
+        }
+        kts.append("\n}")
+                .append("\n");
 
         kts.append("repositories {\n" +
                 "\tmavenCentral()\n" +
@@ -108,8 +137,6 @@ public class GradleBuild {
                 kts.append("\tdestinationDirectory.set(file(\"" + escaped + "\"))\n");
                 kts.append("\tmergeServiceFiles()");  //For service loader files
                 kts.append("}\n");
-
-                csvTasks.add("shadowJar");
             }
             else if (deployment instanceof RpmDeployment) {
                 String rpmName = ((RpmDeployment)deployment).rpmName();
@@ -125,8 +152,6 @@ public class GradleBuild {
                 // String escaped = ((RpmDeployment)deployment).outputDir().replace("\\","\\\\");
                 //kts.append("\tdestinationDirectory.set(file(\"" + escaped + "\"))\n");
                 kts.append("}\n");
-
-                csvTasks.add("buildRpm");
             }
             else if (deployment instanceof DebDeployment) {
                 String rpmName = ((DebDeployment)deployment).rpmName();
@@ -140,10 +165,11 @@ public class GradleBuild {
                 kts.append("os = \"" + ((DebDeployment)deployment).osName() + "\"\n");
                 String escaped = ((DebDeployment)deployment).outputDir().replace("\\","\\\\");
                 kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
-                kts.append("mergeServiceFiles()\n");  //For service loader files*/
-                kts.append("}").append("\n");
-
-                csvTasks.add("buildDeb");
+                kts.append("mergeServiceFiles()\n");  //For service loader files
+                kts.append("}").append("\n");*/
+                kts.append("}").append("\n\n");
+            } else if(deployment instanceof ClassPathDeployment){
+                addClassPathTask(kts, (ClassPathDeployment) deployment);
             }
             else if (deployment instanceof ExeDeployment) {
                 String exeName = ((ExeDeployment)deployment).exeName();
@@ -159,8 +185,6 @@ public class GradleBuild {
                 kts.append("\tmainClassName = \"ai.konduit.serving.launcher.KonduitServingLauncher\"\n");
                 //kts.append("mergeServiceFiles()\n");  //For service loader files
                 kts.append("}\n");
-
-                csvTasks.add("createExe");
             }
         }
 
@@ -171,11 +195,13 @@ public class GradleBuild {
         System.out.println("Dependencies: " + dependencies);
         System.out.println("Deployments: " + deployments);
 
+
+
         File ktsFile = new File(outputDir, "build.gradle.kts");
         FileUtils.writeStringToFile(ktsFile, kts.toString(), Charset.defaultCharset());
     }
 
-    public static void runGradleBuild(File directory) throws IOException {
+    public static void runGradleBuild(File directory, Config config) throws IOException {
         //Check for build.gradle.kts, properties
         //Check for gradlew/gradlew.bat
         File kts = new File(directory, "build.gradle.kts");
@@ -186,18 +212,61 @@ public class GradleBuild {
         if (!gradlew.exists()) {
             throw new IllegalStateException("gradlew.bat doesn't exist");
         }
+
         //Execute gradlew
         ProjectConnection connection = GradleConnector.newConnector()
                 .forProjectDirectory(directory)
                 //.useGradleVersion("6.1")
                 .connect();
+        List<String> tasks = new ArrayList<>();
+        tasks.add("wrapper");
+        for(Deployment d : config.deployments()){
+            String s = d.gradleTaskName();
+            if(!tasks.contains(s)){
+                tasks.add(s);
+            }
+        }
 
         try {
-            String[] tasksList = new String[csvTasks.size()];
-            csvTasks.toArray(tasksList);
-            connection.newBuild().forTasks(tasksList).run();
-            } finally {
+            connection.newBuild().setStandardOutput(System.out).setStandardError(System.err).forTasks(tasks.toArray(new String[0])).run();
+        } finally {
             connection.close();
+        }
+    }
+
+    private static void addClassPathTask(StringBuilder kts, ClassPathDeployment cpd){
+        //Adapted from: https://stackoverflow.com/a/54159784
+        if(cpd.type() == ClassPathDeployment.Type.TEXT_FILE) {
+            kts.append("//Task: ClassPathDeployment - writes the absolute path of all JAR files for the build to the specified text file, one per line\n")
+                    .append("task(\"writeClassPathToFile\"){\n")
+                    .append("    var spec2File: Map<String, File> = emptyMap()\n")
+                    .append("    configurations.compileClasspath {\n")
+                    .append("        val s2f: MutableMap<ResolvedModuleVersion, File> = mutableMapOf()\n")
+                    .append("        // https://discuss.gradle.org/t/map-dependency-instances-to-file-s-when-iterating-through-a-configuration/7158\n")
+                    .append("        resolvedConfiguration.resolvedArtifacts.forEach({ ra: ResolvedArtifact ->\n")
+                    .append("            s2f.put(ra.moduleVersion, ra.file)\n").append("        })\n")
+                    .append("        spec2File = s2f.mapKeys({\"${it.key.id.group}:${it.key.id.name}\"})\n")
+                    .append("        spec2File.keys.sorted().forEach({ it -> println(it.toString() + \" -> \" + spec2File.get(it))})\n")
+                    .append("        val sb = StringBuilder()\n")
+                    .append("        spec2File.keys.sorted().forEach({ it -> sb.append(spec2File.get(it)); sb.append(\"\\n\")})\n")
+                    .append("        File(\"").append(cpd.outputFile()).append("\").writeText(sb.toString())\n")
+                    .append("    }\n")
+                    .append("}\n");
+        } else {
+            //Write a manifest JAR
+            kts.append("//Write a JAR with a manifest containin the path of all dependencies, but no other content\n")
+                    .append("tasks.withType(Jar::class) {\n")
+                    .append("    manifest {\n")
+                    .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
+                    .append("        attributes[\"Class-Path\"] = configurations.runtimeClasspath.get().getFiles().joinToString(separator=\" \")\n")
+                    .append("    }\n");
+
+            if(cpd.outputFile() != null){
+                String path = cpd.outputFile().replace("\\", "/");
+                kts.append("setProperty(\"archiveFileName\", \"").append(path).append("\")\n");
+            }
+
+            kts.append("}");
         }
     }
 }

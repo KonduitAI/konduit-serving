@@ -277,7 +277,7 @@ public class BuildCLI {
 
         System.out.println("Starting build...");
         long start = System.currentTimeMillis();
-        GradleBuild.runGradleBuild(tempDir);
+        GradleBuild.runGradleBuild(tempDir, c);
         long end = System.currentTimeMillis();
 
         System.out.println(">> Build complete\n\n");

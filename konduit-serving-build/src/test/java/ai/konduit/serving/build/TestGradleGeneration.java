@@ -23,6 +23,7 @@ import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.DebDeployment;
 import ai.konduit.serving.build.deployments.ExeDeployment;
 import ai.konduit.serving.build.deployments.RpmDeployment;
+import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import ai.konduit.serving.build.build.GradleBuild;
 import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
@@ -33,6 +34,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.nd4j.common.util.ArchiveUtils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -54,8 +56,10 @@ public class TestGradleGeneration {
                 .build();
 
         File dir = testDir.newFolder();
+//        File dir = new File("C:/Temp/Gradle");
         File jsonF = new File(dir, "pipeline.json");
         FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
+
 
         File gradeDir = new File(dir, "gradle");
         File uberJarDir = new File(dir, "uberjar");
@@ -88,12 +92,64 @@ public class TestGradleGeneration {
 
         //Actually run the build
         //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
-        GradleBuild.runGradleBuild(gradeDir);
+        GradleBuild.runGradleBuild(gradeDir, c);
 
 
         //Check output JAR exists
         File expUberJar = new File(uberJarDir, "my.jar");
         assertTrue(expUberJar.exists());
+    }
+
+    @Ignore
+    @Test
+    public void testManifestJarCreation() throws Exception {
+        Pipeline p = SequencePipeline.builder()
+                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
+                .build();
+
+        File dir = testDir.newFolder();
+//        File dir = new File("C:/Temp/Gradle");
+        File jsonF = new File(dir, "pipeline.json");
+        FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
+
+        File gradeDir = new File(dir, "gradle");
+        File mfJar = new File(dir, "myManifestJar.jar");
+
+        Config c = new Config()
+                .pipelinePath(jsonF.getAbsolutePath())
+                .target(Target.LINUX_X86)
+                .serving(Serving.HTTP)
+                .deployments(
+                        new ClassPathDeployment().type(ClassPathDeployment.Type.JAR_MANIFEST).outputFile(mfJar.getAbsolutePath())
+                );
+
+        GradleBuild.generateGradleBuildFiles(gradeDir, c);
+
+        //Check for gradlew and gradlew.bat
+
+        //Check for build.gradle.kts
+        File buildGradle = new File(gradeDir, "build.gradle.kts");
+        assertTrue(buildGradle.exists());
+        String buildGradleStr = FileUtils.readFileToString(buildGradle, StandardCharsets.UTF_8);
+
+        //Check that it includes the appropriate section
+        assertTrue(buildGradleStr, buildGradleStr.contains("manifest"));
+        assertTrue(buildGradleStr, buildGradleStr.contains("Class-Path"));
+
+        //Actually run the build
+        //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
+        GradleBuild.runGradleBuild(gradeDir, c);
+
+        assertTrue(mfJar.exists());
+        File dest = new File(dir, "mf.txt");
+        ArchiveUtils.zipExtractSingleFile(mfJar, dest, "META-INF/MANIFEST.MF");
+        String mfContent = FileUtils.readFileToString(dest, StandardCharsets.UTF_8);
+        mfContent = mfContent.replace("\n ", "");
+        assertTrue(mfContent.contains("Class-Path: "));
+        assertTrue(mfContent.contains(".jar"));
+        assertTrue(mfContent.contains("konduit-serving-pipeline"));
+        assertTrue(mfContent.contains("nd4j-native-1.0.0"));
+        assertTrue(mfContent.contains("deeplearning4j-core"));
     }
 
     @Test
@@ -123,7 +179,7 @@ public class TestGradleGeneration {
         assertTrue(buildGradle.exists());
         String buildGradleStr = FileUtils.readFileToString(buildGradle, StandardCharsets.UTF_8);
 
-        GradleBuild.runGradleBuild(gradeDir);
+        GradleBuild.runGradleBuild(gradeDir, c);
         File expFile = new File(gradeDir + File.separator + "build" + File.separator + "distributions", "my-0.noarch.rpm");
         assertTrue(expFile.exists());
     }
@@ -153,7 +209,7 @@ public class TestGradleGeneration {
         File buildGradle = new File(gradeDir, "build.gradle.kts");
         assertTrue(buildGradle.exists());
 
-        GradleBuild.runGradleBuild(gradeDir);
+        GradleBuild.runGradleBuild(gradeDir, c);
 
         File expFile = new File(gradeDir + File.separator + "build" + File.separator + "distributions", "my_0_all.deb");
         assertTrue(expFile.exists());
@@ -187,7 +243,7 @@ public class TestGradleGeneration {
 
         //Actually run the build
         //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
-        GradleBuild.runGradleBuild(gradeDir);
+        GradleBuild.runGradleBuild(gradeDir, c);
 
         //Check output JAR exists
         File expFile = new File(gradeDir + File.separator + "build" + File.separator + "launch4j", "my.exe");

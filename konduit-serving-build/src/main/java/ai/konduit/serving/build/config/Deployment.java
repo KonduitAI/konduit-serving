@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.build.config;
 
+import ai.konduit.serving.build.build.GradlePlugin;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
@@ -25,7 +26,6 @@ import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 import java.util.List;
 import java.util.Map;
 
-import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.As.PROPERTY;
 import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 
 @JsonSubTypes({
@@ -62,4 +62,9 @@ public interface Deployment {
      */
     String outputString();
 
+    List<String> gradleImports();
+
+    List<GradlePlugin> gradlePlugins();
+
+    String gradleTaskName();
 }

@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.build.deployments;
 
+import ai.konduit.serving.build.build.GradlePlugin;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.config.DeploymentValidation;
 import ai.konduit.serving.build.config.SimpleDeploymentValidation;
@@ -122,5 +123,20 @@ public class UberJarDeployment implements Deployment {
         sb.append("JAR size:            ").append(size).append("\n");
         sb.append("JAR launch command:  java -cp konduit-serving-deployment.jar <TODO args>\n");
         return sb.toString();
+    }
+
+    @Override
+    public List<String> gradleImports() {
+        return Collections.singletonList("com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar");
+    }
+
+    @Override
+    public List<GradlePlugin> gradlePlugins() {
+        return Collections.singletonList(new GradlePlugin("com.github.johnrengelman.shadow", "2.0.4"));
+    }
+
+    @Override
+    public String gradleTaskName() {
+        return "shadowJar";
     }
 }

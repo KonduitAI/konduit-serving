@@ -1,5 +1,6 @@
 package ai.konduit.serving.build.deployments;
 
+import ai.konduit.serving.build.build.GradlePlugin;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.config.DeploymentValidation;
 import lombok.Data;
@@ -83,5 +84,20 @@ public class RpmDeployment implements Deployment {
         sb.append("EXE size:       ").append(size);
 
         return sb.toString();
+    }
+
+    @Override
+    public List<String> gradleImports() {
+        return Collections.singletonList("org.redline_rpm.header.Os");
+    }
+
+    @Override
+    public List<GradlePlugin> gradlePlugins() {
+        return Collections.singletonList(new GradlePlugin("nebula.ospackage", "8.3.0"));
+    }
+
+    @Override
+    public String gradleTaskName() {
+        return "buildRpm";
     }
 }
