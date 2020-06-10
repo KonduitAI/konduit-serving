@@ -70,6 +70,12 @@ public class DataJsonTest {
                     d = Data.singleton("myKey", BoundingBox.create(0.5, 0.4, 0.9, 1.0));
                     d.put("myKey2", BoundingBox.createXY(0.1, 1, 0.2, 0.9, "label", 0.7));
                     break;
+                case POINT:
+                    d = Data.singleton("myKey", Point.create(0.1, 0.2, "foo", 1.0));
+                    d.put("myKey2", Point.create(0.1, 0.2, 0.3, "bar", 0.5));
+                    d.put("myKey3", Point.create(new double[]{0.1, 0.2, 0.3, 0.4, 0.5}, "spam", 0.2));
+                    d.put("myKey4", Point.create(0.9, 0.8, 0.7, 0.6, 0.4, 0.5));
+                    break;
                 default:
                     throw new RuntimeException();
             }
@@ -148,6 +154,15 @@ public class DataJsonTest {
                     List<BoundingBox> bbList = Arrays.asList(BoundingBox.createXY(0.2, 0.4, 0.7, 0.9, "myLabel", 0.8),
                             BoundingBox.create(0.4, 0.5, 0.3, 0.1, "otherlabel", 0.99));
                     d = Data.singletonList("key", bbList, ValueType.BOUNDING_BOX);
+                    break;
+                case POINT:
+                    List<Point> pList = Arrays.asList(
+                            Point.create(0.1, 0.2, "foo", 1.0),
+                            Point.create(0.1, 0.2, 0.3, "bar", 0.5),
+                            Point.create(new double[]{0.1, 0.2, 0.3, 0.4, 0.5}, "spam", 0.2),
+                            Point.create(0.9, 0.8, 0.7, 0.6, 0.4, 0.5)
+                    );
+                    d = Data.singletonList("key", pList, ValueType.POINT);
                     break;
                 default:
                     throw new RuntimeException();

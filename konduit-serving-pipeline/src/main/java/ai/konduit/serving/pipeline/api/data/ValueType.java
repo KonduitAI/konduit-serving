@@ -18,6 +18,7 @@
 package ai.konduit.serving.pipeline.api.data;
 
 public enum ValueType {
+    //NOTE: some uses of .ordinal() in protobuf means that any new additions should be added at the end of the list
     NDARRAY,
     STRING,
     BYTES,
@@ -27,5 +28,6 @@ public enum ValueType {
     BOOLEAN,
     BOUNDING_BOX,
     DATA,
-    LIST
+    LIST,
+    POINT
 }
