@@ -59,20 +59,19 @@ public class GradleBuild {
         kts.append("import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar\n");
         kts.append("import edu.sc.seis.launch4j.tasks.DefaultLaunch4jTask\n");
         kts.append("import org.redline_rpm.header.Os\n");
-        kts.append("plugins { id(\"java\") \n id(\"com.github.johnrengelman.shadow\") version \"2.0.4\"\n" +
-                "id(\"nebula.rpm\") version \"8.3.0\" \n" +
-                "id(\"nebula.deb\") version \"8.3.0\" \n" +
-                "id(\"nebula.ospackage\") version \"8.3.0\" \n" +
-                "id(\"edu.sc.seis.launch4j\") version \"2.4.6\"}\n");
+        kts.append("plugins { \n" +
+                "\tid(\"java\") \n " +
+                "\tid(\"com.github.johnrengelman.shadow\") version \"2.0.4\"\n" +
+                "\tid(\"nebula.rpm\") version \"8.3.0\" \n" +
+                "\tid(\"nebula.deb\") version \"8.3.0\" \n" +
+                "\tid(\"nebula.ospackage\") version \"8.3.0\" \n" +
+                "\tid(\"edu.sc.seis.launch4j\") version \"2.4.6\"\n}\n");
 
-        /*kts.append("plugins { id(\"java\") \n id(\"com.github.johnrengelman.shadow\") \n" +
-                "id(\"nebula.rpm\") \n" +
-                "id(\"nebula.deb\") \n" +
-                "id(\"edu.sc.seis.launch4j\") }\n");*/
-
-
-        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n" +
-                "maven {\nurl = uri(\"https://plugins.gradle.org/m2/\")}\n}\n");
+        kts.append("repositories {\n" +
+                "\tmavenCentral()\n" +
+                "\tmavenLocal()\n" +
+                "\tjcenter()\n" +
+                "\tmaven {\n\turl = uri(\"https://plugins.gradle.org/m2/\")}\n}\n");
         kts.append("group = \"ai.konduit\"\n");
         //kts.append("version = \"1.0-SNAPSHOT\"\n");
 
@@ -84,9 +83,9 @@ public class GradleBuild {
             if (dep.classifier() == null)
                 kts.append("\timplementation(\"" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + "\")").
                         append("\n");
-            /*else
+            else
                 kts.append("\timplementation(\"" + dep.groupId() + ":" + dep.artifactId() + ":" + dep.version() + ":" + dep.classifier() + "\")").
-                        append("\n");*/
+                        append("\n");
         }
         if (!dependencies.isEmpty()) {
             kts.append("}").append("\n");
@@ -98,7 +97,7 @@ public class GradleBuild {
 
         for (Deployment deployment : deployments) {
             if (deployment instanceof UberJarDeployment) {
-                kts.append("\ttasks.withType<ShadowJar> {\n");
+                kts.append("tasks.withType<ShadowJar> {\n");
                 String jarName = ((UberJarDeployment)deployment).jarName();
                 if(jarName.endsWith(".jar")){
                     jarName = jarName.substring(0, jarName.length()-4);
@@ -106,8 +105,8 @@ public class GradleBuild {
 
                 kts.append("\tbaseName = \"" + jarName + "\"\n");
                 String escaped = ((UberJarDeployment)deployment).outputDir().replace("\\","\\\\");
-                kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
-                kts.append("mergeServiceFiles()");  //For service loader files
+                kts.append("\tdestinationDirectory.set(file(\"" + escaped + "\"))\n");
+                kts.append("\tmergeServiceFiles()");  //For service loader files
                 kts.append("}\n");
 
                 csvTasks.add("shadowJar");
@@ -136,7 +135,7 @@ public class GradleBuild {
                     rpmName = rpmName.substring(0, rpmName.length()-4);
                 }
 
-                kts.append("packageName = \"" + rpmName + "\"\n");
+                kts.append("\tpackageName = \"" + rpmName + "\"\n");
                 /*kts.append("arch = \"" + ((DebDeployment)deployment).archName() + "\"\n");
                 kts.append("os = \"" + ((DebDeployment)deployment).osName() + "\"\n");
                 String escaped = ((DebDeployment)deployment).outputDir().replace("\\","\\\\");
@@ -153,11 +152,11 @@ public class GradleBuild {
                     exeName = exeName.substring(0, exeName.length()-4);
                 }
 
-                kts.append("outfile = \"" + exeName + ".exe\"\n");
+                kts.append("\toutfile = \"" + exeName + ".exe\"\n");
                 String escaped = ((ExeDeployment)deployment).outputDir().replace("\\","\\\\");
                 //kts.append("outputDir = \"" + escaped + "\")\n");
                 //kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
-                kts.append("mainClassName = \"ai.konduit.serving.launcher.KonduitServingLauncher\"\n");
+                kts.append("\tmainClassName = \"ai.konduit.serving.launcher.KonduitServingLauncher\"\n");
                 //kts.append("mergeServiceFiles()\n");  //For service loader files
                 kts.append("}\n");
 
@@ -165,7 +164,7 @@ public class GradleBuild {
             }
         }
 
-        //System.out.println(kts.toString());
+        System.out.println(kts.toString());
 
         Preconditions.checkState(!deployments.isEmpty(), "No deployments were specified");
 
