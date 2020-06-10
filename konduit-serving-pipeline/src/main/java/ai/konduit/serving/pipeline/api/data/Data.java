@@ -356,6 +356,9 @@ public interface Data {
             case DATA:
                 put(key, from.getData(key));
                 return;
+            case BOUNDING_BOX:
+                put(key, from.getBoundingBox(key));
+                return;
             case LIST:
                 ValueType vtList = from.listType(key);
                 List<?> l = from.getList(key, vtList);
