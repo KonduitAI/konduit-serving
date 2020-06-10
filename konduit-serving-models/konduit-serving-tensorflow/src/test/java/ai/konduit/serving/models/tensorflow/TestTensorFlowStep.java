@@ -705,7 +705,7 @@ public class TestTensorFlowStep {
                     .format(NDFormat.CHANNELS_LAST)
                     .dataType(NDArrayType.UINT8)
                     .normalization(new ImageNormalization(ImageNormalization.Type.SCALE))
-                    .listHandling(ImageToNDArrayConfig.ListHandling.LIST_OUT)
+                    .listHandling(ImageToNDArrayConfig.ListHandling.BATCH)
                     .build();
 
 
