@@ -20,7 +20,6 @@ package ai.konduit.serving.data.image.step.facial;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
-import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -35,8 +34,8 @@ import org.nd4j.linalg.factory.Nd4j;
 
 import java.util.List;
 
-import static ai.konduit.serving.data.image.util.CropUtil.accountForCrop;
-import static ai.konduit.serving.data.image.util.CropUtil.scaleIfRequired;
+import static ai.konduit.serving.data.image.step.facial.CropUtil.accountForCrop;
+import static ai.konduit.serving.data.image.step.facial.CropUtil.scaleIfRequired;
 
 public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
 
@@ -74,7 +73,6 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
 
         if (!faces_bboxes.isEmpty()) {
             for (BoundingBox face_bbox : faces_bboxes) {
-                System.out.println(face_bbox.x1());
                 BoundingBox bb = accountForCrop(i, face_bbox, im2ndConf);
 
                 double x1 = Math.min(bb.x1(), bb.x2());
@@ -85,33 +83,24 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
                 int h = (int) Math.round(bb.height() * scaled.rows());
                 int w = (int) Math.round(bb.width() * scaled.cols());
                 Rect r = new Rect(x, y, w, h);
+                org.bytedeco.opencv.global.opencv_imgproc.rectangle(scaled, r, Scalar.GREEN, 2, 8, 0);
 
-                org.bytedeco.opencv.global.opencv_imgproc.rectangle(scaled, r, Scalar.GREEN, 1, 8, 0);
-            }
-
-            if (im2ndConf != null && step.drawCropRegion()) {
-                BoundingBox bb = ImageToNDArray.getCropRegion(i, im2ndConf);
-
-
-                int x = (int) (bb.x1() * scaled.cols());
-                int y = (int) (bb.y1() * scaled.rows());
-                int h = (int) (bb.height() * scaled.rows());
-                int w = (int) (bb.width() * scaled.cols());
-                Rect r = new Rect(x, y, w, h);
-                org.bytedeco.opencv.global.opencv_imgproc.rectangle(scaled, r, Scalar.GREEN, 1, 8, 0);
 
                 landmarkArr = landmarkArr.mul(bb.x2() - bb.x1());
                 float[][] marks = landmarkArr.toFloatMatrix();
                 for (int row = 0; row < marks.length; row++) {
-                    Point point = new Point((int) (landmarkArr.getRow(row).toFloatVector()[0] * scaled.cols()), (int) (landmarkArr.getRow(row).toFloatVector()[1] * scaled.rows()));
+                    Point point = new Point((int) ((landmarkArr.getRow(row).toFloatVector()[0] + bb.x1()) * scaled.cols()), (int) ((landmarkArr.getRow(row).toFloatVector()[1] + bb.y1()) * scaled.rows()));
 
                     org.bytedeco.opencv.global.opencv_imgproc.circle(scaled, point, 1, Scalar.RED);
-
                 }
+
             }
-            String outputName = step.outputName();
-            if (outputName == null)
-                outputName = DrawFacialKeyPointsStep.DEFAULT_OUTPUT_NAME;
+
+
+        }
+        String outputName = step.outputName();
+        if (outputName == null) {
+            outputName = DrawFacialKeyPointsStep.DEFAULT_OUTPUT_NAME;
         }
 
         return Data.singleton(step.image(), Image.create(scaled));

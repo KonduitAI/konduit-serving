@@ -1,4 +1,4 @@
-package ai.konduit.serving.data.image.util;
+package ai.konduit.serving.data.image.step.facial;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
