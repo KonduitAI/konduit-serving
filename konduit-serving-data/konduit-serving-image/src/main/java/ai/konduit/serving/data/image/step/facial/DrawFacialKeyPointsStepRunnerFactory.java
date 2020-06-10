@@ -16,27 +16,22 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.step.facial;
+package ai.konduit.serving.data.image.step.facial;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.experimental.Accessors;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import org.nd4j.common.base.Preconditions;
 
-
-@Builder
-@Data
-@Accessors(fluent = true)
-@AllArgsConstructor
-public class DrawFacialKeyPointsStep implements PipelineStep {
-
-    public static final String DEFAULT_OUTPUT_NAME = "image";
-
-    private String landmarkArray;
-    private String image;
-    private String outputName;
-
+public class DrawFacialKeyPointsStepRunnerFactory implements PipelineStepRunnerFactory {
+    @Override
+    public boolean canRun(PipelineStep pipelineStep) {
+        return pipelineStep instanceof DrawFacialKeyPointsStep;
     }
 
-
+    @Override
+    public PipelineStepRunner create(PipelineStep pipelineStep) {
+        Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
+        return new DrawFacialKeyPointsStepRunner((DrawFacialKeyPointsStep) pipelineStep);
+    }
+}

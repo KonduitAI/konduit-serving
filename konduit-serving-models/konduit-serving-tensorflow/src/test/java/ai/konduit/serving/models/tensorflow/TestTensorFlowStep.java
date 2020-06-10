@@ -24,6 +24,7 @@ import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
+import ai.konduit.serving.data.image.step.facial.DrawFacialKeyPointsStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
@@ -38,7 +39,6 @@ import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import ai.konduit.serving.pipeline.impl.step.bbox.filter.BoundingBoxFilterStep;
-import ai.konduit.serving.pipeline.impl.step.facial.DrawFacialKeyPointsStep;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 import ai.konduit.serving.pipeline.util.ArchiveUtils;
 import ai.konduit.serving.pipeline.util.TestUtils;
@@ -47,7 +47,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
-import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
 import java.net.URL;
@@ -55,7 +54,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep.*;
+import static ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep.builder;
 import static org.junit.Assert.assertEquals;
 
 @Slf4j
@@ -730,6 +729,7 @@ public class TestTensorFlowStep {
             // Draw face keypoints on the image
             GraphStep drawer = merged.then("keypoints-drawer", DrawFacialKeyPointsStep.builder()
                     .image("image")
+                    .imageToNDArrayConfig(c)
                     .landmarkArray("logits/BiasAdd")
                     .build());
 
