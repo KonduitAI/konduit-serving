@@ -21,4 +21,4 @@ ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStepRunnerFactor
 ai.konduit.serving.data.image.step.grid.draw.DrawGridStepRunnerFactory
 ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStepRunnerFactory
 ai.konduit.serving.data.image.step.grid.crop.CropGridStepRunnerFactory
-ai.konduit.serving.data.image.step.bb.point.ConvertBoundingBoxToPointStepFactory
+ai.konduit.serving.data.image.step.bb.point.ConvertBoundingBoxToPointStepRunnerFactory

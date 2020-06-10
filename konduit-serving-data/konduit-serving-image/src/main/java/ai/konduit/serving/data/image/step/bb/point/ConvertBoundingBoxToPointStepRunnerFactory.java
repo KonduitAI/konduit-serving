@@ -23,7 +23,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import org.nd4j.common.base.Preconditions;
 
-public class ConvertBoundingBoxToPointStepFactory implements PipelineStepRunnerFactory {
+public class ConvertBoundingBoxToPointStepRunnerFactory implements PipelineStepRunnerFactory {
     @Override
     public boolean canRun(PipelineStep pipelineStep) {
         return pipelineStep instanceof ConvertBoundingBoxToPointStep;

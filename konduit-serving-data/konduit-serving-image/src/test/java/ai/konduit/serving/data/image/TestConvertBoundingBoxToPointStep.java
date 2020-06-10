@@ -21,6 +21,7 @@ package ai.konduit.serving.data.image;
 import ai.konduit.serving.data.image.step.bb.point.ConvertBoundingBoxToPointStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
@@ -51,7 +52,7 @@ public class TestConvertBoundingBoxToPointStep {
                                 .build();
 
 
-                        BoundingBox bb = BoundingBox.createXY(1, 2, 3, 4);
+                        BoundingBox bb = BoundingBox.createXY(1, 2, 3, 4, "label", 0.5);
                         Data in = Data.singleton("bbox", bb);
                         if (keepOthers) {
                             in.put("somekey", "somevalue");
@@ -59,30 +60,30 @@ public class TestConvertBoundingBoxToPointStep {
                         }
                         Data out = p.executor().exec(in);
 
-                        BoundingBox point = out.getBoundingBox(outName ? "bbox" : "myOutput");
-                        assertEquals(0, point.height(), 0);
-                        assertEquals(0, point.width(), 0);
+                        Point point = out.getPoint(outName ? "bbox" : "myOutput");
+                        assertEquals(bb.label(), point.label());
+                        assertEquals(bb.probability(), point.probability(), 0);
 
                         switch (method) {
                             case TOP_LEFT:
-                                assertEquals(bb.x1(), point.x1(), 0);
-                                assertEquals(bb.y1(), point.y1(), 0);
+                                assertEquals(bb.x1(), point.x(), 0);
+                                assertEquals(bb.y1(), point.y(), 0);
                                 break;
                             case TOP_RIGHT:
-                                assertEquals(bb.x2(), point.x1(), 0);
-                                assertEquals(bb.y1(), point.y1(), 0);
+                                assertEquals(bb.x2(), point.x(), 0);
+                                assertEquals(bb.y1(), point.y(), 0);
                                 break;
                             case BOTTOM_LEFT:
-                                assertEquals(bb.x1(), point.x1(), 0);
-                                assertEquals(bb.y2(), point.y1(), 0);
+                                assertEquals(bb.x1(), point.x(), 0);
+                                assertEquals(bb.y2(), point.y(), 0);
                                 break;
                             case BOTTOM_RIGHT:
-                                assertEquals(bb.x2(), point.x1(), 0);
-                                assertEquals(bb.y2(), point.y1(), 0);
+                                assertEquals(bb.x2(), point.x(), 0);
+                                assertEquals(bb.y2(), point.y(), 0);
                                 break;
                             case CENTER:
-                                assertEquals(bb.cx(), point.x1(), 0);
-                                assertEquals(bb.cy(), point.y1(), 0);
+                                assertEquals(bb.cx(), point.x(), 0);
+                                assertEquals(bb.cy(), point.y(), 0);
                                 break;
                         }
 
@@ -115,17 +116,14 @@ public class TestConvertBoundingBoxToPointStep {
                 Data in = Data.singletonList("bbox", lbb, ValueType.BOUNDING_BOX);
                 Data out = p.executor().exec(in);
 
-                List<BoundingBox> lOut = out.getListBoundingBox("myOutput");
+                List<Point> lOut = out.getListPoint("myOutput");
                 assertEquals(lbb.size(), lOut.size());
                 for (int i = 0; i < lbb.size(); i++) {
-                    BoundingBox bbOut = lOut.get(i);
-                    assertEquals(bbOut.width(), 0, 0);
-                    assertEquals(bbOut.height(), 0, 0);
-
+                    Point pOut = lOut.get(i);
                     BoundingBox bbIn = lbb.get(i);
 
-                    assertEquals(bbIn.x1(),bbOut.x1(),0);
-                    assertEquals(bbIn.y1(),bbOut.y1(),0);
+                    assertEquals(bbIn.x1(), pOut.x(),0);
+                    assertEquals(bbIn.y1(), pOut.y(),0);
                 }
             }
         }

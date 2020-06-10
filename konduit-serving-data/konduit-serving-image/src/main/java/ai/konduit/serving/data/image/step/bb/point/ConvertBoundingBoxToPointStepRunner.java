@@ -18,9 +18,11 @@
 
 package ai.konduit.serving.data.image.step.bb.point;
 
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@CanRun(ConvertBoundingBoxToPointStep.class)
 public class ConvertBoundingBoxToPointStepRunner implements PipelineStepRunner {
 
     protected final ConvertBoundingBoxToPointStep step;
@@ -78,23 +81,23 @@ public class ConvertBoundingBoxToPointStepRunner implements PipelineStepRunner {
             throw new IllegalStateException("Data[" + bboxName + "] is neither a BoundingBox or List<BoundingBox> - is " + vt);
         }
 
-        List<BoundingBox> out = new ArrayList<>();
+        List<Point> out = new ArrayList<>();
         for(BoundingBox bb : list) {
             switch (step.method()){
                 case TOP_LEFT:
-                    out.add(BoundingBox.create(bb.x1(), bb.y1(), 0, 0));
+                    out.add(Point.create(bb.x1(), bb.y1(), bb.label(), bb.probability()));
                     break;
                 case TOP_RIGHT:
-                    out.add(BoundingBox.create(bb.x2(), bb.y1(), 0, 0));
+                    out.add(Point.create(bb.x2(), bb.y1(), bb.label(), bb.probability()));
                     break;
                 case BOTTOM_LEFT:
-                    out.add(BoundingBox.create(bb.x1(), bb.y2(), 0, 0));
+                    out.add(Point.create(bb.x1(), bb.y2(), bb.label(), bb.probability()));
                     break;
                 case BOTTOM_RIGHT:
-                    out.add(BoundingBox.create(bb.x2(), bb.y2(), 0, 0));
+                    out.add(Point.create(bb.x2(), bb.y2(), bb.label(), bb.probability()));
                     break;
                 case CENTER:
-                    out.add(BoundingBox.create(bb.cx(), bb.cy(), 0, 0));
+                    out.add(Point.create(bb.cx(), bb.cy(), bb.label(), bb.probability()));
                     break;
             }
         }
@@ -105,7 +108,7 @@ public class ConvertBoundingBoxToPointStepRunner implements PipelineStepRunner {
         if(singleValue){
             d = Data.singleton(outName, out.get(0));
         } else {
-            d = Data.singletonList(outName, out, ValueType.IMAGE);
+            d = Data.singletonList(outName, out, ValueType.POINT);
         }
 
         if(step.keepOtherFields()){

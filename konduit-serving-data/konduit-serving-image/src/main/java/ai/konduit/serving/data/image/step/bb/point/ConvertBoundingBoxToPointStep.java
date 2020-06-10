@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.bb.point;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,14 +31,12 @@ import lombok.experimental.Accessors;
  * BOTTOM_RIGHT, CENTER<br>
  * Note: supports both {@code BoundingBox} and {@code List<BoundingBox>} fields. If the input is as single value,
  * the output will be a single value; if the input is a list, the output will be a list.<br>
- * <br>
- * Note: The output is a bounding box again, with it's top left point being set to the actual point and a zero width and
- * height.
  */
 @Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@JsonName("CONVERT_BOUNDING_BOX_TO_POINT")
 public class ConvertBoundingBoxToPointStep implements PipelineStep {
     public enum ConversionMethod {TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, CENTER}
 
