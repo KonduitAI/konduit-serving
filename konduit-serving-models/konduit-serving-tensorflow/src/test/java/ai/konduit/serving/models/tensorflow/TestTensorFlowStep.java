@@ -693,7 +693,19 @@ public class TestTensorFlowStep {
                     .includeMinibatchDim(true)
                     .format(NDFormat.CHANNELS_LAST)
                     .dataType(NDArrayType.UINT8)
+                    .listHandling(ImageToNDArrayConfig.ListHandling.BATCH)
                     .normalization(null)
+                    .build();
+
+            ImageToNDArrayConfig faceImageConfig = ImageToNDArrayConfig.builder()
+                    .height(128)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
+                    .width(128)   // size origin
+                    .channelLayout(NDChannelLayout.RGB)
+                    .includeMinibatchDim(true)
+                    .format(NDFormat.CHANNELS_LAST)
+                    .dataType(NDArrayType.UINT8)
+                    .normalization(new ImageNormalization(ImageNormalization.Type.SCALE))
+                    .listHandling(ImageToNDArrayConfig.ListHandling.LIST_OUT)
                     .build();
 
 
@@ -717,24 +729,18 @@ public class TestTensorFlowStep {
                     .threshold(0.1)
                     .build());
 
-            GraphStep extractBBox = ssdProc.then("extracted_bbox", ExtractBoundingBoxStep.builder()
+            GraphStep merged1 = ssdProc.mergeWith("merge1", camera);
+
+            GraphStep extractBBox = merged1.then("extracted_bbox", ExtractBoundingBoxStep.builder()
                     .imageName("image")
                     .aspectRatio(1.0)
                     .bboxName("img_bbox")
-                    .imageToNDArrayConfig(c)
+                    .imageToNDArrayConfig(faceImageConfig)
                     .outputName("face_image_bbox")
                     .build()
             ) ;
 
-            ImageToNDArrayConfig faceImageConfig = ImageToNDArrayConfig.builder()
-                    .height(128)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
-                    .width(128)   // size origin
-                    .channelLayout(NDChannelLayout.RGB)
-                    .includeMinibatchDim(true)
-                    .format(NDFormat.CHANNELS_LAST)
-                    .dataType(NDArrayType.UINT8)
-                    .normalization(new ImageNormalization(ImageNormalization.Type.SCALE))
-                    .build();
+
 
             GraphStep face2n  = extractBBox.then("FaceBBoxtoNDArray", ImageToNDArrayStep.builder()
                     .config(faceImageConfig)
