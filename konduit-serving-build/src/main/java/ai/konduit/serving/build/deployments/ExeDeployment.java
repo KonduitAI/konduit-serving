@@ -112,7 +112,7 @@ public class ExeDeployment implements Deployment {
     }
 
     @Override
-    public String gradleTaskName() {
-        return "createExe";
+    public List<String> gradleTaskNames() {
+        return Collections.singletonList("createExe");
     }
 }

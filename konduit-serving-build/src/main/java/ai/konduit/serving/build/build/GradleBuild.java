@@ -31,6 +31,7 @@ import org.nd4j.common.base.Preconditions;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class GradleBuild {
@@ -151,10 +152,19 @@ public class GradleBuild {
                 kts.append("\tpackageName = \"" + rpmName + "\"\n");
                 //kts.append("\tarch = \"" + ((RpmDeployment)deployment).archName() + "\"\n");
                 //kts.append("\tos = \"" + ((RpmDeployment)deployment).osName() + "\"\n");
-                kts.append("\tos = Os.LINUX\n");
+                kts.append("\tos = " + ((RpmDeployment)deployment).osName() + "\n");
                 // String escaped = ((RpmDeployment)deployment).outputDir().replace("\\","\\\\");
                 //kts.append("\tdestinationDirectory.set(file(\"" + escaped + "\"))\n");
                 kts.append("}\n");
+
+                String built = (outputDir + File.separator + "build" + File.separator + "distributions" + File.separator + rpmName).
+                        replace("\\","\\\\");;
+                String deployed = (((RpmDeployment)deployment).outputDir() + File.separator + rpmName).
+                        replace("\\","\\\\");
+
+                kts.append("tasks.register<Copy>(\"copyRpm\") {\n");
+                kts.append("\t from(\""  + built + "\")\n");
+                kts.append("\t into(\""  + deployed + "\")\n}\n");
             }
             else if (deployment instanceof DebDeployment) {
                 String rpmName = ((DebDeployment)deployment).rpmName();
@@ -200,16 +210,18 @@ public class GradleBuild {
                 if (fromFiles.size() > 0) {
                     String rpmName = ((TarDeployment) deployment).getArchiveName();
                     kts.append("distributions {\n");
+                    //String escaped = ((TarDeployment)deployment).getOutputDir().replace("\\","\\\\");
+                    //kts.append("\tdestinationDirectory.set(file(\"" + escaped + "\"))\n");
+                    //kts.append("tasks.withType<ShadowJar> {\n");
                     kts.append("\tmain {\n");
+
                     kts.append("\t\tdistributionBaseName.set( \"" + rpmName + "\")\n");
-                    kts.append("\t contents {\n");
+                    kts.append("\t\t contents {\n");
                     for (String file : fromFiles) {
                         String escaped = file.replace("\\","\\\\");
-                        kts.append("\t\tfrom(\"" + escaped + "\")\n");
+                        kts.append("\t\t\tfrom(\"" + escaped + "\")\n");
                     }
-                    kts.append("\t }\n");
-                    //String escaped = ((TarDeployment)deployment).getOutputDir().replace("\\","\\\\");
-                    //kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
+                    kts.append("\t\t }\n");
                     //kts.append("mergeServiceFiles()\n");  //For service loader files
                     kts.append("\t}\n");
                     kts.append("}").append("\n\n");
@@ -250,9 +262,10 @@ public class GradleBuild {
         List<String> tasks = new ArrayList<>();
         tasks.add("wrapper");
         for(Deployment d : config.deployments()){
-            String s = d.gradleTaskName();
-            if(!tasks.contains(s)){
-                tasks.add(s);
+            for (String s : d.gradleTaskNames()) {
+                if (!tasks.contains(s)) {
+                    tasks.add(s);
+                }
             }
         }
 

@@ -114,7 +114,7 @@ public class DebDeployment implements Deployment {
     }
 
     @Override
-    public String gradleTaskName() {
-        return "buildDeb";
+    public List<String> gradleTaskNames() {
+        return Collections.singletonList("buildDeb");
     }
 }

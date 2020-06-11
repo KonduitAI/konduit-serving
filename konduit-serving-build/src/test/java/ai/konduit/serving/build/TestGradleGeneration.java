@@ -168,7 +168,7 @@ public class TestGradleGeneration {
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
                 .serving(Serving.HTTP)
-                .deployments(new RpmDeployment().outputDir(uberJarDir.getAbsolutePath()).archName("AMD").osName("LINUX").rpmName("my.rpm"));
+                .deployments(new RpmDeployment().outputDir(uberJarDir.getAbsolutePath()).archName("AMD").osName(Os.LINUX).rpmName("my.rpm"));
 
         GradleBuild.generateGradleBuildFiles(gradeDir, c);
 

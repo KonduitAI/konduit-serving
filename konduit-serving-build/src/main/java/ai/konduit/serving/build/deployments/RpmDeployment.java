@@ -41,7 +41,7 @@ public class RpmDeployment implements Deployment {
     private String rpmName;
     private String version;
     private String archName;
-    private String osName;
+    private Os osName;
 
     public RpmDeployment(String outputDir) {
         this(outputDir, "ks", defaultVersion());
@@ -114,7 +114,14 @@ public class RpmDeployment implements Deployment {
     }
 
     @Override
-    public String gradleTaskName() {
-        return "buildRpm";
+    public List<String> gradleTaskNames() {
+        List<String> ret = new ArrayList<>();
+        ret.add("buildRpm");
+        ret.add("copyRpm");
+        return ret;
+    }
+
+    public String osName() {
+        return "Os." + osName.getData();
     }
 }

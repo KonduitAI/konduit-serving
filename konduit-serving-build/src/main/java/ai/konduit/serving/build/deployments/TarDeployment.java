@@ -93,7 +93,7 @@ public class TarDeployment implements Deployment {
     }
 
     @Override
-    public String gradleTaskName() {
-        return "distTar";
+    public List<String> gradleTaskNames() {
+        return Collections.singletonList("distTar");
     }
 }

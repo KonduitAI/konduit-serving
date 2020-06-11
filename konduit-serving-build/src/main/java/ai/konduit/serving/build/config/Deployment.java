@@ -68,7 +68,7 @@ public interface Deployment {
 
     List<GradlePlugin> gradlePlugins();
 
-    String gradleTaskName();
+    List<String> gradleTaskNames();
 
     static String defaultVersion(){
         long time = System.currentTimeMillis();

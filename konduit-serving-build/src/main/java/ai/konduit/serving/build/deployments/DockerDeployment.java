@@ -87,7 +87,7 @@ public class DockerDeployment implements Deployment {
     }
 
     @Override
-    public String gradleTaskName() {
-        return "buildImage";
+    public List<String> gradleTaskNames() {
+        return Collections.singletonList("buildImage");
     }
 }

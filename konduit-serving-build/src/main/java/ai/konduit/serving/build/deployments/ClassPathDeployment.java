@@ -116,7 +116,7 @@ public class ClassPathDeployment implements Deployment {
     }
 
     @Override
-    public String gradleTaskName() {
-        return "build";
+    public List<String> gradleTaskNames() {
+        return Collections.singletonList("build");
     }
 }
