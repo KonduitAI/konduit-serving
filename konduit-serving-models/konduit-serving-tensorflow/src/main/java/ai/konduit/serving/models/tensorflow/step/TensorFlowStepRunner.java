@@ -22,8 +22,10 @@ import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.impl.data.ValueNotFoundException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -71,6 +73,17 @@ public class TensorFlowStepRunner implements PipelineStepRunner {
 
         Session.Runner r = sess.runner();
         for (String s : step.getInputNames()) {
+            if(!data.has(s)){
+                throw new ValueNotFoundException( "Error in TensorFlowStep: Input data does not have a value corresponding to TensorFlowStep.inputNames value \"" +
+                        s + "\" - data keys = " + data.keys());
+            }
+            if(data.type(s) != ValueType.NDARRAY){
+                String listType = data.type(s) == ValueType.LIST ? data.listType(s).toString() : null;
+                throw new ValueNotFoundException( "Error in TensorFlowStep (" + name() + "): Input data value corresponding to TensorFlowStep.inputNames value \"" +
+                        s + "\" is not an NDArray type - is " + (listType == null ? data.type(s) : "List<" + listType + ">"));
+            }
+
+
             NDArray arr = data.getNDArray(s);       //TODO checks
             Tensor<?> t = arr.getAs(Tensor.class);  //TODO casting
             r.feed(s, t);

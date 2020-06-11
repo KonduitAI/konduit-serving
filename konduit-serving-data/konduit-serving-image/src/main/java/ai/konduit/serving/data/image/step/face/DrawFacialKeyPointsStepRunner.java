@@ -16,9 +16,8 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.facial;
+package ai.konduit.serving.data.image.step.face;
 
-import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
@@ -29,13 +28,11 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;
 import org.bytedeco.opencv.opencv_core.*;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
 import java.util.List;
 
-import static ai.konduit.serving.data.image.step.facial.CropUtil.accountForCrop;
-import static ai.konduit.serving.data.image.step.facial.CropUtil.scaleIfRequired;
+import static ai.konduit.serving.data.image.step.face.CropUtil.accountForCrop;
+import static ai.konduit.serving.data.image.step.face.CropUtil.scaleIfRequired;
 
 public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
 
@@ -60,11 +57,11 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
     public Data exec(Context ctx, Data data) {
 
 
-        Image i = data.getImage(step.image());
+        Image img = data.getImage(step.image());
 
-        Mat m = i.getAs(Mat.class);
+        Mat m = img.getAs(Mat.class);
 
-        INDArray landmarkArr = getDetectedMarks(data.getNDArray(step.landmarkArray()));
+        float[][] landmarkArr = getDetectedMarks(data.getNDArray(step.landmarkArray()));
         List<BoundingBox> faces_bboxes = data.getListBoundingBox("img_bbox");
         Mat scaled = scaleIfRequired(m, this.step);
 
@@ -73,7 +70,7 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
 
         if (!faces_bboxes.isEmpty()) {
             for (BoundingBox face_bbox : faces_bboxes) {
-                BoundingBox bb = accountForCrop(i, face_bbox, im2ndConf);
+                BoundingBox bb = accountForCrop(img, face_bbox, im2ndConf);
 
                 double x1 = Math.min(bb.x1(), bb.x2());
                 double y1 = Math.min(bb.y1(), bb.y2());
@@ -86,10 +83,22 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
                 org.bytedeco.opencv.global.opencv_imgproc.rectangle(scaled, r, Scalar.GREEN, 2, 8, 0);
 
 
-                landmarkArr = landmarkArr.mul(bb.x2() - bb.x1());
-                float[][] marks = landmarkArr.toFloatMatrix();
+//                landmarkArr = landmarkArr.mul(bb.x2() - bb.x1());
+                float width = (float) (bb.x2() - bb.x1());
+                for(int i=0; i<landmarkArr.length; i++ ){
+                    for( int j=0; j<landmarkArr[i].length; j++ ){
+                        landmarkArr[i][j] *= width;
+                    }
+                }
+
+//                float[][] marks = landmarkArr.toFloatMatrix();
+                float[][] marks = landmarkArr;
                 for (int row = 0; row < marks.length; row++) {
-                    Point point = new Point((int) ((landmarkArr.getRow(row).toFloatVector()[0] + bb.x1()) * scaled.cols()), (int) ((landmarkArr.getRow(row).toFloatVector()[1] + bb.y1()) * scaled.rows()));
+                    double xp = (landmarkArr[row][0] + bb.x1()) * scaled.cols();
+                    double yp = (landmarkArr[row][1] + bb.y1()) * scaled.rows();
+
+//                    Point point = new Point((int) ((landmarkArr.getRow(row).toFloatVector()[0] + bb.x1()) * scaled.cols()), (int) ((landmarkArr.getRow(row).toFloatVector()[1] + bb.y1()) * scaled.rows()));
+                    Point point = new Point((int)xp, (int)yp);
 
                     org.bytedeco.opencv.global.opencv_imgproc.circle(scaled, point, 1, Scalar.RED);
                 }
@@ -108,10 +117,10 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
     }
 
 
-    private INDArray getDetectedMarks(NDArray landmark) {
-        INDArray landmarkArr = landmark.getAs(INDArray.class);
-        return Nd4j.toFlattened(landmarkArr).reshape(-1, 2);
-
+    private float[][] getDetectedMarks(NDArray landmark) {
+        float[][] landmarkArr = landmark.getAs(float[][].class);
+//        return Nd4j.toFlattened(landmarkArr).reshape(-1, 2);
+        return landmarkArr;
     }
 
 

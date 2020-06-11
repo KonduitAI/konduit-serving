@@ -1,8 +1,7 @@
-package ai.konduit.serving.data.image.step.facial;
+package ai.konduit.serving.data.image.step.face;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
-import ai.konduit.serving.data.image.step.facial.DrawFacialKeyPointsStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Image;
 import org.bytedeco.opencv.opencv_core.Mat;

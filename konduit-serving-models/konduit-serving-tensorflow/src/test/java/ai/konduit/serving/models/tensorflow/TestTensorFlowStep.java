@@ -26,7 +26,7 @@ import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
 import ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep;
-import ai.konduit.serving.data.image.step.facial.DrawFacialKeyPointsStep;
+import ai.konduit.serving.data.image.step.face.DrawFacialKeyPointsStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
@@ -685,7 +685,7 @@ public class TestTensorFlowStep {
                     .outputKey("image")
                     .build());
 
-
+            //Detect faces using mobilenet model: image -> NDArray -> TF -> SSD post processor
             ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
                     .height(128)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
                     .width(128)   // size origin
@@ -693,10 +693,45 @@ public class TestTensorFlowStep {
                     .includeMinibatchDim(true)
                     .format(NDFormat.CHANNELS_LAST)
                     .dataType(NDArrayType.UINT8)
-                    .listHandling(ImageToNDArrayConfig.ListHandling.BATCH)
                     .normalization(null)
                     .build();
 
+            GraphStep i2n = camera.then("image2NDArrayFaceDetectorInference", ImageToNDArrayStep.builder()
+                    .config(c)
+                    .keys(Collections.singletonList("image"))
+                    .outputNames(Collections.singletonList("image_tensor")) //TODO varargs builder method
+                    .build());
+
+            GraphStep tf = i2n.then("tf", builder()
+                    .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
+                    .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
+                    .modelUri(face_detector_graph.toURI().toString())
+                    .build());
+
+            GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
+                    .outputName("img_bbox")
+                    .keepOtherValues(true)
+                    .threshold(0.1)
+                    .build());
+
+
+            //Extract the face bounding boxes as images
+            GraphStep merged1 = ssdProc.mergeWith("merge1", camera);
+
+
+            GraphStep extractBBox = merged1.then("extracted_bbox", ExtractBoundingBoxStep.builder()
+                    .imageName("image")
+                    .aspectRatio(1.0)
+                    .bboxName("img_bbox")
+                    .imageToNDArrayConfig(c)
+                    .outputName("face_image_bbox")
+                    .keepOtherFields(false)
+                    .build()) ;
+
+
+
+
+            //Convert the face bounding boxes to NDArrays
             ImageToNDArrayConfig faceImageConfig = ImageToNDArrayConfig.builder()
                     .height(128)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
                     .width(128)   // size origin
@@ -708,48 +743,16 @@ public class TestTensorFlowStep {
                     .listHandling(ImageToNDArrayConfig.ListHandling.BATCH)
                     .build();
 
-
-            GraphStep i2n = camera.then("image2NDArrayFaceDetectorInference", ImageToNDArrayStep.builder()
-                    .config(c)
-                    .keys(Arrays.asList("image","image"))
-                    .outputNames(Arrays.asList("image_tensor","input_image_tensor")) //TODO varargs builder method
-                    .build());
-
-            //Run image in TF model
-            GraphStep tf = i2n.then("tf", builder()
-                    .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                    .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
-                    .modelUri(face_detector_graph.toURI().toString())
-                    .build());
-
-
-            GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
-                    .outputName("img_bbox")
-                    .keepOtherValues(true)
-                    .threshold(0.1)
-                    .build());
-
-            GraphStep merged1 = ssdProc.mergeWith("merge1", camera);
-
-            GraphStep extractBBox = merged1.then("extracted_bbox", ExtractBoundingBoxStep.builder()
-                    .imageName("image")
-                    .aspectRatio(1.0)
-                    .bboxName("img_bbox")
-                    .imageToNDArrayConfig(faceImageConfig)
-                    .outputName("face_image_bbox")
-                    .build()
-            ) ;
-
-
-
             GraphStep face2n  = extractBBox.then("FaceBBoxtoNDArray", ImageToNDArrayStep.builder()
                     .config(faceImageConfig)
                     .keys(Arrays.asList("face_image_bbox"))
-                    .outputNames(Arrays.asList("input_image_tensor")) //TODO varargs builder method
+                    .outputNames(Arrays.asList("input_image_tensor"))   //Name to match face keypoint
                     .build());
 
+
+            //Detect keypoints on the face boxes
             GraphStep tf_keydetector = face2n.then("keydetector", builder()
-                    .inputNames(Collections.singletonList("input_image_tensor"))    //TODO varargs builder method
+                    .inputNames(Collections.singletonList("input_image_tensor"))
                     .outputNames(Arrays.asList("logits/BiasAdd"))
                     .modelUri(keypoints_graph.toURI().toString())
                     .build());

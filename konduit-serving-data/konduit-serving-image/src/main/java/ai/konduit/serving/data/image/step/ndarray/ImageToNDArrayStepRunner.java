@@ -128,7 +128,7 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
 
                 if(batch){
                     if(l.size() == 1){
-                        d.putListNDArray(outNames.get(idx++), l);
+                        d.put(outNames.get(idx++), l.get(0));
                     } else {
                         //Check that all have the same shape before combining
                         long[] first = l.get(0).shape();
