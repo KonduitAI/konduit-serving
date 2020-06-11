@@ -38,6 +38,9 @@ public class TarDeployment implements Deployment {
     @Getter
     private String archiveName;
     private String version;
+    @Setter
+    @Getter
+    private List<String> files;
 
     public TarDeployment(String outputDir) {
         this(outputDir, "ks", Deployment.defaultVersion());

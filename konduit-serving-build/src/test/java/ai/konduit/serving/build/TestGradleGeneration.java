@@ -35,6 +35,7 @@ import org.nd4j.common.util.ArchiveUtils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -296,8 +297,12 @@ public class TestGradleGeneration {
         File gradleDir = new File(dir, "gradle");
         File archiveDir = new File(dir, "tar");
 
+        List<String> files = Collections.singletonList(jsonF.getAbsolutePath());
+
         val deployment = new TarDeployment(archiveDir.getAbsolutePath());
         deployment.setArchiveName("ks");
+        deployment.setFiles(files);
+
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
@@ -313,5 +318,7 @@ public class TestGradleGeneration {
         //Actually run the build
         //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
         GradleBuild.runGradleBuild(gradleDir, c);
+        File expFile = new File(gradleDir + File.separator + "build" + File.separator + "distributions", "ks.tar");
+        assertTrue(expFile.exists());
     }
 }

@@ -196,15 +196,24 @@ public class GradleBuild {
                     "}\n");
             }
             else if (deployment instanceof TarDeployment) {
-                String rpmName = ((TarDeployment)deployment).getArchiveName();
-                kts.append("distributions {\n");
-                kts.append("\tmain {\n");
-                kts.append("\t\tdistributionBaseName.set( \"" + rpmName + "\")\n");
-                //String escaped = ((TarDeployment)deployment).getOutputDir().replace("\\","\\\\");
-                //kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
-                //kts.append("mergeServiceFiles()\n");  //For service loader files
-                kts.append("\t}\n");
-                kts.append("}").append("\n\n");
+                List<String> fromFiles = ((TarDeployment)deployment).getFiles();
+                if (fromFiles.size() > 0) {
+                    String rpmName = ((TarDeployment) deployment).getArchiveName();
+                    kts.append("distributions {\n");
+                    kts.append("\tmain {\n");
+                    kts.append("\t\tdistributionBaseName.set( \"" + rpmName + "\")\n");
+                    kts.append("\t contents {\n");
+                    for (String file : fromFiles) {
+                        String escaped = file.replace("\\","\\\\");
+                        kts.append("\t\tfrom(\"" + escaped + "\")\n");
+                    }
+                    kts.append("\t }\n");
+                    //String escaped = ((TarDeployment)deployment).getOutputDir().replace("\\","\\\\");
+                    //kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
+                    //kts.append("mergeServiceFiles()\n");  //For service loader files
+                    kts.append("\t}\n");
+                    kts.append("}").append("\n\n");
+                }
             }
         }
 
