@@ -23,6 +23,8 @@ import ai.konduit.serving.build.deployments.UberJarDeployment;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -67,4 +69,10 @@ public interface Deployment {
     List<GradlePlugin> gradlePlugins();
 
     String gradleTaskName();
+
+    static String defaultVersion(){
+        long time = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMDD-HHmmss.SSS");
+        return sdf.format(new Date(time));
+    }
 }

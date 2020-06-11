@@ -20,15 +20,12 @@ package ai.konduit.serving.build;
 
 import ai.konduit.serving.build.config.*;
 import ai.konduit.serving.build.dependencies.Dependency;
-import ai.konduit.serving.build.deployments.DebDeployment;
-import ai.konduit.serving.build.deployments.ExeDeployment;
-import ai.konduit.serving.build.deployments.RpmDeployment;
-import ai.konduit.serving.build.deployments.ClassPathDeployment;
-import ai.konduit.serving.build.deployments.UberJarDeployment;
+import ai.konduit.serving.build.deployments.*;
 import ai.konduit.serving.build.build.GradleBuild;
 import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
+import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -42,7 +39,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
-@Ignore //TO be run manually, not part of CI (as it requires all modules to be installed first)
+//@Ignore //TO be run manually, not part of CI (as it requires all modules to be installed first)
 public class TestGradleGeneration {
 
     @Rule
@@ -248,5 +245,40 @@ public class TestGradleGeneration {
         //Check output JAR exists
         File expFile = new File(gradeDir + File.separator + "build" + File.separator + "launch4j", "my.exe");
         assertTrue(expFile.exists());
+    }
+
+    // This test requires local docker running, so should be moved to integration tests suite when we have it.
+    @Ignore
+    @Test
+    public void testDockerImageGeneration() throws Exception {
+
+        Pipeline p = SequencePipeline.builder()
+                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
+                .build();
+
+        File dir = testDir.newFolder();
+        File jsonF = new File(dir, "pipeline.json");
+        FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
+
+        File gradleDir = new File(dir, "gradle");
+        File imageDir = new File(dir, "image");
+
+        val deployment = new DockerDeployment(imageDir.getAbsolutePath());
+        deployment.setImageName("ks");
+        Config c = new Config()
+                .pipelinePath(jsonF.getAbsolutePath())
+                .target(Target.LINUX_X86)
+                .serving(Serving.HTTP)
+                .deployments(deployment);
+
+        GradleBuild.generateGradleBuildFiles(gradleDir, c);
+
+        //Check for build.gradle.kts
+        File buildGradle = new File(gradleDir, "build.gradle.kts");
+        assertTrue(buildGradle.exists());
+
+        //Actually run the build
+        //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
+        GradleBuild.runGradleBuild(gradleDir, c);
     }
 }

@@ -21,13 +21,8 @@ package ai.konduit.serving.build.build;
 import ai.konduit.serving.build.config.Config;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.dependencies.Dependency;
-import ai.konduit.serving.build.deployments.DebDeployment;
-import ai.konduit.serving.build.deployments.ExeDeployment;
-import ai.konduit.serving.build.deployments.RpmDeployment;
-import ai.konduit.serving.build.deployments.ClassPathDeployment;
-import ai.konduit.serving.build.deployments.UberJarDeployment;
+import ai.konduit.serving.build.deployments.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
@@ -60,6 +55,10 @@ public class GradleBuild {
         gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew.bat")));
         if (gradlewResource.exists())
             FileUtils.copyFileToDirectory(gradlewResource, outputDir);
+
+        File dockerResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("Dockerfile")));
+        if (dockerResource.exists())
+            FileUtils.copyFileToDirectory(dockerResource, outputDir);
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
         StringBuilder kts = new StringBuilder();
@@ -185,6 +184,12 @@ public class GradleBuild {
                 kts.append("\tmainClassName = \"ai.konduit.serving.launcher.KonduitServingLauncher\"\n");
                 //kts.append("mergeServiceFiles()\n");  //For service loader files
                 kts.append("}\n");
+            }
+            else if (deployment instanceof DockerDeployment) {
+                String escaped = dockerResource.getParent().replace("\\","\\\\");
+                kts.append("tasks.create(\"buildImage\", DockerBuildImage::class) {\n" +
+                        "\tinputDir.set(file(\"" + escaped + "\"))\n" +
+                    "}\n");
             }
         }
 
