@@ -23,7 +23,18 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.tags.Tag;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -36,12 +47,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.common.primitives.Pair;
+import org.openapitools.codegen.ClientOptInput;
+import org.openapitools.codegen.DefaultGenerator;
+import org.openapitools.codegen.Generator;
+import org.openapitools.codegen.languages.JavaClientCodegen;
+import org.openapitools.codegen.languages.PythonClientCodegen;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
+import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM;
 
 @Slf4j
 public class GenerateRestClients {
@@ -61,8 +81,10 @@ public class GenerateRestClients {
         ClassPool classPool = ClassPool.getDefault();
 
         OpenAPI openAPI = new OpenAPI();
+        createApiInfo(openAPI);
         List<CtClass> annotatedClasses = createAnnotatedClasses(classPool, mappings);
         annotatedClasses.add(classPool.get("ai.konduit.serving.vertx.config.InferenceConfiguration"));
+        annotatedClasses.add(classPool.get("ai.konduit.serving.vertx.protocols.http.api.ErrorResponse"));
 
         // This has to be done in order otherwise we'll have duplicated classes compilation error.
         // This is to make sure that the classes referenced in the later iterations are defined in the previous one.
@@ -72,12 +94,36 @@ public class GenerateRestClients {
             addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep")).toClass());
             addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.pipeline.api.pipeline.Pipeline")).toClass());
             addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.vertx.config.InferenceConfiguration")).toClass());
+            addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.vertx.protocols.http.api.ErrorResponse")).toClass());
         } catch (CannotCompileException e) {
             log.error("Error while adding schema classes to OpenApi specs", e);
             System.exit(1);
         }
 
-        log.info(Yaml.pretty(openAPI));
+        genearteClients(openAPI);
+        log.info("\n{}", Yaml.pretty(openAPI));
+    }
+
+    private static void genearteClients(OpenAPI openAPI) {
+        PythonClientCodegen pythonClientCodegen = new PythonClientCodegen();
+        pythonClientCodegen.setOutputDir("clients/python");
+        pythonClientCodegen.setOpenAPI(openAPI);
+        pythonClientCodegen.setPackageName("konduit");
+        pythonClientCodegen.setPackageVersion("0.1.0");
+
+        JavaClientCodegen javaClientCodegen = new JavaClientCodegen();
+        javaClientCodegen.setOutputDir("clients/java");
+        javaClientCodegen.setOpenAPI(openAPI);
+        javaClientCodegen.setApiPackage("ai.konduit.serving.java.client");
+        javaClientCodegen.setModelPackage("ai.konduit.serving.java.client.models");
+        javaClientCodegen.setInvokerPackage("ai.konduit.serving.java.client.invoker");
+        javaClientCodegen.setGroupId("ai.konduit.serving");
+        javaClientCodegen.setArtifactId("konduit-serving-java-client");
+        javaClientCodegen.setArtifactVersion("0.1.0-SNAPSHOT");
+
+        Generator generator = new DefaultGenerator();
+        generator.opts(new ClientOptInput().openAPI(openAPI).config(pythonClientCodegen)).generate();
+        generator.opts(new ClientOptInput().openAPI(openAPI).config(javaClientCodegen)).generate();
     }
 
     private static int findIndex(List<CtClass> array, String className) {
@@ -177,5 +223,74 @@ public class GenerateRestClients {
 
     private static void addSchemas(OpenAPI openAPI, Class<?> clazz) {
         ModelConverters.getInstance().readAll(clazz).forEach(openAPI::schema);
+    }
+
+    private static void createApiInfo(OpenAPI openAPI) {
+        try (InputStream is = GenerateRestClients.class.getClassLoader().getResourceAsStream("META-INF/konduit-serving-clients-git.properties")) {
+            if (is == null) {
+                throw new IllegalStateException("Cannot find konduit-serving-clients-git.properties on classpath");
+            }
+            Properties gitProperties = new Properties();
+            gitProperties.load(is);
+            String projectVersion = gitProperties.getProperty("git.build.version");
+            String commitId = gitProperties.getProperty("git.commit.id").substring(0, 8);
+
+            openAPI.info(new Info()
+                    .title("Konduit Serving REST API")
+                    .version(String.format("%s | Commit: %s", projectVersion, commitId))
+                    .description("RESTful API for various operations inside konduit-serving")
+                    .license(new License()
+                            .name("Apache 2.0")
+                            .url("https://github.com/KonduitAI/konduit-serving/blob/master/LICENSE"))
+                    .contact(new Contact()
+                            .url("https://konduit.ai/contact")
+                            .name("Konduit K.K.")
+                            .email("hello@konduit.ai")))
+                    .tags(Collections.singletonList(
+                            new Tag()
+                                    .name("inference")
+                                    .description("Inference server operations")))
+                    .externalDocs(new ExternalDocumentation()
+                            .description("Online documentation")
+                            .url("https://serving.konduit.ai"))
+                    .path("/predict", new PathItem()
+                            .summary("Predicts an output based on the given JSON (key/value) or binary string")
+                            .description("Takes a JSON string of key value pairs or a binary data string (protobuf) as input " +
+                                    "and processes it in the pipeline. The output could be json or a binary string based on " +
+                                    "the accept header value (application/json or application/octet-stream respectively).")
+                            .post(new Operation()
+                                    .operationId("predict")
+                                    .addTagsItem("inference")
+                                    .requestBody(new RequestBody()
+                                            .required(true)
+                                            .content(new Content()
+                                                    .addMediaType(APPLICATION_JSON.toString(),
+                                                            new MediaType().schema(new MapSchema()))
+                                                    .addMediaType(APPLICATION_OCTET_STREAM.toString(),
+                                                            new MediaType().schema(new BinarySchema()))
+                                            )
+                                    ).responses(new ApiResponses()
+                                            .addApiResponse("200", new ApiResponse()
+                                                    .description("Successful operation")
+                                                    .content(new Content()
+                                                            .addMediaType(APPLICATION_JSON.toString(),
+                                                                    new MediaType().schema(new MapSchema()))
+                                                            .addMediaType(APPLICATION_OCTET_STREAM.toString(),
+                                                                    new MediaType().schema(new BinarySchema()))
+                                                    )
+                                            ).addApiResponse("500", new ApiResponse()
+                                                    .description("Internal server error")
+                                                    .content(new Content()
+                                                            .addMediaType(APPLICATION_JSON.toString(), new MediaType()
+                                                                    .schema(new ObjectSchema().$ref("#/components/schemas/ErrorResponse"))
+                                                            )
+                                                    )
+                                            )
+                                    )
+                            )
+                    );
+        } catch (IOException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 }
