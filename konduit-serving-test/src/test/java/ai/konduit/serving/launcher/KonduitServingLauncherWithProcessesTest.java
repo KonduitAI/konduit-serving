@@ -180,7 +180,8 @@ public class KonduitServingLauncherWithProcessesTest {
     }
 
     private List<String> runAndTailOutput(Function<String, Boolean> predicate, String... command) throws IOException, InterruptedException {
-        BufferedReader reader =  new BufferedReader(new InputStreamReader(runAndGetInputStream(command)));
+        Process process = startProcessFromCommand(command);
+        BufferedReader reader =  new BufferedReader(new InputStreamReader(process.getInputStream()));
 
         boolean end = false;
         List<String> output = new ArrayList<>();
@@ -194,6 +195,10 @@ public class KonduitServingLauncherWithProcessesTest {
                 output.add(line);
                 end = predicate.apply(line);
             }
+        }
+
+        if(command[0].equals("logs")) {
+            process.destroyForcibly();
         }
 
         return output;

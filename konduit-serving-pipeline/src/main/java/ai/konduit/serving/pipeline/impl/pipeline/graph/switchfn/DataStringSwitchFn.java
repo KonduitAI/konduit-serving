@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
@@ -38,6 +39,7 @@ import java.util.Map;
  */
 @lombok.Data
 @Accessors(fluent = true)
+@JsonName("STRING_SWITCH")
 public class DataStringSwitchFn implements SwitchFn {
 
     private final int numOutputs;

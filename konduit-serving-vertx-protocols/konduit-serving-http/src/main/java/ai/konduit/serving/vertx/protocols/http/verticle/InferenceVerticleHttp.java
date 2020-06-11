@@ -28,10 +28,8 @@ import ai.konduit.serving.vertx.protocols.http.api.KonduitServingHttpException;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import io.vertx.core.http.HttpServer;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -89,6 +87,13 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                             ((ContextInternal) context).getDeployment()
                                     .deploymentOptions()
                                     .setConfig(new JsonObject(inferenceConfiguration.toJson()));
+
+                            long pid = getPid();
+
+                            saveInspectionDataIfRequired(pid);
+
+                            // Periodically checks for configuration updates and save them.
+                            vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
 
                             log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.getHost());
                             log.info("Inference HTTP server started on port {} with {} pipeline steps", actualPort, pipeline.size());

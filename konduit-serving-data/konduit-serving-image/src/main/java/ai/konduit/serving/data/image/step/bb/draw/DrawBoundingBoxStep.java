@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.bb.draw;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
@@ -41,6 +42,7 @@ import java.util.Map;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@JsonName("DRAW_BOUNDING_BOX")
 public class DrawBoundingBoxStep implements PipelineStep {
     public static final String DEFAULT_COLOR = "lime";
 

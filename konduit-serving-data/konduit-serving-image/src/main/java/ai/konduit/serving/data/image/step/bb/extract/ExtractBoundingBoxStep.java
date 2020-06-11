@@ -18,15 +18,13 @@
 
 package ai.konduit.serving.data.image.step.bb.extract;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import java.util.Map;
 
 /**
  *
@@ -46,6 +44,7 @@ import java.util.Map;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@JsonName("EXTRACT_BOUNDING_BOX")
 public class ExtractBoundingBoxStep implements PipelineStep {
     private String imageName;       //If null: just find any image
     private String bboxName;       //If null: just find any BB's

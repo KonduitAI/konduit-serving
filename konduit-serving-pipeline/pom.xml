@@ -19,6 +19,12 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-annotation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- TODO - remove this to avoid version issues? We only really use it for a small number of utils... Preconditions for example -->
         <dependency>
             <groupId>org.nd4j</groupId>

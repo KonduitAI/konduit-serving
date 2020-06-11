@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
@@ -33,6 +34,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
  */
 @lombok.Data
 @Accessors(fluent = true)
+@JsonName("INT_SWITCH")
 public class DataIntSwitchFn implements SwitchFn {
 
     private final int numOutputs;

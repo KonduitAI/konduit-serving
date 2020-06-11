@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -34,7 +35,8 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
-public class SwitchOutput extends BaseGraphStep {
+@JsonName(GraphConstants.GRAPH_SWITCH_OUTPUT_JSON_KEY)
+public class SwitchOutput extends BaseGraphStep implements GraphStep {
 
     private final int outputNum;
     private final String switchName;

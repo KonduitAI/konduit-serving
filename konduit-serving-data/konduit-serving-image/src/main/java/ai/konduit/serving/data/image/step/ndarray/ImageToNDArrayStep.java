@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.ndarray;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Builder;
@@ -56,6 +57,7 @@ import java.util.List;
  */
 @Builder
 @Data
+@JsonName("IMAGE_TO_NDARRAY")
 public class ImageToNDArrayStep implements PipelineStep {
 
     public static final String DEFAULT_METADATA_KEY = "@ImageToNDArrayStepMetadata";
