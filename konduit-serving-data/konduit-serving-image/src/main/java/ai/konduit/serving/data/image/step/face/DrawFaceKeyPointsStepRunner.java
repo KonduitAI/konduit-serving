@@ -19,6 +19,7 @@
 package ai.konduit.serving.data.image.step.face;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -61,7 +62,7 @@ public class DrawFaceKeyPointsStepRunner implements PipelineStepRunner {
 
         Mat m = img.getAs(Mat.class);
 
-        float[][] landmarkArr = getDetectedMarks(data.getNDArray(step.landmarkArray()));
+        float[][] landmarkArr = data.getNDArray(step.landmarkArray()).getAs(float[][].class);
         List<BoundingBox> faces_bboxes = data.getListBoundingBox("img_bbox");
         Mat scaled = scaleIfRequired(m, this.step);
 
@@ -72,15 +73,26 @@ public class DrawFaceKeyPointsStepRunner implements PipelineStepRunner {
             for (BoundingBox face_bbox : faces_bboxes) {
                 BoundingBox bb = accountForCrop(img, face_bbox, im2ndConf);
 
-                double x1 = Math.min(bb.x1(), bb.x2());
-                double y1 = Math.min(bb.y1(), bb.y2());
+                if(step.drawFaceBox()) {
+                    double x1 = Math.min(bb.x1(), bb.x2());
+                    double y1 = Math.min(bb.y1(), bb.y2());
 
-                int x = (int) (x1 * scaled.cols());
-                int y = (int) (y1 * scaled.rows());
-                int h = (int) Math.round(bb.height() * scaled.rows());
-                int w = (int) Math.round(bb.width() * scaled.cols());
-                Rect r = new Rect(x, y, w, h);
-                org.bytedeco.opencv.global.opencv_imgproc.rectangle(scaled, r, Scalar.GREEN, 2, 8, 0);
+                    int x = (int) (x1 * scaled.cols());
+                    int y = (int) (y1 * scaled.rows());
+                    int h = (int) Math.round(bb.height() * scaled.rows());
+                    int w = (int) Math.round(bb.width() * scaled.cols());
+                    Rect r = new Rect(x, y, w, h);
+
+                    Scalar s;
+                    if(step.faceBoxColor() == null){
+                        s = ColorUtil.stringToColor(DrawFaceKeyPointsStep.DEFAULT_BOX_COLOR);
+                    } else {
+                        s = ColorUtil.stringToColor(step.faceBoxColor());
+                    }
+
+
+                    org.bytedeco.opencv.global.opencv_imgproc.rectangle(scaled, r, s, 2, 8, 0);
+                }
 
                 int prod = landmarkArr.length * landmarkArr[0].length;
                 float[][] keypoints = new float[prod/2][2];
@@ -95,18 +107,26 @@ public class DrawFaceKeyPointsStepRunner implements PipelineStepRunner {
                 for (int i = 0; i < keypoints.length; i++) {
                     //Currently, keypoints coordinates are specified in terms of the face bounding box.
                     //We need to translate them to overall image pixels
-
                     double xp = (bb.x1() + keypoints[i][0] * bb.width()) * img.width();
                     double yp = (bb.y1() + keypoints[i][1] * bb.height()) * img.height();
 
                     Point point = new Point((int)xp, (int)yp);
 
-                    org.bytedeco.opencv.global.opencv_imgproc.circle(scaled, point, 1, Scalar.RED);
+                    Scalar s;
+                    if(step.pointColor() == null){
+                        s = ColorUtil.stringToColor(DrawFaceKeyPointsStep.DEFAULT_POINT_COLOR);
+                    } else {
+                        s = ColorUtil.stringToColor(step.pointColor());
+                    }
+                    int size = step.pointSize();
+
+                    org.bytedeco.opencv.global.opencv_imgproc.circle(scaled, point, size, s);
                 }
 
+                if (im2ndConf.listHandling() == ImageToNDArrayConfig.ListHandling.FIRST || im2ndConf.listHandling() == ImageToNDArrayConfig.ListHandling.NONE) {
+                    break;
+                }
             }
-
-
         }
         String outputName = step.outputName();
         if (outputName == null) {
@@ -116,14 +136,6 @@ public class DrawFaceKeyPointsStepRunner implements PipelineStepRunner {
         return Data.singleton(step.image(), Image.create(scaled));
 
     }
-
-
-    private float[][] getDetectedMarks(NDArray landmark) {
-        float[][] landmarkArr = landmark.getAs(float[][].class);
-        return landmarkArr;
-    }
-
-
 }
 
 

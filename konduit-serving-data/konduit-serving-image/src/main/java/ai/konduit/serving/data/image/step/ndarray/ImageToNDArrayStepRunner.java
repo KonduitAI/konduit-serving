@@ -113,7 +113,8 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
                         throw new IllegalStateException("Error in step " + name() + " of type ImageToNDArrayStep: input field \"" +
                                 s + "\" is a List<Image> but ImageToNDArrayConfig.listHandling == ListHandling.NONE.\n" +
                                 "For List<Image> --> List<NDArray>, use ListHandling.LIST_OUT\n" +
-                                "For List<Image> --> NDArray, use ListHandling.BATCH (where arrays are batched along dimension 0");
+                                "For List<Image> --> NDArray, use ListHandling.BATCH (where arrays are batched along dimension 0)\n" +
+                                "For List<Image>.get(0) --> NDArray, use ListHandling.FIRST");
                     case FIRST:
                         List<Image> imgList = data.getListImage(s);
                         if(imgList.isEmpty()){

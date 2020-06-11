@@ -25,13 +25,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-
+/**
+ * A step for drawing face keypoints.
+ * Assumes the key point array is an NDArray with shape [numExamples][2*numPoints], where each entry alternates x and y
+ * coordinates, in 0 to 1 scale. Other formats may be added in the future.
+ */
 @Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class DrawFaceKeyPointsStep implements PipelineStep {
-
+    public static final String DEFAULT_BOX_COLOR = "lime";
+    public static final String DEFAULT_POINT_COLOR = "red";
     public static final String DEFAULT_OUTPUT_NAME = "image";
 
     public enum Scale {NONE, AT_LEAST, AT_MOST}
@@ -39,7 +44,12 @@ public class DrawFaceKeyPointsStep implements PipelineStep {
     private ImageToNDArrayConfig imageToNDArrayConfig;
     private int resizeH;
     private int resizeW;
-    private boolean drawCropRegion = false;
+    @Builder.Default
+    private boolean drawFaceBox = true;
+    private String faceBoxColor;
+    private String pointColor;
+    @Builder.Default
+    private int pointSize = 1;
 
 
     @Builder.Default
@@ -51,10 +61,9 @@ public class DrawFaceKeyPointsStep implements PipelineStep {
 
     public DrawFaceKeyPointsStep() {
         this.scale = Scale.NONE;
-
+        this.pointSize = 1;
+        this.drawFaceBox = true;
     }
-
-
 }
 
 
