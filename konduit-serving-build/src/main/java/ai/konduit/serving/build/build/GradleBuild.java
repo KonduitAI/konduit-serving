@@ -23,6 +23,7 @@ import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.*;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
@@ -88,7 +89,10 @@ public class GradleBuild {
             List<GradlePlugin> gi = d.gradlePlugins();
             if(gi != null && !gi.isEmpty()){
                 for(GradlePlugin g : gi) {
-                    kts.append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
+                    if (StringUtils.isNotEmpty(g.version()))
+                        kts.append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
+                    else
+                        kts.append("id(\"").append(g.id()).append("\")\n");
                 }
             }
         }
@@ -190,6 +194,17 @@ public class GradleBuild {
                 kts.append("tasks.create(\"buildImage\", DockerBuildImage::class) {\n" +
                         "\tinputDir.set(file(\"" + escaped + "\"))\n" +
                     "}\n");
+            }
+            else if (deployment instanceof TarDeployment) {
+                String rpmName = ((TarDeployment)deployment).getArchiveName();
+                kts.append("distributions {\n");
+                kts.append("\tmain {\n");
+                kts.append("\t\tdistributionBaseName.set( \"" + rpmName + "\")\n");
+                //String escaped = ((TarDeployment)deployment).getOutputDir().replace("\\","\\\\");
+                //kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
+                //kts.append("mergeServiceFiles()\n");  //For service loader files
+                kts.append("\t}\n");
+                kts.append("}").append("\n\n");
             }
         }
 

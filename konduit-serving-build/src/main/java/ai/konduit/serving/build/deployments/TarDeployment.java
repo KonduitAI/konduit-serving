@@ -20,61 +20,53 @@ package ai.konduit.serving.build.deployments;
 import ai.konduit.serving.build.build.GradlePlugin;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.config.DeploymentValidation;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import lombok.Getter;
+import lombok.Setter;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
-@Data
-@Accessors(fluent = true)
-@NoArgsConstructor
-public class ExeDeployment implements Deployment {
-    public static final String DEFAULT_EXE_NAME = "konduit-serving-deployment.exe";
-    public static final String PROP_OUTPUTDIR = "exe.outputdir";
-    public static final String PROP_EXENAME = "exe.name";
+public class TarDeployment implements Deployment {
 
+    public static final String DEFAULT_ARCHIVE_NAME = "ks";
+    public static final String PROP_OUTPUTDIR = "tar.outputdir";
+    public static final String PROP_ARCHIVENAME = "tar.name";
+
+    @Getter
     private String outputDir;
-    private String exeName;
+    @Setter
+    @Getter
+    private String archiveName;
     private String version;
 
-    public ExeDeployment(String outputDir) {
-        this(outputDir, "ks", defaultVersion());
+    public TarDeployment(String outputDir) {
+        this(outputDir, "ks", Deployment.defaultVersion());
     }
 
-    public ExeDeployment(@JsonProperty("outputDir") String outputDir, @JsonProperty("exeName") String exeName,
-                         @JsonProperty("version") String version){
+    public TarDeployment(@JsonProperty("outputDir") String outputDir, @JsonProperty("rpmName") String imageName,
+                            @JsonProperty("version") String version){
         this.outputDir = outputDir;
-        this.exeName = exeName;
+        this.archiveName = imageName;
         this.version = version;
-    }
-
-    private static String defaultVersion(){
-        long time = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMDD-HHmmss.SSS");
-        return sdf.format(new Date(time));
     }
 
     @Override
     public List<String> propertyNames() {
-        return Arrays.asList(PROP_OUTPUTDIR, PROP_EXENAME);
+        return Arrays.asList(DEFAULT_ARCHIVE_NAME, PROP_OUTPUTDIR, PROP_ARCHIVENAME);
     }
 
     @Override
     public Map<String, String> asProperties() {
         Map<String,String> m = new LinkedHashMap<>();
         m.put(PROP_OUTPUTDIR, outputDir);
-        m.put(PROP_EXENAME, exeName);
+        m.put(PROP_ARCHIVENAME, archiveName);
         return m;
     }
 
     @Override
     public void fromProperties(Map<String, String> props) {
         outputDir = props.getOrDefault(PROP_OUTPUTDIR, outputDir);
-        exeName = props.getOrDefault(PROP_EXENAME, exeName);
+        archiveName = props.getOrDefault(PROP_ARCHIVENAME, archiveName);
     }
 
     @Override
@@ -84,35 +76,21 @@ public class ExeDeployment implements Deployment {
 
     @Override
     public String outputString() {
-        File outFile = new File(outputDir, exeName);
-        StringBuilder sb = new StringBuilder();
-        sb.append("EXE location:   ").append(outFile.getAbsolutePath()).append("\n");
-        String size;
-        if(outFile.exists()){
-            long bytes = outFile.length();
-            double bytesPerMB = 1024 * 1024;
-            double mb = bytes / bytesPerMB;
-            size = String.format("%.2f", mb) + " MB";
-        } else {
-            size = "<EXE not found>";
-        }
-        sb.append("EXE size:       ").append(size);
-
-        return sb.toString();
+        return null;
     }
 
     @Override
     public List<String> gradleImports() {
-        return Collections.singletonList("edu.sc.seis.launch4j.tasks.DefaultLaunch4jTask");
+        return null;
     }
 
     @Override
     public List<GradlePlugin> gradlePlugins() {
-        return Collections.singletonList(new GradlePlugin("edu.sc.seis.launch4j", "2.4.6"));
+        return Collections.singletonList(new GradlePlugin("distribution", ""));
     }
 
     @Override
     public String gradleTaskName() {
-        return "createExe";
+        return "distTar";
     }
 }

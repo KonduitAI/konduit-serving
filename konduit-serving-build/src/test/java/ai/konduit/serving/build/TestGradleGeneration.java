@@ -281,4 +281,37 @@ public class TestGradleGeneration {
         //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
         GradleBuild.runGradleBuild(gradleDir, c);
     }
+
+    @Test
+    public void testTarGeneration() throws Exception {
+
+        Pipeline p = SequencePipeline.builder()
+                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
+                .build();
+
+        File dir = testDir.newFolder();
+        File jsonF = new File(dir, "pipeline.json");
+        FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
+
+        File gradleDir = new File(dir, "gradle");
+        File archiveDir = new File(dir, "tar");
+
+        val deployment = new TarDeployment(archiveDir.getAbsolutePath());
+        deployment.setArchiveName("ks");
+        Config c = new Config()
+                .pipelinePath(jsonF.getAbsolutePath())
+                .target(Target.LINUX_X86)
+                .serving(Serving.HTTP)
+                .deployments(deployment);
+
+        GradleBuild.generateGradleBuildFiles(gradleDir, c);
+
+        //Check for build.gradle.kts
+        File buildGradle = new File(gradleDir, "build.gradle.kts");
+        assertTrue(buildGradle.exists());
+
+        //Actually run the build
+        //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
+        GradleBuild.runGradleBuild(gradleDir, c);
+    }
 }
