@@ -88,7 +88,7 @@ public class TestImageToNDArray {
                                                     .channelLayout(rgb ? NDChannelLayout.RGB : NDChannelLayout.BGR)
                                                     .format(f)
                                                     .includeMinibatchDim(leadingDim)
-                                                    .normalization(new ImageNormalization(scaleNorm ? ImageNormalization.Type.SCALE : ImageNormalization.Type.NONE))
+                                                    .normalization(new ImageNormalization(scaleNorm ? ImageNormalization.Type.SCALE_01 : ImageNormalization.Type.NONE))
                                                     .build())
                                             .build())
                                     .build();
@@ -345,6 +345,12 @@ public class TestImageToNDArray {
                     expB = b;
                     break;
                 case SCALE:
+                    float f = 255/2.0f;
+                    expR = r / f - 1.0f;
+                    expG = g / f - 1.0f;
+                    expB = b / f - 1.0f;
+                    break;
+                case SCALE_01:
                     expR = r / 255f;
                     expG = g / 255f;
                     expB = b / 255f;
@@ -726,14 +732,14 @@ public class TestImageToNDArray {
                             assertEquals(3, l.size());
                             for (NDArray arr : l) {
                                 if (incMB) {
-                                    if(f == NDFormat.CHANNELS_FIRST){
-                                        assertArrayEquals(new long[]{1,3,oH, oW}, arr.shape());
+                                    if (f == NDFormat.CHANNELS_FIRST) {
+                                        assertArrayEquals(new long[]{1, 3, oH, oW}, arr.shape());
                                     } else {
-                                        assertArrayEquals(new long[]{1,oH, oW, 3}, arr.shape());
+                                        assertArrayEquals(new long[]{1, oH, oW, 3}, arr.shape());
                                     }
                                 } else {
-                                    if(f == NDFormat.CHANNELS_FIRST){
-                                        assertArrayEquals(new long[]{3,oH, oW}, arr.shape());
+                                    if (f == NDFormat.CHANNELS_FIRST) {
+                                        assertArrayEquals(new long[]{3, oH, oW}, arr.shape());
                                     } else {
                                         assertArrayEquals(new long[]{oH, oW, 3}, arr.shape());
                                     }
@@ -742,20 +748,37 @@ public class TestImageToNDArray {
 
                             List<NDArray> outExp = new ArrayList<>();
                             PipelineExecutor exec = pSingle.executor();
-                            for(Image i : inputImages){
+                            for (Image i : inputImages) {
                                 outExp.add(exec.exec(Data.singleton("images", i)).getNDArray("out"));
                             }
                             assertEquals(outExp, l);
                         } else {
-                            //Batch
+                            //Batch or first
                             assertEquals(ValueType.NDARRAY, out.type("out"));
                             NDArray arr = out.getNDArray("out");
                             PipelineExecutor exec = pSingle.executor();
 
-                            if(f == NDFormat.CHANNELS_FIRST){
-                                assertArrayEquals(new long[]{3, 3,oH, oW}, arr.shape());
+                            boolean first = lh == ImageToNDArrayConfig.ListHandling.FIRST;
+                            if(first){
+                                if (incMB) {
+                                    if (f == NDFormat.CHANNELS_FIRST) {
+                                        assertArrayEquals(new long[]{1, 3, oH, oW}, arr.shape());
+                                    } else {
+                                        assertArrayEquals(new long[]{1, oH, oW, 3}, arr.shape());
+                                    }
+                                } else {
+                                    if (f == NDFormat.CHANNELS_FIRST) {
+                                        assertArrayEquals(new long[]{3, oH, oW}, arr.shape());
+                                    } else {
+                                        assertArrayEquals(new long[]{oH, oW, 3}, arr.shape());
+                                    }
+                                }
                             } else {
-                                assertArrayEquals(new long[]{3, oH, oW, 3}, arr.shape());
+                                if (f == NDFormat.CHANNELS_FIRST) {
+                                    assertArrayEquals(new long[]{3, 3, oH, oW}, arr.shape());
+                                } else {
+                                    assertArrayEquals(new long[]{3, oH, oW, 3}, arr.shape());
+                                }
                             }
 
                             if(incMB){
@@ -765,14 +788,25 @@ public class TestImageToNDArray {
                                     float[][][][] f4a = exec.exec(Data.singleton("images", i)).getNDArray("out").getAs(float[][][][].class);
                                     boolean eq = Arrays.deepEquals(f4[idx++], f4a[0]);
                                     assertTrue(eq);
+
+                                    if(first)
+                                        break;;
                                 }
                             } else {
-                                float[][][][] f4 = arr.getAs(float[][][][].class);
-                                int idx = 0;
-                                for(Image i : inputImages){
-                                    float[][][] f3 = exec.exec(Data.singleton("images", i)).getNDArray("out").getAs(float[][][].class);
-                                    boolean eq = Arrays.deepEquals(f4[idx++], f3);
+                                if(first){
+                                    float[][][] f3 = arr.getAs(float[][][].class);
+                                    int idx = 0;
+                                    float[][][] f3_2 = exec.exec(Data.singleton("images", inputImages.get(0))).getNDArray("out").getAs(float[][][].class);
+                                    boolean eq = Arrays.deepEquals(f3, f3_2);
                                     assertTrue(eq);
+                                } else {
+                                    float[][][][] f4 = arr.getAs(float[][][][].class);
+                                    int idx = 0;
+                                    for (Image i : inputImages) {
+                                        float[][][] f3 = exec.exec(Data.singleton("images", i)).getNDArray("out").getAs(float[][][].class);
+                                        boolean eq = Arrays.deepEquals(f4[idx++], f3);
+                                        assertTrue(eq);
+                                    }
                                 }
                             }
                         }

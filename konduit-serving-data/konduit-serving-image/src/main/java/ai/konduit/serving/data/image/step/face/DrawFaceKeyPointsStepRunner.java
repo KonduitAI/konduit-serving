@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.face;
 
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
@@ -35,6 +36,7 @@ import java.util.List;
 import static ai.konduit.serving.data.image.step.face.CropUtil.accountForCrop;
 import static ai.konduit.serving.data.image.step.face.CropUtil.scaleIfRequired;
 
+@CanRun(DrawFaceKeyPointsStep.class)
 public class DrawFaceKeyPointsStepRunner implements PipelineStepRunner {
 
 
