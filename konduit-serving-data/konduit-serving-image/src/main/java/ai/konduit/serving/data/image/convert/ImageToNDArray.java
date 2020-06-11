@@ -101,6 +101,22 @@ public class ImageToNDArray {
 
     }
 
+    public static long[] getOutputShape(ImageToNDArrayConfig config){
+        int rank = config.includeMinibatchDim() ? 4 : 3;
+        long[] out = new long[rank];
+        out[0] = 1;
+        if(config.format() == NDFormat.CHANNELS_FIRST){
+            out[1] = config.channelLayout().numChannels();
+            out[2] = config.height();
+            out[3] = config.width();
+        } else {
+            out[1] = config.height();
+            out[2] = config.width();
+            out[3] = config.channelLayout().numChannels();
+        }
+        return out;
+    }
+
     protected static Pair<NDArray,BoundingBox> convert(Image image, ImageToNDArrayConfig config, boolean withMeta) {
         BoundingBox bbMeta = null;
 
@@ -298,8 +314,12 @@ public class ImageToNDArray {
         } else {
             switch (config.normalization().type()){
                 case SCALE:
-                    float scale = n.maxValue() == null ? 255.0f : n.maxValue().floatValue();
-                    f = (x,c) -> (x / scale);
+                    float scale = (n.maxValue() == null ? 255.0f : n.maxValue().floatValue()) / 2.0f;
+                    f = (x,c) -> (x / scale - 1.0f);
+                    break;
+                case SCALE_01:
+                    float scale01 = n.maxValue() == null ? 255.0f : n.maxValue().floatValue();
+                    f = (x,c) -> (x / scale01);
                     break;
                 case SUBTRACT_MEAN:
                     //TODO support grayscale

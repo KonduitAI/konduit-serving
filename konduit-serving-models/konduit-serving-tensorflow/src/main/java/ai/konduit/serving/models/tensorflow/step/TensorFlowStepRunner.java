@@ -37,6 +37,7 @@ import org.tensorflow.Tensor;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -105,7 +106,19 @@ public class TensorFlowStepRunner implements PipelineStepRunner {
             r.fetch(name, idx);
         }
 
-        List<Tensor<?>> l = r.run();
+        List<Tensor<?>> l;
+        try{
+            l = r.run();
+        } catch (Throwable t){
+            StringBuilder sb = new StringBuilder();
+            sb.append("TensorFlow exception in TensorFlowStep (" + name() + "). Input shapes:\n");
+            for(String s : step.getInputNames()){
+                NDArray arr = data.getNDArray(s);
+                sb.append(s).append(": ").append(Arrays.toString(arr.shape())).append("\n");
+            }
+            throw new RuntimeException(sb.toString(), t);
+        }
+
 
         Data out = Data.empty();
         for (int i = 0; i < outNames.size(); i++) {

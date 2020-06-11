@@ -63,7 +63,8 @@ import lombok.experimental.Accessors;
  *         and only when {@code List<Image>} is passed in instead of {@code Image}. This setting determines what the output
  *         should be. NONE: Error for {@code List<Image>} input (only single Images are allowed). BATCH: a single output
  *         NDArray is returned, with the images batched along dimension 0. LIST_OUT: A {@code List<NDArray>} is returned
- *         instead of a single {@code NDArray} - one entry for each entry in the input {@code List<Image>}.
+ *         instead of a single {@code NDArray} - one entry for each entry in the input {@code List<Image>}. FIRST:
+ *         the first bounding box only is returned as as single {@code NDArray} - the remainder are discarded/ignored.
  *     </li>
  * </ul>
  *
@@ -77,7 +78,7 @@ public class ImageToNDArrayConfig {
     /**
      * See {@link ImageToNDArrayConfig} - listHandling field
      */
-    public static enum ListHandling {NONE, BATCH, LIST_OUT}
+    public static enum ListHandling {NONE, BATCH, LIST_OUT, FIRST}
 
 
     private Integer height;

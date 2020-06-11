@@ -34,12 +34,12 @@ import java.util.List;
 import static ai.konduit.serving.data.image.step.face.CropUtil.accountForCrop;
 import static ai.konduit.serving.data.image.step.face.CropUtil.scaleIfRequired;
 
-public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
+public class DrawFaceKeyPointsStepRunner implements PipelineStepRunner {
 
 
-    protected final DrawFacialKeyPointsStep step;
+    protected final DrawFaceKeyPointsStep step;
 
-    public DrawFacialKeyPointsStepRunner(@NonNull DrawFacialKeyPointsStep step) {
+    public DrawFaceKeyPointsStepRunner(@NonNull DrawFaceKeyPointsStep step) {
         this.step = step;
     }
 
@@ -82,22 +82,23 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
                 Rect r = new Rect(x, y, w, h);
                 org.bytedeco.opencv.global.opencv_imgproc.rectangle(scaled, r, Scalar.GREEN, 2, 8, 0);
 
-
-//                landmarkArr = landmarkArr.mul(bb.x2() - bb.x1());
-                float width = (float) (bb.x2() - bb.x1());
+                int prod = landmarkArr.length * landmarkArr[0].length;
+                float[][] keypoints = new float[prod/2][2];
+                int pos = 0;
                 for(int i=0; i<landmarkArr.length; i++ ){
-                    for( int j=0; j<landmarkArr[i].length; j++ ){
-                        landmarkArr[i][j] *= width;
+                    for( int j=0; j<landmarkArr[0].length; j++ ){
+                        keypoints[pos/2][pos%2] = landmarkArr[i][j];
+                        pos++;
                     }
                 }
 
-//                float[][] marks = landmarkArr.toFloatMatrix();
-                float[][] marks = landmarkArr;
-                for (int row = 0; row < marks.length; row++) {
-                    double xp = (landmarkArr[row][0] + bb.x1()) * scaled.cols();
-                    double yp = (landmarkArr[row][1] + bb.y1()) * scaled.rows();
+                for (int i = 0; i < keypoints.length; i++) {
+                    //Currently, keypoints coordinates are specified in terms of the face bounding box.
+                    //We need to translate them to overall image pixels
 
-//                    Point point = new Point((int) ((landmarkArr.getRow(row).toFloatVector()[0] + bb.x1()) * scaled.cols()), (int) ((landmarkArr.getRow(row).toFloatVector()[1] + bb.y1()) * scaled.rows()));
+                    double xp = (bb.x1() + keypoints[i][0] * bb.width()) * img.width();
+                    double yp = (bb.y1() + keypoints[i][1] * bb.height()) * img.height();
+
                     Point point = new Point((int)xp, (int)yp);
 
                     org.bytedeco.opencv.global.opencv_imgproc.circle(scaled, point, 1, Scalar.RED);
@@ -109,7 +110,7 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
         }
         String outputName = step.outputName();
         if (outputName == null) {
-            outputName = DrawFacialKeyPointsStep.DEFAULT_OUTPUT_NAME;
+            outputName = DrawFaceKeyPointsStep.DEFAULT_OUTPUT_NAME;
         }
 
         return Data.singleton(step.image(), Image.create(scaled));
@@ -119,7 +120,6 @@ public class DrawFacialKeyPointsStepRunner implements PipelineStepRunner {
 
     private float[][] getDetectedMarks(NDArray landmark) {
         float[][] landmarkArr = landmark.getAs(float[][].class);
-//        return Nd4j.toFlattened(landmarkArr).reshape(-1, 2);
         return landmarkArr;
     }
 

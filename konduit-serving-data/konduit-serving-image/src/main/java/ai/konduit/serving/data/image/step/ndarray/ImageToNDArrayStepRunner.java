@@ -114,8 +114,16 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
                                 s + "\" is a List<Image> but ImageToNDArrayConfig.listHandling == ListHandling.NONE.\n" +
                                 "For List<Image> --> List<NDArray>, use ListHandling.LIST_OUT\n" +
                                 "For List<Image> --> NDArray, use ListHandling.BATCH (where arrays are batched along dimension 0");
+                    case FIRST:
+                        List<Image> imgList = data.getListImage(s);
+                        if(imgList.isEmpty()){
+                            empty(d, outNames.get(idx++));
+                        } else {
+                            NDArray array = ImageToNDArray.convert(data.getListImage(s).get(0), step.getConfig());
+                            d.put(outNames.get(idx++), array);
+                        }
+                        return d;
                     case BATCH:
-
                         batch = true;   //Fall through
                     case LIST_OUT:
                         List<Image> images = data.getListImage(s);
@@ -127,7 +135,11 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
                 }
 
                 if(batch){
-                    if(l.size() == 1){
+                    if(l.size() == 0) {
+                        //Return empty NDArray
+                        empty(d, outNames.get(idx++));
+                        continue;
+                    } else if(l.size() == 1){
                         d.put(outNames.get(idx++), l.get(0));
                     } else {
                         //Check that all have the same shape before combining
@@ -217,5 +229,16 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
         }
 
         return d;
+    }
+
+    private void empty(Data d, String outName){
+        long[] shape = ImageToNDArray.getOutputShape(step.getConfig());
+        if(shape.length == 3){
+            shape = new long[]{0, shape[0], shape[1], shape[2]};
+        } else {
+            shape[0] = 0;
+        }
+        SerializedNDArray arr = new SerializedNDArray(step.getConfig().dataType(), shape, ByteBuffer.allocate(0));
+        d.put(outName, NDArray.create(arr));
     }
 }

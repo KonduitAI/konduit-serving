@@ -26,7 +26,7 @@ import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
 import ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep;
-import ai.konduit.serving.data.image.step.face.DrawFacialKeyPointsStep;
+import ai.konduit.serving.data.image.step.face.DrawFaceKeyPointsStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
@@ -652,7 +652,7 @@ public class TestTensorFlowStep {
             //Pretrained model source:https://github.com/songhengyang/face_landmark_factory
 
             // keypoint model downloading
-            String fileUrl = "https://github.com/songhengyang/face_landmark_factory/raw/master/assets/frozen_inference_graph.pb";
+            String fileUrl = "https://github.com/songhengyang/face_landmark_factory/raw/master/model/facial_landmark_SqueezeNet.pb";
             File testDir = TestUtils.testResourcesStorageDir();
             File saveDir = new File(testDir, "konduit-serving-tensorflow/face-keypoints-detection");
             File keypoints_graph = new File(saveDir, "keypoints_detection_frozen_inference_graph.pb");
@@ -711,7 +711,7 @@ public class TestTensorFlowStep {
             GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
                     .outputName("img_bbox")
                     .keepOtherValues(true)
-                    .threshold(0.1)
+                    .threshold(0.5)
                     .build());
 
 
@@ -721,7 +721,6 @@ public class TestTensorFlowStep {
 
             GraphStep extractBBox = merged1.then("extracted_bbox", ExtractBoundingBoxStep.builder()
                     .imageName("image")
-                    .aspectRatio(1.0)
                     .bboxName("img_bbox")
                     .imageToNDArrayConfig(c)
                     .outputName("face_image_bbox")
@@ -733,14 +732,15 @@ public class TestTensorFlowStep {
 
             //Convert the face bounding boxes to NDArrays
             ImageToNDArrayConfig faceImageConfig = ImageToNDArrayConfig.builder()
-                    .height(128)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
-                    .width(128)   // size origin
+                    .height(128)
+                    .width(128)
                     .channelLayout(NDChannelLayout.RGB)
                     .includeMinibatchDim(true)
                     .format(NDFormat.CHANNELS_LAST)
                     .dataType(NDArrayType.UINT8)
-                    .normalization(new ImageNormalization(ImageNormalization.Type.SCALE))
-                    .listHandling(ImageToNDArrayConfig.ListHandling.BATCH)
+                    //Model expects "subtract mean" normalization
+                    .normalization(new ImageNormalization(ImageNormalization.Type.SUBTRACT_MEAN).meanRgb(new double[]{104.0, 177.0, 123.0}))
+                    .listHandling(ImageToNDArrayConfig.ListHandling.FIRST)
                     .build();
 
             GraphStep face2n  = extractBBox.then("FaceBBoxtoNDArray", ImageToNDArrayStep.builder()
@@ -763,7 +763,7 @@ public class TestTensorFlowStep {
 
 
             // Draw face keypoints on the image
-            GraphStep drawer = merged.then("keypoints-drawer", DrawFacialKeyPointsStep.builder()
+            GraphStep drawer = merged.then("keypoints-drawer", DrawFaceKeyPointsStep.builder()
                     .image("image")
                     .imageToNDArrayConfig(c)
                     .landmarkArray("logits/BiasAdd")

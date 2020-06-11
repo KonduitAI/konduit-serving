@@ -10,7 +10,7 @@ import org.nd4j.common.base.Preconditions;
 
 public class CropUtil {
 
-    public static Mat scaleIfRequired(Mat m, DrawFacialKeyPointsStep step){
+    public static Mat scaleIfRequired(Mat m, DrawFaceKeyPointsStep step){
         if(step.scale() != null && step.scale() != step.scale().NONE){
             boolean scaleRequired = false;
             int newH = 0;
@@ -95,6 +95,6 @@ public class CropUtil {
         double x2 = cropRegion.x1() + cropWidth * bbox.x2();
         double y1 = cropRegion.y1() + cropHeight * bbox.y1();
         double y2 = cropRegion.y1() + cropHeight * bbox.y2();
-        return BoundingBox.createXY(x1, x2, y1, y2, null, bbox.probability());
+        return BoundingBox.createXY(x1, x2, y1, y2, bbox.label(), bbox.probability());
     }
 }
