@@ -5,7 +5,7 @@ PROPOSED
 
 Proposed by: Alex Black (12/06/2020)
 
-Discussed with: 
+Discussed with: Paul
 
 ## Context
 
@@ -74,4 +74,12 @@ For example, two use cases supported by this design include:
 
 ## Discussion
 
+Discussion with Paul: 
+Spring MVC-style (i.e., annotations) is a possible (better?) approach for defining the path, consumes/produces, etc.  
+We also agree to mark it as experimental / "unstable API" - we'll see how this goes in practice, and maybe change the API,
+design or details after we've used it in practice in a few projects.
 
+An alternative to this approach is "embedded" Konduit Serving - i.e., instead of running custom endpoints in Konduit Serving,
+run Konduit Serving embedded within say a Spring Boot app. Note that this has (for the new API) been something that is planned
+to be supported (hence why konduit-serving-pipeline has the core pipeline abstraction, but nothing to do with serving, Vert.x,
+etc). This will still be an option in the future.
