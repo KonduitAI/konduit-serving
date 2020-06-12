@@ -30,14 +30,12 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.common.base.Preconditions;
-import org.tensorflow.Graph;
-import org.tensorflow.SavedModelBundle;
-import org.tensorflow.Session;
-import org.tensorflow.Tensor;
+import org.tensorflow.*;
 
 import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 @Slf4j
@@ -175,6 +173,12 @@ public class TensorFlowStepRunner implements PipelineStepRunner {
                 log.error("SavedModel loading exception:", t);
                 throw new IllegalStateException("Unable to load TensorFlow model as either a frozen model .pb or Savedmodel .pb", t);
             }
+        }
+
+        Iterator ops = graph.operations();
+        while(ops.hasNext()){
+            Operation o = (Operation) ops.next();
+            System.out.println(o.name() + ", " + o.type());
         }
 
         this.sess = new Session(graph);

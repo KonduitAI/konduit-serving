@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.models.tensorflow;
 
+import ai.konduit.serving.annotation.module.ModuleInfo;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.camera.step.capture.CameraFrameCaptureStep;
 import ai.konduit.serving.camera.step.capture.VideoFrameCaptureStep;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
@@ -800,6 +802,91 @@ public class TestTensorFlowStep {
 
         GraphPipeline p = b.build(show);
 
+
+        PipelineExecutor exec = p.executor();
+
+        Data in = Data.empty();
+        for (int i = 0; i < 1000; i++) {
+            exec.exec(in);
+        }
+    }
+
+    @Test
+    @Ignore   //To be run manually due to need for webcam and frame output
+    public void testFaceMaskDetection() throws Exception {
+        //Pretrained model source: https://github.com/AIZOOTech/FaceMaskDetection
+
+        String fileUrl = "https://github.com/AIZOOTech/FaceMaskDetection/raw/master/models/face_mask_detection.pb";
+        File testDir = TestUtils.testResourcesStorageDir();
+        File saveDir = new File(testDir, "konduit-serving-tensorflow/facemask-detection");
+        File f = new File(saveDir, "facemask_frozen_inference_graph.pb");
+
+        if (!f.exists()) {
+            log.info("Downloading model: {} -> {}", fileUrl, saveDir.getAbsolutePath());
+            FileUtils.copyURLToFile(new URL(fileUrl), f);
+            log.info("Download complete");
+        }
+
+
+
+        GraphBuilder b = new GraphBuilder();
+        GraphStep input = b.input();
+
+        //Capture frame from webcam
+        GraphStep camera = input.then("camera", CameraFrameCaptureStep.builder()
+                .camera(0)
+                .outputKey("image")
+                .build());
+
+        //Detect faces using mobilenet model: image -> NDArray -> TF -> SSD post processor
+        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+                .channelLayout(NDChannelLayout.RGB)
+                .includeMinibatchDim(true)
+                .format(NDFormat.CHANNELS_LAST)
+                .dataType(NDArrayType.UINT8)
+                .normalization(null)
+                .build();
+
+        GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
+                .config(c)
+                .keys(Collections.singletonList("image"))
+                .outputNames(Collections.singletonList("image_tensor")) //TODO varargs builder method
+                .build());
+
+        GraphStep tf = i2n.then("tf", builder()
+                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
+                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
+                .modelUri(f.toURI().toString())
+                .build());
+
+
+
+        //Post process SSD outputs to BoundingBox objects
+        GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
+                .outputName("img_bbox")
+                .build());
+
+        //Merge camera image with bounding boxes
+        GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
+
+        //Draw bounding boxes on the image
+        GraphStep drawer = merged.then("drawer", DrawBoundingBoxStep.builder()
+                .imageName("image")
+                .bboxName("img_bbox")
+                .lineThickness(2)
+                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
+                .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
+                .build());
+
+
+        //Show image in Java frame
+        GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
+                .displayName("person in mask")
+                .imageName("image")
+                .build());
+
+
+        GraphPipeline p = b.build(show);
 
         PipelineExecutor exec = p.executor();
 
