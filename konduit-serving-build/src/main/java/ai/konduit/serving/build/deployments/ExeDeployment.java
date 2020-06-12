@@ -26,7 +26,6 @@ import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Data

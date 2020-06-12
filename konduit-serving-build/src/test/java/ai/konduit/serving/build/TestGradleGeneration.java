@@ -163,12 +163,13 @@ public class TestGradleGeneration {
 
         File gradeDir = new File(dir, "gradle");
         File rpmDir = new File(dir, "rpm");
+        rpmDir.mkdir();
 
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
                 .serving(Serving.HTTP)
-                .deployments(new RpmDeployment().outputDir(rpmDir.getAbsolutePath()).archName("AMD").osName(Os.LINUX).rpmName("my.rpm"));
+                .deployments(new RpmDeployment().outputDir(rpmDir.getAbsolutePath()).archName(Architecture.ARM).osName(Os.LINUX).rpmName("my.rpm"));
 
         GradleBuild.generateGradleBuildFiles(gradeDir, c);
 
@@ -178,7 +179,7 @@ public class TestGradleGeneration {
         String buildGradleStr = FileUtils.readFileToString(buildGradle, StandardCharsets.UTF_8);
 
         GradleBuild.runGradleBuild(gradeDir, c);
-        File expFile = new File(rpmDir, "my-0.noarch.rpm");
+        File expFile = new File(rpmDir, "my-0.arm.rpm");
         assertTrue(expFile.exists());
     }
 
@@ -226,6 +227,7 @@ public class TestGradleGeneration {
 
         File gradeDir = new File(dir, "gradle");
         File exeDir = new File(dir, "exe");
+        exeDir.mkdir();
 
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())
@@ -265,7 +267,7 @@ public class TestGradleGeneration {
         File imageDir = new File(dir, "image");
 
         val deployment = new DockerDeployment(imageDir.getAbsolutePath());
-        deployment.setImageName("ks");
+        //deployment.setImageName("ks");
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
@@ -299,9 +301,7 @@ public class TestGradleGeneration {
 
         List<String> files = Collections.singletonList(jsonF.getAbsolutePath());
 
-        val deployment = new TarDeployment(archiveDir.getAbsolutePath());
-        deployment.setArchiveName("ks");
-        deployment.setFiles(files);
+        val deployment = new TarDeployment(archiveDir.getAbsolutePath()).archiveName("ks").files(files);
 
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())

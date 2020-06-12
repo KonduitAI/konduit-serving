@@ -42,8 +42,7 @@ public class DebDeployment implements Deployment, OsSpecific {
     private String outputDir;
     private String rpmName;
     private String version;
-    private String archName;
-    @Getter @Setter
+    private Architecture archName;
     private Os osName;
 
     public DebDeployment(String outputDir) {
@@ -102,7 +101,10 @@ public class DebDeployment implements Deployment, OsSpecific {
 
     @Override
     public List<String> gradleImports() {
-        return Collections.singletonList("org.redline_rpm.header.Os");
+        List<String> retVal = new ArrayList<>();
+        retVal.add("org.redline_rpm.header.Os");
+        retVal.add("org.redline_rpm.header.Architecture");
+        return retVal;
     }
 
     @Override
@@ -123,5 +125,12 @@ public class DebDeployment implements Deployment, OsSpecific {
         if (osName == null)
             return StringUtils.EMPTY;
         return "Os." + osName.getData();
+    }
+
+    @Override
+    public String archName() {
+        if (archName == null)
+            return StringUtils.EMPTY;
+        return "Architecture." + archName.getData();
     }
 }

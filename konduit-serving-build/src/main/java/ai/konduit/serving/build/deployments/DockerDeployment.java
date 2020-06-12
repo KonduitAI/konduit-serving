@@ -39,7 +39,6 @@ public class DockerDeployment implements Deployment {
     public static final String PROP_RPMNAME = "docker.name";
 
     private String outputDir;
-    @Setter
     private String imageName;
     private String version;
 

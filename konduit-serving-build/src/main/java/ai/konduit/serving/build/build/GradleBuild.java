@@ -36,8 +36,9 @@ import java.util.List;
 
 public class GradleBuild {
 
-    private static String createCopyTask(String taskName, String fromDir, String toDir, String fileMask) {
-        String built = (fromDir + File.separator + "build" + File.separator + "distributions").
+    private static String createCopyTask(String taskName, String fromDir, String toDir, String fileMask,
+                                         String pluginOutput) {
+        String built = (fromDir + File.separator + "build" + File.separator + pluginOutput).
                 replace("\\","\\\\");;
         String deployed = (toDir.replace("\\","\\\\"));
 
@@ -150,12 +151,12 @@ public class GradleBuild {
                 }
 
                 kts.append("\tpackageName = \"" + rpmName + "\"\n");
-                //kts.append("\tarch = \"" + ((RpmDeployment)deployment).archName() + "\"\n");
+                kts.append("\tsetArch( " + ((RpmDeployment)deployment).archName() + ")\n");
                 kts.append("\tos = " + ((RpmDeployment)deployment).osName() + "\n");
                 kts.append("}\n");
 
                 kts.append(createCopyTask("copyRpm", outputDir.getAbsolutePath(),
-                        ((RpmDeployment)deployment).outputDir(), "*.rpm"));
+                        ((RpmDeployment)deployment).outputDir(), "*.rpm", "distributions"));
             }
             else if (deployment instanceof DebDeployment) {
                 String rpmName = ((DebDeployment)deployment).rpmName();
@@ -165,12 +166,12 @@ public class GradleBuild {
                 }
 
                 kts.append("\tpackageName = \"" + rpmName + "\"\n");
-                //kts.append("\tarch = \"" + ((DebDeployment)deployment).archName() + "\"\n");
+                //kts.append("\tsetArch(" + ((DebDeployment)deployment).archName() + ")\n");
                 kts.append("\tos = " + ((DebDeployment)deployment).osName() + "\n");
                 kts.append("}").append("\n\n");
 
                 kts.append(createCopyTask("copyDeb", outputDir.getAbsolutePath(), ((DebDeployment)deployment).outputDir(),
-                        "*.deb"));
+                        "*.deb", "distributions"));
             } else if(deployment instanceof ClassPathDeployment){
                 addClassPathTask(kts, (ClassPathDeployment) deployment);
             }
@@ -185,7 +186,7 @@ public class GradleBuild {
                 kts.append("\tmainClassName = \"ai.konduit.serving.launcher.KonduitServingLauncher\"\n");
                 kts.append("}\n");
                 kts.append(createCopyTask("copyExe", outputDir.getAbsolutePath(), ((ExeDeployment)deployment).outputDir(),
-                        "*.exe"));
+                        "*.exe", "launch4j"));
             }
 
             else if (deployment instanceof DockerDeployment) {
@@ -195,9 +196,9 @@ public class GradleBuild {
                     "}\n");
             }
             else if (deployment instanceof TarDeployment) {
-                List<String> fromFiles = ((TarDeployment)deployment).getFiles();
+                List<String> fromFiles = ((TarDeployment)deployment).files();
                 if (fromFiles.size() > 0) {
-                    String rpmName = ((TarDeployment) deployment).getArchiveName();
+                    String rpmName = ((TarDeployment) deployment).archiveName();
                     kts.append("distributions {\n");
                     kts.append("\tmain {\n");
 
@@ -211,8 +212,8 @@ public class GradleBuild {
                     kts.append("\t}\n");
                     kts.append("}").append("\n\n");
 
-                    kts.append(createCopyTask("copyTar", outputDir.getAbsolutePath(), ((TarDeployment)deployment).getOutputDir(),
-                            "*.tar"));
+                    kts.append(createCopyTask("copyTar", outputDir.getAbsolutePath(), ((TarDeployment)deployment).outputDir(),
+                            "*.tar", "distributions"));
                 }
             }
         }

@@ -39,14 +39,9 @@ public class TarDeployment implements Deployment {
     public static final String PROP_OUTPUTDIR = "tar.outputdir";
     public static final String PROP_ARCHIVENAME = "tar.name";
 
-    @Getter
     private String outputDir;
-    @Setter
-    @Getter
     private String archiveName;
     private String version;
-    @Setter
-    @Getter
     private List<String> files;
 
     public TarDeployment(String outputDir) {
