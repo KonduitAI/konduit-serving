@@ -41,7 +41,6 @@ public class RpmDeployment implements Deployment, OsSpecific {
     private String outputDir;
     private String rpmName;
     private String version;
-    private String archName;
     private Os osName;
 
     public RpmDeployment(String outputDir) {
