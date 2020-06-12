@@ -843,31 +843,26 @@ public class TestTensorFlowStep {
                 .channelLayout(NDChannelLayout.RGB)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
-                .dataType(NDArrayType.UINT8)
+                .dataType(NDArrayType.FLOAT)
                 .normalization(null)
                 .build();
 
         GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
                 .config(c)
                 .keys(Collections.singletonList("image"))
-                .outputNames(Collections.singletonList("image_tensor")) //TODO varargs builder method
+                .outputNames(Collections.singletonList("data_1")) //TODO varargs builder method
                 .build());
 
         GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
+                .inputNames(Collections.singletonList("data_1"))      //TODO varargs builder method
+                .outputNames(Arrays.asList("cls_branch_concat_1/concat"))
                 .modelUri(f.toURI().toString())
                 .build());
 
 
+        // TODO: interpret output (may be mask coords etc) / write separate step nd draw bbox/segment
+        //  based on https://github.com/AIZOOTech/FaceMaskDetection/blob/master/tensorflow_infer.py#L30
 
-        //Post process SSD outputs to BoundingBox objects
-        GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
-                .outputName("img_bbox")
-                .build());
-
-        //Merge camera image with bounding boxes
-        GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
 
         //Draw bounding boxes on the image
         GraphStep drawer = merged.then("drawer", DrawBoundingBoxStep.builder()
