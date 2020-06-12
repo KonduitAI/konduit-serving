@@ -21,11 +21,8 @@ import ai.konduit.serving.build.build.GradlePlugin;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.config.DeploymentValidation;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.apache.commons.lang3.StringUtils;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.io.File;
@@ -34,7 +31,7 @@ import java.util.*;
 @Data
 @Accessors(fluent = true)
 @NoArgsConstructor
-public class DebDeployment implements Deployment, OsSpecific {
+public class DebDeployment implements Deployment {
     public static final String DEFAULT_EXE_NAME = "konduit-serving-deployment.deb";
     public static final String PROP_OUTPUTDIR = "deb.outputdir";
     public static final String PROP_RPMNAME = "deb.name";
@@ -42,8 +39,8 @@ public class DebDeployment implements Deployment, OsSpecific {
     private String outputDir;
     private String rpmName;
     private String version;
-    private Architecture archName;
-    private Os osName;
+    private String archName;
+    private String osName;
 
     public DebDeployment(String outputDir) {
         this(outputDir, "ks", Deployment.defaultVersion());
@@ -118,19 +115,5 @@ public class DebDeployment implements Deployment, OsSpecific {
         ret.add("buildDeb");
         ret.add("copyDeb");
         return ret;
-    }
-
-    @Override
-    public String osName() {
-        if (osName == null)
-            return StringUtils.EMPTY;
-        return "Os." + osName.getData();
-    }
-
-    @Override
-    public String archName() {
-        if (archName == null)
-            return StringUtils.EMPTY;
-        return "Architecture." + archName.getData();
     }
 }

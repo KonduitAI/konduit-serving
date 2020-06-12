@@ -166,11 +166,14 @@ public class TestGradleGeneration {
         File rpmDir = new File(dir, "rpm");
         rpmDir.mkdir();
 
+        String archStr = GradleBuild.getRpmDebArch(Target.LINUX_X86);
+        String osStr = GradleBuild.getRpmDebOs(Target.LINUX_X86);
+
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
                 .serving(Serving.HTTP)
-                .deployments(new RpmDeployment().outputDir(rpmDir.getAbsolutePath()).archName(Architecture.ARM).osName(Os.LINUX).rpmName("my.rpm"));
+                .deployments(new RpmDeployment().outputDir(rpmDir.getAbsolutePath()).archName(archStr).osName(osStr).rpmName("my.rpm"));
 
         GradleBuild.generateGradleBuildFiles(gradeDir, c);
 
@@ -180,10 +183,8 @@ public class TestGradleGeneration {
         String buildGradleStr = FileUtils.readFileToString(buildGradle, StandardCharsets.UTF_8);
         assertFalse(buildGradleStr.isEmpty());
 
-        String archStr = GradleBuild.getRpmDebArch(Target.LINUX_X86);
-
         GradleBuild.runGradleBuild(gradeDir, c);
-        File expFile = new File(rpmDir, "my-0.arm.rpm");
+        File expFile = new File(rpmDir, "my-0.x86_64.rpm");
         assertTrue(expFile.exists());
 
 
@@ -208,7 +209,9 @@ public class TestGradleGeneration {
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
                 .serving(Serving.HTTP)
-                .deployments(new DebDeployment().outputDir(targetDir.getAbsolutePath()).rpmName("my.deb").osName(Os.CYGWINNT));
+                .deployments(new DebDeployment().outputDir(targetDir.getAbsolutePath()).
+                        rpmName("my").
+                        osName(GradleBuild.getRpmDebOs(Target.LINUX_X86)));
 
         GradleBuild.generateGradleBuildFiles(gradeDir, c);
 

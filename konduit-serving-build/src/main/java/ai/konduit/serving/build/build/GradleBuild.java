@@ -272,15 +272,30 @@ public class GradleBuild {
             case x86:
             case x86_avx2:
             case x86_avx512:
-                return "X86_64";
+                return "Architecture.X86_64";
             case armhf:
-                return "ARM";
+                return "Architecture.ARM";
             case arm64:
-                return "AARCH64";
+                return "Architecture.AARCH64";
             case ppc64le:
-                return "PPC64";
+                return "Architecture.PPC64";
             default:
                 throw new RuntimeException("Unknown arch for target: " + t);
+        }
+    }
+
+    public static String getRpmDebOs(Target t){
+        //https://github.com/craigwblake/redline/blob/master/src/main/java/org/redline_rpm/header/Os.java
+        switch (t.os()){
+            case LINUX:
+                return "Os.LINUX";
+            case WINDOWS:
+                return "Os.CYGWINNT";
+            case MACOSX:
+                return "Os.MACOSX";
+            //case ANDROID:
+            default:
+                throw new RuntimeException("Unknown os for target: " + t);
         }
     }
 
