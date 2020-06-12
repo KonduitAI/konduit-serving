@@ -195,9 +195,9 @@ public class GradleBuild {
                     "}\n");
             }
             else if (deployment instanceof TarDeployment) {
-                List<String> fromFiles = ((TarDeployment)deployment).getFiles();
+                List<String> fromFiles = ((TarDeployment)deployment).files();
                 if (fromFiles.size() > 0) {
-                    String rpmName = ((TarDeployment) deployment).getArchiveName();
+                    String rpmName = ((TarDeployment) deployment).archiveName();
                     kts.append("distributions {\n");
                     kts.append("\tmain {\n");
 
@@ -211,7 +211,7 @@ public class GradleBuild {
                     kts.append("\t}\n");
                     kts.append("}").append("\n\n");
 
-                    kts.append(createCopyTask("copyTar", outputDir.getAbsolutePath(), ((TarDeployment)deployment).getOutputDir(),
+                    kts.append(createCopyTask("copyTar", outputDir.getAbsolutePath(), ((TarDeployment)deployment).outputDir(),
                             "*.tar"));
                 }
             }

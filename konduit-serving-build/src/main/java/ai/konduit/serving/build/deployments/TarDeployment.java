@@ -21,13 +21,12 @@ import ai.konduit.serving.build.build.GradlePlugin;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.config.DeploymentValidation;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.*;
+
 
 
 @Data
@@ -39,14 +38,9 @@ public class TarDeployment implements Deployment {
     public static final String PROP_OUTPUTDIR = "tar.outputdir";
     public static final String PROP_ARCHIVENAME = "tar.name";
 
-    @Getter
     private String outputDir;
-    @Setter
-    @Getter
     private String archiveName;
     private String version;
-    @Setter
-    @Getter
     private List<String> files;
 
     public TarDeployment(String outputDir) {

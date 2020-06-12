@@ -82,7 +82,7 @@ public class TestGradleGeneration {
         List<Dependency> deps = c.resolveDependencies();
         for(Dependency d : deps){
             String s = d.gavString();
-            //assertTrue(buildGradleStr.contains(s));
+            assertTrue(buildGradleStr.contains(s));
         }
 
         //Check that it includes the uber-jar component
@@ -265,7 +265,7 @@ public class TestGradleGeneration {
         File imageDir = new File(dir, "image");
 
         val deployment = new DockerDeployment(imageDir.getAbsolutePath());
-        deployment.setImageName("ks");
+        deployment.imageName("ks");
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
@@ -300,8 +300,8 @@ public class TestGradleGeneration {
         List<String> files = Collections.singletonList(jsonF.getAbsolutePath());
 
         val deployment = new TarDeployment(archiveDir.getAbsolutePath());
-        deployment.setArchiveName("ks");
-        deployment.setFiles(files);
+        deployment.archiveName("ks");
+        deployment.files(files);
 
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())

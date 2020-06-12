@@ -19,6 +19,7 @@
 package ai.konduit.serving.annotation.module;
 
 import ai.konduit.serving.annotation.AnnotationUtils;
+import ai.konduit.serving.annotation.runner.CanRun;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -46,8 +47,15 @@ public class RequiresDependenciesProcessor extends AbstractProcessor {
 
         if(env.processingOver()){
             if(moduleName == null){
+                Collection<? extends Element> c = env.getElementsAnnotatedWith(RequiresDependenciesAll.class);
+                List<TypeElement> types1 = ElementFilter.typesIn(c);
+                Collection<? extends Element> c2 = env.getElementsAnnotatedWith(RequiresDependenciesAny.class);
+                List<TypeElement> types2 = ElementFilter.typesIn(c2);
+                Collection<? extends Element> c3 = env.getElementsAnnotatedWith(InheritRequiredDependencies.class);
+                List<TypeElement> types3 = ElementFilter.typesIn(c3);
                 throw new IllegalStateException("No class in this module is annotated with @ModuleInfo - a class with " +
-                        "@ModuleInfo(\"your-module-name\" should be added to the module that has the @CanRun(...) annotation");
+                        "@ModuleInfo(\"your-module-name\") should be added to the module that has the @RequiresDependenciesAll or " +
+                        "@RequiresDependenciesAny or @InheritRequiredDependencies annotation: " + types1 + ", " + types2 + ", " + types3);
             }
             writeFile();
         } else {
