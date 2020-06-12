@@ -20,6 +20,7 @@ package ai.konduit.serving.build.build;
 
 import ai.konduit.serving.build.config.Config;
 import ai.konduit.serving.build.config.Deployment;
+import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.*;
 import org.apache.commons.io.FileUtils;
@@ -262,6 +263,24 @@ public class GradleBuild {
             connection.newBuild().setStandardOutput(System.out).setStandardError(System.err).forTasks(tasks.toArray(new String[0])).run();
         } finally {
             connection.close();
+        }
+    }
+
+    public static String getRpmDebArch(Target t){
+        //https://github.com/craigwblake/redline/blob/master/src/main/java/org/redline_rpm/header/Architecture.java
+        switch (t.arch()){
+            case x86:
+            case x86_avx2:
+            case x86_avx512:
+                return "X86_64";
+            case armhf:
+                return "ARM";
+            case arm64:
+                return "AARCH64";
+            case ppc64le:
+                return "PPC64";
+            default:
+                throw new RuntimeException("Unknown arch for target: " + t);
         }
     }
 

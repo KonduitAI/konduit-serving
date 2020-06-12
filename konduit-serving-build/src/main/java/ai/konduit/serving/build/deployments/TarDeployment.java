@@ -21,13 +21,12 @@ import ai.konduit.serving.build.build.GradlePlugin;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.config.DeploymentValidation;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.*;
+
 
 
 @Data

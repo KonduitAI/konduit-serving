@@ -38,9 +38,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-//@Ignore //TO be run manually, not part of CI (as it requires all modules to be installed first)
+@Ignore //TO be run manually, not part of CI (as it requires all modules to be installed first)
 public class TestGradleGeneration {
 
     @Rule
@@ -82,7 +83,7 @@ public class TestGradleGeneration {
         List<Dependency> deps = c.resolveDependencies();
         for(Dependency d : deps){
             String s = d.gavString();
-            //assertTrue(buildGradleStr.contains(s));
+            assertTrue(buildGradleStr.contains(s));
         }
 
         //Check that it includes the uber-jar component
@@ -177,10 +178,16 @@ public class TestGradleGeneration {
         File buildGradle = new File(gradeDir, "build.gradle.kts");
         assertTrue(buildGradle.exists());
         String buildGradleStr = FileUtils.readFileToString(buildGradle, StandardCharsets.UTF_8);
+        assertFalse(buildGradleStr.isEmpty());
+
+        String archStr = GradleBuild.getRpmDebArch(Target.LINUX_X86);
 
         GradleBuild.runGradleBuild(gradeDir, c);
         File expFile = new File(rpmDir, "my-0.arm.rpm");
         assertTrue(expFile.exists());
+
+
+        assertTrue(expFile.length() + " bytes", expFile.length() > 20_000_000);    //Uberjar with DL4J etc and all dependencies is hundreds of MB usually
     }
 
     @Test
@@ -212,6 +219,8 @@ public class TestGradleGeneration {
 
         File expFile = new File(targetDir, "my_0_all.deb");
         assertTrue(expFile.exists());
+
+        assertTrue(expFile.length() + " bytes", expFile.length() > 20_000_000);    //Uberjar with DL4J etc and all dependencies is hundreds of MB usually
     }
 
     @Test
@@ -222,6 +231,7 @@ public class TestGradleGeneration {
                 .build();
 
         File dir = testDir.newFolder();
+//        File dir = new File("C:/Temp/Gradle");
         File jsonF = new File(dir, "pipeline.json");
         FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
 
@@ -248,6 +258,8 @@ public class TestGradleGeneration {
         //Check output JAR exists
         File expFile = new File(exeDir, "my.exe");
         assertTrue(expFile.exists());
+
+        assertTrue(expFile.length() + " bytes", expFile.length() > 20_000_000);    //Uberjar with DL4J etc and all dependencies is hundreds of MB usually
     }
 
     // This test requires local docker running, so should be moved to integration tests suite when we have it.
@@ -260,6 +272,7 @@ public class TestGradleGeneration {
                 .build();
 
         File dir = testDir.newFolder();
+//        File dir = new File("C:/Temp/Gradle");
         File jsonF = new File(dir, "pipeline.json");
         FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
 
@@ -293,6 +306,7 @@ public class TestGradleGeneration {
                 .build();
 
         File dir = testDir.newFolder();
+//        File dir = new File("C:/Temp/Gradle");
         File jsonF = new File(dir, "pipeline.json");
         FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
 
@@ -320,5 +334,6 @@ public class TestGradleGeneration {
         GradleBuild.runGradleBuild(gradleDir, c);
         File expFile = new File(archiveDir, "ks.tar");
         assertTrue(expFile.exists());
+        assertTrue(expFile.length() + " bytes", expFile.length() > 20_000_000);    //Uberjar with DL4J etc and all dependencies is hundreds of MB usually
     }
 }

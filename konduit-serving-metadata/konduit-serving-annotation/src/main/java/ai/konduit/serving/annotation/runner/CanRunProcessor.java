@@ -52,9 +52,11 @@ public class CanRunProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
 
         if(env.processingOver()){
-            if(moduleName == null){
+            if(moduleName == null && !toWrite.isEmpty()){
+                Collection<? extends Element> c = env.getElementsAnnotatedWith(CanRun.class);
+                List<TypeElement> types = ElementFilter.typesIn(c);
                 throw new IllegalStateException("No class in this module is annotated with @ModuleInfo - a class with " +
-                        "@ModuleInfo(\"your-module-name\" should be added to the module that has the @CanRun(...) annotation");
+                        "@ModuleInfo(\"your-module-name\") should be added to the module that has the @CanRun(...) annotation: " + types + " - " + toWrite);
             }
             writeFile();
         } else {

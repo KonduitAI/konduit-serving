@@ -157,6 +157,12 @@ public class JData implements Data {
     }
 
     @Override
+    public Point getPoint(String key) throws ValueNotFoundException {
+        Value<Point> data = valueIfFound(key, ValueType.POINT);
+        return data.get();
+    }
+
+    @Override
     public List<Object> getList(String key, ValueType type) {
         Value<List<Object>> data = valueIfFound(key, ValueType.LIST);
         return data.get();
@@ -191,6 +197,11 @@ public class JData implements Data {
     @Override
     public List<Double> getListDouble(String key) {
         return listIfFound(key, ValueType.DOUBLE);
+    }
+
+    @Override
+    public List<Point> getListPoint(String key) {
+        return listIfFound(key, ValueType.POINT);
     }
 
     @Override
@@ -262,6 +273,12 @@ public class JData implements Data {
     }
 
     @Override
+    public void put(String key, Point data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new PointValue(data));
+    }
+
+    @Override
     public void put(String key, Data data) {
         if (!StringUtils.equals(key, Data.RESERVED_KEY_METADATA))
             Data.assertNotReservedKey(key);
@@ -319,6 +336,11 @@ public class JData implements Data {
     @Override
     public void putListBoundingBox(String key, List<BoundingBox> data) {
         dataMap.put(key, new ListValue(data, ValueType.BOUNDING_BOX));
+    }
+
+    @Override
+    public void putListPoint(String key, List<Point> data) {
+        dataMap.put(key, new ListValue(data, ValueType.POINT));
     }
 
     public void putList(String key, List<?> data, ValueType vt){
@@ -403,6 +425,8 @@ public class JData implements Data {
             instance.put(key, (Image)data);
         } else if(data instanceof BoundingBox){
             instance.put(key, (BoundingBox)data);
+        } else if(data instanceof Point){
+            instance.put(key, (Point)data);
         }
 //        else if (data instanceof Object) {
 //            instance.put(key, (Object)data);
@@ -434,6 +458,8 @@ public class JData implements Data {
             instance.putListBytes(key, (List<byte[]>) data);
         } else if(valueType == ValueType.BOUNDING_BOX){
             instance.putListBoundingBox(key, (List<BoundingBox>)data);
+        } else if(valueType == ValueType.POINT){
+            instance.putListPoint(key, (List<Point>)data);
         } else if (valueType == ValueType.LIST) {
             //TODO don't use JData - use Data interface
             instance.putList(key, data, valueType);
@@ -494,6 +520,11 @@ public class JData implements Data {
             return this;
         }
 
+        public DataBuilder add(String key, Point data){
+            instance.put(key, data);
+            return this;
+        }
+
         public DataBuilder addListString(String key, List<String> data) {
             instance.putListString(key, data);
             return this;
@@ -531,6 +562,11 @@ public class JData implements Data {
 
         public DataBuilder addListBoundingBox(String key, List<BoundingBox> data) {
             instance.putListBoundingBox(key, data);
+            return this;
+        }
+
+        public DataBuilder addListPoint(String key, List<Point> data) {
+            instance.putListPoint(key, data);
             return this;
         }
 

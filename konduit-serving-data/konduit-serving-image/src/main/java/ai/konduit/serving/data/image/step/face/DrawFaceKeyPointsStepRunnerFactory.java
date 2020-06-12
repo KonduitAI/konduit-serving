@@ -15,19 +15,23 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
-package ai.konduit.serving.pipeline.api.data;
 
-public enum ValueType {
-    //NOTE: some uses of .ordinal() in protobuf means that any new additions should be added at the end of the list
-    NDARRAY,
-    STRING,
-    BYTES,
-    IMAGE,
-    DOUBLE,
-    INT64,
-    BOOLEAN,
-    BOUNDING_BOX,
-    DATA,
-    LIST,
-    POINT
+package ai.konduit.serving.data.image.step.face;
+
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import org.nd4j.common.base.Preconditions;
+
+public class DrawFaceKeyPointsStepRunnerFactory implements PipelineStepRunnerFactory {
+    @Override
+    public boolean canRun(PipelineStep pipelineStep) {
+        return pipelineStep instanceof DrawFaceKeyPointsStep;
+    }
+
+    @Override
+    public PipelineStepRunner create(PipelineStep pipelineStep) {
+        Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
+        return new DrawFaceKeyPointsStepRunner((DrawFaceKeyPointsStep) pipelineStep);
+    }
 }

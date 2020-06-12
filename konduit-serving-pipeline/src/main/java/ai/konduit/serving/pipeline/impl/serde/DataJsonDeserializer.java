@@ -79,7 +79,7 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                     Pair<List<Object>, ValueType> p = deserializeList(jp, n2);
                     d.putList(s, p.getFirst(), p.getSecond());
                 } else if (n2.isObject()) {
-                    //Could be: Bytes, image, NDArray or Data
+                    //Could be: Bytes, image, NDArray, BoundingBox, Point or Data
                     if (n2.has(Data.RESERVED_KEY_BYTES_BASE64) || n2.has(Data.RESERVED_KEY_BYTES_ARRAY)) {
                         //byte[] stored in base64 or byte[] as JSON array
                         byte[] bytes = deserializeBytes(n2);
@@ -92,6 +92,8 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                         d.put(s, deserializeImage(n2));
                     } else if(n2.has(Data.RESERVED_KEY_BB_CY) || n2.has(Data.RESERVED_KEY_BB_X1)){
                         d.put(s, deserializeBB(n2));
+                    } else if(n2.has(Data.RESERVED_KEY_POINT_COORDS)){
+                        d.put(s, deserializePoint(n2));
                     } else {
                         //Must be data
                         Data dInner = deserialize(jp, n2);
@@ -161,6 +163,29 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
             double y2 = n2.get(Data.RESERVED_KEY_BB_Y2).doubleValue();
             return BoundingBox.createXY(x1, x2, y1, y2, label, prob);
         }
+    }
+
+    protected Point deserializePoint(JsonNode n2){
+        String label = null;
+        Double prob = null;
+        if(n2.has("label") ){
+            label = n2.get("label").textValue();
+        } else if(n2.has("@label")){
+            label = n2.get("@label").textValue();
+        }
+
+        if(n2.has("probability")){
+            prob = n2.get("probability").doubleValue();
+        } else if(n2.has("@probability")){
+            prob = n2.get("@probability").doubleValue();
+        }
+
+        ArrayNode n3 = (ArrayNode) n2.get(Data.RESERVED_KEY_POINT_COORDS);
+        double[] coords = new double[n3.size()];
+        for (int i = 0; i < n3.size(); i++) {
+            coords[i] = n3.get(i).asDouble();
+        }
+        return Point.create(coords, label, prob);
     }
 
     protected byte[] deserializeBytes(JsonNode n2){
@@ -248,6 +273,11 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                     list.add(deserializeBB(n.get(i)));
                 }
                 break;
+            case POINT:
+                for( int i=0; i<size; i++ ){
+                    list.add(deserializePoint(n.get(i)));
+                }
+                break;
             default:
                 throw new IllegalStateException("Unable to deserialize list with values of type: " + listType);
         }
@@ -266,7 +296,7 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
         } else if (n.isArray()){
             return ValueType.LIST;
         } else if (n.isObject()) {
-            //Could be: Bytes, image, NDArray or Data
+            //Could be: Bytes, image, NDArray, BoundingBox, Point or Data
             if (n.has(Data.RESERVED_KEY_BYTES_BASE64)) {
                 return ValueType.BYTES;
             } else if (n.has(Data.RESERVED_KEY_BYTES_ARRAY)) {
@@ -279,6 +309,8 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                 return ValueType.IMAGE;
             } else if(n.has(Data.RESERVED_KEY_BB_CX) || n.has(Data.RESERVED_KEY_BB_X1)){
                 return ValueType.BOUNDING_BOX;
+            } else if(n.has(Data.RESERVED_KEY_POINT_COORDS)){
+                return ValueType.POINT;
             } else {
                 //Must be data
                 return ValueType.DATA;
