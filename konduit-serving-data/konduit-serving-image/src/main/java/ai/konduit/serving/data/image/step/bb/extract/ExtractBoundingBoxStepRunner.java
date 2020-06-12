@@ -124,6 +124,12 @@ public class ExtractBoundingBoxStepRunner implements PipelineStepRunner {
             int y = (int)(y1 * img.rows());
             int h = (int) Math.round(bb.height() * img.rows());
             int w = (int)Math.round(bb.width() * img.cols());
+
+//            int x = (int)(x1 * img.cols()) - 30;
+//            int y = (int)(y1 * img.rows()) - 30;
+//            int h = (int) Math.round(bb.height() * img.rows()) + 60;
+//            int w = (int)Math.round(bb.width() * img.cols()) + 60;
+
             Rect r = new Rect(x, y, w, h);
             Mat m = img.apply(r);
 

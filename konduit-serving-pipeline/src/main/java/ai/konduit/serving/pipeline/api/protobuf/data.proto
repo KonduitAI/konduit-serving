@@ -17,6 +17,7 @@ message DataScheme {
         Image imValue = 9;
         BoundingBox boxValue = 10;
         DataMap metaData = 11;
+        Point pointValue = 14;
     }
     ValueType listType = 12;
     ValueType type = 13;
@@ -32,6 +33,7 @@ message DataScheme {
         BOUNDING_BOX = 7;
         DATA = 8;
         LIST = 9;
+        POINT = 10;
     }
 }
 
@@ -56,6 +58,9 @@ message NDArrayList {
 message BoundingBoxesList {
     repeated BoundingBox list = 1;
 }
+message PointList {
+    repeated Point list = 1;
+}
 message List {
     oneof list {
 	   StringList sList = 1;
@@ -65,6 +70,7 @@ message List {
 	   ImageList imList = 5;
 	   NDArrayList ndList = 6;
 	   BoundingBoxesList bboxList = 7;
+	   PointList pList = 8;
 	}
 }
 
@@ -120,3 +126,8 @@ message DataMap {
     map<string, DataScheme> metaData = 2;
 }
 
+message Point {
+    string label = 1;
+    double probability = 2;
+    repeated double coords = 3;
+}

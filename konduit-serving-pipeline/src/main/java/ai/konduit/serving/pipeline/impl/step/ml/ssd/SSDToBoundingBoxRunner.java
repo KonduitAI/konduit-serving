@@ -79,14 +79,34 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
                 double x2 = bArr[0][i][3];
                 double p = pArr[0][i];
 
+                if(p < threshold)
+                    continue;
+
+                if(step.aspectRatio() != null){
+                    double[] d = adjustAspect(x1, x2, y1, y2, step.aspectRatio());
+                    x1 = d[0];
+                    x2 = d[1];
+                    y1 = d[2];
+                    y2 = d[3];
+                }
+
+                if(step.scale() != null && step.scale() != 1.0){
+                    double s = step.scale();
+                    double cx = (x1+x2) / 2.0;
+                    double cy = (y1+y2) / 2.0;
+                    x1 = cx - (cx-x1) * s;
+                    x2 = cx + (x2-cx) * s;
+                    y1 = cy - (cy-y1) * s;
+                    y2 = cy + (y2-cy) * s;
+                }
+
 
                 float label = lArr[0][0];
                 if (step.classLabels.length > 0 && (int) label > step.classLabels.length) {
                     throw new ArrayIndexOutOfBoundsException(String.format("Predicted label index was %s but only %s labels were provided", (int) label, step.classLabels.length));
                 }
-                if (p >= threshold) {
-                    l.add(BoundingBox.createXY(x1, x2, y1, y2, !ArrayUtils.isEmpty(step.classLabels) ? step.classLabels[(int) label - 1] : "no label provided", p));
-                }
+
+                l.add(BoundingBox.createXY(x1, x2, y1, y2, !ArrayUtils.isEmpty(step.classLabels) ? step.classLabels[(int) label - 1] : "no label provided", p));
             }
 
             //TODO copy other data to output
@@ -116,9 +136,30 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
                 double y2 = bArr[0][i][2];
                 double x2 = bArr[0][i][3];
                 double p = pArr[0][i];
-                if (p >= threshold) {
-                    l.add(BoundingBox.createXY(x1, x2, y1, y2, null, p));
+
+                if(p < threshold)
+                    continue;
+
+                if(step.aspectRatio() != null){
+                    double[] d = adjustAspect(x1, x2, y1, y2, step.aspectRatio());
+                    x1 = d[0];
+                    x2 = d[1];
+                    y1 = d[2];
+                    y2 = d[3];
                 }
+
+
+                if(step.scale() != null && step.scale() != 1.0){
+                    double s = step.scale();
+                    double cx = (x1+x2) / 2.0;
+                    double cy = (y1+y2) / 2.0;
+                    x1 = cx - (cx-x1) * s;
+                    x2 = cx + (x2-cx) * s;
+                    y1 = cy - (cy-y1) * s;
+                    y2 = cy + (y2-cy) * s;
+                }
+
+                l.add(BoundingBox.createXY(x1, x2, y1, y2, null, p));
             }
 
             //TODO copy other data to output
@@ -138,6 +179,31 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
             }
 
             return d;
+        }
+    }
+
+    protected double[] adjustAspect(double x1, double x2, double y1, double y2, double aspect){
+        double w = (x2 - x1);
+        double h = (y2 - y1);
+        double currAspect = w / h;
+        if(currAspect == aspect){
+            return new double[]{x1, x2, y1, y2};
+        } else if(currAspect < aspect){
+            //Increase width
+            double newW = aspect * h;
+            double cx = (x1+x2)/2.0;
+            double x1a = cx - newW/2.0;
+            double x2a = cx + newW/2.0;
+            return new double[]{x1a, x2a, y1, y2};
+        } else if(currAspect > aspect){
+            //Increase height
+            double newH = w / aspect;
+            double cy = (y1+y2)/2.0;
+            double y1a = cy - newH/2.0;
+            double y2a = cy + newH/2.0;
+            return new double[]{x1, x2, y1a, y2a};
+        } else {
+            throw new RuntimeException("Invalid aspect ratios: current = " + currAspect + ", required = " + aspect);
         }
     }
 }

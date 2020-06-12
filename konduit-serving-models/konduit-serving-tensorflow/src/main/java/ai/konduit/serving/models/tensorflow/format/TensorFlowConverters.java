@@ -67,6 +67,7 @@ public class TensorFlowConverters {
         public Tensor<?> convert(SerializedNDArray from){
             long[] shape = from.getShape();
             Class<?> tfType = TensorFlowUtil.toTFType(from.getType());
+            from.getBuffer().rewind();
             Tensor<?> t = Tensor.create(tfType, shape, from.getBuffer());
             return t;
         }
