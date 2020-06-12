@@ -81,7 +81,7 @@ public class DebDeployment implements Deployment {
     public String outputString() {
         File outFile = new File(outputDir, rpmName);
         StringBuilder sb = new StringBuilder();
-        sb.append("EXE location:   ").append(outFile.getAbsolutePath()).append("\n");
+        sb.append("DEB location:   ").append(outFile.getAbsolutePath()).append("\n");
         String size;
         if(outFile.exists()){
             long bytes = outFile.length();
@@ -89,9 +89,9 @@ public class DebDeployment implements Deployment {
             double mb = bytes / bytesPerMB;
             size = String.format("%.2f", mb) + " MB";
         } else {
-            size = "<EXE not found>";
+            size = "<DEB not found>";
         }
-        sb.append("EXE size:       ").append(size);
+        sb.append("DEB size:       ").append(size);
 
         return sb.toString();
     }

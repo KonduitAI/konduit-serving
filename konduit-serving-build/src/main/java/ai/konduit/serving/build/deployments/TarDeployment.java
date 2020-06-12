@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+import java.io.File;
 import java.util.*;
 
 
@@ -80,7 +81,21 @@ public class TarDeployment implements Deployment {
 
     @Override
     public String outputString() {
-        return null;
+        File outFile = new File(outputDir, archiveName);
+        StringBuilder sb = new StringBuilder();
+        sb.append("TAR location:   ").append(outFile.getAbsolutePath()).append("\n");
+        String size;
+        if(outFile.exists()){
+            long bytes = outFile.length();
+            double bytesPerMB = 1024 * 1024;
+            double mb = bytes / bytesPerMB;
+            size = String.format("%.2f", mb) + " MB";
+        } else {
+            size = "<TAR not found>";
+        }
+        sb.append("TAR size:       ").append(size);
+
+        return sb.toString();
     }
 
     @Override

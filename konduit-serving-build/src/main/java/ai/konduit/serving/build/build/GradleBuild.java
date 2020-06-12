@@ -191,10 +191,18 @@ public class GradleBuild {
             }
 
             else if (deployment instanceof DockerDeployment) {
-                String escaped = dockerResource.getParent().replace("\\","\\\\");
-                kts.append("tasks.create(\"buildImage\", DockerBuildImage::class) {\n" +
-                        "\tinputDir.set(file(\"" + escaped + "\"))\n" +
-                    "}\n");
+                String escapedOutputDir = ((DockerDeployment)deployment).outputDir().replace("\\","\\\\");
+                String escaped = StringUtils.EMPTY;
+                if (dockerResource != null)
+                    escaped = dockerResource.getParent().replace("\\","\\\\");
+
+                kts.append("tasks.create(\"buildImage\", DockerBuildImage::class) {\n");
+                           //"\tdestinationDirectory.set(file(\"" + escapedOutputDir + "\"))\n");
+                if (StringUtils.isNotEmpty(escaped))
+                    kts.append("\tinputDir.set(file(\"" + escaped + "\"))\n");
+                else
+                    kts.append("\tval baseImage = FromInstruction(From(\"openjdk:8-jre\"))\n");
+                kts.append("}\n");
             }
             else if (deployment instanceof TarDeployment) {
                 List<String> fromFiles = ((TarDeployment)deployment).files();
