@@ -26,7 +26,8 @@ import java.util.List;
 
 /**
  * Endpoint represents a single custom HTTP endpoints, as part of a {@link HttpEndpoints} instance, as specified via
- * InferenceConfiguration.
+ * InferenceConfiguration.<br>
+ * <b>>NOTE</b: The API API for custom endpoints should be considered experimental and subject to change
  *
  * @author Alex Black
  */

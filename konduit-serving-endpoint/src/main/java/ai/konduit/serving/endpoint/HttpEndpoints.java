@@ -25,7 +25,8 @@ import java.util.List;
 
 /**
  * HttpEndpoint represents one or more custom HTTP endpoints, specified via InferenceConfiguration.
- * Returns a (possibly null/empty) list of endpoints for the given {@link Pipeline} and {@link PipelineExecutor}
+ * Returns a (possibly null/empty) list of endpoints for the given {@link Pipeline} and {@link PipelineExecutor}<br>
+ * <b>>NOTE</b: The API API for custom endpoints should be considered experimental and subject to change
  *
  * @author Alex Black
  */
