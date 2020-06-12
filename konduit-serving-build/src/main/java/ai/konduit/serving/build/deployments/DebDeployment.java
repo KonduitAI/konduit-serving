@@ -21,18 +21,20 @@ import ai.konduit.serving.build.build.GradlePlugin;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.config.DeploymentValidation;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Data
 @Accessors(fluent = true)
 @NoArgsConstructor
-public class DebDeployment implements Deployment {
+public class DebDeployment implements Deployment, OsSpecific {
     public static final String DEFAULT_EXE_NAME = "konduit-serving-deployment.deb";
     public static final String PROP_OUTPUTDIR = "deb.outputdir";
     public static final String PROP_RPMNAME = "deb.name";
@@ -41,10 +43,11 @@ public class DebDeployment implements Deployment {
     private String rpmName;
     private String version;
     private String archName;
-    private String osName;
+    @Getter @Setter
+    private Os osName;
 
     public DebDeployment(String outputDir) {
-        this(outputDir, "ks", defaultVersion());
+        this(outputDir, "ks", Deployment.defaultVersion());
     }
 
     public DebDeployment(@JsonProperty("outputDir") String outputDir, @JsonProperty("rpmName") String rpmName,
@@ -52,12 +55,6 @@ public class DebDeployment implements Deployment {
         this.outputDir = outputDir;
         this.rpmName = rpmName;
         this.version = version;
-    }
-
-    private static String defaultVersion(){
-        long time = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMDD-HHmmss.SSS");
-        return sdf.format(new Date(time));
     }
 
     @Override
@@ -115,6 +112,16 @@ public class DebDeployment implements Deployment {
 
     @Override
     public List<String> gradleTaskNames() {
-        return Collections.singletonList("buildDeb");
+        List<String> ret = new ArrayList<>();
+        ret.add("buildDeb");
+        ret.add("copyDeb");
+        return ret;
+    }
+
+    @Override
+    public String osName() {
+        if (osName == null)
+            return StringUtils.EMPTY;
+        return "Os." + osName.getData();
     }
 }

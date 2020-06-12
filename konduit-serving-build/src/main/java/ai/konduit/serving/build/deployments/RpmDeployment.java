@@ -23,6 +23,7 @@ import ai.konduit.serving.build.config.DeploymentValidation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.io.File;
@@ -32,7 +33,7 @@ import java.util.*;
 @Data
 @Accessors(fluent = true)
 @NoArgsConstructor
-public class RpmDeployment implements Deployment {
+public class RpmDeployment implements Deployment, OsSpecific {
     public static final String DEFAULT_EXE_NAME = "konduit-serving-deployment.rpm";
     public static final String PROP_OUTPUTDIR = "rpm.outputdir";
     public static final String PROP_RPMNAME = "rpm.name";
@@ -121,7 +122,10 @@ public class RpmDeployment implements Deployment {
         return ret;
     }
 
+    @Override
     public String osName() {
+        if (osName == null)
+            return StringUtils.EMPTY;
         return "Os." + osName.getData();
     }
 }

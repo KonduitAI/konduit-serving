@@ -42,7 +42,7 @@ public class ExeDeployment implements Deployment {
     private String version;
 
     public ExeDeployment(String outputDir) {
-        this(outputDir, "ks", defaultVersion());
+        this(outputDir, "ks", Deployment.defaultVersion());
     }
 
     public ExeDeployment(@JsonProperty("outputDir") String outputDir, @JsonProperty("exeName") String exeName,
@@ -50,12 +50,6 @@ public class ExeDeployment implements Deployment {
         this.outputDir = outputDir;
         this.exeName = exeName;
         this.version = version;
-    }
-
-    private static String defaultVersion(){
-        long time = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMDD-HHmmss.SSS");
-        return sdf.format(new Date(time));
     }
 
     @Override
@@ -113,6 +107,9 @@ public class ExeDeployment implements Deployment {
 
     @Override
     public List<String> gradleTaskNames() {
-        return Collections.singletonList("createExe");
+        List<String> ret = new ArrayList<>();
+        ret.add("createExe");
+        ret.add("copyExe");
+        return ret;
     }
 }

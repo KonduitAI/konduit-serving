@@ -36,6 +36,18 @@ import java.util.List;
 
 public class GradleBuild {
 
+    private static String createCopyTask(String taskName, String fromDir, String toDir, String fileMask) {
+        String built = (fromDir + File.separator + "build" + File.separator + "distributions").
+                replace("\\","\\\\");;
+        String deployed = (toDir.replace("\\","\\\\"));
+
+        String retVal =  "tasks.register<Copy>(\"" + taskName + "\") {\n" +
+                         "\t from(\""  + built + "\")\n" +
+                         "\t include(\"" + fileMask + "\")\n" +
+                         "\t into(\""  + deployed + "\")\n}\n";
+        return retVal;
+    }
+
     public static void generateGradleBuildFiles(File outputDir, Config config) throws IOException {
 
         //TODO We need a proper solution for this!
@@ -64,16 +76,6 @@ public class GradleBuild {
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
         StringBuilder kts = new StringBuilder();
-        /*kts.append("import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar\n");
-        kts.append("import edu.sc.seis.launch4j.tasks.DefaultLaunch4jTask\n");
-        kts.append("import org.redline_rpm.header.Os\n");
-        kts.append("plugins { \n" +
-                "\tid(\"java\") \n " +
-                "\tid(\"com.github.johnrengelman.shadow\") version \"2.0.4\"\n" +
-                "\tid(\"nebula.rpm\") version \"8.3.0\" \n" +
-                "\tid(\"nebula.deb\") version \"8.3.0\" \n" +
-                "\tid(\"nebula.ospackage\") version \"8.3.0\" \n" +
-                "\tid(\"edu.sc.seis.launch4j\") version \"2.4.6\"\n}\n");*/
 
         for(Deployment d : config.deployments()){
             List<String> imports = d.gradleImports();
@@ -83,7 +85,6 @@ public class GradleBuild {
                 }
             }
         }
-
 
         kts.append("plugins { java \n");
         for(Deployment d : config.deployments()){
@@ -124,7 +125,6 @@ public class GradleBuild {
             kts.append("}").append("\n");
         }
 
-
         List<Deployment> deployments = config.deployments();
         Preconditions.checkState(deployments != null, "No deployments (uberjar, docker, etc) were specified for the build");
 
@@ -151,20 +151,11 @@ public class GradleBuild {
 
                 kts.append("\tpackageName = \"" + rpmName + "\"\n");
                 //kts.append("\tarch = \"" + ((RpmDeployment)deployment).archName() + "\"\n");
-                //kts.append("\tos = \"" + ((RpmDeployment)deployment).osName() + "\"\n");
                 kts.append("\tos = " + ((RpmDeployment)deployment).osName() + "\n");
-                // String escaped = ((RpmDeployment)deployment).outputDir().replace("\\","\\\\");
-                //kts.append("\tdestinationDirectory.set(file(\"" + escaped + "\"))\n");
                 kts.append("}\n");
 
-                String built = (outputDir + File.separator + "build" + File.separator + "distributions" + File.separator + rpmName).
-                        replace("\\","\\\\");;
-                String deployed = (((RpmDeployment)deployment).outputDir() + File.separator + rpmName).
-                        replace("\\","\\\\");
-
-                kts.append("tasks.register<Copy>(\"copyRpm\") {\n");
-                kts.append("\t from(\""  + built + "\")\n");
-                kts.append("\t into(\""  + deployed + "\")\n}\n");
+                kts.append(createCopyTask("copyRpm", outputDir.getAbsolutePath(),
+                        ((RpmDeployment)deployment).outputDir(), "*.rpm"));
             }
             else if (deployment instanceof DebDeployment) {
                 String rpmName = ((DebDeployment)deployment).rpmName();
@@ -174,13 +165,12 @@ public class GradleBuild {
                 }
 
                 kts.append("\tpackageName = \"" + rpmName + "\"\n");
-                /*kts.append("arch = \"" + ((DebDeployment)deployment).archName() + "\"\n");
-                kts.append("os = \"" + ((DebDeployment)deployment).osName() + "\"\n");
-                String escaped = ((DebDeployment)deployment).outputDir().replace("\\","\\\\");
-                kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
-                kts.append("mergeServiceFiles()\n");  //For service loader files
-                kts.append("}").append("\n");*/
+                //kts.append("\tarch = \"" + ((DebDeployment)deployment).archName() + "\"\n");
+                kts.append("\tos = " + ((DebDeployment)deployment).osName() + "\n");
                 kts.append("}").append("\n\n");
+
+                kts.append(createCopyTask("copyDeb", outputDir.getAbsolutePath(), ((DebDeployment)deployment).outputDir(),
+                        "*.deb"));
             } else if(deployment instanceof ClassPathDeployment){
                 addClassPathTask(kts, (ClassPathDeployment) deployment);
             }
@@ -190,15 +180,14 @@ public class GradleBuild {
                 if(exeName.endsWith(".exe")){
                     exeName = exeName.substring(0, exeName.length()-4);
                 }
-
                 kts.append("\toutfile = \"" + exeName + ".exe\"\n");
-                String escaped = ((ExeDeployment)deployment).outputDir().replace("\\","\\\\");
-                //kts.append("outputDir = \"" + escaped + "\")\n");
                 //kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
                 kts.append("\tmainClassName = \"ai.konduit.serving.launcher.KonduitServingLauncher\"\n");
-                //kts.append("mergeServiceFiles()\n");  //For service loader files
                 kts.append("}\n");
+                kts.append(createCopyTask("copyExe", outputDir.getAbsolutePath(), ((ExeDeployment)deployment).outputDir(),
+                        "*.exe"));
             }
+
             else if (deployment instanceof DockerDeployment) {
                 String escaped = dockerResource.getParent().replace("\\","\\\\");
                 kts.append("tasks.create(\"buildImage\", DockerBuildImage::class) {\n" +
@@ -210,9 +199,6 @@ public class GradleBuild {
                 if (fromFiles.size() > 0) {
                     String rpmName = ((TarDeployment) deployment).getArchiveName();
                     kts.append("distributions {\n");
-                    //String escaped = ((TarDeployment)deployment).getOutputDir().replace("\\","\\\\");
-                    //kts.append("\tdestinationDirectory.set(file(\"" + escaped + "\"))\n");
-                    //kts.append("tasks.withType<ShadowJar> {\n");
                     kts.append("\tmain {\n");
 
                     kts.append("\t\tdistributionBaseName.set( \"" + rpmName + "\")\n");
@@ -222,9 +208,11 @@ public class GradleBuild {
                         kts.append("\t\t\tfrom(\"" + escaped + "\")\n");
                     }
                     kts.append("\t\t }\n");
-                    //kts.append("mergeServiceFiles()\n");  //For service loader files
                     kts.append("\t}\n");
                     kts.append("}").append("\n\n");
+
+                    kts.append(createCopyTask("copyTar", outputDir.getAbsolutePath(), ((TarDeployment)deployment).getOutputDir(),
+                            "*.tar"));
                 }
             }
         }

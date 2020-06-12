@@ -162,13 +162,13 @@ public class TestGradleGeneration {
         FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
 
         File gradeDir = new File(dir, "gradle");
-        File uberJarDir = new File(dir, "rpm");
+        File rpmDir = new File(dir, "rpm");
 
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
                 .serving(Serving.HTTP)
-                .deployments(new RpmDeployment().outputDir(uberJarDir.getAbsolutePath()).archName("AMD").osName(Os.LINUX).rpmName("my.rpm"));
+                .deployments(new RpmDeployment().outputDir(rpmDir.getAbsolutePath()).archName("AMD").osName(Os.LINUX).rpmName("my.rpm"));
 
         GradleBuild.generateGradleBuildFiles(gradeDir, c);
 
@@ -178,7 +178,7 @@ public class TestGradleGeneration {
         String buildGradleStr = FileUtils.readFileToString(buildGradle, StandardCharsets.UTF_8);
 
         GradleBuild.runGradleBuild(gradeDir, c);
-        File expFile = new File(gradeDir + File.separator + "build" + File.separator + "distributions", "my-0.noarch.rpm");
+        File expFile = new File(rpmDir, "my-0.noarch.rpm");
         assertTrue(expFile.exists());
     }
 
@@ -194,13 +194,13 @@ public class TestGradleGeneration {
         FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
 
         File gradeDir = new File(dir, "gradle");
-        File uberJarDir = new File(dir, "deb");
+        File targetDir = new File(dir, "deb");
 
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
                 .serving(Serving.HTTP)
-                .deployments(new DebDeployment().outputDir(uberJarDir.getAbsolutePath()).rpmName("my.deb"));
+                .deployments(new DebDeployment().outputDir(targetDir.getAbsolutePath()).rpmName("my.deb").osName(Os.CYGWINNT));
 
         GradleBuild.generateGradleBuildFiles(gradeDir, c);
 
@@ -209,7 +209,7 @@ public class TestGradleGeneration {
 
         GradleBuild.runGradleBuild(gradeDir, c);
 
-        File expFile = new File(gradeDir + File.separator + "build" + File.separator + "distributions", "my_0_all.deb");
+        File expFile = new File(targetDir, "my_0_all.deb");
         assertTrue(expFile.exists());
     }
 
@@ -225,13 +225,13 @@ public class TestGradleGeneration {
         FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
 
         File gradeDir = new File(dir, "gradle");
-        File uberJarDir = new File(dir, "exe");
+        File exeDir = new File(dir, "exe");
 
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
                 .serving(Serving.HTTP)
-                .deployments(new ExeDeployment().outputDir(uberJarDir.getAbsolutePath()).exeName("my.exe"));
+                .deployments(new ExeDeployment().outputDir(exeDir.getAbsolutePath()).exeName("my.exe"));
 
         GradleBuild.generateGradleBuildFiles(gradeDir, c);
 
@@ -244,7 +244,7 @@ public class TestGradleGeneration {
         GradleBuild.runGradleBuild(gradeDir, c);
 
         //Check output JAR exists
-        File expFile = new File(gradeDir + File.separator + "build" + File.separator + "launch4j", "my.exe");
+        File expFile = new File(exeDir, "my.exe");
         assertTrue(expFile.exists());
     }
 
@@ -318,7 +318,7 @@ public class TestGradleGeneration {
         //Actually run the build
         //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
         GradleBuild.runGradleBuild(gradleDir, c);
-        File expFile = new File(gradleDir + File.separator + "build" + File.separator + "distributions", "ks.tar");
+        File expFile = new File(archiveDir, "ks.tar");
         assertTrue(expFile.exists());
     }
 }
