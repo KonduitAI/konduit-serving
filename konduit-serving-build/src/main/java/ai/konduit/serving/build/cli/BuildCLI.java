@@ -87,6 +87,10 @@ public class BuildCLI {
             validateValueWith = CLIValidators.ServerTypeValidator.class)
     private List<String> serverTypes = Arrays.asList(HTTP, GRPC);
 
+    @Parameter(names = {"-ad", "--additionalDependencies"},
+            description = "Additional dependencies to include, in GAV(C) format: \"group_id:artifact_id:version\" / \"group_id:artifact_id:version:classifier\"",
+            validateValueWith = CLIValidators.AdditionalDependenciesValidator.class)
+    private List<String> additionalDependencies;
 
     public static void main(String... args) throws Exception {
         new BuildCLI().exec(args);
@@ -111,6 +115,9 @@ public class BuildCLI {
         }
         System.out.println(padRight("Server type(s):", ' ', keyWidth) + String.join(", ", serverTypes));
         System.out.println(padRight("Deployment type(s):", ' ', keyWidth) + String.join(", ", deploymentTypes));
+        if(additionalDependencies != null){
+            System.out.println(padRight("Additional dependencies:", ' ', keyWidth) + String.join(", ", additionalDependencies));
+        }
         System.out.println("\n");
 
         List<Deployment> deployments = parseDeployments();
@@ -155,7 +162,8 @@ public class BuildCLI {
                 .pipelinePath(pipeline)
                 .target(t)
                 .deployments(deployments)
-                .serving(serving);
+                .serving(serving)
+                .additionalDependencies(additionalDependencies);
 
         int width2 = 36;
         if(pipeline != null){
