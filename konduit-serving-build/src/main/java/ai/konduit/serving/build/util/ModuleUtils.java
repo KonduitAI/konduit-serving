@@ -72,6 +72,9 @@ public class ModuleUtils {
                     Map<String,Object> m = (Map<String,Object>)o;
                     String jsonType = (String) m.get("@type");
                     Module mod = moduleForJsonType(jsonType);
+                    if(mod == null)
+                        continue;
+
                     String runnerClass = null;      //TODO
 
                     String name = "";   //TODO
@@ -97,9 +100,19 @@ public class ModuleUtils {
         Preconditions.checkState(map.containsKey(jsonType), "No JSON subtype known for: %s", jsonType);
 
         List<RunnerInfo> l = map.get(jsonType);
+        if(l == null || l.isEmpty()){
+            log.warn("Failed to determine runner for JSON type {} - class represents custom functionality, or missing @CanRun annotation on the runner?", jsonType);
+            return null;
+        }
+
         if(l.size() > 1){
             log.warn("More than 1 runner available for JSON type {} - returning first", jsonType);
         }
+        if (l.get(0) == null) {
+            log.warn("Failed to determine runner for JSON type {} - class represents custom functionality, or missing @CanRun annotation on the runner?", jsonType);
+            return null;
+        }
+
         return l.get(0).module();
     }
 

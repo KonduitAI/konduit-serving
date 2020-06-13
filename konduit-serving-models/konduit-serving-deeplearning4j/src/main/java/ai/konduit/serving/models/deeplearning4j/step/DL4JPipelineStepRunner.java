@@ -41,8 +41,8 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
-@CanRun(DL4JModelPipelineStep.class)
 @Slf4j
+@CanRun({DL4JModelPipelineStep.class, KerasModelStep.class})
 public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     public static final String DEFAULT_OUT_NAME_SINGLE = "default";

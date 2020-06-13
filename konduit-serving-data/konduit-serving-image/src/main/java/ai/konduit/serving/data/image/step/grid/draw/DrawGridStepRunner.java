@@ -40,7 +40,7 @@ import org.nd4j.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 
-@CanRun(DrawGridStep.class)
+@CanRun({DrawGridStep.class, DrawFixedGridStep.class})
 public class DrawGridStepRunner implements PipelineStepRunner {
 
     protected final DrawGridStep step;
