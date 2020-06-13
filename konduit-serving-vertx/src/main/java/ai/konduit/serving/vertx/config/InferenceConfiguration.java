@@ -27,6 +27,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Builder
@@ -40,6 +41,8 @@ public class InferenceConfiguration implements Serializable, TextConfig {
     private int port = 0;
     @Builder.Default
     private ServerProtocol protocol = ServerProtocol.HTTP;
+
+    private List<String> customEndpoints;
 
     private Pipeline pipeline;
 
