@@ -26,6 +26,7 @@ import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.dependencies.DependencyRequirement;
 import ai.konduit.serving.build.dependencies.ModuleRequirements;
+import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import com.beust.jcommander.*;
 import lombok.extern.slf4j.Slf4j;
@@ -91,6 +92,16 @@ public class BuildCLI {
             description = "Additional dependencies to include, in GAV(C) format: \"group_id:artifact_id:version\" / \"group_id:artifact_id:version:classifier\"",
             validateValueWith = CLIValidators.AdditionalDependenciesValidator.class)
     private List<String> additionalDependencies;
+
+    @Parameter(names = {"-c", "--config"},
+            description = "Configuration for the deployment types specified via -dt/--deploymentType.\n" +
+                    "For example, \"-c jar.outputdir=/some/dir jar.name=my.jar\" etc.\n" +
+                    "Configuration keys:\n" +
+                    UberJarDeployment.CLI_KEYS + "\n" +
+                    ClassPathDeployment.CLI_KEYS + "\n",
+            variableArity = true,
+            validateValueWith = CLIValidators.ConfigValidator.class)
+    private List<String> config;
 
     public static void main(String... args) throws Exception {
         new BuildCLI().exec(args);
@@ -164,6 +175,18 @@ public class BuildCLI {
                 .deployments(deployments)
                 .serving(serving)
                 .additionalDependencies(additionalDependencies);
+
+        if(config != null){
+            Map<String,String> props = new HashMap<>();
+            for(String s : config){
+                String[] split = s.split("=");
+                props.put(split[0], split[1]);
+            }
+            for(Deployment d : deployments){
+                d.fromProperties(props);
+            }
+        }
+
 
         int width2 = 36;
         if(pipeline != null){
