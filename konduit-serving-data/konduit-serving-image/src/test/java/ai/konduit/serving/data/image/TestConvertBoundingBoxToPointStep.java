@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.data.image;
 
-import ai.konduit.serving.data.image.step.bb.point.ConvertBoundingBoxToPointStep;
+import ai.konduit.serving.data.image.step.point.convert.ConvertBoundingBoxToPointStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Point;
@@ -30,7 +30,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static ai.konduit.serving.data.image.step.bb.point.ConvertBoundingBoxToPointStep.ConversionMethod.*;
+import static ai.konduit.serving.data.image.step.point.convert.ConvertBoundingBoxToPointStep.ConversionMethod.*;
 import static org.junit.Assert.assertEquals;
 
 public class TestConvertBoundingBoxToPointStep {
