@@ -176,8 +176,7 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>${maven-shade-plugin.version}</version>
                 <configuration>
-                    <shadedArtifactAttached>true</shadedArtifactAttached>
-                    <shadedClassifierName>${spin.version}-${javacpp.platform}-${chip}</shadedClassifierName>
+                    <shadedArtifactAttached>false</shadedArtifactAttached>
                     <createDependencyReducedPom>true</createDependencyReducedPom>
                     <filters>
                         <filter>

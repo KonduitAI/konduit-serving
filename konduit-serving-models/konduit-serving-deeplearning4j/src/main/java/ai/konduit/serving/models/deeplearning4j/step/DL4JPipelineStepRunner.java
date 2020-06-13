@@ -116,19 +116,15 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     protected static File getFile(String uri) {
         Preconditions.checkState(uri != null && !uri.isEmpty(), "No model URI was provided (model URI was null or empty)");
-        URI u = null;
-        try {
-            u = URI.create(uri);
-        } catch (IllegalArgumentException e) {
-            try {
-                u = new File(uri).toURI();
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
+
+        File f;
+        if(uri.startsWith("file:/")){
+            f = new File(URI.create(uri));
+        } else {
+            f = new File(uri);
         }
 
-        File f = new File(uri);
-        Preconditions.checkState(f.exists(), "No model file exists at URI: %s", u);
+        Preconditions.checkState(f.exists(), "No model file exists at URI: %s", uri);
         return f;
     }
 
