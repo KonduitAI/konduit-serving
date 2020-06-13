@@ -1,7 +1,7 @@
 # Custom REST Endpoints
 
 ## Status
-PROPOSED
+ACCEPTED
 
 Proposed by: Alex Black (12/06/2020)
 
@@ -25,7 +25,7 @@ Additionally, for developing real apps we might need to (for example) provide a 
 endpoint, etc that hosts an actual HTML page the user can view and interact with. 
  
 
-## Proposal
+## Decision
 
 This proposal suggests the addition of custom endpoint functionality for Konduit Serving.
 
