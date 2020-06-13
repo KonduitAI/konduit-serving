@@ -169,7 +169,7 @@ public class CLIValidators {
                 String[] split = s.split("=");
                 if(split.length != 2){
                     throw new ParameterException("Invalid config setting: Configuration for deployments " +
-                            "be specified in the format \"key=value\". Got " + value);
+                            "be specified in the format \"key=value\". Got " +  "[\"" + String.join("\", \"", value + "\"]"));
                 }
             }
         }
