@@ -32,6 +32,11 @@ class Data(object):
     @staticmethod
     def _check_type(item):
         atomic_types = (str, int, float, bool, bytes, memoryview, bytearray, Data, BoundingBox, np.ndarray)
+        def _type(obj):
+            tp = type(obj)
+            if tp in (bytearray, bytes):
+                return memoryview
+            return tp
         if __PIL_INSTALLED__:
             atomic_types += (PIL.Image.Image,)
         if isinstance(item, atomic_types):
@@ -39,7 +44,7 @@ class Data(object):
         elif isinstance(item, (list, tuple)):
             if not item:
                 raise Exception("Empty list not allowed.")
-            if len(set(map(type, item))) > 1:
+            if len(set(map(_type, item))) > 1:
                 raise Exception("All items in list should have same type.")
             subitem = item[0]
             if isinstance(subitem, atomic_types):
@@ -54,6 +59,18 @@ class Data(object):
             types_str = ', '.join([tp.__name__ for tp in atomic_types])
             raise Exception("Unsupported type: " + type(item).__name__ + ". Supported types are: " + types_str + ".")
 
+    @staticmethod
+    def _convert_to_memview(ls):
+        out = []
+        for x in ls:
+            if isinstance(x, (list, tuple)):
+                out.append(Data._convert_to_memview(x))
+            elif isinstance(x, (bytearray, bytes)):
+                out.append(memoryview(x))
+            else:
+                out.append(x)
+        return out
+
     def __init__(self):
         self.map = {}
         self.meta = None
@@ -63,6 +80,8 @@ class Data(object):
         Data._check_type(value)
         if isinstance(value, (bytes, bytearray)):
             value = memoryview(value)
+        elif isinstance(value, (list, tuple)):
+            value = Data._convert_to_memview(value)
         self.map[key] = value
 
     def __getitem__(self, key):
