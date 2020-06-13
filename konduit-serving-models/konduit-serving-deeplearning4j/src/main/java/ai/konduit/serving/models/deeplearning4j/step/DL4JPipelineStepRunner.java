@@ -127,7 +127,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
             }
         }
 
-        File f = new File(u);
+        File f = new File(uri);
         Preconditions.checkState(f.exists(), "No model file exists at URI: %s", u);
         return f;
     }
@@ -243,7 +243,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
         String key = data.keys().get(0);
         NDArray array = data.getNDArray(key);
 
-        INDArray out = (INDArray) array.get();          //TOOD NO CAST
+        INDArray out = array.getAs(INDArray.class);          //TOOD NO CAST
         return out;
     }
 }

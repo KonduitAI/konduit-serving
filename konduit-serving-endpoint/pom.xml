@@ -34,13 +34,11 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web</artifactId>
             <version>${vertx-stack.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-pipeline</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
