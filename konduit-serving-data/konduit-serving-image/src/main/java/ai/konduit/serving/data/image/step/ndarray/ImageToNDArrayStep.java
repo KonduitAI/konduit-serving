@@ -19,10 +19,12 @@
 package ai.konduit.serving.data.image.step.ndarray;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
@@ -57,6 +59,7 @@ import java.util.List;
  */
 @Builder
 @Data
+@Accessors(fluent = true)
 @JsonName("IMAGE_TO_NDARRAY")
 public class ImageToNDArrayStep implements PipelineStep {
 
@@ -85,5 +88,12 @@ public class ImageToNDArrayStep implements PipelineStep {
         this.keepOtherValues = keepOtherValues;
         this.metadata = metadata;
         this.metadataKey = metadataKey;
+    }
+
+    public ImageToNDArrayStep(){
+        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
+        //Without setting defaults here again like this, the fields would actually be null or 0 etc
+        keepOtherValues = true;
+        metadataKey = DEFAULT_METADATA_KEY;
     }
 }

@@ -153,10 +153,10 @@ public class DrawGridStepRunner implements PipelineStepRunner {
         int gridThickness;
         if(fixed){
             gridColor = fStep.gridColor() == null ? borderColor : ColorUtil.stringToColor(fStep.gridColor());
-            gridThickness = fStep.gridThickness();
+            gridThickness = fStep.gridThickness() == null ? borderThickness : fStep.gridThickness();
         } else {
             gridColor = step.gridColor() == null ? borderColor : ColorUtil.stringToColor(step.gridColor());
-            gridThickness = step.gridThickness();
+            gridThickness = step.gridThickness() == null ? borderThickness : step.gridThickness();
         }
 
         if(gridThickness <= 0)
