@@ -68,6 +68,12 @@ public class PyData extends PythonType<Data> {
                 for(List item: (List<List>)val){
                     list.add(jListToPython(item, ValueType.LIST));
                 }
+                break;
+            case DATA:
+                for(Data item: (List<Data>)val){
+                    list.add(PyData.INSTANCE.toPython(item));
+                }
+                break;
             default:
                 throw new PythonException("Unsupported type in list: " + type);
         }
@@ -125,12 +131,15 @@ public class PyData extends PythonType<Data> {
         } else if (Python.type(item0).attr("__name__").toString().equals("BoundingBox")) {
             List<BoundingBox> jVal = new ArrayList<>();
             for (int i = 0; i < size; i++) {
+                PythonObject label = val.attr("label");
+                PythonObject prob = val.attr("probability");
+
                 BoundingBox bbox = BoundingBox.create(val.attr("cx").toDouble(),
                         val.attr("cy").toDouble(),
                         val.attr("height").toDouble(),
                         val.attr("width").toDouble(),
-                        val.attr("label").toString(),
-                        val.attr("probability").toDouble());
+                        label.isNone()?null: label.toString(),
+                        prob.isNone()?null: prob.toDouble());
                 jVal.add(bbox);
             }
             return new Pair<>(jVal, ValueType.BOUNDING_BOX);
@@ -249,7 +258,7 @@ public class PyData extends PythonType<Data> {
                         data.set(pyKey, PILImage.INSTANCE.toPython(javaObject.getImage(key)));
                         break;
                     case LIST:
-                       data.set(pyKey, jListToPython(javaObject.getListData(key), javaObject.listType(key)));
+                       data.set(pyKey, jListToPython(javaObject.getList(key, javaObject.listType(key)), javaObject.listType(key)));
                     case DATA:
                         data.set(pyKey, toPython(javaObject.getData(key)));
                         break;

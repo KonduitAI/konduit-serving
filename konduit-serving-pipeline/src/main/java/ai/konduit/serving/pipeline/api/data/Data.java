@@ -111,7 +111,8 @@ public interface Data {
     List<Boolean> getListBoolean(String key);
     List<byte[]> getListBytes(String key);
     List<Double> getListDouble(String key);
-    List<List<?>> getListData(String key);
+    List<Data> getListData(String key);
+    List<List<?>> getListList(String key);
     List<Image> getListImage(String key);
     List<NDArray> getListNDArray(String key);
     List<BoundingBox> getListBoundingBox(String key);
@@ -131,6 +132,7 @@ public interface Data {
     void putListBytes(String key, List<byte[]> data);
     void putListDouble(String key, List<Double> data);
     void putListData(String key, List<Data> data);
+    void putListList(String key, List<List<?>> data);
     void putListImage(String key, List<Image> data);
     void putListNDArray(String key, List<NDArray> data);
     void putListBoundingBox(String key, List<BoundingBox> data);

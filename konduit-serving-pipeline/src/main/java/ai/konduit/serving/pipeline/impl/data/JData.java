@@ -194,7 +194,12 @@ public class JData implements Data {
     }
 
     @Override
-    public List<List<?>> getListData(String key) {
+    public List<Data> getListData(String key) {
+        return listIfFound(key, ValueType.DATA);
+    }
+
+    @Override
+    public List<List<?>> getListList(String key) {
         return listIfFound(key, ValueType.LIST);
     }
 
@@ -302,6 +307,12 @@ public class JData implements Data {
     public void putListData(String key, List<Data> data) {
         Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, ValueType.DATA));
+    }
+
+    @Override
+    public void putListList(String key, List<List<?>> data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new ListValue(data, ValueType.LIST));
     }
 
     @Override
