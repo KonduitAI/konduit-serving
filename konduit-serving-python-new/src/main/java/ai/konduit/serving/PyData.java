@@ -240,7 +240,6 @@ public class PyData extends PythonType<Data> {
 
     @Override
     public PythonObject toPython(Data javaObject) throws PythonException {
-        System.out.println("toPython()");
         PythonObject dataCls = Python.globals().attr("get").call("Data");
         if (dataCls.isNone()) {
             String baseCode;
@@ -317,7 +316,6 @@ public class PyData extends PythonType<Data> {
                 }
             }
             PythonGC.keep(data);
-            System.out.println("toPython()...Done");
             return data;
         }
     }

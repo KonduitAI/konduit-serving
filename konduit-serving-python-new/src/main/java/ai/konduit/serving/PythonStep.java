@@ -20,9 +20,6 @@ public class PythonStep implements PipelineStep {
     private final String setupMethodName;
     private final String runMethodName;
 
-    static {
-        PipelineRegistry.registerStepRunnerFactory(new Factory());
-    }
 
     public PythonStep(@Nonnull String code, @Nonnull String setupMethodName, @Nonnull String runMethodName) {
         this.code = code;
