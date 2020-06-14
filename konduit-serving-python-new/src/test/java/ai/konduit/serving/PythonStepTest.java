@@ -16,16 +16,25 @@
 
 
 package ai.konduit.serving;
+
+import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.data.JData;
+import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
+import org.eclipse.python4j.PythonTypes;
 import org.junit.Assert;
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.*;
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 public class PythonStepTest {
@@ -45,10 +54,10 @@ public class PythonStepTest {
     public void testPythonStepWithSetup() {
         String code = "five=0\n" +
                 "def setup():\n" +
-                "\tglobal five\n"+
-                "\tfive+=5.\n"+
-                "def run(data):\n"+
-                "\tdata['x'] += five + 2.\n"+
+                "\tglobal five\n" +
+                "\tfive+=5.\n" +
+                "def run(data):\n" +
+                "\tdata['x'] += five + 2.\n" +
                 "\treturn data";
 
         PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
@@ -60,12 +69,12 @@ public class PythonStepTest {
     }
 
     @Test
-    public void testPythonStepAllPrimitiveTypes(){
+    public void testPythonStepAllPrimitiveTypes() {
 
         Data inputData = new JData();
 
         inputData.put("s1", "Hello");
-        inputData.put("s2","World");
+        inputData.put("s2", "World");
 
         inputData.put("i1", 1);
         inputData.put("i2", 2);
@@ -88,14 +97,14 @@ public class PythonStepTest {
         expected.put("a", new byte[]{97, 98, 99, 100, 101, 102}); //abcdef
 
 
-        String code = "def setup():pass\n"+
-                "def run(input):\n"+
-                "\tret=Data()\n"+
-                "\tret['s']=input['s1']+' '+input['s2']+'!'\n"+
-                "\tret['i']=input['i1']+input['i2']*input['i3']\n"+
-                "\tret['f']=input['f2']-input['f1']+input['f3']\n"+
-                "\tret['b']=input['b1']\n"+
-                "\tret['a']=bytes(input['a1']) + b'def'\n"+
+        String code = "def setup():pass\n" +
+                "def run(input):\n" +
+                "\tret=Data()\n" +
+                "\tret['s']=input['s1']+' '+input['s2']+'!'\n" +
+                "\tret['i']=input['i1']+input['i2']*input['i3']\n" +
+                "\tret['f']=input['f2']-input['f1']+input['f3']\n" +
+                "\tret['b']=input['b1']\n" +
+                "\tret['a']=bytes(input['a1']) + b'def'\n" +
                 "\treturn ret\n";
         PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
         Pipeline pipeline = SequencePipeline.builder().add(step).build();
@@ -106,7 +115,7 @@ public class PythonStepTest {
 
 
     @Test
-    public void testPythonStepWithLists(){
+    public void testPythonStepWithLists() {
         Data inputData = new JData();
 
         inputData.putListString("s", Arrays.asList("Hello", "World"));
@@ -124,14 +133,14 @@ public class PythonStepTest {
         expected.putListBoolean("b", Arrays.asList(true, false, true, false));
         expected.putListBytes("a", Arrays.asList(new byte[]{97, 98, 99}, new byte[]{100, 101, 102}, new byte[]{97, 98, 99, 100, 101, 102}));
 
-        String code = "def setup():pass\n"+
-                "def run(input):\n"+
-                "\tret=Data()\n"+
-                "\tret['s']=input['s']+[input['s'][0]+' '+input['s'][1]+'!']\n"+
-                "\tret['i']=input['i']+[input['i'][0]+input['i'][1]*input['i'][2]]\n"+
-                "\tret['f']=input['f']+[input['f'][1]-input['f'][0]+input['f'][2]]\n"+
-                "\tret['b']=input['b']+[input['b'][1]]\n"+
-                "\tret['a']=input['a'] + [bytes(input['a'][0]) + bytes(input['a'][1])]\n"+
+        String code = "def setup():pass\n" +
+                "def run(input):\n" +
+                "\tret=Data()\n" +
+                "\tret['s']=input['s']+[input['s'][0]+' '+input['s'][1]+'!']\n" +
+                "\tret['i']=input['i']+[input['i'][0]+input['i'][1]*input['i'][2]]\n" +
+                "\tret['f']=input['f']+[input['f'][1]-input['f'][0]+input['f'][2]]\n" +
+                "\tret['b']=input['b']+[input['b'][1]]\n" +
+                "\tret['a']=input['a'] + [bytes(input['a'][0]) + bytes(input['a'][1])]\n" +
                 "\treturn ret\n";
 
         PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
@@ -142,20 +151,20 @@ public class PythonStepTest {
     }
 
     @Test
-    public void testPythonStepWithNDArrays(){
+    public void testPythonStepWithNDArrays() {
         Data inputData = new JData();
-        INDArray arr1 = Nd4j.rand(3,2);
-        INDArray arr2 = Nd4j.rand(3,2);
+        INDArray arr1 = Nd4j.rand(3, 2);
+        INDArray arr2 = Nd4j.rand(3, 2);
         inputData.put("arr1", NDArray.create(arr1));
         inputData.put("arr2", NDArray.create(arr2));
 
         Data expected = new JData();
         expected.put("out", NDArray.create(arr1.mul(2).add(arr2)));
 
-        String code = "def setup():pass\n"+
-                "def run(input):\n"+
-                "\tret=Data()\n"+
-                "\tret['out']=input['arr1']*2+input['arr2']\n"+
+        String code = "def setup():pass\n" +
+                "def run(input):\n" +
+                "\tret=Data()\n" +
+                "\tret['out']=input['arr1']*2+input['arr2']\n" +
                 "\treturn ret\n";
 
         PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
@@ -164,8 +173,69 @@ public class PythonStepTest {
         Assert.assertEquals(expected, output);
     }
 
-    @Test
-    public void testPythonStepWithImage(){
+    private static byte[] getTestPng() {
+        try {
+            byte[] aByteArray = {0xa, 0x2, 0xf, (byte) 0xff, (byte) 0xff, (byte) 0xff};
+            int width = 1;
+            int height = 2;
+            DataBuffer buffer = new DataBufferByte(aByteArray, aByteArray.length);
+            WritableRaster raster = Raster.createInterleavedRaster(buffer, width, height, 3 * width, 3, new int[]{0, 1, 2}, (Point) null);
+            ColorModel cm = new ComponentColorModel(ColorModel.getRGBdefault().getColorSpace(), false, true, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+            BufferedImage image = new BufferedImage(cm, raster, true, null);
+            try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                ImageIO.write(image, "png", baos);
+                return baos.toByteArray();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
+    }
+
+    @Test
+    public void testPythonStepWithImage() {
+        byte[] png = getTestPng();
+        Data inputData = new JData();
+        inputData.put("img1", Image.create(new Png(png)));
+
+        Data expected = inputData.clone();
+        expected.put("img2", Image.create(new Png(png)));
+
+        String code = "def setup():pass\n" +
+                "def run(input):\n" +
+                "\tinput['img2']=input['img1']\n" +
+                "\treturn input\n";
+
+        PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
+        Pipeline pipeline = SequencePipeline.builder().add(step).build();
+        Data output = pipeline.executor().exec(inputData);
+        Assert.assertEquals(expected, output);
+    }
+
+    @Test
+    public void testPythonStepWithBoundingBox() {
+        byte[] png = getTestPng();
+        Data inputData = new JData();
+        inputData.put("img1", Image.create(new Png(png)));
+
+
+        Data expected = inputData.clone();
+        expected.put("img2", Image.create(new Png(png)));
+        expected.put("box1", BoundingBox.create(0.5, 0.5, 0.1, 0.1, "box1", 0.2));
+        expected.put("box2", BoundingBox.create(0.5, 0.5, 0.1, 0.1, "box2", null));
+        expected.put("box3", BoundingBox.create(0.5, 0.5, 0.1, 0.1));
+
+        String code = "def setup():pass\n" +
+                "def run(input):\n" +
+                "\tinput['img2']=input['img1']\n" +
+                "\tinput['box1']=BoundingBox(0.5, 0.5, 0.1, 0.1, 'box1', 0.2)\n"+
+                "\tinput['box2']=BoundingBox(0.5, 0.5, 0.1, 0.1, 'box2')\n"+
+                "\tinput['box3']=BoundingBox(0.5, 0.5, 0.1, 0.1)\n"+
+                "\treturn input\n";
+
+        PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
+        Pipeline pipeline = SequencePipeline.builder().add(step).build();
+        Data output = pipeline.executor().exec(inputData);
+        Assert.assertEquals(expected, output);
     }
 }

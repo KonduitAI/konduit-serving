@@ -15,3 +15,5 @@
 ################################################################################
 
 ai.konduit.serving.PyData
+ai.konduit.serving.PyBoundingBox
+ai.konduit.serving.PILImage

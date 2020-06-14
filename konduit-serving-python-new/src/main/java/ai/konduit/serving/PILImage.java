@@ -34,12 +34,13 @@ public class PILImage extends PythonType<Image> {
 
     private static boolean isPillowInstalled() {
         if (isPillowInstalled == null) {
-            try {
-                Python.importModule("PIL.Image");
-                isPillowInstalled = true;
-            } catch (PythonException pe) {
-                isPillowInstalled = false;
-            }
+            isPillowInstalled = PythonProcess.isPackageInstalled("pillow");
+//            try {
+//                Python.importModule("PIL.Image");
+//                isPillowInstalled = true;
+//            } catch (PythonException pe) {
+//                isPillowInstalled = false;
+//            }
         }
         return isPillowInstalled;
     }
@@ -64,15 +65,16 @@ public class PILImage extends PythonType<Image> {
 
     @Override
     public Image toJava(PythonObject pythonObject) {
-        String typeStr = Python.str(Python.type(pythonObject)).toString();
-        if (!typeStr.equals("<class 'PIL.Image.Image'>")) {
-            throw new PythonException("Expected PIL.Image.Image, received " + typeStr);
-        }
+
         try (PythonGC gc = PythonGC.watch()) {
+            String typeStr = Python.str(Python.type(pythonObject)).toString();
+            if (!Python.isinstance(pythonObject, pythonType())){
+                throw new PythonException("Expected PIL.Image.Image, received " + typeStr);
+            }
             PythonObject bytesIO = Python.importModule("io").attr("BytesIO").call();
             List<PythonObject> args = Collections.singletonList(bytesIO);
             Map<String, String> kwargs = Collections.singletonMap("format", "PNG");
-            pythonObject.callWithArgsAndKwargs(args, kwargs);
+            pythonObject.attr("save").callWithArgsAndKwargs(args, kwargs);
             PythonObject memview = Python.memoryview(bytesIO.attr("getvalue").call());
             byte[] bytes = PythonTypes.MEMORYVIEW.toJava(memview).getStringBytes();
             return Image.create(new Png(bytes));
@@ -107,5 +109,13 @@ public class PILImage extends PythonType<Image> {
         return javaObject instanceof Image;
     }
 
+    @Override
+    public PythonObject pythonType(){
+        try(PythonGC gc = PythonGC.watch()){
+            PythonObject ret = Python.importModule("PIL.Image").attr("Image");
+            PythonGC.keep(ret);
+            return ret;
+        }
+    }
 
 }

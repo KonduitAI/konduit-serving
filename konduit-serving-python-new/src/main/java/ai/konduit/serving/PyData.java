@@ -39,7 +39,7 @@ public class PyData extends PythonType<Data> {
 
 
     public PyData() {
-        super("Data", Data.class);
+        super("__main__.Data", Data.class);
     }
 
 
@@ -170,15 +170,7 @@ public class PyData extends PythonType<Data> {
         } else if (Python.type(item0).attr("__name__").toString().equals("BoundingBox")) {
             List<BoundingBox> jVal = new ArrayList<>();
             for (int i = 0; i < size; i++) {
-                PythonObject label = val.attr("label");
-                PythonObject prob = val.attr("probability");
-
-                BoundingBox bbox = BoundingBox.create(val.attr("cx").toDouble(),
-                        val.attr("cy").toDouble(),
-                        val.attr("height").toDouble(),
-                        val.attr("width").toDouble(),
-                        label.isNone() ? null : label.toString(),
-                        prob.isNone() ? null : prob.toDouble());
+                BoundingBox bbox = PyBoundingBox.INSTANCE.toJava(val);
                 jVal.add(bbox);
             }
             return new Pair<>(jVal, ValueType.BOUNDING_BOX);
@@ -235,12 +227,7 @@ public class PyData extends PythonType<Data> {
                 } else if (PythonTypes.getPythonTypeForPythonObject(val).equals(PILImage.INSTANCE)) {
                     data.put(strKey, PILImage.INSTANCE.toJava(val));
                 } else if (Python.type(val).attr("__name__").toString().equals("BoundingBox")) {
-                    BoundingBox jVal = BoundingBox.create(val.attr("cx").toDouble(),
-                            val.attr("cy").toDouble(),
-                            val.attr("height").toDouble(),
-                            val.attr("width").toDouble(),
-                            val.attr("label").toString(),
-                            val.attr("probability").toDouble());
+                    BoundingBox jVal = PyBoundingBox.INSTANCE.toJava(val);
                     data.put(strKey, jVal);
                 } else if (Python.isinstance(val, Python.listType())) {
                     Pair<List, ValueType> listAndType = pyListToJava(val);
@@ -302,22 +289,8 @@ public class PyData extends PythonType<Data> {
                         data.set(pyKey, NumpyArray.INSTANCE.toPython(javaObject.getNDArray(key).getAs(INDArray.class)));
                         break;
                     case BOUNDING_BOX:
-                        PythonObject bboxCls = Python.globals().get("BoundingBox");
                         BoundingBox jBbox = javaObject.getBoundingBox(key);
-                        List<PythonObject> args = new ArrayList<>();
-                        args.add(new PythonObject(jBbox.cx()));
-                        args.add(new PythonObject(jBbox.cy()));
-                        args.add(new PythonObject(jBbox.height()));
-                        args.add(new PythonObject(jBbox.width()));
-                        Map<String, PythonObject> kwargs = new HashMap<>();
-                        if (jBbox.label() != null) {
-                            kwargs.put("label", new PythonObject(jBbox.label()));
-                        }
-                        if (jBbox.probability() != null) {
-                            kwargs.put("probability", new PythonObject(jBbox.probability()));
-                        }
-                        PythonObject bbox = bboxCls.callWithArgsAndKwargs(args, kwargs);
-                        data.set(pyKey, bbox);
+                        data.set(pyKey, PyBoundingBox.INSTANCE.toPython(jBbox));
                         break;
                     case IMAGE:
                         data.set(pyKey, PILImage.INSTANCE.toPython(javaObject.getImage(key)));
