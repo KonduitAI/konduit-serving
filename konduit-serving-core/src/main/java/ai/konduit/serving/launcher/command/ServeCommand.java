@@ -232,7 +232,7 @@ public class ServeCommand extends DefaultCommand {
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {
 
             String line;
-            while (!Thread.currentThread().isInterrupted()) {
+            while (LauncherUtils.isProcessExists(id)) {
                 line = reader.readLine();
                 if (line == null) {
                     Thread.sleep(100);

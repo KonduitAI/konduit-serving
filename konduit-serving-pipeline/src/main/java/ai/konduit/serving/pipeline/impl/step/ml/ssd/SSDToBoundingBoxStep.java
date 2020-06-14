@@ -18,20 +18,42 @@
 
 package ai.konduit.serving.pipeline.impl.step.ml.ssd;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+/**
+ *
+ * <ul>
+ *     <li><b>scale</b>: An optional way to increase the size of the bounding boxes by some fraction. If specified, a value
+ *     of 1.0 is equivalent to no scaling. A scale of 2.0 means the center is unchanged, but the width and height are now
+ *     2.0x larger than it would otherwise be</li>
+ *     <li><b>aspectRatio</b>: An optional way to control the output shape (aspect ratio) of the bounding boxes. Defined in
+ *     terms of "width / height" - if specified, an aspect ratio of 1.0 gives a square output; an aspect ratio of 2.0 gives
+ *     twice as wide as it is high. Note that for making the output the correct aspect ratio, one of the height or width
+ *     will be increased; the other dimension will not change. That is, the pre-aspect-ratio-corrected box will be contained
+ *     fully within the output box
+ *     </li>
+ * </ul>
+ *
+ */
 @Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@JsonName("SSD_TO_BBOX")
 public class SSDToBoundingBoxStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";
+    // You can do new SSDToBoundingBoxStep().classLabels(SSDToBoundingBoxStep.COCO_LABELS)
+    public static final String[] COCO_LABELS = new String[]{"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "street sign", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "hat", "backpack", "umbrella", "shoe", "eye glasses", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "plate", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "mirror", "dining table", "window", "desk", "toilet", "door", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "blender", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush", "hair brush"};
 
     //TODO config
+
+    @Builder.Default
+    protected String[] classLabels = null;
 
     @Builder.Default
     protected boolean keepOtherValues = true;
@@ -39,8 +61,13 @@ public class SSDToBoundingBoxStep implements PipelineStep {
     @Builder.Default
     protected double threshold = 0.5;
 
+    protected Double scale = null;
+    protected Double aspectRatio = null;
+
+
     @Builder.Default
     protected String outputName = DEFAULT_OUTPUT_NAME;
+
 
     public SSDToBoundingBoxStep(){
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
@@ -48,6 +75,7 @@ public class SSDToBoundingBoxStep implements PipelineStep {
         this.keepOtherValues = true;
         this.outputName = DEFAULT_OUTPUT_NAME;
         this.threshold = 0.5;
+        this.classLabels = null;
     }
 
 }

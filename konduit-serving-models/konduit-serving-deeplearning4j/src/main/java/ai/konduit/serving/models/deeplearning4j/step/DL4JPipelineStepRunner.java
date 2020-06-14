@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.models.deeplearning4j.step;
 
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.models.deeplearning4j.step.keras.KerasModelStep;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -26,10 +27,8 @@ import ai.konduit.serving.pipeline.impl.data.JData;
 import lombok.extern.slf4j.Slf4j;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.modelimport.keras.KerasModel;
-import org.deeplearning4j.nn.modelimport.keras.KerasSequentialModel;
 import org.deeplearning4j.nn.modelimport.keras.exceptions.InvalidKerasConfigurationException;
 import org.deeplearning4j.nn.modelimport.keras.exceptions.UnsupportedKerasConfigurationException;
-import org.deeplearning4j.nn.modelimport.keras.utils.DL4JKerasModelValidator;
 import org.deeplearning4j.nn.modelimport.keras.utils.KerasModelBuilder;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.DL4JModelValidator;
@@ -42,6 +41,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
+@CanRun(DL4JModelPipelineStep.class)
 @Slf4j
 public class DL4JPipelineStepRunner implements PipelineStepRunner {
 

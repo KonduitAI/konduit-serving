@@ -18,11 +18,14 @@
 
 package ai.konduit.serving.models.tensorflow.step;
 
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.impl.data.ValueNotFoundException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -34,9 +37,11 @@ import org.tensorflow.Tensor;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
+@CanRun(TensorFlowPipelineStep.class)
 public class TensorFlowStepRunner implements PipelineStepRunner {
 
     private final TensorFlowPipelineStep step;
@@ -69,6 +74,17 @@ public class TensorFlowStepRunner implements PipelineStepRunner {
 
         Session.Runner r = sess.runner();
         for (String s : step.getInputNames()) {
+            if(!data.has(s)){
+                throw new ValueNotFoundException( "Error in TensorFlowStep: Input data does not have a value corresponding to TensorFlowStep.inputNames value \"" +
+                        s + "\" - data keys = " + data.keys());
+            }
+            if(data.type(s) != ValueType.NDARRAY){
+                String listType = data.type(s) == ValueType.LIST ? data.listType(s).toString() : null;
+                throw new ValueNotFoundException( "Error in TensorFlowStep (" + name() + "): Input data value corresponding to TensorFlowStep.inputNames value \"" +
+                        s + "\" is not an NDArray type - is " + (listType == null ? data.type(s) : "List<" + listType + ">"));
+            }
+
+
             NDArray arr = data.getNDArray(s);       //TODO checks
             Tensor<?> t = arr.getAs(Tensor.class);  //TODO casting
             r.feed(s, t);
@@ -90,7 +106,19 @@ public class TensorFlowStepRunner implements PipelineStepRunner {
             r.fetch(name, idx);
         }
 
-        List<Tensor<?>> l = r.run();
+        List<Tensor<?>> l;
+        try{
+            l = r.run();
+        } catch (Throwable t){
+            StringBuilder sb = new StringBuilder();
+            sb.append("TensorFlow exception in TensorFlowStep (" + name() + "). Input shapes:\n");
+            for(String s : step.getInputNames()){
+                NDArray arr = data.getNDArray(s);
+                sb.append(s).append(": ").append(Arrays.toString(arr.shape())).append("\n");
+            }
+            throw new RuntimeException(sb.toString(), t);
+        }
+
 
         Data out = Data.empty();
         for (int i = 0; i < outNames.size(); i++) {

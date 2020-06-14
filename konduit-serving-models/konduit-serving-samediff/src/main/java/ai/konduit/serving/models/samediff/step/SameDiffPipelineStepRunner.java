@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.models.samediff.step;
 
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -32,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+@CanRun(SameDiffModelPipelineStep.class)
 public class SameDiffPipelineStepRunner implements PipelineStepRunner {
 
     public static final String DEFAULT_OUT_NAME_SINGLE = "default";
@@ -46,7 +47,7 @@ public class SameDiffPipelineStepRunner implements PipelineStepRunner {
 
         //TODO DON'T ASSUME LOCAL FILE URI!
 
-        String uri = step.getModelUri();
+        String uri = step.modelUri();
         Preconditions.checkState(uri != null && !uri.isEmpty(), "No model URI was provided (model URI was null or empty)");
         URI u = URI.create(uri);
         File f = new File(u);
@@ -57,7 +58,7 @@ public class SameDiffPipelineStepRunner implements PipelineStepRunner {
         try {
             sd = SameDiff.load(f, false);
         } catch (Throwable e) {
-            throw new ModelLoadingException("Failed to load SameDiff model from URI " + step.getModelUri(), e);
+            throw new ModelLoadingException("Failed to load SameDiff model from URI " + step.modelUri(), e);
         }
     }
 

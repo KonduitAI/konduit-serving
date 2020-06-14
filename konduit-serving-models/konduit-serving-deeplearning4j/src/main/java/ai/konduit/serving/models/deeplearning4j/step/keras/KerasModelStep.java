@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.models.deeplearning4j.step.keras;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +31,7 @@ import java.util.List;
 @Data
 @Accessors(fluent = true)
 @Builder
+@JsonName("KERAS")
 public class KerasModelStep implements PipelineStep {
 
     private String modelUri;

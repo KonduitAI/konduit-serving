@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -345,6 +346,7 @@ public class DataTest {
         imageData.save(serFile);
         Data restoredData = Data.fromFile(serFile);
         assertEquals(imageData.get(KEY), restoredData.get(KEY));
+        assertEquals(imageData, restoredData);
     }
 
     @Test
@@ -358,6 +360,7 @@ public class DataTest {
         ndData.save(serFile);
         Data restoredData = Data.fromFile(serFile);
         assertEquals(ndData.get(KEY), restoredData.get(KEY));
+        assertEquals(ndData, restoredData);
     }
 
     @Test
@@ -374,6 +377,7 @@ public class DataTest {
         Data restoredData = Data.fromFile(serFile);
         assertEquals(imageData.getList(KEY, ValueType.IMAGE),
                      restoredData.getList(KEY, ValueType.IMAGE));
+        assertEquals(imageData, restoredData);
     }
 
     @Test
@@ -389,6 +393,7 @@ public class DataTest {
         Data restoredData = Data.fromFile(serFile);
         assertEquals(ndData.getList(KEY, ValueType.NDARRAY),
                 restoredData.getList(KEY, ValueType.NDARRAY));
+        assertEquals(ndData, restoredData);
     }
 
     @Test
@@ -403,6 +408,7 @@ public class DataTest {
         Data restoredData = Data.fromFile(serFile);
         assertEquals(stringsData.getList(KEY, ValueType.STRING),
                      restoredData.getList(KEY, ValueType.STRING));
+        assertEquals(stringsData, restoredData);
     }
 
     @Test
@@ -419,7 +425,7 @@ public class DataTest {
         Data restoredData = Data.fromFile(serFile);
         assertEquals(doubleData.getList(KEY, ValueType.DOUBLE),
                         restoredData.getList(KEY, ValueType.DOUBLE));
-
+        assertEquals(doubleData, restoredData);
     }
 
     @Test
@@ -436,7 +442,7 @@ public class DataTest {
         Data restoredData = Data.fromFile(serFile);
         assertEquals(boolData.getList(KEY, ValueType.DOUBLE),
                 restoredData.getList(KEY, ValueType.DOUBLE));
-
+        assertEquals(boolData, restoredData);
     }
 
     @Test
@@ -452,7 +458,7 @@ public class DataTest {
         Data restoredData = Data.fromFile(serFile);
         assertEquals(intData.getList(KEY, ValueType.DOUBLE),
                 restoredData.getList(KEY, ValueType.DOUBLE));
-
+        assertEquals(intData, restoredData);
     }
 
     @Test
@@ -510,6 +516,7 @@ public class DataTest {
         boxData.save(newFile);
         Data restoredData = Data.fromFile(newFile);
         assertEquals(boxData.get(KEY), restoredData.get(KEY));
+        assertEquals(boxData, restoredData);
     }
 
     @Test
@@ -522,6 +529,7 @@ public class DataTest {
         boxData.save(newFile);
         Data restoredData = Data.fromFile(newFile);
         assertEquals(boxData.get(KEY), restoredData.get(KEY));
+        assertEquals(boxData, restoredData);
     }
 
     @Test
@@ -531,12 +539,30 @@ public class DataTest {
             boxes.add(new BBoxXY(d, d, d+5, d+6, "testArea", 0.7));
         }
         Data boxesData = Data.singletonList(KEY, boxes, ValueType.BOUNDING_BOX);
+        boxesData.put("box", BoundingBox.create(0.5, 0.5, 1, 1, null, 1.0));
+        boxesData.put("box2", BoundingBox.create(0.5, 0.5, 1, 1, "label", null));
+        boxesData.put("box3", BoundingBox.createXY(0.5, 0.5, 1, 1, null, 1.0));
+        boxesData.put("box4", BoundingBox.createXY(0.5, 0.5, 1, 1, "label", null));
         File newFile = testDir.newFile();
         boxesData.save(newFile);
 
         Data restoredData = Data.fromFile(newFile);
-        assertEquals(boxesData.getList(KEY, ValueType.BOUNDING_BOX),
-                restoredData.getList(KEY, ValueType.BOUNDING_BOX));
+        assertEquals(boxesData, restoredData);
     }
 
+    @Test
+    public void testPointSerde() throws IOException {
+        Data d = Data.singleton("point", Point.create(0.1, 0.2, "foo", 1.0));
+        d.put("point2", Point.create(0.1, 0.2, 0.3));
+        d.putListPoint("pointList", Arrays.asList(
+                Point.create(0.9, 0.8, 0.7, 0.6, 0.4, 0.5),
+                Point.create(0.9, 0.8, "label", null),
+                Point.create(0.9, 0.8, 0.7),
+                Point.create(0.1, 0.2, 0.3, null, 1.0)));
+        File newFile = testDir.newFile();
+        d.save(newFile);
+
+        Data restored = Data.fromFile(newFile);
+        assertEquals(d, restored);
+    }
 }

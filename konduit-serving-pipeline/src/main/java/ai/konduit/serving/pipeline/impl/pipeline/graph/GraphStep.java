@@ -90,7 +90,6 @@ public interface GraphStep extends TextConfig {
      */
     default GraphStep then(String name, PipelineStep step) {
         GraphStep s = new PipelineGraphStep(builder(), step, name, this.name());
-        ;
         builder().add(s);
         return s;
     }

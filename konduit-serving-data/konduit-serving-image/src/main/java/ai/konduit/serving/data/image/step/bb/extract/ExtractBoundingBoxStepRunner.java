@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.bb.extract;
 
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.context.Context;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@CanRun(ExtractBoundingBoxStep.class)
 public class ExtractBoundingBoxStepRunner implements PipelineStepRunner {
 
     protected final ExtractBoundingBoxStep step;
@@ -122,6 +124,12 @@ public class ExtractBoundingBoxStepRunner implements PipelineStepRunner {
             int y = (int)(y1 * img.rows());
             int h = (int) Math.round(bb.height() * img.rows());
             int w = (int)Math.round(bb.width() * img.cols());
+
+//            int x = (int)(x1 * img.cols()) - 30;
+//            int y = (int)(y1 * img.rows()) - 30;
+//            int h = (int) Math.round(bb.height() * img.rows()) + 60;
+//            int w = (int)Math.round(bb.width() * img.cols()) + 60;
+
             Rect r = new Rect(x, y, w, h);
             Mat m = img.apply(r);
 

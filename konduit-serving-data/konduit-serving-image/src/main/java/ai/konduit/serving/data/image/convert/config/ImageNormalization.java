@@ -28,7 +28,9 @@ import lombok.experimental.Accessors;
  *
  * <ul>
  *     <li><b>NONE</b>: No image normalization will be applied</li>
- *     <li><b>SCALE</b>: Divide images by maxValue, or divide by 255 if maxValue is not specified, to give output in range [0,1]. This is the default.</li>
+ *     <li><b>SCALE</b>: Divide images by maxValue/2, or divide by 255/2 if maxValue is not specified, then subtract 1.0,
+ *       to give output in range [-1,1]. This is the default.</li>
+ *     <li><b>SCALE_01</b>: Divide images by maxValue, or divide by 255 if maxValue is not specified, to give output in range [0,1]. This is the default.</li>
  *     <li><b>SUBTRACT_MEAN</b>: Subtract the channels by the provided meanRgb array, with values [meanRed, meanGreen, meanBlue].
  *         out = (in - mean) for each channel. Note that if the output format is in BGR format, the meanRgb value should
  *         still be provided in RGB order</li>
@@ -62,6 +64,7 @@ public class ImageNormalization {
     public enum Type {
         NONE,
         SCALE,
+        SCALE_01,
         SUBTRACT_MEAN,
         STANDARDIZE,
         INCEPTION,

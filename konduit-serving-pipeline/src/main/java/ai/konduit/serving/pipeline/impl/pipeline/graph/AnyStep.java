@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import lombok.EqualsAndHashCode;
 
 import java.util.List;
@@ -30,7 +31,8 @@ import java.util.List;
  * @author Alex Black
  */
 @EqualsAndHashCode(callSuper = true)
-public class AnyStep extends BaseMergeStep {
+@JsonName(GraphConstants.GRAPH_ANY_JSON_KEY)
+public class AnyStep extends BaseMergeStep implements GraphStep {
 
     public AnyStep(GraphBuilder b, List<String> steps, String name) {
         super(b, steps, name);

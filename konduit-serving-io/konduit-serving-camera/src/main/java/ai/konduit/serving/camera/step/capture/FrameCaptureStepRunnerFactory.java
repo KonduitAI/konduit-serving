@@ -25,13 +25,18 @@ import org.nd4j.common.base.Preconditions;
 public class FrameCaptureStepRunnerFactory implements PipelineStepRunnerFactory {
     @Override
     public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof FrameCapturePipelineStep;
+        return (pipelineStep instanceof CameraFrameCaptureStep)
+                || (pipelineStep instanceof VideoFrameCaptureStep);
     }
 
     @Override
     public PipelineStepRunner create(PipelineStep step) {
         Preconditions.checkState(canRun(step), "Unable to run pipeline step of type %s", step.getClass());
 
-        return new FrameCaptureStepRunner((FrameCapturePipelineStep) step);
+        if(step instanceof CameraFrameCaptureStep){
+            return new FrameCaptureStepRunner((CameraFrameCaptureStep) step);
+        }else{
+            return new FrameCaptureStepRunner((VideoFrameCaptureStep) step);
+        }
     }
 }
