@@ -69,7 +69,7 @@ public class PyData extends PythonType<Data> {
             case BYTES:
                 for (byte[] item : (List<byte[]>) val) {
                     ByteBuffer buff = ByteBuffer.allocateDirect(item.length);
-                    for (int i=0; i<item.length;i++){
+                    for (int i = 0; i < item.length; i++) {
                         buff.put(i, item[i]);
                     }
                     buff.rewind();
@@ -86,16 +86,7 @@ public class PyData extends PythonType<Data> {
                 break;
             case BOUNDING_BOX:
                 for (BoundingBox item : (List<BoundingBox>) val) {
-                    list.add(
-                            Python.globals().get("BoundingBox").call(
-                                    item.cx(),
-                                    item.cy(),
-                                    item.height(),
-                                    item.width(),
-                                    item.label(),
-                                    item.probability()
-                            )
-                    );
+                    list.add(PyBoundingBox.INSTANCE.toPython(item));
                 }
                 break;
             case IMAGE:
