@@ -8,6 +8,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
 import org.eclipse.python4j.PythonJob;
 import org.eclipse.python4j.PythonVariable;
+import org.nd4j.common.base.Preconditions;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -67,6 +68,7 @@ public class PythonStep implements PipelineStep {
 
         @Override
         public PipelineStepRunner create(PipelineStep pipelineStep){
+            Preconditions.checkState(canRun(pipelineStep), "Required PythonStep. Received " + pipelineStep.getClass());
             return new Runner((PythonStep) pipelineStep);
         }
 

@@ -147,4 +147,8 @@ public class PythonStepTest {
         Assert.assertEquals(expected, output);
     }
 
+    @Test
+    public void testPythonStepWithImage(){
+
+    }
 }

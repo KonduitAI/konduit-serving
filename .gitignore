@@ -61,3 +61,6 @@ konduit-serving-codegen/src/main/resources/docker/centos/aarch64/cuda/10.0/nvidi
 
 konduit-serving-core-git.properties
 builds
+
+# python
+*/__pycache__/
