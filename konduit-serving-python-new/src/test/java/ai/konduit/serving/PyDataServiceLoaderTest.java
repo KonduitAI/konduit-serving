@@ -17,6 +17,7 @@
 
 package ai.konduit.serving;
 
+import ai.konduit.serving.pipeline.impl.data.JData;
 import org.eclipse.python4j.PythonTypes;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,6 +25,6 @@ import org.junit.Test;
 public class PyDataServiceLoaderTest{
     @Test
     public void testPyDataServiceLoader(){
-        Assert.assertEquals(PyData.INSTANCE, PythonTypes.get("Data"));
+        Assert.assertEquals(PyData.INSTANCE, PythonTypes.getPythonTypeForJavaObject(new JData()));
     }
 }

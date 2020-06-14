@@ -42,7 +42,7 @@ public class PythonStepTest {
     @Test
     public void testPythonStepBasic() {
         String code = "def setup():pass\ndef run(data):\n\tdata['x'] += 1\n\treturn data";
-        PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
+        PythonStep step = new PythonStep().code(code).setupMethod("setup").runMethod("run");
         Pipeline pipeline = SequencePipeline.builder().add(step).build();
         Data input = new JData();
         input.put("x", 5);
@@ -60,7 +60,7 @@ public class PythonStepTest {
                 "\tdata['x'] += five + 2.\n" +
                 "\treturn data";
 
-        PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
+        PythonStep step = new PythonStep().code(code).setupMethod("setup").runMethod("run");
         Pipeline pipeline = SequencePipeline.builder().add(step).build();
         Data input = new JData();
         input.put("x", 5);
@@ -106,7 +106,7 @@ public class PythonStepTest {
                 "\tret['b']=input['b1']\n" +
                 "\tret['a']=bytes(input['a1']) + b'def'\n" +
                 "\treturn ret\n";
-        PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
+        PythonStep step = new PythonStep().code(code).setupMethod("setup").runMethod("run");
         Pipeline pipeline = SequencePipeline.builder().add(step).build();
         Data output = pipeline.executor().exec(inputData);
         Assert.assertEquals(expected, output);
@@ -143,7 +143,7 @@ public class PythonStepTest {
                 "\tret['a']=input['a'] + [bytes(input['a'][0]) + bytes(input['a'][1])]\n" +
                 "\treturn ret\n";
 
-        PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
+        PythonStep step = new PythonStep().code(code).setupMethod("setup").runMethod("run");
         Pipeline pipeline = SequencePipeline.builder().add(step).build();
         Data output = pipeline.executor().exec(inputData);
         Assert.assertEquals(expected, output);
@@ -167,7 +167,7 @@ public class PythonStepTest {
                 "\tret['out']=input['arr1']*2+input['arr2']\n" +
                 "\treturn ret\n";
 
-        PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
+        PythonStep step = new PythonStep().code(code).setupMethod("setup").runMethod("run");
         Pipeline pipeline = SequencePipeline.builder().add(step).build();
         Data output = pipeline.executor().exec(inputData);
         Assert.assertEquals(expected, output);
@@ -206,7 +206,7 @@ public class PythonStepTest {
                 "\tinput['img2']=input['img1']\n" +
                 "\treturn input\n";
 
-        PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
+        PythonStep step = new PythonStep().code(code).setupMethod("setup").runMethod("run");
         Pipeline pipeline = SequencePipeline.builder().add(step).build();
         Data output = pipeline.executor().exec(inputData);
         Assert.assertEquals(expected, output);
@@ -233,7 +233,7 @@ public class PythonStepTest {
                 "\tinput['box3']=BoundingBox(0.5, 0.5, 0.1, 0.1)\n"+
                 "\treturn input\n";
 
-        PythonStep step = PythonStep.builder().code(code).setupMethod("setup").runMethod("run").build();
+        PythonStep step = new PythonStep().code(code).setupMethod("setup").runMethod("run");
         Pipeline pipeline = SequencePipeline.builder().add(step).build();
         Data output = pipeline.executor().exec(inputData);
         Assert.assertEquals(expected, output);

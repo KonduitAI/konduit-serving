@@ -23,6 +23,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
+import lombok.experimental.Accessors;
 import org.eclipse.python4j.PythonJob;
 import org.eclipse.python4j.PythonVariable;
 import org.nd4j.common.base.Preconditions;
@@ -31,48 +32,14 @@ import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.UUID;
 
+@lombok.Data
+@Accessors(fluent=true)
 public class PythonStep implements PipelineStep {
 
-    private final String code;
-    private final String setupMethodName;
-    private final String runMethodName;
+    private String code;
+    private String setupMethod;
+    private String runMethod;
 
-
-    public PythonStep(@Nonnull String code, @Nonnull String setupMethodName, @Nonnull String runMethodName) {
-        this.code = code;
-        this.setupMethodName = setupMethodName;
-        this.runMethodName = runMethodName;
-    }
-
-    public static Builder builder(){
-        return new Builder();
-    }
-
-    public static class Builder{
-        private String code;
-        private String setupMethodName;
-        private String runMethodName;
-
-        public Builder code(String code){
-            this.code  = code;
-            return this;
-        }
-
-        public Builder setupMethod(String setupMethodName){
-            this.setupMethodName = setupMethodName;
-            return this;
-        }
-
-        public Builder runMethod(String runMethodName){
-            this.runMethodName = runMethodName;
-            return this;
-        }
-
-        public PythonStep build(){
-            return new PythonStep(code, setupMethodName, runMethodName);
-        }
-
-    }
     public static class Factory implements PipelineStepRunnerFactory{
 
         @Override
@@ -111,7 +78,7 @@ public class PythonStep implements PipelineStep {
         public Runner(PythonStep pythonStep){
             this.pythonStep = pythonStep;
             this.pythonJob = new PythonJob("job_" + UUID.randomUUID().toString().replace('-', '_'),
-                    resolveActualCode(pythonStep.code, pythonStep.setupMethodName, pythonStep.runMethodName), true);
+                    resolveActualCode(pythonStep.code, pythonStep.setupMethod, pythonStep.runMethod), true);
         }
 
         @Override
