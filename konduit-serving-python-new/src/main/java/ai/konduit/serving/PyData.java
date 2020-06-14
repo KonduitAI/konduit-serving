@@ -135,11 +135,11 @@ public class PyData extends PythonType<Data> {
         } else if (Python.isinstance(item0, Python.memoryviewType())) {
             List<byte[]> jVal = new ArrayList<>();
             for (int i = 0; i < size; i++) {
-                BytePointer bp = PythonTypes.MEMORYVIEW.toJava(val.get(i));
-                byte[] bytes = new byte[(int)bp.capacity()];
-                bp.get(bytes);
-                jVal.add(bytes);
-                //jVal.add(PythonTypes.MEMORYVIEW.toJava(val.get(i)).getStringBytes());
+//                BytePointer bp = PythonTypes.MEMORYVIEW.toJava(val.get(i));
+//                byte[] bytes = new byte[(int)bp.capacity()];
+//                bp.get(bytes);
+//                jVal.add(bytes);
+                jVal.add(PythonTypes.MEMORYVIEW.toJava(val.get(i)).getStringBytes());
             }
             return new Pair<>(jVal, ValueType.BYTES);
         } else if (Python.isinstance(item0, Python.importModule("numpy").attr("ndarray"))) {
@@ -213,8 +213,9 @@ public class PyData extends PythonType<Data> {
                     data.put(strKey, jVal);
                 } else if (Python.isinstance(val, Python.memoryviewType())) {
                     BytePointer bp = PythonTypes.MEMORYVIEW.toJava(val);
-                    byte[] jVal = new byte[(int)bp.capacity()];
-                    bp.get(jVal);
+                    byte[] jVal = bp.getStringBytes();
+//                    byte[] jVal = new byte[(int)bp.capacity()];
+//                    bp.get(jVal);
                     data.put(strKey, jVal);
                 } else if (Python.isinstance(val, Python.importModule("numpy").attr("ndarray"))) {
                     INDArray arr = NumpyArray.INSTANCE.toJava(val);
