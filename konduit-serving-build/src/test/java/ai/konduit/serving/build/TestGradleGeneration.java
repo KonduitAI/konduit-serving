@@ -97,6 +97,20 @@ public class TestGradleGeneration {
         //Check output JAR exists
         File expUberJar = new File(uberJarDir, "my.jar");
         assertTrue(expUberJar.exists());
+
+        //Extract manifest and make sure it has correct main class
+        File dest = new File(dir, "mf.txt");
+        ArchiveUtils.zipExtractSingleFile(expUberJar, dest, "META-INF/MANIFEST.MF");
+        String mfContent = FileUtils.readFileToString(dest, StandardCharsets.UTF_8);
+        mfContent = mfContent.replace("\n ", "");
+        boolean found = false;
+        for(String line : mfContent.split("\n")){
+            if (line.contains("Main-Class") && line.contains("ai.konduit.serving.cli.launcher.KonduitServingLauncher")) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue("No main class attribute found", found);
     }
 
     @Ignore

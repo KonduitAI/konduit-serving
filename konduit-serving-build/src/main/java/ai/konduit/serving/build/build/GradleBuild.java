@@ -28,12 +28,8 @@ import org.apache.commons.io.IOUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
-import org.nd4j.common.io.ClassPathResource;
 
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +71,7 @@ public class GradleBuild {
             List<GradlePlugin> gi = d.gradlePlugins();
             if(gi != null && !gi.isEmpty()){
                 for(GradlePlugin g : gi) {
-                    kts.append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
+                    kts.append("\t").append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
                 }
             }
         }
@@ -118,6 +114,14 @@ public class GradleBuild {
                 kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
                 kts.append("mergeServiceFiles()\n");  //For service loader files
                 kts.append("}").append("\n\n");
+
+                kts.append("//Add manifest - entry point\n")
+                        .append("tasks.withType(Jar::class) {\n")
+                        .append("    manifest {\n")
+                        .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
+                        .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
+                        .append("    }\n")
+                        .append("}\n\n");
             } else if(deployment instanceof ClassPathDeployment){
                 addClassPathTask(kts, (ClassPathDeployment) deployment);
             }
