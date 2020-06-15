@@ -175,11 +175,12 @@ public class TensorFlowStepRunner implements PipelineStepRunner {
             }
         }
 
-        Iterator ops = graph.operations();
-        while(ops.hasNext()){
-            Operation o = (Operation) ops.next();
-            System.out.println(o.name() + ", " + o.type());
-        }
+        //  Uncomment if you want to see ops sequence in graph
+        //        Iterator ops = graph.operations();
+        //        while(ops.hasNext()){
+        //            Operation o = (Operation) ops.next();
+        //            System.out.println(o.name() + ", " + o.type());
+        //        }
 
         this.sess = new Session(graph);
     }

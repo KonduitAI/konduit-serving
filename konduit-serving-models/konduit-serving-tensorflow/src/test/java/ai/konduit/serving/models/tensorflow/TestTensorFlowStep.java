@@ -29,6 +29,7 @@ import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
 import ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep;
 import ai.konduit.serving.data.image.step.face.DrawFaceKeyPointsStep;
+import ai.konduit.serving.data.image.step.facemask.DrawFaceMaskStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
@@ -859,19 +860,16 @@ public class TestTensorFlowStep {
                 .modelUri(f.toURI().toString())
                 .build());
 
+        //  Merge camera image with face keypoints
+        GraphStep merged = camera.mergeWith("facemask-points", tf);
 
-        // TODO: interpret output (may be mask coords etc) / write separate step nd draw bbox/segment
-        //  based on https://github.com/AIZOOTech/FaceMaskDetection/blob/master/tensorflow_infer.py#L30
+
+
+
 
 
         //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", DrawBoundingBoxStep.builder()
-                .imageName("image")
-                .bboxName("img_bbox")
-                .lineThickness(2)
-                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
-                .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
-                .build());
+        GraphStep drawer = merged.then("drawer", DrawFaceMaskStep.builder().build());
 
 
         //Show image in Java frame
