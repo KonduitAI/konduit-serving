@@ -106,8 +106,8 @@ public class TestGradleGeneration {
                 .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
                 .build();
 
-//        File dir = testDir.newFolder();
-        File dir = new File("C:/Temp/Gradle");
+        File dir = testDir.newFolder();
+//        File dir = new File("C:/Temp/Gradle");
         File jsonF = new File(dir, "pipeline.json");
         FileUtils.writeStringToFile(jsonF, p.toJson(), StandardCharsets.UTF_8);
 
