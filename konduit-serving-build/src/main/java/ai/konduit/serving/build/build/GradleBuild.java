@@ -65,8 +65,17 @@ public class GradleBuild {
             }
         }
 
+        // ----- Repositories Section -----
+        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n}\n");
 
+
+        // ----- Plugins Section -----
         kts.append("plugins { java \n");
+        /*
+        //Not yet released - uncomment this once gradle-javacpp-platform plugin is available
+        //Set JavaCPP platforms - https://github.com/bytedeco/gradle-javacpp#the-platform-plugin
+        kts.append("id(\"org.bytedeco.gradle-javacpp-platform\") version \"1.5.3\"\n");      //TODO THIS VERSION SHOULDN'T BE HARDCODED
+         */
         for(Deployment d : config.deployments()){
             List<GradlePlugin> gi = d.gradlePlugins();
             if(gi != null && !gi.isEmpty()){
@@ -77,7 +86,14 @@ public class GradleBuild {
         }
         kts.append("\n}")
             .append("\n");
-        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n}\n");
+
+        /*
+        //Uncomment once gradle-javacpp-platform plugin available
+        kts.append("ext {\n")
+                .append("\tjavacppPlatorm = \"").append(config.target().toJavacppPlatform() + "\"\n")
+                .append("}\n\n");
+         */
+
         kts.append("group = \"ai.konduit\"\n");
         //kts.append("version = \"1.0-SNAPSHOT\"\n");
 
@@ -170,7 +186,9 @@ public class GradleBuild {
         }
 
         try {
-            connection.newBuild().setStandardOutput(System.out).setStandardError(System.err).forTasks(tasks.toArray(new String[0])).run();
+            connection.newBuild().setStandardOutput(System.out).setStandardError(System.err)
+                    .forTasks(tasks.toArray(new String[0]))
+                    .run();
         } finally {
             connection.close();
         }
