@@ -20,9 +20,14 @@ package ai.konduit.serving.clients.generators;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import io.swagger.codegen.v3.ClientOptInput;
+import io.swagger.codegen.v3.ClientOpts;
+import io.swagger.codegen.v3.CodegenConstants;
+import io.swagger.codegen.v3.DefaultGenerator;
+import io.swagger.codegen.v3.generators.java.JavaClientCodegen;
+import io.swagger.codegen.v3.generators.python.PythonClientCodegen;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -47,16 +52,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.common.primitives.Pair;
-import org.openapitools.codegen.ClientOptInput;
-import org.openapitools.codegen.DefaultGenerator;
-import org.openapitools.codegen.Generator;
-import org.openapitools.codegen.languages.JavaClientCodegen;
-import org.openapitools.codegen.languages.PythonClientCodegen;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -100,30 +97,50 @@ public class GenerateRestClients {
             System.exit(1);
         }
 
-        genearteClients(openAPI);
-        log.info("\n{}", Yaml.pretty(openAPI));
+        generateClients(openAPI);
     }
 
-    private static void genearteClients(OpenAPI openAPI) {
-        PythonClientCodegen pythonClientCodegen = new PythonClientCodegen();
-        pythonClientCodegen.setOutputDir("clients/python");
-        pythonClientCodegen.setOpenAPI(openAPI);
-        pythonClientCodegen.setPackageName("konduit");
-        pythonClientCodegen.setPackageVersion("0.1.0");
+    private static void generateClients(OpenAPI openAPI) {
+        File clientsDirectory = new File("clients");
+
+        try {
+            if (clientsDirectory.exists() && clientsDirectory.isDirectory())
+                FileUtils.deleteDirectory(clientsDirectory);
+        } catch (IOException exception) {
+            log.error("Unable to clean 'clients' directory", exception);
+        }
+
+        DefaultGenerator defaultGenerator = new DefaultGenerator();
 
         JavaClientCodegen javaClientCodegen = new JavaClientCodegen();
         javaClientCodegen.setOutputDir("clients/java");
-        javaClientCodegen.setOpenAPI(openAPI);
-        javaClientCodegen.setApiPackage("ai.konduit.serving.java.client");
         javaClientCodegen.setModelPackage("ai.konduit.serving.java.client.models");
         javaClientCodegen.setInvokerPackage("ai.konduit.serving.java.client.invoker");
+        javaClientCodegen.setApiPackage("ai.konduit.serving.java.client");
         javaClientCodegen.setGroupId("ai.konduit.serving");
-        javaClientCodegen.setArtifactId("konduit-serving-java-client");
+        javaClientCodegen.setArtifactId("konduit-serving-client");
         javaClientCodegen.setArtifactVersion("0.1.0-SNAPSHOT");
 
-        Generator generator = new DefaultGenerator();
-        generator.opts(new ClientOptInput().openAPI(openAPI).config(pythonClientCodegen)).generate();
-        generator.opts(new ClientOptInput().openAPI(openAPI).config(javaClientCodegen)).generate();
+        defaultGenerator
+                .opts(new ClientOptInput()
+                        .openAPI(openAPI)
+                        .config(javaClientCodegen)
+                        .opts(new ClientOpts()))
+                .generate();
+
+        PythonClientCodegen pythonClientCodegen = new PythonClientCodegen();
+        pythonClientCodegen.setOutputDir("clients/python");
+
+        ClientOpts pythonClientOpts = new ClientOpts();
+        pythonClientOpts.getProperties().put(CodegenConstants.PACKAGE_NAME, "konduit");
+        pythonClientOpts.getProperties().put(CodegenConstants.PACKAGE_VERSION, "0.2.0"); // new version after already available "konduit" version on PyPi (which is 0.1.10) - https://pypi.org/project/konduit/0.1.10/
+
+        defaultGenerator
+                .opts(new ClientOptInput()
+                        .openAPI(openAPI)
+                        .config(pythonClientCodegen)
+                        .opts(pythonClientOpts))
+                .generate();
     }
 
     private static int findIndex(List<CtClass> array, String className) {
@@ -138,12 +155,16 @@ public class GenerateRestClients {
 
     private static Map<String, List<Pair<String, String>>> getJsonNameMappings() throws IOException {
         String resourcePath = "META-INF/konduit-serving/JsonNameMapping";
-        try {
-            String jsonNameMappingsString = FileUtils.readFileToString(new ClassPathResource(resourcePath).getFile(),
-                    StandardCharsets.UTF_8);
-
+        try(BufferedReader bufferedReader = new BufferedReader(new FileReader(new ClassPathResource(resourcePath).getFile()))) {
             Map<String, List<Pair<String, String>>> mappings = new LinkedHashMap<>();
-            for(String line : jsonNameMappingsString.split(System.lineSeparator())) {
+            while (true) {
+                String line = bufferedReader.readLine();
+                if(line == null) {
+                    break;
+                } else {
+                    line = line.trim();
+                }
+
                 String[] splits = line.split(",");
                 if(splits.length > 2) {
                     String key = splits[2]; // Super class
