@@ -228,6 +228,7 @@ public class Config {
         Set<Module> modules = new LinkedHashSet<>();
         modules.add(Module.PIPELINE);       //Always include core API
         modules.add(Module.VERTX);          //Always include core Vert.x module for serving
+        modules.add(Module.CLI);            //Always include CLI for launching
 
         for(Serving s : serving){
             switch (s){

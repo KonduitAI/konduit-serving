@@ -28,6 +28,7 @@ import ai.konduit.serving.build.dependencies.DependencyRequirement;
 import ai.konduit.serving.build.dependencies.ModuleRequirements;
 import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
+import ai.konduit.serving.build.config.Module;
 import com.beust.jcommander.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;

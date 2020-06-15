@@ -24,10 +24,10 @@ import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
-import org.nd4j.common.io.ClassPathResource;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -50,15 +50,8 @@ public class GradleBuild {
         Preconditions.checkState(uberjar != classpathMF || !uberjar, "Unable to create both a classpath manifest (ClassPathDeployment)" +
                 " and uber-JAR deployment at once");
 
-        File gradlewResource = new ClassPathResource("gradle/gradlew").getFile();
-        Preconditions.checkState(gradlewResource.exists(), "Could not find gradlew resource that should be available in konduit-serving-build JAR");
-        if (gradlewResource.exists())
-            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
-
-        gradlewResource = new ClassPathResource("gradle/gradlew.bat").getFile();
-        Preconditions.checkState(gradlewResource.exists(), "Could not find gradlew.bat resource that should be available in konduit-serving-build JAR");
-        if (gradlewResource.exists())
-            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
+        copyResource("/gradle/gradlew", new File(outputDir, "gradlew"));
+        copyResource("/gradle/gradlew.bat", new File(outputDir, "gradlew.bat"));
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
         StringBuilder kts = new StringBuilder();
@@ -72,19 +65,35 @@ public class GradleBuild {
             }
         }
 
+        // ----- Repositories Section -----
+        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n}\n");
 
+
+        // ----- Plugins Section -----
         kts.append("plugins { java \n");
+        /*
+        //Not yet released - uncomment this once gradle-javacpp-platform plugin is available
+        //Set JavaCPP platforms - https://github.com/bytedeco/gradle-javacpp#the-platform-plugin
+        kts.append("id(\"org.bytedeco.gradle-javacpp-platform\") version \"1.5.3\"\n");      //TODO THIS VERSION SHOULDN'T BE HARDCODED
+         */
         for(Deployment d : config.deployments()){
             List<GradlePlugin> gi = d.gradlePlugins();
             if(gi != null && !gi.isEmpty()){
                 for(GradlePlugin g : gi) {
-                    kts.append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
+                    kts.append("\t").append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
                 }
             }
         }
         kts.append("\n}")
             .append("\n");
-        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n}\n");
+
+        /*
+        //Uncomment once gradle-javacpp-platform plugin available
+        kts.append("ext {\n")
+                .append("\tjavacppPlatorm = \"").append(config.target().toJavacppPlatform() + "\"\n")
+                .append("}\n\n");
+         */
+
         kts.append("group = \"ai.konduit\"\n");
         //kts.append("version = \"1.0-SNAPSHOT\"\n");
 
@@ -121,6 +130,14 @@ public class GradleBuild {
                 kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
                 kts.append("mergeServiceFiles()\n");  //For service loader files
                 kts.append("}").append("\n\n");
+
+                kts.append("//Add manifest - entry point\n")
+                        .append("tasks.withType(Jar::class) {\n")
+                        .append("    manifest {\n")
+                        .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
+                        .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
+                        .append("    }\n")
+                        .append("}\n\n");
             } else if(deployment instanceof ClassPathDeployment){
                 addClassPathTask(kts, (ClassPathDeployment) deployment);
             }
@@ -169,7 +186,9 @@ public class GradleBuild {
         }
 
         try {
-            connection.newBuild().setStandardOutput(System.out).setStandardError(System.err).forTasks(tasks.toArray(new String[0])).run();
+            connection.newBuild().setStandardOutput(System.out).setStandardError(System.err)
+                    .forTasks(tasks.toArray(new String[0]))
+                    .run();
         } finally {
             connection.close();
         }
@@ -208,6 +227,19 @@ public class GradleBuild {
             }
 
             kts.append("}");
+        }
+    }
+
+    protected static void copyResource(String resource, File to){
+        InputStream is = GradleBuild.class.getResourceAsStream(resource);
+        Preconditions.checkState(is != null, "Could not find %s resource that should be available in konduit-serving-build JAR", resource);
+
+        to.getParentFile().mkdirs();
+
+        try(InputStream bis = new BufferedInputStream(is); OutputStream os = new BufferedOutputStream(new FileOutputStream(to))){
+            IOUtils.copy(bis, os);
+        } catch (IOException e){
+            throw new RuntimeException("Error copying resource " + resource + " to " + to, e);
         }
     }
 }

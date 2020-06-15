@@ -114,6 +114,7 @@ public class TestResolving {
                 List<Dependency> expectedDeps = new ArrayList<>();
                 expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-pipeline", ksVersion));
                 expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-vertx", ksVersion));
+                expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-cli", ksVersion));
                 expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-http", ksVersion));
                 expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-grpc", ksVersion));
                 if(testNum == 0){
