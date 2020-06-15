@@ -24,12 +24,16 @@ import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.common.io.ClassPathResource;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,15 +54,8 @@ public class GradleBuild {
         Preconditions.checkState(uberjar != classpathMF || !uberjar, "Unable to create both a classpath manifest (ClassPathDeployment)" +
                 " and uber-JAR deployment at once");
 
-        File gradlewResource = new ClassPathResource("gradle/gradlew").getFile();
-        Preconditions.checkState(gradlewResource.exists(), "Could not find gradlew resource that should be available in konduit-serving-build JAR");
-        if (gradlewResource.exists())
-            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
-
-        gradlewResource = new ClassPathResource("gradle/gradlew.bat").getFile();
-        Preconditions.checkState(gradlewResource.exists(), "Could not find gradlew.bat resource that should be available in konduit-serving-build JAR");
-        if (gradlewResource.exists())
-            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
+        copyResource("/gradle/gradlew", new File(outputDir, "gradlew"));
+        copyResource("/gradle/gradlew.bat", new File(outputDir, "gradlew.bat"));
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
         StringBuilder kts = new StringBuilder();
@@ -208,6 +205,19 @@ public class GradleBuild {
             }
 
             kts.append("}");
+        }
+    }
+
+    protected static void copyResource(String resource, File to){
+        InputStream is = GradleBuild.class.getResourceAsStream(resource);
+        Preconditions.checkState(is != null, "Could not find %s resource that should be available in konduit-serving-build JAR", resource);
+
+        to.getParentFile().mkdirs();
+
+        try(InputStream bis = new BufferedInputStream(is); OutputStream os = new BufferedOutputStream(new FileOutputStream(to))){
+            IOUtils.copy(bis, os);
+        } catch (IOException e){
+            throw new RuntimeException("Error copying resource " + resource + " to " + to, e);
         }
     }
 }
