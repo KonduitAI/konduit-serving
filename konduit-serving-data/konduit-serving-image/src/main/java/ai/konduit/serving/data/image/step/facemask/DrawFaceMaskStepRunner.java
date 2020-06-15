@@ -22,9 +22,12 @@ import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 @CanRun(DrawFaceMaskStep.class)
 public class DrawFaceMaskStepRunner implements PipelineStepRunner {
@@ -49,6 +52,11 @@ public class DrawFaceMaskStepRunner implements PipelineStepRunner {
     @Override
     public Data exec(Context ctx, Data data) {
 
+        INDArray landmarks = data.getNDArray(step.landmarkArray()).getAs(INDArray.class);
+
+        // https://github.com/AIZOOTech/FaceMaskDetection/blob/master/tensorflow_infer.py#L53
+        INDArray y_bboxes_output = landmarks.tensorAlongDimension(0,0,0);
+        INDArray y_cls_output = landmarks.tensorAlongDimension(0,0,1);
 
         Image img = data.getImage(step.image());
 
@@ -61,6 +69,7 @@ public class DrawFaceMaskStepRunner implements PipelineStepRunner {
         return Data.singleton(step.image(), Image.create(img));
 
     }
+
 }
 
 

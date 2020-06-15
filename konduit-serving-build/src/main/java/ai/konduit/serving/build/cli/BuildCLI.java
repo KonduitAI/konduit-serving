@@ -30,7 +30,7 @@ import ai.konduit.serving.build.deployments.UberJarDeployment;
 import com.beust.jcommander.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-
+import ai.konduit.serving.build.config.Module;
 import java.io.File;
 import java.util.*;
 

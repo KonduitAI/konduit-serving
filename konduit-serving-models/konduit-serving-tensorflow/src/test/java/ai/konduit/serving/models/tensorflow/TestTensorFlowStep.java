@@ -863,13 +863,10 @@ public class TestTensorFlowStep {
         //  Merge camera image with face keypoints
         GraphStep merged = camera.mergeWith("facemask-points", tf);
 
-
-
-
-
-
         //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", DrawFaceMaskStep.builder().build());
+        GraphStep drawer = merged.then("drawer", DrawFaceMaskStep.builder()
+                .landmarkArray("cls_branch_concat_1/concat")
+                .build());
 
 
         //Show image in Java frame
