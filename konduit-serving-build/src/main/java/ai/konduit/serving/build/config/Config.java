@@ -60,6 +60,9 @@ public class Config {
     private List<Serving> serving = Collections.singletonList(Serving.HTTP);
     private List<Module> modules;
 
+    //Additional dependencies, in GAV(C) format: "group_id:artifact_id:version" / "group_id:artifact_id:version:classifier"
+    private List<String> additionalDependencies;
+
     private List<Deployment> deployments;
 
     public Config(@JsonProperty("pipelinePath") String pipelinePath, @JsonProperty("ksVersion") String ksVersion,
@@ -343,6 +346,18 @@ public class Config {
                         }
                     }
                 }
+            }
+        }
+
+        //Additional dependencies:
+        if(additionalDependencies != null && !additionalDependencies.isEmpty()){
+            for(String s : additionalDependencies){
+                String[] split = s.split(":");
+                Preconditions.checkState(split.length == 3 || split.length == 4, "Invalid additionalDependency setting: Dependencies must " +
+                        "be specified in \"group_id:artifact_id:version\" or \"group_id:artifact_id:version:classifier\" format. Got %s", additionalDependencies);
+                String c = split.length == 4 ? split[3] : null;
+                Dependency d = new Dependency(split[0], split[1], split[2], c);
+                deps.add(d);
             }
         }
 

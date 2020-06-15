@@ -27,6 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.io.ClassPathResource;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -49,13 +50,13 @@ public class GradleBuild {
         Preconditions.checkState(uberjar != classpathMF || !uberjar, "Unable to create both a classpath manifest (ClassPathDeployment)" +
                 " and uber-JAR deployment at once");
 
-
-
-        File gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew")));
+        File gradlewResource = new ClassPathResource("gradle/gradlew").getFile();
+        Preconditions.checkState(gradlewResource.exists(), "Could not find gradlew resource that should be available in konduit-serving-build JAR");
         if (gradlewResource.exists())
             FileUtils.copyFileToDirectory(gradlewResource, outputDir);
 
-        gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew.bat")));
+        gradlewResource = new ClassPathResource("gradle/gradlew.bat").getFile();
+        Preconditions.checkState(gradlewResource.exists(), "Could not find gradlew.bat resource that should be available in konduit-serving-build JAR");
         if (gradlewResource.exists())
             FileUtils.copyFileToDirectory(gradlewResource, outputDir);
 
@@ -149,7 +150,7 @@ public class GradleBuild {
         if (!kts.exists()) {
             throw new IllegalStateException("build.gradle.kts doesn't exist");
         }
-        File gradlew = new File("target/classes/gradlew.bat");
+        File gradlew = new File(directory, "gradlew.bat");
         if (!gradlew.exists()) {
             throw new IllegalStateException("gradlew.bat doesn't exist");
         }
