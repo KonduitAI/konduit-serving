@@ -234,13 +234,13 @@ public class ServeCommand extends DefaultCommand {
         Process process = builder.start();
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
             while (LauncherUtils.isProcessExists(id)) {
-                if(reader.ready()) {
+                while(reader.ready()){
                     out.println(reader.readLine());
-                } else if(errReader.ready()){
-                    out.println(errReader.readLine());
-                } else {
-                    Thread.sleep(100);
                 }
+                while(errReader.ready()) {
+                    out.println(errReader.readLine());
+                }
+                Thread.sleep(100);
             }
             //Print any additional errors
             while(reader.ready()) {
