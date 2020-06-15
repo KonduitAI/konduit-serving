@@ -230,20 +230,29 @@ public class ServeCommand extends DefaultCommand {
 
     private void runAndTailOutput(ProcessBuilder builder) throws IOException {
         Process process = builder.start();
-        try(BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
             while (LauncherUtils.isProcessExists(id)) {
                 if(reader.ready()) {
                     out.println(reader.readLine());
+                } else if(errReader.ready()){
+                    out.println(errReader.readLine());
                 } else {
                     Thread.sleep(100);
                 }
+            }
+            //Print any additional errors
+            while(reader.ready()) {
+                out.println(reader.readLine());
+            }
+            while(errReader.ready()) {
+                out.println(errReader.readLine());
             }
         } catch (InterruptedException interruptedException) {
             out.format("Killing server (%s) logs%n", id);
         }
 
         if (!process.isAlive()) {
-            out.format("Server with id (%s) terminated...%n", id);
+            out.format("Server with id (%s) terminated with exit code %s...%n", id, process.exitValue());
         }
     }
 
