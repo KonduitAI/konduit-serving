@@ -25,6 +25,7 @@ import ai.konduit.serving.build.build.GradleBuild;
 import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
@@ -299,6 +300,7 @@ public class TestGradleGeneration {
         //Actually run the build
         //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
         GradleBuild.runGradleBuild(gradleDir, c);
+        assertTrue(StringUtils.isNotEmpty(deployment.imageId()));
     }
 
     @Test

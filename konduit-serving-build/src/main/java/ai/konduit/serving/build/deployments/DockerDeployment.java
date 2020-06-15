@@ -41,6 +41,7 @@ public class DockerDeployment implements Deployment {
     private String outputDir;
     private String imageName;
     private String version;
+    private String imageId;
 
     public DockerDeployment(String outputDir) {
         this(outputDir, "ks", Deployment.defaultVersion());
@@ -79,7 +80,7 @@ public class DockerDeployment implements Deployment {
 
     @Override
     public String outputString() {
-        return null;
+        return imageId;
     }
 
     @Override

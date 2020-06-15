@@ -34,6 +34,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GradleBuild {
 
@@ -268,7 +270,27 @@ public class GradleBuild {
         }
 
         try {
-            connection.newBuild().setStandardOutput(System.out).setStandardError(System.err).forTasks(tasks.toArray(new String[0])).run();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            connection.newBuild().setStandardOutput(baos).setStandardError(System.err).forTasks(tasks.toArray(new String[0])).run();
+            String output = baos.toString();
+            Pattern pattern = Pattern.compile("(Successfully built )(\\w)+");
+            Matcher matcher = pattern.matcher(output);
+            String dockerId = StringUtils.EMPTY;
+            while (matcher.find()){
+                String[] words = matcher.group(0).split(" ");
+                if (words.length >= 3) {
+                    dockerId = words[2];
+                }
+            }
+            final String effDockerId = dockerId;
+            System.out.println(output);
+            if (StringUtils.isNotEmpty(dockerId)) {
+                config.deployments().stream().forEach(
+                        d -> {
+                            if (d instanceof DockerDeployment)
+                                ((DockerDeployment) d).imageId(effDockerId);
+                        });
+            }
         } finally {
             connection.close();
         }
