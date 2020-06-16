@@ -60,9 +60,7 @@ public class CanRunProcessor extends AbstractProcessor {
                     return false;
 
                 throw new IllegalStateException("No class in this module is annotated with @ModuleInfo - a class with " +
-                        "@ModuleInfo(\"your-module-name\" should be added to the module that has the @CanRun(...) annotation - EXISTS: " + exists
-                        + " - toWrite = " + toWrite
-                        + " - content = " + content);
+                        "@ModuleInfo(\"your-module-name\" should be added to the module that has the @CanRun(...) annotation");
             }
             writeFile();
         } else {
