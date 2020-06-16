@@ -21,16 +21,17 @@ package ai.konduit.serving.cli.launcher.command;
 import ai.konduit.serving.cli.launcher.KonduitServingLauncher;
 import ai.konduit.serving.cli.launcher.LauncherUtils;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import com.google.common.reflect.ClassPath;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.nd4j.common.io.ClassPathResource;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
 import static ai.konduit.serving.cli.launcher.command.KonduitRunCommand.DEFAULT_SERVICE;
@@ -49,6 +50,7 @@ import static ai.konduit.serving.cli.launcher.command.KonduitRunCommand.DEFAULT_
         "- Starts a server in the background with an id of 'inf_server' using 'config.yaml' as configuration file:\n" +
         "$ konduit serve -id inf_server -c config.yaml -b\n" +
         "--------------")
+@Slf4j
 public class ServeCommand extends DefaultCommand {
 
     private String id;
@@ -230,20 +232,29 @@ public class ServeCommand extends DefaultCommand {
 
     private void runAndTailOutput(ProcessBuilder builder) throws IOException {
         Process process = builder.start();
-        try(BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
             while (LauncherUtils.isProcessExists(id)) {
-                if(reader.ready()) {
+                while(reader.ready()){
                     out.println(reader.readLine());
-                } else {
-                    Thread.sleep(100);
                 }
+                while(errReader.ready()) {
+                    out.println(errReader.readLine());
+                }
+                Thread.sleep(100);
+            }
+            //Print any additional errors
+            while(reader.ready()) {
+                out.println(reader.readLine());
+            }
+            while(errReader.ready()) {
+                out.println(errReader.readLine());
             }
         } catch (InterruptedException interruptedException) {
             out.format("Killing server (%s) logs%n", id);
         }
 
         if (!process.isAlive()) {
-            out.format("Server with id (%s) terminated...%n", id);
+            out.format("Server with id (%s) terminated with exit code %s...%n", id, process.exitValue());
         }
     }
 
@@ -271,15 +282,25 @@ public class ServeCommand extends DefaultCommand {
         String logbackFileProperty = "logback.configurationFile";
         String defaultLogbackFile = "logback-run_command.xml";
         if (!String.join(" ", cmd).contains(logbackFileProperty)) {
-            try {
-                ExecUtils.addArgument(cmd, String.format("-D%s=%s", konduitLogsFileProperty,
-                        new File(DirectoryFetcher.getCommandLogsDir(), id + ".log").getAbsolutePath()));
-                ExecUtils.addArgument(cmd, String.format("-D%s=%s", logbackFileProperty,
-                        new ClassPathResource(defaultLogbackFile).getFile().getAbsolutePath()));
-            } catch (IOException e) {
-                e.printStackTrace(out);
-            }
+            ExecUtils.addArgument(cmd, String.format("-D%s=%s", konduitLogsFileProperty,
+                    new File(DirectoryFetcher.getCommandLogsDir(), id + ".log").getAbsolutePath()));
+            File logbackFile = extractLogbackFile(defaultLogbackFile);
+            ExecUtils.addArgument(cmd, String.format("-D%s=%s", logbackFileProperty,
+                    logbackFile.getAbsolutePath()));
         }
+    }
+
+    private File extractLogbackFile(String file){
+        String s = UUID.randomUUID().toString().replace("-","").substring(0, 16);
+        int idx = file.lastIndexOf('.');
+        String name = file.substring(0, idx) + "_" + s + file.substring(idx);
+        File out =  new File(FileUtils.getTempDirectory(), name);
+        try(InputStream is = new ClassPathResource(file).getInputStream(); OutputStream os = new BufferedOutputStream(new FileOutputStream(out))){
+            IOUtils.copy(is, os);
+        } catch (IOException e){
+            log.error("Error extracting logback file: file does not exist or temp directory cannot be written to?", e);
+        }
+        return out;
     }
 
     private File getJava() {

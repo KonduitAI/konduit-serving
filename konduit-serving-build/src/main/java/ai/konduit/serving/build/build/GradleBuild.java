@@ -25,6 +25,7 @@ import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.io.IOUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
@@ -66,13 +67,8 @@ public class GradleBuild {
         Preconditions.checkState(uberjar != classpathMF || !uberjar, "Unable to create both a classpath manifest (ClassPathDeployment)" +
                 " and uber-JAR deployment at once");
 
-        File gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew")));
-        if (gradlewResource.exists())
-            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
-
-        gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew.bat")));
-        if (gradlewResource.exists())
-            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
+        copyResource("/gradle/gradlew", new File(outputDir, "gradlew"));
+        copyResource("/gradle/gradlew.bat", new File(outputDir, "gradlew.bat"));
 
         File dockerResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("Dockerfile")));
         if (dockerResource.exists())
@@ -90,26 +86,38 @@ public class GradleBuild {
             }
         }
 
+        // ----- Repositories Section -----
+        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n}\n");
+
+
+        // ----- Plugins Section -----
         kts.append("plugins { java \n");
+        /*
+        //Not yet released - uncomment this once gradle-javacpp-platform plugin is available
+        //Set JavaCPP platforms - https://github.com/bytedeco/gradle-javacpp#the-platform-plugin
+        kts.append("id(\"org.bytedeco.gradle-javacpp-platform\") version \"1.5.3\"\n");      //TODO THIS VERSION SHOULDN'T BE HARDCODED
+         */
         for(Deployment d : config.deployments()){
             List<GradlePlugin> gi = d.gradlePlugins();
             if(gi != null && !gi.isEmpty()){
                 for(GradlePlugin g : gi) {
                     if (StringUtils.isNotEmpty(g.version()))
-                        kts.append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
+                        kts.append("\t").append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
                     else
-                        kts.append("id(\"").append(g.id()).append("\")\n");
+                        kts.append("\t").append("id(\"").append(g.id()).append("\")\n");
                 }
             }
         }
         kts.append("\n}")
-                .append("\n");
+            .append("\n");
 
-        kts.append("repositories {\n" +
-                "\tmavenCentral()\n" +
-                "\tmavenLocal()\n" +
-                "\tjcenter()\n" +
-                "\tmaven {\n\turl = uri(\"https://plugins.gradle.org/m2/\")}\n}\n");
+        /*
+        //Uncomment once gradle-javacpp-platform plugin available
+        kts.append("ext {\n")
+                .append("\tjavacppPlatorm = \"").append(config.target().toJavacppPlatform() + "\"\n")
+                .append("}\n\n");
+         */
+
         kts.append("group = \"ai.konduit\"\n");
         //kts.append("version = \"1.0-SNAPSHOT\"\n");
 
@@ -145,6 +153,13 @@ public class GradleBuild {
                 kts.append("\tdestinationDirectory.set(file(\"" + escaped + "\"))\n");
                 kts.append("\tmergeServiceFiles()");  //For service loader files
                 kts.append("}\n");
+				kts.append("//Add manifest - entry point\n")
+                        .append("tasks.withType(Jar::class) {\n")
+                        .append("    manifest {\n")
+                        .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
+                        .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
+                        .append("    }\n")
+                        .append("}\n\n");
             }
             else if (deployment instanceof RpmDeployment) {
                 String rpmName = ((RpmDeployment)deployment).rpmName();
@@ -249,7 +264,7 @@ public class GradleBuild {
         if (!kts.exists()) {
             throw new IllegalStateException("build.gradle.kts doesn't exist");
         }
-        File gradlew = new File("target/classes/gradlew.bat");
+        File gradlew = new File(directory, "gradlew.bat");
         if (!gradlew.exists()) {
             throw new IllegalStateException("gradlew.bat doesn't exist");
         }
@@ -362,6 +377,19 @@ public class GradleBuild {
             }
 
             kts.append("}");
+        }
+    }
+
+    protected static void copyResource(String resource, File to){
+        InputStream is = GradleBuild.class.getResourceAsStream(resource);
+        Preconditions.checkState(is != null, "Could not find %s resource that should be available in konduit-serving-build JAR", resource);
+
+        to.getParentFile().mkdirs();
+
+        try(InputStream bis = new BufferedInputStream(is); OutputStream os = new BufferedOutputStream(new FileOutputStream(to))){
+            IOUtils.copy(bis, os);
+        } catch (IOException e){
+            throw new RuntimeException("Error copying resource " + resource + " to " + to, e);
         }
     }
 }

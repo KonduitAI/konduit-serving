@@ -45,6 +45,9 @@ public class UberJarDeployment implements Deployment {
     public static final String PROP_AID = "jar.artifactid";
     public static final String PROP_VER = "jar.version";
 
+    public static final String CLI_KEYS = "JAR deployment config keys: " + PROP_OUTPUTDIR + ", " + PROP_JARNAME + ","
+            + PROP_GID + ", " + PROP_AID + ", " + PROP_VER;
+
     private String outputDir;
     private String jarName;
     private String groupId;

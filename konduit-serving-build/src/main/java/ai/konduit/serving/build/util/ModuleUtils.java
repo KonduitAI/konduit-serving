@@ -72,6 +72,9 @@ public class ModuleUtils {
                     Map<String,Object> m = (Map<String,Object>)o;
                     String jsonType = (String) m.get("@type");
                     Module mod = moduleForJsonType(jsonType);
+                    if(mod == null)
+                        continue;
+
                     String runnerClass = null;      //TODO
 
                     String name = "";   //TODO
@@ -81,8 +84,27 @@ public class ModuleUtils {
                     out.put(id, Collections.singletonList(ri));
                 }
             }
-        } else {
-            throw new UnsupportedOperationException("GraphPipeline handling not yet implemented");
+        } else if(stepsObj instanceof Map) {
+            Map<String,Object> m = (Map<String,Object>)stepsObj;
+            for(Map.Entry<String,Object> e : m.entrySet()){
+                if(e.getValue() instanceof Map){
+                    Map<String,Object> step = (Map<String,Object>)e.getValue();
+                    if(step.containsKey("@type")){
+                        String jsonType = (String) step.get("@type");
+                        Module mod = moduleForJsonType(jsonType);
+                        if(mod == null)
+                            continue;
+
+                        String runnerClass = null;      //TODO
+
+                        String name = "";   //TODO
+                        StepId id = new StepId(stepCount, name, jsonType);
+
+                        RunnerInfo ri = new RunnerInfo(runnerClass, mod);
+                        out.put(id, Collections.singletonList(ri));
+                    }
+                }
+            }
         }
 
         return out;
@@ -97,9 +119,19 @@ public class ModuleUtils {
         Preconditions.checkState(map.containsKey(jsonType), "No JSON subtype known for: %s", jsonType);
 
         List<RunnerInfo> l = map.get(jsonType);
+        if(l == null || l.isEmpty()){
+            log.warn("Failed to determine runner for JSON type {} - class represents custom functionality, or missing @CanRun annotation on the runner?", jsonType);
+            return null;
+        }
+
         if(l.size() > 1){
             log.warn("More than 1 runner available for JSON type {} - returning first", jsonType);
         }
+        if (l.get(0) == null) {
+            log.warn("Failed to determine runner for JSON type {} - class represents custom functionality, or missing @CanRun annotation on the runner?", jsonType);
+            return null;
+        }
+
         return l.get(0).module();
     }
 

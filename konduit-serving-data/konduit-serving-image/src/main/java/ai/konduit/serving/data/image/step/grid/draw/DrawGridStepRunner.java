@@ -40,7 +40,7 @@ import org.nd4j.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 
-@CanRun(DrawGridStep.class)
+@CanRun({DrawGridStep.class, DrawFixedGridStep.class})
 public class DrawGridStepRunner implements PipelineStepRunner {
 
     protected final DrawGridStep step;
@@ -153,10 +153,10 @@ public class DrawGridStepRunner implements PipelineStepRunner {
         int gridThickness;
         if(fixed){
             gridColor = fStep.gridColor() == null ? borderColor : ColorUtil.stringToColor(fStep.gridColor());
-            gridThickness = fStep.gridThickness();
+            gridThickness = fStep.gridThickness() == null ? borderThickness : fStep.gridThickness();
         } else {
             gridColor = step.gridColor() == null ? borderColor : ColorUtil.stringToColor(step.gridColor());
-            gridThickness = step.gridThickness();
+            gridThickness = step.gridThickness() == null ? borderThickness : step.gridThickness();
         }
 
         if(gridThickness <= 0)
