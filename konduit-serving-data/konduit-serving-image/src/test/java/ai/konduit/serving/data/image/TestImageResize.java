@@ -20,6 +20,7 @@ package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
 import ai.konduit.serving.data.image.step.resize.ImageResizeStep;
+import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -27,6 +28,7 @@ import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.junit.Test;
 
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -34,17 +36,12 @@ import static org.junit.Assert.assertTrue;
 public class TestImageResize {
 
     @Test
-    public void test() {
-
-    }
-
-
-    @Test
-    public void testAspectRatioHandling() {
+    public void testWithAspectRatioHandling() throws Exception {
 
         for (AspectRatioHandling h : AspectRatioHandling.values()) {
             for (boolean wLarger : new boolean[]{false, true}) {
-                System.out.println(h + " - wLarger=" + wLarger);
+                String s = h + " - wLarger=" + wLarger;
+                System.out.println(s);
 
                 int[][][] chw;
                 if (wLarger) {
@@ -56,7 +53,7 @@ public class TestImageResize {
                 for (int c = 0; c < chw.length; c++) {
                     for (int y = 0; y < chw[0].length; y++) {
                         for (int x = 0; x < chw[0][0].length; x++) {
-                            chw[c][y][x] = 100 * c + y + x;
+                            chw[c][y][x] = c + y + x;
                         }
                     }
                 }
@@ -69,6 +66,7 @@ public class TestImageResize {
                                 .aspectRatioHandling(h)
                                 .height(32)
                                 .width(32))
+//                        .add(new ShowImagePipelineStep().displayName(s))
                         .build();
 
                 Data in = Data.singleton("img", i);
@@ -98,15 +96,40 @@ public class TestImageResize {
                             }
                         }
                     }
-                    BufferedImage bi = TestImageToNDArray.toBufferedImage(sub);
-                    boolean eq = TestConversion.bufferedImagesEqual(outImg.getAs(BufferedImage.class), bi);
-                    assertTrue(eq);
+
+                    int[][][] act = toCHW(outImg.getAs(BufferedImage.class));
+                    for( int c=0; c<3; c++ ){
+                        for( int y=0; y<32; y++ ){
+                            boolean eq = Arrays.equals(sub[c][y], act[c][y]);
+                            if(!eq){
+                                System.out.println(c + " - " + y);
+                            }
+                            assertTrue(eq);
+                        }
+                    }
+
+//                    assertTrue(eq);
                 }
-                //TODO PAD and STRETCH
+                //TODO PAD and STRETCH validation
             }
-
         }
+    }
 
+    public int[][][] toCHW(BufferedImage bi){
+        int[][][] out = new int[3][bi.getHeight()][bi.getWidth()];
+        for( int y=0; y<bi.getHeight(); y++){
+            for( int x=0; x<bi.getWidth(); x++ ){
+                int rgb = bi.getRGB(x, y);
+                int r = (rgb & 0b111111110000000000000000) >> 16;
+                int g = (rgb & 0b000000001111111100000000) >> 8;
+                int b = rgb & 0b000000000000000011111111;
+
+                out[0][y][x] = r;
+                out[1][y][x] = g;
+                out[2][y][x] = b;
+            }
+        }
+        return out;
     }
 
 }

@@ -214,7 +214,7 @@ public class ImageToNDArray {
         } else {
             //Need to crop from the height dimension
             croppedW = imgW;
-            croppedH = (int)(image.rows() / aspectOut);
+            croppedH = (int)(image.cols() / aspectOut);
             int delta = imgH - croppedH;
             x0 = 0;
             y0 = delta / 2;

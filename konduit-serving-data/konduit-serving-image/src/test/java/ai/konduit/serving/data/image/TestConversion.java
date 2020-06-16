@@ -136,7 +136,9 @@ public class TestConversion {
 
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-                if (img1.getRGB(i,j) != img2.getRGB(i,j)) {
+                int rgb1 = img1.getRGB(i,j);
+                int rgb2 = img2.getRGB(i,j);
+                if (rgb1 != rgb2) {
                     return false;
                 }
             }

@@ -28,8 +28,11 @@ import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.common.primitives.Pair;
@@ -125,7 +128,7 @@ public class ImageResizeRunner implements PipelineStepRunner {
             }
             Mat m = in.getAs(Mat.class);
             Mat resized = new Mat();
-            org.bytedeco.opencv.global.opencv_imgproc.resize(m, resized, new Size(h, w));
+            org.bytedeco.opencv.global.opencv_imgproc.resize(m, resized, new Size(w, h));
             return Image.create(resized);
         } else {
             //Both h/w are specified - need to check and maybe handle aspect ratio
@@ -139,39 +142,43 @@ public class ImageResizeRunner implements PipelineStepRunner {
             if(arCurrent == arOut || step.aspectRatioHandling() == AspectRatioHandling.STRETCH || step.aspectRatioHandling() == null){
                 //Aspect ratio OK - or just stretching
                 Mat resized = new Mat();
-                org.bytedeco.opencv.global.opencv_imgproc.resize(m, resized, new Size(step.height(), step.width()));
+                org.bytedeco.opencv.global.opencv_imgproc.resize(m, resized, new Size(step.width(), step.height()));
                 return Image.create(resized);
             } else {
                 if(step.aspectRatioHandling() == AspectRatioHandling.CENTER_CROP){
-                    Pair<Mat, BoundingBox> p = ImageToNDArray.centerCrop(m, step.height, step.width, false);
+                    Pair<Mat, BoundingBox> p = ImageToNDArray.centerCrop(m, step.height(), step.width(), false);
                     Mat crop = p.getFirst();
                     if(crop.rows() == step.height() && crop.cols() == step.width()){
                         return Image.create(crop);
                     }
                     Mat resized = new Mat();
-                    org.bytedeco.opencv.global.opencv_imgproc.resize(crop, resized, new Size(step.height(), step.width()));
+                    org.bytedeco.opencv.global.opencv_imgproc.resize(crop, resized, new Size(step.width(), step.height()));
                     return Image.create(resized);
                 } else if(step.aspectRatioHandling() == AspectRatioHandling.PAD){
                     if(arCurrent > arOut){
                         //Pad height
                         int newH = (int)Math.round(in.width() / arOut);
                         Mat padded = new Mat(newH, in.width(), m.type());
+                        UByteIndexer u = padded.createIndexer(!Loader.getPlatform().startsWith("android"));
+                        u.pointer().zero();
                         int delta = newH - in.height();
 
                         Mat sub = padded.apply(new Rect(0,delta/2,in.width(),in.height()));
-                        sub.put(m);
+                        m.copyTo(sub);
 
                         Mat resized = new Mat();
-                        org.bytedeco.opencv.global.opencv_imgproc.resize(padded, resized, new Size(step.height(), step.width()));
+                        org.bytedeco.opencv.global.opencv_imgproc.resize(padded, resized, new Size(step.width(), step.height()));
                         return Image.create(resized);
                     } else {
                         //Pad width
                         int newW = (int)Math.round(in.height() * arOut);
                         Mat padded = new Mat(in.height(), newW, m.type());
+                        UByteIndexer u = padded.createIndexer(!Loader.getPlatform().startsWith("android"));
+                        u.pointer().zero();
                         int delta = newW - in.width();
 
                         Mat sub = padded.apply(new Rect(delta/2,0, in.width(), in.height()));
-                        sub.put(m);
+                        m.copyTo(sub);
 
                         Mat resized = new Mat();
                         org.bytedeco.opencv.global.opencv_imgproc.resize(padded, resized, new Size(step.height(), step.width()));

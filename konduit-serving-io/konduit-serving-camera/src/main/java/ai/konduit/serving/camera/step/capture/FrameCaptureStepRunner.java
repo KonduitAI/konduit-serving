@@ -90,7 +90,6 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
         grabber = new OpenCVFrameGrabber(step.getCamera());
         converter = new OpenCVFrameConverter.ToIplImage();
 
-        //TODO NEED TO CONFIGURE - RESOLUTION ETC
         int w = step.getWidth();
         int h = step.getHeight();
         grabber.setImageHeight(h);
