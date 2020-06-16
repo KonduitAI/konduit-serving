@@ -48,9 +48,9 @@ public class TestImageResize {
 
                 int[][][] chw;
                 if (wLarger) {
-                    chw = new int[3][48][32];
-                } else {
                     chw = new int[3][32][48];
+                } else {
+                    chw = new int[3][48][32];
                 }
 
                 for (int c = 0; c < chw.length; c++) {
