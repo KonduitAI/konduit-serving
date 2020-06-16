@@ -38,6 +38,7 @@ public class DockerDeployment implements Deployment {
     public static final String PROP_OUTPUTDIR = "docker.outputdir";
     public static final String PROP_RPMNAME = "docker.name";
 
+    private String inputDir;
     private String outputDir;
     private String imageName;
     private String version;

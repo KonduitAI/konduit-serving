@@ -100,17 +100,21 @@ public class TarDeployment implements Deployment {
 
     @Override
     public List<String> gradleImports() {
-        return null;
+        return Collections.singletonList("com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar");
     }
 
     @Override
     public List<GradlePlugin> gradlePlugins() {
-        return Collections.singletonList(new GradlePlugin("distribution", ""));
+        List<GradlePlugin> ret = new ArrayList<>();
+        ret.add(new GradlePlugin("distribution", ""));
+        ret.add(new GradlePlugin("com.github.johnrengelman.shadow", "2.0.4"));
+        return ret;
     }
 
     @Override
     public List<String> gradleTaskNames() {
         List<String> ret = new ArrayList<>();
+        ret.add("shadowJar");
         ret.add("distTar");
         ret.add("copyTar");
         return ret;

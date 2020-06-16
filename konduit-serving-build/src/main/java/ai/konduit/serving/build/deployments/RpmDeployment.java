@@ -108,17 +108,22 @@ public class RpmDeployment implements Deployment {
         List<String> retVal = new ArrayList<>();
         retVal.add("org.redline_rpm.header.Os");
         retVal.add("org.redline_rpm.header.Architecture");
+        retVal.add("com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar");
         return retVal;
     }
 
     @Override
     public List<GradlePlugin> gradlePlugins() {
-        return Collections.singletonList(new GradlePlugin("nebula.ospackage", "8.3.0"));
+        List<GradlePlugin> retVal = new ArrayList<>();
+        retVal.add(new GradlePlugin("nebula.ospackage", "8.3.0"));
+        retVal.add(new GradlePlugin("com.github.johnrengelman.shadow", "2.0.4"));
+        return retVal;
     }
 
     @Override
     public List<String> gradleTaskNames() {
         List<String> ret = new ArrayList<>();
+        ret.add("shadowJar");
         ret.add("buildRpm");
         ret.add("copyRpm");
         return ret;

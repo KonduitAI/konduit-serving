@@ -96,17 +96,25 @@ public class ExeDeployment implements Deployment {
 
     @Override
     public List<String> gradleImports() {
-        return Collections.singletonList("edu.sc.seis.launch4j.tasks.DefaultLaunch4jTask");
+        List<String> retVal = new ArrayList<>();
+        retVal.add("edu.sc.seis.launch4j.tasks.DefaultLaunch4jTask");
+        retVal.add("com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar");
+        return retVal;
     }
 
     @Override
     public List<GradlePlugin> gradlePlugins() {
-        return Collections.singletonList(new GradlePlugin("edu.sc.seis.launch4j", "2.4.6"));
+        List<GradlePlugin> retVal = new ArrayList<>();
+        retVal.add(new GradlePlugin("nebula.ospackage", "8.3.0"));
+        retVal.add(new GradlePlugin("com.github.johnrengelman.shadow", "2.0.4"));
+        retVal.add(new GradlePlugin("edu.sc.seis.launch4j", "2.4.6"));
+        return retVal;
     }
 
     @Override
     public List<String> gradleTaskNames() {
         List<String> ret = new ArrayList<>();
+        ret.add("shadowJar");
         ret.add("createExe");
         ret.add("copyExe");
         return ret;

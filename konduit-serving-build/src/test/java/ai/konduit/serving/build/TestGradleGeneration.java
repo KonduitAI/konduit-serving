@@ -39,8 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @Ignore //TO be run manually, not part of CI (as it requires all modules to be installed first)
 public class TestGradleGeneration {
@@ -315,6 +314,7 @@ public class TestGradleGeneration {
         //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
         GradleBuild.runGradleBuild(gradleDir, c);
         assertTrue(StringUtils.isNotEmpty(deployment.imageId()));
+        assertEquals(deployment.outputString(), deployment.imageId());
     }
 
     @Test

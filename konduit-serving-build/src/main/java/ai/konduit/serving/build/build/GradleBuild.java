@@ -142,32 +142,23 @@ public class GradleBuild {
 
         for (Deployment deployment : deployments) {
             if (deployment instanceof UberJarDeployment) {
-                kts.append("tasks.withType<ShadowJar> {\n");
+                String escaped = ((UberJarDeployment)deployment).outputDir().replace("\\","\\\\");
                 String jarName = ((UberJarDeployment)deployment).jarName();
                 if(jarName.endsWith(".jar")){
                     jarName = jarName.substring(0, jarName.length()-4);
                 }
-
-                kts.append("\tbaseName = \"" + jarName + "\"\n");
-                String escaped = ((UberJarDeployment)deployment).outputDir().replace("\\","\\\\");
-                kts.append("\tdestinationDirectory.set(file(\"" + escaped + "\"))\n");
-                kts.append("\tmergeServiceFiles()");  //For service loader files
-                kts.append("}\n");
-				kts.append("//Add manifest - entry point\n")
-                        .append("tasks.withType(Jar::class) {\n")
-                        .append("    manifest {\n")
-                        .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
-                        .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
-                        .append("    }\n")
-                        .append("}\n\n");
+                addUberJarTask(kts, jarName, escaped);
             }
             else if (deployment instanceof RpmDeployment) {
+                String escaped = ((RpmDeployment)deployment).outputDir().replace("\\","\\\\");
+                addUberJarTask(kts,  "ks", escaped);
+
                 String rpmName = ((RpmDeployment)deployment).rpmName();
                 kts.append("ospackage { \n");
                 if(rpmName.endsWith(".rpm")){
                     rpmName = rpmName.substring(0, rpmName.length()-4);
                 }
-
+                kts.append("\tfrom(\"" + escaped + "\")\n");
                 kts.append("\tpackageName = \"" + rpmName + "\"\n");
                 kts.append("\tsetArch( " + ((RpmDeployment)deployment).archName() + ")\n");
                 kts.append("\tos = " + ((RpmDeployment)deployment).osName() + "\n");
@@ -177,12 +168,15 @@ public class GradleBuild {
                         ((RpmDeployment)deployment).outputDir(), "*.rpm", "distributions"));
             }
             else if (deployment instanceof DebDeployment) {
+                String escaped = ((DebDeployment)deployment).outputDir().replace("\\","\\\\");
+                addUberJarTask(kts,  "ks", escaped);
+
                 String rpmName = ((DebDeployment)deployment).rpmName();
                 kts.append("ospackage {\n");
                 if(rpmName.endsWith(".deb")){
                     rpmName = rpmName.substring(0, rpmName.length()-4);
                 }
-
+                kts.append("\tfrom(\"" + escaped + "\")\n");
                 kts.append("\tpackageName = \"" + rpmName + "\"\n");
                 //kts.append("\tsetArch(" + ((DebDeployment)deployment).archName() + ")\n");
                 kts.append("\tos = " + ((DebDeployment)deployment).osName() + "\n");
@@ -209,19 +203,26 @@ public class GradleBuild {
 
             else if (deployment instanceof DockerDeployment) {
                 String escapedOutputDir = ((DockerDeployment)deployment).outputDir().replace("\\","\\\\");
-                String escaped = StringUtils.EMPTY;
-                if (dockerResource != null)
-                    escaped = dockerResource.getParent().replace("\\","\\\\");
+                String escapedInputDir = StringUtils.EMPTY;
+                if (StringUtils.isEmpty(((DockerDeployment)deployment).inputDir())) {
+                    if (dockerResource != null)
+                        escapedInputDir = dockerResource.getParent().replace("\\","\\\\");
+                }
+                else {
+                   escapedInputDir = ((DockerDeployment) deployment).inputDir().replace("\\", "\\\\");
+                }
 
                 kts.append("tasks.create(\"buildImage\", DockerBuildImage::class) {\n");
                            //"\tdestinationDirectory.set(file(\"" + escapedOutputDir + "\"))\n");
-                if (StringUtils.isNotEmpty(escaped))
-                    kts.append("\tinputDir.set(file(\"" + escaped + "\"))\n");
+                if (StringUtils.isNotEmpty(escapedInputDir))
+                    kts.append("\tinputDir.set(file(\"" + escapedInputDir + "\"))\n");
                 else
                     kts.append("\tval baseImage = FromInstruction(From(\"openjdk:8-jre\"))\n");
                 kts.append("}\n");
             }
             else if (deployment instanceof TarDeployment) {
+                String escaped = ((TarDeployment)deployment).outputDir().replace("\\","\\\\");
+                addUberJarTask(kts,  "ks", escaped);
                 List<String> fromFiles = ((TarDeployment)deployment).files();
                 if (fromFiles.size() > 0) {
                     String rpmName = ((TarDeployment) deployment).archiveName();
@@ -231,9 +232,10 @@ public class GradleBuild {
                     kts.append("\t\tdistributionBaseName.set( \"" + rpmName + "\")\n");
                     kts.append("\t\t contents {\n");
                     for (String file : fromFiles) {
-                        String escaped = file.replace("\\","\\\\");
-                        kts.append("\t\t\tfrom(\"" + escaped + "\")\n");
+                        String escapedFile = file.replace("\\","\\\\");
+                        kts.append("\t\t\tfrom(\"" + escapedFile + "\")\n");
                     }
+                    kts.append("\t\t\tfrom(\"" + escaped + "\")\n");
                     kts.append("\t\t }\n");
                     kts.append("\t}\n");
                     kts.append("}").append("\n\n");
@@ -342,6 +344,22 @@ public class GradleBuild {
             default:
                 throw new RuntimeException("Unknown os for target: " + t);
         }
+    }
+
+    private static void addUberJarTask(StringBuilder kts, String fileName, String directoryName) {
+        kts.append("tasks.withType<ShadowJar> {\n");
+        String jarName = fileName;
+        kts.append("\tbaseName = \"" + jarName + "\"\n");
+        kts.append("\tdestinationDirectory.set(file(\"" + directoryName + "\"))\n");
+        kts.append("\tmergeServiceFiles()");  //For service loader files
+        kts.append("}\n");
+        kts.append("//Add manifest - entry point\n")
+                .append("tasks.withType(Jar::class) {\n")
+                .append("    manifest {\n")
+                .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
+                .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
+                .append("    }\n")
+                .append("}\n\n");
     }
 
     private static void addClassPathTask(StringBuilder kts, ClassPathDeployment cpd){
