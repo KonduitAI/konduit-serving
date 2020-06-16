@@ -28,6 +28,7 @@ import io.swagger.codegen.v3.generators.java.JavaClientCodegen;
 import io.swagger.codegen.v3.generators.python.PythonClientCodegen;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -97,6 +98,7 @@ public class GenerateRestClients {
             System.exit(1);
         }
 
+        log.info("Generated open api spec is: {}\n", Yaml.pretty(openAPI));
         generateClients(openAPI);
     }
 

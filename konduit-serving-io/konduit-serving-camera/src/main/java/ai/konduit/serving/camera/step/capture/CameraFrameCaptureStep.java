@@ -19,22 +19,38 @@ package ai.konduit.serving.camera.step.capture;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+// TODO: not sure if it's relevant here but maybe we can later add a variable to specify the frames per second
+//  or a way to specify max number of inferences per second. This can potentially save us some compute.- SHAMS
 @Builder
 @Data
 @JsonName("FRAME_CAPTURE")
+@Schema(description = "A pipeline step that specifies an input that's taken from a camera feed.")
 public class CameraFrameCaptureStep implements PipelineStep {
 
     @Builder.Default
+    @Schema(description = "ID of the camera from which the input is taken from. Each system cameras is assigned an ID, " +
+            "which is usually 0 for the first device, 1 for the second and so on...",
+            defaultValue = "0")
     private int camera = 0;         //TODO add other (more robust) ways to select camera
+
     @Builder.Default
+    @Schema(description = "Width of the incoming image frame. This will scale the original resolution width to the specified value.",
+            defaultValue = "640")
     private int width = 640;
+
     @Builder.Default
+    @Schema(description = "Height of the incoming image frame. This will scale the original resolution height to the specified value.",
+            defaultValue = "480")
     private int height = 480;
+
     @Builder.Default
+    @Schema(description = "Name of the output key that will contain and carry the image frame data to the later pipeline steps.",
+            defaultValue = "image")
     private String outputKey = "image";
 
     public CameraFrameCaptureStep(@JsonProperty("camera") int camera, @JsonProperty("width") int width,

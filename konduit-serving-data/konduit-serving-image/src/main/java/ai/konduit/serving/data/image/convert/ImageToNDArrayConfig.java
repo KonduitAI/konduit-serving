@@ -23,6 +23,7 @@ import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,7 +35,7 @@ import lombok.experimental.Accessors;
  * The following can be configured:<br>
  * <ul>
  *     <li><b>height</b>: Output NDArray image height: leave null to convert to the same size as the input. Default: null</li>
- *     <li><b>width</b>: Output NDArray image height: leave null to convert to the same size as the input. Default: null</li>
+ *     <li><b>width</b>: Output NDArray image width: leave null to convert to the same size as the input. Default: null</li>
  *     <li><b>datatype</b>: {@link NDArrayType} (data type) of the output array</li>
  *     <li><b>includeMinibatchDim</b>: If true: the output array will be rank 4 with shape [1, c, h, w] or [1, h, w, c].
  *         If false: return rank 3 array with shape [c, h, w] or [h, w, c]. Default: true</li>
@@ -67,21 +68,37 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @Builder
 @AllArgsConstructor
+@Schema(description = "Configuration for converting an image into an n-dimensional array.")
 public class ImageToNDArrayConfig {
 
+    @Schema(description = "Output array image height. Leave null to convert to the same size as the image height.")
     private Integer height;
+
+    @Schema(description = "Output array image width: leave null to convert to the same size as the image width.")
     private Integer width;
+
     @Builder.Default
+    @Schema(description = "Data type of the n-dimensional array.", defaultValue = "FLOAT")
     private NDArrayType dataType = NDArrayType.FLOAT;
+
     @Builder.Default
+    @Schema(description = "")
     private boolean includeMinibatchDim = true;
     @Builder.Default
+
+    @Schema(description = "")
     private AspectRatioHandling aspectRatioHandling = AspectRatioHandling.CENTER_CROP;
+
     @Builder.Default
+    @Schema(description = "")
     private NDFormat format = NDFormat.CHANNELS_FIRST;
+
     @Builder.Default
+    @Schema(description = "")
     private NDChannelLayout channelLayout = NDChannelLayout.RGB;
+
     @Builder.Default
+    @Schema(description = "")
     private ImageNormalization normalization = new ImageNormalization(ImageNormalization.Type.SCALE);
 
     public ImageToNDArrayConfig() {
