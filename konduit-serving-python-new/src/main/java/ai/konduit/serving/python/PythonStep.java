@@ -1,34 +1,35 @@
-/* ******************************************************************************
- * Copyright (c) 2020 Konduit K.K.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Apache License, Version 2.0 which is available at
- * https://www.apache.org/licenses/LICENSE-2.0.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- ******************************************************************************/
+/*
+ *  ******************************************************************************
+ *  * Copyright (c) 2020 Konduit K.K.
+ *  *
+ *  * This program and the accompanying materials are made available under the
+ *  * terms of the Apache License, Version 2.0 which is available at
+ *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  * License for the specific language governing permissions and limitations
+ *  * under the License.
+ *  *
+ *  * SPDX-License-Identifier: Apache-2.0
+ *  *****************************************************************************
+ */
 
 
-package ai.konduit.serving;
+package ai.konduit.serving.python;
 
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
-import ai.konduit.serving.pipeline.registry.PipelineRegistry;
 import lombok.experimental.Accessors;
 import org.eclipse.python4j.PythonJob;
 import org.eclipse.python4j.PythonVariable;
 import org.nd4j.common.base.Preconditions;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -55,7 +56,8 @@ public class PythonStep implements PipelineStep {
 
     }
 
-    public static class Runner implements PipelineStepRunner{
+    @CanRun(PythonStep.class)
+    public static class Runner implements PipelineStepRunner {
 
         private final PythonStep pythonStep;
         private final PythonJob pythonJob;
