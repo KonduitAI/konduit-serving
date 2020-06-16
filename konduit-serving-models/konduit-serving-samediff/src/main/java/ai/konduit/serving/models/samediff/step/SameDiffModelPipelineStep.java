@@ -29,6 +29,7 @@ import java.util.List;
 @Data
 @Accessors(fluent = true)
 @JsonName("SAMEDIFF")
+@Schema(description = "A pipeline step that configures a samediff model that is to be executed.")
 public class SameDiffModelPipelineStep implements PipelineStep {
 
     @Schema(description = "Specifies the locaiton of a saved model file.")

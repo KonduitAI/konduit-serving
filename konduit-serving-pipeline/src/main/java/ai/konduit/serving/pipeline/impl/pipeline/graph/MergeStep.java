@@ -19,6 +19,7 @@
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
@@ -34,6 +35,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @JsonName(GraphConstants.GRAPH_MERGE_JSON_KEY)
+@Schema(description = "A graph pipeline step the configures how to merge multiple graph steps.")
 public class MergeStep extends BaseMergeStep implements GraphStep {
 
     public MergeStep(GraphBuilder b, List<String> steps, String name) {

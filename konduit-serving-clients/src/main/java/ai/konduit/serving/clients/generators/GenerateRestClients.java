@@ -71,6 +71,10 @@ public class GenerateRestClients {
                 .setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
 
         Map<String, List<Pair<String, String>>> mappings = getJsonNameMappings();
+        mappings.put("ai.konduit.serving.pipeline.api.data.BoundingBox",
+                Arrays.asList(new Pair<>(null, "ai.konduit.serving.pipeline.impl.data.box.BBoxCHW"),
+                        new Pair<>(null, "ai.konduit.serving.pipeline.impl.data.box.BBoxXY"))
+        );
         mappings.put("ai.konduit.serving.pipeline.api.pipeline.Pipeline",
                 Arrays.asList(new Pair<>(null, "ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline"),
                         new Pair<>(null, "ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline"))
@@ -87,6 +91,7 @@ public class GenerateRestClients {
         // This has to be done in order otherwise we'll have duplicated classes compilation error.
         // This is to make sure that the classes referenced in the later iterations are defined in the previous one.
         try {
+            addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.pipeline.api.data.BoundingBox")).toClass());
             addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.pipeline.api.step.PipelineStep")).toClass());
             addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn")).toClass());
             addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep")).toClass());
@@ -98,7 +103,7 @@ public class GenerateRestClients {
             System.exit(1);
         }
 
-        log.info("Generated open api spec is: {}\n", Yaml.pretty(openAPI));
+        log.info("Generated open api spec is: \n{}\n", Yaml.pretty(openAPI));
         generateClients(openAPI);
     }
 

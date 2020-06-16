@@ -19,6 +19,7 @@
 package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @JsonName(GraphConstants.GRAPH_ANY_JSON_KEY)
+@Schema(description = "A graph pipeline step that selects only one output from a switch step.")
 public class AnyStep extends BaseMergeStep implements GraphStep {
 
     public AnyStep(GraphBuilder b, List<String> steps, String name) {

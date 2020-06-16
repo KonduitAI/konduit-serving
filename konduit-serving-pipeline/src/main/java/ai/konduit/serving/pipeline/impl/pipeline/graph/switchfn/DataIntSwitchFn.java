@@ -22,6 +22,7 @@ import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
@@ -35,9 +36,15 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @lombok.Data
 @Accessors(fluent = true)
 @JsonName("INT_SWITCH")
+@Schema(description = "A switch function that that selects the output based on a integer values from the data instance. " +
+        "The specified field name must be an integer value between 0 and numOutputs inclusive")
 public class DataIntSwitchFn implements SwitchFn {
 
+    @Schema(description = "The number of outputs from a switch step.")
     private final int numOutputs;
+
+    @Schema(description = "Field name key from a data instance whose value will channel the graph flow to a specific switch branch. " +
+            "In this case, it will be the nth index from a list of switch outputs.")
     private final String fieldName;
 
     public DataIntSwitchFn(@JsonProperty("numOutputs") int numOutputs, @JsonProperty("fieldName") String fieldName){

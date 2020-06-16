@@ -18,6 +18,10 @@
 
 package ai.konduit.serving.vertx.config;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "An enum that determines the server type. HTTP -> starts an http server, MQTT -> starts " +
+        "an mqtt server, GRPC -> start a grpc server.")
 public enum ServerProtocol {
     HTTP,
     MQTT,
