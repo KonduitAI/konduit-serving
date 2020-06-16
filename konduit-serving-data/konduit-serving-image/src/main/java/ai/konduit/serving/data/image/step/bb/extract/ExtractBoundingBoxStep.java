@@ -21,6 +21,7 @@ package ai.konduit.serving.data.image.step.bb.extract;
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -45,17 +46,36 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 @JsonName("EXTRACT_BOUNDING_BOX")
+@Schema(description = "A pipeline step to configure one or more given bounding boxes, and an input image to " +
+        "extract from the input region an image that corresponds to the bounding box region.")
 public class ExtractBoundingBoxStep implements PipelineStep {
-    private String imageName;       //If null: just find any image
-    private String bboxName;       //If null: just find any BB's
+
+    @Schema(description = "Name of the input image key from the previous step. If set to null, it will try to find any image in the incoming data instance.")
+    private String imageName;
+
+    @Schema(description = "Name of the bounding boxes key from the previous step. If set to null, it will try to find any bounding box in the incoming data instance.")
+    private String bboxName;
+
+    @Schema(description = "Name of the output key that will contain the output as images the input image " +
+            "region covered by the bounding boxes.")
     private String outputName;
+
     @Builder.Default
+    @Schema(description = "If true, other data key and values from the previous step are kept and passed on to the next step as well.",
+            defaultValue = "true")
     private boolean keepOtherFields = true;
+
+    @Schema(description = "If set, the smaller dimensions will be increased to keep the aspect ratio correct (which may crop outside the image border).")
     private Double aspectRatio = null;
+
+    @Schema(description = "If specified, the cropped images will be resized to the specified height.")
     private Integer resizeH;
+
+    @Schema(description = "If specified, the cropped images will be resized to the specified width.")
     private Integer resizeW;
 
-    //Used to account for the fact that ImageToNDArray can crop images
+    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig can be " +
+            "used to crop images.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
 
     public ExtractBoundingBoxStep() {

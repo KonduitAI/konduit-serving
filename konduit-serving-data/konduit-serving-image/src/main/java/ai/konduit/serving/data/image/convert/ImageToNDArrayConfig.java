@@ -74,7 +74,7 @@ public class ImageToNDArrayConfig {
     @Schema(description = "Output array image height. Leave null to convert to the same size as the image height.")
     private Integer height;
 
-    @Schema(description = "Output array image width: leave null to convert to the same size as the image width.")
+    @Schema(description = "Output array image width. Leave null to convert to the same size as the image width.")
     private Integer width;
 
     @Builder.Default
@@ -82,23 +82,31 @@ public class ImageToNDArrayConfig {
     private NDArrayType dataType = NDArrayType.FLOAT;
 
     @Builder.Default
-    @Schema(description = "")
+    @Schema(description = "If true, the output array will contain an extra dimension for the minibatch number. This " +
+            "will look like (1, Channels, Height, Width) instead of (Channels, Height, Width) for foramt == CHANNELS_FIRST " +
+            "or (1, Height, Width, Channels) instead of (Height, Width, Channels) for format == CHANNELS_LAST.",
+            defaultValue = "true")
     private boolean includeMinibatchDim = true;
     @Builder.Default
 
-    @Schema(description = "")
+    @Schema(description = "An enum to Handle the situation where the input image and output NDArray have different aspect ratios.",
+            defaultValue = "CENTER_CROP")
     private AspectRatioHandling aspectRatioHandling = AspectRatioHandling.CENTER_CROP;
 
     @Builder.Default
-    @Schema(description = "")
+    @Schema(description = "The format to be used when converting an Image to an NDArray.",
+            defaultValue = "CHANNELS_FIRST")
     private NDFormat format = NDFormat.CHANNELS_FIRST;
 
     @Builder.Default
-    @Schema(description = "")
+    @Schema(description = "An enum that represents the type (and order) of the channels for an image after it has " +
+            "been converted to an NDArray. ",
+            defaultValue = "RGB")
     private NDChannelLayout channelLayout = NDChannelLayout.RGB;
 
     @Builder.Default
-    @Schema(description = "")
+    @Schema(description = "An enum that specifies the normalization type of an image array values.",
+            defaultValue = "SCALE")
     private ImageNormalization normalization = new ImageNormalization(ImageNormalization.Type.SCALE);
 
     public ImageToNDArrayConfig() {

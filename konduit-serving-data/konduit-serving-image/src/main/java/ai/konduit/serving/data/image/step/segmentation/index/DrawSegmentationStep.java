@@ -21,6 +21,7 @@ package ai.konduit.serving.data.image.step.segmentation.index;
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -51,16 +52,37 @@ import java.util.List;
 @Accessors(fluent = true)
 @AllArgsConstructor
 @JsonName("DRAW_SEGMENTATION")
+@Schema(description = "A pipeline step that configures how to draw a segmentation mask, optionally on an image.")
 public class DrawSegmentationStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "image";
     public static final double DEFAULT_OPACITY = 0.5;
 
+    @Schema(description = "This is an optional field which specifies the list of colors to use for each class. " +
+            "The color can be a hex string or it can be from a set of predefined values: [white, silver, gray, black, " +
+            "red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple].")
     private List<String> classColors;
+
+    @Schema(description = "Name of the NDArray with the class indices, 0 to numClasses-1. Shape [1, height, width].")
     private String segmentArray;
+
+    @Schema(description = "An optional field, specifying the name of the image to draw the segmentation classes " +
+            "on to. If not provided, the segmentation classes are drawn onto a black background image.")
     private String image;
+
+    @Schema(description = "Name of the output image",
+            defaultValue = DEFAULT_OUTPUT_NAME)
     private String outputName;
-    private Double opacity;         //0 to 1
+
+    @Schema(description = "An optional field, that is used only used when <image> key name is set. This specifies, the opacity, " +
+            "between 0.0 and 1.0, of the mask to draw on the image. Default value of 0.5 is used if it's not set. " +
+            "Value of 0.0 is fully transparent, 1.0 is fully opaque.", defaultValue = "0.5")
+    private Double opacity;
+
+    @Schema(description = "An optional field, specifying a class that's not to be drawn. If not set, all classes will be drawn")
     private Integer backgroundClass;
+
+    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig can be " +
+            "used to crop images.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
 
 }

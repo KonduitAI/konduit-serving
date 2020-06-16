@@ -16,11 +16,9 @@
 package ai.konduit.serving.models.samediff.step;
 
 import ai.konduit.serving.annotation.json.JsonName;
-import ai.konduit.serving.models.samediff.SameDiffConfig;
-import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
@@ -33,8 +31,12 @@ import java.util.List;
 @JsonName("SAMEDIFF")
 public class SameDiffModelPipelineStep implements PipelineStep {
 
+    @Schema(description = "Specifies the locaiton of a saved model file.")
     private String modelUri;
-    private List<String> outputNames;       //Mainly for ComputationGraph with multiple outputs - map INDArray[] to Data keys
+
+    @Schema(description = "A list of names of the output placeholders (mainly for DL4J - computation graph, with multiple outputs. Where the values of these output keys are mapped " +
+            "from the computation graph output - INDArray[] to data keys).")
+    private List<String> outputNames;
 
     public SameDiffModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("outputNames") List<String> outputNames){
         this.modelUri = modelUri;

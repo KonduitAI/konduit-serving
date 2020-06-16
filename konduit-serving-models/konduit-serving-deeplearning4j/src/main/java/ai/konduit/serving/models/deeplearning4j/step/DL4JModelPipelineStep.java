@@ -36,11 +36,11 @@ public class DL4JModelPipelineStep implements PipelineStep {
     private String modelUri;
 
     @Schema(description = "A list of names of the input placeholders (mainly for DL4J - computation graph, with multiple inputs. Where values from the input data keys are mapped to " +
-            "the computation graph inputs)")
+            "the computation graph inputs).")
     private List<String> inputNames;
 
     @Schema(description = "A list of names of the output placeholders (mainly for DL4J - computation graph, with multiple outputs. Where the values of these output keys are mapped " +
-            "from the computation graph output - INDArray[] to data keys)")
+            "from the computation graph output - INDArray[] to data keys).")
     private List<String> outputNames;
 
     public DL4JModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputNames") List<String> inputNames,

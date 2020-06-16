@@ -49,11 +49,13 @@ import java.util.Map;
 public class DrawBoundingBoxStep implements PipelineStep {
     public static final String DEFAULT_COLOR = "lime";
 
-    @Schema(description = "A scaling policy enum, specifying how to scale the bounding box width and height.")
+    @Schema(description = "A scaling policy enum, specifying how to scale the bounding box width and height. " +
+            "NONE -> No scaling, AT_LEAST -> Scale up if necessary, so H >= scaleH and W >= scaleW, AT_MOST -> " +
+            "Scale down if necessary, so H <= scaleH and W <= scaleW")
     public enum Scale {
-        @Schema(description = "No scaling") NONE,
-        @Schema(description = "Scale up if necessary, so H >= scaleH and W >= scaleW") AT_LEAST,
-        @Schema(description = "Scale down if necessary, so H <= scaleH and W <= scaleW") AT_MOST
+        NONE,
+        AT_LEAST,
+        AT_MOST
     }
 
     @Schema(description = "Name of the input image key from the previous step. If set to null, it will try to find any image in the incoming data instance.")
@@ -78,11 +80,13 @@ public class DrawBoundingBoxStep implements PipelineStep {
     private String color;
 
     @Builder.Default
-    @Schema(description = "Line thickness to use to draw the bounding box (in pixels).")
+    @Schema(description = "Line thickness to use to draw the bounding box (in pixels).",
+            defaultValue = "1")
     private int lineThickness = 1;
 
     @Builder.Default
-    @Schema(description = "The scaling policy to use for scaling the bounding boxes.")
+    @Schema(description = "The scaling policy to use for scaling the bounding boxes.",
+            defaultValue = "NONE")
     private Scale scale = Scale.NONE;
 
     @Schema(description = "Height threshold to be used with the scaling policy.")
@@ -91,10 +95,14 @@ public class DrawBoundingBoxStep implements PipelineStep {
     @Schema(description = "Width threshold to be used with the scaling policy.")
     private int resizeW;
 
-    //Used to account for the fact that ImageToNDArray can crop images
+    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig can be " +
+            "used to crop images.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
-    @Schema(description = "", defaultValue = "false")
+
+    @Schema(description = "If true, the cropped region based on the image array is drawn.", defaultValue = "false")
     private boolean drawCropRegion = false;
+
+    @Schema(description = "Color of the crop region.")
     private String cropRegionColor;
 
     /*
