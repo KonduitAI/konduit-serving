@@ -31,8 +31,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @JsonName("SHOW_IMAGE")
 public class ShowImagePipelineStep implements PipelineStep {
 
-    @Builder.Default
-    private String imageName = "image";
+    private String imageName;
     @Builder.Default
     private String displayName = "Image";
     @Builder.Default
@@ -54,7 +53,6 @@ public class ShowImagePipelineStep implements PipelineStep {
     public ShowImagePipelineStep(){
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
         //Without setting defaults here again like this, the fields would actually be null
-        this.imageName = "image";
         this.displayName = displayName();
         this.width = 1280;
         this.height = 720;

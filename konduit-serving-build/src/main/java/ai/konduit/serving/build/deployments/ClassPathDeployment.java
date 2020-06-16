@@ -44,6 +44,8 @@ public class ClassPathDeployment implements Deployment {
     public static final String OUTPUT_FILE_PROP = "classpath.outputFile";
     public static final String TYPE_PROP = "classpath.type";
 
+    public static final String CLI_KEYS = "ClassPathDeployment config keys: " + OUTPUT_FILE_PROP + ", " + TYPE_PROP;
+
     private String outputFile;
     private Type type;
 

@@ -31,6 +31,8 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
+import static org.junit.Assert.assertTrue;
+
 @Ignore //To be run manually, not as part of CI (as it requires all modules to be installed first)
 public class TestCLI {
 
@@ -47,14 +49,17 @@ public class TestCLI {
         File dir = testDir.newFolder();
         File f = new File(dir, "pipeline.json");
         FileUtils.writeStringToFile(f, p.toJson(), StandardCharsets.UTF_8);
+        File uberjar = new File(dir, "ks-uberjar.jar");
 
         BuildCLI.main(
                 "--os", "windows",
                 "--arch", "x86_avx2",
                 "-p", f.getAbsolutePath(),
-                "-m", "konduit-serving-image"
+                "-m", "konduit-serving-image",
+                "-c", "jar.outputdir=" + dir.getAbsolutePath(), "jar.name=" + uberjar.getName()
         );
 
+        assertTrue(uberjar.exists());
+        assertTrue(uberjar.length() > 20_000_000);
     }
-
 }

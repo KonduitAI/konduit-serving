@@ -24,6 +24,7 @@ import ai.konduit.serving.build.config.Arch;
 import ai.konduit.serving.build.config.OS;
 import com.beust.jcommander.IValueValidator;
 import com.beust.jcommander.ParameterException;
+import org.nd4j.common.base.Preconditions;
 
 import java.util.Arrays;
 import java.util.List;
@@ -142,6 +143,34 @@ public class CLIValidators {
                 throw new ParameterException("Invalid device string: must be blank (not set = CPU), or have value " +
                         ComputeDevice.CPU + ", " + ComputeDevice.CUDA_100 + ", " + ComputeDevice.CUDA_101 + ", " +
                         ComputeDevice.CUDA_102);
+            }
+        }
+    }
+
+    public static class AdditionalDependenciesValidator implements IValueValidator<List<String>>{
+
+        @Override
+        public void validate(String name, List<String> value) throws ParameterException {
+            for(String s : value){
+                String[] split = s.split(":");
+                if(split.length != 3 && split.length != 4){
+                    throw new ParameterException("Invalid additionalDependency setting: Dependencies must " +
+                            "be specified in \"group_id:artifact_id:version\" or \"group_id:artifact_id:version:classifier\" format. Got " + value);
+                }
+            }
+        }
+    }
+
+    public static class ConfigValidator implements IValueValidator<List<String>>{
+
+        @Override
+        public void validate(String name, List<String> value) throws ParameterException {
+            for(String s : value){
+                String[] split = s.split("=");
+                if(split.length != 2){
+                    throw new ParameterException("Invalid config setting: Configuration for deployments " +
+                            "be specified in the format \"key=value\". Got " +  "[\"" + String.join("\", \"", value + "\"]"));
+                }
             }
         }
     }
