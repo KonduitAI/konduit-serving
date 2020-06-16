@@ -291,7 +291,7 @@ public class TestImageToNDArray {
      * @param img
      * @return
      */
-    public BufferedImage toBufferedImage(int[][][] img){
+    public static BufferedImage toBufferedImage(int[][][] img){
 
         int h = img[0].length;
         int w = img[0][0].length;

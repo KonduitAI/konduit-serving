@@ -127,7 +127,7 @@ public class TestConversion {
         }
     }
 
-    protected static boolean bufferedImagesEqual(BufferedImage img1, BufferedImage img2) {
+    public static boolean bufferedImagesEqual(BufferedImage img1, BufferedImage img2) {
         if (img1.getHeight() != img2.getHeight() || img1.getWidth() != img2.getWidth()) {
             return false;
         }

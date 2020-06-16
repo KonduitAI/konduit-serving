@@ -187,7 +187,7 @@ public class ImageToNDArray {
         return new Pair<>(NDArray.create(arr), bbMeta);
     }
 
-    protected static Pair<Mat,BoundingBox> centerCrop(Mat image, int outH, int outW, boolean withBB) {
+    public static Pair<Mat,BoundingBox> centerCrop(Mat image, int outH, int outW, boolean withBB) {
         int imgH = image.rows();
         int imgW = image.cols();
 
