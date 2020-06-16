@@ -187,7 +187,7 @@ public class ImageToNDArray {
         return new Pair<>(NDArray.create(arr), bbMeta);
     }
 
-    protected static Pair<Mat,BoundingBox> centerCrop(Mat image, int outH, int outW, boolean withBB) {
+    public static Pair<Mat,BoundingBox> centerCrop(Mat image, int outH, int outW, boolean withBB) {
         int imgH = image.rows();
         int imgW = image.cols();
 
@@ -214,7 +214,7 @@ public class ImageToNDArray {
         } else {
             //Need to crop from the height dimension
             croppedW = imgW;
-            croppedH = (int)(image.rows() / aspectOut);
+            croppedH = (int)(image.cols() / aspectOut);
             int delta = imgH - croppedH;
             x0 = 0;
             y0 = delta / 2;
