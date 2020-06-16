@@ -54,4 +54,8 @@ public class KerasModelStep implements PipelineStep {
         this.outputNames = outputNames;
     }
 
+    public KerasModelStep(String modelUri){
+        this.modelUri = modelUri;
+    }
+
 }

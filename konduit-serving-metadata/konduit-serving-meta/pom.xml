@@ -35,6 +35,11 @@
             <artifactId>konduit-serving-pipeline</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-cli</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- konduit-serving-models -->
         <dependency>

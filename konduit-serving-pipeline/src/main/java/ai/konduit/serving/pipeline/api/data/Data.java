@@ -57,6 +57,9 @@ public interface Data {
     String RESERVED_KEY_BB_CY = "@cy";
     String RESERVED_KEY_BB_H = "@h";
     String RESERVED_KEY_BB_W = "@w";
+    String RESERVED_KEY_POINT = "@Point";
+    String RESERVED_KEY_POINT_COORDS = "@Coords";
+
 
 
 
@@ -65,7 +68,8 @@ public interface Data {
                 RESERVED_KEY_IMAGE_DATA, RESERVED_KEY_NDARRAY_SHAPE, RESERVED_KEY_NDARRAY_TYPE, RESERVED_KEY_NDARRAY_DATA_BASE64,
                 RESERVED_KEY_NDARRAY_DATA_ARRAY, RESERVED_KEY_METADATA,
                 RESERVED_KEY_BB_X1, RESERVED_KEY_BB_X2, RESERVED_KEY_BB_Y1, RESERVED_KEY_BB_Y2,
-                RESERVED_KEY_BB_CX, RESERVED_KEY_BB_CY, RESERVED_KEY_BB_H, RESERVED_KEY_BB_W);
+                RESERVED_KEY_BB_CX, RESERVED_KEY_BB_CY, RESERVED_KEY_BB_H, RESERVED_KEY_BB_W,
+                RESERVED_KEY_POINT, RESERVED_KEY_POINT_COORDS);
     }
 
     int size();
@@ -105,6 +109,7 @@ public interface Data {
     Image getImage(String key) throws ValueNotFoundException;
     long getLong(String key) throws ValueNotFoundException;
     BoundingBox getBoundingBox(String key) throws ValueNotFoundException;
+    Point getPoint(String key) throws ValueNotFoundException;
     List<Object> getList(String key, ValueType type);                   //TODO type
     Data getData(String key);
 
@@ -113,6 +118,7 @@ public interface Data {
     List<Boolean> getListBoolean(String key);
     List<byte[]> getListBytes(String key);
     List<Double> getListDouble(String key);
+    List<Point> getListPoint(String key);
     List<List<?>> getListData(String key);
     List<Image> getListImage(String key);
     List<NDArray> getListNDArray(String key);
@@ -126,6 +132,7 @@ public interface Data {
     void put(String key, double data);
     void put(String key, boolean data);
     void put(String key, BoundingBox data);
+    void put(String key, Point data);
 
     void putListString(String key, List<String> data);
     void putListInt64(String key, List<Long> data);
@@ -136,6 +143,7 @@ public interface Data {
     void putListImage(String key, List<Image> data);
     void putListNDArray(String key, List<NDArray> data);
     void putListBoundingBox(String key, List<BoundingBox> data);
+    void putListPoint(String key, List<Point> data);
     void put(String key, Data data);
 
     boolean hasMetaData();
@@ -292,6 +300,12 @@ public interface Data {
                     if(!BoundingBox.equals(bb1, bb2))
                         return false;
                     break;
+                case POINT:
+                    Point p1 = d1.getPoint(s);
+                    Point p2 = d2.getPoint(s);
+                    if(!Point.equals(p1, p2))
+                        return false;
+                    break;
             }
         }
 
@@ -336,8 +350,14 @@ public interface Data {
             case BOOLEAN:
                 put(key, from.getBoolean(key));
                 return;
+            case POINT:
+                put(key, from.getPoint(key));
+                return;
             case DATA:
                 put(key, from.getData(key));
+                return;
+            case BOUNDING_BOX:
+                put(key, from.getBoundingBox(key));
                 return;
             case LIST:
                 ValueType vtList = from.listType(key);
@@ -366,6 +386,9 @@ public interface Data {
                         break;
                     case BOUNDING_BOX:
                         putListBoundingBox(key, (List<BoundingBox>)l);
+                        break;
+                    case POINT:
+                        putListPoint(key, (List<Point>)l);
                         break;
                     case DATA:
                         putListData(key, (List<Data>)l);

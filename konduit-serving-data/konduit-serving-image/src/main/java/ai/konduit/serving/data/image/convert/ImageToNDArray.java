@@ -101,6 +101,22 @@ public class ImageToNDArray {
 
     }
 
+    public static long[] getOutputShape(ImageToNDArrayConfig config){
+        int rank = config.includeMinibatchDim() ? 4 : 3;
+        long[] out = new long[rank];
+        out[0] = 1;
+        if(config.format() == NDFormat.CHANNELS_FIRST){
+            out[1] = config.channelLayout().numChannels();
+            out[2] = config.height();
+            out[3] = config.width();
+        } else {
+            out[1] = config.height();
+            out[2] = config.width();
+            out[3] = config.channelLayout().numChannels();
+        }
+        return out;
+    }
+
     protected static Pair<NDArray,BoundingBox> convert(Image image, ImageToNDArrayConfig config, boolean withMeta) {
         BoundingBox bbMeta = null;
 
@@ -171,7 +187,7 @@ public class ImageToNDArray {
         return new Pair<>(NDArray.create(arr), bbMeta);
     }
 
-    protected static Pair<Mat,BoundingBox> centerCrop(Mat image, int outH, int outW, boolean withBB) {
+    public static Pair<Mat,BoundingBox> centerCrop(Mat image, int outH, int outW, boolean withBB) {
         int imgH = image.rows();
         int imgW = image.cols();
 
@@ -198,7 +214,7 @@ public class ImageToNDArray {
         } else {
             //Need to crop from the height dimension
             croppedW = imgW;
-            croppedH = (int)(image.rows() / aspectOut);
+            croppedH = (int)(image.cols() / aspectOut);
             int delta = imgH - croppedH;
             x0 = 0;
             y0 = delta / 2;
@@ -298,8 +314,12 @@ public class ImageToNDArray {
         } else {
             switch (config.normalization().type()){
                 case SCALE:
-                    float scale = n.maxValue() == null ? 255.0f : n.maxValue().floatValue();
-                    f = (x,c) -> (x / scale);
+                    float scale = (n.maxValue() == null ? 255.0f : n.maxValue().floatValue()) / 2.0f;
+                    f = (x,c) -> (x / scale - 1.0f);
+                    break;
+                case SCALE_01:
+                    float scale01 = n.maxValue() == null ? 255.0f : n.maxValue().floatValue();
+                    f = (x,c) -> (x / scale01);
                     break;
                 case SUBTRACT_MEAN:
                     //TODO support grayscale

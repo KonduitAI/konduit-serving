@@ -50,6 +50,7 @@
         <module>konduit-serving-cli</module>
         <module>konduit-serving-metrics</module>
         <module>konduit-serving-clients</module>
+        <module>konduit-serving-endpoint</module>
     </modules>
 
     <name>konduit-serving</name>

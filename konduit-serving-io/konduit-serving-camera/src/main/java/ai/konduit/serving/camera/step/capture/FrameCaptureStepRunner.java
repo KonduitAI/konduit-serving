@@ -79,6 +79,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
         try {
             Frame frame = grabber.grab();
             Image i = Image.create(frame);
+            //System.out.println("IMAGE: h=" + i.height() + ", w=" + i.width());
             return Data.singleton(outputKey, i);
         } catch (Throwable t){
             throw new RuntimeException("Error getting frame", t);
@@ -89,9 +90,10 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
         grabber = new OpenCVFrameGrabber(step.getCamera());
         converter = new OpenCVFrameConverter.ToIplImage();
 
-        //TODO NEED TO CONFIGURE - RESOLUTION ETC
         int w = step.getWidth();
         int h = step.getHeight();
+        grabber.setImageHeight(h);
+        grabber.setImageWidth(w);
 
         try {
             grabber.start();

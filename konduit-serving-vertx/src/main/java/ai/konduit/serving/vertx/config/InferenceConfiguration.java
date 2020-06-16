@@ -28,6 +28,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Builder
@@ -47,6 +48,8 @@ public class InferenceConfiguration implements Serializable, TextConfig {
     @Builder.Default
     @Schema(description = "Server type.", defaultValue = "HTTP")
     private ServerProtocol protocol = ServerProtocol.HTTP;
+
+    private List<String> customEndpoints;
 
     @Schema(description = "The main konduit serving pipeline configuration.")
     private Pipeline pipeline;

@@ -21,7 +21,8 @@ package ai.konduit.serving.data.image.convert.config;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * How We should handle the situation where the input image and output NDArray have different aspect ratios<br>
+ * How We should handle the situation where the input image and output image/NDArray have different aspect ratios?<br>
+ * Use in {@link ai.konduit.serving.data.image.convert.ImageToNDArrayConfig} and {@link ai.konduit.serving.data.image.step.resize.ImageResizeStep}
  * See {@link ai.konduit.serving.data.image.convert.ImageToNDArrayConfig} for more details<br>
  * <ul>
  *     <li>CENTER_CROP: Crop the larger dimension down to the correct aspect ratio (and then resize if necessary).</li>

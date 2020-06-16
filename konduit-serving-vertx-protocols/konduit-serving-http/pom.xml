@@ -30,6 +30,13 @@
     <artifactId>konduit-serving-http</artifactId>
 
     <dependencies>
+        <!-- Custom endpoints functionality -->
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-endpoint</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web</artifactId>
