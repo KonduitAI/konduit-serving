@@ -71,6 +71,9 @@ public class GenerateRestClients {
                 .setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
 
         Map<String, List<Pair<String, String>>> mappings = getJsonNameMappings();
+        mappings.put("ai.konduit.serving.endpoint.Endpoint",
+                Collections.singletonList(new Pair<>(null, "ai.konduit.serving.endpoint.AssetServingEndpoint"))
+        );
         mappings.put("ai.konduit.serving.pipeline.api.data.BoundingBox",
                 Arrays.asList(new Pair<>(null, "ai.konduit.serving.pipeline.impl.data.box.BBoxCHW"),
                         new Pair<>(null, "ai.konduit.serving.pipeline.impl.data.box.BBoxXY"))
@@ -91,6 +94,7 @@ public class GenerateRestClients {
         // This has to be done in order otherwise we'll have duplicated classes compilation error.
         // This is to make sure that the classes referenced in the later iterations are defined in the previous one.
         try {
+            addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.endpoint.Endpoint")).toClass());
             addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.pipeline.api.data.BoundingBox")).toClass());
             addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.pipeline.api.step.PipelineStep")).toClass());
             addSchemas(openAPI, annotatedClasses.get(findIndex(annotatedClasses, "ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn")).toClass());
