@@ -134,8 +134,8 @@ public class TestPerspectiveTransformStep {
         Point outPoint = out.getPoint("point");
         BoundingBox outBB = out.getBoundingBox("boundingBox");
 
-        assertEquals(Point.create(1, 1, "bar", 0.3), outPoint);
-        assertEquals(BoundingBox.create(2,2, 2, 2, "foo", 0.7), outBB);
+        assertEquals(Point.create(5.142857142857143,  2.5714285714285716, "bar", 0.3), outPoint);
+        assertEquals(BoundingBox.create(3.6,1.8, 2, 2, "foo", 0.7), outBB);
     }
 
     @Test
