@@ -61,21 +61,21 @@ public class ImageNormalization {
         return VGG_MEAN_RGB.clone();
     }
 
-    @Schema(description = "An enum that specifies the normalization type of an image array values. " +
-            "NONE -> No image normalization will be applied, " +
-            "SCALE -> Divide images by maxValue/2, or divide by 255/2 if maxValue is not specified, then subtract 1.0, to give output in range [-1,1]. " +
-            "SCALE_01 -> Divide images by maxValue, or divide by 255 if maxValue is not specified, to give output in range [0,1]. " +
-            "SUBTRACT_MEAN -> Subtract the channels by the provided meanRgb array, with values [meanRed, meanGreen, meanBlue]. " +
+    @Schema(description = "An enum that specifies the normalization type of an image array values. <br><br>" +
+            "NONE -> No image normalization will be applied, <br>" +
+            "SCALE -> Divide images by maxValue/2, or divide by 255/2 if maxValue is not specified, then subtract 1.0, to give output in range [-1,1], <br>" +
+            "SCALE_01 -> Divide images by maxValue, or divide by 255 if maxValue is not specified, to give output in range [0,1], <br>" +
+            "SUBTRACT_MEAN -> Subtract the channels by the provided meanRgb array, with values [meanRed, meanGreen, meanBlue], " +
             "out = (in - mean) for each channel. Note that if the output format is in BGR format, the meanRgb value should " +
-            "still be provided in RGB order. " +
+            "still be provided in RGB order. <br>" +
             "STANDARDIZE -> Subtract the channels by the provided meanRgb array, and then divide by stdRgb, where meanRgb " +
             "is [meanRed, meanGreen, meanBlue], and stdRgb is [standardDeviationRed, standardDeviationGreen, standardDeviationBlue]. " +
             "out = (in - mean)/std for each channel. Note that if the output format is in BGR format, the meanRgb and stdRgb " +
-            "values should still be provided in RGB order. " +
+            "values should still be provided in RGB order. <br>" +
             "INCEPTION -> Applies inception preprocessing for inference/evaluation as described here: https://github.com/tensorflow/models/blob/master/research/slim/preprocessing/inception_preprocessing.py " +
             "Specifically, preprocess_for_eval method: scale to [-1, 1] range. " +
             "In practice this is done by dividing by 255 (assuming pixels are in range 0 to 255) to give [0, 1] then subtracting " +
-            "0.5 and multiplying by 2 to give [-1, 1]. Note uses maxValue (like SCALE) if provided. " +
+            "0.5 and multiplying by 2 to give [-1, 1]. Note uses maxValue (like SCALE) if provided. <br>" +
             "VGG_SUBTRACT_MEAN -> As per SUBTRACT_MEAN but the fixed values [meanRed, meanGreen, meanBlue] = " +
             " 123.68, 116.779, 103.939]. Note the meanRgb array with these values need not be provided explicitly. If the " +
             " output format is BGR, these are appropriately reordered before applying to the channels.")

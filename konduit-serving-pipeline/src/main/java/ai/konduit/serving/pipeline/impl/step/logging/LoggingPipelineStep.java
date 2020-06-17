@@ -35,7 +35,8 @@ import org.slf4j.event.Level;
         "the input data unchanged.")
 public class LoggingPipelineStep implements PipelineStep {
 
-    @Schema(description = "An enum specifying what part of a data instance should be logged. KEYS -> only output data keys, " +
+    @Schema(description = "An enum specifying what part of a data instance should be logged. <br><br>" +
+            "KEYS -> only output data keys, <br>" +
             "KEYS_AND_VALUES -> output both data keys and values.")
     public enum Log { KEYS, KEYS_AND_VALUES }
 

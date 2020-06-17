@@ -80,10 +80,10 @@ public class ImageToNDArrayConfig {
     /**
      * See {@link ImageToNDArrayConfig} - listHandling field
      */
-    @Schema(description = "An enum to specify how to handle a list of input images. " +
-            "NONE -> No list handling i.e. Simply convert an image to n-dimensional array (assuming the input is not a list of images), " +
-            "BATCH -> Convert a list of images to a batch of n-dimensional array (whose first axis will be first image index), " +
-            "LIST_OUT -> Convert a list of images to a list of n-dimensional array, " +
+    @Schema(description = "An enum to specify how to handle a list of input images. <br><br>" +
+            "NONE -> No list handling i.e. Simply convert an image to n-dimensional array (assuming the input is not a list of images), <br>" +
+            "BATCH -> Convert a list of images to a batch of n-dimensional array (whose first axis will be first image index), <br>" +
+            "LIST_OUT -> Convert a list of images to a list of n-dimensional array, <br>" +
             "FIRST -> Convert the first image in the list of images to an n-dimensional array.")
     public enum ListHandling {NONE, BATCH, LIST_OUT, FIRST}
 
@@ -106,9 +106,10 @@ public class ImageToNDArrayConfig {
     private boolean includeMinibatchDim = true;
     @Builder.Default
 
-    @Schema(description = "An enum to Handle the situation where the input image and output NDArray have different aspect ratios. " +
-            "Available values: CENTER_CROP (crop larger dimension then resize if necessary), PAD (pad smaller dimension then resize if necessary), " +
-            "STRETCH (simply resize, distorting if necessary)",
+    @Schema(description = "An enum to Handle the situation where the input image and output NDArray have different aspect ratios. <br><br>" +
+            "CENTER_CROP (crop larger dimension then resize if necessary), <br>" +
+            "PAD (pad smaller dimension then resize if necessary), <br>" +
+            "STRETCH (simply resize, distorting if necessary).",
             defaultValue = "CENTER_CROP")
     private AspectRatioHandling aspectRatioHandling = AspectRatioHandling.CENTER_CROP;
 

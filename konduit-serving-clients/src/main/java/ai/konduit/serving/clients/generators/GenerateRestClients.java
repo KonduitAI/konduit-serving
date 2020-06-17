@@ -55,6 +55,7 @@ import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.common.primitives.Pair;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -111,7 +112,7 @@ public class GenerateRestClients {
         generateClients(openAPI);
     }
 
-    private static void generateClients(OpenAPI openAPI) {
+    private static void generateClients(OpenAPI openAPI) throws IOException {
         File clientsDirectory = new File("clients");
 
         try {
@@ -133,7 +134,7 @@ public class GenerateRestClients {
         javaClientCodegen.setArtifactId("konduit-serving-client");
         javaClientCodegen.setArtifactVersion("0.1.0-SNAPSHOT");
 
-        defaultGenerator
+        List<File> generatedJavaClientFiles = defaultGenerator
                 .opts(new ClientOptInput()
                         .openAPI(openAPI)
                         .config(javaClientCodegen)
@@ -147,13 +148,38 @@ public class GenerateRestClients {
         pythonClientOpts.getProperties().put(CodegenConstants.PACKAGE_NAME, "konduit");
         pythonClientOpts.getProperties().put(CodegenConstants.PACKAGE_VERSION, "0.2.0"); // new version after already available "konduit" version on PyPi (which is 0.1.10) - https://pypi.org/project/konduit/0.1.10/
 
-        defaultGenerator
+        List<File> generatedPythonClientFiles = defaultGenerator
                 .opts(new ClientOptInput()
                         .openAPI(openAPI)
                         .config(pythonClientCodegen)
                         .opts(pythonClientOpts))
                 .generate();
+
+        findAndReplaceCharacters(generatedJavaClientFiles);
+        findAndReplaceCharacters(generatedPythonClientFiles);
     }
+
+    private static void findAndReplaceCharacters(List<File> generatedFiles) throws IOException {
+        log.info("\n\nReplacing new line characters in the generated files: ");
+        for(File file : generatedFiles) {
+            if(file.getAbsolutePath().endsWith(".md") || file.getAbsolutePath().endsWith(".java")) {
+                FileUtils.writeStringToFile(file,
+                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replaceAll("&lt;br&gt;", "<br>"),
+                        StandardCharsets.UTF_8);
+
+                log.info("Replaced &lt;br&gt; to <br> in {}", file.getAbsolutePath());
+            }
+
+            if(file.getAbsolutePath().endsWith(".py")) {
+                FileUtils.writeStringToFile(file,
+                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replaceAll("<br>", "\n\t\t"),
+                        StandardCharsets.UTF_8);
+
+                log.info("Replaced <br> to \\n\\t\\t in {}", file.getAbsolutePath());
+            }
+        }
+    }
+
 
     private static int findIndex(List<CtClass> array, String className) {
         for(int i = 0; i < array.size(); i++) {
