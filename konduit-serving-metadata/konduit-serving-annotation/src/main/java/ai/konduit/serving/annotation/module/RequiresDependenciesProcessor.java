@@ -19,6 +19,7 @@
 package ai.konduit.serving.annotation.module;
 
 import ai.konduit.serving.annotation.AnnotationUtils;
+import ai.konduit.serving.annotation.runner.CanRun;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -46,6 +47,12 @@ public class RequiresDependenciesProcessor extends AbstractProcessor {
 
         if(env.processingOver()){
             if(moduleName == null){
+                //Handle incremental build situation: usually occurs in IDEs, where the class with the annotation
+                //has been modified and gets recompiled in isolation (without any of the other classes)
+                //In this case, the generated file probably already exists, and we don't need to do anything
+                if(AnnotationUtils.existsAndContains(processingEnv.getFiler(), "ai.konduit.serving.annotation.module.RequiresDependencies", toWrite))
+                    return false;
+
                 throw new IllegalStateException("No class in this module is annotated with @ModuleInfo - a class with " +
                         "@ModuleInfo(\"your-module-name\" should be added to the module that has the @CanRun(...) annotation");
             }
