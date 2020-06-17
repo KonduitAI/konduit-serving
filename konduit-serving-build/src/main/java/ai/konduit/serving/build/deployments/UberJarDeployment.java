@@ -139,7 +139,7 @@ public class UberJarDeployment implements Deployment {
     }
 
     @Override
-    public String gradleTaskName() {
-        return "shadowJar";
+    public List<String> gradleTaskNames() {
+        return Collections.singletonList("shadowJar");
     }
 }
