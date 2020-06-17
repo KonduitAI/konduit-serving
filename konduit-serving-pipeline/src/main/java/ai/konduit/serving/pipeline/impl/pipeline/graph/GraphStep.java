@@ -77,7 +77,8 @@ public interface GraphStep extends TextConfig {
      */
     boolean hasStep();
 
-    @Schema(description = "Determines if the graph step has a pipeline step associated with it.")
+    @Schema(description = "Determines if the graph step has a pipeline step associated with it.",
+            accessMode = Schema.AccessMode.READ_ONLY)
     default boolean getHasStep() {
         return hasStep();
     }

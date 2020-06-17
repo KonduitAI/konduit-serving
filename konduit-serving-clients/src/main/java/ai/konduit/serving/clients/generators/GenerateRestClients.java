@@ -118,16 +118,17 @@ public class GenerateRestClients {
             if (clientsDirectory.exists() && clientsDirectory.isDirectory())
                 FileUtils.deleteDirectory(clientsDirectory);
         } catch (IOException exception) {
-            log.error("Unable to clean 'clients' directory", exception);
+            log.error("Unable to clean 'clients' directory at {}", clientsDirectory.getAbsolutePath(), exception);
+            System.exit(1);
         }
 
         DefaultGenerator defaultGenerator = new DefaultGenerator();
 
         JavaClientCodegen javaClientCodegen = new JavaClientCodegen();
         javaClientCodegen.setOutputDir("clients/java");
-        javaClientCodegen.setModelPackage("ai.konduit.serving.java.client.models");
-        javaClientCodegen.setInvokerPackage("ai.konduit.serving.java.client.invoker");
-        javaClientCodegen.setApiPackage("ai.konduit.serving.java.client");
+        javaClientCodegen.setModelPackage("ai.konduit.serving.client.java.models");
+        javaClientCodegen.setInvokerPackage("ai.konduit.serving.client.java.invoker");
+        javaClientCodegen.setApiPackage("ai.konduit.serving.client.java");
         javaClientCodegen.setGroupId("ai.konduit.serving");
         javaClientCodegen.setArtifactId("konduit-serving-client");
         javaClientCodegen.setArtifactVersion("0.1.0-SNAPSHOT");

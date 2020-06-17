@@ -80,7 +80,12 @@ public class ImageToNDArrayConfig {
     /**
      * See {@link ImageToNDArrayConfig} - listHandling field
      */
-    public static enum ListHandling {NONE, BATCH, LIST_OUT, FIRST}
+    @Schema(description = "An enum to specify how to handle a list of input images. " +
+            "NONE -> No list handling i.e. Simply convert an image to n-dimensional array (assuming the input is not a list of images), " +
+            "BATCH -> Convert a list of images to a batch of n-dimensional array (whose first axis will be first image index), " +
+            "LIST_OUT -> Convert a list of images to a list of n-dimensional array, " +
+            "FIRST -> Convert the first image in the list of images to an n-dimensional array.")
+    public enum ListHandling {NONE, BATCH, LIST_OUT, FIRST}
 
 
     @Schema(description = "Output array image height. Leave null to convert to the same size as the image height.")
@@ -119,10 +124,12 @@ public class ImageToNDArrayConfig {
     private NDChannelLayout channelLayout = NDChannelLayout.RGB;
 
     @Builder.Default
-    @Schema(description = "Configuration that specifies the normalization type of an image array values.",
-            defaultValue = "SCALE")
+    @Schema(description = "Configuration that specifies the normalization type of an image array values.")
     private ImageNormalization normalization = new ImageNormalization(ImageNormalization.Type.SCALE);
+
     @Builder.Default
+    @Schema(description = "An enum to specify how to handle a list of input images.",
+            defaultValue = "NONE")
     private ListHandling listHandling = ListHandling.NONE;
 
     public ImageToNDArrayConfig() {
