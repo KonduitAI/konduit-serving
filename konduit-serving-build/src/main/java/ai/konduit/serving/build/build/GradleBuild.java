@@ -150,7 +150,7 @@ public class GradleBuild {
                 addUberJarTask(kts, jarName, escaped);
             }
             else if (deployment instanceof RpmDeployment) {
-                RpmDeployment r = (RpmDeployment)dependencies;
+                RpmDeployment r = (RpmDeployment)deployment;
                 String escaped = r.outputDir().replace("\\","\\\\");
                 addUberJarTask(kts,  "ks", escaped);
 
@@ -196,7 +196,7 @@ public class GradleBuild {
                 }
                 kts.append("\toutfile = \"" + exeName + ".exe\"\n");
                 //kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
-                kts.append("\tmainClassName = \"ai.konduit.serving.launcher.KonduitServingLauncher\"\n");
+                kts.append("\tmainClassName = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n");
                 kts.append("}\n");
                 kts.append(createCopyTask("copyExe", outputDir.getAbsolutePath(), ((ExeDeployment)deployment).outputDir(),
                         "*.exe", "launch4j"));
