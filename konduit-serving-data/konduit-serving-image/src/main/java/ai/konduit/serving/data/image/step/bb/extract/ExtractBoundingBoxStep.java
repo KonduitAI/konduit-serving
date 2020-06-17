@@ -46,8 +46,8 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 @JsonName("EXTRACT_BOUNDING_BOX")
-@Schema(description = "A pipeline step to configure one or more given bounding boxes, and an input image to " +
-        "extract from the input region an image that corresponds to the bounding box region.")
+@Schema(description = "A pipeline step that extracts sub-images from an input image, based on the locations of input bounding boxes. " +
+        "Returns List<Image> for the cropped image regions")
 public class ExtractBoundingBoxStep implements PipelineStep {
 
     @Schema(description = "Name of the input image key from the previous step. If set to null, it will try to find any image in the incoming data instance.")
@@ -74,8 +74,10 @@ public class ExtractBoundingBoxStep implements PipelineStep {
     @Schema(description = "If specified, the cropped images will be resized to the specified width.")
     private Integer resizeW;
 
-    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig can be " +
-            "used to crop images.")
+    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig may be " +
+            "used to crop images before passing to the network, when the image aspect ratio doesn't match the NDArray " +
+            "aspect ratio. This allows the step to determine the subset of the image actually passed to the network that " +
+            "produced the bounding boxes.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
 
     public ExtractBoundingBoxStep() {

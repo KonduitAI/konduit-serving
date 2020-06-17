@@ -70,14 +70,14 @@ public class DrawGridStep implements PipelineStep {
     @Schema(description = "If true, the lists are in pixels coordinates, not from 0 to 1.")
     private boolean coordsArePixels;
 
-    @Schema(description = "Color of the border. The color can be a hex string or " +
-            "it can be from a set of predefined values: [white, silver, gray, black, red, maroon, yellow, olive, lime, green," +
-            "aqua, teal, blue, navy, fuchsia, purple]")
+    @Schema(description = "Color of the border. The color can be a hex/HTML string like" +
+            "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
+            "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private String borderColor;
 
-    @Schema(description = "Color of the grid. The color can be a hex string or " +
-            "it can be from a set of predefined values: [white, silver, gray, black, red, maroon, yellow, olive, lime, green," +
-            "aqua, teal, blue, navy, fuchsia, purple]")
+    @Schema(description = "Color of the grid. The color can be a hex/HTML string like" +
+            "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
+            "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private String gridColor;
 
     @Builder.Default

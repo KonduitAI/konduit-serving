@@ -49,7 +49,7 @@ public class LoggingPipelineStep implements PipelineStep {
     private Log log = Log.KEYS;
 
     @Builder.Default
-    @Schema(description = "A regular expression specifying the logging filter to data instance keys. ")
+    @Schema(description = "A regular expression that allows filtering of keys - i.e., only those that match the regex will be logged.")
     public String keyFilterRegex = null;
 
     public LoggingPipelineStep(@JsonProperty("logLevel") Level logLevel, @JsonProperty("log") Log log, @JsonProperty("keyfilterRegex") String keyFilterRegex) {

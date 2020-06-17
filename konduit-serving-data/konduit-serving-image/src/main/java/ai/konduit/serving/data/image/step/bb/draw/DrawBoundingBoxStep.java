@@ -70,9 +70,9 @@ public class DrawBoundingBoxStep implements PipelineStep {
     @Schema(description = "If true, then draw the class probability on top of the bounding box.")
     private boolean drawProbability;
 
-    @Schema(description = "Specifies the color of different classes/labels that are drawn. The color can be a hex string or " +
-            "it can be from a set of predefined values: [white, silver, gray, black, red, maroon, yellow, olive, lime, green," +
-            "aqua, teal, blue, navy, fuchsia, purple]")
+    @Schema(description = "Specifies the color of different classes/labels that are drawn. The color can be a hex/HTML string like" +
+            "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
+            "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private Map<String, String> classColors;
 
     @Schema(description = "The default color to use in case a color for a label/class is not defined.",
@@ -95,14 +95,15 @@ public class DrawBoundingBoxStep implements PipelineStep {
     @Schema(description = "Width threshold to be used with the scaling policy.")
     private int resizeW;
 
-    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig can be " +
-            "used to crop images.")
+    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig may be " +
+            "used to crop images before passing to the network, when the image aspect ratio doesn't match the NDArray " +
+            "aspect ratio. This allows the step to determine the subset of the image actually passed to the network.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
 
     @Schema(description = "If true, the cropped region based on the image array is drawn.", defaultValue = "false")
     private boolean drawCropRegion = false;
 
-    @Schema(description = "Color of the crop region.")
+    @Schema(description = "Color of the crop region. Only used if drawCropRegion = true.")
     private String cropRegionColor;
 
     /*

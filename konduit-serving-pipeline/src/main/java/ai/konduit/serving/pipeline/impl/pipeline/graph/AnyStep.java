@@ -33,7 +33,9 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @JsonName(GraphConstants.GRAPH_ANY_JSON_KEY)
-@Schema(description = "A graph pipeline step that selects only one output from a switch step.")
+@Schema(description = "A graph pipeline step that forwards the first available input to the output. Usually used in " +
+        "conjunction with an earlier Switch step - i.e., input -> Switch -> (left branch, right branch) -> Any." +
+        " If more than one of the inputs is available to AnyStep, the output is undefined (it could return any of the inputs)")
 public class AnyStep extends BaseMergeStep implements GraphStep {
 
     public AnyStep(GraphBuilder b, List<String> steps, String name) {

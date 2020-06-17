@@ -95,13 +95,15 @@ public class ImageToNDArrayConfig {
 
     @Builder.Default
     @Schema(description = "If true, the output array will contain an extra dimension for the minibatch number. This " +
-            "will look like (1, Channels, Height, Width) instead of (Channels, Height, Width) for foramt == CHANNELS_FIRST " +
+            "will look like (1, Channels, Height, Width) instead of (Channels, Height, Width) for format == CHANNELS_FIRST " +
             "or (1, Height, Width, Channels) instead of (Height, Width, Channels) for format == CHANNELS_LAST.",
             defaultValue = "true")
     private boolean includeMinibatchDim = true;
     @Builder.Default
 
-    @Schema(description = "An enum to Handle the situation where the input image and output NDArray have different aspect ratios.",
+    @Schema(description = "An enum to Handle the situation where the input image and output NDArray have different aspect ratios. " +
+            "Available values: CENTER_CROP (crop larger dimension then resize if necessary), PAD (pad smaller dimension then resize if necessary), " +
+            "STRETCH (simply resize, distorting if necessary)",
             defaultValue = "CENTER_CROP")
     private AspectRatioHandling aspectRatioHandling = AspectRatioHandling.CENTER_CROP;
 
@@ -111,13 +113,13 @@ public class ImageToNDArrayConfig {
     private NDFormat format = NDFormat.CHANNELS_FIRST;
 
     @Builder.Default
-    @Schema(description = "An enum that represents the type (and order) of the channels for an image after it has " +
-            "been converted to an NDArray. ",
+    @Schema(description = "An enum that represents the type (and order) of the color channels for an image after it has " +
+            "been converted to an NDArray. For example, RGB vs. BGR etc",
             defaultValue = "RGB")
     private NDChannelLayout channelLayout = NDChannelLayout.RGB;
 
     @Builder.Default
-    @Schema(description = "An enum that specifies the normalization type of an image array values.",
+    @Schema(description = "Configuration that specifies the normalization type of an image array values.",
             defaultValue = "SCALE")
     private ImageNormalization normalization = new ImageNormalization(ImageNormalization.Type.SCALE);
     @Builder.Default

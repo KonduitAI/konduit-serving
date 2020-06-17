@@ -30,7 +30,8 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @Builder
 @Accessors(fluent = true)
 @JsonName("SHOW_IMAGE")
-@Schema(description = "A pipeline step that configures how to show/render an image from a previous step.")
+@Schema(description = "A pipeline step that configures how to show/render an image from a previous step in an application " +
+        "frame. Usually only used for testing and debugging locally, not when serving from HTTP/GRPC etc endpoints")
 public class ShowImagePipelineStep implements PipelineStep {
 
     @Builder.Default

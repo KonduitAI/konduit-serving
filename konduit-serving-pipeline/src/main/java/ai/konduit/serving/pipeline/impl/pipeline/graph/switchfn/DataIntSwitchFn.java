@@ -37,7 +37,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @Accessors(fluent = true)
 @JsonName("INT_SWITCH")
 @Schema(description = "A switch function that that selects the output based on a integer values from the data instance. " +
-        "The specified field name must be an integer value between 0 and numOutputs inclusive")
+        "The specified field name must be an integer value between 0 and numOutputs-1 inclusive")
 public class DataIntSwitchFn implements SwitchFn {
 
     @Schema(description = "The number of outputs from a switch step.")

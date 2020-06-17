@@ -31,13 +31,13 @@ import java.util.List;
 @Data
 @SuperBuilder
 @JsonName("TENSORFLOW")
-@Schema(description = "A pipeline step that configures a tensorflow model that is to be executed.")
+@Schema(description = "A pipeline step that configures a TensorFlow model that is to be executed.")
 public class TensorFlowPipelineStep extends BaseModelPipelineStep<TensorFlowConfiguration> {
 
     @Schema(description = "A list of names of the input placeholders.")
     private List<String> inputNames;
 
-    @Schema(description = "A list of names of the output placeholders.")
+    @Schema(description = "A list of names of the output arrays - i.e., what should be predicted.")
     private List<String> outputNames;
 
     public TensorFlowPipelineStep(String modelUri, TensorFlowConfiguration config) {

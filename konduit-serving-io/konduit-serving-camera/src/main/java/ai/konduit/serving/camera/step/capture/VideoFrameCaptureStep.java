@@ -35,7 +35,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @Data
 @JsonName("VIDEO_CAPTURE")
 @Schema(description = "A pipeline step that configures how to extracts a single frame from a video each time inference is called." +
-        " The video path is hardcoded.")
+        " The video path is hardcoded, mainly used for testing/demo purposes given this")
 public class VideoFrameCaptureStep implements PipelineStep {
 
     @Schema(description = "Location of the video file.")

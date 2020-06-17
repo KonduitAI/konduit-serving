@@ -29,14 +29,13 @@ import java.util.List;
 @Data
 @Accessors(fluent = true)
 @JsonName("SAMEDIFF")
-@Schema(description = "A pipeline step that configures a samediff model that is to be executed.")
+@Schema(description = "A pipeline step that configures a SameDiff model that is to be executed.")
 public class SameDiffModelPipelineStep implements PipelineStep {
 
-    @Schema(description = "Specifies the locaiton of a saved model file.")
+    @Schema(description = "Specifies the location of a saved model file.")
     private String modelUri;
 
-    @Schema(description = "A list of names of the output placeholders (mainly for DL4J - computation graph, with multiple outputs. Where the values of these output keys are mapped " +
-            "from the computation graph output - INDArray[] to data keys).")
+    @Schema(description = "A list of names of the output arrays - i.e., the names of the arrays to predict/return.")
     private List<String> outputNames;
 
     public SameDiffModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("outputNames") List<String> outputNames){

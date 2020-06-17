@@ -36,7 +36,7 @@ import java.util.List;
 @Schema(description = "A pipeline step that configures a Keras model that is to be executed.")
 public class KerasModelStep implements PipelineStep {
 
-    @Schema(description = "Specifies the locaiton of a saved model file.")
+    @Schema(description = "Specifies the location of a saved model file.")
     private String modelUri;
 
     @Schema(description = "A list of names of the input placeholders (mainly for DL4J - computation graph, with multiple inputs. Where values from the input data keys are mapped to " +

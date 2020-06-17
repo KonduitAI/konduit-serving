@@ -50,7 +50,7 @@ public class InferenceConfiguration implements Serializable, TextConfig {
     private ServerProtocol protocol = ServerProtocol.HTTP;
 
     @Schema(description = "List of custom endpoint class names that are configured to " +
-            "provide custom endpoints functionality.")
+            "provide custom endpoints functionality (fully qualified Java path - for example com.mycompany.MyEndpointsClass).")
     private List<String> customEndpoints;
 
     @Schema(description = "The main konduit serving pipeline configuration.")

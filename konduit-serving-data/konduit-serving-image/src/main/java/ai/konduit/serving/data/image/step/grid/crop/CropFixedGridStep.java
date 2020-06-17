@@ -59,7 +59,7 @@ public class CropFixedGridStep implements PipelineStep {
     @Schema(description = "Number of grid segments in the other direction (between (x[2],y[2]) and (x[3],y[3])).")
     private int grid2;
 
-    @Schema(description = "If true, the lists are in pixels coordinates, not from 0 to 1.")
+    @Schema(description = "If true, the x/y coordinate lists/arrays are in pixels coordinates, not from 0 to 1.")
     private boolean coordsArePixels;
 
     @Schema(description = "Name of the output bounding boxes key.")

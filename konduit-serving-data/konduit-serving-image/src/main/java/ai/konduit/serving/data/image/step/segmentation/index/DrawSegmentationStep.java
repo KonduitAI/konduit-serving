@@ -58,8 +58,9 @@ public class DrawSegmentationStep implements PipelineStep {
     public static final double DEFAULT_OPACITY = 0.5;
 
     @Schema(description = "This is an optional field which specifies the list of colors to use for each class. " +
-            "The color can be a hex string or it can be from a set of predefined values: [white, silver, gray, black, " +
-            "red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple].")
+            "The color can be a hex/HTML string like" +
+            "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
+            "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private List<String> classColors;
 
     @Schema(description = "Name of the NDArray with the class indices, 0 to numClasses-1. Shape [1, height, width].")
@@ -81,8 +82,10 @@ public class DrawSegmentationStep implements PipelineStep {
     @Schema(description = "An optional field, specifying a class that's not to be drawn. If not set, all classes will be drawn")
     private Integer backgroundClass;
 
-    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig can be " +
-            "used to crop images.")
+    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig may be " +
+            "used to crop images before passing to the network, when the image aspect ratio doesn't match the NDArray " +
+            "aspect ratio. This allows the step to determine the subset of the image actually passed to the network that " +
+            "produced the segmentation prediction to be drawn.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
 
 }
