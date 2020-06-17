@@ -90,6 +90,15 @@ LoopPipeline(SequencePipeline) or a LoopPipeline(GraphPipeline).
 In either case, we can simply add a new field  - `@LoopTrigger`, and otherwise leave the existing JSON format unchanged.
 i.e., the presence of this field means that we have a LoopPipeline decorator. 
 
+
+## Alternatives
+
+* We use a "setting" style instead of decorator style - i.e., SequencePipeline.setLoopTrigger(LoopTrigger)
+  This has the downside that all other pipeline steps need to implement loop execution and caching functionality, which
+  is definitely not ideal.
+* LoopTrigger is set in InferenceConfiguration (but this doesn't serve the needs of non-serving cases like example 3)
+
+
 ## Consequences 
 
 ### Advantages
