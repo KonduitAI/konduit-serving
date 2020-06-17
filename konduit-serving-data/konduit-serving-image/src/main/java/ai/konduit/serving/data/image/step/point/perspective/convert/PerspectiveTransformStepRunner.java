@@ -24,6 +24,7 @@ import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.bytedeco.javacpp.indexer.DoubleIndexer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
+@Slf4j
 @CanRun(PerspectiveTransformStep.class)
 public class PerspectiveTransformStepRunner implements PipelineStepRunner {
 
@@ -99,10 +101,34 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
                 source = points;
             }
         }
+
+        int refWidth = -1;
+        int refHeight = -1;
+        if(step.referenceImage() != null){
+            ValueType type = data.type(step.referenceImage());
+            Image refImg;
+            if(type == ValueType.IMAGE){
+                refImg = data.getImage(step.referenceImage());
+            }else if(type == ValueType.LIST && data.listType(step.referenceImage()) == ValueType.IMAGE){
+                List<Image> images = data.getListImage(step.referenceImage());
+                if(images.size() == 0){
+                    throw new IllegalArgumentException("fild "+step.referenceImage()+" is an empty list");
+                }
+                refImg = images.get(0);
+            }else{
+                throw new IllegalArgumentException("field "+step.referenceImage()+" is neither an image nor a list of images");
+            }
+            refWidth = refImg.width();
+            refHeight = refImg.height();
+        }else if(step.referenceWidth() != null && step.referenceHeight() != null){
+            refWidth = step.referenceWidth();
+            refHeight = step.referenceHeight();
+        }
+
         // Step 1: create transformation matrix
         Mat sourceMat = pointsToMat(source);
         Mat targetMat = pointsToMat(target);
-        Mat transMat = opencv_imgproc.getPerspectiveTransform(sourceMat, targetMat);
+        Mat transMat = getPerspectiveTransform(sourceMat, targetMat, refWidth, refHeight);
 
         // Step 2: find fields to apply transformation to
         List<String> fields = step.inputNames();
@@ -134,6 +160,12 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
 
         // Step 3: apply transformation matrix to fields appropriately
         val out = Data.empty();
+        if(step.keepOtherFields()){
+            for(String key : data.keys()){
+                out.copyFrom(key, data);
+            }
+        }
+
         for (int i = 0; i < fields.size(); i++) {
             String key = fields.get(i);
             ValueType keyType = data.type(key);
@@ -182,13 +214,6 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
             }
         }
 
-        if(step.keepOtherFields()){
-            for(String key : data.keys()){
-                if(fields.contains(key)){
-                    out.copyFrom(key, data);
-                }
-            }
-        }
         return out;
     }
 
@@ -197,15 +222,13 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
         Mat src = new Mat(1, 1, CvType.CV_64FC(it.dimensions()));
         DoubleIndexer idx = src.createIndexer();
         for (int i = 0; i < it.dimensions(); i++) {
-            idx.put(1, i, it.get(i));
+            idx.put(0, i, it.get(i));
         }
         opencv_core.perspectiveTransform(src, dst, transform);
 
         idx = dst.createIndexer();
         double[] coords = new double[it.dimensions()];
-        for (int i = 0; i < it.dimensions(); i++) {
-            coords[i] = idx.getDouble(1, i);
-        }
+        idx.get(0L, coords);
 
         return Point.create(coords, it.label(), it.probability());
     }
@@ -218,14 +241,29 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
     private Image transform(Mat transform, Image it) {
         Mat dst = new Mat();
         Mat src = it.getAs(Mat.class);
-        Size outputSize = calculateOutputSize(transform, src);
+        Size outputSize = calculateOutputSize(transform, it.width(), it.height());
         opencv_imgproc.warpPerspective(src, dst, transform, outputSize);
         return Image.create(dst);
     }
 
-    private Size calculateOutputSize(Mat transform, Mat image) {
-        int width = image.arrayWidth();
-        int height = image.arrayHeight();
+    private Mat getPerspectiveTransform(Mat sourceMat, Mat targetMat, int refWidth, int refHeight) {
+        Mat initialTransform = opencv_imgproc.getPerspectiveTransform(sourceMat, targetMat);
+        if(refWidth == -1 || refHeight == -1) { return initialTransform; }
+
+        // Calculate where edges will end up in this case
+        double[] extremes = calculateExtremes(initialTransform, refWidth, refHeight);
+
+        FloatIndexer tIdx = targetMat.createIndexer();
+        long rows = tIdx.size(0);
+        for (long i = 0; i < rows; i++) {
+            tIdx.put(i, 0, (float)(tIdx.get(i, 0) - extremes[0]));
+            tIdx.put(i, 1, (float)(tIdx.get(i, 1) - extremes[1]));
+        }
+
+        return opencv_imgproc.getPerspectiveTransform(sourceMat, targetMat);
+    }
+
+    private double[] calculateExtremes(Mat transform, int width, int height) {
         Mat src = new Mat(4, 1, CvType.CV_64FC2);
         DoubleIndexer idx = src.createIndexer();
         // topLeft
@@ -267,7 +305,24 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
         double minY = DoubleStream.of(yValues).min().getAsDouble();
         double maxY = DoubleStream.of(yValues).max().getAsDouble();
 
-        return new Size((int)Math.round(maxX - minX), (int)Math.round(maxY - minY));
+        return new double[]{minX, minY, maxX, maxY};
+    }
+
+    private Size calculateOutputSize(Mat transform, int width, int height) {
+        double[] extremes = calculateExtremes(transform, width, height);
+        double minX = extremes[0];
+        double minY = extremes[1];
+        double maxX = extremes[2];
+        double maxY = extremes[3];
+
+        int outputWidth = (int) Math.round(maxX - minX);
+        int outputHeight = (int) Math.round(maxY - minY);
+        if(outputWidth > 4096 || outputHeight > 4096){
+            log.warn("Selected transform would create a too large output image ({}, {}})", outputWidth, outputHeight);
+            outputWidth = Math.min(outputWidth, 4096);
+            outputHeight = Math.min(outputHeight, 4096);
+        }
+        return new Size(outputWidth, outputHeight);
     }
 
     private List<Point> calculateTargetPoints(List<Point> source) {

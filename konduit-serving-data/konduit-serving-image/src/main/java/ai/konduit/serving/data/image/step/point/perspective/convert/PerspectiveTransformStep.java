@@ -52,20 +52,39 @@ public class PerspectiveTransformStep implements PipelineStep {
     @Singular
     private List<String> outputNames;
     /**
-     * When you provide source points as an input, they must be provided as a list of 4 points
+     * When you provide source points as an input, they must be provided as a list of 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
     private String sourcePointsName;
     /**
-     * When you provide target points as an input, they must be provided as a list of 4 points
+     * When you provide target points as an input, they must be provided as a list of 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
     private String targetPointsName;
 
     /**
-     * takes exactly 4 points
+     * When a referenceImage is provided, the transform will be adjusted to ensure the entire transformed image fits into the output image (up to 4096x4096)<br>
+     * Can also reference a list of images, in which case <b>only the first</b> image is used as the reference.<br>
+     * The adjustment is applied to all inputs of the step.
+     */
+    private String referenceImage;
+
+    /**
+     * When a reference width and height are provided, the transform will be adjusted to make sure the entire area fits into the output image (up to 4096x4096)<br>
+     * The adjustment is applied to all inputs of the step.
+     */
+    private Integer referenceWidth;
+    /**
+     * When a reference width and height are provided, the transform will be adjusted to make sure the entire area fits into the output image (up to 4096x4096)<br>
+     * The adjustment is applied to all inputs of the step.
+     */
+    private Integer referenceHeight;
+
+
+    /**
+     * takes exactly 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
     private List<Point> sourcePoints;
     /**
-     * takes exactly 4 points
+     * takes exactly 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
     private List<Point> targetPoints;
 
