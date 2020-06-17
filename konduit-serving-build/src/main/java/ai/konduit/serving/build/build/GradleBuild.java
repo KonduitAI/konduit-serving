@@ -218,6 +218,10 @@ public class GradleBuild {
                     kts.append("\tinputDir.set(file(\"" + escapedInputDir + "\"))\n");
                 else
                     kts.append("\tval baseImage = FromInstruction(From(\"").append(dd.baseImage()).append("\n");
+                if(dd.imageName() != null){
+                    //Note image names must be lower case
+                    kts.append("\timages.add(\"").append(dd.imageName().toLowerCase()).append("\")");
+                }
                 kts.append("}\n");
             }
             else if (deployment instanceof TarDeployment) {

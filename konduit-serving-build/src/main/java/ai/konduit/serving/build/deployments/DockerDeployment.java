@@ -42,7 +42,7 @@ public class DockerDeployment implements Deployment {
     private String inputDir;
     private String imageName;
     private String version;
-    private String imageId;
+    private String imageId;         //Should be in form: "somerepo:version"
 
     public DockerDeployment() {
         this(DEFAULT_BASE_IMAGE, "ks", Deployment.defaultVersion());

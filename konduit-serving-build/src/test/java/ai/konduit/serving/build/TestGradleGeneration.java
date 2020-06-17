@@ -292,7 +292,7 @@ public class TestGradleGeneration {
         File gradleDir = new File(dir, "gradle");
         File imageDir = new File(dir, "image");
 
-        val deployment = new DockerDeployment();
+        val deployment = new DockerDeployment().imageName("myrepo:1.0.0");
         //deployment.setImageName("ks");
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())
@@ -310,7 +310,7 @@ public class TestGradleGeneration {
         //TODO this might not be doable in a unit test (unless all modules have been installed to local maven repo first)
         GradleBuild.runGradleBuild(gradleDir, c);
         assertTrue(StringUtils.isNotEmpty(deployment.imageId()));
-        assertEquals(deployment.outputString(), deployment.imageId());
+        assertTrue(deployment.outputString().contains(deployment.imageId()));
     }
 
     @Test
