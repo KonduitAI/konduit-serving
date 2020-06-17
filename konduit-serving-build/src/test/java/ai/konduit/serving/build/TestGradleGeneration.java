@@ -180,14 +180,11 @@ public class TestGradleGeneration {
         File rpmDir = new File(dir, "rpm");
         rpmDir.mkdir();
 
-        String archStr = GradleBuild.getRpmDebArch(Target.LINUX_X86);
-        String osStr = GradleBuild.getRpmDebOs(Target.LINUX_X86);
-
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())
                 .target(Target.LINUX_X86)
                 .serving(Serving.HTTP)
-                .deployments(new RpmDeployment().outputDir(rpmDir.getAbsolutePath()).archName(archStr).osName(osStr).rpmName("my.rpm"));
+                .deployments(new RpmDeployment().outputDir(rpmDir.getAbsolutePath()).rpmName("my.rpm"));
 
         GradleBuild.generateGradleBuildFiles(gradeDir, c);
 
@@ -224,8 +221,7 @@ public class TestGradleGeneration {
                 .target(Target.LINUX_X86)
                 .serving(Serving.HTTP)
                 .deployments(new DebDeployment().outputDir(targetDir.getAbsolutePath()).
-                        rpmName("my").
-                        osName(GradleBuild.getRpmDebOs(Target.LINUX_X86)));
+                        rpmName("my"));
 
         GradleBuild.generateGradleBuildFiles(gradeDir, c);
 
@@ -296,7 +292,7 @@ public class TestGradleGeneration {
         File gradleDir = new File(dir, "gradle");
         File imageDir = new File(dir, "image");
 
-        val deployment = new DockerDeployment(imageDir.getAbsolutePath());
+        val deployment = new DockerDeployment();
         //deployment.setImageName("ks");
         Config c = new Config()
                 .pipelinePath(jsonF.getAbsolutePath())

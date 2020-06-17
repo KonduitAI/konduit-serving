@@ -150,22 +150,23 @@ public class GradleBuild {
                 addUberJarTask(kts, jarName, escaped);
             }
             else if (deployment instanceof RpmDeployment) {
-                String escaped = ((RpmDeployment)deployment).outputDir().replace("\\","\\\\");
+                RpmDeployment r = (RpmDeployment)dependencies;
+                String escaped = r.outputDir().replace("\\","\\\\");
                 addUberJarTask(kts,  "ks", escaped);
 
-                String rpmName = ((RpmDeployment)deployment).rpmName();
+                String rpmName = r.rpmName();
                 kts.append("ospackage { \n");
                 if(rpmName.endsWith(".rpm")){
                     rpmName = rpmName.substring(0, rpmName.length()-4);
                 }
                 kts.append("\tfrom(\"" + escaped + "\")\n");
                 kts.append("\tpackageName = \"" + rpmName + "\"\n");
-                kts.append("\tsetArch( " + ((RpmDeployment)deployment).archName() + ")\n");
-                kts.append("\tos = " + ((RpmDeployment)deployment).osName() + "\n");
+                kts.append("\tsetArch( " + getRpmDebArch(config.target()) + ")\n");
+                kts.append("\tos = " + getRpmDebOs(config.target()) + "\n");
                 kts.append("}\n");
 
                 kts.append(createCopyTask("copyRpm", outputDir.getAbsolutePath(),
-                        ((RpmDeployment)deployment).outputDir(), "*.rpm", "distributions"));
+                        r.outputDir(), "*.rpm", "distributions"));
             }
             else if (deployment instanceof DebDeployment) {
                 String escaped = ((DebDeployment)deployment).outputDir().replace("\\","\\\\");
@@ -179,7 +180,7 @@ public class GradleBuild {
                 kts.append("\tfrom(\"" + escaped + "\")\n");
                 kts.append("\tpackageName = \"" + rpmName + "\"\n");
                 //kts.append("\tsetArch(" + ((DebDeployment)deployment).archName() + ")\n");
-                kts.append("\tos = " + ((DebDeployment)deployment).osName() + "\n");
+                kts.append("\tos = " + getRpmDebOs(config.target()) + "\n");
                 kts.append("}").append("\n\n");
 
                 kts.append(createCopyTask("copyDeb", outputDir.getAbsolutePath(), ((DebDeployment)deployment).outputDir(),
@@ -202,22 +203,21 @@ public class GradleBuild {
             }
 
             else if (deployment instanceof DockerDeployment) {
-                String escapedOutputDir = ((DockerDeployment)deployment).outputDir().replace("\\","\\\\");
                 String escapedInputDir = StringUtils.EMPTY;
-                if (StringUtils.isEmpty(((DockerDeployment)deployment).inputDir())) {
+                DockerDeployment dd = (DockerDeployment)deployment;
+                if (StringUtils.isEmpty(dd.inputDir())) {
                     if (dockerResource != null)
                         escapedInputDir = dockerResource.getParent().replace("\\","\\\\");
                 }
                 else {
-                   escapedInputDir = ((DockerDeployment) deployment).inputDir().replace("\\", "\\\\");
+                   escapedInputDir = dd.inputDir().replace("\\", "\\\\");
                 }
 
                 kts.append("tasks.create(\"buildImage\", DockerBuildImage::class) {\n");
-                           //"\tdestinationDirectory.set(file(\"" + escapedOutputDir + "\"))\n");
                 if (StringUtils.isNotEmpty(escapedInputDir))
                     kts.append("\tinputDir.set(file(\"" + escapedInputDir + "\"))\n");
                 else
-                    kts.append("\tval baseImage = FromInstruction(From(\"openjdk:8-jre\"))\n");
+                    kts.append("\tval baseImage = FromInstruction(From(\"").append(dd.baseImage()).append("\n");
                 kts.append("}\n");
             }
             else if (deployment instanceof TarDeployment) {

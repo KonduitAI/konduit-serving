@@ -40,7 +40,6 @@ public class DebDeployment implements Deployment {
     private String rpmName;
     private String version;
     private String archName;
-    private String osName;
 
     public DebDeployment(String outputDir) {
         this(outputDir, "ks", Deployment.defaultVersion());

@@ -40,8 +40,6 @@ public class RpmDeployment implements Deployment {
     private String outputDir;
     private String rpmName;
     private String version;
-    private String archName;
-    private String osName;
 
     public RpmDeployment(String outputDir) {
         this(outputDir, "ks", defaultVersion());

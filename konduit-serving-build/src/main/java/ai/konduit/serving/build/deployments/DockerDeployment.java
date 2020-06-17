@@ -20,9 +20,9 @@ package ai.konduit.serving.build.deployments;
 import ai.konduit.serving.build.build.GradlePlugin;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.config.DeploymentValidation;
+import ai.konduit.serving.build.config.SimpleDeploymentValidation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -31,57 +31,65 @@ import java.util.*;
 
 @Data
 @Accessors(fluent = true)
-@NoArgsConstructor
 public class DockerDeployment implements Deployment {
 
+    public static final String DEFAULT_BASE_IMAGE = "openjdk:8-jre";
     public static final String DEFAULT_IMAGE_NAME = "ks";
-    public static final String PROP_OUTPUTDIR = "docker.outputdir";
-    public static final String PROP_RPMNAME = "docker.name";
+    public static final String PROP_BASE_IMG = "docker.baseimage";
+    public static final String PROP_NAME = "docker.name";
 
+    private String baseImage;
     private String inputDir;
-    private String outputDir;
     private String imageName;
     private String version;
     private String imageId;
 
-    public DockerDeployment(String outputDir) {
-        this(outputDir, "ks", Deployment.defaultVersion());
+    public DockerDeployment() {
+        this(DEFAULT_BASE_IMAGE, "ks", Deployment.defaultVersion());
     }
 
-    public DockerDeployment(@JsonProperty("outputDir") String outputDir, @JsonProperty("rpmName") String imageName,
-                             @JsonProperty("version") String version){
-        this.outputDir = outputDir;
+    public DockerDeployment(@JsonProperty("baseImage") String baseImage, @JsonProperty("rpmName") String imageName,
+                            @JsonProperty("version") String version){
+        this.baseImage = baseImage;
         this.imageName = imageName;
         this.version = version;
     }
 
     @Override
     public List<String> propertyNames() {
-        return Arrays.asList(DEFAULT_IMAGE_NAME, PROP_OUTPUTDIR, PROP_RPMNAME);
+        return Arrays.asList(PROP_BASE_IMG, PROP_NAME);
     }
 
     @Override
     public Map<String, String> asProperties() {
         Map<String,String> m = new LinkedHashMap<>();
-        m.put(PROP_OUTPUTDIR, outputDir);
-        m.put(PROP_RPMNAME, imageName);
+        m.put(PROP_BASE_IMG, baseImage);
+        m.put(PROP_NAME, imageName);
         return m;
     }
 
     @Override
     public void fromProperties(Map<String, String> props) {
-        outputDir = props.getOrDefault(PROP_OUTPUTDIR, outputDir);
-        imageName = props.getOrDefault(PROP_RPMNAME, imageName);
+        baseImage = props.getOrDefault(PROP_BASE_IMG, baseImage);
+        imageName = props.getOrDefault(PROP_NAME, imageName);
     }
 
     @Override
     public DeploymentValidation validate() {
-        return null;
+        if(baseImage == null || baseImage.isEmpty()){
+            return new SimpleDeploymentValidation("No base image name is set (property: " + PROP_BASE_IMG + ")");
+        }
+        return new SimpleDeploymentValidation();
     }
 
     @Override
     public String outputString() {
-        return imageId;
+        StringBuilder sb = new StringBuilder();
+        sb.append("JAR location:        ");
+        sb.append("Docker image name:   ").append(imageName).append("\n");
+        sb.append("Docker base image:   ").append(baseImage).append("\n");
+        sb.append("Docker image id:     ").append(imageId).append("\n");
+        return sb.toString();
     }
 
     @Override
