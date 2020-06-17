@@ -46,13 +46,20 @@ public class RequiresDependenciesProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
 
         if(env.processingOver()){
-            if(moduleName == null){
+            if(moduleName == null && !toWrite.isEmpty()){
+                //Handle incremental build situation: usually occurs in IDEs, where the class with the annotation
+                //has been modified and gets recompiled in isolation (without any of the other classes)
+                //In this case, the generated file probably already exists, and we don't need to do anything
+                if(AnnotationUtils.existsAndContains(processingEnv.getFiler(), "ai.konduit.serving.annotation.module.RequiresDependencies", toWrite))
+                    return false;
+
                 Collection<? extends Element> c = env.getElementsAnnotatedWith(RequiresDependenciesAll.class);
                 List<TypeElement> types1 = ElementFilter.typesIn(c);
                 Collection<? extends Element> c2 = env.getElementsAnnotatedWith(RequiresDependenciesAny.class);
                 List<TypeElement> types2 = ElementFilter.typesIn(c2);
                 Collection<? extends Element> c3 = env.getElementsAnnotatedWith(InheritRequiredDependencies.class);
                 List<TypeElement> types3 = ElementFilter.typesIn(c3);
+
                 throw new IllegalStateException("No class in this module is annotated with @ModuleInfo - a class with " +
                         "@ModuleInfo(\"your-module-name\") should be added to the module that has the @RequiresDependenciesAll or " +
                         "@RequiresDependenciesAny or @InheritRequiredDependencies annotation: " + types1 + ", " + types2 + ", " + types3);
