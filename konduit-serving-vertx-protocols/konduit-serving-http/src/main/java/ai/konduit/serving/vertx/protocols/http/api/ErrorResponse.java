@@ -19,6 +19,7 @@
 package ai.konduit.serving.vertx.protocols.http.api;
 
 import ai.konduit.serving.pipeline.util.ObjectMappers;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,8 +34,14 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "An object specifying error information for anything that doesn't happen according to plan while " +
+        "sending inference requests to the konduit serving http server.")
 public class ErrorResponse implements Serializable {
+
+    @Schema(description = "Error code associated with the error object.")
     private HttpApiErrorCode errorCode;
+
+    @Schema(description = "The message associated with the error.")
     private String errorMessage;
 
     public static ErrorResponse fromJson(String jsonString) {

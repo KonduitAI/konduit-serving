@@ -39,6 +39,7 @@ import java.util.*;
 public class Module {
     private static final Map<String, Module> MODULES = loadModuleInfo();
 
+    public static final Module CLI = forName("konduit-serving-cli");
     public static final Module PIPELINE = forName("konduit-serving-pipeline");
     public static final Module VERTX = forName("konduit-serving-vertx");
     public static final Module HTTP = forName("konduit-serving-http");

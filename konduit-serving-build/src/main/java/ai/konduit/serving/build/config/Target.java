@@ -66,4 +66,9 @@ public class Target {
     public String toString(){
         return "Target(" + os + "," + arch + (device == null ? "" : "," + device.toString()) + ")";
     }
+
+    public String toJavacppPlatform(){
+        //https://github.com/bytedeco/javacpp/tree/master/src/main/resources/org/bytedeco/javacpp/properties
+        return os.name() + "-" + arch.name();
+    }
 }

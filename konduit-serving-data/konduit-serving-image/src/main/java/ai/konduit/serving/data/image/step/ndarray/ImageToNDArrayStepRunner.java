@@ -59,15 +59,14 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
 
     @Override
     public Data exec(Context ctx, Data data) {
-
         /*
         Behaviour:
         (a) If keys are defined, convert only those
         (b) In no keys are defined, convert all images
          */
 
-        List<String> toConvert = step.getKeys();
-        List<String> outNames = step.getOutputNames();
+        List<String> toConvert = step.keys();
+        List<String> outNames = step.outputNames();
         boolean inferOutNames = (outNames == null) || outNames.isEmpty();
         if(inferOutNames)
             outNames = new ArrayList<>();
@@ -89,7 +88,7 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
         Preconditions.checkState(toConvert.size() == outNames.size(), "Got (or inferred) a difference number of input images key" +
                 " vs. output names: inputToConvert=%s, outputNames=%s", toConvert, outNames);
 
-        boolean meta = step.isMetadata();
+        boolean meta = step.metadata();
         List<BoundingBox> cropRegionMeta = meta ? new ArrayList<>(toConvert.size()) : null;
         List<Long> origHMeta = meta ? new ArrayList<>(toConvert.size()) : null;
         List<Long> origWMeta = meta ? new ArrayList<>(toConvert.size()) : null;
@@ -107,7 +106,7 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
             if(isList){
                 List<NDArray> l = new ArrayList<>();
                 boolean batch = false;
-                switch (step.getConfig().listHandling()){
+                switch (step.config().listHandling()){
                     default:
                     case NONE:
                         throw new IllegalStateException("Error in step " + name() + " of type ImageToNDArrayStep: input field \"" +
@@ -120,7 +119,7 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
                         if(imgList.isEmpty()){
                             empty(d, outNames.get(idx++));
                         } else {
-                            NDArray array = ImageToNDArray.convert(data.getListImage(s).get(0), step.getConfig());
+                            NDArray array = ImageToNDArray.convert(data.getListImage(s).get(0), step.config());
                             d.put(outNames.get(idx++), array);
                         }
                         return d;
@@ -129,7 +128,7 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
                     case LIST_OUT:
                         List<Image> images = data.getListImage(s);
                         for(Image i : images){
-                            NDArray out = ImageToNDArray.convert(i, step.getConfig());
+                            NDArray out = ImageToNDArray.convert(i, step.config());
                             l.add(out);
                         }
                         break;
@@ -158,7 +157,7 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
                         int size = nd.getBuffer().capacity();
                         int newSize = size * l.size();
                         long[] newShape = l.get(0).shape().clone();
-                        if(!step.getConfig().includeMinibatchDim()){
+                        if(!step.config().includeMinibatchDim()){
                             newShape = new long[]{0, newShape[0], newShape[1], newShape[2]};
                         }
 
@@ -185,18 +184,18 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
                 Image i = data.getImage(s);
 
                 if (meta) {
-                    Pair<NDArray, BoundingBox> p = ImageToNDArray.convertWithMetadata(i, step.getConfig());
+                    Pair<NDArray, BoundingBox> p = ImageToNDArray.convertWithMetadata(i, step.config());
                     cropRegionMeta.add(p.getSecond());
                     origHMeta.add((long) i.height());
                     origWMeta.add((long) i.width());
                 } else {
-                    NDArray array = ImageToNDArray.convert(i, step.getConfig());
+                    NDArray array = ImageToNDArray.convert(i, step.config());
                     d.put(outNames.get(idx++), array);
                 }
             }
         }
 
-        if(step.isKeepOtherValues()) {
+        if(step.keepOtherValues()) {
             for (String s : data.keys()){
                 if(toConvert.contains(s))
                     continue;
@@ -221,7 +220,7 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
                 dMeta.putListInt64(ImageToNDArrayStep.META_IMG_W, origWMeta);
                 dMeta.putListBoundingBox(ImageToNDArrayStep.META_CROP_REGION, cropRegionMeta);
             }
-            String key = step.getMetadataKey();
+            String key = step.metadataKey();
             if(key == null)
                 key = ImageToNDArrayStep.DEFAULT_METADATA_KEY;
 
@@ -233,13 +232,13 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
     }
 
     private void empty(Data d, String outName){
-        long[] shape = ImageToNDArray.getOutputShape(step.getConfig());
+        long[] shape = ImageToNDArray.getOutputShape(step.config());
         if(shape.length == 3){
             shape = new long[]{0, shape[0], shape[1], shape[2]};
         } else {
             shape[0] = 0;
         }
-        SerializedNDArray arr = new SerializedNDArray(step.getConfig().dataType(), shape, ByteBuffer.allocate(0));
+        SerializedNDArray arr = new SerializedNDArray(step.config().dataType(), shape, ByteBuffer.allocate(0));
         d.put(outName, NDArray.create(arr));
     }
 }

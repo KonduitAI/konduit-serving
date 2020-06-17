@@ -20,6 +20,7 @@ package ai.konduit.serving.data.image.step.grid.crop;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,18 +48,45 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonName("CROP_GRID")
+@Schema(description = "A pipeline step that crops sub images out of a larger image, based on a grid. " +
+        "The grid is defined in terms of the x/y coordinates of the corners (which comes from the input data instance), " +
+        "and the number of segments within the grid in both directions. The 4 corner X coordinates come from a double array in <xName> " +
+        "and the 4 corner Y coordinates come from a double array in <yName>. Note that the output depends on the configuration. The " +
+        "output contains a list of cropped images from the grid.")
 public class CropGridStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "crops";
 
-    private String imageName;               //If null: just find any image
-    private String xName;                   //Name of the List<Long> or List<Double> of length 4, specifying X coordinates in any order
-    private String yName;                   //Name of the List<Long> or List<Double> of length 4, specifying Y coordinates in any order (that matches X order)
-    private int grid1;                      //Number of grid segments between (x[0],y[0]) and (x[1],y[1])
-    private int grid2;                      //Number of grid segments in the other direction
-    private boolean coordsArePixels;        //If true: Lists are in pixels, not 0 to 1
+    @Schema(description = "Name of the input image key from the previous step. If set to null, it will try to find any image in the incoming data instance.")
+    private String imageName;
+
+    @Schema(description = "Name of the key of a list (of length 4), specifying X coordinates in any order.")
+    private String xName;
+
+    @Schema(description = "Name of the key of a list (of length 4), specifying Y coordinates in any order (that matches X order).")
+    private String yName;
+
+    @Schema(description = "Number of grid segments between (xName[0],yName[0]) and (xName[1],yName[1]).")
+    private int grid1;
+
+    @Schema(description = "Number of grid segments in the other direction (between (xName[2],yName[2]) and (xName[3],yName[3])).")
+    private int grid2;
+
+    @Schema(description = "If true, the lists are in pixels coordinates, not from 0 to 1.")
+    private boolean coordsArePixels;
+
+    @Schema(description = "Name of the output bounding boxes key.")
     private String boundingBoxName;
+
+    @Schema(description = "If true, the two lists are returned which contains the data of grid horizontal and verticle coordinates, respectively.")
     private boolean outputCoordinates;
+
+    @Schema(description = "If true, other data key and values from the previous step are kept and passed on to the next step as well.")
     private boolean keepOtherFields;
+
+    @Schema(description = "If set, the smaller dimensions will be increased to keep the aspect ratio correct (which may crop outside the image border).")
     private Double aspectRatio;
+
+    @Schema(description = "Name of the key of all the cropped output images from this step.",
+            defaultValue = DEFAULT_OUTPUT_NAME)
     private String outputName;
 }

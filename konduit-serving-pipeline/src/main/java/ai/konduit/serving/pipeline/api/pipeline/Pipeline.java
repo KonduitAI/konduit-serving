@@ -16,16 +16,16 @@
 
 package ai.konduit.serving.pipeline.api.pipeline;
 
-import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.TextConfig;
+import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.serde.PipelineDeserializer;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.NonNull;
 import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 /**
  * A Pipeline object represents the configuration of a machine learning pipeline - including zero or more machine learning
@@ -37,6 +37,7 @@ import java.util.UUID;
  * perhaps including conditional operations/branching
  */
 @JsonDeserialize(using = PipelineDeserializer.class)
+@Schema(description = "A konduit serving pipeline.")
 public interface Pipeline extends TextConfig, Serializable {
 
     /**
