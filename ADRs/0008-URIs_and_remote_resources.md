@@ -1,7 +1,7 @@
 # URIs/URLs and Remote Resources
 
 ## Status
-PROPOSED
+ACCEPTED (17/06/2020)
 
 Proposed by: Alex (11/06/2020)
 
@@ -47,7 +47,7 @@ listing, etc is not required.
 
 The supported types of URIs should be extensible also - i.e., users should be able to add other types if needed.
 
-## Proposal
+## Decision
 
 We utilize standard Java APIs for this: URI, URL, URLConnection and InputStream:
 ```java
