@@ -21,19 +21,18 @@ package ai.konduit.serving.data.image;
 import ai.konduit.serving.data.image.step.point.perspective.convert.PerspectiveTransformStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
-import ai.konduit.serving.pipeline.api.data.BoundingBox;
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.api.data.Point;
+import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.nd4j.common.resources.Resources;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 
+import java.io.File;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -263,5 +262,36 @@ public class TestPerspectiveTransformStep {
         p.executor().exec(d);
 
         Thread.sleep(100000);
+    }
+
+    @Ignore
+    @Test
+    public void testImage() throws Exception {
+        Pipeline p = SequencePipeline.builder()
+                .add(PerspectiveTransformStep.builder()
+                        .inputName("image")
+                        .sourcePoints(Arrays.asList(
+                                Point.create(12, 196),
+                                Point.create(496, 253),
+                                Point.create(23, 422),
+                                Point.create(483, 498)
+                        ))
+//                        .targetPoints(Arrays.asList(
+//                                Point.create(10, 10),
+//                                Point.create(590, 10),
+//                                Point.create(10, 590),
+//                                Point.create(590, 590)
+//                        ))
+                        .build())
+                .add(new ShowImagePipelineStep().width(600).height(600))
+                .build();
+
+        File f = Resources.asFile("data/shelves.png");
+        Image i = Image.create(f);
+
+        Data d = Data.singleton("image", i);
+        Data out = p.executor().exec(d);
+
+        Thread.sleep(Long.MAX_VALUE);
     }
 }
