@@ -21,6 +21,7 @@ package ai.konduit.serving.pipeline.impl.pipeline.loop;
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Trigger;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.ToString;
@@ -32,6 +33,17 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+/**
+ * A simple looping trigger to be used with an {@link ai.konduit.serving.pipeline.impl.pipeline.AsyncPipeline}.<br>
+ * It has two modes of operation:<br>
+ * (a) Loop continuously with no delay - if frequencyMs is not set, or<br>
+ * (b) Loop every frequencyMs milliseconds, if this is set
+ *
+ * @author Alex Black
+ */
+@Schema(description = "A simple looping trigger to be used with an AsyncPipeline. It has two modes of operation:<br>" +
+        "(a) Loop continuously with no delay - if frequencyMs is not set, or<br>" +
+        "(b) Loop every frequencyMs milliseconds, if this is set")
 @lombok.Data
 @Slf4j
 @JsonIgnoreProperties({"stop", "thread", "exception", "first", "current", "callbackFn"})

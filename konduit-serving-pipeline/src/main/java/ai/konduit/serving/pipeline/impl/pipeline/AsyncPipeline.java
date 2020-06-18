@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.api.pipeline.Trigger;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.serde.AsyncPipelineSerializer;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -29,12 +30,30 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
 
+/**
+ * AsyncPipeline is used for situations such as processing streams of data. The idea is that an AsyncPipeline
+ * may perform execution in the background (internally); when the AsyncPipeline is queried, it may return the last processed
+ * Data output. The behaviour of the AsyncPipeline is determined by the underlying Trigger.<br>
+ * Note that because of the asynchronous nature of AsyncPipeline, the input Data instance may not actually be used
+ * when executing the underlying pipeline. This means that AsyncPipeline is restricted to situations where the Data is loaded within
+ * the pipeline itself, or no (external) input is required. For example, when an image (video frame) is loaded by FrameCaptureStep.
+ *
+ * @author Alex Black
+ */
 @Data
 @Accessors(fluent = true)
 @JsonSerialize(using = AsyncPipelineSerializer.class)
+@Schema(description = "AsyncPipeline is used for situations such as processing streams of data. The idea is that an AsyncPipeline" +
+        " may perform execution in the background (internally); when the AsyncPipeline is queried, it may return the last processed" +
+        " Data output. The behaviour of the AsyncPipeline is determined by the underlying Trigger.<br>" +
+        "Note that because of the asynchronous nature of AsyncPipeline, the input Data instance may not actually be used " +
+        "when executing the underlying pipeline. This means that AsyncPipeline is restricted to situations where the Data is loaded within " +
+        "the pipeline itself, or no (external) input is required. For example, when an image (video frame) is loaded by FrameCaptureStep.")
 public class AsyncPipeline implements Pipeline, AutoCloseable {
 
+    @Schema(description = "The underlying pipeline")
     protected final Pipeline underlying;
+    @Schema(description = "The async pipeline trigger")
     protected final Trigger trigger;
     @EqualsAndHashCode.Exclude
     @ToString.Exclude

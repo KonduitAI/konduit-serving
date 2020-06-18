@@ -19,18 +19,31 @@
 package ai.konduit.serving.pipeline.impl.pipeline.loop;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A trigger to be used with an {@link ai.konduit.serving.pipeline.impl.pipeline.AsyncPipeline}.<br>
+ * TimeLoopTrigger performs execution of the underlying executor every time unit (every minute, every 2 hours, etc)
+ * at the start of the time unit, or at the start + an optional offset.
+ *
+ * @author Alex Black
+ */
+@Schema(description = "A trigger to be used with an {@link ai.konduit.serving.pipeline.impl.pipeline.AsyncPipeline}.<br>" +
+        "TimeLoopTrigger performs execution of the underlying executor every time unit (every minute, every 2 hours, etc)" +
+        "at the start of the time unit, or at the start + an optional offset.")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @JsonName("TIME_LOOP_TRIGGER")
 public class TimeLoopTrigger extends SimpleLoopTrigger {
 
     protected final long offset;
 
-    protected TimeLoopTrigger(@JsonProperty("frequencyMs") Long frequencyMs, @JsonProperty("offset") long offset){
+    protected TimeLoopTrigger(@JsonProperty("frequencyMs") Long frequencyMs, @JsonProperty("offset") long offset) {
         super(frequencyMs);
         this.offset = offset;
     }
@@ -39,13 +52,13 @@ public class TimeLoopTrigger extends SimpleLoopTrigger {
         this(duration, unit, 0);
     }
 
-    public TimeLoopTrigger(long duration, TimeUnit unit, long offset){
+    public TimeLoopTrigger(long duration, TimeUnit unit, long offset) {
         super(unit.toMillis(duration));
         this.offset = offset;
     }
 
     @Override
-    protected long firstRunDelay(){
+    protected long firstRunDelay() {
         long now = System.currentTimeMillis();
         long next = now + frequencyMs - (now % frequencyMs) + offset;
         return next - now;
