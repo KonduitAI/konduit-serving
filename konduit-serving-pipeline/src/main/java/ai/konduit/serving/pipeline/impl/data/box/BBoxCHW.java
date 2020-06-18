@@ -18,18 +18,31 @@
 package ai.konduit.serving.pipeline.impl.data.box;
 
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 @Data
 @Accessors(fluent = true)
+@Schema(description = "A bounding box based on center X, center Y, height and width format.")
 public class BBoxCHW implements BoundingBox {
 
+    @Schema(description = "Center X coordinate.")
     private final double cx;
+
+    @Schema(description = "Center Y coordinate.")
     private final double cy;
+
+    @Schema(description = "Box height.")
     private final double h;
+
+    @Schema(description = "Box width.")
     private final double w;
+
+    @Schema(description = "Class label.")
     private final String label;
+
+    @Schema(description = "Class probability.")
     private final Double probability;
 
     public BBoxCHW(double cx, double cy, double h, double w){

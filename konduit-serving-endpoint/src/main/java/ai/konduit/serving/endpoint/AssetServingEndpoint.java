@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.endpoint;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.impl.MimeMapping;
@@ -29,9 +30,13 @@ import java.util.List;
 /**
  *
  */
+@Schema(description = "A base object for configuring a custom endpoint to serve assets.")
 public abstract class AssetServingEndpoint implements Endpoint {
 
+    @Schema(description = "Endpoint http path.")
     protected final String httpPath;
+
+    @Schema(description = "Asset file path.")
     protected final String fileAssetPath;
 
     public AssetServingEndpoint(String httpPath, String fileAssetPath){

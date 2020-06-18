@@ -20,6 +20,7 @@ package ai.konduit.serving.pipeline.impl.step.ml.ssd;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -45,6 +46,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 @JsonName("SSD_TO_BBOX")
+@Schema(description = "A pipeline step that configures extraction of bounding boxes from an SSD model output.")
 public class SSDToBoundingBoxStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";
     // You can do new SSDToBoundingBoxStep().classLabels(SSDToBoundingBoxStep.COCO_LABELS)
@@ -53,12 +55,17 @@ public class SSDToBoundingBoxStep implements PipelineStep {
     //TODO config
 
     @Builder.Default
+    @Schema(description = "A list of class labels.")
     protected String[] classLabels = null;
 
     @Builder.Default
+    @Schema(description = "If true, other data key and values from the previous step are kept and passed on to the next step as well.",
+            defaultValue = "true")
     protected boolean keepOtherValues = true;
 
     @Builder.Default
+    @Schema(description = "Threadshold to the output of the SSD models for fetching bounding boxes for.",
+            defaultValue = "0.5")
     protected double threshold = 0.5;
 
     protected Double scale = null;
@@ -66,6 +73,8 @@ public class SSDToBoundingBoxStep implements PipelineStep {
 
 
     @Builder.Default
+    @Schema(description = "Output key name where the bounding box will be contained in.",
+            defaultValue = DEFAULT_OUTPUT_NAME)
     protected String outputName = DEFAULT_OUTPUT_NAME;
 
 

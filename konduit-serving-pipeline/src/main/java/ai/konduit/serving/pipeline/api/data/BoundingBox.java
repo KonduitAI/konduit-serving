@@ -2,6 +2,7 @@ package ai.konduit.serving.pipeline.api.data;
 
 import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
 import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Objects;
 
@@ -19,6 +20,13 @@ import java.util.Objects;
  *
  * @author Alex Black
  */
+@Schema(description = "This object is usually used to represent a rectangular region in an image, along with an optional String label, " +
+        "and an aptional double probability. Bounding boxes can be defined in two (essentially equivalent) formats: " +
+        "(a) Based on center X, center Y, height and width " +
+        "(b) Based on x1, x2, y1 and y2 locations (i.e., lower/upper X, lower/upper Y coordinate) " +
+        "As a general rule, bounding box coordinates are specified as a fraction of the image - with coordinates (x,y)=(0.0, 0.0) " +
+        "being top left of the image, and (x,y)=(1.0, 1.0) being the bottom right of the image. However, in some use cases, " +
+        "specifying x/y locations in pixels might be used.")
 public interface BoundingBox {
 
     /**
