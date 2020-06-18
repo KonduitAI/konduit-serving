@@ -18,11 +18,22 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.loop;
 
+import ai.konduit.serving.annotation.json.JsonName;
+import lombok.Data;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
+
 import java.util.concurrent.TimeUnit;
 
+@Data
+@JsonName("TIME_LOOP_TRIGGER")
 public class TimeLoopTrigger extends SimpleLoopTrigger {
 
     protected final long offset;
+
+    protected TimeLoopTrigger(@JsonProperty("frequencyMs") Long frequencyMs, @JsonProperty("offset") long offset){
+        super(frequencyMs);
+        this.offset = offset;
+    }
 
     public TimeLoopTrigger(long duration, TimeUnit unit) {
         this(duration, unit, 0);

@@ -21,16 +21,23 @@ package ai.konduit.serving.pipeline.impl.pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.Trigger;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
+import ai.konduit.serving.pipeline.impl.pipeline.serde.AsyncPipelineSerializer;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
+import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
 
 @Data
 @Accessors(fluent = true)
+@JsonSerialize(using = AsyncPipelineSerializer.class)
 public class AsyncPipeline implements Pipeline, AutoCloseable {
 
     protected final Pipeline underlying;
     protected final Trigger trigger;
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     protected AsyncPipelineExecutor executor;
 
     public AsyncPipeline(@NonNull Pipeline underlying, @NonNull Trigger trigger){

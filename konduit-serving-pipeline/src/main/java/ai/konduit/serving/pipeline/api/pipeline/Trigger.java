@@ -18,11 +18,16 @@
 
 package ai.konduit.serving.pipeline.api.pipeline;
 
+import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.data.Data;
+import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
 import java.util.function.Function;
 
-public interface Trigger {
+import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
+
+@JsonTypeInfo(use = NAME, property = "@type")
+public interface Trigger extends TextConfig {
 
     Data query(Data data);
 

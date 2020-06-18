@@ -22,12 +22,17 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.api.pipeline.Trigger;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import ai.konduit.serving.pipeline.impl.pipeline.loop.SimpleLoopTrigger;
 import ai.konduit.serving.pipeline.impl.pipeline.loop.TimeLoopTrigger;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
 import ai.konduit.serving.pipeline.impl.testpipelines.count.CountStep;
 import ai.konduit.serving.pipeline.impl.testpipelines.time.TimeStep;
 import org.junit.Test;
+import org.slf4j.event.Level;
 
+import java.nio.channels.Pipe;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -103,7 +108,6 @@ public class AsyncPipelineTest {
 
     @Test
     public void testTimeLoopTrigger() throws Exception {
-
         CountStep cs = new CountStep();
         Pipeline p = SequencePipeline.builder()
                 .add(cs)
@@ -140,5 +144,45 @@ public class AsyncPipelineTest {
                 assertTrue(l + ", delta=" + delta, delta >= (1000-threshold) || delta < threshold);
             }
         }
+    }
+
+    @Test
+    public void testJson(){
+
+        for(Trigger t : new Trigger[]{new SimpleLoopTrigger(1000), new TimeLoopTrigger(1, TimeUnit.MINUTES), new TimeLoopTrigger(1, TimeUnit.MINUTES, 20000)}){
+
+            Pipeline p = SequencePipeline.builder()
+                    .add(LoggingPipelineStep.builder().build())
+                    .build();
+
+            Pipeline a1 = new AsyncPipeline(p, t);
+            String json = a1.toJson();
+            String yaml = a1.toYaml();
+
+            System.out.println(json);
+
+            Pipeline a1j = Pipeline.fromJson(json);
+            Pipeline a1y = Pipeline.fromYaml(yaml);
+
+            assertEquals(a1, a1j);
+            assertEquals(a1, a1y);
+
+            GraphBuilder b = new GraphBuilder();
+            GraphStep s = b.input().then("log", LoggingPipelineStep.builder().build());
+
+            Pipeline g = b.build(s);
+
+            Pipeline a2 = new AsyncPipeline(g, t);
+
+            String gJson = a2.toJson();
+            String gYaml = a2.toYaml();
+
+            Pipeline a2j = Pipeline.fromJson(gJson);
+            Pipeline a2y = Pipeline.fromYaml(gYaml);
+
+            assertEquals(a2, a2j);
+            assertEquals(a2, a2y);
+        }
+
     }
 }

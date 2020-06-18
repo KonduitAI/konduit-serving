@@ -18,9 +18,12 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.loop;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Trigger;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
@@ -29,11 +32,18 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+@lombok.Data
 @Slf4j
-@JsonIgnoreProperties({"stop", "thread", "last", "callbackFn"})
+@JsonIgnoreProperties({"stop", "thread", "exception", "first", "current", "callbackFn"})
+@JsonName("SIMPLE_LOOP_TRIGGER")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 public class SimpleLoopTrigger implements Trigger {
 
+    @EqualsAndHashCode.Include
+    @ToString.Include
     protected final Long frequencyMs;
+
     protected AtomicBoolean stop = new AtomicBoolean();
     protected Thread thread;
     protected Throwable exception;
