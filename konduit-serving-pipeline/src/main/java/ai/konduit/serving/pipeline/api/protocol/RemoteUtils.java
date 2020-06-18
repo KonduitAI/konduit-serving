@@ -1,4 +1,4 @@
-package ai.konduit.serving.build.remote;
+package ai.konduit.serving.pipeline.api.protocol;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;

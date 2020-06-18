@@ -1,6 +1,6 @@
 package ai.konduitai.serving.pipeline.protocol;
 
-import ai.konduit.serving.build.remote.RemoteUtils;
+import ai.konduit.serving.pipeline.api.protocol.RemoteUtils;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -9,6 +9,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
@@ -49,7 +53,41 @@ public class TestURL {
         url = HTTPS + HOST + ":" + PORT + "/src/test/resources/config/config.json";
         data = RemoteUtils.configFromHttp(url);
         assertTrue(data.contains("pipelineSteps"));
+
+        /*url = FTP + HOST + ":" + 21 + "/src/test/resources/config/config.json";
+        data = RemoteUtils.configFromHttp(url);
+        assertTrue(data.contains("pipelineSteps"));*/
     }
 
 
+    @Test
+    public void testS3() throws IOException {
+        URL url = new URL("s3://<access-key>:<secret-key>@<bucket>.s3.amazonaws.com/<filename>");
+
+        URLConnection conn = url.openConnection();
+        InputStream is = conn.getInputStream();
+
+        if (is != null) {
+
+            Writer writer = new StringWriter();
+            char[] buffer = new char[1024];
+            try {
+                Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                int n;
+                while ((n = reader.read(buffer)) != -1) {
+                    writer.write(buffer, 0, n);
+                }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                is.close();
+            }
+
+            System.out.println("connected");
+            System.out.println(writer.toString());
+
+        }
+    }
 }
