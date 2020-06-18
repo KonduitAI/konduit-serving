@@ -20,6 +20,7 @@ import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 import org.nd4j.shade.jackson.annotation.JsonPropertyOrder;
@@ -58,6 +59,7 @@ public class GraphPipeline implements Pipeline {
 
     @Schema(description = "A unique identifier that's used to differentiate among different executing pipelines. Used " +
             "for identifying a pipeline while reporting metrics.")
+    @EqualsAndHashCode.Exclude
     private String id;
 
     public GraphPipeline(@JsonProperty("steps") Map<String, GraphStep> steps,
