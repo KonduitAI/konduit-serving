@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.point.convert;
+package ai.konduit.serving.data.image.step.bb.point;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -26,9 +26,10 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * ConvertBoundingBoxToPointStep: Given one or more bounding boxes, create a point representation of them.<br>
+ * BoundingBoxToPointStep: Given one or more bounding boxes, create a point representation of them.<br>
  * You can choose from the following methods of converting the bounding box to a point: TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT,
- * BOTTOM_RIGHT, CENTER<br>
+ * BOTTOM_RIGHT, CENTER.<br>
+ * Set to CENTER by default.<br>
  * Note: supports both {@code BoundingBox} and {@code List<BoundingBox>} fields. If the input is as single value,
  * the output will be a single value; if the input is a list, the output will be a list.<br>
  */
@@ -36,8 +37,8 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
-@JsonName("CONVERT_BOUNDING_BOX_TO_POINT")
-public class ConvertBoundingBoxToPointStep implements PipelineStep {
+@JsonName("BOUNDING_BOX_TO_POINT")
+public class BoundingBoxToPointStep implements PipelineStep {
     public enum ConversionMethod {TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, CENTER}
 
     private String bboxName;       //If null: just find any BB's
@@ -45,10 +46,10 @@ public class ConvertBoundingBoxToPointStep implements PipelineStep {
     @Builder.Default
     private boolean keepOtherFields = true;
     @Builder.Default
-    private ConversionMethod method = ConversionMethod.BOTTOM_LEFT;
+    private ConversionMethod method = ConversionMethod.CENTER;
 
 
-    public ConvertBoundingBoxToPointStep() {
+    public BoundingBoxToPointStep() {
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
         //Without setting defaults here again like this, the boolean default would be false, the enum would be null
         keepOtherFields = true;

@@ -16,22 +16,22 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.point.convert;
+package ai.konduit.serving.data.image.step.bb.point;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import org.nd4j.common.base.Preconditions;
 
-public class ConvertBoundingBoxToPointStepRunnerFactory implements PipelineStepRunnerFactory {
+public class BoundingBoxToPointStepRunnerFactory implements PipelineStepRunnerFactory {
     @Override
     public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof ConvertBoundingBoxToPointStep;
+        return pipelineStep instanceof BoundingBoxToPointStep;
     }
 
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new ConvertBoundingBoxToPointStepRunner((ConvertBoundingBoxToPointStep) pipelineStep);
+        return new BoundingBoxToPointStepRunner((BoundingBoxToPointStep) pipelineStep);
     }
 }

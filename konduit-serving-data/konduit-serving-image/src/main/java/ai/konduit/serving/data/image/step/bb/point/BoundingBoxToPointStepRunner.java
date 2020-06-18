@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.point.convert;
+package ai.konduit.serving.data.image.step.bb.point;
 
 import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
@@ -33,12 +33,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@CanRun(ConvertBoundingBoxToPointStep.class)
-public class ConvertBoundingBoxToPointStepRunner implements PipelineStepRunner {
+@CanRun(BoundingBoxToPointStep.class)
+public class BoundingBoxToPointStepRunner implements PipelineStepRunner {
 
-    protected final ConvertBoundingBoxToPointStep step;
+    protected final BoundingBoxToPointStep step;
 
-    public ConvertBoundingBoxToPointStepRunner(@NonNull ConvertBoundingBoxToPointStep step){
+    public BoundingBoxToPointStepRunner(@NonNull BoundingBoxToPointStep step){
         this.step = step;
     }
 

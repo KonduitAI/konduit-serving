@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.data.image;
 
-import ai.konduit.serving.data.image.step.point.convert.ConvertBoundingBoxToPointStep;
+import ai.konduit.serving.data.image.step.bb.point.BoundingBoxToPointStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Point;
@@ -30,7 +30,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static ai.konduit.serving.data.image.step.point.convert.ConvertBoundingBoxToPointStep.ConversionMethod.*;
+import static ai.konduit.serving.data.image.step.bb.point.BoundingBoxToPointStep.ConversionMethod.*;
 import static org.junit.Assert.assertEquals;
 
 public class TestConvertBoundingBoxToPointStep {
@@ -39,11 +39,11 @@ public class TestConvertBoundingBoxToPointStep {
     public void testSingle() throws Exception {
         for (boolean outName : new boolean[]{false, true}) {
             for (boolean keepOthers : new boolean[]{false, true}) {
-                for (ConvertBoundingBoxToPointStep.ConversionMethod method : new ConvertBoundingBoxToPointStep.ConversionMethod[]{BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT, CENTER})
+                for (BoundingBoxToPointStep.ConversionMethod method : new BoundingBoxToPointStep.ConversionMethod[]{BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT, CENTER})
                     for (boolean nullNames : new boolean[]{false, true}) {
 
                         Pipeline p = SequencePipeline.builder()
-                                .add(ConvertBoundingBoxToPointStep.builder()
+                                .add(BoundingBoxToPointStep.builder()
                                         .bboxName(nullNames ? null : "bbox")
                                         .outputName(outName ? null : "myOutput")
                                         .method(method)
@@ -105,7 +105,7 @@ public class TestConvertBoundingBoxToPointStep {
     public void testList() {
             for (boolean nullNames : new boolean[]{false, true}) {
                 Pipeline p = SequencePipeline.builder()
-                        .add(ConvertBoundingBoxToPointStep.builder()
+                        .add(BoundingBoxToPointStep.builder()
                                 .bboxName(nullNames ? null : "bbox")
                                 .outputName("myOutput")
                                 .method(TOP_LEFT)
