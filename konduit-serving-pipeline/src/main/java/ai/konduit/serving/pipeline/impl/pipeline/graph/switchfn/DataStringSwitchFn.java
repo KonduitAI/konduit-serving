@@ -22,6 +22,7 @@ import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
@@ -40,10 +41,19 @@ import java.util.Map;
 @lombok.Data
 @Accessors(fluent = true)
 @JsonName("STRING_SWITCH")
+@Schema(description = "A switch function that selects the output based a string value from the data instance. " +
+        "The specified field name must be a string value, and must be present in the provided selection map. " +
+        "For example, if the map has values {x: 0, y: 1} then if data[fieldName] is x, the input " +
+        "is forwarded to output 0. If it is y the output is forwarded to output 1.")
 public class DataStringSwitchFn implements SwitchFn {
 
+    @Schema(description = "The number of outputs from a switch step. Must be equal to the size of the selection map.")
     private final int numOutputs;
+
+    @Schema(description = "Field name key from a data instance whose value should be one of the keys in the selection map.")
     private final String fieldName;
+
+    @Schema(description = "Selection map that determines where the output from the switch will be channelled to.")
     private final Map<String, Integer> map;
 
     public DataStringSwitchFn(@JsonProperty("numOutputs") int numOutputs, @JsonProperty("fieldName") String fieldName,

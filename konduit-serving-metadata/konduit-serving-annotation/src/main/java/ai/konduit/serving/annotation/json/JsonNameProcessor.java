@@ -67,17 +67,26 @@ public class JsonNameProcessor extends AbstractProcessor {
             List<TypeElement> types = ElementFilter.typesIn(c);
 
             for (TypeElement annotation : types) {
-                List<? extends TypeMirror> interfaces = annotation.getInterfaces();
-                if(interfaces != null && !interfaces.isEmpty()){
-                    for(TypeMirror t : interfaces){
-                        String str = t.toString();
-                        if(PIPELINE_STEP.equals(str) || SWITCH_FN.equals(str) || GRAPH_STEP.equals(str)){
-                            String jn = annotation.getAnnotation(JsonName.class).value();
-                            toWrite.add(jn + "," + annotation.toString() + "," + str);      //Format: json_name,class_name,interface_name
-                            subTypes.add(new JsonSubType(jn, annotation.toString(), str));
-                            break;
-                        }
+                TypeMirror t = annotation.asType();
+                TypeMirror pipelineStepTypeMirror = processingEnv.getElementUtils().getTypeElement(PIPELINE_STEP).asType();
+                TypeMirror switchFnTypeMirror = processingEnv.getElementUtils().getTypeElement(SWITCH_FN).asType();
+                TypeMirror graphStepTypeMirror = processingEnv.getElementUtils().getTypeElement(GRAPH_STEP).asType();
+                boolean isPS = processingEnv.getTypeUtils().isAssignable(t, pipelineStepTypeMirror);
+                boolean isSF = processingEnv.getTypeUtils().isAssignable(t, switchFnTypeMirror);
+                boolean isGS = processingEnv.getTypeUtils().isAssignable(t, graphStepTypeMirror);
+                if(isPS || isSF || isGS){
+                    String str;
+                    if(isPS){
+                        str = PIPELINE_STEP;
+                    } else if(isSF){
+                        str = SWITCH_FN;
+                    } else {
+                        str = GRAPH_STEP;
                     }
+
+                    String jn = annotation.getAnnotation(JsonName.class).value();
+                    toWrite.add(jn + "," + annotation.toString() + "," + str);      //Format: json_name,class_name,interface_name
+                    subTypes.add(new JsonSubType(jn, annotation.toString(), str));
                 }
             }
         }

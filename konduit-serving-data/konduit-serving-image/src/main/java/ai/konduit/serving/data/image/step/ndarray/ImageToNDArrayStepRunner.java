@@ -59,7 +59,6 @@ public class ImageToNDArrayStepRunner implements PipelineStepRunner {
 
     @Override
     public Data exec(Context ctx, Data data) {
-
         /*
         Behaviour:
         (a) If keys are defined, convert only those
