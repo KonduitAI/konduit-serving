@@ -16,13 +16,14 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.bb.point;
+package ai.konduit.serving.pipeline.impl.step.bbox.point;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -33,27 +34,16 @@ import lombok.experimental.Accessors;
  * Note: supports both {@code BoundingBox} and {@code List<BoundingBox>} fields. If the input is as single value,
  * the output will be a single value; if the input is a list, the output will be a list.<br>
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("BOUNDING_BOX_TO_POINT")
 public class BoundingBoxToPointStep implements PipelineStep {
     public enum ConversionMethod {TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, CENTER}
 
     private String bboxName;       //If null: just find any BB's
     private String outputName;
-    @Builder.Default
     private boolean keepOtherFields = true;
-    @Builder.Default
     private ConversionMethod method = ConversionMethod.CENTER;
-
-
-    public BoundingBoxToPointStep() {
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the boolean default would be false, the enum would be null
-        keepOtherFields = true;
-
-        method = ConversionMethod.BOTTOM_LEFT;
-    }
 }

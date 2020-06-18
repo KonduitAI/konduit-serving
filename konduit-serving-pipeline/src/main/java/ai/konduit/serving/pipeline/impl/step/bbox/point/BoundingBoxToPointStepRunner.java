@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.bb.point;
+package ai.konduit.serving.pipeline.impl.step.bbox.point;
 
 import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
@@ -44,7 +44,7 @@ public class BoundingBoxToPointStepRunner implements PipelineStepRunner {
 
     @Override
     public void close() {
-
+        //No op
     }
 
     @Override

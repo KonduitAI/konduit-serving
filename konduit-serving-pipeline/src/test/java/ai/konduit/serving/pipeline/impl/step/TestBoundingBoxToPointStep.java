@@ -16,9 +16,9 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image;
+package ai.konduit.serving.pipeline.impl.step;
 
-import ai.konduit.serving.data.image.step.bb.point.BoundingBoxToPointStep;
+import ai.konduit.serving.pipeline.impl.step.bbox.point.BoundingBoxToPointStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Point;
@@ -30,25 +30,24 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static ai.konduit.serving.data.image.step.bb.point.BoundingBoxToPointStep.ConversionMethod.*;
+import static ai.konduit.serving.pipeline.impl.step.bbox.point.BoundingBoxToPointStep.ConversionMethod.*;
 import static org.junit.Assert.assertEquals;
 
-public class TestConvertBoundingBoxToPointStep {
+public class TestBoundingBoxToPointStep {
 
     @Test
-    public void testSingle() throws Exception {
+    public void testSingle() {
         for (boolean outName : new boolean[]{false, true}) {
             for (boolean keepOthers : new boolean[]{false, true}) {
                 for (BoundingBoxToPointStep.ConversionMethod method : new BoundingBoxToPointStep.ConversionMethod[]{BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT, CENTER})
                     for (boolean nullNames : new boolean[]{false, true}) {
 
                         Pipeline p = SequencePipeline.builder()
-                                .add(BoundingBoxToPointStep.builder()
+                                .add(new BoundingBoxToPointStep()
                                         .bboxName(nullNames ? null : "bbox")
                                         .outputName(outName ? null : "myOutput")
                                         .method(method)
-                                        .keepOtherFields(keepOthers)
-                                        .build())
+                                        .keepOtherFields(keepOthers))
                                 .build();
 
 
@@ -105,11 +104,10 @@ public class TestConvertBoundingBoxToPointStep {
     public void testList() {
             for (boolean nullNames : new boolean[]{false, true}) {
                 Pipeline p = SequencePipeline.builder()
-                        .add(BoundingBoxToPointStep.builder()
+                        .add(new BoundingBoxToPointStep()
                                 .bboxName(nullNames ? null : "bbox")
                                 .outputName("myOutput")
-                                .method(TOP_LEFT)
-                                .build())
+                                .method(TOP_LEFT))
                         .build();
 
                 List<BoundingBox> lbb = Arrays.asList(BoundingBox.create(0.5, 0.22, 0.25, 0.3), BoundingBox.create(0.5, 0.22, 0.25, 0.3));
