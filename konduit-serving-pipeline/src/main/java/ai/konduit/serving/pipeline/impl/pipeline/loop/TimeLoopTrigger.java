@@ -29,13 +29,13 @@ import java.util.concurrent.TimeUnit;
 /**
  * A trigger to be used with an {@link ai.konduit.serving.pipeline.impl.pipeline.AsyncPipeline}.<br>
  * TimeLoopTrigger performs execution of the underlying executor every time unit (every minute, every 2 hours, etc)
- * at the start of the time unit, or at the start + an optional offset.
+ * at the start of the time unit (start of the minute, hour, etc), or at the start + an optional offset.
  *
  * @author Alex Black
  */
 @Schema(description = "A trigger to be used with an {@link ai.konduit.serving.pipeline.impl.pipeline.AsyncPipeline}.<br>" +
         "TimeLoopTrigger performs execution of the underlying executor every time unit (every minute, every 2 hours, etc)" +
-        "at the start of the time unit, or at the start + an optional offset.")
+        "at the start of the time unit (start of the minute, hour, etc), or at the start + an optional offset.")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @JsonName("TIME_LOOP_TRIGGER")
