@@ -19,13 +19,13 @@
 package ai.konduit.serving.pipeline.impl.pipeline.loop;
 
 import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.pipeline.LoopTrigger;
+import ai.konduit.serving.pipeline.api.pipeline.Trigger;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Function;
 
 @Slf4j
-public class SimpleLoopTrigger implements LoopTrigger {
+public class SimpleLoopTrigger implements Trigger {
 
     private final Long frequencyMs;
     private Thread thread;

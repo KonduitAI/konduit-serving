@@ -21,7 +21,7 @@ package ai.konduit.serving.pipeline.impl.pipeline;
 import ai.konduit.serving.pipeline.api.context.Profiler;
 import ai.konduit.serving.pipeline.api.context.ProfilerConfig;
 import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.pipeline.LoopTrigger;
+import ai.konduit.serving.pipeline.api.pipeline.Trigger;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
@@ -31,16 +31,16 @@ import org.slf4j.Logger;
 import java.util.List;
 
 @Slf4j
-public class LoopPipelineExecutor implements PipelineExecutor {
+public class AsyncPipelineExecutor implements PipelineExecutor {
 
-    protected final LoopPipeline pipeline;
-    protected final LoopTrigger trigger;
+    protected final AsyncPipeline pipeline;
+    protected final Trigger trigger;
     protected final PipelineExecutor underlyingExec;
 
 
-    public LoopPipelineExecutor(LoopPipeline pipeline){
+    public AsyncPipelineExecutor(AsyncPipeline pipeline){
         this.pipeline = pipeline;
-        this.trigger = pipeline.loopTrigger();
+        this.trigger = pipeline.trigger();
         this.underlyingExec = pipeline.underlying().executor();
 
         //Set up trigger callback:
@@ -59,7 +59,7 @@ public class LoopPipelineExecutor implements PipelineExecutor {
 
     @Override
     public Data exec(Data data) {
-        trigger.q
+        return trigger.query(data);
     }
 
     @Override

@@ -22,7 +22,7 @@ import ai.konduit.serving.pipeline.api.data.Data;
 
 import java.util.function.Function;
 
-public interface LoopTrigger {
+public interface Trigger {
 
     Data query(Data data);
 

@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline;
 
-import ai.konduit.serving.pipeline.api.pipeline.LoopTrigger;
+import ai.konduit.serving.pipeline.api.pipeline.Trigger;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import lombok.Data;
@@ -26,19 +26,19 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(fluent = true)
-public class LoopPipeline implements Pipeline {
+public class AsyncPipeline implements Pipeline {
 
     protected final Pipeline underlying;
-    protected final LoopTrigger loopTrigger;
+    protected final Trigger trigger;
 
-    public LoopPipeline(Pipeline underlying, LoopTrigger loopTrigger){
+    public AsyncPipeline(Pipeline underlying, Trigger trigger){
         this.underlying = underlying;
-        this.loopTrigger = loopTrigger;
+        this.trigger = trigger;
     }
 
     @Override
     public PipelineExecutor executor() {
-        return null;
+        return new AsyncPipelineExecutor(this);
     }
 
     @Override
