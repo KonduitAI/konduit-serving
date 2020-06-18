@@ -20,43 +20,112 @@ package ai.konduit.serving.pipeline.impl.pipeline.loop;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Trigger;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 @Slf4j
+@JsonIgnoreProperties({"stop", "thread", "last", "callbackFn"})
 public class SimpleLoopTrigger implements Trigger {
 
-    private final Long frequencyMs;
-    private Thread thread;
+    protected final Long frequencyMs;
+    protected AtomicBoolean stop = new AtomicBoolean();
+    protected Thread thread;
+    protected Throwable exception;
 
-    private Data last;
-    private Function<Data,Data> callbackFn;
+    protected CountDownLatch first = new CountDownLatch(1);
+    protected volatile Data current;
+    protected Function<Data,Data> callbackFn;
 
     public SimpleLoopTrigger(){
-        this(null);
+        this((Long)null);
     }
 
-    public SimpleLoopTrigger(Long frequencyMs){
-        this.frequencyMs = frequencyMs;
+    public SimpleLoopTrigger(Integer frequencyMs){
+        this(frequencyMs == null ? null : frequencyMs.longValue());
+    }
 
+    public SimpleLoopTrigger(@JsonProperty("frequencyMs") Long frequencyMs){
+        this.frequencyMs = frequencyMs;
+    }
+
+    @Override
+    public Data query(Data data) {
+        if(stop.get())
+            throw new IllegalStateException("Unable to get output after trigger has been stopped");
+
+        if(current == null){
+            if(exception != null){
+                throw new RuntimeException("Error in Async execution thread", exception);
+            } else {
+                try {
+                    first.await();
+                } catch (InterruptedException e){
+                    log.error("Error while waiting for first async result", e);
+                }
+            }
+            //Latch was count down. We need to check again for an exception, as an exception could have occurred
+            // after the last exception check
+            if(current != null){
+                return current;
+            } else if(exception != null){
+                throw new RuntimeException("Error in Async execution thread", exception);
+            } else {
+                throw new RuntimeException("Unknown error occurred: current Data is null but no exception was thrown by async executioner");
+            }
+        }
+
+
+        return current;
+    }
+
+    @Override
+    public void setCallback(@NonNull Function<Data, Data> callbackFn) {
+        this.callbackFn = callbackFn;
+        if(thread != null){
+            stop.set(true);
+            thread.interrupt();
+        }
+
+        stop = new AtomicBoolean();
+        current = null;
+        first = new CountDownLatch(1);
         //Start up a new thread for performing inference
-        thread = new Thread(new InferenceRunner());
+        thread = new Thread(new InferenceRunner(stop, first));
         thread.setDaemon(true); //TODO should this be a daemon thread or not?
         thread.start();
     }
 
     @Override
-    public Data query(Data data) {
-        return last;
+    public void stop() {
+        stop.set(true);
+        if(thread != null){
+            thread.interrupt();
+        }
     }
 
-    @Override
-    public void setCallback(Function<Data, Data> callbackFn) {
-
+    protected long firstRunDelay(){
+        return 0;
     }
 
-    private static class InferenceRunner implements Runnable {
+    protected long nextStart(long lastStart){
+        return lastStart + frequencyMs;
+    }
+
+    private class InferenceRunner implements Runnable {
+
+        private final AtomicBoolean stop;
+        private final CountDownLatch first;
+
+        protected InferenceRunner(AtomicBoolean stop, CountDownLatch first){
+            this.stop = stop;
+            this.first = first;
+        }
 
         @Override
         public void run() {
@@ -64,15 +133,54 @@ public class SimpleLoopTrigger implements Trigger {
                 runHelper();
             } catch (Throwable t){
                 log.error("Uncaught exception in SimpleLoopTrigger.InferenceRunner", t);
+                exception = t;
+                current = null;
+            } finally {
+                //Count down in case the external thread is waiting at query, and we have an exception at the first iteration
+                if(current == null){
+                    first.countDown();
+                }
             }
         }
 
         public void runHelper(){
-            long last = 0;
-            while (true){
-                long start = System.currentTimeMillis();
+            boolean delay = frequencyMs != null;
+            Data empty = Data.empty();
+            boolean firstExec = true;
+            long firstRunDelay = firstRunDelay();
+            while (!stop.get()){
+                if(firstExec && firstRunDelay > 0){
+                    //For TimeLoopTrigger, which has an offset
+                    try {
+                        Thread.sleep(firstRunDelay);
+                    } catch (InterruptedException e){
+                        log.error("Received InterruptedException in " + getClass().getName() + " - stopping thread", e);
+                        break;
+                    }
+                }
 
-                last = System.currentTimeMillis();
+                long start = delay ? System.currentTimeMillis() : 0L;
+                current = callbackFn.apply(empty);
+                if(firstExec) {
+                    first.countDown();
+                    firstExec = false;
+                }
+
+                if(delay && !stop.get()) {
+                    long nextStart = nextStart(start);
+                    long now = System.currentTimeMillis();
+                    if(nextStart > now){
+                        long sleep = nextStart - now;
+                        try {
+                            Thread.sleep(sleep);
+                        } catch (InterruptedException e){
+                            if(!stop.get()) {
+                                log.error("Received InterruptedException in SimpleLoopTrigger - stopping thread", e);
+                            }
+                            break;
+                        }
+                    }
+                }
             }
         }
     }

@@ -16,18 +16,20 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.api.pipeline;
+package ai.konduit.serving.pipeline.impl.testpipelines.time;
 
-import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 
-import java.util.function.Function;
+public class TimeFactory implements PipelineStepRunnerFactory {
+    @Override
+    public boolean canRun(PipelineStep step) {
+        return step instanceof TimeStep;
+    }
 
-public interface Trigger {
-
-    Data query(Data data);
-
-    void setCallback(Function<Data,Data> callbackFn);
-
-    void stop();
-
+    @Override
+    public PipelineStepRunner create(PipelineStep step) {
+        return new TimeRunner((TimeStep)step);
+    }
 }

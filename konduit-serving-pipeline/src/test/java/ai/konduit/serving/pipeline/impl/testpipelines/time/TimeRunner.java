@@ -16,18 +16,33 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.api.pipeline;
+package ai.konduit.serving.pipeline.impl.testpipelines.time;
 
+import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 
-import java.util.function.Function;
+public class TimeRunner implements PipelineStepRunner {
 
-public interface Trigger {
+    private TimeStep step;
 
-    Data query(Data data);
+    public TimeRunner(TimeStep step){
+        this.step = step;
+    }
 
-    void setCallback(Function<Data,Data> callbackFn);
+    @Override
+    public void close() {
 
-    void stop();
+    }
 
+    @Override
+    public PipelineStep getPipelineStep() {
+        return step;
+    }
+
+    @Override
+    public Data exec(Context ctx, Data data) {
+        return Data.singleton("time", System.currentTimeMillis());
+    }
 }

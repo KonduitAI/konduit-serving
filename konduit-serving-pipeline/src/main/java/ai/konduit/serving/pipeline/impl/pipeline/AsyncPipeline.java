@@ -22,23 +22,28 @@ import ai.konduit.serving.pipeline.api.pipeline.Trigger;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.experimental.Accessors;
 
 @Data
 @Accessors(fluent = true)
-public class AsyncPipeline implements Pipeline {
+public class AsyncPipeline implements Pipeline, AutoCloseable {
 
     protected final Pipeline underlying;
     protected final Trigger trigger;
+    protected AsyncPipelineExecutor executor;
 
-    public AsyncPipeline(Pipeline underlying, Trigger trigger){
+    public AsyncPipeline(@NonNull Pipeline underlying, @NonNull Trigger trigger){
         this.underlying = underlying;
         this.trigger = trigger;
     }
 
     @Override
-    public PipelineExecutor executor() {
-        return new AsyncPipelineExecutor(this);
+    public synchronized PipelineExecutor executor() {
+        if(executor == null){
+            executor = new AsyncPipelineExecutor(this);
+        }
+        return executor;
     }
 
     @Override
@@ -49,5 +54,15 @@ public class AsyncPipeline implements Pipeline {
     @Override
     public String id() {
         return underlying.id();
+    }
+
+    public void start(){
+        //Thread is started in the underlying executor constructor
+        executor();
+    }
+
+    @Override
+    public void close() {
+        trigger.stop();
     }
 }
