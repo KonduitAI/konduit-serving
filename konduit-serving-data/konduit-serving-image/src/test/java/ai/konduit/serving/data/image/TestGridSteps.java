@@ -225,6 +225,7 @@ public class TestGridSteps {
                             }
 
                             String json = p.toJson();
+//                            System.out.println(json);
                             Pipeline p2 = Pipeline.fromJson(json);
                             assertEquals(p, p2);
 
