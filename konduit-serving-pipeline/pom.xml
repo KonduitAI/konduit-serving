@@ -87,6 +87,12 @@
             <artifactId>micrometer-core</artifactId>
             <version>1.2.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>${swagger-stack.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

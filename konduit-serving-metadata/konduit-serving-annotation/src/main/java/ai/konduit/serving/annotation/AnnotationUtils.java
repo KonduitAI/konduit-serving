@@ -21,7 +21,7 @@ package ai.konduit.serving.annotation;
 import javax.annotation.processing.Filer;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import java.io.Writer;
+import java.io.*;
 import java.util.List;
 
 public class AnnotationUtils {
@@ -45,6 +45,47 @@ public class AnnotationUtils {
 
         } catch (Throwable t) {
             throw new RuntimeException("Error in annotation processing", t);
+        }
+    }
+
+    public static boolean existsAndContains(Filer filer, String c, List<String> lines){
+        String outputFile = "META-INF/konduit-serving/" + c;
+        if(!fileExists(filer, c))
+            return false;
+        String content = getContent(filer, c);
+        for(String s : lines){
+            if(!content.contains(s)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean fileExists(Filer filer, String c){
+        String outputFile = "META-INF/konduit-serving/" + c;
+        try {
+            FileObject file = filer.getResource(StandardLocation.CLASS_OUTPUT, "", outputFile);
+            return file != null;
+        } catch (IOException e){
+            return false;
+        }
+    }
+
+    public static String getContent(Filer filer, String c){
+        String outputFile = "META-INF/konduit-serving/" + c;
+        try {
+            FileObject file = filer.getResource(StandardLocation.CLASS_OUTPUT, "", outputFile);
+            InputStream is = file.openInputStream();
+            StringBuilder sb = new StringBuilder();
+            try (Reader r = new BufferedReader(new InputStreamReader(is))) {
+                int ch = 0;
+                while ((ch = r.read()) != -1) {
+                    sb.append((char) ch);
+                }
+            }
+            return sb.toString();
+        } catch (IOException e){
+            throw new RuntimeException("ERROR READING FILE", e);
         }
     }
 }

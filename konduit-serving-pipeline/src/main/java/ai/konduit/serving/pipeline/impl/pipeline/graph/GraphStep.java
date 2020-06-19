@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.serde.GraphStepDeserializer;
 import ai.konduit.serving.pipeline.impl.pipeline.serde.GraphStepSerializer;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
 
@@ -36,6 +37,7 @@ import java.util.List;
  */
 @JsonSerialize(using = GraphStepSerializer.class)
 @JsonDeserialize(using = GraphStepDeserializer.class)
+@Schema(description = "A step in a graph pipeline.")
 public interface GraphStep extends TextConfig {
 
     /**
@@ -75,11 +77,31 @@ public interface GraphStep extends TextConfig {
      */
     boolean hasStep();
 
+    @Schema(description = "Determines if the graph step has a pipeline step associated with it.",
+            accessMode = Schema.AccessMode.READ_ONLY)
+    default boolean getHasStep() {
+        return hasStep();
+    }
+
+    @Schema(description = "Gets the list of inputs to the graph step.")
+    default List<String> getInputs() {
+        return inputs();
+    }
+
+    @Schema(description = "Gets the number of inputs coming into the pipeline step.")
+    default int getNumInputs() {
+        return numInputs();
+    }
+
+    @Schema(description = "Name of the graph step.")
+    default String getName() {
+        return name();
+    }
     /**
      * @return The {@link PipelineStep}, if one exists (according to {@link #hasStep()}
      */
+    @Schema(description = "Pipeline step that's associated with the graph step.")
     PipelineStep getStep();
-
 
     /**
      * Add a new GraphStep to the GraphBuilder/GraphPipeline, with the specified name, with data fed in from this step
