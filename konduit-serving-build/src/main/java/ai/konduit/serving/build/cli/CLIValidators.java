@@ -22,6 +22,7 @@ import ai.konduit.serving.build.config.ComputeDevice;
 import ai.konduit.serving.build.config.Deployment;
 import ai.konduit.serving.build.config.Arch;
 import ai.konduit.serving.build.config.OS;
+import ai.konduit.serving.pipeline.api.protocol.RemoteUtils;
 import com.beust.jcommander.IValueValidator;
 import com.beust.jcommander.ParameterException;
 import org.nd4j.common.base.Preconditions;
@@ -165,7 +166,10 @@ public class CLIValidators {
 
         @Override
         public void validate(String name, List<String> value) throws ParameterException {
+
             for(String s : value){
+                if (RemoteUtils.isUrl(s))
+                    continue;
                 String[] split = s.split("=");
                 if(split.length != 2){
                     throw new ParameterException("Invalid config setting: Configuration for deployments " +

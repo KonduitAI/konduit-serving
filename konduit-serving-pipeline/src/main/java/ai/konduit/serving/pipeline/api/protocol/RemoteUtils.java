@@ -11,6 +11,15 @@ import java.util.Arrays;
 
 public class RemoteUtils {
 
+    public static boolean isUrl(String input) {
+        if (input.startsWith("http://") ||
+            input.startsWith("https://") ||
+            input.startsWith("ftp://")) {
+            return true;
+        }
+        return false;
+    }
+
     public static String configFromHttp(String uri) throws IOException {
 
         URI u = URI.create(uri);

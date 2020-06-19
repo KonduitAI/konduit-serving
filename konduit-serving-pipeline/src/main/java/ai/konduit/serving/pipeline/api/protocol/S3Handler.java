@@ -30,10 +30,7 @@ public class S3Handler extends URLStreamHandler {
                     secretKey = credentials[1];
                 }
 
-                //bucket
                 String bucket = url.getHost().substring(0, url.getHost().indexOf("."));
-
-                //key
                 String key = url.getPath().substring(1);
 
                 try {
