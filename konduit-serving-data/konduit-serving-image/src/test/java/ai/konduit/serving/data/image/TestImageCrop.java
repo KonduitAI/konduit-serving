@@ -31,6 +31,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static org.junit.Assert.assertEquals;
+
 public class TestImageCrop {
 
     @Test
@@ -149,6 +151,14 @@ public class TestImageCrop {
 
                         exec.exec(in);
                         //Thread.sleep(200);
+
+                        String json = p.toJson();
+                        String yaml = p.toYaml();
+                        Pipeline pj = Pipeline.fromJson(json);
+                        Pipeline py = Pipeline.fromYaml(yaml);
+
+                        assertEquals(p, pj);
+                        assertEquals(p, py);
                     }
                 }
             }
