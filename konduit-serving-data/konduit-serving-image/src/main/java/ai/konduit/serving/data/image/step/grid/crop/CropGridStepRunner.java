@@ -146,8 +146,8 @@ public class CropGridStepRunner implements PipelineStepRunner {
 
             //x1, x2, x3, x4, y1, y2, y3, y4 - these represent the corner dimensions of the current row
             // within the overall grid
-            int bx1 = (int) fracBetween (i/gx, tr.x(), tr.x());
-            int bx2 = (int) fracBetween((i+1)/gx, tr.x(), tr.x());
+            int bx1 = (int) fracBetween (i/gx, tl.x(), tr.x());
+            int bx2 = (int) fracBetween((i+1)/gx, tl.x(), tr.x());
             int by1 = (int) fracBetween (i/gx, tl.y(), tr.y());
             int by2 = (int) fracBetween((i+1)/gx, tl.y(), tr.y());
             int bx3 = (int) fracBetween (i/gx, bl.x(), br.x());
