@@ -93,6 +93,10 @@
             <artifactId>swagger-annotations</artifactId>
             <version>${swagger-stack.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
