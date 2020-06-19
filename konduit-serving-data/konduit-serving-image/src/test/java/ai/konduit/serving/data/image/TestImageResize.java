@@ -25,6 +25,7 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
 
@@ -134,6 +135,7 @@ public class TestImageResize {
         return out;
     }
 
+    @Ignore
     @Test
     public void testManual() throws Exception {
 
