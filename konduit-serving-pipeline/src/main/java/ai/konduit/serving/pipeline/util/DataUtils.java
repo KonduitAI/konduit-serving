@@ -63,4 +63,22 @@ public class DataUtils {
         return field;
     }
 
+    public static String inferListField(Data d, ValueType vt, String errMultipleKeys, String errNoKeys){
+        String field = null;
+        for(String s : d.keys()){
+            if(d.type(s) == ValueType.LIST && d.listType(s) == vt){
+                if(field == null) {
+                    field = s;
+                } else {
+                    throw new IllegalStateException(String.format(errMultipleKeys, field, s));
+                }
+            }
+        }
+
+        if(field == null)
+            throw new IllegalStateException(errNoKeys);
+
+        return field;
+    }
+
 }

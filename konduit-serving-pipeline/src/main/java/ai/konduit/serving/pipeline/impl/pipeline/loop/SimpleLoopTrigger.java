@@ -37,13 +37,18 @@ import java.util.function.Function;
  * A simple looping trigger to be used with an {@link ai.konduit.serving.pipeline.impl.pipeline.AsyncPipeline}.<br>
  * It has two modes of operation:<br>
  * (a) Loop continuously with no delay - if frequencyMs is not set, or<br>
- * (b) Loop every frequencyMs milliseconds, if this is set
+ * (b) Loop every frequencyMs milliseconds, if this is set<br>
+ * <br>
+ * Optionally, a fixed input Data instance may be provided that is fed into the pipeline at each call of the underlying
+ * pipeline (when executed in an async manner)
  *
  * @author Alex Black
  */
 @Schema(description = "A simple looping trigger to be used with an AsyncPipeline. It has two modes of operation:<br>" +
         "(a) Loop continuously with no delay - if frequencyMs is not set, or<br>" +
-        "(b) Loop every frequencyMs milliseconds, if this is set")
+        "(b) Loop every frequencyMs milliseconds, if this is set<br>" +
+        "Optionally, a fixed input Data instance may be provided that is fed into the pipeline at each call of the underlying " +
+        "pipeline (when executed in an async manner). If this is not provided, execution is performed using Data.empty() as input.")
 @lombok.Data
 @Slf4j
 @JsonIgnoreProperties({"stop", "thread", "exception", "first", "current", "callbackFn"})
@@ -55,6 +60,8 @@ public class SimpleLoopTrigger implements Trigger {
     @EqualsAndHashCode.Include
     @ToString.Include
     protected final Long frequencyMs;
+    @EqualsAndHashCode.Include
+    protected final Data data;
 
     protected AtomicBoolean stop = new AtomicBoolean();
     protected Thread thread;
@@ -72,8 +79,13 @@ public class SimpleLoopTrigger implements Trigger {
         this(frequencyMs == null ? null : frequencyMs.longValue());
     }
 
-    public SimpleLoopTrigger(@JsonProperty("frequencyMs") Long frequencyMs){
+    public SimpleLoopTrigger(Long frequencyMs) {
+        this(frequencyMs, null);
+    }
+
+    public SimpleLoopTrigger(@JsonProperty("frequencyMs") Long frequencyMs, @JsonProperty("data") Data inputData){
         this.frequencyMs = frequencyMs;
+        this.data = inputData;
     }
 
     @Override
@@ -167,7 +179,7 @@ public class SimpleLoopTrigger implements Trigger {
 
         public void runHelper(){
             boolean delay = frequencyMs != null;
-            Data empty = Data.empty();
+            Data in = data == null ? Data.empty() : data;
             boolean firstExec = true;
             long firstRunDelay = firstRunDelay();
             while (!stop.get()){
@@ -182,7 +194,7 @@ public class SimpleLoopTrigger implements Trigger {
                 }
 
                 long start = delay ? System.currentTimeMillis() : 0L;
-                current = callbackFn.apply(empty);
+                current = callbackFn.apply(in);
                 if(firstExec) {
                     first.countDown();
                     firstExec = false;

@@ -19,8 +19,8 @@
 package ai.konduit.serving.pipeline.impl.pipeline.loop;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import ai.konduit.serving.pipeline.api.data.Data;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -30,21 +30,26 @@ import java.util.concurrent.TimeUnit;
  * A trigger to be used with an {@link ai.konduit.serving.pipeline.impl.pipeline.AsyncPipeline}.<br>
  * TimeLoopTrigger performs execution of the underlying executor every time unit (every minute, every 2 hours, etc)
  * at the start of the time unit (start of the minute, hour, etc), or at the start + an optional offset.
- *
+ * <br>
+ * Optionally, a fixed input Data instance may be provided that is fed into the pipeline at each call of the underlying
+ * pipeline (when executed in an async manner). If this is not provided, execution is performed using Data.empty() as input.
  * @author Alex Black
  */
 @Schema(description = "A trigger to be used with an {@link ai.konduit.serving.pipeline.impl.pipeline.AsyncPipeline}.<br>" +
         "TimeLoopTrigger performs execution of the underlying executor every time unit (every minute, every 2 hours, etc)" +
-        "at the start of the time unit (start of the minute, hour, etc), or at the start + an optional offset.")
-@Data
+        "at the start of the time unit (start of the minute, hour, etc), or at the start + an optional offset.<br>" +
+        "Optionally, a fixed input Data instance may be provided that is fed into the pipeline at each call of the underlying " +
+        "pipeline (when executed in an async manner). If this is not provided, execution is performed using Data.empty() as input.")
+@lombok.Data
 @EqualsAndHashCode(callSuper = true)
 @JsonName("TIME_LOOP_TRIGGER")
 public class TimeLoopTrigger extends SimpleLoopTrigger {
 
     protected final long offset;
 
-    protected TimeLoopTrigger(@JsonProperty("frequencyMs") Long frequencyMs, @JsonProperty("offset") long offset) {
-        super(frequencyMs);
+    protected TimeLoopTrigger(@JsonProperty("frequencyMs") Long frequencyMs, @JsonProperty("offset") long offset,
+                              @JsonProperty("data") Data data) {
+        super(frequencyMs, data);
         this.offset = offset;
     }
 
