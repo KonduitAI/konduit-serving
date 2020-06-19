@@ -22,6 +22,7 @@ import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
@@ -30,6 +31,7 @@ import lombok.AllArgsConstructor;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,8 +66,19 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
             inputName = DataUtils.inferField(data, ValueType.NDARRAY, false, errMultipleKeys, errNoKeys);
         }
 
+        String probName = step.probName() == null ? ClassifierOutputStep.DEFAULT_PROB_NAME : step.probName();
+        String indexName = step.indexName() == null ? ClassifierOutputStep.DEFAULT_PROB_NAME : step.probName();
+        String labelName = step.labelName() == null ? ClassifierOutputStep.DEFAULT_PROB_NAME : step.probName();
+
 
         NDArray classifierOutput = data.getNDArray(inputName);
+        if (classifierOutput.shape().length > 2) {
+            throw new UnsupportedOperationException("Invalid input to ClassifierOutputStep: only rank 1 or 2 inputs are available, got array with shape" + Arrays.toString(classifierOutput.shape()));
+
+        }
+
+        classifierOutput = FloatNDArrayToDouble(classifierOutput);
+
 
         boolean batch = false;
         if (classifierOutput.shape().length == 2 && classifierOutput.shape()[0] > 1) {
@@ -86,7 +99,7 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
 
 
         if (!batch) {
-            double[] classifierOutputArr = squeze(classifierOutput);
+            double[] classifierOutputArr = squeeze(classifierOutput);
             double[] maxValueWithIdx = getMaxValueAndIndex(classifierOutputArr);
             double prob = maxValueWithIdx[0];
             long index = (long) maxValueWithIdx[1];
@@ -94,24 +107,24 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
 
             if (step.topN() != null && step.topN() > 1) {
                 if (step.returnProb()) {
-                    data.putListDouble(step.probName(), Collections.singletonList(prob));
+                    data.putListDouble(probName, Collections.singletonList(prob));
                 }
                 if (step.returnIndex()) {
-                    data.putListInt64(step.indexName(), Collections.singletonList(index));
+                    data.putListInt64(indexName, Collections.singletonList(index));
                 }
                 if (step.returnLabel()) {
-                    data.putListString(step.labelName(), Collections.singletonList(label));
+                    data.putListString(labelName, Collections.singletonList(label));
                 }
             } else {
 
                 if (step.returnProb()) {
-                    data.put(step.probName(), prob);
+                    data.put(probName, prob);
                 }
                 if (step.returnIndex()) {
-                    data.put(step.indexName(), index);
+                    data.put(indexName, index);
                 }
                 if (step.returnLabel()) {
-                    data.put(step.labelName(), label);
+                    data.put(labelName, label);
                 }
 
             }
@@ -126,9 +139,9 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
             double[][] y = classifierOutput.getAs(double[][].class);
 
             List<Double> probs = new ArrayList<Double>();
-            List<Long> indeces = new ArrayList<Long>();
+            List<Long> indices = new ArrayList<Long>();
             List<String> labelsList = new ArrayList<String>();
-            List<NDArray> allPropabilities = new ArrayList<NDArray>();
+            List<NDArray> allProbabilities = new ArrayList<NDArray>();
 
             for (int i = 0; i < bS; i++) {
                 double[] sample = y[i];
@@ -138,23 +151,23 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
                 String label = labels.get((int) index);
 
                 probs.add(prob);
-                indeces.add(index);
+                indices.add(index);
                 labelsList.add(label);
-                allPropabilities.add(NDArray.create(sample));
+                allProbabilities.add(NDArray.create(sample));
             }
 
 
             if (step.returnProb()) {
-                data.putListDouble(step.probName(), probs);
+                data.putListDouble(probName, probs);
             }
             if (step.returnIndex()) {
-                data.putListInt64(step.indexName(), indeces);
+                data.putListInt64(indexName, indices);
             }
             if (step.returnLabel()) {
-                data.putListString(step.labelName(), labelsList);
+                data.putListString(labelName, labelsList);
             }
             if (step.allProbabilities()) {
-                data.putListNDArray("allProbabilities", allPropabilities);
+                data.putListNDArray("allProbabilities", allProbabilities);
             }
 
         }
@@ -164,7 +177,7 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
     }
 
 
-    public static double[] squeze(NDArray arr) {
+    public static double[] squeeze(NDArray arr) {
 
         // we have [numClasses] array, so do not modify nothing
         if (arr.shape().length == 1) {
@@ -176,7 +189,7 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
             return arr.getAs(double[][].class)[0];
         }
 
-        return null;
+        throw new UnsupportedOperationException("Failed squeezing NDArray");
 
     }
 
@@ -190,6 +203,21 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
             }
         }
         return new double[]{max, maxIdx};
+    }
+
+    NDArray FloatNDArrayToDouble(NDArray ndarr) {
+        if (ndarr.type() == NDArrayType.FLOAT || ndarr.type() == NDArrayType.FLOAT16 || ndarr.type() == NDArrayType.BFLOAT16) {
+            float[][] farr = ndarr.getAs(float[][].class);
+            double[][] darr = new double[(int) ndarr.shape()[0]][(int) ndarr.shape()[1]];
+            for (int i = 0; i < farr.length; i++) {
+                for (int j = 0; j < farr[i].length; i++) {
+                    darr[i][j] = Double.valueOf(farr[i][j]);
+                }
+            }
+
+            return NDArray.create(darr);
+        }
+        return ndarr;
     }
 
 
