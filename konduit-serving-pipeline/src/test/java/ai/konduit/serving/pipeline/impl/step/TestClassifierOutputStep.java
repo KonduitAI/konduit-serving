@@ -103,7 +103,7 @@ public class TestClassifierOutputStep {
                                     }
 
                                     if (retAllProb) {
-                                        assertTrue(out.has("allProbabilities") && (out.type("allProbabilities") == ValueType.LIST));
+                                        assertTrue(out.has("allProbabilities") && (out.type("allProbabilities") == ValueType.LIST || out.type("allProbabilities") == ValueType.NDARRAY));
                                     }
 
 
@@ -190,7 +190,7 @@ public class TestClassifierOutputStep {
                                     }
 
                                     if (retAllProb) {
-                                        assertTrue(out.has("allProbabilities") && (out.type("allProbabilities") == ValueType.LIST));
+                                        assertTrue(out.has("allProbabilities") && (out.type("allProbabilities") == ValueType.LIST || out.type("allProbabilities") == ValueType.NDARRAY));
                                     }
 
 

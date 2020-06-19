@@ -129,7 +129,7 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
 
             }
             if (step.allProbabilities()) {
-                data.putListDouble("allProbabilities", DoubleStream.of(classifierOutputArr).boxed().collect(Collectors.toList()));
+                data.put("allProbabilities", NDArray.create(classifierOutputArr));
             }
         }
 
