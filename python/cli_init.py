@@ -32,9 +32,9 @@ INCOMPATIBLE_COMPILATION_TAGS = ["cli_base", "cli_base_2", "cli_base_3", "cli_ba
 DOWNLOAD_TAG = "cli_base"
 
 LAST_COMPATIBLE_KONDUIT_VERSION = "0.1.0-SNAPSHOT"
-DEFAULT_KONDUIT_TAG = "cli_base_5"
+DEFAULT_KONDUIT_TAG = "cli_base_6"
 KONDUIT_JAR_URL_FORMAT = "https://github.com/KonduitAI/konduit-serving/releases/download/" \
-                         "{tag}/konduit-serving-uberjar-{version}-{spin}-{platform}-{chip}${cuda_version}.jar"
+                         "{tag}/konduit-serving-uberjar-{version}-{spin}-{platform}-{chip}{cuda_version}.jar"
 
 os_choices = [
     "windows-x86_64",
@@ -108,7 +108,7 @@ def git_clone_konduit(use_https=True, tag=DEFAULT_KONDUIT_TAG):
         subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "fetch", "--all"])
         subprocess.call(["git", "checkout", tag], cwd=KONDUIT_SOURCE_DIR,
                         shell=sys.platform.startswith("win"))
-        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "pull"])
+        subprocess.call(["git", "-C", KONDUIT_SOURCE_DIR, "pull", "origin", tag])
     except Exception as e:
         raise RuntimeError(">>> Could not clone konduit-serving repository and switch to commit hash {}"
                            "Make sure to have git installed. Type 'konduit-init --help' for help .\n"
@@ -172,7 +172,7 @@ def get_jar_url(platform, version, spin, chip, cuda_version=None):
                                          tag=DOWNLOAD_TAG,
                                          spin=spin,
                                          chip=chip,
-                                         cuda_version=("-cuda" + cuda_version) if chip == "gpu" else "")
+                                         cuda_version=("-cuda-" + cuda_version) if chip == "gpu" else "")
 
 
 git_tags = list(set(get_git_tags()).difference(INCOMPATIBLE_COMPILATION_TAGS))
