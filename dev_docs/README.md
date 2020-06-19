@@ -3,7 +3,7 @@
 These docs are designed to explain the architecture of Konduit Serving (for the "new" API as of 05/2020).
 
 See `ADRs/0003-Pipeline-API_Rewrite.md` for background and motivation on the current design.  
-See also: dev_docs/BuildToolReadme.md for details on the Konduit Serving build tool (reading this first is recommended).
+See also: dev_docs/BuildToolReadme.md for details on the Konduit Serving build tool (reading this first is recommended). <br> 
 See also: dev_docs/ClientsAndDocsGeneration.md for details on how we're generating client code along with its reference documentation.
 
 ## Core classes:
