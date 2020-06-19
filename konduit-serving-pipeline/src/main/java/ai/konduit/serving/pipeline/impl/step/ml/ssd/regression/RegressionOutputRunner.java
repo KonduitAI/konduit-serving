@@ -28,6 +28,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.util.DataUtils;
 import lombok.AllArgsConstructor;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -76,10 +77,9 @@ public class RegressionOutputRunner implements PipelineStepRunner {
         }
 
 
-
         if (!batch) {
             double[] regressionOutputArr = squeze(regressionOutput);
-            for (Map.Entry<String,Integer> entry : outputNames.entrySet())
+            for (Map.Entry<String, Integer> entry : outputNames.entrySet())
                 data.put(entry.getKey(), regressionOutputArr[entry.getValue()]);
 
         }
@@ -89,9 +89,15 @@ public class RegressionOutputRunner implements PipelineStepRunner {
             int bS = (int) regressionOutput.shape()[1];
             double[][] y = regressionOutput.getAs(double[][].class);
 
-            for (int i = 0; i < bS; i++) {
+            for (Map.Entry<String, Integer> entry : outputNames.entrySet()) {
+                List<Double> list = new ArrayList<Double>();
+                for (int i = 0; i < bS; i++) {
+                    list.add(y[i][entry.getValue()]);
+                }
+                data.putListDouble(entry.getKey(), list);
 
             }
+
 
         }
 
