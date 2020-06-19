@@ -45,7 +45,7 @@ import java.util.List;
  */
 @Data
 @Accessors(fluent = true)
-@JsonName("RESIZE")
+@JsonName("IMAGE_CROP")
 @NoArgsConstructor
 @Schema(description = "Crop an image to the specified rectangular region. The crop region may be specified in one of two ways:<br>" +
         "(a) Via a bounding box, or<br>" +
