@@ -35,6 +35,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
     protected boolean initialized;
     protected FrameGrabber grabber;
     protected OpenCVFrameConverter.ToIplImage converter;
+    protected boolean loop = false;
     private Runnable init;
 
     public FrameCaptureStepRunner(CameraFrameCaptureStep step){
@@ -78,6 +79,10 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
 
         try {
             Frame frame = grabber.grab();
+            if(frame == null && loop){
+                grabber.setFrameNumber(0);
+                frame = grabber.grab();
+            }
             Image i = Image.create(frame);
             //System.out.println("IMAGE: h=" + i.height() + ", w=" + i.width());
             return Data.singleton(outputKey, i);
@@ -107,6 +112,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
 
     protected void initFFmpegFrameGrabber(VideoFrameCaptureStep step){
         grabber = new FFmpegFrameGrabber(step.getFilePath());
+        loop = step.isLoop();
         converter = new OpenCVFrameConverter.ToIplImage();
 
         try {
