@@ -26,6 +26,7 @@ import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -54,16 +55,17 @@ public class TestGridSteps {
         in.putListDouble("x", Arrays.asList(0.5, 0.7, 0.2, 0.6));
         in.putListDouble("y", Arrays.asList(0.2, 0.3, 0.6, 0.7));
 
+        in.putListPoint("points", Arrays.asList(Point.create(0.5, 0.2), Point.create(0.7, 0.3), Point.create(0.2, 0.6), Point.create(0.6, 0.7)));
+
 
         Pipeline p = SequencePipeline.builder()
                 .add(DrawGridStep.builder()
                         .borderColor("green")
                         .gridColor("blue")
                         .coordsArePixels(false)
-                        .grid1(3)
-                        .grid2(10)
-                        .xName("x")
-                        .yName("y")
+                        .gridX(3)
+                        .gridY(10)
+                        .pointsName("points")
                         .imageName("image")
                         .borderThickness(10)
                         .gridThickness(4)
@@ -76,166 +78,6 @@ public class TestGridSteps {
         exec.exec(in);
 
         Thread.sleep(1000000);
-    }
-
-    @Test
-    public void testOrders() throws Exception {
-        //The order in which we provide the points should make zero difference - except for the grid1 / grid2 order
-        int numOrders = 4 * 3 * 2;
-
-        int[][] orders = new int[numOrders][4];
-        int x = 0;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (j == i)
-                    continue;
-                for (int k = 0; k < 4; k++) {
-                    if (k == i || k == j)
-                        continue;
-
-                    orders[x][0] = i;
-                    orders[x][1] = j;
-                    orders[x][2] = k;
-                    for (int l = 0; l < 4; l++) {
-                        if (i != l && j != l && k != l) {
-                            orders[x][3] = l;
-                            break;
-                        }
-                    }
-
-                    //System.out.println(x + " - " + Arrays.toString(orders[x]));
-                    x++;
-                }
-            }
-        }
-
-        File f = Resources.asFile("data/mona_lisa_535x800.png");
-        Image i = Image.create(f);
-        Data in = Data.singleton("image", i);
-        in.putListDouble("x", Arrays.asList(0.5, 0.7, 0.2, 0.6));
-        in.putListDouble("y", Arrays.asList(0.2, 0.3, 0.6, 0.7));
-
-
-        Pipeline p = SequencePipeline.builder()
-                .add(DrawGridStep.builder()
-                        .borderColor("green")
-                        .gridColor("blue")
-                        .coordsArePixels(false)
-                        .grid1(3)
-                        .grid2(10)
-                        .xName("x")
-                        .yName("y")
-                        .imageName("image")
-                        .borderThickness(10)
-                        .gridThickness(4)
-                        .build())
-                //.add(new ShowImagePipelineStep("image", "EXPECTED", null, null))
-                .build();
-
-        PipelineExecutor exec = p.executor();
-        Data out = exec.exec(in);
-        Image imgOutExp = out.getImage("image");
-
-        for (boolean pixelCoords : new boolean[]{false, true}) {
-
-            for (int[] order : orders) {
-                if ((order[0] == 0 && order[1] == 3) || (order[0] == 3 && order[1] == 0) ||
-                        (order[0] == 1 && order[1] == 2) || (order[0] == 2 && order[1] == 1))
-                    continue;   //Skip orders where first 2 points are on opposite corners (grid1 is defined relative to first 2 points)
-
-                System.out.println("Testing order: " + Arrays.toString(order) + ", pixelCoords=" + pixelCoords);
-                //Work out grid 1 vs. 2
-                //if [0, 1, ...] or [1, 0, ...] or [2, 3, ...] or [3, 2, ...] grid1 should be 3
-                //Otherwise grid1 = 10
-
-                int grid1;
-                int grid2;
-                if ((order[0] == 0 && order[1] == 1) ||
-                        (order[0] == 1 && order[1] == 0) ||
-                        (order[0] == 2 && order[1] == 3) ||
-                        (order[0] == 3 && order[1] == 2)) {
-                    grid1 = 3;
-                    grid2 = 10;
-                } else {
-                    grid1 = 10;
-                    grid2 = 3;
-                }
-
-                double[] xD = new double[]{0.5, 0.7, 0.2, 0.6};
-                double[] yD = new double[]{0.2, 0.3, 0.6, 0.7};
-
-                if (pixelCoords) {
-                    for (int j = 0; j < 4; j++) {
-                        xD[j] = (int) (xD[j] * i.width());
-                        yD[j] = (int) (yD[j] * i.height());
-                    }
-                }
-
-                in = Data.singleton("image", i);
-                in.putListDouble("x", Arrays.asList(xD[order[0]], xD[order[1]], xD[order[2]], xD[order[3]]));
-                in.putListDouble("y", Arrays.asList(yD[order[0]], yD[order[1]], yD[order[2]], yD[order[3]]));
-
-
-                Pipeline p2 = SequencePipeline.builder()
-                        .add(DrawGridStep.builder()
-                                .borderColor("green")
-                                .gridColor("blue")
-                                .coordsArePixels(pixelCoords)
-                                .grid1(grid1)
-                                .grid2(grid2)
-                                .xName("x")
-                                .yName("y")
-                                .imageName("image")
-                                .borderThickness(10)
-                                .gridThickness(4)
-                                .build())
-                        //.add(new ShowImagePipelineStep("image", "ACTUAL - " + Arrays.toString(order) + " - pixelCoords=" + pixelCoords, null, null))
-                        .build();
-                exec = p2.executor();
-                out = exec.exec(in);
-                Image imgOut2 = out.getImage("image");
-                if (pixelCoords) {
-                    //Tiny rounding error - images are not exactly (bit for bit) identical - but are correct
-                    //Max 10 pixels differ by more than value of 32 for r,g,b channels combined
-                    assertApproxEqual(imgOutExp, imgOut2, 32, 10);
-                } else {
-                    assertEquals(imgOutExp, imgOut2);
-                }
-
-                //Also test fixed grid step:
-                double[] xV = new double[]{xD[order[0]], xD[order[1]], xD[order[2]], xD[order[3]]};
-                double[] yV = new double[]{yD[order[0]], yD[order[1]], yD[order[2]], yD[order[3]]};
-                Pipeline p3 = SequencePipeline.builder()
-                        .add(DrawFixedGridStep.builder()
-                                .borderColor("green")
-                                .gridColor("blue")
-                                .coordsArePixels(pixelCoords)
-                                .grid1(grid1)
-                                .grid2(grid2)
-                                .x(xV)
-                                .y(yV)
-                                .imageName("image")
-                                .borderThickness(10)
-                                .gridThickness(4)
-                                .build())
-                        //.add(new ShowImagePipelineStep("image", "FIXED - ACTUAL - " + Arrays.toString(order) + " - pixelCoords=" + pixelCoords, null, null))
-                        .build();
-                Data outFixed = p3.executor().exec(in);
-                Image imgFixed = outFixed.getImage("image");
-                if (pixelCoords) {
-                    //Tiny rounding error - images are not exactly (bit for bit) identical - but are correct
-                    //Max 10 pixels differ by more than value of 32 for r,g,b channels combined
-                    assertApproxEqual(imgOutExp, imgFixed, 32, 10);
-                } else {
-                    assertEquals(imgOutExp, imgFixed);
-                }
-
-                String json = p2.toJson();
-                String jsonF = p3.toJson();
-                assertEquals(p2, Pipeline.fromJson(json));
-                assertEquals(p3, Pipeline.fromJson(jsonF));
-            }
-        }
     }
 
     protected void assertApproxEqual(Image i1, Image i2, int differenceThreshold, int maxPixelsDifferent) {
@@ -284,26 +126,17 @@ public class TestGridSteps {
         for(boolean fixed : new boolean[]{false, true}) {
         for (boolean px : new boolean[]{false, true}) {
             Data in = Data.singleton("image", i);
-            double[] x = null;
-            double[] y = null;
-            if(!fixed) {
-                if (px) {
-                    in.putListDouble("x", Arrays.asList(0.015 * i.width(), 0.04 * i.width(), 0.815 * i.width(), 0.795 * i.width()));
-                    in.putListDouble("y", Arrays.asList(0.33 * i.height(), 0.70 * i.height(), 0.42 * i.height(), 0.83 * i.height()));
-                } else {
-                    in.putListDouble("x", Arrays.asList(0.015, 0.04, 0.815, 0.795));
-                    in.putListDouble("y", Arrays.asList(0.33, 0.70, 0.42, 0.83));
-                }
+            List<Point> points;
+            if (px) {
+                points = Arrays.asList(Point.create(0.015 * i.width(), 0.33 * i.height()), Point.create(0.04 * i.width(), 0.70 * i.height()),
+                        Point.create(0.815 * i.width(), 0.42 * i.height()), Point.create(0.795 * i.width(), 0.83 * i.height()));
             } else {
-                if(px) {
-                    x = new double[]{0.015 * i.width(), 0.04 * i.width(), 0.815 * i.width(), 0.795 * i.width()};
-                    y = new double[]{0.33 * i.height(), 0.70 * i.height(), 0.42 * i.height(), 0.83 * i.height()};
-                } else {
-                    x = new double[]{0.015, 0.04, 0.815, 0.795};
-                    y = new double[]{0.33, 0.70, 0.42, 0.83};
-                }
+                points = Arrays.asList(Point.create(0.015, 0.33), Point.create(0.04, 0.70), Point.create(0.815, 0.42), Point.create(0.795, 0.83));
             }
             in.put("key", "value");
+            if(!fixed){
+                in.putListPoint("points", points);
+            }
 
             for(boolean outName : new boolean[]{false, true}) {
                 for (boolean keep : new boolean[]{false, true}) {
@@ -316,8 +149,6 @@ public class TestGridSteps {
                                     .coordsArePixels(false)
                                     .grid1(g1)
                                     .grid2(g2)
-                                    .x(x)
-                                    .y(y)
                                     .imageName("image")
                                     .keepOtherFields(keep)
                                     .outputName(outName ? "output" : null)
@@ -330,10 +161,9 @@ public class TestGridSteps {
                                     .borderColor("green")
                                     .gridColor("blue")
                                     .coordsArePixels(false)
-                                    .grid1(g1)
-                                    .grid2(g2)
-                                    .x(x)
-                                    .y(y)
+                                    .gridX(g1)
+                                    .gridY(g2)
+                                    .points(points)
                                     .imageName("image")
                                     .borderThickness(4)
                                     .gridThickness(2)
@@ -357,10 +187,9 @@ public class TestGridSteps {
                                     .borderColor("green")
                                     .gridColor("blue")
                                     .coordsArePixels(false)
-                                    .grid1(g1)
-                                    .grid2(g2)
-                                    .xName("x")
-                                    .yName("y")
+                                    .gridX(g1)
+                                    .gridY(g2)
+                                    .pointsName("points")
                                     .imageName("image")
                                     .borderThickness(4)
                                     .gridThickness(2)

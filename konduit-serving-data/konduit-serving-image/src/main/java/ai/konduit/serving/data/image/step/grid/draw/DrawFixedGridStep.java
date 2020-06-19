@@ -19,12 +19,15 @@
 package ai.konduit.serving.data.image.step.grid.draw;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
+
+import java.util.List;
 
 /**
  * As per {@link DrawGridStep} but the x/y location values are hardcoded into the configuration, instead of coming
@@ -37,26 +40,22 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 @JsonName("DRAW_FIXED_GRID")
-@Schema(description = "A pipeline step that configures how a grid is drawn based on the input taken from a " +
-        "CropFixedGridStep. This is similar to DrawGridStep but the x/y location values are hardcoded into " +
-        "the configuration, instead of coming dynamically from the input Data instance.")
+@Schema(description = "A pipeline step that draws a grid on an image. This is similar to DrawGridStep but the corner x/y" +
+        " location values are hardcoded into the configuration (via points), instead of coming dynamically from the input Data instance.")
 public class DrawFixedGridStep implements PipelineStep {
     public static final String DEFAULT_COLOR = "lime";
 
     @Schema(description = "Name of the input image key from the previous step. If set to null, it will try to find any image in the incoming data instance.")
     private String imageName;
 
-    @Schema(description = "A list (of length 4), specifying X coordinates in any order.")
-    private double[] x;
+    @Schema(description = "A List<Point> (of length 4), the corners, in order: topLeft, topRight, bottomLeft, bottomRight")
+    private List<Point> points;
 
-    @Schema(description = "A list (of length 4), specifying Y coordinates in any order (that matches X order).")
-    private double[] y;
+    @Schema(description = "The number of grid segments between (topLeft and topRight) and (bottomLeft and bottomRight)")
+    private int gridX;
 
-    @Schema(description = "Number of grid segments between (x[0],y[0]) and (x[1],y[1]).")
-    private int grid1;
-
-    @Schema(description = "Number of grid segments in the other direction (between (x[2],y[2]) and (x[3],y[3])).")
-    private int grid2;
+    @Schema(description = "The number of grid segments between (topLeft and bottomLeft) and (topRight and bottomRight)")
+    private int gridY;
 
     @Schema(description = "If true, the lists are in pixels coordinates, not from 0 to 1.")
     private boolean coordsArePixels;
