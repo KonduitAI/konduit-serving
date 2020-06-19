@@ -19,6 +19,7 @@
 package ai.konduit.serving.data.image.step.grid.crop;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+
+import java.util.List;
 
 /**
  * As per {@link CropGridStep} but the x/y location values are hardcoded into the configuration, instead of coming
@@ -47,19 +50,17 @@ public class CropFixedGridStep implements PipelineStep {
     @Schema(description = "Name of the input image key from the previous step. If set to null, it will try to find any image in the incoming data instance.")
     private String imageName;
 
-    @Schema(description = "A list (of length 4), specifying X coordinates in any order.")
-    private double[] x;
+    @Schema(description = "A List<Point> (of length 4), the corners, in order: topLeft, topRight, bottomLeft, bottomRight")
+    private List<Point> points;
 
-    @Schema(description = "A list (of length 4), specifying Y coordinates in any order (that matches X order).")
-    private double[] y;
+    @Schema(description = "The number of grid segments between (topLeft and topRight) and (bottomLeft and bottomRight)")
+    private int gridX;
 
-    @Schema(description = "Number of grid segments between (x[0],y[0]) and (x[1],y[1]).")
-    private int grid1;
+    @Schema(description = "The number of grid segments between (topLeft and bottomLeft) and (topRight and bottomRight)")
+    private int gridY;
 
-    @Schema(description = "Number of grid segments in the other direction (between (x[2],y[2]) and (x[3],y[3])).")
-    private int grid2;
-
-    @Schema(description = "If true, the x/y coordinate lists/arrays are in pixels coordinates, not from 0 to 1.")
+    @Schema(description = "If true, the points are in pixels coordinates (0 to width-1) and (0 to height-1); if false, they " +
+            "are 0.0 to 1.0 (fraction of image height/width)")
     private boolean coordsArePixels;
 
     @Schema(description = "Name of the output bounding boxes key.")

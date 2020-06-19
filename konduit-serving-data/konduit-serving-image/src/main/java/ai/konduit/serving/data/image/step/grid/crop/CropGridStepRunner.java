@@ -20,18 +20,11 @@ package ai.konduit.serving.data.image.step.grid.crop;
 
 import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
-import ai.konduit.serving.pipeline.api.data.BoundingBox;
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.util.DataUtils;
 import lombok.NonNull;
-import org.apache.commons.math3.geometry.euclidean.twod.Segment;
-import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.apache.commons.math3.geometry.euclidean.twod.hull.ConvexHull2D;
-import org.apache.commons.math3.geometry.euclidean.twod.hull.MonotoneChain;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.nd4j.common.base.Preconditions;
@@ -81,38 +74,45 @@ public class CropGridStepRunner implements PipelineStepRunner {
         }
 
         Image i = data.getImage(imgName);
-        double[] x;
-        double[] y;
+        List<Point> points;
 
         if(fixed){
-            x = fStep.x();
-            y = fStep.y();
+            points = fStep.points();
+            Preconditions.checkState(points != null, "Error in CropFixedGridStep: points field was null (corder points" +
+                    " must be provided for cropping via CropFixedGridStep.points field)");
         } else {
-            String xName = step.xName();
-            String yName = step.yName();
-            if (xName == null || yName == null) {
-                throw new IllegalStateException("xName and yName must be specified in configuration. These should be the name of length 4 List<Double> or List<Long>");
+            String pName = step.pointsName();
+            if (pName == null) {
+                String errMultipleKeys = "CropGridStep pointsName field name was not provided and could not be inferred: multiple List<Point> fields exist: %s and %s";
+                String errNoKeys = "CropGridStep pointsName field name was not provided and could not be inferred: no List<Point> fields exist";
+                pName = DataUtils.inferListField(data, ValueType.POINT, errMultipleKeys, errNoKeys);
             }
 
-            if (data.type(xName) != ValueType.LIST || (data.listType(xName) != ValueType.DOUBLE && data.listType(xName) != ValueType.INT64)) {
-                String str = (data.type(xName) == ValueType.LIST ? ", list type " + data.listType(xName).toString() : "");
-                throw new IllegalStateException("xName = \"" + xName + "\" should be a length 4 List<Double> or List<Long>, but is type " + data.type(xName) + str);
-            }
+            Preconditions.checkState(data.has(pName), "Error in CropGridStep: Input Data does not have any values for pointName=\"%s\"", pName);
 
-            if (data.type(yName) != ValueType.LIST || (data.listType(yName) != ValueType.DOUBLE && data.listType(yName) != ValueType.INT64)) {
-                String str = (data.type(yName) == ValueType.LIST ? ", list type " + data.listType(yName).toString() : "");
-                throw new IllegalStateException("yName = \"" + yName + "\" should be a length 4 List<Double> or List<Long>, but is type " + data.type(yName) + str);
+            if (data.type(pName) != ValueType.LIST || data.listType(pName) != ValueType.POINT) {
+                String type = (data.type(pName) == ValueType.LIST ? "List<" + data.listType(pName).toString() + ">" : "" + data.type(pName));
+                throw new IllegalStateException("pointName = \"" + pName + "\" should be a length 4 List<Point> but is type " + type);
             }
-
-            x = getAsDouble("xName", xName, data);
-            y = getAsDouble("yName", yName, data);
+            points = data.getListPoint(pName);
         }
 
-        ConvexHull2D ch = convexHull(x, y);
+        boolean isPx = fixed ? fStep.coordsArePixels() : step.coordsArePixels();
+        List<Point> pxPoints;
+        if(isPx){
+            pxPoints = points;
+        } else {
+            pxPoints = new ArrayList<>(4);
+            for(Point p : points){
+                pxPoints.add(Point.create(p.x() * i.width(), p.y() * i.height()));
+            }
+        }
+
 
         Mat m = i.getAs(Mat.class);
-        Segment[] segments = ch.getLineSegments();
-        Pair<List<Image>,List<BoundingBox>> p = cropGrid(m, segments, x, y);
+        double gx = fixed ? fStep.gridX() : step.gridX();
+        double gy = fixed ? fStep.gridY() : step.gridY();
+        Pair<List<Image>,List<BoundingBox>> p = cropGrid(m, pxPoints, gx, gy);
 
         Data out;
         if(step != null ? step.keepOtherFields() : fStep.keepOtherFields()){
@@ -133,137 +133,31 @@ public class CropGridStepRunner implements PipelineStepRunner {
         return out;
     }
 
-    protected Pair<List<Image>,List<BoundingBox>> cropGrid(Mat m, Segment[] segments, double[] x, double[] y) {
-        Segment grid1Segment1 = null;
-
-        //Work out the
-        for (Segment s : segments) {
-            Vector2D start = s.getStart();
-            Vector2D end = s.getEnd();
-            if (grid1Segment1 == null &&
-                    (start.getX() == x[0] && end.getX() == x[1]) ||
-                    (start.getX() == x[1] && end.getX() == x[0])) {
-                grid1Segment1 = s;
-            }
-        }
-
-        if(grid1Segment1 == null){
-            StringBuilder sb = new StringBuilder();
-            sb.append("Invalid order for grid points:");
-            for( int i=0; i<4; i++ ){
-                if(i > 0)
-                    sb.append(",");
-                sb.append(" (").append(x[i]).append(",").append(y[i]).append(")");
-            }
-            sb.append(" - first two points are on opposite corners of the grid, hence defining grid1 relative to this is impossible." +
-                    " Box coordinates must be defined such that (x[0],y[0]) and (x[1],y[1]) are adjacent");
-
-            throw new IllegalStateException(sb.toString());
-        }
-
-        Segment grid1Segment2 = null;
-        Segment grid2Segment1 = null;
-        Segment grid2Segment2 = null;
-        for (Segment s : segments) {
-            if (s == grid1Segment1)
-                continue;
-            if (!grid1Segment1.getStart().equals(s.getStart()) &&
-                    !grid1Segment1.getStart().equals(s.getEnd()) &&
-                    !grid1Segment1.getEnd().equals(s.getStart()) &&
-                    !grid1Segment1.getEnd().equals(s.getEnd())) {
-                grid1Segment2 = s;
-            } else if (grid2Segment1 == null) {
-                grid2Segment1 = s;
-            } else {
-                grid2Segment2 = s;
-            }
-        }
-
-        double g1, g2;
-        if(step != null){
-            g1 = step.grid1();
-            g2 = step.grid2();
-        } else {
-            g1 = fStep.grid1();
-            g2 = fStep.grid2();
-        }
-
-        /*
-        At this point
-        grid1Segment1 is the grid1 left side of the grid area
-        grid1Segment2 is the grid1 right side of the grid area
-        grid2Segment1 is the top side of the grid area
-        grid2Segment2 is the bottom side of the grid area
-         */
-
-        //Corner coordinates
-        double x1, x2, x3, x4, y1, y2, y3, y4;
-        if(grid1Segment1.getStart().getX() <= grid1Segment1.getEnd().getX()){
-            x1 = grid1Segment1.getStart().getX();
-            x2 = grid1Segment1.getEnd().getX();
-            y1 = grid1Segment1.getStart().getY();
-            y2 = grid1Segment1.getEnd().getY();
-        } else {
-            x1 = grid1Segment1.getEnd().getX();
-            x2 = grid1Segment1.getStart().getX();
-            y1 = grid1Segment1.getEnd().getY();
-            y2 = grid1Segment1.getStart().getY();
-        }
-        if(grid1Segment2.getStart().getX() <= grid1Segment2.getEnd().getX()){
-            x3 = grid1Segment2.getStart().getX();
-            x4 = grid1Segment2.getEnd().getX();
-            y3 = grid1Segment2.getStart().getY();
-            y4 = grid1Segment2.getEnd().getY();
-        } else {
-            x3 = grid1Segment2.getEnd().getX();
-            x4 = grid1Segment2.getStart().getX();
-            y3 = grid1Segment2.getEnd().getY();
-            y4 = grid1Segment2.getStart().getY();
-        }
-
-        boolean s1XMostIsTop = y1 < y2;
-        boolean s2XMostIsTop = y3 < y4;
-
-        if(s1XMostIsTop != s2XMostIsTop){
-            //Need to swap
-            double tx3 = x3;
-            double ty3 = y3;
-            x3 = x4;
-            y3 = y4;
-            x4 = tx3;
-            y4 = ty3;
-        }
-
-        if(step != null ? step.coordsArePixels() : fStep.coordsArePixels()){
-            x1 /= m.cols();
-            x2 /= m.cols();
-            x3 /= m.cols();
-            x4 /= m.cols();
-            y1 /= m.rows();
-            y2 /= m.rows();
-            y3 /= m.rows();
-            y4 /= m.rows();
-        }
+    protected Pair<List<Image>,List<BoundingBox>> cropGrid(Mat m, List<Point> pxPoints, double gx, double gy) {
+        Point tl = pxPoints.get(0);
+        Point tr = pxPoints.get(1);
+        Point bl = pxPoints.get(2);
+        Point br = pxPoints.get(3);
 
 
         List<Image> out = new ArrayList<>();
         List<BoundingBox> bbox = (step != null ? step.boundingBoxName() != null : fStep.boundingBoxName() != null) ? new ArrayList<>() : null;
-        for( int i=0; i<g1; i++ ){
+        for( int i=0; i<gx; i++ ){
 
             //x1, x2, x3, x4, y1, y2, y3, y4 - these represent the corner dimensions of the current row
             // within the overall grid
-            int bx1 = (int) (m.cols() * fracBetween (i/g1, x1, x2));
-            int bx2 = (int) (m.cols() * fracBetween((i+1)/g1, x1, x2));
-            int by1 = (int) (m.rows() * fracBetween (i/g1, y1, y2));
-            int by2 = (int) (m.rows() * fracBetween((i+1)/g1, y1, y2));
-            int bx3 = (int) (m.cols() * fracBetween (i/g1, x3, x4));
-            int bx4 = (int) (m.cols() * fracBetween((i+1)/g1, x3, x4));
-            int by3 = (int) (m.rows() * fracBetween (i/g1, y3, y4));
-            int by4 = (int) (m.rows() * fracBetween((i+1)/g1, y3, y4));
+            int bx1 = (int) fracBetween (i/gx, tr.x(), tr.x());
+            int bx2 = (int) fracBetween((i+1)/gx, tr.x(), tr.x());
+            int by1 = (int) fracBetween (i/gx, tl.y(), tr.y());
+            int by2 = (int) fracBetween((i+1)/gx, tl.y(), tr.y());
+            int bx3 = (int) fracBetween (i/gx, bl.x(), br.x());
+            int bx4 = (int) fracBetween((i+1)/gx, bl.x(), br.x());
+            int by3 = (int) fracBetween (i/gx, bl.y(), br.y());
+            int by4 = (int) fracBetween((i+1)/gx, bl.y(), br.y());
 
-            for( int j=0; j<g2; j++ ){
+            for( int j=0; j<gy; j++ ){
                 //Now, we need to segment the row, to get the grid square
-                double sg2 = 1.0 / g2;
+                double sg2 = 1.0 / gy;
 
                 double[] t1 = fracBetween(j*sg2, bx1, by1, bx3, by3);
                 int ax1 = (int) t1[0];
@@ -323,7 +217,7 @@ public class CropGridStepRunner implements PipelineStepRunner {
 
 
                 Rect r = new Rect(minX, minY, w, h);
-                Mat crop = m.apply(r);
+                Mat crop = m.apply(r).clone();
                 out.add(Image.create(crop));
 
                 if(bbox != null){
@@ -351,27 +245,5 @@ public class CropGridStepRunner implements PipelineStepRunner {
 
     private int max(int a, int b, int c, int d){
         return Math.max(Math.max(a, b), Math.max(c, d));
-    }
-
-    protected double[] getAsDouble(String label, String xyName, Data data){
-        if(data.listType(xyName) == ValueType.DOUBLE){
-            List<Double> l = data.getListDouble(xyName);
-            Preconditions.checkState(l.size() == 4, label + "=" + xyName + " should be a length 4 list but is length " + l.size());
-            double[] xy = new double[4];
-            for( int j=0; j<4; j++ ){
-                xy[j] = l.get(j);
-            }
-            return xy;
-        } else {
-            throw new UnsupportedOperationException("Not yet implemeted - int64");
-        }
-    }
-
-    protected ConvexHull2D convexHull(double[] x, double[] y){
-        List<Vector2D> vList = new ArrayList<>(4);
-        for(int i=0; i<4; i++ ){
-            vList.add(new Vector2D(x[i], y[i]));
-        }
-        return new MonotoneChain().generate(vList);
     }
 }

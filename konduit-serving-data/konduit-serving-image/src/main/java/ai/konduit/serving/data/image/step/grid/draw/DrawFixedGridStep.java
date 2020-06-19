@@ -57,7 +57,8 @@ public class DrawFixedGridStep implements PipelineStep {
     @Schema(description = "The number of grid segments between (topLeft and bottomLeft) and (topRight and bottomRight)")
     private int gridY;
 
-    @Schema(description = "If true, the lists are in pixels coordinates, not from 0 to 1.")
+    @Schema(description = "If true, the points are in pixels coordinates (0 to width-1) and (0 to height-1); if false, they " +
+            "are 0.0 to 1.0 (fraction of image height/width)")
     private boolean coordsArePixels;
 
     @Schema(description = "Color of the border. If not setThe color can be a hex/HTML string like" +

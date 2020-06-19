@@ -75,8 +75,8 @@ public class DrawGridStepRunner implements PipelineStepRunner {
         String imgName = fixed ? fStep.imageName() : step.imageName();
 
         if (imgName == null) {
-            String errMultipleKeys = "Image field name was not provided and could not be inferred: multiple image fields exist: %s and %s";
-            String errNoKeys = "Image field name was not provided and could not be inferred: no image fields exist";
+            String errMultipleKeys = "DrawGridStep points field name was not provided and could not be inferred: multiple List<Point> fields exist: %s and %s";
+            String errNoKeys = "DrawGridStep points field name was not provided and could not be inferred: no List<Point> fields exist";
             imgName = DataUtils.inferField(data, ValueType.IMAGE, false, errMultipleKeys, errNoKeys);
         }
 
@@ -88,10 +88,12 @@ public class DrawGridStepRunner implements PipelineStepRunner {
         } else {
             String pName = step.pointsName();
             if (pName == null || pName.isEmpty()) {
-                String errMultipleKeys = "";
-                String errNoKeys = "";
+                String errMultipleKeys = "DrawGridStep points field name was not provided and could not be inferred: multiple List<Point> fields exist: %s and %s";
+                String errNoKeys = "DrawGridStep points field name was not provided and could not be inferred: no List<Point> fields exist";
                 pName = DataUtils.inferListField(data, ValueType.POINT, errMultipleKeys, errNoKeys);
             }
+
+            Preconditions.checkState(data.has(pName), "Error in CropGridStep: Input Data does not have any values for pointName=\"%s\"", pName);
 
             if (data.type(pName) != ValueType.LIST || data.listType(pName) != ValueType.POINT) {
                 String type = (data.type(pName) == ValueType.LIST ? "List<" + data.listType(pName).toString() + ">" : "" + data.type(pName));

@@ -120,8 +120,8 @@ public class TestGridSteps {
 
 
 
-        int g1 = 4;
-        int g2 = 2;
+        int gx = 4;
+        int gy = 2;
 
         for(boolean fixed : new boolean[]{false, true}) {
         for (boolean px : new boolean[]{false, true}) {
@@ -141,14 +141,14 @@ public class TestGridSteps {
             for(boolean outName : new boolean[]{false, true}) {
                 for (boolean keep : new boolean[]{false, true}) {
                     for(boolean bb : new boolean[]{false, true}) {
-
                         PipelineStep s;
                         PipelineStep draw;
                         if(fixed){
                             s = CropFixedGridStep.builder()
                                     .coordsArePixels(false)
-                                    .grid1(g1)
-                                    .grid2(g2)
+                                    .points(points)
+                                    .gridX(gx)
+                                    .gridY(gy)
                                     .imageName("image")
                                     .keepOtherFields(keep)
                                     .outputName(outName ? "output" : null)
@@ -160,9 +160,9 @@ public class TestGridSteps {
                             draw = DrawFixedGridStep.builder()
                                     .borderColor("green")
                                     .gridColor("blue")
-                                    .coordsArePixels(false)
-                                    .gridX(g1)
-                                    .gridY(g2)
+                                    .coordsArePixels(px)
+                                    .gridX(gx)
+                                    .gridY(gy)
                                     .points(points)
                                     .imageName("image")
                                     .borderThickness(4)
@@ -171,10 +171,9 @@ public class TestGridSteps {
                         } else {
                             s = CropGridStep.builder()
                                     .coordsArePixels(false)
-                                    .grid1(g1)
-                                    .grid2(g2)
-                                    .xName("x")
-                                    .yName("y")
+                                    .gridX(gx)
+                                    .gridY(gy)
+                                    .pointsName("points")
                                     .imageName("image")
                                     .keepOtherFields(keep)
                                     .outputName(outName ? "output" : null)
@@ -186,9 +185,9 @@ public class TestGridSteps {
                             draw = DrawGridStep.builder()
                                     .borderColor("green")
                                     .gridColor("blue")
-                                    .coordsArePixels(false)
-                                    .gridX(g1)
-                                    .gridY(g2)
+                                    .coordsArePixels(px)
+                                    .gridX(gx)
+                                    .gridY(gy)
                                     .pointsName("points")
                                     .imageName("image")
                                     .borderThickness(4)
@@ -208,7 +207,7 @@ public class TestGridSteps {
 
                             Data out = exec.exec(in);
                             List<Image> l = out.getListImage(outName ? "output" : CropGridStep.DEFAULT_OUTPUT_NAME);
-                            assertEquals(g1 * g2, l.size());
+                            assertEquals(gx * gy, l.size());
 
                             if (keep) {
                                 assertTrue(out.has("key"));
@@ -220,7 +219,7 @@ public class TestGridSteps {
                             if (bb) {
                                 assertTrue(out.has("bbox"));
                                 List<BoundingBox> lbb = out.getListBoundingBox("bbox");
-                                assertEquals(g1 * g2, lbb.size());
+                                assertEquals(gx * gy, lbb.size());
                             } else {
                                 assertFalse(out.has("bbox"));
                             }
