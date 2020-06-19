@@ -90,6 +90,22 @@ public class TestClassifierOutputStep {
                                     Data in = Data.singleton("preds", preds);
                                     Data out = p.executor().exec(in);
 
+                                    if (retProb ) {
+                                        assertTrue(out.has("prob") && (out.type("prob") == ValueType.DOUBLE||out.type("prob") == ValueType.LIST));
+                                    }
+
+                                    if (retIndex ) {
+                                        assertTrue(out.has("index") && (out.type("index") == ValueType.INT64||out.type("index") == ValueType.LIST));
+                                    }
+
+                                    if (retLabel) {
+                                        assertTrue(out.has("label") && (out.type("label") == ValueType.STRING||out.type("label") == ValueType.LIST));
+                                    }
+
+                                    if (retAllProb) {
+                                        assertTrue(out.has("allProbabilities") && (out.type("allProbabilities") == ValueType.LIST));
+                                    }
+
 
                                 }
 
@@ -160,6 +176,22 @@ public class TestClassifierOutputStep {
                                     NDArray preds = NDArray.create(values);
                                     Data in = Data.singleton("preds", preds);
                                     Data out = p.executor().exec(in);
+
+                                    if (retProb ) {
+                                        assertTrue(out.has("prob") && (out.type("prob") == ValueType.DOUBLE||out.type("prob") == ValueType.LIST));
+                                    }
+
+                                    if (retIndex ) {
+                                        assertTrue(out.has("index") && (out.type("index") == ValueType.INT64||out.type("index") == ValueType.LIST));
+                                    }
+
+                                    if (retLabel) {
+                                        assertTrue(out.has("label") && (out.type("label") == ValueType.STRING||out.type("label") == ValueType.LIST));
+                                    }
+
+                                    if (retAllProb) {
+                                        assertTrue(out.has("allProbabilities") && (out.type("allProbabilities") == ValueType.LIST));
+                                    }
 
 
                                 }

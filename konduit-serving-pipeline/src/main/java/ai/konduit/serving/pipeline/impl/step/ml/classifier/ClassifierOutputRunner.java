@@ -67,8 +67,8 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
         }
 
         String probName = step.probName() == null ? ClassifierOutputStep.DEFAULT_PROB_NAME : step.probName();
-        String indexName = step.indexName() == null ? ClassifierOutputStep.DEFAULT_PROB_NAME : step.probName();
-        String labelName = step.labelName() == null ? ClassifierOutputStep.DEFAULT_PROB_NAME : step.probName();
+        String indexName = step.indexName() == null ? ClassifierOutputStep.DEFAULT_PROB_NAME : step.indexName();
+        String labelName = step.labelName() == null ? ClassifierOutputStep.DEFAULT_PROB_NAME : step.labelName();
 
 
         NDArray classifierOutput = data.getNDArray(inputName);
@@ -210,7 +210,7 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
             float[][] farr = ndarr.getAs(float[][].class);
             double[][] darr = new double[(int) ndarr.shape()[0]][(int) ndarr.shape()[1]];
             for (int i = 0; i < farr.length; i++) {
-                for (int j = 0; j < farr[i].length; i++) {
+                for (int j = 0; j < farr[i].length; j++) {
                     darr[i][j] = Double.valueOf(farr[i][j]);
                 }
             }
