@@ -17,40 +17,69 @@ public class TestClassifierOutputStep {
     public void testcase1() {
 
 
-        int bS = 1;
         int numClasses = 3;
 
-        double values[][] = new double[bS][numClasses];
-        for (int i = 0; i < values.length; i++) {
-            for (int j = 0; j < values[i].length; j++) {
-                values[i][j] = (Math.random() * 10);
+        //some labels
+        List<String> labelsList1 = new ArrayList<String>();
+        labelsList1.add("apple");
+        labelsList1.add("banana");
+        labelsList1.add("orange");
+
+        //just empty
+        List<String> labelsList2 = new ArrayList<String>();
+
+        // list with labels, empty and null
+        List<List<String>> labelsLists = new ArrayList<List<String>>();
+        labelsLists.add(labelsList1);
+        labelsLists.add(labelsList2);
+        labelsLists.add(null);
+
+
+        for (boolean retIndex : new boolean[]{false, true}) {
+            for (boolean retProb : new boolean[]{false, true}) {
+                for (boolean retLabel : new boolean[]{false, true}) {
+                    for (boolean retAllProb : new boolean[]{false, true}) {
+                        for (int bS : new int[]{1, 3}) {
+                            for (Integer topN : new Integer[]{null, 1, 3}) {
+                                for (List<String> labels : labelsLists) {
+
+                                    double values[][] = new double[bS][numClasses];
+                                    for (int i = 0; i < values.length; i++) {
+                                        for (int j = 0; j < values[i].length; j++) {
+                                            values[i][j] = (Math.random() * 10);
+                                        }
+
+
+                                        Pipeline p = SequencePipeline.builder()
+                                                .add(new ClassifierOutputStep()
+                                                        .inputName("preds")
+                                                        .returnIndex(retIndex)
+                                                        .returnLabel(retLabel)
+                                                        .returnProb(retProb)
+                                                        .allProbabilities(retAllProb)
+                                                        .labelName("label")
+                                                        .topN(topN)
+                                                        .indexName("index")
+                                                        .probName("prob")
+                                                        .Labels(labels))
+                                                .build();
+
+
+                                        NDArray preds = NDArray.create(values);
+                                        Data in = Data.singleton("preds", preds);
+                                        Data out = p.executor().exec(in);
+
+                                    }
+
+
+                                }
+                            }
+                        }
+                    }
+                }
             }
-
-            List<String> labelsList = new ArrayList<String>();
-            labelsList.add("apple");
-            labelsList.add("banana");
-            labelsList.add("orange");
-
-            Pipeline p = SequencePipeline.builder()
-                    .add(new ClassifierOutputStep()
-                            .inputName("preds")
-                            .returnIndex(true)
-                            .returnLabel(true)
-                            .returnProb(true)
-                            .allProbabilities(true)
-                            .labelName("label")
-                            .indexName("index")
-                            .probName("prob")
-                            .Labels(labelsList))
-                    .build();
-
-
-            NDArray preds = NDArray.create(values);
-            Data in = Data.singleton("preds", preds);
-            Data out = p.executor().exec(in);
-
         }
-
-
     }
 }
+
+

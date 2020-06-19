@@ -20,7 +20,6 @@ package ai.konduit.serving.pipeline.impl.step.ml.classifier;
 
 import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
-import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.ValueType;
@@ -28,16 +27,13 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.util.DataUtils;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.ArrayUtils;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.indexing.NDArrayIndex;
-import org.nd4j.shade.protobuf.common.primitives.Doubles;
-import oshi.util.LsofUtil;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 @AllArgsConstructor
 @CanRun(ClassifierOutputStep.class)
@@ -69,7 +65,7 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
         }
 
 
-        INDArray classifierOutput = data.getNDArray(inputName).getAs(INDArray.class);
+        NDArray classifierOutput = data.getNDArray(inputName);
 
         boolean batch = false;
         if (classifierOutput.shape().length == 2 && classifierOutput.shape()[0] > 1) {
@@ -78,6 +74,10 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
 
         // If not specified, the predicted class index as a string is used - i.e., "0", "1"
         List<String> labels = step.Labels();
+
+        if (labels == null) {
+            labels = new ArrayList<String>();
+        }
         if (labels.isEmpty()) {
             for (int i = 0; i < classifierOutput.shape()[1]; i++) {
                 labels.add(Integer.toString(i));
@@ -86,9 +86,10 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
 
 
         if (!batch) {
-            Nd4j.squeeze(classifierOutput, 0);
-            double prob = classifierOutput.maxNumber().doubleValue();
-            long index = classifierOutput.argMax(0).getLong(0);
+            double[] classifierOutputArr = squeze(classifierOutput);
+            double[] maxValueWithIdx = getMaxValueAndIndex(classifierOutputArr);
+            double prob = maxValueWithIdx[0];
+            long index = (long) maxValueWithIdx[1];
             String label = labels.get((int) index);
 
             if (step.topN() != null && step.topN() > 1) {
@@ -115,52 +116,84 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
 
             }
             if (step.allProbabilities()) {
-                data.putListDouble("allProbabilities", Doubles.asList(classifierOutput.data().dup().asDouble()));
+                data.putListDouble("allProbabilities", DoubleStream.of(classifierOutputArr).boxed().collect(Collectors.toList()));
             }
         }
 
-            if (batch) {
+        if (batch) {
 
-                int bS = (int) classifierOutput.shape()[1];
+            int bS = (int) classifierOutput.shape()[1];
+            double[][] y = classifierOutput.getAs(double[][].class);
 
-                List<Double> probs = new ArrayList<Double>();
-                List<Long> indeces = new ArrayList<Long>();
-                List<String> labelsList = new ArrayList<String>();
-                List<NDArray> allPropabilities = new ArrayList<NDArray>();
+            List<Double> probs = new ArrayList<Double>();
+            List<Long> indeces = new ArrayList<Long>();
+            List<String> labelsList = new ArrayList<String>();
+            List<NDArray> allPropabilities = new ArrayList<NDArray>();
 
-                for (int i = 0; i < bS; i++) {
-                    INDArray y = classifierOutput.get(NDArrayIndex.point(i), NDArrayIndex.all());
+            for (int i = 0; i < bS; i++) {
+                double[] sample = y[i];
+                double[] maxValueWithIdx = getMaxValueAndIndex(sample);
+                double prob = maxValueWithIdx[0];
+                long index = (long) maxValueWithIdx[1];
+                String label = labels.get((int) index);
 
-                    double prob = y.maxNumber().doubleValue();
-                    long index = y.argMax(0).getLong(0);
-                    String label = labels.get((int) index);
-
-                    probs.add(prob);
-                    indeces.add(index);
-                    labelsList.add(label);
-                    allPropabilities.add(NDArray.create(y.data().dup().asDouble()));
-                }
-
-
-                if (step.returnProb()) {
-                    data.putListDouble(step.probName(), probs);
-                }
-                if (step.returnIndex()) {
-                    data.putListInt64(step.indexName(), indeces);
-                }
-                if (step.returnLabel()) {
-                    data.putListString(step.labelName(), labelsList);
-                }
-                if (step.allProbabilities()) {
-                    data.putListNDArray("allProbabilities", allPropabilities);
-                }
-
+                probs.add(prob);
+                indeces.add(index);
+                labelsList.add(label);
+                allPropabilities.add(NDArray.create(sample));
             }
 
 
-            return data;
+            if (step.returnProb()) {
+                data.putListDouble(step.probName(), probs);
+            }
+            if (step.returnIndex()) {
+                data.putListInt64(step.indexName(), indeces);
+            }
+            if (step.returnLabel()) {
+                data.putListString(step.labelName(), labelsList);
+            }
+            if (step.allProbabilities()) {
+                data.putListNDArray("allProbabilities", allPropabilities);
+            }
+
         }
+
+
+        return data;
     }
+
+
+    public static double[] squeze(NDArray arr) {
+
+        // we have [numClasses] array, so do not modify nothing
+        if (arr.shape().length == 1) {
+            return arr.getAs(double[].class);
+        }
+
+        // i.e we have [1, numClasses] array
+        if (arr.shape().length == 2 && arr.shape()[0] == 1) {
+            return arr.getAs(double[][].class)[0];
+        }
+
+        return null;
+
+    }
+
+    double[] getMaxValueAndIndex(double[] arr) {
+        double max = arr[0];
+        int maxIdx = 0;
+        for (int i = 1; i < arr.length; i++) {
+            if (arr[i] > max) {
+                max = arr[i];
+                maxIdx = i;
+            }
+        }
+        return new double[]{max, maxIdx};
+    }
+
+
+}
 
 
 
