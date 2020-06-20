@@ -36,7 +36,7 @@ public class TestRegressionOutputStep {
 
 
     @Test
-    public void testCaseNonBatch() {
+    public void testCaseNonBatchDouble() {
         Map<String, Integer> hashMap = new HashMap<String, Integer>();
         hashMap.put("a",0);
         hashMap.put("c",2);
@@ -60,7 +60,7 @@ public class TestRegressionOutputStep {
 
 
     @Test
-    public void testCaseBatch() {
+    public void testCaseBatchDouble() {
         Map<String, Integer> hashMap = new HashMap<String, Integer>();
         hashMap.put("a",0);
         hashMap.put("c",2);
@@ -80,6 +80,49 @@ public class TestRegressionOutputStep {
         Data out = p.executor().exec(in);
         System.out.println(out.get("a"));
         System.out.println(out.get("c"));
+    }
+
+    @Test
+    public void testCaseNonBatchFloat() {
+        Map<String, Integer> hashMap = new HashMap<String, Integer>();
+        hashMap.put("a",0);
+        hashMap.put("c",2);
+        float[][] values = new float[][]{{(float) 0.1, (float) 0.2, (float) 0.3}};
+
+
+        Pipeline p = SequencePipeline.builder()
+                .add(new RegressionOutputStep()
+                        .inputName("preds")
+                        .outputNames(hashMap))
+
+                .build();
+
+        // float values input
+        NDArray preds = NDArray.create(values);
+        Data in = Data.singleton("preds", preds);
+        Data out = p.executor().exec(in);
+    }
+
+
+    @Test
+    public void testCaseBatchFloat() {
+        Map<String, Integer> hashMap = new HashMap<String, Integer>();
+        hashMap.put("a",0);
+        hashMap.put("c",2);
+        float[][] values = new float[][]{{(float) 0.1, (float) 0.2, (float) 0.3}, {(float) 0.4, (float) 0.5, (float) 0.6}};
+
+
+        Pipeline p = SequencePipeline.builder()
+                .add(new RegressionOutputStep()
+                        .inputName("preds")
+                        .outputNames(hashMap))
+
+                .build();
+
+        // float values input
+        NDArray preds = NDArray.create(values);
+        Data in = Data.singleton("preds", preds);
+        Data out = p.executor().exec(in);
     }
 
 

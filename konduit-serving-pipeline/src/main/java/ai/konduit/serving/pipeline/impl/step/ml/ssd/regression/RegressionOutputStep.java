@@ -34,7 +34,7 @@ import java.util.Map;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
-@JsonName("REGRESSION")
+@JsonName("REGRESSION_OUTPUT")
 @Schema(description = "RegressionOutput handler")
 public class RegressionOutputStep implements PipelineStep {
 
@@ -48,7 +48,6 @@ public class RegressionOutputStep implements PipelineStep {
     public RegressionOutputStep() {
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
         //Without setting defaults here again like this, the fields would actually be null
-
 
     }
 

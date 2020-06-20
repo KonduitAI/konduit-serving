@@ -22,6 +22,7 @@ import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
@@ -64,6 +65,12 @@ public class RegressionOutputRunner implements PipelineStepRunner {
 
 
         NDArray regressionOutput = data.getNDArray(inputName);
+        if (regressionOutput.shape().length > 2) {
+            throw new UnsupportedOperationException("Invalid input to ClassifierOutputStep: only rank 1 or 2 inputs are available, got array with shape" + Arrays.toString(regressionOutput.shape()));
+
+        }
+        regressionOutput = FloatNDArrayToDouble(regressionOutput);
+
 
         boolean batch = false;
         if (regressionOutput.shape().length == 2 && regressionOutput.shape()[0] > 1) {
@@ -122,16 +129,19 @@ public class RegressionOutputRunner implements PipelineStepRunner {
 
     }
 
-    double[] getMaxValueAndIndex(double[] arr) {
-        double max = arr[0];
-        int maxIdx = 0;
-        for (int i = 1; i < arr.length; i++) {
-            if (arr[i] > max) {
-                max = arr[i];
-                maxIdx = i;
+    NDArray FloatNDArrayToDouble(NDArray ndarr) {
+        if (ndarr.type() == NDArrayType.FLOAT || ndarr.type() == NDArrayType.FLOAT16 || ndarr.type() == NDArrayType.BFLOAT16) {
+            float[][] farr = ndarr.getAs(float[][].class);
+            double[][] darr = new double[(int) ndarr.shape()[0]][(int) ndarr.shape()[1]];
+            for (int i = 0; i < farr.length; i++) {
+                for (int j = 0; j < farr[i].length; j++) {
+                    darr[i][j] = Double.valueOf(farr[i][j]);
+                }
             }
+
+            return NDArray.create(darr);
         }
-        return new double[]{max, maxIdx};
+        return ndarr;
     }
 
 
