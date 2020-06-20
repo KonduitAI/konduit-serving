@@ -93,7 +93,7 @@ public class RegressionOutputRunner implements PipelineStepRunner {
 
         if (batch) {
 
-            int bS = (int) regressionOutput.shape()[1];
+            int bS = (int) regressionOutput.shape()[0];
             double[][] y = regressionOutput.getAs(double[][].class);
 
             for (Map.Entry<String, Integer> entry : outputNames.entrySet()) {
