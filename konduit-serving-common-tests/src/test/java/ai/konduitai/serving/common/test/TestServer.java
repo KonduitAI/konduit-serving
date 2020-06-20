@@ -1,4 +1,4 @@
-package ai.konduit.serving.build;
+package ai.konduitai.serving.common.test;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
