@@ -71,6 +71,8 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
         try {
             graph = b.buildModel().getComputationGraph();
             net = null;
+        } catch (UnsupportedKerasConfigurationException e){
+            throw new RuntimeException("Unsupported Keras layer found in model", e);
         } catch (Throwable t) {
             if (t.getMessage() != null && t.getMessage().toLowerCase().contains("sequential")) {
                 try {
