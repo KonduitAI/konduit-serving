@@ -25,9 +25,12 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.nd4j.common.resources.Resources;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -132,4 +135,23 @@ public class TestImageResize {
         return out;
     }
 
+    @Ignore
+    @Test
+    public void testManual() throws Exception {
+
+        File f = Resources.asFile("data/mona_lisa.png");;
+        Data d = Data.singleton("image", Image.create(f));
+
+        Pipeline p = SequencePipeline.builder()
+                .add(new ImageResizeStep()
+                        .aspectRatioHandling(AspectRatioHandling.CENTER_CROP)
+                        .height(1024)
+                        .width(768))
+                        .add(new ShowImagePipelineStep())
+                .build();
+
+        p.executor().exec(d);
+
+        Thread.sleep(Long.MAX_VALUE);
+    }
 }

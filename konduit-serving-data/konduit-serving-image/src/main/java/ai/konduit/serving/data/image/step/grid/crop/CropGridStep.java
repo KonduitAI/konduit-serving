@@ -33,9 +33,9 @@ import lombok.experimental.Accessors;
  * The 4 corner X coordinates come from {@code Data.getListDouble(xName)} and the 4 corner Y coordinates come from
  * {@code Data.getListDouble(yName)}.<br>
  * Note that the output depends on the configuration.
- * Always returned: {@code List<Image>} - the cropped images from the grid<br>
- * Returned if {@code outputCoordinates=true}: two {@code List<Long>}s - the box coordinates (0,0), ..., (grid1-1, grid2-1)<br>
- * Returned if {@code boundingBoxName != null}: one {@code List<BoundingBox>} - the crop bounding boxes, (0,0), (0,1), ..., (grid1-1, grid2-1)<br>
+ * Always returned: {@code List<Image>} - the cropped images from the grid, in order: (row,col) = (0,0), (0, 1), ..., (0, C-1), ..., (R-1, C-1).<br>
+ * Returned if {@code outputCoordinates=true}: two {@code List<Long>}s - the box coordinates (0,0), ..., (gridX-1, gridY-1)<br>
+ * Returned if {@code boundingBoxName != null}: one {@code List<BoundingBox>} - the crop bounding boxes, (0,0), (0,1), ..., (gridX-1, gridY-1)<br>
  * See also {@link CropFixedGridStep}<br>
  * If {@code aspectRatio} is set, the smaller dimension will be increased to keep the aspect ratio correct. Note this may crop
  * outside the image border
@@ -49,27 +49,25 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @JsonName("CROP_GRID")
 @Schema(description = "A pipeline step that crops sub images out of a larger image, based on a grid. " +
-        "The grid is defined in terms of the x/y coordinates of the corners (which comes from the input data instance), " +
-        "and the number of segments within the grid in both directions. The 4 corner X coordinates come from a double array in <xName> " +
-        "and the 4 corner Y coordinates come from a double array in <yName>. Note that the output depends on the configuration. The " +
-        "output contains a list of cropped images from the grid.")
+        "The 4 corner coordinates are defined as points, and come from {@code Data.getListPoint(name)}, in the following order:" +
+        "topLeft, topRight, bottomLeft, bottomRight<br>" +
+        "gridX is the number of grid segments between (topLeft and topRight) and (bottomLeft and bottomRight).<br>" +
+        "gridY is the number of grid segments between (topLeft and bottomLeft) and (topRight and bottomRight)<br>" +
+        "The output contains a List<Image> of cropped images from the grid, in order: (row,col) = (0,0), (0, 1), ..., (0, C-1), ..., (R-1, C-1).")
 public class CropGridStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "crops";
 
     @Schema(description = "Name of the input image key from the previous step. If set to null, it will try to find any image in the incoming data instance.")
     private String imageName;
 
-    @Schema(description = "Name of the key of a list (of length 4), specifying X coordinates in any order.")
-    private String xName;
+    @Schema(description = "Name of the List<Point> points specifying the corners, in order: topLeft, topRight, bottomLeft, bottomRight")
+    private String pointsName;
 
-    @Schema(description = "Name of the key of a list (of length 4), specifying Y coordinates in any order (that matches X order).")
-    private String yName;
+    @Schema(description = "The number of grid segments between (topLeft and topRight) and (bottomLeft and bottomRight)")
+    private int gridX;
 
-    @Schema(description = "Number of grid segments between (xName[0],yName[0]) and (xName[1],yName[1]).")
-    private int grid1;
-
-    @Schema(description = "Number of grid segments in the other direction (between (xName[2],yName[2]) and (xName[3],yName[3])).")
-    private int grid2;
+    @Schema(description = "The number of grid segments between (topLeft and bottomLeft) and (topRight and bottomRight)")
+    private int gridY;
 
     @Schema(description = "If true, the lists are in pixels coordinates, not from 0 to 1.")
     private boolean coordsArePixels;

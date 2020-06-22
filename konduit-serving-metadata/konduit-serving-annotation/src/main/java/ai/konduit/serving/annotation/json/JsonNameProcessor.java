@@ -40,6 +40,7 @@ public class JsonNameProcessor extends AbstractProcessor {
     private static final String PIPELINE_STEP = "ai.konduit.serving.pipeline.api.step.PipelineStep";
     private static final String SWITCH_FN = "ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn";
     private static final String GRAPH_STEP = "ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep";
+    private static final String TRIGGER = "ai.konduit.serving.pipeline.api.pipeline.Trigger";
 
     private List<String> toWrite = new ArrayList<>();
     private List<JsonSubType> subTypes = new ArrayList<>();
@@ -71,17 +72,21 @@ public class JsonNameProcessor extends AbstractProcessor {
                 TypeMirror pipelineStepTypeMirror = processingEnv.getElementUtils().getTypeElement(PIPELINE_STEP).asType();
                 TypeMirror switchFnTypeMirror = processingEnv.getElementUtils().getTypeElement(SWITCH_FN).asType();
                 TypeMirror graphStepTypeMirror = processingEnv.getElementUtils().getTypeElement(GRAPH_STEP).asType();
+                TypeMirror triggerMirror = processingEnv.getElementUtils().getTypeElement(TRIGGER).asType();
                 boolean isPS = processingEnv.getTypeUtils().isAssignable(t, pipelineStepTypeMirror);
                 boolean isSF = processingEnv.getTypeUtils().isAssignable(t, switchFnTypeMirror);
                 boolean isGS = processingEnv.getTypeUtils().isAssignable(t, graphStepTypeMirror);
-                if(isPS || isSF || isGS){
+                boolean isT = processingEnv.getTypeUtils().isAssignable(t, triggerMirror);
+                if(isPS || isSF || isGS || isT){
                     String str;
                     if(isPS){
                         str = PIPELINE_STEP;
                     } else if(isSF){
                         str = SWITCH_FN;
-                    } else {
+                    } else if(isGS) {
                         str = GRAPH_STEP;
+                    } else {
+                        str = TRIGGER;
                     }
 
                     String jn = annotation.getAnnotation(JsonName.class).value();

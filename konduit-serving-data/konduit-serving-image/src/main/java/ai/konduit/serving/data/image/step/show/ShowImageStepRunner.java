@@ -25,6 +25,7 @@ import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.util.DataUtils;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
 import org.nd4j.common.base.Preconditions;
@@ -61,8 +62,11 @@ public class ShowImageStepRunner implements PipelineStepRunner {
     @Override
     public synchronized Data exec(Context ctx, Data data) {
         String name = step.imageName();
-        if(name == null)
-            name = tryInferName(data);
+        if(name == null) {
+            String errMultipleKeys = "Image field name was not provided and could not be inferred: multiple image fields exist: %s and %s";
+            String errNoKeys = "Image field name was not provided and could not be inferred: no image fields exist";
+            name = DataUtils.inferField(data, ValueType.IMAGE, true, errMultipleKeys, errNoKeys);
+        }
 
         boolean allowMultiple = step.allowMultiple();
         boolean isSingle = data.has(name) && data.type(name) == ValueType.IMAGE;
@@ -131,25 +135,5 @@ public class ShowImageStepRunner implements PipelineStepRunner {
         int h = (step.height() == null || step.height() == 0) ? MIN_HEIGHT : step.height();
         cf.setCanvasSize(w, h);
         return cf;
-    }
-
-    protected String tryInferName(Data d){
-        List<String> l = d.keys();
-        String name = null;
-        for(String s : l){
-            if(d.type(s) == ValueType.IMAGE){
-                if(name != null){
-                    //Multiple possible images
-                    //TODO do we just want to add an option to show multiple images
-                    throw new IllegalStateException("No image name/key was provided and multiple images are present in data: \""
-                            + name + "\" and \"" + s + "\"" );
-                } else {
-                    name = s;
-                }
-            }
-        }
-
-        Preconditions.checkState(name != null, "Data does not contain any image values to display. Data keys: %s", d.keys());
-        return name;
     }
 }
