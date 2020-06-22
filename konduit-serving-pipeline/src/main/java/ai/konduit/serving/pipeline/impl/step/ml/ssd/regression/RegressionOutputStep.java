@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
@@ -41,8 +40,8 @@ public class RegressionOutputStep implements PipelineStep {
     @Schema(description = "inputName - optional. If set: this represents the NDArray. If not set: use DataUtils.inferField to find an NDArray field")
     String inputName;
 
-    @Schema(description = "Map<String,Integer> where the key is the output name, and the value is the index in the array.")
-    Map<String,Integer> outputNames;
+    @Schema(description = "Map<String,Integer> where the key is the output name, and the value is the index in the array.", defaultValue = "null")
+    Map<String,Integer> names;
 
 
     public RegressionOutputStep() {

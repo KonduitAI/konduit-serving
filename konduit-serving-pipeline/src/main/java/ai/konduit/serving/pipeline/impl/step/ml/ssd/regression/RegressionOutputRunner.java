@@ -29,10 +29,9 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.util.DataUtils;
 import lombok.AllArgsConstructor;
 
-import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 @AllArgsConstructor
 @CanRun(RegressionOutputStep.class)
@@ -77,10 +76,10 @@ public class RegressionOutputRunner implements PipelineStepRunner {
             batch = true;
         }
 
-        Map<String, Integer> outputNames = step.outputNames();
+        Map<String, Integer> outputNames = step.names();
 
-        if (outputNames == null) {
-            outputNames = new HashMap<String, Integer>();
+        if (outputNames == null || outputNames.isEmpty()) {
+            throw new UnsupportedOperationException(".names field was not provided or equal null");
         }
 
 
@@ -135,13 +134,21 @@ public class RegressionOutputRunner implements PipelineStepRunner {
             double[][] darr = new double[(int) ndarr.shape()[0]][(int) ndarr.shape()[1]];
             for (int i = 0; i < farr.length; i++) {
                 for (int j = 0; j < farr[i].length; j++) {
-                    darr[i][j] = Double.valueOf(farr[i][j]);
+                    darr[i][j] = round(Double.valueOf(farr[i][j]),7);
                 }
             }
 
             return NDArray.create(darr);
         }
         return ndarr;
+    }
+
+    private static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
 

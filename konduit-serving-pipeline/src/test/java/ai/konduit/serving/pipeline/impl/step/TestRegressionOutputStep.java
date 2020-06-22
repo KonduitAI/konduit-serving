@@ -19,18 +19,16 @@ package ai.konduit.serving.pipeline.impl.step;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
-import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.regression.RegressionOutputStep;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 
 public class TestRegressionOutputStep {
 
@@ -46,7 +44,7 @@ public class TestRegressionOutputStep {
         Pipeline p = SequencePipeline.builder()
                 .add(new RegressionOutputStep()
                         .inputName("preds")
-                        .outputNames(hashMap))
+                        .names(hashMap))
 
                 .build();
 
@@ -54,8 +52,17 @@ public class TestRegressionOutputStep {
         NDArray preds = NDArray.create(values);
         Data in = Data.singleton("preds", preds);
         Data out = p.executor().exec(in);
-        System.out.println(out.get("a"));
-        System.out.println(out.get("c"));
+        assertTrue((double)out.get("a") == 0.1);
+        assertTrue((double)out.get("c") == 0.3);
+
+        String json = p.toJson();
+        String yaml = p.toYaml();
+
+        Pipeline pj = Pipeline.fromJson(json);
+        Pipeline py = Pipeline.fromYaml(yaml);
+
+        assertEquals(p, pj);
+        assertEquals(p, py);
     }
 
 
@@ -70,7 +77,7 @@ public class TestRegressionOutputStep {
         Pipeline p = SequencePipeline.builder()
                 .add(new RegressionOutputStep()
                         .inputName("preds")
-                        .outputNames(hashMap))
+                        .names(hashMap))
 
                 .build();
 
@@ -78,8 +85,21 @@ public class TestRegressionOutputStep {
         NDArray preds = NDArray.create(values);
         Data in = Data.singleton("preds", preds);
         Data out = p.executor().exec(in);
-        System.out.println(out.get("a"));
-        System.out.println(out.get("c"));
+
+        List<Double> list1 = Arrays.asList(0.1, 0.4);
+        List<Double> list2 = Arrays.asList(0.3, 0.6);
+
+        assertTrue(out.get("a").equals(list1));
+        assertTrue(out.get("c").equals(list2));
+
+        String json = p.toJson();
+        String yaml = p.toYaml();
+
+        Pipeline pj = Pipeline.fromJson(json);
+        Pipeline py = Pipeline.fromYaml(yaml);
+
+        assertEquals(p, pj);
+        assertEquals(p, py);
     }
 
     @Test
@@ -93,7 +113,7 @@ public class TestRegressionOutputStep {
         Pipeline p = SequencePipeline.builder()
                 .add(new RegressionOutputStep()
                         .inputName("preds")
-                        .outputNames(hashMap))
+                        .names(hashMap))
 
                 .build();
 
@@ -101,6 +121,18 @@ public class TestRegressionOutputStep {
         NDArray preds = NDArray.create(values);
         Data in = Data.singleton("preds", preds);
         Data out = p.executor().exec(in);
+
+        assertTrue(out.get("a").equals(0.1));
+        assertTrue(out.get("c").equals(0.3));
+
+        String json = p.toJson();
+        String yaml = p.toYaml();
+
+        Pipeline pj = Pipeline.fromJson(json);
+        Pipeline py = Pipeline.fromYaml(yaml);
+
+        assertEquals(p, pj);
+        assertEquals(p, py);
     }
 
 
@@ -115,7 +147,7 @@ public class TestRegressionOutputStep {
         Pipeline p = SequencePipeline.builder()
                 .add(new RegressionOutputStep()
                         .inputName("preds")
-                        .outputNames(hashMap))
+                        .names(hashMap))
 
                 .build();
 
@@ -123,6 +155,20 @@ public class TestRegressionOutputStep {
         NDArray preds = NDArray.create(values);
         Data in = Data.singleton("preds", preds);
         Data out = p.executor().exec(in);
+        List<Double> list1 = Arrays.asList(0.1, 0.4);
+        List<Double> list2 = Arrays.asList(0.3, 0.6);
+
+        assertTrue(out.get("a").equals(list1));
+        assertTrue(out.get("c").equals(list2));
+
+        String json = p.toJson();
+        String yaml = p.toYaml();
+
+        Pipeline pj = Pipeline.fromJson(json);
+        Pipeline py = Pipeline.fromYaml(yaml);
+
+        assertEquals(p, pj);
+        assertEquals(p, py);
     }
 
 
