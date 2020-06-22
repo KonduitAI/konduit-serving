@@ -2,12 +2,11 @@ package ai.konduitai.serving.pipeline.protocol;
 
 import ai.konduit.serving.pipeline.api.protocol.FtpClient;
 import ai.konduit.serving.pipeline.api.protocol.RemoteUtils;
-import ai.konduit.serving.pipeline.api.protocol.S3Handler;
+import ai.konduit.serving.pipeline.api.protocol.handlers.S3StreamHandlerFactory;
 import ai.konduitai.serving.common.test.TestServer;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.net.ftp.FTPClient;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.mockftpserver.fake.FakeFtpServer;
@@ -15,7 +14,6 @@ import org.mockftpserver.fake.UserAccount;
 import org.mockftpserver.fake.filesystem.DirectoryEntry;
 import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.WindowsFakeFileSystem;
-import oshi.software.os.FileSystem;
 
 import java.io.*;
 import java.net.URL;
@@ -40,8 +38,9 @@ public class TestURL {
 
     @Before
     public void setUp() throws Exception {
-        System.setProperty("java.protocol.handler.pkgs",
-                "ai.konduit.serving.pipeline.api.protocol");
+        URL.setURLStreamHandlerFactory(new S3StreamHandlerFactory());
+        /*System.setProperty("java.protocol.handler.pkgs",
+                "ai.konduit.serving.pipeline.api.protocol.handlers");*/
         server = new TestServer(HTTP, HOST, PORT);
         server.start();
         configData = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("config/config.json"),
@@ -96,33 +95,13 @@ public class TestURL {
     @Ignore
     @Test
     public void testS3() throws IOException {
-        System.out.println("Registered protocols:" + System.getProperty("java.protocol.handler.pkgs"));
         URL url = new URL("s3://<access-key>:<secret-key>@<bucket>.s3.amazonaws.com/<filename>");
 
         URLConnection conn = url.openConnection();
-        InputStream is = conn.getInputStream();
-
-        if (is != null) {
-
-            Writer writer = new StringWriter();
-            char[] buffer = new char[1024];
-            try {
-                Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-                int n;
-                while ((n = reader.read(buffer)) != -1) {
-                    writer.write(buffer, 0, n);
-                }
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                is.close();
-            }
-
-            System.out.println("connected");
-            System.out.println(writer.toString());
-
+        try (InputStream is = conn.getInputStream()) {
+            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            String received = IOUtils.toString(reader);
+            System.out.println(received);
         }
     }
 }

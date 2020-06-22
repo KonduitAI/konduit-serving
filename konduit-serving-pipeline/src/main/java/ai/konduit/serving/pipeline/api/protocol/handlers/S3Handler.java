@@ -1,4 +1,4 @@
-package ai.konduit.serving.pipeline.api.protocol;
+package ai.konduit.serving.pipeline.api.protocol.handlers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +20,6 @@ public class S3Handler extends URLStreamHandler {
             @Override
             public InputStream getInputStream() throws IOException {
 
-                //aws credentials
                 String accessKey = null;
                 String secretKey = null;
 
@@ -37,7 +36,6 @@ public class S3Handler extends URLStreamHandler {
                     RestS3Service s3Service = new RestS3Service(new AWSCredentials(accessKey, secretKey));
                     S3Object s3obj = s3Service.getObject(bucket, key);
                     return s3obj.getDataInputStream();
-
                 } catch (ServiceException e) {
                     throw new IOException(e);
                 }
