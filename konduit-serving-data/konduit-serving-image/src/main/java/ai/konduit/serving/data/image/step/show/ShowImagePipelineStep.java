@@ -45,14 +45,12 @@ public class ShowImagePipelineStep implements PipelineStep {
     private String displayName = "Image";
 
     @Builder.Default
-    @Schema(description = "Height of the image.",
-            defaultValue = "1280")
-    private Integer width = 1280;
+    @Schema(description = "Height of the displayed image frame. If null: same size as image is used")
+    private Integer width;
 
     @Builder.Default
-    @Schema(description = "Width of the image.",
-            defaultValue = "720")
-    private Integer height = 720;
+    @Schema(description = "Width of the image. If null: same size as the image")
+    private Integer height;
 
     @Schema(description = "Allow multiple images to be shown.")
     private boolean allowMultiple = false;
@@ -71,8 +69,6 @@ public class ShowImagePipelineStep implements PipelineStep {
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
         //Without setting defaults here again like this, the fields would actually be null
         this.displayName = displayName();
-        this.width = 1280;
-        this.height = 720;
     }
 
 

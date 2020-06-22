@@ -183,7 +183,7 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
         jg.writeEndObject();
     }
 
-    private void writeBB(JsonGenerator jg, BoundingBox bb) throws IOException {
+    public static void writeBB(JsonGenerator jg, BoundingBox bb) throws IOException {
         //We'll keep it in the original format, if possible - but encode it as a X/Y format otherwise
         jg.writeStartObject();
         if(bb instanceof BBoxCHW){

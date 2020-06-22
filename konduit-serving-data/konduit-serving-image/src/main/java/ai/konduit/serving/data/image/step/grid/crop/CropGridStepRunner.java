@@ -39,12 +39,12 @@ public class CropGridStepRunner implements PipelineStepRunner {
     protected final CropGridStep step;
     protected final CropFixedGridStep fStep;
 
-    public CropGridStepRunner(@NonNull CropGridStep step){
+    public CropGridStepRunner(@NonNull CropGridStep step) {
         this.step = step;
         this.fStep = null;
     }
 
-    public CropGridStepRunner(@NonNull CropFixedGridStep step){
+    public CropGridStepRunner(@NonNull CropFixedGridStep step) {
         this.step = null;
         this.fStep = step;
     }
@@ -56,7 +56,7 @@ public class CropGridStepRunner implements PipelineStepRunner {
 
     @Override
     public PipelineStep getPipelineStep() {
-        if(step != null)
+        if (step != null)
             return step;
         return fStep;
     }
@@ -76,7 +76,7 @@ public class CropGridStepRunner implements PipelineStepRunner {
         Image i = data.getImage(imgName);
         List<Point> points;
 
-        if(fixed){
+        if (fixed) {
             points = fStep.points();
             Preconditions.checkState(points != null, "Error in CropFixedGridStep: points field was null (corder points" +
                     " must be provided for cropping via CropFixedGridStep.points field)");
@@ -99,11 +99,11 @@ public class CropGridStepRunner implements PipelineStepRunner {
 
         boolean isPx = fixed ? fStep.coordsArePixels() : step.coordsArePixels();
         List<Point> pxPoints;
-        if(isPx){
+        if (isPx) {
             pxPoints = points;
         } else {
             pxPoints = new ArrayList<>(4);
-            for(Point p : points){
+            for (Point p : points) {
                 pxPoints.add(Point.create(p.x() * i.width(), p.y() * i.height()));
             }
         }
@@ -112,28 +112,28 @@ public class CropGridStepRunner implements PipelineStepRunner {
         Mat m = i.getAs(Mat.class);
         double gx = fixed ? fStep.gridX() : step.gridX();
         double gy = fixed ? fStep.gridY() : step.gridY();
-        Pair<List<Image>,List<BoundingBox>> p = cropGrid(m, pxPoints, gx, gy);
+        Pair<List<Image>, List<BoundingBox>> p = cropGrid(m, pxPoints, gx, gy);
 
         Data out;
-        if(step != null ? step.keepOtherFields() : fStep.keepOtherFields()){
+        if (step != null ? step.keepOtherFields() : fStep.keepOtherFields()) {
             out = data.clone();
         } else {
             out = Data.empty();
         }
 
         String outName = (step != null ? step.outputName() : fStep.outputName());
-        if(outName == null)
+        if (outName == null)
             outName = CropGridStep.DEFAULT_OUTPUT_NAME;
         out.putListImage(outName, p.getFirst());
 
-        if(step != null ? step.boundingBoxName() != null : fStep.boundingBoxName() != null){
+        if (step != null ? step.boundingBoxName() != null : fStep.boundingBoxName() != null) {
             out.putListBoundingBox(step != null ? step.boundingBoxName() : fStep.boundingBoxName(), p.getSecond());
         }
 
         return out;
     }
 
-    protected Pair<List<Image>,List<BoundingBox>> cropGrid(Mat m, List<Point> pxPoints, double gx, double gy) {
+    protected Pair<List<Image>, List<BoundingBox>> cropGrid(Mat m, List<Point> pxPoints, double gx, double gy) {
         Point tl = pxPoints.get(0);
         Point tr = pxPoints.get(1);
         Point bl = pxPoints.get(2);
@@ -142,86 +142,62 @@ public class CropGridStepRunner implements PipelineStepRunner {
 
         List<Image> out = new ArrayList<>();
         List<BoundingBox> bbox = (step != null ? step.boundingBoxName() != null : fStep.boundingBoxName() != null) ? new ArrayList<>() : null;
-        for( int i=0; i<gx; i++ ){
+        //Note we are iterating (adding to output) in order: (0,0), (0, 1), ..., (0, C-1), ..., (R-1, C-1) - i.e., per row
+        for (int j = 0; j < gy; j++) {
+            for (int i = 0; i < gx; i++) {
+                //Work out the corners of the current crop box
+                Point boxTL = topLeft(j, i, (int) gy, (int) gx, tl, tr, bl, br);
+                Point boxTR = topRight(j, i, (int) gy, (int) gx, tl, tr, bl, br);
+                Point boxBL = bottomLeft(j, i, (int) gy, (int) gx, tl, tr, bl, br);
+                Point boxBR = bottomRight(j, i, (int) gy, (int) gx, tl, tr, bl, br);
 
-            //x1, x2, x3, x4, y1, y2, y3, y4 - these represent the corner dimensions of the current row
-            // within the overall grid
-            int bx1 = (int) fracBetween (i/gx, tl.x(), tr.x());
-            int bx2 = (int) fracBetween((i+1)/gx, tl.x(), tr.x());
-            int by1 = (int) fracBetween (i/gx, tl.y(), tr.y());
-            int by2 = (int) fracBetween((i+1)/gx, tl.y(), tr.y());
-            int bx3 = (int) fracBetween (i/gx, bl.x(), br.x());
-            int bx4 = (int) fracBetween((i+1)/gx, bl.x(), br.x());
-            int by3 = (int) fracBetween (i/gx, bl.y(), br.y());
-            int by4 = (int) fracBetween((i+1)/gx, bl.y(), br.y());
+                double minX = min(boxTL.x(), boxTR.x(), boxBL.x(), boxBR.x());
+                double maxX = max(boxTL.x(), boxTR.x(), boxBL.x(), boxBR.x());
+                double minY = min(boxTL.y(), boxTR.y(), boxBL.y(), boxBR.y());
+                double maxY = max(boxTL.y(), boxTR.y(), boxBL.y(), boxBR.y());
 
-            for( int j=0; j<gy; j++ ){
-                //Now, we need to segment the row, to get the grid square
-                double sg2 = 1.0 / gy;
+                int w = (int)(maxX - minX);
+                int h = (int)(maxY - minY);
 
-                double[] t1 = fracBetween(j*sg2, bx1, by1, bx3, by3);
-                int ax1 = (int) t1[0];
-                int ay1 = (int) t1[1];
-
-                double[] t2 = fracBetween((j+1)*sg2, bx2, by2, bx4, by4);
-                int ax2 = (int) t2[0];
-                int ay2 = (int) t2[1];
-
-                double[] t3 = fracBetween((j+1)*sg2, bx1, by1, bx3, by3);
-                int ax3 = (int) t3[0];
-                int ay3 = (int) t3[1];
-
-                double[] t4 = fracBetween((j+1)*sg2, bx2, by2, bx4, by4);
-                int ax4 = (int) t4[0];
-                int ay4 = (int) t4[1];
-
-                int minX = min(ax1, ax2, ax3, ax4);
-                int maxX = max(ax1, ax2, ax3, ax4);
-                int minY = min(ay1, ay2, ay3, ay4);
-                int maxY = max(ay1, ay2, ay3, ay4);
-
-                int w = maxX-minX;
-                int h = maxY-minY;
-
-                if((step != null && step.aspectRatio() != null) || (fStep != null && fStep.aspectRatio() != null)){
-                    double currAr = w / (double)h;
+                if ((step != null && step.aspectRatio() != null) || (fStep != null && fStep.aspectRatio() != null)) {
+                    double currAr = w / (double) h;
                     double ar = step != null ? step.aspectRatio() : fStep.aspectRatio();
-                    if(ar < currAr){
+                    if (ar < currAr) {
                         //Need to increase height dimension to give desired AR
                         int newH = (int) (w / ar);
-                        minY -= (newH-h)/2;
+                        minY -= (newH - h) / 2.0;
                         h = newH;
-                    } else if(ar > currAr){
+                    } else if (ar > currAr) {
                         //Need ot increase width dimension to give desired AR
                         int newW = (int) (h * ar);
-                        minX -= (newW-w)/2;
+                        minX -= (newW - w) / 2.0;
                         w = newW;
                     }
                 }
 
                 //Make sure bounds are inside image. TODO handle this differently for aspect ratio preserving?
-                if(minX < 0){
+                if (minX < 0) {
                     w += minX;
                     minX = 0;
                 }
-                if(minX + w > m.cols()){
-                    w = m.cols() - minX;
+                if (minX + w > m.cols()) {
+                    w = m.cols() - (int)minX;
                 }
-                if(minY < 0){
+                if (minY < 0) {
                     h += minY;
                     minY = 0;
                 }
-                if(minY + h > m.rows()){
-                    h = m.rows() - minY;
+                if (minY + h > m.rows()) {
+                    h = m.rows() - (int)minY;
                 }
 
 
-                Rect r = new Rect(minX, minY, w, h);
+                Rect r = new Rect((int)minX, (int)minY, w, h);
                 Mat crop = m.apply(r).clone();
                 out.add(Image.create(crop));
 
-                if(bbox != null){
-                    bbox.add(BoundingBox.createXY(minX / (double)m.cols(), (minX + w)/ (double)m.cols(), minY/ (double)m.rows(), (minY + h)/ (double)m.rows()));
+                if (bbox != null) {
+                    bbox.add(BoundingBox.createXY(minX / (double) m.cols(), (minX + w) / (double) m.cols(), minY / (double) m.rows(), (minY + h) / (double) m.rows()));
                 }
             }
         }
@@ -229,21 +205,49 @@ public class CropGridStepRunner implements PipelineStepRunner {
         return Pair.of(out, bbox);
     }
 
-    private double fracBetween(double frac, double a, double b){
-        return a + frac * (b-a);
+    private Point topLeft(int row, int col, int numRows, int numCols, Point tl, Point tr, Point bl, Point br) {
+        //Here, we are stepping "rows/numRows" between TL/BL and TR/BR
+        //This gives us the line along which the
+        //Then we just need to step between those points
+        /*
+        i.e., for O=(1,2) we work out (x,y) for A and B, then step 2/numCols from A to B
+        |-----------------|
+        |     |     |     |
+        A-----|-----O-----B
+        |     |     |     |
+        |-----------------|
+         */
+        Point tlbl = fracBetween(row / (double) numRows, tl, bl);
+        Point trbr = fracBetween(row / (double) numRows, tr, br);
+
+        return fracBetween(col / (double) numCols, tlbl, trbr);
     }
 
-    private double[] fracBetween(double frac, double x1, double y1, double x2, double y2){
-        return new double[]{
-                x1 + frac * (x2-x1),
-                y1 + frac * (y2-y1)};
+    private Point bottomRight(int row, int col, int numRows, int numCols, Point tl, Point tr, Point bl, Point br) {
+        return topLeft(row + 1, col + 1, numRows, numCols, tl, tr, bl, br);
     }
 
-    private int min(int a, int b, int c, int d){
+    private Point bottomLeft(int row, int col, int numRows, int numCols, Point tl, Point tr, Point bl, Point br) {
+        return topLeft(row + 1, col, numRows, numCols, tl, tr, bl, br);
+    }
+
+    private Point topRight(int row, int col, int numRows, int numCols, Point tl, Point tr, Point bl, Point br) {
+        return topLeft(row, col + 1, numRows, numCols, tl, tr, bl, br);
+    }
+
+    Point fracBetween(double frac, Point p1, Point p2) {
+        return Point.create(fracBetween(frac, p1.x(), p2.x()), fracBetween(frac, p1.y(), p2.y()));
+    }
+
+    private double fracBetween(double frac, double a, double b) {
+        return a + frac * (b - a);
+    }
+
+    private double min(double a, double b, double c, double d) {
         return Math.min(Math.min(a, b), Math.min(c, d));
     }
 
-    private int max(int a, int b, int c, int d){
+    private double max(double a, double b, double c, double d) {
         return Math.max(Math.max(a, b), Math.max(c, d));
     }
 }

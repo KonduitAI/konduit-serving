@@ -46,9 +46,14 @@ public class VideoFrameCaptureStep implements PipelineStep {
             defaultValue = "image")
     private String outputKey = "image";
 
-    public VideoFrameCaptureStep(@JsonProperty("filePath") String filePath, @JsonProperty("outputKey") String outputKey){
+    @Builder.Default
+    @Schema(description = "Loop the video when it reaches the end?")
+    private boolean loop = true;
+
+    public VideoFrameCaptureStep(@JsonProperty("filePath") String filePath, @JsonProperty("outputKey") String outputKey, @JsonProperty("loop") boolean loop){
         this.filePath = filePath;
         this.outputKey = outputKey;
+        this.loop = loop;
     }
 
 }
