@@ -19,6 +19,7 @@ package ai.konduit.serving.camera.step.capture;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
@@ -33,15 +34,26 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @Builder
 @Data
 @JsonName("VIDEO_CAPTURE")
+@Schema(description = "A pipeline step that configures how to extracts a single frame from a video each time inference is called." +
+        " The video path is hardcoded, mainly used for testing/demo purposes given this")
 public class VideoFrameCaptureStep implements PipelineStep {
 
+    @Schema(description = "Location of the video file.")
     private String filePath;
+
     @Builder.Default
+    @Schema(description = "Name of the output key where the image frame will be located.",
+            defaultValue = "image")
     private String outputKey = "image";
 
-    public VideoFrameCaptureStep(@JsonProperty("filePath") String filePath, @JsonProperty("outputKey") String outputKey){
+    @Builder.Default
+    @Schema(description = "Loop the video when it reaches the end?")
+    private boolean loop = true;
+
+    public VideoFrameCaptureStep(@JsonProperty("filePath") String filePath, @JsonProperty("outputKey") String outputKey, @JsonProperty("loop") boolean loop){
         this.filePath = filePath;
         this.outputKey = outputKey;
+        this.loop = loop;
     }
 
 }

@@ -17,3 +17,4 @@
 ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStepRunnerFactory
 ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxRunnerFactory
 ai.konduit.serving.pipeline.impl.step.bbox.filter.BoundingBoxFilterStepRunnerFactory
+ai.konduit.serving.pipeline.impl.step.bbox.point.BoundingBoxToPointStepRunnerFactory

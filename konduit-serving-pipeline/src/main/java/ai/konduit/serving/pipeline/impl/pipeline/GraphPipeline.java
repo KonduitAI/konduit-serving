@@ -18,7 +18,9 @@ package ai.konduit.serving.pipeline.impl.pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 import org.nd4j.shade.jackson.annotation.JsonPropertyOrder;
@@ -44,11 +46,20 @@ import java.util.UUID;
 @Data
 @Accessors(fluent = true)
 @JsonPropertyOrder({"outputStep", "steps"})
+@Schema(description = "A type of pipeline that defines the execution flow in a directed acyclic graph (DAG) of configurable steps. " +
+        "The execution flow can also contain optional steps.")
 public class GraphPipeline implements Pipeline {
     public static final String INPUT_KEY = "input";
 
+    @Schema(description = "A map of configurable graph steps that defines a directed acyclic graph (DAG) of a pipeline execution.")
     private final Map<String, GraphStep> steps;
+
+    @Schema(description = "Name of the output step in the graph pipeline map.")
     private final String outputStep;
+
+    @Schema(description = "A unique identifier that's used to differentiate among different executing pipelines. Used " +
+            "for identifying a pipeline while reporting metrics.")
+    @EqualsAndHashCode.Exclude
     private String id;
 
     public GraphPipeline(@JsonProperty("steps") Map<String, GraphStep> steps,

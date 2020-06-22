@@ -20,6 +20,7 @@ package ai.konduit.serving.data.image.step.show;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -29,16 +30,29 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @Builder
 @Accessors(fluent = true)
 @JsonName("SHOW_IMAGE")
+@Schema(description = "A pipeline step that configures how to show/render an image from a previous step in an application " +
+        "frame. Usually only used for testing and debugging locally, not when serving from HTTP/GRPC etc endpoints")
 public class ShowImagePipelineStep implements PipelineStep {
 
     @Builder.Default
+    @Schema(description = "Name of the incoming input image key.",
+            defaultValue = "image")
     private String imageName = "image";
+
     @Builder.Default
+    @Schema(description = "Image display name.",
+            defaultValue = "Image")
     private String displayName = "Image";
+
     @Builder.Default
-    private Integer width = 1280;
+    @Schema(description = "Height of the displayed image frame. If null: same size as image is used")
+    private Integer width;
+
     @Builder.Default
-    private Integer height = 720;
+    @Schema(description = "Width of the image. If null: same size as the image")
+    private Integer height;
+
+    @Schema(description = "Allow multiple images to be shown.")
     private boolean allowMultiple = false;
 
     public ShowImagePipelineStep(@JsonProperty("imageName") String imageName, @JsonProperty("displayName") String displayName,
@@ -54,10 +68,7 @@ public class ShowImagePipelineStep implements PipelineStep {
     public ShowImagePipelineStep(){
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
         //Without setting defaults here again like this, the fields would actually be null
-        this.imageName = "image";
         this.displayName = displayName();
-        this.width = 1280;
-        this.height = 720;
     }
 
 

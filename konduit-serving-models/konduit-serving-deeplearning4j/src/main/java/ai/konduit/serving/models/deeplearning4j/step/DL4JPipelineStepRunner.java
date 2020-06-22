@@ -41,8 +41,8 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
-@CanRun(DL4JModelPipelineStep.class)
 @Slf4j
+@CanRun({DL4JModelPipelineStep.class, KerasModelStep.class})
 public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     public static final String DEFAULT_OUT_NAME_SINGLE = "default";
@@ -71,6 +71,8 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
         try {
             graph = b.buildModel().getComputationGraph();
             net = null;
+        } catch (UnsupportedKerasConfigurationException e){
+            throw new RuntimeException("Unsupported Keras layer found in model", e);
         } catch (Throwable t) {
             if (t.getMessage() != null && t.getMessage().toLowerCase().contains("sequential")) {
                 try {
@@ -116,19 +118,15 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     protected static File getFile(String uri) {
         Preconditions.checkState(uri != null && !uri.isEmpty(), "No model URI was provided (model URI was null or empty)");
-        URI u = null;
-        try {
-            u = URI.create(uri);
-        } catch (IllegalArgumentException e) {
-            try {
-                u = new File(uri).toURI();
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
+
+        File f;
+        if(uri.startsWith("file:/")){
+            f = new File(URI.create(uri));
+        } else {
+            f = new File(uri);
         }
 
-        File f = new File(u);
-        Preconditions.checkState(f.exists(), "No model file exists at URI: %s", u);
+        Preconditions.checkState(f.exists(), "No model file exists at URI: %s", uri);
         return f;
     }
 
@@ -243,7 +241,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
         String key = data.keys().get(0);
         NDArray array = data.getNDArray(key);
 
-        INDArray out = (INDArray) array.get();          //TOOD NO CAST
+        INDArray out = array.getAs(INDArray.class);          //TOOD NO CAST
         return out;
     }
 }

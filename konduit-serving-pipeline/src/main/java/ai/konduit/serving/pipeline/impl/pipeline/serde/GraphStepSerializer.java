@@ -47,7 +47,7 @@ public class GraphStepSerializer extends JsonSerializer<GraphStep> {
     public void serialize(GraphStep gs, JsonGenerator jg, SerializerProvider sp) throws IOException {
         Map<Class<?>,String> names = ObjectMappers.getSubtypeNames();
         String stepJsonType = names.get(gs.getClass());
-        Preconditions.checkState(gs instanceof PipelineGraphStep || stepJsonType != null, "No JSON name for %s", gs);
+        Preconditions.checkState(gs instanceof PipelineGraphStep || stepJsonType != null, "No JSON name is known for GraphStep of type %s", gs);
 
         String name = gs.name();
 

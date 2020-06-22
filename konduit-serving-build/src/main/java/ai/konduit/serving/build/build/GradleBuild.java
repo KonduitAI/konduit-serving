@@ -20,10 +20,12 @@ package ai.konduit.serving.build.build;
 
 import ai.konduit.serving.build.config.Config;
 import ai.konduit.serving.build.config.Deployment;
+import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
-import ai.konduit.serving.build.deployments.ClassPathDeployment;
-import ai.konduit.serving.build.deployments.UberJarDeployment;
+import ai.konduit.serving.build.deployments.*;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.io.IOUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
@@ -31,9 +33,25 @@ import org.nd4j.common.base.Preconditions;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GradleBuild {
+
+    private static String createCopyTask(String taskName, String fromDir, String toDir, String fileMask,
+                                         String pluginOutput) {
+        String built = (fromDir + File.separator + "build" + File.separator + pluginOutput).
+                replace("\\","\\\\");;
+        String deployed = (toDir.replace("\\","\\\\"));
+
+        String retVal =  "tasks.register<Copy>(\"" + taskName + "\") {\n" +
+                         "\t from(\""  + built + "\")\n" +
+                         "\t include(\"" + fileMask + "\")\n" +
+                         "\t into(\""  + deployed + "\")\n}\n";
+        return retVal;
+    }
 
     public static void generateGradleBuildFiles(File outputDir, Config config) throws IOException {
 
@@ -49,19 +67,16 @@ public class GradleBuild {
         Preconditions.checkState(uberjar != classpathMF || !uberjar, "Unable to create both a classpath manifest (ClassPathDeployment)" +
                 " and uber-JAR deployment at once");
 
+        copyResource("/gradle/gradlew", new File(outputDir, "gradlew"));
+        copyResource("/gradle/gradlew.bat", new File(outputDir, "gradlew.bat"));
 
-
-        File gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew")));
-        if (gradlewResource.exists())
-            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
-
-        gradlewResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("gradlew.bat")));
-        if (gradlewResource.exists())
-            FileUtils.copyFileToDirectory(gradlewResource, outputDir);
+        File dockerResource = new File(String.valueOf(GradleBuild.class.getClassLoader().getResource("Dockerfile")));
+        if (dockerResource.exists())
+            FileUtils.copyFileToDirectory(dockerResource, outputDir);
 
         //Generate build.gradle.kts (and gradle.properties if necessary)
         StringBuilder kts = new StringBuilder();
-        //kts.append("import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar\n");
+
         for(Deployment d : config.deployments()){
             List<String> imports = d.gradleImports();
             if(imports != null && !imports.isEmpty()){
@@ -71,19 +86,38 @@ public class GradleBuild {
             }
         }
 
+        // ----- Repositories Section -----
+        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n}\n");
 
+
+        // ----- Plugins Section -----
         kts.append("plugins { java \n");
+        /*
+        //Not yet released - uncomment this once gradle-javacpp-platform plugin is available
+        //Set JavaCPP platforms - https://github.com/bytedeco/gradle-javacpp#the-platform-plugin
+        kts.append("id(\"org.bytedeco.gradle-javacpp-platform\") version \"1.5.3\"\n");      //TODO THIS VERSION SHOULDN'T BE HARDCODED
+         */
         for(Deployment d : config.deployments()){
             List<GradlePlugin> gi = d.gradlePlugins();
             if(gi != null && !gi.isEmpty()){
                 for(GradlePlugin g : gi) {
-                    kts.append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
+                    if (StringUtils.isNotEmpty(g.version()))
+                        kts.append("\t").append("id(\"").append(g.id()).append("\"").append(") version \"").append(g.version()).append("\"\n");
+                    else
+                        kts.append("\t").append("id(\"").append(g.id()).append("\")\n");
                 }
             }
         }
         kts.append("\n}")
             .append("\n");
-        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n}\n");
+
+        /*
+        //Uncomment once gradle-javacpp-platform plugin available
+        kts.append("ext {\n")
+                .append("\tjavacppPlatorm = \"").append(config.target().toJavacppPlatform() + "\"\n")
+                .append("}\n\n");
+         */
+
         kts.append("group = \"ai.konduit\"\n");
         //kts.append("version = \"1.0-SNAPSHOT\"\n");
 
@@ -103,31 +137,118 @@ public class GradleBuild {
             kts.append("}").append("\n");
         }
 
-
         List<Deployment> deployments = config.deployments();
         Preconditions.checkState(deployments != null, "No deployments (uberjar, docker, etc) were specified for the build");
 
         for (Deployment deployment : deployments) {
             if (deployment instanceof UberJarDeployment) {
-                kts.append("tasks.withType<ShadowJar> {\n");
+                String escaped = ((UberJarDeployment)deployment).outputDir().replace("\\","\\\\");
                 String jarName = ((UberJarDeployment)deployment).jarName();
                 if(jarName.endsWith(".jar")){
                     jarName = jarName.substring(0, jarName.length()-4);
                 }
+                addUberJarTask(kts, jarName, escaped);
+            }
+            else if (deployment instanceof RpmDeployment) {
+                RpmDeployment r = (RpmDeployment)deployment;
+                String escaped = r.outputDir().replace("\\","\\\\");
+                addUberJarTask(kts,  "ks", escaped);
 
-                kts.append("\tbaseName = \"" + jarName + "\"\n");
-                String escaped = ((UberJarDeployment)deployment).outputDir().replace("\\","\\\\");
-                kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
-                kts.append("mergeServiceFiles()\n");  //For service loader files
+                String rpmName = r.rpmName();
+                kts.append("ospackage { \n");
+                if(rpmName.endsWith(".rpm")){
+                    rpmName = rpmName.substring(0, rpmName.length()-4);
+                }
+                kts.append("\tfrom(\"" + escaped + "\")\n");
+                kts.append("\tpackageName = \"" + rpmName + "\"\n");
+                kts.append("\tsetArch( " + getRpmDebArch(config.target()) + ")\n");
+                kts.append("\tos = " + getRpmDebOs(config.target()) + "\n");
+                kts.append("}\n");
+
+                kts.append(createCopyTask("copyRpm", outputDir.getAbsolutePath(),
+                        r.outputDir(), "*.rpm", "distributions"));
+            }
+            else if (deployment instanceof DebDeployment) {
+                String escaped = ((DebDeployment)deployment).outputDir().replace("\\","\\\\");
+                addUberJarTask(kts,  "ks", escaped);
+
+                String rpmName = ((DebDeployment)deployment).rpmName();
+                kts.append("ospackage {\n");
+                if(rpmName.endsWith(".deb")){
+                    rpmName = rpmName.substring(0, rpmName.length()-4);
+                }
+                kts.append("\tfrom(\"" + escaped + "\")\n");
+                kts.append("\tpackageName = \"" + rpmName + "\"\n");
+                //kts.append("\tsetArch(" + ((DebDeployment)deployment).archName() + ")\n");
+                kts.append("\tos = " + getRpmDebOs(config.target()) + "\n");
                 kts.append("}").append("\n\n");
+
+                kts.append(createCopyTask("copyDeb", outputDir.getAbsolutePath(), ((DebDeployment)deployment).outputDir(),
+                        "*.deb", "distributions"));
             } else if(deployment instanceof ClassPathDeployment){
                 addClassPathTask(kts, (ClassPathDeployment) deployment);
             }
-        }
+            else if (deployment instanceof ExeDeployment) {
+                String exeName = ((ExeDeployment)deployment).exeName();
+                kts.append("tasks.withType<DefaultLaunch4jTask> {\n");
+                if(exeName.endsWith(".exe")){
+                    exeName = exeName.substring(0, exeName.length()-4);
+                }
+                kts.append("\toutfile = \"" + exeName + ".exe\"\n");
+                //kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
+                kts.append("\tmainClassName = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n");
+                kts.append("}\n");
+                kts.append(createCopyTask("copyExe", outputDir.getAbsolutePath(), ((ExeDeployment)deployment).outputDir(),
+                        "*.exe", "launch4j"));
+            }
 
-        /*kts.append("tasks.withType<ShadowJar> {\n" +
-            "baseName = \"uber\"\n" +
-            "}\n");*/
+            else if (deployment instanceof DockerDeployment) {
+                String escapedInputDir = StringUtils.EMPTY;
+                DockerDeployment dd = (DockerDeployment)deployment;
+                if (StringUtils.isEmpty(dd.inputDir())) {
+                    if (dockerResource != null)
+                        escapedInputDir = dockerResource.getParent().replace("\\","\\\\");
+                }
+                else {
+                   escapedInputDir = dd.inputDir().replace("\\", "\\\\");
+                }
+
+                kts.append("tasks.create(\"buildImage\", DockerBuildImage::class) {\n");
+                if (StringUtils.isNotEmpty(escapedInputDir))
+                    kts.append("\tinputDir.set(file(\"" + escapedInputDir + "\"))\n");
+                else
+                    kts.append("\tval baseImage = FromInstruction(From(\"").append(dd.baseImage()).append("\n");
+                if(dd.imageName() != null){
+                    //Note image names must be lower case
+                    kts.append("\timages.add(\"").append(dd.imageName().toLowerCase()).append("\")");
+                }
+                kts.append("}\n");
+            }
+            else if (deployment instanceof TarDeployment) {
+                String escaped = ((TarDeployment)deployment).outputDir().replace("\\","\\\\");
+                addUberJarTask(kts,  "ks", escaped);
+                List<String> fromFiles = ((TarDeployment)deployment).files();
+                if (fromFiles.size() > 0) {
+                    String rpmName = ((TarDeployment) deployment).archiveName();
+                    kts.append("distributions {\n");
+                    kts.append("\tmain {\n");
+
+                    kts.append("\t\tdistributionBaseName.set( \"" + rpmName + "\")\n");
+                    kts.append("\t\t contents {\n");
+                    for (String file : fromFiles) {
+                        String escapedFile = file.replace("\\","\\\\");
+                        kts.append("\t\t\tfrom(\"" + escapedFile + "\")\n");
+                    }
+                    kts.append("\t\t\tfrom(\"" + escaped + "\")\n");
+                    kts.append("\t\t }\n");
+                    kts.append("\t}\n");
+                    kts.append("}").append("\n\n");
+
+                    kts.append(createCopyTask("copyTar", outputDir.getAbsolutePath(), ((TarDeployment)deployment).outputDir(),
+                            "*.tar", "distributions"));
+                }
+            }
+        }
 
         System.out.println(kts.toString());
 
@@ -149,29 +270,100 @@ public class GradleBuild {
         if (!kts.exists()) {
             throw new IllegalStateException("build.gradle.kts doesn't exist");
         }
-        File gradlew = new File("target/classes/gradlew.bat");
+        File gradlew = new File(directory, "gradlew.bat");
         if (!gradlew.exists()) {
             throw new IllegalStateException("gradlew.bat doesn't exist");
         }
+
         //Execute gradlew
         ProjectConnection connection = GradleConnector.newConnector()
                 .forProjectDirectory(directory)
+                //.useGradleVersion("6.1")
                 .connect();
-
         List<String> tasks = new ArrayList<>();
         tasks.add("wrapper");
         for(Deployment d : config.deployments()){
-            String s = d.gradleTaskName();
-            if(!tasks.contains(s)){
-                tasks.add(s);
+            for (String s : d.gradleTaskNames()) {
+                if (!tasks.contains(s)) {
+                    tasks.add(s);
+                }
             }
         }
 
         try {
-            connection.newBuild().setStandardOutput(System.out).setStandardError(System.err).forTasks(tasks.toArray(new String[0])).run();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            connection.newBuild().setStandardOutput(baos).setStandardError(System.err).forTasks(tasks.toArray(new String[0])).run();
+            String output = baos.toString();
+            Pattern pattern = Pattern.compile("(Successfully built )(\\w)+");
+            Matcher matcher = pattern.matcher(output);
+            String dockerId = StringUtils.EMPTY;
+            while (matcher.find()){
+                String[] words = matcher.group(0).split(" ");
+                if (words.length >= 3) {
+                    dockerId = words[2];
+                }
+            }
+            final String effDockerId = dockerId;
+            System.out.println(output);
+            if (StringUtils.isNotEmpty(dockerId)) {
+                config.deployments().stream().forEach(
+                        d -> {
+                            if (d instanceof DockerDeployment)
+                                ((DockerDeployment) d).imageId(effDockerId);
+                        });
+            }
         } finally {
             connection.close();
         }
+    }
+
+    public static String getRpmDebArch(Target t){
+        //https://github.com/craigwblake/redline/blob/master/src/main/java/org/redline_rpm/header/Architecture.java
+        switch (t.arch()){
+            case x86:
+            case x86_avx2:
+            case x86_avx512:
+                return "Architecture.X86_64";
+            case armhf:
+                return "Architecture.ARM";
+            case arm64:
+                return "Architecture.AARCH64";
+            case ppc64le:
+                return "Architecture.PPC64";
+            default:
+                throw new RuntimeException("Unknown arch for target: " + t);
+        }
+    }
+
+    public static String getRpmDebOs(Target t){
+        //https://github.com/craigwblake/redline/blob/master/src/main/java/org/redline_rpm/header/Os.java
+        switch (t.os()){
+            case LINUX:
+                return "Os.LINUX";
+            case WINDOWS:
+                return "Os.CYGWINNT";
+            case MACOSX:
+                return "Os.MACOSX";
+            //case ANDROID:
+            default:
+                throw new RuntimeException("Unknown os for target: " + t);
+        }
+    }
+
+    private static void addUberJarTask(StringBuilder kts, String fileName, String directoryName) {
+        kts.append("tasks.withType<ShadowJar> {\n");
+        String jarName = fileName;
+        kts.append("\tbaseName = \"" + jarName + "\"\n");
+        kts.append("\tdestinationDirectory.set(file(\"" + directoryName + "\"))\n");
+        kts.append("\tmergeServiceFiles()");  //For service loader files
+        kts.append("}\n");
+        kts.append("//Add manifest - entry point\n")
+                .append("tasks.withType(Jar::class) {\n")
+                .append("    manifest {\n")
+                .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
+                .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
+                .append("    }\n")
+                .append("}\n\n");
     }
 
     private static void addClassPathTask(StringBuilder kts, ClassPathDeployment cpd){
@@ -207,6 +399,19 @@ public class GradleBuild {
             }
 
             kts.append("}");
+        }
+    }
+
+    protected static void copyResource(String resource, File to){
+        InputStream is = GradleBuild.class.getResourceAsStream(resource);
+        Preconditions.checkState(is != null, "Could not find %s resource that should be available in konduit-serving-build JAR", resource);
+
+        to.getParentFile().mkdirs();
+
+        try(InputStream bis = new BufferedInputStream(is); OutputStream os = new BufferedOutputStream(new FileOutputStream(to))){
+            IOUtils.copy(bis, os);
+        } catch (IOException e){
+            throw new RuntimeException("Error copying resource " + resource + " to " + to, e);
         }
     }
 }

@@ -62,7 +62,8 @@ konduit-serving-core-git.properties
 builds
 
 */dependency-reduced-pom.xml
+dependency-reduced-pom.xml
+*/dependency-reduced-pom.xml
 
 # python
 */__pycache__/
-

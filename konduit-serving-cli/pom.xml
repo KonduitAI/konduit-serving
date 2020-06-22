@@ -129,7 +129,7 @@
                 <configuration>
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
                     <generateGitPropertiesFilename>
-                        target/classes/META-INF/konduit-serving-cli-git.properties
+                        target/classes/META-INF/${project.artifactId}-git.properties
                     </generateGitPropertiesFilename>
                     <gitDescribe>
                         <skip>true</skip>

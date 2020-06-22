@@ -26,10 +26,13 @@ import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.dependencies.DependencyRequirement;
 import ai.konduit.serving.build.dependencies.ModuleRequirements;
+import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
+import ai.konduit.serving.build.config.Module;
 import com.beust.jcommander.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
 import java.util.*;
@@ -58,8 +61,9 @@ public class BuildCLI {
     @Parameter(names = {"-p", "--pipeline"})
     private String pipeline;
 
-    @Parameter(names = {"-o", "--os"}, required = true, validateValueWith = CLIValidators.OSValueValidator.class,
-            description = "Operating systems to build for. Valid values: {linux, windows, mac} (case insensitive)")
+    @Parameter(names = {"-o", "--os"}, validateValueWith = CLIValidators.OSValueValidator.class,
+            description = "Operating systems to build for. Valid values: {linux, windows, mac} (case insensitive).\n" +
+                    "If not set, the current system OS will be used")
     private List<String> os;
 
     @Parameter(names = {"-a", "--arch"}, validateValueWith = CLIValidators.ArchValueValidator.class,
@@ -87,6 +91,20 @@ public class BuildCLI {
             validateValueWith = CLIValidators.ServerTypeValidator.class)
     private List<String> serverTypes = Arrays.asList(HTTP, GRPC);
 
+    @Parameter(names = {"-ad", "--additionalDependencies"},
+            description = "Additional dependencies to include, in GAV(C) format: \"group_id:artifact_id:version\" / \"group_id:artifact_id:version:classifier\"",
+            validateValueWith = CLIValidators.AdditionalDependenciesValidator.class)
+    private List<String> additionalDependencies;
+
+    @Parameter(names = {"-c", "--config"},
+            description = "Configuration for the deployment types specified via -dt/--deploymentType.\n" +
+                    "For example, \"-c jar.outputdir=/some/dir jar.name=my.jar\" etc.\n" +
+                    "Configuration keys:\n" +
+                    UberJarDeployment.CLI_KEYS + "\n" +
+                    ClassPathDeployment.CLI_KEYS + "\n",
+            variableArity = true,
+            validateValueWith = CLIValidators.ConfigValidator.class)
+    private List<String> config;
 
     public static void main(String... args) throws Exception {
         new BuildCLI().exec(args);
@@ -94,6 +112,11 @@ public class BuildCLI {
 
     public void exec(String[] args) throws Exception {
         JCommander.newBuilder().addObject(this).build().parse(args);
+
+        //Infer OS if necessary
+        if(os == null || os.isEmpty())
+            inferOS();
+
 
         //------------------------------------- Build Configuration --------------------------------------
 
@@ -111,6 +134,9 @@ public class BuildCLI {
         }
         System.out.println(padRight("Server type(s):", ' ', keyWidth) + String.join(", ", serverTypes));
         System.out.println(padRight("Deployment type(s):", ' ', keyWidth) + String.join(", ", deploymentTypes));
+        if(additionalDependencies != null){
+            System.out.println(padRight("Additional dependencies:", ' ', keyWidth) + String.join(", ", additionalDependencies));
+        }
         System.out.println("\n");
 
         List<Deployment> deployments = parseDeployments();
@@ -155,7 +181,20 @@ public class BuildCLI {
                 .pipelinePath(pipeline)
                 .target(t)
                 .deployments(deployments)
-                .serving(serving);
+                .serving(serving)
+                .additionalDependencies(additionalDependencies);
+
+        if(config != null){
+            Map<String,String> props = new HashMap<>();
+            for(String s : config){
+                String[] split = s.split("=");
+                props.put(split[0], split[1]);
+            }
+            for(Deployment d : deployments){
+                d.fromProperties(props);
+            }
+        }
+
 
         int width2 = 36;
         if(pipeline != null){
@@ -368,4 +407,15 @@ public class BuildCLI {
         return out;
     }
 
+    protected void inferOS(){
+        if(SystemUtils.IS_OS_LINUX) {
+            os = Collections.singletonList(OS.LINUX.name());
+        } else if(SystemUtils.IS_OS_WINDOWS){
+            os = Collections.singletonList(OS.WINDOWS.name());
+        } else  if(SystemUtils.IS_OS_MAC){
+            os = Collections.singletonList(OS.MACOSX.name());
+        } else {
+            throw new IllegalStateException("No OS was provided and operating system could not be inferred");
+        }
+    }
 }

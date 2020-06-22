@@ -59,6 +59,7 @@ public interface Data {
     String RESERVED_KEY_BB_W = "@w";
     String RESERVED_KEY_POINT = "@Point";
     String RESERVED_KEY_POINT_COORDS = "@Coords";
+    String RESERVED_KEY_ASYNC_TRIGGER = "@AsyncTrigger";
 
 
 
@@ -69,7 +70,7 @@ public interface Data {
                 RESERVED_KEY_NDARRAY_DATA_ARRAY, RESERVED_KEY_METADATA,
                 RESERVED_KEY_BB_X1, RESERVED_KEY_BB_X2, RESERVED_KEY_BB_Y1, RESERVED_KEY_BB_Y2,
                 RESERVED_KEY_BB_CX, RESERVED_KEY_BB_CY, RESERVED_KEY_BB_H, RESERVED_KEY_BB_W,
-                RESERVED_KEY_POINT, RESERVED_KEY_POINT_COORDS);
+                RESERVED_KEY_POINT, RESERVED_KEY_POINT_COORDS, RESERVED_KEY_ASYNC_TRIGGER);
     }
 
     int size();
