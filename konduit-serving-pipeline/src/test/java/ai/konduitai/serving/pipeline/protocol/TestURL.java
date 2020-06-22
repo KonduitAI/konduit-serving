@@ -1,5 +1,6 @@
 package ai.konduitai.serving.pipeline.protocol;
 
+import ai.konduit.serving.pipeline.api.protocol.FtpClient;
 import ai.konduit.serving.pipeline.api.protocol.RemoteUtils;
 import ai.konduit.serving.pipeline.api.protocol.S3Handler;
 import ai.konduitai.serving.common.test.TestServer;
@@ -7,17 +8,21 @@ import lombok.val;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.mockftpserver.fake.FakeFtpServer;
 import org.mockftpserver.fake.UserAccount;
+import org.mockftpserver.fake.filesystem.DirectoryEntry;
+import org.mockftpserver.fake.filesystem.FileEntry;
+import org.mockftpserver.fake.filesystem.WindowsFakeFileSystem;
+import oshi.software.os.FileSystem;
 
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 public class TestURL {
 
@@ -59,22 +64,33 @@ public class TestURL {
         assertTrue(data.contains("pipelineSteps"));
     }
 
-    @Ignore
+    @Ignore("Windows bound manual test")
     @Test
     public void testFTP() throws IOException, InterruptedException {
         FakeFtpServer fakeFtpServer = new FakeFtpServer();
+        String homeDir = testDir.newFolder().getAbsolutePath();
         fakeFtpServer.addUserAccount(new UserAccount("user", "password",
-                                    testDir.newFolder().getAbsolutePath()));
+                                    homeDir));
+        val fileSystem = new WindowsFakeFileSystem();
+        fileSystem.add(new DirectoryEntry(homeDir));
+        fileSystem.add(new FileEntry(homeDir + File.separator + "config.json", "{\"pipelineSteps\": []}"));
+        fakeFtpServer.setFileSystem(fileSystem);
+
         fakeFtpServer.start();
+        System.out.println("FTP started on : " + fakeFtpServer.getServerControlPort());
 
-        FTPClient ftp = new FTPClient();
-        ftp.connect("localhost");
-        ftp.login("user", "password");
-        FTPFile[] files = ftp.listFiles(".");
-
-        String url = FTP + "user:password@" + HOST + ":" + 21 + "/src/test/resources/config/config.json";
-        String data = RemoteUtils.configFromHttp(url);
-        assertTrue(data.contains("pipelineSteps"));
+        FtpClient ftpClient = new FtpClient();
+        ftpClient.connect("localhost");
+        if (ftpClient.login("user", "password")) {
+            String url = FTP + "user:password@" + HOST + ":" + 21 + "/config.json";
+            String data = RemoteUtils.configFromHttp(url);
+            assertTrue(data.contains("pipelineSteps"));
+            fakeFtpServer.stop();
+        }
+        else {
+            fakeFtpServer.stop();
+            fail();
+        }
     }
 
     @Ignore

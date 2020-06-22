@@ -2,12 +2,12 @@ package ai.konduit.serving.pipeline.api.protocol;
 
 public class GoogleCloudClient implements NetClient {
     @Override
-    public void connect() {
-        
+    public void connect(String host) {
+
     }
 
     @Override
-    public boolean login() {
+    public boolean login(String user, String password) {
         return false;
     }
 }

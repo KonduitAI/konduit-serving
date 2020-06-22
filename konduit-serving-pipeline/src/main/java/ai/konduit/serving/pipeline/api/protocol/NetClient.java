@@ -1,7 +1,9 @@
 package ai.konduit.serving.pipeline.api.protocol;
 
-public interface NetClient {
-    void connect();
+import java.io.IOException;
 
-    boolean login();
+public interface NetClient {
+    void connect(String host) throws IOException;
+
+    boolean login(String user, String password) throws IOException;
 }
