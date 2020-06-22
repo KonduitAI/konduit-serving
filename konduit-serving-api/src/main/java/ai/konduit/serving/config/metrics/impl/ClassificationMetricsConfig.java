@@ -4,6 +4,7 @@ import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.util.ObjectMappers;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +19,7 @@ import java.util.Map;
  * @author Adam Gibson
  */
 @Data
-@Builder
+@Accessors(fluent=true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClassificationMetricsConfig implements MetricsConfig {

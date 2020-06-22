@@ -82,27 +82,26 @@ public class TestTensorFlowStep {
         GraphStep input = b.input();
 
         //Capture frame from webcam
-        GraphStep camera = input.then("camera", CameraFrameCaptureStep.builder()
+        GraphStep camera = input.then("camera", new CameraFrameCaptureStep()
                 .camera(0)
                 .outputKey("image")
-                .build());
+        );
 
         //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
-        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
                 .height(256)
                 .width(256)
                 .channelLayout(NDChannelLayout.RGB)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
                 .dataType(NDArrayType.UINT8)
-                .normalization(null)
-                .build();
+                .normalization(null);
 
-        GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
+        GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Arrays.asList("image"))
                 .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
-                .build());
+        );
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", builder()
@@ -112,27 +111,26 @@ public class TestTensorFlowStep {
                 .build());
 
         //Post process SSD outputs to BoundingBox objects
-        GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
-                .outputName("img_bbox")
-                .build());
+        GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
+                .outputName("img_bbox"));
 
         //Merge camera image with bounding boxes
         GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
 
         //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", DrawBoundingBoxStep.builder()
+        GraphStep drawer = merged.then("drawer", new DrawBoundingBoxStep()
                 .imageName("image")
                 .bboxName("img_bbox")
                 .lineThickness(2)
                 .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
                 .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
-                .build());
+        );
 
         /*
         //Crop out the detected face region instead, for visualization
         //This works, but is a little buggy ATM as there's obviously no image to draw when there's no face, and it
         // can't yet draw multiple images simultaneously
-        GraphStep drawer = merged.then("drawer", ExtractBoundingBoxStep.builder()
+        GraphStep drawer = merged.then("drawer", ExtractBoundingBoxStep()
                 .imageName("image")
                 .bboxName("img_bbox")
                 .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
@@ -140,10 +138,10 @@ public class TestTensorFlowStep {
          */
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
+        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
                 .displayName("Face detection")
                 .imageName("image")
-                .build());
+        );
 
 
         GraphPipeline p = b.build(show);
@@ -173,30 +171,29 @@ public class TestTensorFlowStep {
             log.info("Download complete");
         }
 
-        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
                 .height(256)
                 .width(256)
                 .channelLayout(NDChannelLayout.RGB)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
                 .dataType(NDArrayType.UINT8)
-                .normalization(null)
-                .build();
+                .normalization(null);
 
         Pipeline p = SequencePipeline.builder()
-                .add(ImageToNDArrayStep.builder()
+                .add(new ImageToNDArrayStep()
                         .config(c)
                         .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
-                        .build())
+                )
                 .add(builder()
                         .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
                         .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
                         .modelUri(f.toURI().toString())      //Face detection model
                         .build())
-                .add(SSDToBoundingBoxStep.builder()
+                .add(new SSDToBoundingBoxStep()
                         .keepOtherValues(false)
                         .outputName("bbox")
-                        .build())
+                )
                 .build();
 
         Image img = Image.create(Resources.asFile("data/mona_lisa.png"));
@@ -238,20 +235,19 @@ public class TestTensorFlowStep {
         }
 
 
-        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
                 .height(128)
                 .width(128)
                 .channelLayout(NDChannelLayout.RGB)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
                 .dataType(NDArrayType.UINT8)
-                .normalization(null)
-                .build();
+                .normalization(null);
 
         Pipeline p = SequencePipeline.builder()
-                .add(ImageToNDArrayStep.builder()
+                .add(new ImageToNDArrayStep()
                         .config(c)
-                        .build())
+                )
                 .add(builder()
                         .modelUri(f.toURI().toString())
                         .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
@@ -303,27 +299,26 @@ public class TestTensorFlowStep {
         GraphStep input = b.input();
 
         //Capture frame from webcam
-        GraphStep camera = input.then("camera", CameraFrameCaptureStep.builder()
+        GraphStep camera = input.then("camera", new CameraFrameCaptureStep()
                 .camera(0)
                 .outputKey("image")
-                .build());
+        );
 
         //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
-        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
                 .height(300)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
                 .width(300)   // size origin
                 .channelLayout(NDChannelLayout.RGB)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
                 .dataType(NDArrayType.UINT8)
-                .normalization(null)
-                .build();
+                .normalization(null);
 
-        GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
+        GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Arrays.asList("image"))
                 .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
-                .build());
+        );
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", builder()
@@ -333,28 +328,28 @@ public class TestTensorFlowStep {
                 .build());
 
         //Post process SSD outputs to BoundingBox objects
-        GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
+        GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
                 .outputName("img_bbox")
-                .build());
+        );
 
         //Merge camera image with bounding boxes
         GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
 
         //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", DrawBoundingBoxStep.builder()
+        GraphStep drawer = merged.then("drawer", new DrawBoundingBoxStep()
                 .imageName("image")
                 .bboxName("img_bbox")
                 .lineThickness(2)
                 .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
                 .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
-                .build());
+        );
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
+        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
                 .displayName("person detection")
                 .imageName("image")
-                .build());
+        );
 
 
         GraphPipeline p = b.build(show);
@@ -398,27 +393,26 @@ public class TestTensorFlowStep {
         GraphStep input = b.input();
 
         //Capture frame from video
-        GraphStep camera = input.then("video", VideoFrameCaptureStep.builder()
+        GraphStep camera = input.then("video", new VideoFrameCaptureStep()
                 .filePath(v.getAbsolutePath())
                 .outputKey("image")
-                .build());
+        );
 
         //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
-        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
                 .height(300)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
                 .width(300)   // size origin
                 .channelLayout(NDChannelLayout.RGB)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
                 .dataType(NDArrayType.UINT8)
-                .normalization(null)
-                .build();
+                .normalization(null);
 
-        GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
+        GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Arrays.asList("image"))
                 .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
-                .build());
+        );
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", builder()
@@ -428,28 +422,28 @@ public class TestTensorFlowStep {
                 .build());
 
         //Post process SSD outputs to BoundingBox objects
-        GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
+        GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
                 .outputName("img_bbox")
-                .build());
+        );
 
         //Merge camera image with bounding boxes
         GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
 
         //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", DrawBoundingBoxStep.builder()
+        GraphStep drawer = merged.then("drawer", new DrawBoundingBoxStep()
                 .imageName("image")
                 .bboxName("img_bbox")
                 .lineThickness(2)
                 .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
                 .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
-                .build());
+        );
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
+        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
                 .displayName("person detection")
                 .imageName("image")
-                .build());
+        );
 
 
         GraphPipeline p = b.build(show);
@@ -486,27 +480,26 @@ public class TestTensorFlowStep {
         GraphStep input = b.input();
 
         //Capture frame from webcam
-        GraphStep camera = input.then("camera", CameraFrameCaptureStep.builder()
+        GraphStep camera = input.then("camera", new CameraFrameCaptureStep()
                 .camera(0)
                 .outputKey("image")
-                .build());
+        );
 
         //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
-        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
                 .height(300)
                 .width(300)
                 .channelLayout(NDChannelLayout.RGB)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
                 .dataType(NDArrayType.UINT8)
-                .normalization(null)
-                .build();
+                .normalization(null);
 
-        GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
+        GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Arrays.asList("image"))
                 .outputNames(Arrays.asList("ImageTensor")) //TODO varargs builder method
-                .build());
+                );
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", builder()
@@ -520,21 +513,21 @@ public class TestTensorFlowStep {
         GraphStep merged = camera.mergeWith("img_segmentation", tf);
 
         //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", DrawSegmentationStep.builder()
+        GraphStep drawer = merged.then("drawer", new DrawSegmentationStep()
                 .image("image")
                 .segmentArray("SemanticPredictions")
                 .opacity(0.5)
                 .outputName("out")
                 .imageToNDArrayConfig(c)
                 .backgroundClass(0)
-                .build());
+        );
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
+        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
                 .displayName("image segmentation")
                 .imageName("out")
-                .build());
+        );
 
 
         GraphPipeline p = b.build(show);
@@ -568,27 +561,26 @@ public class TestTensorFlowStep {
         GraphBuilder b = new GraphBuilder();
         GraphStep input = b.input();
         //Capture frame from webcam
-        GraphStep camera = input.then("camera", CameraFrameCaptureStep.builder()
+        GraphStep camera = input.then("camera", new CameraFrameCaptureStep()
                 .camera(0)
                 .outputKey("image")
-                .build());
+        );
 
         //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
-        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
                 .height(300)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
                 .width(300)   // size origin
                 .channelLayout(NDChannelLayout.RGB)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
                 .dataType(NDArrayType.UINT8)
-                .normalization(null)
-                .build();
+                .normalization(null);
 
-        GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
+        GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Arrays.asList("image"))
                 .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
-                .build());
+                );
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", builder()
@@ -600,39 +592,39 @@ public class TestTensorFlowStep {
         //Post process SSD outputs to BoundingBox objects
         String[] COCO_LABELS = new String[]{"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "street sign", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "hat", "backpack", "umbrella", "shoe", "eye glasses", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "plate", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "mirror", "dining table", "window", "desk", "toilet", "door", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "blender", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush", "hair brush"};
 
-        GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
+        GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
                 .outputName("img_bbox")
                 .classLabels(SSDToBoundingBoxStep.COCO_LABELS)
-                .build());
+        );
 
         String[] classesToKeep = new String[]{"person", "car"};
 
         //Post process SSD outputs to BoundingBox objects
-        GraphStep bboxFilter = ssdProc.then("filtered_bbox", BoundingBoxFilterStep.builder()
+        GraphStep bboxFilter = ssdProc.then("filtered_bbox", new BoundingBoxFilterStep()
                 .classesToKeep(classesToKeep)
                 .inputName("img_bbox")
                 .outputName("img_filtered_bbox")
-                .build());
+        );
 
 
         //Merge camera image with bounding boxes
         GraphStep merged = camera.mergeWith("img_filtered_bbox", bboxFilter);
 
         //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", DrawBoundingBoxStep.builder()
+        GraphStep drawer = merged.then("drawer", new DrawBoundingBoxStep()
                 .imageName("image")
                 .bboxName("img_filtered_bbox")
                 .lineThickness(2)
                 .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
                 .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
-                .build());
+        );
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
+        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
                 .displayName("bbox filter")
                 .imageName("image")
-                .build());
+        );
 
 
         GraphPipeline p = b.build(show);
@@ -681,45 +673,45 @@ public class TestTensorFlowStep {
         GraphStep input = b.input();
 
         //Capture frame from webcam
-        GraphStep camera = input.then("camera", CameraFrameCaptureStep.builder()
+        GraphStep camera = input.then("camera", new CameraFrameCaptureStep()
 //                    .height(720)
 //                    .width(1280)
-                .height(360)
-                .width(640)
-                .camera(0)
-                .outputKey("image")
-                .build());
+                        .height(360)
+                        .width(640)
+                        .camera(0)
+                        .outputKey("image")
+        );
 
         //Detect faces using mobilenet model: image -> NDArray -> TF -> SSD post processor
-        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
                 .height(128)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
                 .width(128)   // size origin
                 .channelLayout(NDChannelLayout.RGB)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
                 .dataType(NDArrayType.UINT8)
-                .normalization(null)
-                .build();
+                .normalization(null);
 
-        GraphStep i2n = camera.then("image2NDArrayFaceDetectorInference", ImageToNDArrayStep.builder()
+
+        GraphStep i2n = camera.then("image2NDArrayFaceDetectorInference", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Collections.singletonList("image"))
                 .outputNames(Collections.singletonList("image_tensor")) //TODO varargs builder method
-                .build());
+        );
 
         GraphStep tf = i2n.then("tf", builder()
                 .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
                 .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
-                .modelUri(face_detector_graph.toURI().toString())
-                .build());
+                .modelUri(face_detector_graph.toURI().toString()).build()
+        );
 
-        GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
+        GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
                 .outputName("img_bbox")
                 .keepOtherValues(true)
                 .threshold(0.5)
                 .scale(1.15)
                 .aspectRatio(1.0)
-                .build());
+        );
 
 
         //Extract the face bounding boxes as images
@@ -740,19 +732,17 @@ public class TestTensorFlowStep {
         GraphStep withBoxes = switchOut[1];
 
 
-
-        GraphStep extractBBox = withBoxes.then("extracted_bbox", ExtractBoundingBoxStep.builder()
+        GraphStep extractBBox = withBoxes.then("extracted_bbox", new ExtractBoundingBoxStep()
                 .imageName("image")
                 .bboxName("img_bbox")
                 .imageToNDArrayConfig(c)
                 .outputName("face_image_bbox")
                 .keepOtherFields(false)
-                .build());
-
+        );
 
 
         //Convert the face bounding boxes to NDArrays
-        ImageToNDArrayConfig faceImageConfig = ImageToNDArrayConfig.builder()
+        ImageToNDArrayConfig faceImageConfig = new ImageToNDArrayConfig()
                 .height(128)
                 .width(128)
                 .channelLayout(NDChannelLayout.RGB)
@@ -761,14 +751,13 @@ public class TestTensorFlowStep {
                 .dataType(NDArrayType.UINT8)
                 //Model expects "subtract mean" normalization
                 .normalization(new ImageNormalization(ImageNormalization.Type.SUBTRACT_MEAN).meanRgb(new double[]{104.0, 177.0, 123.0}))
-                .listHandling(ImageToNDArrayConfig.ListHandling.FIRST)  //These models only support minibatch 1
-                .build();
+                .listHandling(ImageToNDArrayConfig.ListHandling.FIRST);  //These models only support minibatch 1
 
-        GraphStep face2n = extractBBox.then("FaceBBoxtoNDArray", ImageToNDArrayStep.builder()
+        GraphStep face2n = extractBBox.then("FaceBBoxtoNDArray", new ImageToNDArrayStep()
                 .config(faceImageConfig)
                 .keys(Arrays.asList("face_image_bbox"))
                 .outputNames(Arrays.asList("input_image_tensor"))   //Name to match face keypoint
-                .build());
+        );
 
 
         //Detect keypoints on the face boxes
@@ -782,20 +771,20 @@ public class TestTensorFlowStep {
         GraphStep merged = camera.mergeWith("facial-keypoints", ssdProc, tf_keydetector);
 
         // Draw face keypoints on the image
-        GraphStep drawer = merged.then("keypoints-drawer", DrawFaceKeyPointsStep.builder()
+        GraphStep drawer = merged.then("keypoints-drawer", new DrawFaceKeyPointsStep()
                 .image("image")
                 .imageToNDArrayConfig(c)
                 .landmarkArray("logits/BiasAdd")
-                .build());
+        );
 
 
         //Show image in Java frame
 
         GraphStep any = b.any("any", noBoxes, drawer);
-        GraphStep show = /*drawer.*/any.then("show", ShowImagePipelineStep.builder()
+        GraphStep show = /*drawer.*/any.then("show", new ShowImagePipelineStep()
                 .displayName("Face keypoints")
                 .imageName("image")
-                .build());
+        );
 
 
         GraphPipeline p = b.build(show);

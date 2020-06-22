@@ -30,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.records.Record;
 import org.datavec.api.writable.Writable;
@@ -53,7 +54,7 @@ import java.util.*;
  * @author Adam Gibson
  */
 @Slf4j
-@Builder
+@Accessors(fluent=true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class BatchInputParser {
@@ -98,9 +99,9 @@ public class BatchInputParser {
 
             List<BatchPartInfo> batch = partInfo.get(inputParts.get(i));
             for (int j = 0; j < batch.size(); j++) {
-                Pair<String, Integer> partNameAndIndex = partNameAndIndex(batch.get(j).getPartName());
+                Pair<String, Integer> partNameAndIndex = partNameAndIndex(batch.get(j).partName());
                 Buffer buffer = loadBuffer(routingContext,
-                        batch.get(j).getFileUploadPath());
+                        batch.get(j).fileUploadPath());
                 Object convert = convert(buffer, partNameAndIndex.getFirst(), null, routingContext);
                 Preconditions.checkNotNull(convert, "Converted writable was null!");
                 //set the name

@@ -27,6 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.image.transform.ImageTransformProcess;
@@ -43,7 +44,7 @@ import java.util.List;
  * @author Adam Gibson
  */
 @Data
-@Builder
+@Accessors(fluent=true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConverterArgs implements Serializable {

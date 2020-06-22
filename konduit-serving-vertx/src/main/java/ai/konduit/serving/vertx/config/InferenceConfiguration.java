@@ -26,12 +26,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Data
-@Builder
+@Accessors(fluent=true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "The main object that's used to configure the whole konduit serving pipeline and the server itself.")

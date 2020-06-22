@@ -39,7 +39,6 @@ import java.util.Map;
  * </ul>
  *
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor

@@ -21,7 +21,6 @@ import lombok.experimental.Accessors;
 import java.io.File;
 import java.nio.file.Path;
 
-@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

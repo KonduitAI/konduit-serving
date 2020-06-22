@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -39,10 +40,10 @@ import lombok.experimental.Accessors;
  *
  * @author Alex Black
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("DRAW_GRID")
 @Schema(description = "Draw a grid on the specified image, based on the x/y coordinates of the corners, and the number of segments within " +
         "the grid in both directions.<br>" +
@@ -88,10 +89,6 @@ public class DrawGridStep implements PipelineStep {
             "If null then the same value as the borderThickness is used")
     private Integer gridThickness;
 
-    public DrawGridStep() {
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null or 0 etc
-        this.borderThickness = 1;
-    }
+
 
 }

@@ -25,6 +25,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -58,9 +59,9 @@ import java.util.List;
  *
  * @author Alex Black
  */
-@Builder
 @Data
 @Accessors(fluent = true)
+@NoArgsConstructor
 @JsonName("IMAGE_TO_NDARRAY")
 @Schema(description = "A PipelineStep for converting images to n-dimensional arrays. " +
         "The exact way that images are converted is highly configurable (formats, channels, output sizes, " +
@@ -108,10 +109,5 @@ public class ImageToNDArrayStep implements PipelineStep {
         this.metadataKey = metadataKey;
     }
 
-    public ImageToNDArrayStep(){
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null or 0 etc
-        keepOtherValues = true;
-        metadataKey = DEFAULT_METADATA_KEY;
-    }
+
 }

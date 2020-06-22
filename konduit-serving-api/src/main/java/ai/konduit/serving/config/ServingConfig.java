@@ -30,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
@@ -41,7 +42,7 @@ import java.util.List;
  * Configuration of all properties regarding serving a pipeline.
  */
 @Data
-@Builder
+@Accessors(fluent=true)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({

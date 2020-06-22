@@ -27,6 +27,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -73,8 +74,8 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(fluent = true)
-@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Schema(description = "Configuration for converting an image into an n-dimensional array.")
 public class ImageToNDArrayConfig {
     /**
@@ -133,16 +134,7 @@ public class ImageToNDArrayConfig {
             defaultValue = "NONE")
     private ListHandling listHandling = ListHandling.NONE;
 
-    public ImageToNDArrayConfig() {
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null
-        this.dataType = NDArrayType.FLOAT;
-        this.includeMinibatchDim = true;
-        this.aspectRatioHandling = AspectRatioHandling.CENTER_CROP;
-        this.format = NDFormat.CHANNELS_FIRST;
-        this.channelLayout = NDChannelLayout.RGB;
-        this.normalization = new ImageNormalization(ImageNormalization.Type.SCALE);
-    }
+
 
 
 }

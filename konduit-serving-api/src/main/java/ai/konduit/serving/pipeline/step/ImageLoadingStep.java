@@ -28,6 +28,7 @@ import ai.konduit.serving.pipeline.BasePipelineStep;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.*;
+import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import org.datavec.image.transform.ImageTransformProcess;
 
@@ -35,6 +36,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 @Data
+@Accessors(fluent=true)
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @AllArgsConstructor
@@ -62,8 +64,8 @@ public class ImageLoadingStep extends BasePipelineStep<ImageLoadingStep> impleme
     }
 
     public boolean initialImageLayoutMatchesFinal() {
-        if (getImageProcessingInitialLayout() != null && getImageProcessingRequiredLayout() != null)
-            return getImageProcessingInitialLayout().equals(getImageProcessingRequiredLayout());
+        if (imageProcessingInitialLayout() != null && imageProcessingRequiredLayout() != null)
+            return imageProcessingInitialLayout().equals(imageProcessingRequiredLayout());
         return true;
     }
 

@@ -30,7 +30,7 @@ import org.slf4j.event.Level;
  * @author Alex Black
  */
 @Data
-@Builder
+@Accessors(fluent=true)
 @JsonName("LOGGING")
 @Schema(description = "A pipeline step that simply logs the input Data keys (and optionally values) and returns " +
         "the input data unchanged.")

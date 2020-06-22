@@ -28,7 +28,6 @@ import java.util.List;
 @Data
 @Accessors(fluent = true)
 @JsonName("DEEPLEARNING4J")
-@Builder
 @Schema(description = "A pipeline step that configures a DL4J model that is to be executed.")
 public class DL4JModelPipelineStep implements PipelineStep {
 

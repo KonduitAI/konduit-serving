@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 /**
@@ -31,8 +32,8 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
  * Note that at present this makes it only practically useful for testing/demo purposes.
  * Other options for loading the video will be specified at a later date: https://github.com/KonduitAI/konduit-serving/issues/350
  */
-@Builder
 @Data
+@Accessors(fluent=true)
 @JsonName("VIDEO_CAPTURE")
 @Schema(description = "A pipeline step that configures how to extracts a single frame from a video each time inference is called." +
         " The video path is hardcoded, mainly used for testing/demo purposes given this")

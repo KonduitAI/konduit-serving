@@ -19,8 +19,11 @@ import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
@@ -34,6 +37,7 @@ import java.util.UUID;
  * @see GraphPipeline
  */
 @Data
+@Accessors(fluent = true)
 @Schema(description = "A type of pipeline that defines the execution flow in a series of configurable steps.")
 public class SequencePipeline implements Pipeline {
 

@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -41,10 +42,10 @@ import lombok.experimental.Accessors;
  * </ul>
  *
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("SSD_TO_BBOX")
 @Schema(description = "A pipeline step that configures extraction of bounding boxes from an SSD model output.")
 public class SSDToBoundingBoxStep implements PipelineStep {
@@ -78,13 +79,5 @@ public class SSDToBoundingBoxStep implements PipelineStep {
     protected String outputName = DEFAULT_OUTPUT_NAME;
 
 
-    public SSDToBoundingBoxStep(){
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null
-        this.keepOtherValues = true;
-        this.outputName = DEFAULT_OUTPUT_NAME;
-        this.threshold = 0.5;
-        this.classLabels = null;
-    }
 
 }

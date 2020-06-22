@@ -28,6 +28,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.deeplearning4j.parallelism.ParallelInference;
 import org.deeplearning4j.parallelism.inference.InferenceMode;
 
@@ -39,7 +40,7 @@ import java.io.Serializable;
  * @author Adam Gibson
  */
 @Data
-@Builder
+@Accessors(fluent=true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class ParallelInferenceConfig implements Serializable, TextConfig {
@@ -66,12 +67,12 @@ public class ParallelInferenceConfig implements Serializable, TextConfig {
      *
      * @return default configuration
      */
-    public static ParallelInferenceConfig defaultConfig() {
-        return ParallelInferenceConfig.builder()
+    public ParallelInferenceConfig defaultConfig() {
+        return new ParallelInferenceConfig()
                 .inferenceMode(ParallelInference.DEFAULT_INFERENCE_MODE)
                 .queueLimit(ParallelInference.DEFAULT_QUEUE_LIMIT)
                 .batchLimit(ParallelInference.DEFAULT_BATCH_LIMIT)
-                .workers(NUM_WORKERS).build();
+                .workers(NUM_WORKERS);
 
     }
 

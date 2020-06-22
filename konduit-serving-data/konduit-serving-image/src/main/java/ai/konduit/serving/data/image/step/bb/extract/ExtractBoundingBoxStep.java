@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -41,10 +42,10 @@ import lombok.experimental.Accessors;
  * Note: If resizeH and resizeW are specified, the cropped images will be resized to the specified size
  *
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("EXTRACT_BOUNDING_BOX")
 @Schema(description = "A pipeline step that extracts sub-images from an input image, based on the locations of input bounding boxes. " +
         "Returns List<Image> for the cropped image regions")
@@ -80,9 +81,5 @@ public class ExtractBoundingBoxStep implements PipelineStep {
             "produced the bounding boxes.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
 
-    public ExtractBoundingBoxStep() {
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the boolean default would be false
-        keepOtherFields = true;
-    }
+
 }
