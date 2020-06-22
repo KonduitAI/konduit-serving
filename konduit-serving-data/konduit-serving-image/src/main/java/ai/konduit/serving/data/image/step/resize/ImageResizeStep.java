@@ -51,7 +51,7 @@ import java.util.List;
  */
 @Data
 @Accessors(fluent = true)
-@JsonName("RESIZE")
+@JsonName("IMAGE_RESIZE")
 @NoArgsConstructor
 @Schema(description = "A pipeline step that resizes an image, scaling up or down as needed to comply with the " +
         "specified output height/width. Usually, both <height> and <width> are specified. However, if only one is specified, " +

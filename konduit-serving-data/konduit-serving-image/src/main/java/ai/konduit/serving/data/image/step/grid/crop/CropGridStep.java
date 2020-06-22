@@ -33,9 +33,9 @@ import lombok.experimental.Accessors;
  * The 4 corner X coordinates come from {@code Data.getListDouble(xName)} and the 4 corner Y coordinates come from
  * {@code Data.getListDouble(yName)}.<br>
  * Note that the output depends on the configuration.
- * Always returned: {@code List<Image>} - the cropped images from the grid<br>
- * Returned if {@code outputCoordinates=true}: two {@code List<Long>}s - the box coordinates (0,0), ..., (grid1-1, grid2-1)<br>
- * Returned if {@code boundingBoxName != null}: one {@code List<BoundingBox>} - the crop bounding boxes, (0,0), (0,1), ..., (grid1-1, grid2-1)<br>
+ * Always returned: {@code List<Image>} - the cropped images from the grid, in order: (row,col) = (0,0), (0, 1), ..., (0, C-1), ..., (R-1, C-1).<br>
+ * Returned if {@code outputCoordinates=true}: two {@code List<Long>}s - the box coordinates (0,0), ..., (gridX-1, gridY-1)<br>
+ * Returned if {@code boundingBoxName != null}: one {@code List<BoundingBox>} - the crop bounding boxes, (0,0), (0,1), ..., (gridX-1, gridY-1)<br>
  * See also {@link CropFixedGridStep}<br>
  * If {@code aspectRatio} is set, the smaller dimension will be increased to keep the aspect ratio correct. Note this may crop
  * outside the image border
@@ -53,7 +53,7 @@ import lombok.experimental.Accessors;
         "topLeft, topRight, bottomLeft, bottomRight<br>" +
         "gridX is the number of grid segments between (topLeft and topRight) and (bottomLeft and bottomRight).<br>" +
         "gridY is the number of grid segments between (topLeft and bottomLeft) and (topRight and bottomRight)<br>" +
-        "The output contains a List<Image> of cropped images from the grid.")
+        "The output contains a List<Image> of cropped images from the grid, in order: (row,col) = (0,0), (0, 1), ..., (0, C-1), ..., (R-1, C-1).")
 public class CropGridStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "crops";
 
