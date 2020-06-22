@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestClassifierOutputStep {
@@ -106,10 +107,15 @@ public class TestClassifierOutputStep {
                                         assertTrue(out.has("allProbabilities") && (out.type("allProbabilities") == ValueType.LIST || out.type("allProbabilities") == ValueType.NDARRAY));
                                     }
 
+                                    String json = p.toJson();
+                                    String yaml = p.toYaml();
 
+                                    Pipeline pj = Pipeline.fromJson(json);
+                                    Pipeline py = Pipeline.fromYaml(yaml);
+
+                                    assertEquals(p, pj);
+                                    assertEquals(p, py);
                                 }
-
-
                             }
                         }
                     }
@@ -193,10 +199,16 @@ public class TestClassifierOutputStep {
                                         assertTrue(out.has("allProbabilities") && (out.type("allProbabilities") == ValueType.LIST || out.type("allProbabilities") == ValueType.NDARRAY));
                                     }
 
+                                    String json = p.toJson();
+                                    String yaml = p.toYaml();
+
+                                    Pipeline pj = Pipeline.fromJson(json);
+                                    Pipeline py = Pipeline.fromYaml(yaml);
+
+                                    assertEquals(p, pj);
+                                    assertEquals(p, py);
 
                                 }
-
-
                             }
                         }
                     }

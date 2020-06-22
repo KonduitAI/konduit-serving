@@ -23,6 +23,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -30,13 +31,22 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 
-
+/**
+ * ClassifierOutputStep takes as input a numerical 2d NDArray (i.e., float/double etc type) with shape [minibatch, numClasses]"
+ * which represents the probability distribution (softmax) predictions for a standard classifier and returns based on this array:<br>
+ * - The predicted class label - as a String<br>
+ * - The predicted class index - as an integer (long)<br>
+ * - The predicted class probability - as a Double
+ */
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("CLASSIFIER_OUTPUT")
-@Schema(description = "ClassifierOutputStep takes as input a numerical 2d NDArray (i.e., float/double etc type) with shape [minibatch, numClasses] which represents the softmax predictions for a standard classifier and returns based on this array - The predicted class label - as a String\n" +
-        "- The predicted class index - as an integer (long)\n" +
+@Schema(description = "ClassifierOutputStep takes as input a numerical 2d NDArray (i.e., float/double etc type) with shape [minibatch, numClasses]" +
+        " which represents the softmax predictions for a standard classifier and returns based on this array:<br>" +
+        " - The predicted class label - as a String<br>" +
+        "- The predicted class index - as an integer (long)<br>" +
         "- The predicted class probability - as a Double")
 public class ClassifierOutputStep implements PipelineStep {
     public static final String DEFAULT_PROB_NAME = "prob";
@@ -80,9 +90,4 @@ public class ClassifierOutputStep implements PipelineStep {
 
     @Schema(description = "If true, also returns a List<List<Double>> of all probabilities (basically, converd NDArray to list. False by default.")
     boolean allProbabilities = false;
-
-
-    public ClassifierOutputStep() {
-
-    }
 }
