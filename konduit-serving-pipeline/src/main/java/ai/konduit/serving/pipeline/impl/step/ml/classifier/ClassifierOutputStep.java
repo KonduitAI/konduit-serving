@@ -23,6 +23,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -34,6 +35,7 @@ import java.util.List;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("CLASSIFIER_OUTPUT")
 @Schema(description = "ClassifierOutputStep takes as input a numerical 2d NDArray (i.e., float/double etc type) with shape [minibatch, numClasses] which represents the softmax predictions for a standard classifier and returns based on this array - The predicted class label - as a String\n" +
         "- The predicted class index - as an integer (long)\n" +
@@ -45,44 +47,41 @@ public class ClassifierOutputStep implements PipelineStep {
 
 
     @Schema(description = "inputName - optional. If set: this represents the NDArray. If not set: use DataUtils.inferField to find an NDArray field")
-    String inputName;
+    private String inputName;
 
 
 
-    @Schema(description = "returnLabel, default is true; if false, don't return label")
-    boolean returnLabel = true;
+    @Schema(description = "returnLabel, default is true; if false, don't return label", defaultValue = "true")
+    private boolean returnLabel;
 
 
-    @Schema(description = "returnIndex, default is true")
-    boolean returnIndex = true;
+    @Schema(description = "returnIndex, default is true", defaultValue = "true")
+    private boolean returnIndex;
 
 
-    @Schema(description = " returnProb, default is true")
-    boolean returnProb = true;
+    @Schema(description = " returnProb, default is true", defaultValue = "true")
+    private boolean returnProb;
 
 
-    @Schema(description = "output names for the labels")
-    String labelName = DEFAULT_LABEL_NAME;
+    @Schema(description = "output names for the labels", defaultValue = DEFAULT_LABEL_NAME)
+    private String labelName;
 
 
-    @Schema(description = "output names for the index")
-    String indexName = DEFAULT_INDEX_NAME;
+    @Schema(description = "output names for the index", defaultValue = DEFAULT_INDEX_NAME)
+    private String indexName;
 
 
-    @Schema(description = "output names for the labels propabilities")
-    String probName = DEFAULT_PROB_NAME;
+    @Schema(description = "output names for the labels propabilities", defaultValue = DEFAULT_PROB_NAME)
+    private String probName;
 
     @Schema(description = "as a List<String>. Optional. If not specified, the predicted class index as a string is used - i.e., \"0\", \"1\", etc")
-    List<String> Labels;
+    private List<String> Labels;
 
-    @Schema(description = "Integer, null by default. If non-null and > 1, we return List<String>, List<Long>, List<Double> for the predicted class/index/probability instead of String/Long/Double.")
-    Integer topN = null;
+    @Schema(description = "Integer, null by default. If non-null and > 1, we return List<String>, List<Long>, List<Double> for the predicted class/index/probability instead of String/Long/Double.", defaultValue = "null")
+    private Integer topN;
 
-    @Schema(description = "If true, also returns a List<List<Double>> of all probabilities (basically, converd NDArray to list. False by default.")
-    boolean allProbabilities = false;
+    @Schema(description = "If true, also returns a List<List<Double>> of all probabilities (basically, converd NDArray to list. False by default.", defaultValue = "false")
+    private boolean allProbabilities;
 
 
-    public ClassifierOutputStep() {
-
-    }
 }
