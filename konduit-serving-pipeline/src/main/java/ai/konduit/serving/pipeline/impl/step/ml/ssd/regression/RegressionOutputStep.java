@@ -22,32 +22,25 @@ import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import java.util.List;
 import java.util.Map;
 
 
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("REGRESSION_OUTPUT")
 @Schema(description = "RegressionOutput handler")
 public class RegressionOutputStep implements PipelineStep {
 
     @Schema(description = "inputName - optional. If set: this represents the NDArray. If not set: use DataUtils.inferField to find an NDArray field")
-    String inputName;
+    private String inputName;
 
     @Schema(description = "Map<String,Integer> where the key is the output name, and the value is the index in the array.", defaultValue = "null")
-    Map<String,Integer> names;
-
-
-    public RegressionOutputStep() {
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null
-
-    }
+    private Map<String,Integer> names;
 
 }
