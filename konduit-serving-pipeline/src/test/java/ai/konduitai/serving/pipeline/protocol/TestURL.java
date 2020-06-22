@@ -104,4 +104,17 @@ public class TestURL {
             System.out.println(received);
         }
     }
+
+    @Ignore
+    @Test
+    public void testHDFS() throws IOException {
+        URL url = new URL("hdfs://someurl");
+
+        URLConnection conn = url.openConnection();
+        try (InputStream is = conn.getInputStream()) {
+            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            String received = IOUtils.toString(reader);
+            System.out.println(received);
+        }
+    }
 }
