@@ -18,7 +18,7 @@
 package ai.konduit.serving;
 
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
-import org.eclipse.python4j.*;
+import org.nd4j.python4j.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;

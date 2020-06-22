@@ -19,7 +19,7 @@ package ai.konduit.serving;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import org.bytedeco.javacpp.BytePointer;
-import org.eclipse.python4j.*;
+import org.nd4j.python4j.*;
 
 import java.util.Collections;
 import java.util.List;

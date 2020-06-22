@@ -22,13 +22,11 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
-import ai.konduit.serving.pipeline.registry.PipelineRegistry;
 import lombok.experimental.Accessors;
-import org.eclipse.python4j.PythonJob;
-import org.eclipse.python4j.PythonVariable;
+import org.nd4j.python4j.PythonJob;
+import org.nd4j.python4j.PythonVariable;
 import org.nd4j.common.base.Preconditions;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.UUID;
 

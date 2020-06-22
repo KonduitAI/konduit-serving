@@ -21,7 +21,7 @@ import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import org.apache.commons.io.IOUtils;
 import org.bytedeco.javacpp.BytePointer;
-import org.eclipse.python4j.*;
+import org.nd4j.python4j.*;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
@@ -29,9 +29,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class PyData extends PythonType<Data> {
 
