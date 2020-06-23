@@ -38,15 +38,15 @@ import java.util.List;
 @Schema(description = "The main object that's used to configure the whole konduit serving pipeline and the server itself.")
 public class InferenceConfiguration implements Serializable, TextConfig {
 
-    @Builder.Default
+    
     @Schema(description = "Server host", defaultValue = "localhost")
     private String host = "localhost";
 
-    @Builder.Default
+    
     @Schema(description = "Server port. 0 means that a random port will be selected.", defaultValue = "0")
     private int port = 0;
 
-    @Builder.Default
+    
     @Schema(description = "Server type.", defaultValue = "HTTP")
     private ServerProtocol protocol = ServerProtocol.HTTP;
 

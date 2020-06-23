@@ -30,8 +30,7 @@ public class ConfigSerializationTests {
 
     @Test
     public void testSerializationPython() throws Exception {
-        PythonConfig pythonConfig = PythonConfig.builder()
-                .build();
+        PythonConfig pythonConfig = new PythonConfig();
         tryDeSerialize(trySerialize(pythonConfig), PythonConfig.class);
 
 

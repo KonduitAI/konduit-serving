@@ -80,7 +80,6 @@ public class DrawGridStep implements PipelineStep {
             "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private String gridColor;
 
-    @Builder.Default
     @Schema(description = "Line thickness to use to draw the border (in pixels).",
             defaultValue = "1")
     private int borderThickness = 1;

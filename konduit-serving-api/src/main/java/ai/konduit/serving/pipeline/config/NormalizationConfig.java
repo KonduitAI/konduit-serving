@@ -41,7 +41,6 @@ import java.util.Map;
 @Accessors(fluent=true)
 public class NormalizationConfig implements Serializable {
 
-    @Builder.Default
     private Map<String, String> config = new HashMap<>();
 
     public void put(String key, String value) {

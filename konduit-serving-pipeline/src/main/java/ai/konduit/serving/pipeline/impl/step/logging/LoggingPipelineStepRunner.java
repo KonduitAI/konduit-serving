@@ -37,8 +37,8 @@ public class LoggingPipelineStepRunner implements PipelineStepRunner {
 
     public LoggingPipelineStepRunner(@NonNull LoggingPipelineStep step) {
         this.step = step;
-        if(step.getKeyFilterRegex() != null){
-            pattern = Pattern.compile(step.getKeyFilterRegex());
+        if(step.keyFilterRegex() != null){
+            pattern = Pattern.compile(step.keyFilterRegex());
         } else {
             pattern = null;
         }
@@ -56,8 +56,8 @@ public class LoggingPipelineStepRunner implements PipelineStepRunner {
 
     @Override
     public Data exec(Context ctx, Data data) {
-        Level logLevel = step.getLogLevel();
-        LoggingPipelineStep.Log toLog = step.getLog();
+        Level logLevel = step.logLevel();
+        LoggingPipelineStep.Log toLog = step.log();
         boolean keysOnly = toLog == LoggingPipelineStep.Log.KEYS;
 
         //TODO does SLF4J have utility methods for this?

@@ -300,8 +300,8 @@ public class PythonStep extends BasePipelineStep<PythonStep> {
     public PythonStep step(String stepName, PythonConfig pythonConfig)
             throws Exception {
 
-        Map<String, String> pythonInputs = pythonConfig.getPythonInputs(),
-                pythonOutputs = pythonConfig.getPythonOutputs();
+        Map<String, String> pythonInputs = pythonConfig.pythonInputs(),
+                pythonOutputs = pythonConfig.pythonOutputs();
 
         this.step(stepName, pythonConfig,
                 pythonInputs.keySet().toArray(new String[0]),

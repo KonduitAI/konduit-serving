@@ -55,16 +55,16 @@ public class SSDToBoundingBoxStep implements PipelineStep {
 
     //TODO config
 
-    @Builder.Default
+    
     @Schema(description = "A list of class labels.")
     protected String[] classLabels = null;
 
-    @Builder.Default
+    
     @Schema(description = "If true, other data key and values from the previous step are kept and passed on to the next step as well.",
             defaultValue = "true")
     protected boolean keepOtherValues = true;
 
-    @Builder.Default
+    
     @Schema(description = "Threadshold to the output of the SSD models for fetching bounding boxes for.",
             defaultValue = "0.5")
     protected double threshold = 0.5;
@@ -73,7 +73,7 @@ public class SSDToBoundingBoxStep implements PipelineStep {
     protected Double aspectRatio = null;
 
 
-    @Builder.Default
+    
     @Schema(description = "Output key name where the bounding box will be contained in.",
             defaultValue = DEFAULT_OUTPUT_NAME)
     protected String outputName = DEFAULT_OUTPUT_NAME;

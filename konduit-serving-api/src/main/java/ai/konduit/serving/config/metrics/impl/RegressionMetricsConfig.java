@@ -26,11 +26,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class RegressionMetricsConfig implements MetricsConfig {
 
-    @Builder.Default
     private List<String> regressionColumnLabels = new ArrayList<>(0);
-    @Builder.Default
     private List<SampleType> sampleTypes = new ArrayList<>(0);
-    @Builder.Default
     private List<ColumnDistribution> columnDistributions = new ArrayList<>(0);
 
     @Override

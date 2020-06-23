@@ -35,21 +35,21 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
         "frame. Usually only used for testing and debugging locally, not when serving from HTTP/GRPC etc endpoints")
 public class ShowImagePipelineStep implements PipelineStep {
 
-    @Builder.Default
+    
     @Schema(description = "Name of the incoming input image key.",
             defaultValue = "image")
     private String imageName = "image";
 
-    @Builder.Default
+    
     @Schema(description = "Image display name.",
             defaultValue = "Image")
     private String displayName = "Image";
 
-    @Builder.Default
+    
     @Schema(description = "Height of the displayed image frame. If null: same size as image is used")
     private Integer width;
 
-    @Builder.Default
+    
     @Schema(description = "Width of the image. If null: same size as the image")
     private Integer height;
 

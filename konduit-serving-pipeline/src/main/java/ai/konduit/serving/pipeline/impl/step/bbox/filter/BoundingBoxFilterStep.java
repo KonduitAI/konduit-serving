@@ -32,16 +32,12 @@ public class BoundingBoxFilterStep implements PipelineStep {
 
     public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";
 
-    @Builder.Default
     protected boolean keepOtherValues = true;
 
-    @Builder.Default
     protected String[] classesToKeep = new String[]{};
 
-    @Builder.Default
     protected String inputName = "input";
 
-    @Builder.Default
     protected String outputName = DEFAULT_OUTPUT_NAME;
 
 }

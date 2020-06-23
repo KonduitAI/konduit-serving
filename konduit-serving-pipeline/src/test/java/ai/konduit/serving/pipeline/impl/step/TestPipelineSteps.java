@@ -37,7 +37,7 @@ public class TestPipelineSteps {
         AtomicInteger count2 = new AtomicInteger();
         Pipeline p = SequencePipeline.builder()
                 .add(new CallbackPipelineStep(d -> count1.getAndIncrement()))
-                .add(LoggingPipelineStep.builder().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO).build())
+                .add(new LoggingPipelineStep().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO))
                 .add(new CallbackPipelineStep(d -> count2.getAndIncrement()))
                 .build();
 

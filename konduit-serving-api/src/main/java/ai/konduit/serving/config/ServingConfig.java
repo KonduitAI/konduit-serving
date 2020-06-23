@@ -53,28 +53,20 @@ import java.util.List;
 })
 public class ServingConfig implements Serializable, TextConfig {
 
-    @Builder.Default
     private int httpPort = 0;
 
-    @Builder.Default
     private String listenHost = "localhost";
 
-    @Builder.Default
     private Output.DataFormat outputDataFormat = Output.DataFormat.JSON;
 
-    @Builder.Default
     private String uploadsDirectory = DirectoryFetcher.getFileUploadsDir().getAbsolutePath();
 
-    @Builder.Default
     private boolean logTimings = false;
 
-    @Builder.Default
     private boolean createLoggingEndpoints = false;
 
-    @Builder.Default
     private List<MetricsConfig> metricsConfigurations = new ArrayList<>(0);
 
-    @Builder.Default
     private List<MetricType> metricTypes = Arrays.asList(
             MetricType.CLASS_LOADER,
             MetricType.JVM_MEMORY,

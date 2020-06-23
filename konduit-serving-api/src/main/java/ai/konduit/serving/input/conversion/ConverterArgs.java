@@ -53,19 +53,19 @@ public class ConverterArgs implements Serializable {
     private TransformProcess transformProcess;
     private ImageTransformProcess imageTransformProcess;
 
-    @Builder.Default
+    
     private List<Integer> integers = new ArrayList<>();
-    @Builder.Default
+    
     private List<Long> longs = new ArrayList<>();
-    @Builder.Default
+    
     private List<Float> floats = new ArrayList<>();
-    @Builder.Default
+    
     private List<Double> doubles = new ArrayList<>();
-    @Builder.Default
+    
     private List<String> strings = new ArrayList<>();
-    @Builder.Default
+    
     private String imageProcessingRequiredLayout = "NCHW";
-    @Builder.Default
+    
     private String imageProcessingInitialLayout = "NCHW";
 
 }

@@ -24,7 +24,6 @@ import java.util.Map;
 @NoArgsConstructor
 public class ClassificationMetricsConfig implements MetricsConfig {
 
-    @Builder.Default
     private List<String> classificationLabels = new ArrayList<>(0);
 
     @Override

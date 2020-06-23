@@ -42,12 +42,12 @@ public class VideoFrameCaptureStep implements PipelineStep {
     @Schema(description = "Location of the video file.")
     private String filePath;
 
-    @Builder.Default
+    
     @Schema(description = "Name of the output key where the image frame will be located.",
             defaultValue = "image")
     private String outputKey = "image";
 
-    @Builder.Default
+    
     @Schema(description = "Loop the video when it reaches the end?")
     private boolean loop = true;
 

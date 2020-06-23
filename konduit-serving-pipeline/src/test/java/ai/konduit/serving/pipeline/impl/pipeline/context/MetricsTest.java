@@ -71,7 +71,7 @@ public class MetricsTest {
         AtomicInteger count2 = new AtomicInteger();
 
         PipelineStep step1 = new CallbackPipelineStep(d -> count1.getAndIncrement());
-        PipelineStep step2 = LoggingPipelineStep.builder().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO).build();
+        PipelineStep step2 = new LoggingPipelineStep().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO);
         PipelineStep step3 = new CallbackPipelineStep(d -> count2.getAndIncrement());
 
         Pipeline p = SequencePipeline.builder()

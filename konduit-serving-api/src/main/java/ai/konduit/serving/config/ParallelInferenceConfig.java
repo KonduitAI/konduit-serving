@@ -47,15 +47,10 @@ public class ParallelInferenceConfig implements Serializable, TextConfig {
 
     private static final int NUM_WORKERS = 1;
 
-    @Builder.Default
     private int queueLimit = ParallelInference.DEFAULT_QUEUE_LIMIT;
-    @Builder.Default
     private int batchLimit = ParallelInference.DEFAULT_BATCH_LIMIT;
-    @Builder.Default
     private int workers = NUM_WORKERS;
-    @Builder.Default
     private int maxTrainEpochs = 1;
-    @Builder.Default
     private InferenceMode inferenceMode = ParallelInference.DEFAULT_INFERENCE_MODE;
 
     //config json for vertx: used for configuring
@@ -67,7 +62,7 @@ public class ParallelInferenceConfig implements Serializable, TextConfig {
      *
      * @return default configuration
      */
-    public ParallelInferenceConfig defaultConfig() {
+    public static ParallelInferenceConfig defaultConfig() {
         return new ParallelInferenceConfig()
                 .inferenceMode(ParallelInference.DEFAULT_INFERENCE_MODE)
                 .queueLimit(ParallelInference.DEFAULT_QUEUE_LIMIT)

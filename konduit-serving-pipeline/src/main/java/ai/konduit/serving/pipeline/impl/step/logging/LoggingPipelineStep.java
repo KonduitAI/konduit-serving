@@ -18,8 +18,10 @@ package ai.konduit.serving.pipeline.impl.step.logging;
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 import org.slf4j.event.Level;
@@ -31,6 +33,7 @@ import org.slf4j.event.Level;
  */
 @Data
 @Accessors(fluent=true)
+@NoArgsConstructor
 @JsonName("LOGGING")
 @Schema(description = "A pipeline step that simply logs the input Data keys (and optionally values) and returns " +
         "the input data unchanged.")
@@ -41,16 +44,13 @@ public class LoggingPipelineStep implements PipelineStep {
             "KEYS_AND_VALUES -> output both data keys and values.")
     public enum Log { KEYS, KEYS_AND_VALUES }
 
-    @Builder.Default
     @Schema(description = "Log level. This is similar to how standard logging frameworks define logging categories.",
             defaultValue = "INFO")
     private Level logLevel = Level.INFO;
 
-    @Builder.Default
     @Schema(description = "An enum specifying what part of a data instance should be logged.", defaultValue = "KEYS")
     private Log log = Log.KEYS;
 
-    @Builder.Default
     @Schema(description = "A regular expression that allows filtering of keys - i.e., only those that match the regex will be logged.")
     public String keyFilterRegex = null;
 

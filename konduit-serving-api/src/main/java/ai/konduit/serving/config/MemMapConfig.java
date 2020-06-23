@@ -55,9 +55,7 @@ public class MemMapConfig implements Serializable, TextConfig {
     public final static String WORKSPACE_NAME = "memMapWorkspace";
 
     private String arrayPath, unkVectorPath;
-    @Builder.Default
     private long initialMemmapSize = DEFAULT_INITIAL_SIZE;
-    @Builder.Default
     private String workSpaceName = WORKSPACE_NAME;
 
     public static MemMapConfig fromJson(String json){

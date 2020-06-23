@@ -61,7 +61,7 @@ public class ExtractBoundingBoxStep implements PipelineStep {
             "region covered by the bounding boxes.")
     private String outputName;
 
-    @Builder.Default
+    
     @Schema(description = "If true, other data key and values from the previous step are kept and passed on to the next step as well.",
             defaultValue = "true")
     private boolean keepOtherFields = true;

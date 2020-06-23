@@ -84,7 +84,7 @@ public class ImageToNDArrayStep implements PipelineStep {
     @Schema(description = "May be null. If non-null, the input images are renamed to this in the output Data instance after conversion to n-dimensional array.")
     private List<String> outputNames;
 
-    @Builder.Default
+    
     @Schema(description = "True by default. If true, copy all the other (non-converted/non-image) entries in the input data to the output data",
             defaultValue = "true")
     private boolean keepOtherValues = true;
@@ -93,7 +93,7 @@ public class ImageToNDArrayStep implements PipelineStep {
             "and the original input size.")
     private boolean metadata;
 
-    @Builder.Default
+    
     @Schema(description = "Sets the key that the metadata will be stored under. Not relevant if metadata == false.",
             defaultValue = DEFAULT_METADATA_KEY)
     private String metadataKey = DEFAULT_METADATA_KEY;

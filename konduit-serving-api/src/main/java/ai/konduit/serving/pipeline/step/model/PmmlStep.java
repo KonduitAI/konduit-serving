@@ -21,17 +21,19 @@ package ai.konduit.serving.pipeline.step.model;
 import ai.konduit.serving.pipeline.step.ModelStep;
 import ai.konduit.serving.util.ObjectMappers;
 import lombok.*;
+import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Data
 @AllArgsConstructor
+@Accessors(fluent = true)
 @EqualsAndHashCode(callSuper = true)
 public class PmmlStep extends ModelStep {
 
     public static final String DEFAULT_EVALUATOR_FACTORY = "org.jpmml.evaluator.ModelEvaluatorFactory";
 
-    @Builder.Default
+    
     private String evaluatorFactoryName = DEFAULT_EVALUATOR_FACTORY;
 
     public PmmlStep() {}
