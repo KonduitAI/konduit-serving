@@ -258,7 +258,9 @@ public class KonduitServingLauncherWithProcessesTest {
     }
 
     private Collection<String> getMainCommandNames() {
-        return new KonduitServingLauncher().setMainCommands().getCommandNames();
+        KonduitServingLauncher konduitServingLauncher = new KonduitServingLauncher();
+        konduitServingLauncher.setMainCommands();
+        return konduitServingLauncher.getCommandNames();
     }
 
     private String testAndGetImageConfiguration() throws IOException, InterruptedException {

@@ -37,6 +37,11 @@ public class PropertiesConstants {
     public static final String WORKING_DIR = "konduit.working.dir";
 
     /**
+     * System property specifying build data directory where build logs for the build CLI are kept.
+     */
+    public static final String BUILD_DIR = "konduit.build.dir";
+
+    /**
      * This system property is responsible for setting the path where the log files for a konduit server
      * is kept for the `/logs` endpoint.
      */

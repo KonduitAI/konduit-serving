@@ -36,6 +36,8 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.util.*;
 
+import static java.lang.System.out;
+
 /**
  * Command line interface for performing Konduit Serving builds
  * Allows the user to build a JAR or artifact such as a docker image suitable for performing inference on a given
@@ -104,58 +106,68 @@ public class BuildCLI {
             validateValueWith = CLIValidators.ConfigValidator.class)
     private List<String> config;
 
+    @Parameter(names = {"-h", "--help"}, help = true, arity = 0)
+    private boolean help;
+
     public static void main(String... args) throws Exception {
         new BuildCLI().exec(args);
     }
 
     public void exec(String[] args) throws Exception {
-        JCommander.newBuilder().addObject(this).build().parse(args);
+        JCommander jCommander = new JCommander();
+        jCommander.addObject(this);
+        jCommander.parse(args);
+
+        if(help) {
+            jCommander.usage();
+            return;
+        }
 
         //------------------------------------- Build Configuration --------------------------------------
 
         //Print out configuration / values
         int width = 96;
         int keyWidth = 30;
-        System.out.println(padTo("Konduit Serving Build Tool", '=', width));
-        System.out.println(padTo("Build Configuration", '-', width));
-        System.out.println(padRight("Pipeline:", ' ', keyWidth) + (pipeline == null ? "<not specified>" : pipeline));
-        System.out.println(padRight("Target OS:", ' ', keyWidth) + (os.size() == 1 ? os.get(0) : os.toString()));
-        System.out.println(padRight("Target CPU arch.:", ' ', keyWidth) + arch);
-        System.out.println(padRight("Target Device:", ' ', keyWidth) + (device == null ? "CPU" : device));
+        out.println(padTo("Konduit Serving Build Tool", '=', width));
+        out.println(padTo("Build Configuration", '-', width));
+        out.println(padRight("Pipeline:", ' ', keyWidth) + (pipeline == null ? "<not specified>" : pipeline));
+        out.println(padRight("Target OS:", ' ', keyWidth) + (os.size() == 1 ? os.get(0) : os.toString()));
+        out.println(padRight("Target CPU arch.:", ' ', keyWidth) + arch);
+        out.println(padRight("Target Device:", ' ', keyWidth) + (device == null ? "CPU" : device));
         if(modules != null){
-            System.out.println(padRight("Additional modules:", ' ', keyWidth) + String.join(", ", modules));
+            out.println(padRight("Additional modules:", ' ', keyWidth) + String.join(", ", modules));
         }
-        System.out.println(padRight("Server type(s):", ' ', keyWidth) + String.join(", ", serverTypes));
-        System.out.println(padRight("Deployment type(s):", ' ', keyWidth) + String.join(", ", deploymentTypes));
+        out.println(padRight("Server type(s):", ' ', keyWidth) + String.join(", ", serverTypes));
+        out.println(padRight("Deployment type(s):", ' ', keyWidth) + String.join(", ", deploymentTypes));
         if(additionalDependencies != null){
-            System.out.println(padRight("Additional dependencies:", ' ', keyWidth) + String.join(", ", additionalDependencies));
+            out.println(padRight("Additional dependencies:", ' ', keyWidth) + String.join(", ", additionalDependencies));
         }
-        System.out.println("\n");
+        out.println("\n");
 
         List<Deployment> deployments = parseDeployments();
         for( int i=0; i<deployments.size(); i++ ){
             Deployment d = deployments.get(i);
             if(deployments.size() > 1){
-                System.out.println("Deployment " + (i+1) + " of " + deployments.size() + " configuration: " + d.getClass().getSimpleName());
+                out.println("Deployment " + (i+1) + " of " + deployments.size() + " configuration: " + d.getClass().getSimpleName());
             } else {
-                System.out.println("Deployment configuration: " + d.getClass().getSimpleName());
+                out.println("Deployment configuration: " + d.getClass().getSimpleName());
             }
             Map<String,String> props = d.asProperties();
             for(Map.Entry<String,String> e : props.entrySet()){
-                System.out.println(padRight("  " + e.getKey() + ":", ' ', keyWidth) + e.getValue());
+                out.println(padRight("  " + e.getKey() + ":", ' ', keyWidth) + e.getValue());
             }
         }
 
-        System.out.println("\n");
+        out.println("\n");
 
         //--------------------------------------- Validating Build ---------------------------------------
-        System.out.println(padTo("Validating Build", '-', width));
+        out.println(padTo("Validating Build", '-', width));
 
         if((pipeline == null || pipeline.isEmpty()) && (modules == null || modules.isEmpty())){
             String s = "BUILD FAILED: Either a path to a Pipeline (JSON or YAML) must be provided via -p/--pipeline" +
                     " or a list of modules to include must be provided via -m/--modules." +
                     " When a pipeline is provided via JSON or YAML, the required modules will be determined automatically.";
-            System.out.println(wrapString(s, width));
+            out.println(wrapString(s, width));
             System.exit(1);
         }
 
@@ -191,15 +203,15 @@ public class BuildCLI {
 
         int width2 = 36;
         if(pipeline != null){
-            System.out.println("Resolving modules required for pipeline execution...");
+            out.println("Resolving modules required for pipeline execution...");
             List<Module> resolvedModules = c.resolveModules();
             for(Module m : resolvedModules){
-                System.out.println("  " + m.name());
+                out.println("  " + m.name());
             }
-            System.out.println();
+            out.println();
 
             if(modules != null && !modules.isEmpty()){
-                System.out.println("Additional modules specified:");
+                out.println("Additional modules specified:");
                 List<Module> toAdd = new ArrayList<>();
                 boolean anyFailed = false;
                 List<String> failed = new ArrayList<>();
@@ -212,21 +224,21 @@ public class BuildCLI {
                             //Already resolved this one
                             continue;
                         } else {
-                            System.out.println("  " + m.name());
+                            out.println("  " + m.name());
                             toAdd.add(m);
                         }
                     } else {
                         anyFailed = true;
-                        System.out.println("  " + s);
+                        out.println("  " + s);
                         failed.add(s);
                     }
                 }
                 if(anyFailed){
-                    System.out.println("Failed to resolve modules specified via -m/--modules: " + failed);
+                    out.println("Failed to resolve modules specified via -m/--modules: " + failed);
                     if(failed.size() == 1){
-                        System.out.println("No module is known with this name: " + failed.get(0) );
+                        out.println("No module is known with this name: " + failed.get(0) );
                     } else {
-                        System.out.println("No modules are known with these names: " + failed );
+                        out.println("No modules are known with these names: " + failed );
                     }
                     System.exit(1);
                 }
@@ -234,99 +246,99 @@ public class BuildCLI {
                 c.addModules(toAdd);
                 resolvedModules = c.modules();
 
-                System.out.println();
+                out.println();
             }
 
             List<Dependency> d = c.resolveDependencies();
-            System.out.println("Resolving module optional/configurable dependencies for deployment target: " + t);
+            out.println("Resolving module optional/configurable dependencies for deployment target: " + t);
             boolean anyFail = false;
             for(Module m : resolvedModules){
                 ModuleRequirements r = m.dependencyRequirements();
                 boolean satisfied = r == null || r.satisfiedBy(t, d);
                 String s = padRight("  " + m.name() + ":", ' ', width2);
-                System.out.println(s + (satisfied ? " OK" : " FAILED TO RESOLVE REQUIRED DEPENDENCY FOR OS + TARGET ARCHITECTURE"));
+                out.println(s + (satisfied ? " OK" : " FAILED TO RESOLVE REQUIRED DEPENDENCY FOR OS + TARGET ARCHITECTURE"));
                 if(!satisfied){
                     anyFail = true;
                     List<DependencyRequirement> l = r.reqs();
                     for(DependencyRequirement dr : l){
                         if(dr.satisfiedBy(t, d)){
-                            System.out.println("      OK:     " + dr);
+                            out.println("      OK:     " + dr);
                         } else {
-                            System.out.println("      FAILED: " + dr);
+                            out.println("      FAILED: " + dr);
                         }
                     }
                 }
             }
             if(anyFail){
-                System.out.println("BUILD FAILED: Unable to resolve optional dependencies for one or more modules");
-                System.out.println("This likely suggests the module dependencies do not support the target + architecture combination");
+                out.println("BUILD FAILED: Unable to resolve optional dependencies for one or more modules");
+                out.println("This likely suggests the module dependencies do not support the target + architecture combination");
                 System.exit(1);
             }
 
-            System.out.println();
+            out.println();
 
             if(!d.isEmpty()){
-                System.out.println("Resolved dependencies:");
+                out.println("Resolved dependencies:");
                 for(Dependency dep : d){
-                    System.out.println("  " + dep.gavString());
+                    out.println("  " + dep.gavString());
                 }
             }
-            System.out.println();
+            out.println();
 
-            System.out.println("Checking deployment configurations:");
+            out.println("Checking deployment configurations:");
             boolean anyDeploymentsFailed = false;
             for(Deployment dep : deployments){
                 DeploymentValidation v = dep.validate();
                 String s = dep.getClass().getSimpleName();
                 String s2 = padRight("  " + s + ":", ' ', width2);
-                System.out.println(s2 + (v.ok() ? "OK" : "FAILED"));
+                out.println(s2 + (v.ok() ? "OK" : "FAILED"));
                 if(!v.ok()){
                     anyDeploymentsFailed = true;
                     for(String f : v.failureMessages()){
-                        System.out.println("    " + f);
+                        out.println("    " + f);
                     }
                 }
             }
 
             if(anyDeploymentsFailed){
-                System.out.println("BUILD FAILED: one or more deployment method configurations failed.");
-                System.out.println("See failure messages above for details");
+                out.println("BUILD FAILED: one or more deployment method configurations failed.");
+                out.println("See failure messages above for details");
                 System.exit(1);
             }
 
-            System.out.println("\n>> Validation Passed\n");
+            out.println("\n>> Validation Passed\n");
         }
 
 
         //-------------------------------------------- Build ---------------------------------------------
 
-        System.out.println(padTo("Build", '-', width));
+        out.println(padTo("Build", '-', width));
         File tempDir = new File(FileUtils.getTempDirectory(), UUID.randomUUID().toString());
 
-        System.out.println("Generating build files...");
+        out.println("Generating build files...");
         GradleBuild.generateGradleBuildFiles(tempDir, c);
-        System.out.println(">> Build file generation complete\n\n");
+        out.println(">> Build file generation complete\n\n");
 
-        System.out.println("Starting build...");
+        out.println("Starting build...");
         long start = System.currentTimeMillis();
         GradleBuild.runGradleBuild(tempDir, c);
         long end = System.currentTimeMillis();
 
-        System.out.println(">> Build complete\n\n");
+        out.println(">> Build complete\n\n");
 
 
 
 
-        System.out.println(padTo("Build Summary", '-', width));
-        System.out.println(padRight("Build duration:", ' ', keyWidth) + (end-start)/1000 + " sec");
-        System.out.println(padRight("Output artifacts:", ' ', keyWidth) + deployments.size());
+        out.println(padTo("Build Summary", '-', width));
+        out.println(padRight("Build duration:", ' ', keyWidth) + (end-start)/1000 + " sec");
+        out.println(padRight("Output artifacts:", ' ', keyWidth) + deployments.size());
 
-        System.out.println();
+        out.println();
 
         for(Deployment d : deployments){
-            System.out.println(" ----- " + d.getClass().getSimpleName() + " -----");
-            System.out.println(d.outputString());
-            System.out.println();
+            out.println(" ----- " + d.getClass().getSimpleName() + " -----");
+            out.println(d.outputString());
+            out.println();
         }
     }
 

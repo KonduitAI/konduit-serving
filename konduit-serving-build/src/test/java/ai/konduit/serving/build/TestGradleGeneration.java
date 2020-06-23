@@ -18,10 +18,12 @@
 
 package ai.konduit.serving.build;
 
-import ai.konduit.serving.build.config.*;
+import ai.konduit.serving.build.build.GradleBuild;
+import ai.konduit.serving.build.config.Config;
+import ai.konduit.serving.build.config.Serving;
+import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.*;
-import ai.konduit.serving.build.build.GradleBuild;
 import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
@@ -39,7 +41,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @Ignore //TO be run manually, not part of CI (as it requires all modules to be installed first)
 public class TestGradleGeneration {
@@ -105,7 +108,7 @@ public class TestGradleGeneration {
         mfContent = mfContent.replace("\n ", "");
         boolean found = false;
         for(String line : mfContent.split("\n")){
-            if (line.contains("Main-Class") && line.contains("ai.konduit.serving.cli.launcher.KonduitServingLauncher")) {
+            if (line.contains("Main-Class") && line.contains("ai.konduit.serving.build.cli.launcher.extension.KonduitServingBuildLauncher")) {
                 found = true;
                 break;
             }

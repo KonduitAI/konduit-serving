@@ -24,8 +24,8 @@ import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
@@ -33,7 +33,6 @@ import org.nd4j.common.base.Preconditions;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -196,7 +195,7 @@ public class GradleBuild {
                 }
                 kts.append("\toutfile = \"" + exeName + ".exe\"\n");
                 //kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
-                kts.append("\tmainClassName = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n");
+                kts.append("\tmainClassName = \"ai.konduit.serving.build.cli.launcher.extension.KonduitServingBuildLauncher\"\n");
                 kts.append("}\n");
                 kts.append(createCopyTask("copyExe", outputDir.getAbsolutePath(), ((ExeDeployment)deployment).outputDir(),
                         "*.exe", "launch4j"));
@@ -361,7 +360,7 @@ public class GradleBuild {
                 .append("tasks.withType(Jar::class) {\n")
                 .append("    manifest {\n")
                 .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
-                .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
+                .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.build.cli.launcher.extension.KonduitServingBuildLauncher\"\n")
                 .append("    }\n")
                 .append("}\n\n");
     }
@@ -386,10 +385,11 @@ public class GradleBuild {
                     .append("}\n");
         } else {
             //Write a manifest JAR
-            kts.append("//Write a JAR with a manifest containin the path of all dependencies, but no other content\n")
+            kts.append("//Write a JAR with a manifest containing the path of all dependencies, but no other content\n")
                     .append("tasks.withType(Jar::class) {\n")
                     .append("    manifest {\n")
                     .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
+                    .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.build.cli.launcher.extension.KonduitServingBuildLauncher\"\n")
                     .append("        attributes[\"Class-Path\"] = configurations.runtimeClasspath.get().getFiles().joinToString(separator=\" \")\n")
                     .append("    }\n");
 

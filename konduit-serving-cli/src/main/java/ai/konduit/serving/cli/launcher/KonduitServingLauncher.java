@@ -55,30 +55,33 @@ public class KonduitServingLauncher extends Launcher {
     }
 
     public static void main(String[] args) {
-        KonduitServingLauncher konduitServingLauncher = new KonduitServingLauncher().setMainCommands();
-
-        if(args.length > 0 && KonduitRunCommand.class.getAnnotation(Name.class).value().equals(args[0]))
-            konduitServingLauncher.register(KonduitRunCommand.class, KonduitRunCommand::new);
-
-        konduitServingLauncher.dispatch(args);
+        new KonduitServingLauncher().exec(args);
     }
 
-    public KonduitServingLauncher setMainCommands() {
-        return (KonduitServingLauncher) this
-                .unregister("bare")
-                .unregister("start")
-                .unregister("run")
-                .unregister("test")
-                .unregister("version")
-                //.register(JoinCommand.class, JoinCommand::new) // TODO: Uncomment this after implementation and testing
-                .register(ServeCommand.class, ServeCommand::new)
-                .register(ListCommand.class, ListCommand::new)
-                .register(StopCommand.class, StopCommand::new)
-                .register(PredictCommand.class, PredictCommand::new)
-                .register(VersionCommand.class, VersionCommand::new)
-                .register(ConfigCommand.class, ConfigCommand::new)
-                .register(InspectCommand.class, InspectCommand::new)
-                .register(LogsCommand.class, LogsCommand::new);
+    protected void exec(String[] args) {
+        this.setMainCommands();
+
+        if(args.length > 0 && KonduitRunCommand.class.getAnnotation(Name.class).value().equals(args[0]))
+            this.register(KonduitRunCommand.class, KonduitRunCommand::new);
+
+        this.dispatch(args);
+    }
+
+    public void setMainCommands() {
+        this.unregister("bare")
+            .unregister("start")
+            .unregister("run")
+            .unregister("test")
+            .unregister("version")
+            //.register(JoinCommand.class, JoinCommand::new) // TODO: Uncomment this after implementation and testing
+            .register(ServeCommand.class, ServeCommand::new)
+            .register(ListCommand.class, ListCommand::new)
+            .register(StopCommand.class, StopCommand::new)
+            .register(PredictCommand.class, PredictCommand::new)
+            .register(VersionCommand.class, VersionCommand::new)
+            .register(ConfigCommand.class, ConfigCommand::new)
+            .register(InspectCommand.class, InspectCommand::new)
+            .register(LogsCommand.class, LogsCommand::new);
     }
 
     public String commandLinePrefix() {

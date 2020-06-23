@@ -49,6 +49,20 @@ public class DirectoryFetcher {
     }
 
     /**
+     * Creates the build directory if missing and fetches it.
+     * @return konduit-serving build directory.
+     */
+    public static File getBuildDir() {
+        return createAndValidateDirectory(
+                fetchValueBasedOnPriority(
+                        System.getenv(EnvironmentConstants.BUILD_DIR),
+                        System.getProperty(PropertiesConstants.BUILD_DIR),
+                        getDefaultBuildDir()
+                )
+        );
+    }
+
+    /**
      * Creates the server data directory if missing and fetches it.
      * @return konduit-serving server data directory
      */
@@ -112,6 +126,14 @@ public class DirectoryFetcher {
      */
     public static String getDefaultWorkingDir() {
         return createAndValidateDirectory(Paths.get(getUserHomeDir(), Constants.DEFAULT_WORKING_BASE_DIR_NAME).toFile()).getAbsolutePath();
+    }
+
+    /**
+     * Creates the default build directory if missing and fetches it.
+     * @return konduit-serving default build directory absolute path.
+     */
+    public static String getDefaultBuildDir() {
+        return createAndValidateDirectory(new File(getWorkingDir(), Constants.DEFAULT_BUILD_DIR_NAME)).getAbsolutePath();
     }
 
     /**

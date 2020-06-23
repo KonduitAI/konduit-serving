@@ -44,6 +44,11 @@ public class EnvironmentConstants {
     public static final String WORKING_DIR = "KONDUIT_WORKING_DIR";
 
     /**
+     * Environment variable specifying build data directory where build logs for the build CLI are kept.
+     */
+    public static final String BUILD_DIR = "KONDUIT_BUILD_DIR";
+
+    /**
      * This variable is responsible for setting the path where the log files for a konduit server
      * is kept for the `/logs` endpoint.
      */
