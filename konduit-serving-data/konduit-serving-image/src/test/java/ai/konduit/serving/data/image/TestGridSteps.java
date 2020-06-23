@@ -120,18 +120,19 @@ public class TestGridSteps {
 
 
 
-        int gx = 4;
-        int gy = 2;
+        int gx = 2;
+        int gy = 4;
 
         for(boolean fixed : new boolean[]{false, true}) {
         for (boolean px : new boolean[]{false, true}) {
             Data in = Data.singleton("image", i);
             List<Point> points;
             if (px) {
-                points = Arrays.asList(Point.create(0.015 * i.width(), 0.33 * i.height()), Point.create(0.04 * i.width(), 0.70 * i.height()),
-                        Point.create(0.815 * i.width(), 0.42 * i.height()), Point.create(0.795 * i.width(), 0.83 * i.height()));
+                points = Arrays.asList(Point.create(0.015 * i.width(), 0.33 * i.height()), Point.create(0.815 * i.width(), 0.42 * i.height()),
+                        Point.create(0.04 * i.width(), 0.70 * i.height()), Point.create(0.795 * i.width(), 0.83 * i.height()));
             } else {
-                points = Arrays.asList(Point.create(0.015, 0.33), Point.create(0.04, 0.70), Point.create(0.815, 0.42), Point.create(0.795, 0.83));
+                points = Arrays.asList(Point.create(0.015, 0.33), Point.create(0.815, 0.42),
+                        Point.create(0.04, 0.70), Point.create(0.795, 0.83));
             }
             in.put("key", "value");
             if(!fixed){
@@ -154,7 +155,7 @@ public class TestGridSteps {
                                     .outputName(outName ? "output" : null)
                                     .boundingBoxName(bb ? "bbox" : null)
                                     .coordsArePixels(px)
-                                    //.aspectRatio(1.0)
+//                                    .aspectRatio(1.0)
                                     .build();
 
                             draw = DrawFixedGridStep.builder()
@@ -179,7 +180,7 @@ public class TestGridSteps {
                                     .outputName(outName ? "output" : null)
                                     .boundingBoxName(bb ? "bbox" : null)
                                     .coordsArePixels(px)
-                                    //.aspectRatio(1.0)
+//                                    .aspectRatio(1.0)
                                     .build();
 
                             draw = DrawGridStep.builder()
@@ -198,9 +199,9 @@ public class TestGridSteps {
 
                             Pipeline p = SequencePipeline.builder()
                                     .add(draw)
-                                    //.add(new ShowImagePipelineStep().imageName("image").height(null).width(null))
+//                                    .add(new ShowImagePipelineStep().imageName("image").height(null).width(null))
                                     .add(s)
-                                    //.add(new ShowImagePipelineStep().imageName(outName ? "output" : CropGridStep.DEFAULT_OUTPUT_NAME).displayName("Display").width(null).height(null).allowMultiple(true))
+//                                    .add(new ShowImagePipelineStep().imageName(outName ? "output" : CropGridStep.DEFAULT_OUTPUT_NAME).displayName("Display").width(null).height(null).allowMultiple(true))
                                     .build();
 
                             PipelineExecutor exec = p.executor();

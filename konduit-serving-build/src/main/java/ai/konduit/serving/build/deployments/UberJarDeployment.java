@@ -115,16 +115,19 @@ public class UberJarDeployment implements Deployment {
         StringBuilder sb = new StringBuilder();
         sb.append("JAR location:        ").append(outFile.getAbsolutePath()).append("\n");
         String size;
+        String filename = "";
         if(outFile.exists()){
             long bytes = outFile.length();
             double bytesPerMB = 1024 * 1024;
             double mb = bytes / bytesPerMB;
             size = String.format("%.2f", mb) + " MB";
+            filename = outFile.getName();
         } else {
             size = "<JAR not found>";
+            filename = "<jar file name>";
         }
         sb.append("JAR size:            ").append(size).append("\n");
-        sb.append("JAR launch command:  java -cp konduit-serving-deployment.jar <TODO args>\n");
+        sb.append("JAR launch command:  java -jar ").append(filename).append(" <serve|list|stop|inpect|logs>\n");
         return sb.toString();
     }
 
