@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.step.ml.ssd.regression;
+package ai.konduit.serving.pipeline.impl.step.ml.regression;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;

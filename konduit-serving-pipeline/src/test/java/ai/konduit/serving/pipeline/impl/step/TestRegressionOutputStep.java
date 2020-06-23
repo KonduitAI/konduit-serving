@@ -21,16 +21,21 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import ai.konduit.serving.pipeline.impl.step.ml.ssd.regression.RegressionOutputStep;
+import ai.konduit.serving.pipeline.impl.step.ml.regression.RegressionOutputStep;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 
 public class TestRegressionOutputStep {
+
+    private final double eps = 0.0000001;
 
 
     @Test
@@ -52,7 +57,6 @@ public class TestRegressionOutputStep {
         NDArray preds = NDArray.create(values);
         Data in = Data.singleton("preds", preds);
         Data out = p.executor().exec(in);
-        double eps = 0.0000001;
         assertEquals(0.1, (double)out.get("a"), eps);
         assertEquals(0.3, (double)out.get("c"), eps);
 
@@ -123,8 +127,8 @@ public class TestRegressionOutputStep {
         Data in = Data.singleton("preds", preds);
         Data out = p.executor().exec(in);
 
-        assertEquals(0.1,out.get("a"));
-        assertEquals(0.3,out.get("c"));
+        assertEquals(0.1, (double) out.get("a"), eps);
+        assertEquals(0.3,(double) out.get("c"), eps);
 
         String json = p.toJson();
         String yaml = p.toYaml();
@@ -156,11 +160,14 @@ public class TestRegressionOutputStep {
         NDArray preds = NDArray.create(values);
         Data in = Data.singleton("preds", preds);
         Data out = p.executor().exec(in);
-        List<Double> list1 = Arrays.asList(0.1, 0.4);
-        List<Double> list2 = Arrays.asList(0.3, 0.6);
+        double[] expected1 = new double[]{0.1, 0.4};
+        double[] expected2 = new double[]{0.3, 0.6};
+        double[] actual1 = out.getListDouble("a").stream().mapToDouble(d -> d).toArray();;
+        double[] actual2 = out.getListDouble("c").stream().mapToDouble(d -> d).toArray();;
 
-        assertEquals(list1,out.get("a"));
-        assertEquals(list2,out.get("c"));
+
+        assertArrayEquals(expected1,actual1,eps);
+        assertArrayEquals(expected2,actual2,eps);
 
         String json = p.toJson();
         String yaml = p.toYaml();
