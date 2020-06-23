@@ -43,16 +43,7 @@ public class URIResolver {
         URI u = URI.create(uri);
         URL url = u.toURL();
         URLConnection connection = url.openConnection();
-
-        StringBuilder content = new StringBuilder();
-        try(BufferedReader br =
-                    new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-
-            String data = StringUtils.EMPTY;
-            while ((data = br.readLine()) != null)
-                content.append(data);
-            FileUtils.writeStringToFile(cachedFile, content.toString(), "UTF-8");
-        }
+        FileUtils.copyURLToFile(url, cachedFile);
         return cachedFile;
     }
 }
