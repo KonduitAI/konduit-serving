@@ -8,6 +8,7 @@ import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.mockftpserver.fake.FakeFtpServer;
@@ -22,6 +23,7 @@ import java.net.URLConnection;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 public class TestURL {
 
@@ -37,9 +39,12 @@ public class TestURL {
     @Rule
     public TemporaryFolder testDir = new TemporaryFolder();
 
+    static {
+        URL.setURLStreamHandlerFactory(new KSStreamHandlerFactory());
+    }
+
     @Before
     public void setUp() throws Exception {
-        URL.setURLStreamHandlerFactory(new KSStreamHandlerFactory());
         server = new TestServer(HTTP, HOST, PORT);
         server.start();
         configData = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("config/config.json"),
@@ -62,9 +67,9 @@ public class TestURL {
         assertTrue(data.contains("pipelineSteps"));
     }
 
-    @Ignore("Windows bound manual test")
     @Test
     public void testFTP() throws IOException, InterruptedException {
+        assumeTrue(SystemUtils.IS_OS_WINDOWS);
         FakeFtpServer fakeFtpServer = new FakeFtpServer();
         String homeDir = testDir.newFolder().getAbsolutePath();
         fakeFtpServer.addUserAccount(new UserAccount("user", "password",

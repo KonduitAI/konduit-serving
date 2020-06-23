@@ -30,6 +30,7 @@ import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import ai.konduit.serving.build.config.Module;
 import ai.konduit.serving.pipeline.api.protocol.RemoteUtils;
+import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import com.beust.jcommander.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -181,13 +182,12 @@ public class BuildCLI {
         if(config != null){
             Map<String,String> props = new HashMap<>();
             for(String s : config){
-                if (RemoteUtils.isUrl(s))
-                    continue;
-                if (s.startsWith("http://")) {
-                    s = RemoteUtils.configFromHttp(s);
+                File localFile = URIResolver.getFile(s);
+                if (localFile.exists()) {
+                    String content = FileUtils.readFileToString(localFile, "UTF-8");
+                    String[] split = content.split("=");
+                    props.put(split[0], split[1]);
                 }
-                String[] split = s.split("=");
-                props.put(split[0], split[1]);
             }
             for(Deployment d : deployments){
                 d.fromProperties(props);

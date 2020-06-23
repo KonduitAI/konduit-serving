@@ -6,10 +6,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import org.jets3t.service.ServiceException;
+/*import org.jets3t.service.ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Object;
-import org.jets3t.service.security.AWSCredentials;
+import org.jets3t.service.security.AWSCredentials;*/
 
 public class S3Handler extends URLStreamHandler {
 
@@ -32,13 +32,14 @@ public class S3Handler extends URLStreamHandler {
                 String bucket = url.getHost().substring(0, url.getHost().indexOf("."));
                 String key = url.getPath().substring(1);
 
-                try {
+                /*try {
                     RestS3Service s3Service = new RestS3Service(new AWSCredentials(accessKey, secretKey));
                     S3Object s3obj = s3Service.getObject(bucket, key);
                     return s3obj.getDataInputStream();
                 } catch (ServiceException e) {
                     throw new IOException(e);
-                }
+                }*/
+                return null;
             }
 
             @Override
