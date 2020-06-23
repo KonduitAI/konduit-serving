@@ -30,8 +30,8 @@ import lombok.AllArgsConstructor;
 
 import java.util.*;
 
-import static ai.konduit.serving.pipeline.impl.step.ml.Utils.FloatNDArrayToDouble;
-import static ai.konduit.serving.pipeline.impl.step.ml.Utils.squeeze;
+import static ai.konduit.serving.pipeline.util.NDArrayUtils.FloatNDArrayToDouble;
+import static ai.konduit.serving.pipeline.util.NDArrayUtils.squeeze;
 
 @AllArgsConstructor
 @CanRun(RegressionOutputStep.class)
@@ -52,9 +52,7 @@ public class RegressionOutputRunner implements PipelineStepRunner {
 
     @Override
     public Data exec(Context ctx, Data data) {
-
         String inputName = step.inputName();
-
 
         if (inputName == null) {
             String errMultipleKeys = "NDArray field name was not provided and could not be inferred: multiple NDArray fields exist: %s and %s";
@@ -91,7 +89,6 @@ public class RegressionOutputRunner implements PipelineStepRunner {
         }
 
         if (batch) {
-
             int bS = (int) regressionOutput.shape()[0];
             double[][] y = regressionOutput.getAs(double[][].class);
 
@@ -101,17 +98,11 @@ public class RegressionOutputRunner implements PipelineStepRunner {
                     list.add(y[i][entry.getValue()]);
                 }
                 data.putListDouble(entry.getKey(), list);
-
             }
-
-
         }
-
 
         return data;
     }
-
-
 }
 
 

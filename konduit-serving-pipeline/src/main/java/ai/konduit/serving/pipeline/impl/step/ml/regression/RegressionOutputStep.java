@@ -29,12 +29,18 @@ import lombok.experimental.Accessors;
 import java.util.Map;
 
 
+/**
+ * RegressionOutput adapter - extracts values from an NDArray to double values in the output Data instance,
+ * with names as specified.<br>
+ * For example input=Data{'myArray"=<ndarray>}, output=Data{"x"=ndarray[0], "y"=ndarray[7]}
+ */
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonName("REGRESSION_OUTPUT")
-@Schema(description = "RegressionOutput handler")
+@Schema(description = "RegressionOutput adapter - extracts values from an NDArray to double values in the output Data instance," +
+        " with names as specified.<br>For example input=Data{\"myArray\"=<ndarray>}, output=Data{\"x\"=ndarray[0], \"y\"=ndarray[7]}" )
 public class RegressionOutputStep implements PipelineStep {
 
     @Schema(description = "inputName - optional. If set: this represents the NDArray. If not set: use DataUtils.inferField to find an NDArray field")
