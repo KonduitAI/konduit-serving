@@ -92,8 +92,13 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     public DL4JPipelineStepRunner(DL4JModelPipelineStep step) {
         this.step = step;
-        File f = getFile(step.modelUri());  //TODO DON'T ASSUME LOCAL FILE URI!
-
+        //File f = getFile(step.modelUri());  //TODO DON'T ASSUME LOCAL FILE URI!
+        File f = null;
+        try {
+            f = URIResolver.getFile(step.modelUri());
+        } catch (IOException e) {
+            throw new ModelLoadingException("Failed to load Deeplearning4J MultiLayerNetwork from URI " + step.modelUri(), e);
+        }
         boolean isMLN = DL4JModelValidator.validateMultiLayerNetwork(f).isValid();
         boolean isCG = !isMLN && DL4JModelValidator.validateComputationGraph(f).isValid();
 
@@ -101,6 +106,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
         if (isMLN) {
             try {
+
                 net = MultiLayerNetwork.load(f, false);
                 graph = null;
             } catch (IOException e) {

@@ -46,6 +46,6 @@ public class TensorflowStepModelTest {
         INDArray arr = Nd4j.rand(DataType.FLOAT, 3, 4, 4);
         Data data = Data.singleton("in", NDArray.create(arr));
 
-        runner.exec(new DefaultContext(null,null), data);
+        //runner.exec(new DefaultContext(null,null), data);
     }
 }

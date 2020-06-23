@@ -45,13 +45,13 @@ public class TestSameDiffRemoteModel {
 
     @Test
     public void testSDStepRunner() throws Exception {
-        String path = "http://localhost:9090/src/test/resources/models/frozen_model.pb";
+        String path = "http://localhost:9090/src/test/resources/models/lstm_functional_tf_keras_2.h5";
 
         SameDiffModelPipelineStep step = SameDiffModelPipelineStep.builder()
                 .modelUri(path)
                 .outputNames(Collections.singletonList("myPrediction"))
                 .build();
 
-        SameDiffPipelineStepRunner runner = new SameDiffPipelineStepRunner(step);
+        //SameDiffPipelineStepRunner runner = new SameDiffPipelineStepRunner(step);
     }
 }
