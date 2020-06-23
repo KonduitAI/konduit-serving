@@ -114,8 +114,8 @@ public class PredictCommand extends DefaultCommand {
                 Vertx vertx = Vertx.vertx();
 
                 HttpRequest<Buffer> request = WebClient.create(vertx)
-                        .post(inferenceConfiguration.getServingConfig().getHttpPort(),
-                                inferenceConfiguration.getServingConfig().getListenHost(),
+                        .post(inferenceConfiguration.getServingConfig().httpPort(),
+                                inferenceConfiguration.getServingConfig().listenHost(),
                                 String.format("/%s/%s", predictionType, inputDataFormat));
 
 

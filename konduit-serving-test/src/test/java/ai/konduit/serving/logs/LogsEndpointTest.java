@@ -86,7 +86,7 @@ public class LogsEndpointTest {
             if(handler.succeeded()) {
                 testContext.assertTrue(Paths.get(mBaseLogDir, Constants.MAIN_ENDPOINT_LOGS_FILE).toFile().exists());
 
-                given().port(handler.result().getServingConfig().getHttpPort())
+                given().port(handler.result().getServingConfig().httpPort())
                         .get(String.format("/logs/%s", numberOfLinesToReadFromLogs))
                         .then()
                         .assertThat()
@@ -165,7 +165,7 @@ public class LogsEndpointTest {
                     if(handler.succeeded()) {
                         testContext.assertTrue(new File(DirectoryFetcher.getEndpointLogsDir(), Constants.MAIN_ENDPOINT_LOGS_FILE).exists());
 
-                        RequestSpecification requestSpecification = given().port(handler.result().getServingConfig().getHttpPort());
+                        RequestSpecification requestSpecification = given().port(handler.result().getServingConfig().httpPort());
 
                         Response response = requestSpecification.get("/logs/all");
 
@@ -210,8 +210,8 @@ public class LogsEndpointTest {
                         try {
                             InferenceConfiguration inferenceConfiguration = handler.result();
                             String url = String.format("http://%s:%s/logs",
-                                    inferenceConfiguration.getServingConfig().getListenHost(),
-                                    inferenceConfiguration.getServingConfig().getHttpPort());
+                                    inferenceConfiguration.getServingConfig().listenHost(),
+                                    inferenceConfiguration.getServingConfig().httpPort());
                             Desktop.getDesktop().browse(new URL(url).toURI());
                         } catch (Exception e) {
                             e.printStackTrace();

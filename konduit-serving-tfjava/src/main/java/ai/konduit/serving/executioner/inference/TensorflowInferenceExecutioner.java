@@ -64,10 +64,10 @@ public class TensorflowInferenceExecutioner implements
     @Override
     public void initialize(ModelLoader<TensorflowGraphHolder> model, ParallelInferenceConfig config) {
         tensorflowThreadPool = new TensorFlowThreadPool
-                .Builder(model).workers(config.getWorkers())
-                .inferenceMode(config.getInferenceMode())
-                .queueLimit(config.getQueueLimit())
-                .batchLimit(config.getBatchLimit())
+                .Builder(model).workers(config.workers())
+                .inferenceMode(config.inferenceMode())
+                .queueLimit(config.queueLimit())
+                .batchLimit(config.batchLimit())
                 .build();
         this.modelLoader = model;
 

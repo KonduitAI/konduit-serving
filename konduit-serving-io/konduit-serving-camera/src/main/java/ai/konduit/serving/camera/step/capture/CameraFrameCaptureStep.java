@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -29,6 +30,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 //  or a way to specify max number of inferences per second. This can potentially save us some compute.- SHAMS
 @Data
 @Accessors(fluent=true)
+@NoArgsConstructor
 @JsonName("FRAME_CAPTURE")
 @Schema(description = "A pipeline step that specifies an input that's taken from a camera feed.")
 public class CameraFrameCaptureStep implements PipelineStep {

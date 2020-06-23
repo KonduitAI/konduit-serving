@@ -24,13 +24,9 @@ package ai.konduit.serving.pipeline;
 
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.ServingConfig;
-import ai.konduit.serving.pipeline.PipelineStep;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,11 +34,11 @@ public class PipelineSerializationTests {
 
     @Test
     public void testFromYaml() throws Exception {
-        List<PipelineStep> list = new ArrayList<PipelineStep>();
-        list.add((PipelineStep) new PythonStep());
-        list.add((PipelineStep) new PythonStep());
-
-        InferenceConfiguration inferenceConfiguration = new InferenceConfiguration().setSteps(list).;
+        InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
+                .step(new PythonStep())
+                .step(new PythonStep())
+                .servingConfig(new ServingConfig())
+                .build();
         assertEquals(inferenceConfiguration, InferenceConfiguration.fromYaml(inferenceConfiguration.toYaml()));
     }
 

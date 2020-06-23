@@ -55,12 +55,12 @@ public class TensorflowInferenceExecutionerTests {
 
         TensorflowInferenceExecutioner tensorflowInferenceExecutioner = new TensorflowInferenceExecutioner();
 
-        tensorflowInferenceExecutioner.initialize(tensorflowModelLoader, ParallelInferenceConfig.builder()
+        tensorflowInferenceExecutioner.initialize(tensorflowModelLoader, new ParallelInferenceConfig()
                 .batchLimit(1)
                 .workers(1)
                 .queueLimit(1)
                 .inferenceMode(InferenceMode.SEQUENTIAL)
-                .build());
+                );
 
         INDArray assertion = Nd4j.linspace(1, 4, 4).muli(2);
         INDArray[] output = tensorflowInferenceExecutioner.execute(new INDArray[]{Nd4j.linspace(1, 4, 4), Nd4j.linspace(1, 4, 4)});
@@ -85,12 +85,12 @@ public class TensorflowInferenceExecutionerTests {
 
         TensorflowInferenceExecutioner tensorflowInferenceExecutioner = new TensorflowInferenceExecutioner();
 
-        tensorflowInferenceExecutioner.initialize(tensorflowModelLoader, ParallelInferenceConfig.builder()
+        tensorflowInferenceExecutioner.initialize(tensorflowModelLoader, new ParallelInferenceConfig()
                 .batchLimit(1)
                 .workers(1)
                 .queueLimit(1)
                 .inferenceMode(InferenceMode.SEQUENTIAL)
-                .build());
+                );
 
         INDArray assertion = Nd4j.create(new float[]{42}, new long[0]);
         INDArray[] output = tensorflowInferenceExecutioner.execute(new INDArray[]{assertion});

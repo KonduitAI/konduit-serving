@@ -27,7 +27,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.image.transform.ImageTransformProcess;
@@ -44,7 +43,7 @@ import java.util.List;
  * @author Adam Gibson
  */
 @Data
-@Accessors(fluent=true)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConverterArgs implements Serializable {
@@ -53,19 +52,19 @@ public class ConverterArgs implements Serializable {
     private TransformProcess transformProcess;
     private ImageTransformProcess imageTransformProcess;
 
-    
+    @Builder.Default
     private List<Integer> integers = new ArrayList<>();
-    
+    @Builder.Default
     private List<Long> longs = new ArrayList<>();
-    
+    @Builder.Default
     private List<Float> floats = new ArrayList<>();
-    
+    @Builder.Default
     private List<Double> doubles = new ArrayList<>();
-    
+    @Builder.Default
     private List<String> strings = new ArrayList<>();
-    
+    @Builder.Default
     private String imageProcessingRequiredLayout = "NCHW";
-    
+    @Builder.Default
     private String imageProcessingInitialLayout = "NCHW";
 
 }

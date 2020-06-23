@@ -76,10 +76,9 @@ public class SameDiffVerticleNumpyTest extends BaseVerticleTest {
         File tmpSameDiffFile = temporary.newFile();
         sameDiff.asFlatFile(tmpSameDiffFile);
 
-        ServingConfig servingConfig = ServingConfig.builder()
+        ServingConfig servingConfig =new  ServingConfig()
                 .outputDataFormat(Output.DataFormat.NUMPY)
-                .httpPort(port)
-                .build();
+                .httpPort(port);
 
         SameDiffStep config = SameDiffStep.builder()
                 .path(tmpSameDiffFile.getAbsolutePath())

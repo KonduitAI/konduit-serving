@@ -20,12 +20,14 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 @Accessors(fluent = true)
 @JsonName("DEEPLEARNING4J")
 @Schema(description = "A pipeline step that configures a DL4J model that is to be executed.")

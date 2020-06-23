@@ -208,9 +208,9 @@ public class ConfigCommand extends DefaultCommand {
         }
 
         InferenceConfiguration inferenceConfiguration =
-                InferenceConfiguration.builder()
+                new InferenceConfiguration()
                         .protocol(protocol)
-                        .pipeline(pipeline).build();
+                        .pipeline(pipeline);
 
         if(yaml) {
             printOrSave(inferenceConfiguration.toYaml());
@@ -562,11 +562,10 @@ public class ConfigCommand extends DefaultCommand {
                             .newInstance(imageToNDArrayConfigObject3, Arrays.asList("key1", "key2"),
                                     Arrays.asList("output1", "output2"), true, false, "@ImageToNDArrayStepMetadata");
                 case LOGGING:
-                    return LoggingPipelineStep.builder()
-                            .log(LoggingPipelineStep.Log.KEYS_AND_VALUES)
-                            .build();
+                    return new LoggingPipelineStep()
+                            .log(LoggingPipelineStep.Log.KEYS_AND_VALUES);
                 case SSD_TO_BOUNDING_BOX:
-                    return SSDToBoundingBoxStep.builder().build();
+                    return new SSDToBoundingBoxStep();
                 case SAMEDIFF:
                     moduleName = "konduit-serving-samediff";
                     clazz = Class.forName("ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep");

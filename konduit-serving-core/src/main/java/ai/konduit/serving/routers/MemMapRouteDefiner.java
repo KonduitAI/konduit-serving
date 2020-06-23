@@ -115,11 +115,11 @@ public class MemMapRouteDefiner {
      * @return the router with the endpoints defined
      */
     public Router defineRoutes(Vertx vertx, InferenceConfiguration inferenceConfiguration) {
-        long initialSize = inferenceConfiguration.getMemMapConfig().getInitialMemmapSize();
+        long initialSize = inferenceConfiguration.getMemMapConfig().initialMemmapSize();
         Router router = Router.router(vertx);
         memMapConfig = inferenceConfiguration.getMemMapConfig();
 
-        String path =  inferenceConfiguration.getMemMapConfig().getUnkVectorPath();
+        String path =  inferenceConfiguration.getMemMapConfig().unkVectorPath();
 
         if(path != null) {
            try {
@@ -284,7 +284,7 @@ public class MemMapRouteDefiner {
     }
 
     private INDArray getOrSetArrForContext() {
-        String path = memMapConfig.getArrayPath();
+        String path = memMapConfig.arrayPath();
 
 
         File loadFrom = new File(path);
@@ -293,7 +293,7 @@ public class MemMapRouteDefiner {
         }
 
         if (mArray.get() == null) {
-            try (MemoryWorkspace ignored = Nd4j.getWorkspaceManager().getAndActivateWorkspace(mmap, memMapConfig.getWorkSpaceName())) {
+            try (MemoryWorkspace ignored = Nd4j.getWorkspaceManager().getAndActivateWorkspace(mmap, memMapConfig.workSpaceName())) {
                 if (path.endsWith("npy"))
                     mArray.set((Nd4j.createFromNpyFile(loadFrom)));
                 else {

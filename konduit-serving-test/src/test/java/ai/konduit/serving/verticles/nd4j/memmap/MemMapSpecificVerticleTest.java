@@ -75,13 +75,13 @@ public class MemMapSpecificVerticleTest extends BaseMemMapTest {
         FileUtils.writeByteArrayToFile(tmpFile, save);
         InferenceConfiguration inferenceConfiguration =
                 InferenceConfiguration.builder()
-                        .servingConfig(ServingConfig.builder()
+                        .servingConfig(new ServingConfig()
                                 .httpPort(port)
-                                .build())
-                        .memMapConfig(MemMapConfig.builder()
+                                )
+                        .memMapConfig(new MemMapConfig()
                                 .unkVectorPath(unkVectorPath.getAbsolutePath())
                                 .arrayPath(tmpFile.getAbsolutePath())
-                                .build())
+                                )
                         .build();
 
         return new JsonObject(inferenceConfiguration.toJson());

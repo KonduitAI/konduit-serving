@@ -121,7 +121,7 @@ public class ListCommand extends DefaultCommand {
         try {
             configuration = FileUtils.readFileToString(new File(DirectoryFetcher.getServersDataDir(), pid + ".data"), StandardCharsets.UTF_8);
             ServingConfig servingConfig = InferenceConfiguration.fromJson(configuration).getServingConfig();
-            hostAndPort = String.format("%s:%s", servingConfig.getListenHost(), servingConfig.getHttpPort());
+            hostAndPort = String.format("%s:%s", servingConfig.listenHost(), servingConfig.httpPort());
             status = "started";
         } catch (IOException exception) {
             log.error("Error occurred while reading server configuration file\n", exception);

@@ -46,6 +46,8 @@ import org.nd4j.linalg.factory.Nd4j;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import java.util.Collections;
+
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
@@ -81,17 +83,15 @@ public class TestPythonJsonNdArrayScalarInput extends BaseMultiNumpyVerticalTest
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        PythonConfig pythonConfig = PythonConfig.builder()
+        PythonConfig pythonConfig = new PythonConfig()
                 .pythonCode("first += 2; output = first")
-                .pythonInput("first", PythonType.TypeName.NDARRAY.name())
-                .pythonOutput("output", PythonType.TypeName.NDARRAY.name())
-                .build();
+                .pythonInputs(Collections.singletonMap("first", PythonType.TypeName.NDARRAY.name()))
+                .pythonOutputs(Collections.singletonMap("output", PythonType.TypeName.NDARRAY.name()));
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(port)
-                .build();
+        ServingConfig servingConfig = new ServingConfig()
+                .httpPort(port);
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .step(pythonStepConfig)

@@ -83,13 +83,12 @@ public class SameDiffVerticleClassificationMetricsTest extends BaseVerticleTest 
         sameDiff.asFlatFile(tmpSameDiffFile);
         SameDiff values = SameDiff.fromFlatFile(tmpSameDiffFile);
 
-        ServingConfig servingConfig = ServingConfig.builder()
+        ServingConfig servingConfig = new ServingConfig()
                 .outputDataFormat(Output.DataFormat.ND4J)
-                .metricsConfigurations(Collections.singletonList(ClassificationMetricsConfig.builder()
-                        .classificationLabels(Arrays.asList("0", "1")).build()))
+                .metricsConfigurations(Collections.singletonList(new ClassificationMetricsConfig()
+                        .classificationLabels(Arrays.asList("0", "1"))))
                 .metricTypes(Collections.singletonList(MetricType.CLASSIFICATION))
-                .httpPort(port)
-                .build();
+                .httpPort(port);
 
         SameDiffStep modelPipelineConfig = SameDiffStep.builder()
                 .path(tmpSameDiffFile.getAbsolutePath())

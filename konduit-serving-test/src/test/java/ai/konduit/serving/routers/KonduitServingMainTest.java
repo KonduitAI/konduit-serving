@@ -112,9 +112,8 @@ public class KonduitServingMainTest {
         outputSchemaBuilder.addColumnDouble("virginica");
         Schema outputSchema = outputSchemaBuilder.build();
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(PortUtils.getAvailablePort())
-                .build();
+        ServingConfig servingConfig = new ServingConfig()
+                .httpPort(PortUtils.getAvailablePort());
 
         Dl4jStep modelPipelineStep = Dl4jStep.builder()
                 .inputName("default")

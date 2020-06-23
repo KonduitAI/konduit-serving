@@ -69,10 +69,10 @@ public class PmmlInferenceExecutioner implements
     @Override
     public void initialize(ModelLoader<Evaluator> model, ParallelInferenceConfig config) {
         this.inference = new PMMLThreadPool.Builder(model)
-                .batchLimit(config.getBatchLimit())
-                .queueLimit(config.getQueueLimit())
-                .inferenceMode(config.getInferenceMode())
-                .workers(config.getWorkers())
+                .batchLimit(config.batchLimit())
+                .queueLimit(config.queueLimit())
+                .inferenceMode(config.inferenceMode())
+                .workers(config.workers())
                 .build();
         this.modelLoader = model;
 

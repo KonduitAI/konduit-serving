@@ -49,7 +49,7 @@ public class PmmlInferenceExecutionerStepRunner extends BaseStepRunner {
         PmmlStep pmmlStepConfig = (PmmlStep) pipelineStep;
         PmmlInferenceExecutionerFactory inferenceExecutionerFactory = new PmmlInferenceExecutionerFactory();
         try {
-            pmmlInferenceExecutioner = (PmmlInferenceExecutioner) inferenceExecutionerFactory.create(pmmlStepConfig).getInferenceExecutioner();
+            pmmlInferenceExecutioner = (PmmlInferenceExecutioner) inferenceExecutionerFactory.create(pmmlStepConfig).inferenceExecutioner();
             evaluator = pmmlInferenceExecutioner.model();
         } catch (Exception e) {
             e.printStackTrace();

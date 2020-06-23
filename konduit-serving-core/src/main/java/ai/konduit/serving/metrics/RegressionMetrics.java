@@ -70,16 +70,16 @@ public class RegressionMetrics implements MetricsRenderer {
 
     @Override
     public void bindTo(MeterRegistry meterRegistry) {
-        for(int i = 0; i < regressionMetricsConfig.getRegressionColumnLabels().size(); i++) {
+        for(int i = 0; i < regressionMetricsConfig.regressionColumnLabels().size(); i++) {
             StatCounter statCounter = new StatCounter();
             statCounters.add(statCounter);
-            ColumnDistribution columnDistribution = regressionMetricsConfig.getColumnDistributions() != null &&
-                    regressionMetricsConfig.getColumnDistributions().size() == regressionMetricsConfig.getRegressionColumnLabels().size() ?
-                    regressionMetricsConfig.getColumnDistributions().get(i) : null;
-            StatCounterSupplier statCounterSupplier = new StatCounterSupplier(statCounter,regressionMetricsConfig.getSampleTypes().get(i),columnDistribution);
-            outputStatsGauges.add(Gauge.builder(regressionMetricsConfig.getRegressionColumnLabels().get(i),statCounterSupplier)
+            ColumnDistribution columnDistribution = regressionMetricsConfig.columnDistributions() != null &&
+                    regressionMetricsConfig.columnDistributions().size() == regressionMetricsConfig.regressionColumnLabels().size() ?
+                    regressionMetricsConfig.columnDistributions().get(i) : null;
+            StatCounterSupplier statCounterSupplier = new StatCounterSupplier(statCounter,regressionMetricsConfig.sampleTypes().get(i),columnDistribution);
+            outputStatsGauges.add(Gauge.builder(regressionMetricsConfig.regressionColumnLabels().get(i),statCounterSupplier)
                     .tags(tags)
-                    .description("Regression values seen so far for label " + regressionMetricsConfig.getRegressionColumnLabels().get(i))
+                    .description("Regression values seen so far for label " + regressionMetricsConfig.regressionColumnLabels().get(i))
                     .baseUnit("regression.outcome")
                     .register(meterRegistry));
 

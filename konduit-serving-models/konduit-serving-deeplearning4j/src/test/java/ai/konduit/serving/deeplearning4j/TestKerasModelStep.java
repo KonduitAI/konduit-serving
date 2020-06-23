@@ -94,7 +94,7 @@ public class TestKerasModelStep {
 
         for(boolean withNamesDefined : new boolean[]{false, true}) {
             Pipeline p = SequencePipeline.builder()
-                    .add( new KerasModelStep()
+                    .add(new KerasModelStep()
                             .modelUri(path)
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
                             .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)

@@ -83,7 +83,7 @@ public abstract class ModelStep extends BasePipelineStep<ModelStep> {
     @JsonAlias("modelLoadingPath")
     private String path;
 
-    
+    @Builder.Default
     private ParallelInferenceConfig parallelInferenceConfig = ParallelInferenceConfig.defaultConfig();
 
     private NormalizationConfig normalizationConfig;

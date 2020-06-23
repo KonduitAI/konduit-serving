@@ -144,7 +144,7 @@ public class KonduitRunCommand extends RunCommand {
     protected void deploy() {
         if (INFERENCE_SERVICE_TYPE_NAME.equalsIgnoreCase(serviceType)) {
             DeployKonduitServing.registerInferenceVerticleFactory(vertx);
-            super.setMainVerticle(INFERENCE_SERVICE_IDENTIFIER + ":" + inferenceConfiguration.getProtocol().name().toLowerCase());
+            super.setMainVerticle(INFERENCE_SERVICE_IDENTIFIER + ":" + inferenceConfiguration.protocol().name().toLowerCase());
         } else {
             throw new CLIException(String.format("Unsupported service type %s", serviceType));
         }

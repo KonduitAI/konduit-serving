@@ -86,7 +86,7 @@ public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
     @Override
     protected void setupWebServer(Promise<Void> startPromise) {
         Preconditions.checkNotNull(inferenceConfiguration, "Inference configuration undefined!");
-        port = inferenceConfiguration.getServingConfig().getHttpPort();
+        port = inferenceConfiguration.getServingConfig().httpPort();
         if (port == 0) {
             String portEnvValue = System.getenv(ai.konduit.serving.verticles.VerticleConstants.KONDUIT_SERVING_PORT);
             if (portEnvValue != null) {
@@ -103,7 +103,7 @@ public class ClusteredInferenceVerticle extends BaseRoutableVerticle {
         vertx.createHttpServer()
                 .requestHandler(router)
                 .exceptionHandler(Throwable::printStackTrace)
-                .listen(port, inferenceConfiguration.getServingConfig().getListenHost(), handler -> {
+                .listen(port, inferenceConfiguration.getServingConfig().listenHost(), handler -> {
                     if (handler.failed()) {
                         log.error("Could not start HTTP server");
                         startPromise.fail(handler.cause());

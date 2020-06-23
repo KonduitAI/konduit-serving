@@ -121,8 +121,8 @@ public class KonduitServingLauncherWithProcessesTest {
 
         assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID,
                 String.format("%s:%s",
-                        inferenceConfiguration.getHost(),
-                        inferenceConfiguration.getPort()),
+                        inferenceConfiguration.host(),
+                        inferenceConfiguration.port()),
                 STARTED_STRING)));
 
         Data input = Data.singleton("key", "value");
@@ -155,8 +155,8 @@ public class KonduitServingLauncherWithProcessesTest {
 
         assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID,
                 String.format("%s:%s",
-                        inferenceConfiguration.getHost(),
-                        inferenceConfiguration.getPort()),
+                        inferenceConfiguration.host(),
+                        inferenceConfiguration.port()),
                 STARTED_STRING)));
 
         Data input = Data.singleton("key", "value");
@@ -264,13 +264,13 @@ public class KonduitServingLauncherWithProcessesTest {
     private String testAndGetImageConfiguration() throws IOException, InterruptedException {
         String inferenceConfigurationJson = runAndGetOutput("config", "-p", "logging");
 
-        assertEquals(inferenceConfigurationJson, InferenceConfiguration.builder()
+        assertEquals(inferenceConfigurationJson, new InferenceConfiguration()
                 .pipeline(SequencePipeline.builder()
-                        .add(LoggingPipelineStep.builder()
+                        .add(new LoggingPipelineStep()
                                 .log(LoggingPipelineStep.Log.KEYS_AND_VALUES)
-                                .build())
+                                )
                         .build())
-                .build().toJson());
+                .toJson());
 
         if(SystemUtils.IS_OS_WINDOWS) {
             return new JsonObject(inferenceConfigurationJson).encode().replace("\"", "\\\""); // Escaping \" as windows ProcessBuilder removes quotes for some reason.

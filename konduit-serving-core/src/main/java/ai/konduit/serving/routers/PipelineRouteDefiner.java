@@ -157,9 +157,9 @@ public class PipelineRouteDefiner {
         }
 
         metricsRenderers = new ArrayList<>();
-        if (inferenceConfiguration.getServingConfig().getMetricTypes() != null && registry != null) {
+        if (inferenceConfiguration.getServingConfig().metricTypes() != null && registry != null) {
             //don't add more than one type
-            for (MetricType metricType : new HashSet<>(inferenceConfiguration.getServingConfig().getMetricTypes())) {
+            for (MetricType metricType : new HashSet<>(inferenceConfiguration.getServingConfig().metricTypes())) {
                 switch (metricType) {
                     case CLASS_LOADER:
                         addMetric(new ClassLoaderMetrics(),registry);
@@ -183,14 +183,14 @@ public class PipelineRouteDefiner {
                         addMetric(new NativeMetrics(),registry);
                         break;
                     case CLASSIFICATION:
-                        if(inferenceConfiguration.getServingConfig().getMetricsConfigurations() == null) {
+                        if(inferenceConfiguration.getServingConfig().metricsConfigurations() == null) {
                             throw new IllegalStateException("Please specify classification labels to pair with classification metrics");
                         }
-                        List<MetricsConfig> metricsConfigurations = inferenceConfiguration.getServingConfig().getMetricsConfigurations();
+                        List<MetricsConfig> metricsConfigurations = inferenceConfiguration.getServingConfig().metricsConfigurations();
                         for(MetricsConfig metricsConfig : metricsConfigurations) {
                             if(metricsConfig instanceof ClassificationMetricsConfig) {
                                 ClassificationMetricsConfig classificationMetricsConfig = (ClassificationMetricsConfig) metricsConfig;
-                                if(classificationMetricsConfig.getClassificationLabels() == null || classificationMetricsConfig.getClassificationLabels().isEmpty()) {
+                                if(classificationMetricsConfig.classificationLabels() == null || classificationMetricsConfig.classificationLabels().isEmpty()) {
                                     throw new IllegalStateException("No classification labels configured for the classification metrics configuration. Please specify labels.");
                                 }
 
@@ -203,15 +203,15 @@ public class PipelineRouteDefiner {
 
                         break;
                     case REGRESSION:
-                        if(inferenceConfiguration.getServingConfig().getMetricsConfigurations() == null) {
+                        if(inferenceConfiguration.getServingConfig().metricsConfigurations() == null) {
                             throw new IllegalStateException("Please specify classification labels to pair with regression metrics");
                         }
 
-                        List<MetricsConfig> metricsConfigurations2 = inferenceConfiguration.getServingConfig().getMetricsConfigurations();
+                        List<MetricsConfig> metricsConfigurations2 = inferenceConfiguration.getServingConfig().metricsConfigurations();
                         for(MetricsConfig metricsConfig : metricsConfigurations2) {
                             if(metricsConfig instanceof RegressionMetricsConfig) {
                                 RegressionMetricsConfig regressionMetricsConfig = (RegressionMetricsConfig) metricsConfig;
-                                if(regressionMetricsConfig.getRegressionColumnLabels() == null || regressionMetricsConfig.getRegressionColumnLabels().isEmpty()) {
+                                if(regressionMetricsConfig.regressionColumnLabels() == null || regressionMetricsConfig.regressionColumnLabels().isEmpty()) {
                                     throw new IllegalStateException("No regression labels configured for the regression metrics configuration. Please specify labels.");
                                 }
 
@@ -223,15 +223,15 @@ public class PipelineRouteDefiner {
                         }
                         break;
                     case CUSTOM_MULTI_LABEL:
-                        if(inferenceConfiguration.getServingConfig().getMetricsConfigurations() == null) {
+                        if(inferenceConfiguration.getServingConfig().metricsConfigurations() == null) {
                             throw new IllegalStateException("Please specify classification labels to pair with regression metrics");
                         }
 
-                        List<MetricsConfig> metricsConfigurations3 = inferenceConfiguration.getServingConfig().getMetricsConfigurations();
+                        List<MetricsConfig> metricsConfigurations3 = inferenceConfiguration.getServingConfig().metricsConfigurations();
                         for(MetricsConfig metricsConfig : metricsConfigurations3) {
                             if(metricsConfig instanceof MultiLabelMetricsConfig) {
                                 MultiLabelMetricsConfig multiLabelMetricsConfig = (MultiLabelMetricsConfig) metricsConfig;
-                                if(multiLabelMetricsConfig.getLabels() == null || multiLabelMetricsConfig.getLabels().isEmpty()) {
+                                if(multiLabelMetricsConfig.labels() == null || multiLabelMetricsConfig.labels().isEmpty()) {
                                     throw new IllegalStateException("No  labels configured for the regression metrics configuration. Please specify labels.");
                                 }
 
@@ -296,7 +296,7 @@ public class PipelineRouteDefiner {
          * {@link ServingConfig#isCreateLoggingEndpoints()} is true.
          * Returns the last 100 lines of the log file.
          */
-        if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
+        if(inferenceConfiguration.getServingConfig().createLoggingEndpoints()) {
             router.get("/logs")
                     .handler(ctx -> {
                         try {
@@ -354,7 +354,7 @@ public class PipelineRouteDefiner {
 
 
         router.post().handler(BodyHandler.create()
-                .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
+                .setUploadsDirectory(inferenceConfiguration.getServingConfig().uploadsDirectory())
                 .setDeleteUploadedFilesOnEnd(true)
                 .setMergeFormAttributes(true))
                 .failureHandler(failureHandlder -> {
@@ -407,7 +407,7 @@ public class PipelineRouteDefiner {
                         null,
                         outputSchema,
 			            inputDataFormat,
-                        inferenceConfiguration.getServingConfig().getOutputDataFormat());
+                        inferenceConfiguration.getServingConfig().outputDataFormat());
 
                 if (start != null)
                     start.stop();
@@ -472,7 +472,7 @@ public class PipelineRouteDefiner {
                 }
 
                 long endNanos = System.nanoTime();
-                if (inferenceConfiguration.getServingConfig().isLogTimings()) {
+                if (inferenceConfiguration.getServingConfig().logTimings()) {
                     log.info("Timing for batch creation was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                 }
                 if (batch == null) {
@@ -527,13 +527,13 @@ public class PipelineRouteDefiner {
                             null,
                             outputSchema,
 			    inputDataFormat,
-                            inferenceConfiguration.getServingConfig().getOutputDataFormat());
+                            inferenceConfiguration.getServingConfig().outputDataFormat());
 
 
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
-                    if (inferenceConfiguration.getServingConfig().isLogTimings()) {
+                    if (inferenceConfiguration.getServingConfig().logTimings()) {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
                     vertx.runOnContext(handler -> {
@@ -585,7 +585,7 @@ public class PipelineRouteDefiner {
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
-                    if (inferenceConfiguration.getServingConfig().isLogTimings()) {
+                    if (inferenceConfiguration.getServingConfig().logTimings()) {
                         log.info("Timing for batch creation was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos)) + " milliseconds");
                     }
                     if (batch == null) {
@@ -630,7 +630,7 @@ public class PipelineRouteDefiner {
                     if (start != null)
                         start.stop();
                     long endNanos = System.nanoTime();
-                    if (inferenceConfiguration.getServingConfig().isLogTimings()) {
+                    if (inferenceConfiguration.getServingConfig().logTimings()) {
                         log.info("Timing for inference was " + TimeUnit.NANOSECONDS.toMillis((endNanos - nanos))
                                 + " milliseconds");
                     }
@@ -674,7 +674,7 @@ public class PipelineRouteDefiner {
 
     static void generalHandler(InferenceConfiguration inferenceConfiguration, Router router, Logger log) {
         router.post().handler(BodyHandler.create()
-                .setUploadsDirectory(inferenceConfiguration.getServingConfig().getUploadsDirectory())
+                .setUploadsDirectory(inferenceConfiguration.getServingConfig().uploadsDirectory())
                 .setDeleteUploadedFilesOnEnd(true)
                 .setMergeFormAttributes(true))
                 .failureHandler(failureHandlder -> {

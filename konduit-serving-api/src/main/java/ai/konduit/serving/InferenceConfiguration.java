@@ -47,6 +47,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class InferenceConfiguration implements Serializable, TextConfig {
 
     @Singular

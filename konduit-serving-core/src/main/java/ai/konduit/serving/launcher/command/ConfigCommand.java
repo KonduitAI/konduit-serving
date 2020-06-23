@@ -36,12 +36,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavec.python.PythonType;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Name("config")
 @Summary("A helper command for creating JSON for inference configuration")
@@ -151,7 +150,7 @@ public class ConfigCommand extends DefaultCommand {
 
         InferenceConfiguration inferenceConfiguration =
                 InferenceConfiguration.builder()
-                .servingConfig(ServingConfig.builder().build())
+                .servingConfig(new ServingConfig())
                 .steps(pipelineSteps).build();
 
         if(yaml) {
@@ -174,20 +173,26 @@ public class ConfigCommand extends DefaultCommand {
                 .build();
     }
 
+    HashMap<String, String> pythonInputs = new HashMap<String, String>() {{
+        put("x1", PythonType.TypeName.NDARRAY.name());
+        put("x2", PythonType.TypeName.NDARRAY.name());
+    }};
+
+    HashMap<String, String> pythonOutputs = new HashMap<String, String>() {{
+        put("y1", PythonType.TypeName.NDARRAY.name());
+        put("y2", PythonType.TypeName.NDARRAY.name());
+    }};
+
     private PipelineStep<PythonStep> python() {
         return PythonStep.builder()
                 .inputName(DEFAULT)
                 .outputName(DEFAULT)
                 .pythonConfig(DEFAULT,
-                        PythonConfig.builder()
-                                .pythonInput("x1", PythonType.TypeName.NDARRAY.name())
-                                .pythonInput("x2", PythonType.TypeName.NDARRAY.name())
-                                .pythonOutput("y1", PythonType.TypeName.NDARRAY.name())
-                                .pythonOutput("y2", PythonType.TypeName.NDARRAY.name())
+                        new PythonConfig().pythonInputs(pythonInputs).pythonOutputs(pythonOutputs)
                                 .pythonPath("# Execute <python -c \"import sys, os; print(os.pathsep.join([path for path in sys.path if path]))\"> to find the value of it.")
                                 .pythonCode("<python-script # Remove this if 'pythonCodePath' is set>")
                                 .pythonCodePath("<python-code-path # Remove this if 'pythonCode' is set>")
-                                .build())
+                )
                 .build();
     }
 

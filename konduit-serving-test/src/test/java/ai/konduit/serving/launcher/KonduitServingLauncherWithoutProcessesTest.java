@@ -128,8 +128,8 @@ public class KonduitServingLauncherWithoutProcessesTest {
 
         assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID,
                 String.format("%s:%s",
-                        inferenceConfiguration.getServingConfig().getListenHost(),
-                        inferenceConfiguration.getServingConfig().getHttpPort()),
+                        inferenceConfiguration.getServingConfig().listenHost(),
+                        inferenceConfiguration.getServingConfig().httpPort()),
                 "started")));
 
         String imagePath = new ClassPathResource("/data/5_32x32.png").getFile().getAbsolutePath();
@@ -167,8 +167,8 @@ public class KonduitServingLauncherWithoutProcessesTest {
 
         assertThat(runAndGetOutput("list"), Matchers.stringContainsInOrder(Arrays.asList(TEST_SERVER_ID,
                 String.format("%s:%s",
-                        inferenceConfiguration.getServingConfig().getListenHost(),
-                        inferenceConfiguration.getServingConfig().getHttpPort()),
+                        inferenceConfiguration.getServingConfig().listenHost(),
+                        inferenceConfiguration.getServingConfig().httpPort()),
                 "started")));
 
         String imagePath = new ClassPathResource("/data/5_32x32.png").getFile().getAbsolutePath();
@@ -200,14 +200,15 @@ public class KonduitServingLauncherWithoutProcessesTest {
 
         Thread runCommandThread = new Thread(() -> runCommand("run", "-c",
                 InferenceConfiguration.builder()
-                        .servingConfig(ServingConfig.builder()
+                        .servingConfig(new ServingConfig()
                                 .httpPort(port)
                                 .uploadsDirectory(temporaryFolder.getRoot().getAbsolutePath())
-                                .build())
+                                )
                         .step(ImageLoadingStep.builder()
                                 .inputName("default")
                                 .outputName("default")
-                                .build())
+                                .build()
+                                )
                         .build().toJsonObject().encode(),
                 "-i", "1",
                 "-s", "inference"));
@@ -306,9 +307,9 @@ public class KonduitServingLauncherWithoutProcessesTest {
         String inferenceConfigurationJson = runAndGetOutput("config", "-t", "image");
 
         assertEquals(inferenceConfigurationJson, InferenceConfiguration.builder()
-                .servingConfig(ServingConfig.builder()
+                .servingConfig(new ServingConfig()
                         .uploadsDirectory(temporaryFolder.getRoot().getAbsolutePath())
-                        .build())
+                        )
                 .step(ImageLoadingStep.builder()
                         .inputName("default")
                         .outputName("default")

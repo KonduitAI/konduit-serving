@@ -125,9 +125,8 @@ public class TestUtils {
         outputSchemaBuilder.addColumnDouble("virginica");
         Schema outputSchema = outputSchemaBuilder.build();
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .createLoggingEndpoints(true)
-                .build();
+        ServingConfig servingConfig = new ServingConfig()
+                .createLoggingEndpoints(true);
 
         Dl4jStep modelPipelineStep = Dl4jStep.builder()
                 .inputName("default")

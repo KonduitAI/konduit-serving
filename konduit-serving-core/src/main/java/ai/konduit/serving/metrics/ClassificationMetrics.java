@@ -69,12 +69,12 @@ public class ClassificationMetrics implements MetricsRenderer {
 
     @Override
     public void bindTo(MeterRegistry meterRegistry) {
-        for(int i = 0; i < classificationMetricsConfig.getClassificationLabels().size(); i++) {
+        for(int i = 0; i < classificationMetricsConfig.classificationLabels().size(); i++) {
             CurrentClassTrackerCount classTrackerCount = new CurrentClassTrackerCount();
             classTrackerCounts.add(classTrackerCount);
-            classCounterIncrement.add(Gauge.builder(classificationMetricsConfig.getClassificationLabels().get(i),classTrackerCount)
+            classCounterIncrement.add(Gauge.builder(classificationMetricsConfig.classificationLabels().get(i),classTrackerCount)
                     .tags(tags)
-                    .description("Classification counts seen so far for label " + classificationMetricsConfig.getClassificationLabels().get(i))
+                    .description("Classification counts seen so far for label " + classificationMetricsConfig.classificationLabels().get(i))
                     .baseUnit("classification.outcome")
                     .register(meterRegistry));
 

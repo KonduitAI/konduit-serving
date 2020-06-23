@@ -39,7 +39,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
     private Runnable init;
 
     public FrameCaptureStepRunner(CameraFrameCaptureStep step){
-        this.outputKey = step.getOutputKey();
+        this.outputKey = step.outputKey();
         this.step = step;
         init = () -> {
             this.initOpenCVFrameGrabber(step);
@@ -47,7 +47,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
     }
 
     public FrameCaptureStepRunner(VideoFrameCaptureStep step){
-        this.outputKey = step.getOutputKey();
+        this.outputKey = step.outputKey();
         this.step = step;
         init = () -> {
             this.initFFmpegFrameGrabber(step);
@@ -92,11 +92,11 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
     }
 
     protected void initOpenCVFrameGrabber(CameraFrameCaptureStep step){
-        grabber = new OpenCVFrameGrabber(step.getCamera());
+        grabber = new OpenCVFrameGrabber(step.camera());
         converter = new OpenCVFrameConverter.ToIplImage();
 
-        int w = step.getWidth();
-        int h = step.getHeight();
+        int w = step.width();
+        int h = step.height();
         grabber.setImageHeight(h);
         grabber.setImageWidth(w);
 
@@ -111,8 +111,8 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
     }
 
     protected void initFFmpegFrameGrabber(VideoFrameCaptureStep step){
-        grabber = new FFmpegFrameGrabber(step.getFilePath());
-        loop = step.isLoop();
+        grabber = new FFmpegFrameGrabber(step.filePath());
+        loop = step.loop();
         converter = new OpenCVFrameConverter.ToIplImage();
 
         try {

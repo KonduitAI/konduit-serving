@@ -107,9 +107,8 @@ public class ColumnarTransformProcessesTest extends BaseDl4JVerticalTest {
 
         TransformProcessStep transformStep = new TransformProcessStep(transformProcess, outputSchema);
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(port)
-                .build();
+        ServingConfig servingConfig = new ServingConfig()
+                .httpPort(port);
 
         ModelStep modelStepConfig = Dl4jStep.builder().path(modelSave.getAbsolutePath()).build()
                 .setInput(inputSchema)

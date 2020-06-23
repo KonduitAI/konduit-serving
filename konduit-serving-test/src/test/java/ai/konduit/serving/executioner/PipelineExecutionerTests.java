@@ -25,7 +25,6 @@ package ai.konduit.serving.executioner;
 import ai.konduit.serving.InferenceConfiguration;
 import ai.konduit.serving.config.*;
 import ai.konduit.serving.model.*;
-import ai.konduit.serving.model.PythonConfig.PythonConfigBuilder;
 import ai.konduit.serving.pipeline.config.ObjectDetectionConfig;
 import ai.konduit.serving.pipeline.step.ImageLoadingStep;
 import ai.konduit.serving.pipeline.step.ModelStep;
@@ -55,9 +54,8 @@ public class PipelineExecutionerTests {
     public void testDoJsonInference() {
         int port = PortUtils.getAvailablePort();
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(port)
-                .build();
+        ServingConfig servingConfig = new ServingConfig()
+                .httpPort(port);
 
         JsonObject jsonSchema = new JsonObject();
         JsonObject schemaValues = new JsonObject();
@@ -69,7 +67,7 @@ public class PipelineExecutionerTests {
                 .map(Enum::name)
                 .collect(Collectors.toList());
         Map<String,PythonConfig> namesToPythonConfig = new LinkedHashMap<>();
-        PythonConfigBuilder pythonConfig = PythonConfig.builder();
+        PythonConfig pythonConfig = new PythonConfig();
 
         for (SchemaType value : values) {
             if(value == SchemaType.Boolean)
@@ -81,7 +79,7 @@ public class PipelineExecutionerTests {
             jsonSchema.put(value.name(), topLevel);
             switch (value) {
                 case NDArray:
-                    pythonConfig.pythonInput(value.name(), PythonType.TypeName.NDARRAY.name());
+                    pythonConfig.pythonInputs(Collections.singletonMap(value.name(), PythonType.TypeName.NDARRAY.name()));
                     fieldInfo.put("shape",new JsonArray().add(1).add(1));
                     schemaValues.put(value.name(), Nd4j.toNpyByteArray(Nd4j.scalar(1.0)));
                     break;
@@ -91,42 +89,42 @@ public class PipelineExecutionerTests {
                     schemaValues.put(value.name(), true);
                     break;*/
                 case Float:
-                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.FLOAT.name());
+                    pythonConfig.pythonInputs(Collections.singletonMap(value.name(),PythonType.TypeName.FLOAT.name()));
                     schemaValues.put(value.name(), 1.0f);
                     break;
                 case Double:
-                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.FLOAT.name());
+                    pythonConfig.pythonInputs(Collections.singletonMap(value.name(),PythonType.TypeName.FLOAT.name()));
                     schemaValues.put(value.name(), 1.0);
                     break;
                 case Image:
                     schemaValues.put(value.name(), new byte[]{0, 1});
-                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
+                    pythonConfig.pythonInputs(Collections.singletonMap(value.name(),PythonType.TypeName.STR.name()));
                     break;
                 case Integer:
-                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.INT.name());
+                    pythonConfig.pythonInputs(Collections.singletonMap(value.name(),PythonType.TypeName.INT.name()));
                     schemaValues.put(value.name(), 1);
                     break;
                 case String:
-                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
+                    pythonConfig.pythonInputs(Collections.singletonMap(value.name(),PythonType.TypeName.STR.name()));
                     schemaValues.put(value.name(), "1.0");
                     break;
                 case Time:
                     fieldInfo.put("timeZoneId", TimeZone.getDefault().getID());
                     Instant now = Instant.now();
                     schemaValues.put(value.name(), now);
-                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
+                    pythonConfig.pythonInputs(Collections.singletonMap(value.name(),PythonType.TypeName.STR.name()));
                     break;
                 case Categorical:
-                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
+                    pythonConfig.pythonInputs(Collections.singletonMap(value.name(),PythonType.TypeName.STR.name()));
                     fieldInfo.put("categories",new JsonArray().add("cat"));
                     schemaValues.put(value.name(), "cat");
                     break;
                 case Bytes:
-                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.STR.name());
+                    pythonConfig.pythonInputs(Collections.singletonMap(value.name(),PythonType.TypeName.STR.name()));
                     schemaValues.put(value.name(), new byte[]{1, 0});
                     break;
                 case Long:
-                    pythonConfig.pythonInput(value.name(),PythonType.TypeName.INT.name());
+                    pythonConfig.pythonInputs(Collections.singletonMap(value.name(),PythonType.TypeName.INT.name()));
                     schemaValues.put(value.name(), 1L);
                     break;
 
@@ -136,7 +134,7 @@ public class PipelineExecutionerTests {
 
         pythonConfig.pythonCode(SchemaType.NDArray.name() + " += 2");
 
-        PythonConfig built = pythonConfig.build();
+        PythonConfig built =  new PythonConfig();
         JsonObject schemaWrapper = new JsonObject();
         JsonObject valuesWrapper = new JsonObject();
         for(String fieldName : fieldNames) {
@@ -171,10 +169,8 @@ public class PipelineExecutionerTests {
         System.out.println("Started on port " + port);
         String path = new ClassPathResource("inference/tensorflow/mnist/lenet_frozen.pb").getFile().getAbsolutePath();
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(port)
-                .build();
-
+        ServingConfig servingConfig = new ServingConfig()
+                .httpPort(port);
         TensorFlowStep modelStepConfig = TensorFlowStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)
                 .inputNames(Collections.singletonList("image_tensor"))
@@ -205,20 +201,17 @@ public class PipelineExecutionerTests {
         System.out.println("Started on port " + port);
         String path = new ClassPathResource("inference/tensorflow/mnist/lenet_frozen.pb").getFile().getAbsolutePath();
 
-        ObjectDetectionConfig objectRecognitionConfig = ObjectDetectionConfig
-                .builder()
-                .numLabels(80)
-                .build();
+        ObjectDetectionConfig objectRecognitionConfig = new ObjectDetectionConfig()
+                .numLabels(80);
         ImageLoadingStep imageLoadingStepConfig = ImageLoadingStep.builder()
                 .inputNames(Collections.singletonList("image_tensor"))
                 .outputNames(Collections.singletonList("detection_classes"))
                 .objectDetectionConfig(objectRecognitionConfig)
                 .build();
 
-        ServingConfig servingConfig = ServingConfig.builder()
+        ServingConfig servingConfig = new ServingConfig()
                 .outputDataFormat(Output.DataFormat.JSON)
-                .httpPort(port)
-                .build();
+                .httpPort(port);
 
         TensorFlowStep modelStepConfig = TensorFlowStep.builder()
                 .parallelInferenceConfig(parallelInferenceConfig)

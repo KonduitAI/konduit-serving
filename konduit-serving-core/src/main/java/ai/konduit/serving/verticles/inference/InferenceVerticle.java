@@ -102,7 +102,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
             return;
         }
 
-        if(inferenceConfiguration.getServingConfig().isCreateLoggingEndpoints()) {
+        if(inferenceConfiguration.getServingConfig().createLoggingEndpoints()) {
             LogUtils.setFileAppenderIfNeeded();
         }
 
@@ -116,7 +116,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                 return;
             }
         } else {
-            port = inferenceConfiguration.getServingConfig().getHttpPort();
+            port = inferenceConfiguration.getServingConfig().httpPort();
         }
 
         if (port < 0 || port > 0xFFFF) {
@@ -129,13 +129,13 @@ public class InferenceVerticle extends BaseRoutableVerticle {
         vertx.createHttpServer()
                 .requestHandler(router)
                 .exceptionHandler(Throwable::printStackTrace)
-                .listen(port, inferenceConfiguration.getServingConfig().getListenHost(), handler -> {
+                .listen(port, inferenceConfiguration.getServingConfig().listenHost(), handler -> {
                     if (handler.failed()) {
                         log.error("Could not start HTTP server");
                         startPromise.fail(handler.cause());
                     } else {
                         port = handler.result().actualPort();
-                        inferenceConfiguration.getServingConfig().setHttpPort(port);
+                        inferenceConfiguration.getServingConfig().httpPort(port);
 
                         try {
                             ((ContextInternal) context).getDeployment().deploymentOptions().setConfig(new JsonObject(inferenceConfiguration.toJson()));
@@ -149,7 +149,7 @@ public class InferenceVerticle extends BaseRoutableVerticle {
                                 vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
                             }
 
-                            log.info("Inference server is listening on host: '{}'", inferenceConfiguration.getServingConfig().getListenHost());
+                            log.info("Inference server is listening on host: '{}'", inferenceConfiguration.getServingConfig().listenHost());
                             log.info("Inference server started on port {} with {} pipeline steps", port, nSteps);
                             startPromise.complete();
                         } catch (Exception exception) {

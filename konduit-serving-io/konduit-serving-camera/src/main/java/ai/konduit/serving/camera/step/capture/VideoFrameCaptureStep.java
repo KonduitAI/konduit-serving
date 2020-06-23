@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -34,6 +35,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
  */
 @Data
 @Accessors(fluent=true)
+@NoArgsConstructor
 @JsonName("VIDEO_CAPTURE")
 @Schema(description = "A pipeline step that configures how to extracts a single frame from a video each time inference is called." +
         " The video path is hardcoded, mainly used for testing/demo purposes given this")

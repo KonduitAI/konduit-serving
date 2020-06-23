@@ -49,9 +49,8 @@ public class WordPieceTokenizerStepTest
     {
         int port = PortUtils.getAvailablePort();
 
-        ServingConfig servingConfig = ServingConfig.builder()
-                .httpPort(port)
-                .build();
+        ServingConfig servingConfig = new ServingConfig()
+                .httpPort(port);
 
         ClassPathResource classPathResource = new ClassPathResource("vocab/bert-base-uncased-vocab.txt");
 

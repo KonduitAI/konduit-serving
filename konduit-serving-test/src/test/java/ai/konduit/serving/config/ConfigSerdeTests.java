@@ -31,7 +31,7 @@ public class ConfigSerdeTests {
 
     @Test
     public void testImageLoadingSerde() throws Exception {
-        ObjectDetectionConfig objectDetectionConfig = ObjectDetectionConfig.builder().build();
+        ObjectDetectionConfig objectDetectionConfig = new ObjectDetectionConfig();
         ImageLoadingStep imageLoadingStepConfig = ImageLoadingStep.builder()
                 .inputNames(Collections.singletonList("image_tensor"))
                 .outputNames(Collections.singletonList("detection_classes"))

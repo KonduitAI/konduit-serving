@@ -70,7 +70,7 @@ public class InferenceExecutionerStepRunner extends BaseStepRunner {
             Preconditions.checkNotNull(modelPipelineStepConfig.getParallelInferenceConfig(), "No parallel inference configuration found!");
             InitializedInferenceExecutionerConfig init = inferenceExecutionerFactory.create(modelPipelineStepConfig);
             Preconditions.checkNotNull(init, "Initialized inference executioner configuration should not be null!");
-            inferenceExecutioner = init.getInferenceExecutioner();
+            inferenceExecutioner = init.inferenceExecutioner();
 
         } catch (Exception e) {
             throw new IllegalStateException(e);

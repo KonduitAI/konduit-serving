@@ -47,12 +47,11 @@ public class InferenceVerticleMqttTest {
 
     @BeforeClass
     public static void setUp(TestContext testContext) {
-        configuration = InferenceConfiguration.builder()
+        configuration = new InferenceConfiguration()
                 .protocol(ServerProtocol.MQTT)
                 .pipeline(SequencePipeline.builder()
-                        .add(LoggingPipelineStep.builder().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR).build())
-                        .build())
-                .build();
+                        .add(new LoggingPipelineStep().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR))
+                        .build());
 
         Async async = testContext.async();
 
