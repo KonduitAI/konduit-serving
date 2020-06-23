@@ -25,3 +25,5 @@ ai.konduit.serving.data.image.step.face.DrawFaceKeyPointsStepRunnerFactory
 ai.konduit.serving.data.image.step.point.perspective.convert.PerspectiveTransformStepRunnerFactory
 ai.konduit.serving.data.image.step.resize.ImageResizeFactory
 ai.konduit.serving.data.image.step.crop.ImageCropFactory
+ai.konduit.serving.data.image.step.capture.FrameCaptureStepRunnerFactory
+
