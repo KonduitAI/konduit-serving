@@ -1,15 +1,15 @@
 package ai.konduit.serving.pipeline.api.protocol;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Arrays;
 
-public class RemoteUtils {
+public class URIResolver {
 
     public static boolean isUrl(String input) {
         if (input.startsWith("http://") ||
@@ -20,7 +20,25 @@ public class RemoteUtils {
         return false;
     }
 
-    public static String configFromHttp(String uri) throws IOException {
+    private static File cacheDirectory;
+
+    public static File getCacheDirectory() {
+        if (cacheDirectory == null) {
+            File f = new File(System.getProperty("user.home"), ".konduit_cache/");
+            if (!f.exists())
+                f.mkdirs();
+            cacheDirectory = f;
+        }
+        return cacheDirectory;
+    }
+
+    public static File getFile(String uri) throws IOException {
+
+        String fileName = FilenameUtils.getName(uri);
+        File cachedFile = new File(getCacheDirectory(), fileName);
+        if (cachedFile.exists()) {
+            return cachedFile;
+        }
 
         URI u = URI.create(uri);
         URL url = u.toURL();
@@ -33,7 +51,8 @@ public class RemoteUtils {
             String data = StringUtils.EMPTY;
             while ((data = br.readLine()) != null)
                 content.append(data);
+            FileUtils.writeStringToFile(cachedFile, content.toString(), "UTF-8");
         }
-        return content.toString();
+        return cachedFile;
     }
 }

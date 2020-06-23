@@ -1,10 +1,11 @@
 package ai.konduitai.serving.pipeline.protocol;
 
 import ai.konduit.serving.pipeline.api.protocol.FtpClient;
-import ai.konduit.serving.pipeline.api.protocol.RemoteUtils;
-import ai.konduit.serving.pipeline.api.protocol.handlers.S3StreamHandlerFactory;
+import ai.konduit.serving.pipeline.api.protocol.URIResolver;
+import ai.konduit.serving.pipeline.api.protocol.handlers.KSStreamHandlerFactory;
 import ai.konduitai.serving.common.test.TestServer;
 import lombok.val;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
@@ -38,9 +39,7 @@ public class TestURL {
 
     @Before
     public void setUp() throws Exception {
-        URL.setURLStreamHandlerFactory(new S3StreamHandlerFactory());
-        /*System.setProperty("java.protocol.handler.pkgs",
-                "ai.konduit.serving.pipeline.api.protocol.handlers");*/
+        URL.setURLStreamHandlerFactory(new KSStreamHandlerFactory());
         server = new TestServer(HTTP, HOST, PORT);
         server.start();
         configData = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("config/config.json"),
@@ -55,11 +54,11 @@ public class TestURL {
     @Test
     public void testHttpURL() throws Exception {
         String url = HTTP + HOST + ":" + PORT + "/src/test/resources/config/config.json";
-        String data = RemoteUtils.configFromHttp(url);
+        String data = FileUtils.readFileToString(URIResolver.getFile(url), "UTF-8");
         assertTrue(data.contains("pipelineSteps"));
 
         url = HTTPS + HOST + ":" + PORT + "/src/test/resources/config/config.json";
-        data = RemoteUtils.configFromHttp(url);
+        data = FileUtils.readFileToString(URIResolver.getFile(url), "UTF-8");
         assertTrue(data.contains("pipelineSteps"));
     }
 
@@ -82,7 +81,8 @@ public class TestURL {
         ftpClient.connect("localhost");
         if (ftpClient.login("user", "password")) {
             String url = FTP + "user:password@" + HOST + ":" + 21 + "/config.json";
-            String data = RemoteUtils.configFromHttp(url);
+            File dataFile = URIResolver.getFile(url);
+            String data = FileUtils.readFileToString(dataFile, "UTF-8");
             assertTrue(data.contains("pipelineSteps"));
             fakeFtpServer.stop();
         }
@@ -108,7 +108,8 @@ public class TestURL {
     @Ignore
     @Test
     public void testHDFS() throws IOException {
-        URL url = new URL("hdfs://someurl");
+        System.setProperty("hadoop.home.dir", "D:\\install\\hadoop-2.8.0\\bin");
+        URL url = new URL("hdfs://localhost:9000/user/root/config.json");
 
         URLConnection conn = url.openConnection();
         try (InputStream is = conn.getInputStream()) {

@@ -16,14 +16,31 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+    <!--repositories>
+        <repository> <id>mapr-releases</id>
+            <url>http://repository.mapr.com/maven/</url>
+            <snapshots><enabled>false</enabled></snapshots>
+            <releases><enabled>true</enabled></releases>
+        </repository>
+    </repositories-->
 
     <dependencies>
 
+            <!--dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>20200518</version>
+            </dependency-->
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-annotation</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-core</artifactId>
+            <version>2.4.1-mapr-1408</version>
+        </dependency-->
         <dependency>
             <groupId>net.java.dev.jets3t</groupId>
             <artifactId>jets3t</artifactId>

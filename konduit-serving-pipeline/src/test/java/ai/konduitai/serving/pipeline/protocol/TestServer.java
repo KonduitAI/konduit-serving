@@ -1,4 +1,5 @@
-package ai.konduitai.serving.pipeline.protocol;
+package ai.konduitai.serving.common.test;
+
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.DefaultHandler;
