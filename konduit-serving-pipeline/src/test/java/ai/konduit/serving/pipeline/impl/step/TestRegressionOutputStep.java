@@ -52,8 +52,9 @@ public class TestRegressionOutputStep {
         NDArray preds = NDArray.create(values);
         Data in = Data.singleton("preds", preds);
         Data out = p.executor().exec(in);
-        assertTrue((double)out.get("a") == 0.1);
-        assertTrue((double)out.get("c") == 0.3);
+        double eps = 0.0000001;
+        assertEquals(0.1, (double)out.get("a"), eps);
+        assertEquals(0.3, (double)out.get("c"), eps);
 
         String json = p.toJson();
         String yaml = p.toYaml();
@@ -89,8 +90,8 @@ public class TestRegressionOutputStep {
         List<Double> list1 = Arrays.asList(0.1, 0.4);
         List<Double> list2 = Arrays.asList(0.3, 0.6);
 
-        assertTrue(out.get("a").equals(list1));
-        assertTrue(out.get("c").equals(list2));
+        assertEquals(list1,out.get("a"));
+        assertEquals(list2,out.get("c"));
 
         String json = p.toJson();
         String yaml = p.toYaml();
@@ -122,8 +123,8 @@ public class TestRegressionOutputStep {
         Data in = Data.singleton("preds", preds);
         Data out = p.executor().exec(in);
 
-        assertTrue(out.get("a").equals(0.1));
-        assertTrue(out.get("c").equals(0.3));
+        assertEquals(0.1,out.get("a"));
+        assertEquals(0.3,out.get("c"));
 
         String json = p.toJson();
         String yaml = p.toYaml();
@@ -158,8 +159,8 @@ public class TestRegressionOutputStep {
         List<Double> list1 = Arrays.asList(0.1, 0.4);
         List<Double> list2 = Arrays.asList(0.3, 0.6);
 
-        assertTrue(out.get("a").equals(list1));
-        assertTrue(out.get("c").equals(list2));
+        assertEquals(list1,out.get("a"));
+        assertEquals(list2,out.get("c"));
 
         String json = p.toJson();
         String yaml = p.toYaml();

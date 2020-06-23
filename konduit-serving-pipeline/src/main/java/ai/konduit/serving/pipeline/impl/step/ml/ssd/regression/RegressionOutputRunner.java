@@ -79,7 +79,7 @@ public class RegressionOutputRunner implements PipelineStepRunner {
         Map<String, Integer> outputNames = step.names();
 
         if (outputNames == null || outputNames.isEmpty()) {
-            throw new UnsupportedOperationException(".names field was not provided or equal null");
+            throw new UnsupportedOperationException("RegressionOutputStep names field was not provided or is null");
         }
 
 
@@ -112,7 +112,7 @@ public class RegressionOutputRunner implements PipelineStepRunner {
     }
 
 
-    public static double[] squeze(NDArray arr) {
+    private static double[] squeze(NDArray arr) {
 
         // we have [numClasses] array, so do not modify nothing
         if (arr.shape().length == 1) {
@@ -128,7 +128,7 @@ public class RegressionOutputRunner implements PipelineStepRunner {
 
     }
 
-    NDArray FloatNDArrayToDouble(NDArray ndarr) {
+    private static NDArray FloatNDArrayToDouble(NDArray ndarr) {
         if (ndarr.type() == NDArrayType.FLOAT || ndarr.type() == NDArrayType.FLOAT16 || ndarr.type() == NDArrayType.BFLOAT16) {
             float[][] farr = ndarr.getAs(float[][].class);
             double[][] darr = new double[(int) ndarr.shape()[0]][(int) ndarr.shape()[1]];
