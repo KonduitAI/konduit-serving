@@ -19,12 +19,14 @@
 package ai.konduit.serving.common.test;
 
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
+import javax.xml.crypto.URIReference;
 import java.io.File;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
@@ -46,6 +48,7 @@ public abstract class BaseHttpUriTest {
 
     //The directory that files can be placed in to host from
     public File httpDir;
+    public String relativeFolder;
 
     @Before
     public void setUp() throws Exception {
@@ -54,8 +57,9 @@ public abstract class BaseHttpUriTest {
             setStreamHandler = true;
         }
 
-        httpDir = testDir.newFolder();
-        server = new TestServer(PORT, httpDir);
+        relativeFolder = "tests_" + System.currentTimeMillis();
+        httpDir = testDir.newFolder(relativeFolder);
+        server = new TestServer(PORT, testDir.getRoot());
         server.start();
 
     }
@@ -63,6 +67,11 @@ public abstract class BaseHttpUriTest {
     @After
     public void tearDown() throws Exception {
         server.stop();
+        FileUtils.deleteDirectory(httpDir);
+    }
+
+    public String uriFor(String relativePath){
+        return HTTP + HOST + ":" + PORT + "/" + relativeFolder + "/" + relativePath;
     }
 
 }

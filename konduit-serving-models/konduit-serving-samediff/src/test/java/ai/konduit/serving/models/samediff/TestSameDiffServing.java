@@ -81,6 +81,7 @@ public class TestSameDiffServing {
     }
 
     public static SameDiff getModel(){
+        Nd4j.getRandom().setSeed(12345);
         SameDiff sd = SameDiff.create();
         SDVariable in = sd.placeHolder("in", DataType.FLOAT, -1, 784);
 

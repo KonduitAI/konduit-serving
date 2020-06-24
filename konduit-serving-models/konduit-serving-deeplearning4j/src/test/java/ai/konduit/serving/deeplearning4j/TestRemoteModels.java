@@ -26,10 +26,12 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
+import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.api.protocol.handlers.KSStreamHandlerFactory;
 import ai.konduit.serving.pipeline.impl.context.DefaultContext;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.apache.commons.io.FileUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
 import org.nd4j.linalg.api.buffer.DataType;
@@ -46,6 +48,12 @@ public class TestRemoteModels extends BaseHttpUriTest {
         return new KSStreamHandlerFactory();
     }
 
+    @Before
+    public void before(){
+        //Needed until we proprely implement the full path, not just the filename, for the cache
+        URIResolver.clearCache();
+    }
+
     @Test
     public void testDL4JRemoteURI() throws Exception {
         File dir = new File(httpDir, "tests");
@@ -53,7 +61,7 @@ public class TestRemoteModels extends BaseHttpUriTest {
         File f = TestDL4JModelStep.createIrisMLNFile(dir);
         String filename = "tests/" + f.getName();
 
-        String uri = HTTP + HOST + ":" + PORT + "/" + filename;
+        String uri = uriFor(filename);
 
         Pipeline p = SequencePipeline.builder()
                 .add(DL4JModelPipelineStep.builder()
@@ -73,7 +81,7 @@ public class TestRemoteModels extends BaseHttpUriTest {
         String filename = "lstm_functional_tf_keras_2.h5";
         String relativePath = "tests/" + filename;
         FileUtils.copyFile(Resources.asFile(filename), new File(httpDir, relativePath));
-        String uri = HTTP + HOST + ":" + PORT + "/" + relativePath;
+        String uri = uriFor(relativePath);
 
         KerasModelStep step = KerasModelStep.builder()
                 .modelUri(uri)

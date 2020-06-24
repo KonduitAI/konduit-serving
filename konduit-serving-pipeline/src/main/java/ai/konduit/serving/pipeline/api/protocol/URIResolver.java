@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.api.protocol;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
+@Slf4j
 public class URIResolver {
 
     public static boolean isUrl(String input) {
@@ -39,6 +41,13 @@ public class URIResolver {
     }
 
     private static File cacheDirectory;
+    static {
+        File f = new File(System.getProperty("user.home"), ".konduit_cache/");
+        if (!f.exists())
+            f.mkdirs();
+        cacheDirectory = f;
+    }
+
 
     public static File getCachedFile(String uri) {
         URI u = URI.create(uri);
@@ -46,13 +55,6 @@ public class URIResolver {
         System.out.println(u.getPath());
         String[] dirs = u.getPath().split("/");
         fullPath += File.separator + FilenameUtils.getName(uri);
-
-        if (cacheDirectory == null) {
-            File f = new File(System.getProperty("user.home"), ".konduit_cache/");
-            if (!f.exists())
-                f.mkdirs();
-            cacheDirectory = f;
-        }
         File effectiveDirectory = new File(cacheDirectory, fullPath);
         return effectiveDirectory;
     }
@@ -74,5 +76,14 @@ public class URIResolver {
         FileUtils.copyURLToFile(url, cachedFile);
 
         return cachedFile;
+    }
+
+    public static void clearCache(){
+        try {
+            FileUtils.deleteDirectory(cacheDirectory);
+        } catch (IOException e){
+            log.warn("Failed to delete cache directory: {}", cacheDirectory);
+        }
+        cacheDirectory.mkdirs();
     }
 }

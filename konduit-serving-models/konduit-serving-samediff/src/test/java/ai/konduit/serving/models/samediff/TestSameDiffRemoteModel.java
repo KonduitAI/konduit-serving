@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
+import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.api.protocol.handlers.KSStreamHandlerFactory;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.junit.After;
@@ -49,13 +50,20 @@ public class TestSameDiffRemoteModel extends BaseHttpUriTest {
         return new KSStreamHandlerFactory();
     }
 
+    @Before
+    public void before(){
+        //Needed until we proprely implement the full path, not just the filename, for the cache
+        URIResolver.clearCache();
+    }
+
     @Test
     public void testRemote(){
         String filename = "tests/samediff_model.fb";
         SameDiff sd = TestSameDiffServing.getModel();
         new File(httpDir, "tests").mkdirs();
-        sd.save(new File(httpDir, filename), true);
-        String uri = HTTP + HOST + ":" + PORT + "/" + filename;
+        File f = new File(httpDir, filename);
+        sd.save(f, true);
+        String uri = uriFor(filename);
 
 
         INDArray inArr = Nd4j.rand(DataType.FLOAT, 3, 784);
