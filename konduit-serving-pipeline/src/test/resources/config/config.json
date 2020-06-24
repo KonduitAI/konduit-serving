@@ -1,0 +1,60 @@
+{
+  "@type": "InferenceConfiguration",
+  "pipelineSteps": [
+    {
+      "@type": "PythonStep",
+      "inputColumnNames": {
+        "default": [
+          "img_path"
+        ]
+      },
+      "inputNames": [
+        "default"
+      ],
+      "inputSchemas": {
+        "default": [
+          "String"
+        ]
+      },
+      "outputColumnNames": {
+        "default": [
+          "label",
+          "proba"
+        ]
+      },
+      "outputNames": [
+        "default"
+      ],
+      "outputSchemas": {
+        "default": [
+          "String",
+          "String"
+        ]
+      },
+      "pythonConfigs": {
+        "default": {
+          "@type": "PythonConfig",
+          "pythonCodePath": "/usr/share/input-data/exec.py",
+          "pythonInputs": {
+            "img_path": "STR"
+          },
+          "pythonOutputs": {
+            "label": "STR",
+            "proba": "STR"
+          },
+          "pythonPath": "/opt/conda/lib/python37.zip:/opt/conda/lib/python3.7:/opt/conda/lib/python3.7/lib-dynload:/opt/conda/lib/python3.7/site-packages:/opt/conda/lib/python3.7/site-packages/konduitserving-0.1-py3.7.egg:/opt/conda/lib/python3.7/site-packages/pandas-0.24.2-py3.7-linux-x86_64.egg:/opt/conda/lib/python3.7/site-packages/requests_toolbelt-0.9.1-py3.7.egg:/opt/conda/lib/python3.7/site-packages/pyarrow-0.13.0-py3.7-linux-x86_64.egg:/opt/conda/lib/python3.7/site-packages/numpy-1.16.4-py3.7-linux-x86_64.egg:/opt/conda/lib/python3.7/site-packages/pytz-2019.2-py3.7.egg"
+        }
+      }
+    }
+  ],
+  "servingConfig": {
+    "@type": "ServingConfig",
+    "httpPort": 65535,
+    "listenHost": "0.0.0.0",
+    "logTimings": true,
+    "parallelInferenceConfig": {
+      "@type": "ParallelInferenceConfig",
+      "workers": 1
+    }
+  }
+}

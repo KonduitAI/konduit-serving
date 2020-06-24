@@ -33,6 +33,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>konduit-serving-common-tests</module>
         <module>konduit-serving-core</module>
         <module>konduit-serving-api</module>
         <module>konduit-serving-codegen</module>

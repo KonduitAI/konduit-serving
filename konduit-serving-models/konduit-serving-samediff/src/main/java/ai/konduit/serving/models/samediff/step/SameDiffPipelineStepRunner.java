@@ -21,6 +21,7 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.exception.ModelLoadingException;
+import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import org.nd4j.autodiff.samediff.SameDiff;
@@ -45,17 +46,12 @@ public class SameDiffPipelineStepRunner implements PipelineStepRunner {
     public SameDiffPipelineStepRunner(SameDiffModelPipelineStep step) {
         this.step = step;
 
-        //TODO DON'T ASSUME LOCAL FILE URI!
-
         String uri = step.modelUri();
         Preconditions.checkState(uri != null && !uri.isEmpty(), "No model URI was provided (model URI was null or empty)");
-        URI u = URI.create(uri);
-        File f = new File(u);
-
-        Preconditions.checkState(f.exists(), "No model file exists at URI: %s", u);
-
 
         try {
+            File f = URIResolver.getFile(uri);
+            Preconditions.checkState(f.exists(), "No model file exists at URI: %s", uri);
             sd = SameDiff.load(f, false);
         } catch (Throwable e) {
             throw new ModelLoadingException("Failed to load SameDiff model from URI " + step.modelUri(), e);
