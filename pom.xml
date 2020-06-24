@@ -50,6 +50,7 @@
         <module>konduit-serving-metadata</module>
         <module>konduit-serving-cli</module>
         <module>konduit-serving-metrics</module>
+        <module>konduit-serving-clients</module>
         <module>konduit-serving-endpoint</module>
     </modules>
 
@@ -105,7 +106,7 @@
         <dl4j.version>1.0.0-beta7</dl4j.version>
         <datavec.version>${dl4j.version}</datavec.version>
         <nd4j.version>${dl4j.version}</nd4j.version>
-        <slf4j.version>1.7.26</slf4j.version>
+        <slf4j.version>1.7.30</slf4j.version>
         <junit.version>4.12</junit.version>
         <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
         <dependency-check-maven.version>5.3.2</dependency-check-maven.version>
@@ -145,7 +146,7 @@
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
         <hdf5.version>1.12.0</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
-        <jna.version>5.3.1</jna.version>
+        <jna.version>5.5.0</jna.version>
         <cuda.version>10.2</cuda.version>
         <cuda.javacpp.version>${cuda.version}-${javacpp.version}</cuda.javacpp.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
@@ -165,10 +166,56 @@
         <error_prone_annotations.version>2.3.3</error_prone_annotations.version>
         <commons-io.version>2.6</commons-io.version>
         <commons-codec.version>1.10</commons-codec.version>
+        <javaassist.version>3.27.0-GA</javaassist.version>
+        <swagger-stack.version>2.1.2</swagger-stack.version>
+        <io.swagger-core.version>1.6.1</io.swagger-core.version>
+        <joda-time.version>2.9.9</joda-time.version>
+        <jackson-coreutils.version>1.8</jackson-coreutils.version>
+        <jsr305.version>3.0.2</jsr305.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-ext</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>${jsr305.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.fge</groupId>
+                <artifactId>jackson-coreutils</artifactId>
+                <version>${jackson-coreutils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda-time.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-core</artifactId>
+                <version>${io.swagger-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-core</artifactId>
+                <version>${swagger-stack.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-jaxrs2</artifactId>
+                <version>${swagger-stack.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>${javaassist.version}</version>
+            </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
@@ -214,6 +261,11 @@
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-json</artifactId>
                 <version>${oshi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>${jna.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>

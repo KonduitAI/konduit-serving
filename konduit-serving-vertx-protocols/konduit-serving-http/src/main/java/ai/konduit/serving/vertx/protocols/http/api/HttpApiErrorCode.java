@@ -19,7 +19,15 @@
 package ai.konduit.serving.vertx.protocols.http.api;
 
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "An enum specifying the type of error occured on the konduit serving http server. " +
+        "DATA_PARSING_ERROR -> If the incoming data cannot be parsed " +
+        "MISSING_OR_EMPTY_CONTENT_TYPE_HEADER -> If the requests has no Content-Type header " +
+        "INVALID_CONTENT_TYPE_HEADER -> If the Content-Type header has an invalid value. Currently it should be either application/json or application/octet-stream " +
+        "MISSING_OR_EMPTY_ACCEPT_HEADER -> If the request has no Accept header " +
+        "INVALID_ACCEPT_HEADER -> If the Accept header has an invalid value. Currently it should be either application/json or application/octet-stream " +
+        "PIPELINE_PROCESSING_ERROR -> If there's an error while processing the data through the pipeline.")
 public enum HttpApiErrorCode {
     /**
      * If the incoming data cannot be parsed

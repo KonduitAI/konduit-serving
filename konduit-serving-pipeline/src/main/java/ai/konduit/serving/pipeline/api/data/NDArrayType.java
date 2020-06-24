@@ -18,9 +18,12 @@
 
 package ai.konduit.serving.pipeline.api.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * The data type of an {@link NDArray}
  */
+@Schema(description = "An enum that specifies the data type of an n-dimensional array.")
 public enum NDArrayType {
     DOUBLE,
     FLOAT,

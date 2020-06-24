@@ -20,6 +20,7 @@ package ai.konduit.serving.data.image.step.grid.draw;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,10 +29,10 @@ import lombok.experimental.Accessors;
 /**
  * Draw a grid on the specified image, based on the x/y coordinates of the corners, and the number of segments within
  * the grid in both directions.<br>
- * The 4 corner X coordinates come from {@code Data.getListDouble(xName)} and the 4 corner Y coordinates come from
- * {@code Data.getListDouble(yName)}.<br>
- * Note 1: The order of the the X/Y coordinates does not matter, other than grid1 value corresponding to the number of
- * segments between the (x[0],y[0]) and (x[1],y[1]) corners.<br>
+ * The 4 corner coordinates are defined as points, and come from {@code Data.getListPoint(name)}, in the following order:
+ * topLeft, topRight, bottomLeft, bottomRight<br>
+ * gridX is the number of grid segments between (topLeft and topRight) and (bottomLeft and bottomRight).<br>
+ * gridY is the number of grid segments between (topLeft and bottomLeft) and (topRight and bottomRight)<br>
  * The colors and line thicknesses can be configured.
  * <p>
  * See also {@link DrawFixedGridStep}
@@ -43,20 +44,49 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 @JsonName("DRAW_GRID")
+@Schema(description = "Draw a grid on the specified image, based on the x/y coordinates of the corners, and the number of segments within " +
+        "the grid in both directions.<br>" +
+        "The 4 corner coordinates are defined as points, and come from {@code Data.getListPoint(name)}, in the following order:" +
+        "topLeft, topRight, bottomLeft, bottomRight<br>" +
+        "gridX is the number of grid segments between (topLeft and topRight) and (bottomLeft and bottomRight).<br>" +
+        "gridY is the number of grid segments between (topLeft and bottomLeft) and (topRight and bottomRight)<br>" +
+        "The colors and line thicknesses can be configured.")
 public class DrawGridStep implements PipelineStep {
     public static final String DEFAULT_COLOR = "lime";
 
-    private String imageName;               //If null: just find any image
-    private String xName;                   //Name of the List<Long> or List<Double> of length 4, specifying X coordinates in any order
-    private String yName;                   //Name of the List<Long> or List<Double> of length 4, specifying Y coordinates in any order (that matches X order)
-    private int grid1;                      //Number of grid segments between (x[0],y[0]) and (x[1],y[1])
-    private int grid2;                      //Number of grid segments in the other direction
-    private boolean coordsArePixels;        //If true: Lists are in pixels, not 0 to 1
+    @Schema(description = "Name of the input image key from the previous step. If set to null, it will try to find any image in the incoming data instance.")
+    private String imageName;
+
+    @Schema(description = "Name of the List<Point> points specifying the corners, in order: topLeft, topRight, bottomLeft, bottomRight")
+    private String pointsName;
+
+    @Schema(description = "The number of grid segments between (topLeft and topRight) and (bottomLeft and bottomRight)")
+    private int gridX;
+
+    @Schema(description = "The number of grid segments between (topLeft and bottomLeft) and (topRight and bottomRight)")
+    private int gridY;
+
+    @Schema(description = "If true, the lists are in pixels coordinates, not from 0 to 1.")
+    private boolean coordsArePixels;
+
+    @Schema(description = "Color of the border. The color can be a hex/HTML string like" +
+            "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
+            "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private String borderColor;
+
+    @Schema(description = "Color of the grid. The color can be a hex/HTML string like" +
+            "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
+            "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private String gridColor;
+
     @Builder.Default
+    @Schema(description = "Line thickness to use to draw the border (in pixels).",
+            defaultValue = "1")
     private int borderThickness = 1;
-    private Integer gridThickness;          //If null: same thickness as border
+
+    @Schema(description = "Line thickness to use to draw the border (in pixels). " +
+            "If null then the same value as the borderThickness is used")
+    private Integer gridThickness;
 
     public DrawGridStep() {
         //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.

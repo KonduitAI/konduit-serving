@@ -15,8 +15,11 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.pipeline.serde;
 
+import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
+import ai.konduit.serving.pipeline.api.pipeline.Trigger;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.impl.pipeline.AsyncPipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
@@ -49,9 +52,16 @@ public class PipelineDeserializer extends StdDeserializer<Pipeline> {
             id = ((TextNode)tn.get("id")).asText();
         }
 
+        Trigger asyncTrigger = null;        //If present: it's an async pipeline
+        if(tn.get(Data.RESERVED_KEY_ASYNC_TRIGGER) != null){
+            TreeNode triggerNode = tn.get(Data.RESERVED_KEY_ASYNC_TRIGGER);
+            asyncTrigger = jp.getCodec().treeToValue(triggerNode, Trigger.class);
+        }
+
+        Pipeline p;
         if(n.isArray()){
             PipelineStep[] steps = jp.getCodec().treeToValue(n, PipelineStep[].class);
-            return new SequencePipeline(Arrays.asList(steps), id);
+            p = new SequencePipeline(Arrays.asList(steps), id);
         } else if(n.isObject()){
             Map<String, GraphStep> map = new LinkedHashMap<>();
 
@@ -66,10 +76,15 @@ public class PipelineDeserializer extends StdDeserializer<Pipeline> {
 
             String outputStep = ((TextNode)tn.get("outputStep")).asText();
 
-            return new GraphPipeline(map, outputStep, id);
+            p = new GraphPipeline(map, outputStep, id);
         } else {
             throw new JsonParseException(jp, "Unable to deserialize Pipeline: Invalid JSON/YAML? Pipeline is neither a SequencePipeline or a GraphPipeline");
         }
 
+        if(asyncTrigger != null ){
+            return new AsyncPipeline(p, asyncTrigger);
+        }
+
+        return p;
     }
 }

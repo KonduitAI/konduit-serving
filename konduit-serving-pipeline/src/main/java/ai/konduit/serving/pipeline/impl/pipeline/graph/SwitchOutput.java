@@ -20,6 +20,7 @@ package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -36,9 +37,13 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
 @JsonName(GraphConstants.GRAPH_SWITCH_OUTPUT_JSON_KEY)
+@Schema(description = "A graph pipeline step that is a single item in a list of multiple switch step outputs.")
 public class SwitchOutput extends BaseGraphStep implements GraphStep {
 
+    @Schema(description = "Number of outputs from the switch step.")
     private final int outputNum;
+
+    @Schema(description = "Name of the switch output step.")
     private final String switchName;
 
     /**

@@ -19,6 +19,8 @@
 package ai.konduit.serving.pipeline.api.data;
 
 import ai.konduit.serving.pipeline.impl.data.point.NDPoint;
+import ai.konduit.serving.pipeline.impl.serde.PointDeserializer;
+import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 
 import java.util.Objects;
 
@@ -31,6 +33,7 @@ import java.util.Objects;
  *
  * @author Paul Dubs
  */
+@JsonDeserialize(using = PointDeserializer.class)
 public interface Point {
 
     /**
