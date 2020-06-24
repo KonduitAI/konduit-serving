@@ -185,7 +185,7 @@ public class ServeCommand extends DefaultCommand {
         cliArguments.addAll(getArguments());
 
         String finalClassPath = Strings.isNullOrEmpty(classpath) ? System.getProperty("java.class.path") :
-                System.getProperty("java.class.path") ;
+                System.getProperty("java.class.path") + File.pathSeparator + classpath;
 
         // Add the classpath to env.
         builder.environment().putAll(System.getenv());
