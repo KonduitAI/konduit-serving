@@ -29,7 +29,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
-import ai.konduitai.serving.common.test.TestServer;
+import ai.konduit.serving.common.test.TestServer;
 
 import static org.junit.Assert.assertTrue;
 

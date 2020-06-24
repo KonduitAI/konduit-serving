@@ -1,9 +1,27 @@
-package ai.konduitai.serving.pipeline.protocol;
+/*
+ *  ******************************************************************************
+ *  * Copyright (c) 2020 Konduit K.K.
+ *  *
+ *  * This program and the accompanying materials are made available under the
+ *  * terms of the Apache License, Version 2.0 which is available at
+ *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  * License for the specific language governing permissions and limitations
+ *  * under the License.
+ *  *
+ *  * SPDX-License-Identifier: Apache-2.0
+ *  *****************************************************************************
+ */
+
+package ai.konduit.serving.pipeline.impl.pipeline.protocol;
 
 import ai.konduit.serving.pipeline.api.protocol.FtpClient;
 import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.api.protocol.handlers.KSStreamHandlerFactory;
-import ai.konduitai.serving.common.test.TestServer;
+import ai.konduit.serving.common.test.TestServer;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -45,7 +63,7 @@ public class TestURL {
 
     @Before
     public void setUp() throws Exception {
-        server = new TestServer(HTTP, HOST, PORT);
+        server = new TestServer(PORT, null);
         server.start();
         configData = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("config/config.json"),
                 "UTF-8");

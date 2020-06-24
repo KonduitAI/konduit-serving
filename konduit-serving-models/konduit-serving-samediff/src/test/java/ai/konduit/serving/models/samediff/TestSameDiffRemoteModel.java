@@ -15,43 +15,63 @@
  ******************************************************************************/
 package ai.konduit.serving.models.samediff;
 
+import ai.konduit.serving.common.test.BaseHttpUriTest;
+import ai.konduit.serving.common.test.TestServer;
 import ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep;
-import ai.konduit.serving.models.samediff.step.SameDiffPipelineStepRunner;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
+import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
+import ai.konduit.serving.pipeline.api.protocol.handlers.KSStreamHandlerFactory;
+import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.nd4j.autodiff.samediff.SameDiff;
+import org.nd4j.linalg.api.buffer.DataType;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
+import java.io.File;
+import java.net.URLStreamHandlerFactory;
 import java.util.Collections;
 
-public class TestSameDiffRemoteModel {
+import static org.junit.Assert.assertEquals;
 
-    private ai.konduitai.serving.common.test.TestServer testServer;
+public class TestSameDiffRemoteModel extends BaseHttpUriTest {
 
-    @Before
-    public void setUp() throws Exception {
-        testServer = new ai.konduitai.serving.common.test.TestServer("http://", "localhost", 9090);
-        testServer.start();
+    private TestServer testServer;
+
+    @Override
+    public URLStreamHandlerFactory streamHandler() {
+        return new KSStreamHandlerFactory();
     }
-
-    @After
-    public void tearDown() throws Exception {
-        testServer.stop();
-    }
-
-    @Rule
-    public TemporaryFolder testDir = new TemporaryFolder();
 
     @Test
-    public void testSDStepRunner() throws Exception {
-        String path = "http://localhost:9090/src/test/resources/models/lstm_functional_tf_keras_2.h5";
+    public void testRemote(){
+        String filename = "tests/samediff_model.fb";
+        SameDiff sd = TestSameDiffServing.getModel();
+        new File(httpDir, "tests").mkdirs();
+        sd.save(new File(httpDir, filename), true);
+        String uri = HTTP + HOST + ":" + PORT + "/" + filename;
 
-        SameDiffModelPipelineStep step = SameDiffModelPipelineStep.builder()
-                .modelUri(path)
-                .outputNames(Collections.singletonList("myPrediction"))
+
+        INDArray inArr = Nd4j.rand(DataType.FLOAT, 3, 784);
+        INDArray outExp = sd.outputSingle(Collections.singletonMap("in", inArr), "out");
+
+        Pipeline p = SequencePipeline.builder()
+                .add(SameDiffModelPipelineStep.builder()
+                        .modelUri(uri)
+                        .outputNames(Collections.singletonList("out"))
+                        .build())
                 .build();
 
-        //SameDiffPipelineStepRunner runner = new SameDiffPipelineStepRunner(step);
+        PipelineExecutor exec = p.executor();
+        Data d = Data.singleton("in", NDArray.create(inArr));
+        Data dOut = exec.exec(d);
+        INDArray outArr = dOut.getNDArray("out").getAs(INDArray.class);
+        assertEquals(outExp, outArr);
     }
 }

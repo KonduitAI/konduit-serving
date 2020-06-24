@@ -56,7 +56,6 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     public DL4JPipelineStepRunner(KerasModelStep step) {
         this.kStep = step;
-        //File f = getFile(step.modelUri());
         KerasModelBuilder b;
         try{
             File f = URIResolver.getFile(step.modelUri());
@@ -92,12 +91,11 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     public DL4JPipelineStepRunner(DL4JModelPipelineStep step) {
         this.step = step;
-        //File f = getFile(step.modelUri());  //TODO DON'T ASSUME LOCAL FILE URI!
-        File f = null;
+        File f;
         try {
             f = URIResolver.getFile(step.modelUri());
         } catch (IOException e) {
-            throw new ModelLoadingException("Failed to load Deeplearning4J MultiLayerNetwork from URI " + step.modelUri(), e);
+            throw new ModelLoadingException("Failed to load Deeplearning4J model (MultiLayerNetwork or ComputationGraph) from URI " + step.modelUri(), e);
         }
         boolean isMLN = DL4JModelValidator.validateMultiLayerNetwork(f).isValid();
         boolean isCG = !isMLN && DL4JModelValidator.validateComputationGraph(f).isValid();
@@ -106,7 +104,6 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
         if (isMLN) {
             try {
-
                 net = MultiLayerNetwork.load(f, false);
                 graph = null;
             } catch (IOException e) {
@@ -120,20 +117,6 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
                 throw new ModelLoadingException("Failed to load Deeplearning4J ComputationGraph from URI " + step.modelUri(), e);
             }
         }
-    }
-
-    protected static File getFile(String uri) {
-        Preconditions.checkState(uri != null && !uri.isEmpty(), "No model URI was provided (model URI was null or empty)");
-
-        File f;
-        if(uri.startsWith("file:/")){
-            f = new File(URI.create(uri));
-        } else {
-            f = new File(uri);
-        }
-
-        Preconditions.checkState(f.exists(), "No model file exists at URI: %s", uri);
-        return f;
     }
 
 
