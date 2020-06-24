@@ -14,4 +14,4 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################################
 
-ai.konduit.serving.PythonStep$Factory
+ai.konduit.serving.python.PythonStep$Factory

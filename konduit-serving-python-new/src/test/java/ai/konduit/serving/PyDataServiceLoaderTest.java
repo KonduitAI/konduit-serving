@@ -19,6 +19,7 @@ package ai.konduit.serving;
 
 import ai.konduit.serving.pipeline.impl.data.JData;
 import org.nd4j.python4j.PythonTypes;
+import ai.konduit.serving.python.PyData;
 import org.junit.Assert;
 import org.junit.Test;
 
