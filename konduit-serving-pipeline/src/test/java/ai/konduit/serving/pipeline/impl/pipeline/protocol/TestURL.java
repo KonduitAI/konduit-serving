@@ -52,7 +52,7 @@ public class TestURL {
     private static final String HTTPS = "http://";
     private static final String FTP = "ftp://";
 
-    private String configData = StringUtils.EMPTY;
+    //private String configData = StringUtils.EMPTY;
 
     @Rule
     public TemporaryFolder testDir = new TemporaryFolder();
@@ -65,8 +65,8 @@ public class TestURL {
     public void setUp() throws Exception {
         server = new TestServer(PORT, null);
         server.start();
-        configData = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("config/config.json"),
-                "UTF-8");
+        /*configData = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("config/config.json"),
+                "UTF-8");*/
     }
 
     @After
