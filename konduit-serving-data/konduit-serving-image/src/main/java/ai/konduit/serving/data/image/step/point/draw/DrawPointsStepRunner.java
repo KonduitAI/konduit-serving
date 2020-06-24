@@ -65,7 +65,7 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
             out.copyFrom(key, data);
         }
 
-        // collect points and how many classes there are
+        // collect points
         List<Point> points = new LinkedList<>();
         for (String pointName : step.points()) {
             ValueType type = data.type(pointName);

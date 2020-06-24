@@ -39,6 +39,7 @@ import java.util.Map;
  *             If no colors are specified, or not enough colors are specified, random colors are used instead (note consistent between runs).
  *             Colors are mapped to named classes in alphabetical order, i.e. first color to class A, second color to class B, etc...</li>
  *     <li><b>points</b>: Names of the points to be drawn. Accepts both single points and lists of points.
+ *     <li><b>radius</b>: Point radius on drawn image. </li>
  *     <li><b>image</b>: Optional. Name of the image to use as size reference</li>
  *     <li><b>width</b>: Must be provided when <b>image</b> isn't set. Used to resolve position of points with relative addressing (dimensions between 0 and 1)</li>
  *     <li><b>height</b>: Must be provided when <b>image</b> isn't set. Used to resolve position of points with relative addressing (dimensions between 0 and 1)</li>
