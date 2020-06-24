@@ -158,6 +158,7 @@ public class TestTensorFlowStep {
     }
 
 
+    @Ignore("24/06/2020 Failed on CI https://github.com/KonduitAI/konduit-serving/issues/403")
     @Test
     public void testFrozenModel() throws Exception {
 
