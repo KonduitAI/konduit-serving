@@ -20,8 +20,11 @@ package ai.konduit.serving.pipeline.api.protocol;
 
 import com.jcabi.aspects.RetryOnFailure;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -42,6 +45,7 @@ public class URIResolver {
     }
 
     private static File cacheDirectory;
+    private static File metaFile;
     static {
         File f = new File(System.getProperty("user.home"), StringUtils.defaultIfEmpty(
                                                             System.getProperty("konduit.serving.cache.location"),
@@ -49,6 +53,12 @@ public class URIResolver {
         if (!f.exists())
             f.mkdirs();
         cacheDirectory = f;
+        metaFile = new File(cacheDirectory, ".metadata");
+        try {
+            metaFile.createNewFile();
+        } catch (IOException e) {
+            log.error("Cache initialization failed", e);
+        }
     }
 
 
@@ -69,12 +79,29 @@ public class URIResolver {
     private static File load(URL url, File cachedFile) throws IOException {
         URLConnection connection = url.openConnection();
 
-        if (connection.getContentLength() == cachedFile.length() &&
-            connection.getLastModified() == cachedFile.lastModified()) {
+        int contentLength = 0;
+        long lastModified = 0;
+
+        Reader in = new FileReader(metaFile);
+        Iterable<CSVRecord> records = CSVFormat.DEFAULT
+                .parse(in);
+        for (CSVRecord record : records) {
+            if (record.get(0).equals(cachedFile.getAbsolutePath())) {
+                contentLength = Integer.parseInt(record.get(1));
+                lastModified = Long.parseLong(record.get(2));
+                break;
+            }
+        }
+        if (lastModified > 0 && connection.getLastModified() == lastModified &&
+                                contentLength == connection.getContentLength()) {
+            // File is in cache and its timestamps are the same as of remote resource
             return cachedFile;
         }
         else {
             cachedFile.delete();
+            String metaData = cachedFile.getAbsolutePath() + "," + connection.getContentLength() + "," +
+                    connection.getLastModified();
+            FileUtils.writeStringToFile(metaFile, metaData, "UTF-8");
         }
         return null;
     }
