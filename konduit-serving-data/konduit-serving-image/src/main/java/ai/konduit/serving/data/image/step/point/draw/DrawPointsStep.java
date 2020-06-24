@@ -21,10 +21,7 @@ package ai.konduit.serving.data.image.step.point.draw;
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Singular;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.util.List;
@@ -48,12 +45,12 @@ import java.util.Map;
  *
  * @author Paul Dubs
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("DRAW_POINTS")
-@Schema(description = "A pipeline step that configures how to draw 2D points, optionally on an image.")
+@Schema(description = "A pipeline step that configures how to draw 2D points.")
 public class DrawPointsStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "image";
 
@@ -63,11 +60,11 @@ public class DrawPointsStep implements PipelineStep {
             "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private Map<String, String> classColors;
 
-    @Schema(description = "Names of the points to be drawn. Accepts both single points and lists of points.")
+    @Schema(description = "Name of the input data fields containing the points to be drawn. Accepts both single points and lists of points. Accepts both relative and absolute addressed points.")
     @Singular
     private List<String> points;
 
-    @Schema(description = "Point radius on drawn image. ")
+    @Schema(description = "Optional. Point radius on drawn image. Default = 5px")
     private Integer radius;
 
     @Schema(description = "An optional field, specifying the name of the image to use as size reference")

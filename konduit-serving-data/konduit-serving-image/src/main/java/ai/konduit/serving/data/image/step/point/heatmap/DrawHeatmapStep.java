@@ -22,8 +22,8 @@ import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.Accessors;
 
@@ -45,16 +45,16 @@ import java.util.List;
  *
  * @author Paul Dubs
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("DRAW_HEATMAP")
-@Schema(description = "A pipeline step that configures how to draw 2D points, optionally on an image.")
+@Schema(description = "A pipeline step that configures how to draw a 2D pipeline.")
 public class DrawHeatmapStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "image";
 
-    @Schema(description = "Names of the points to be used for the heatmap. Accepts both single points and lists of points.")
+    @Schema(description = "Name of the input data fields containing the points used for the heatmap. Accepts both single points and lists of points.")
     @Singular
     private List<String> points;
 

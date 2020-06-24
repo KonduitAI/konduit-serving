@@ -878,18 +878,16 @@ public class TestTensorFlowStep {
         //Merge camera image with bounding boxes
         GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
 
-        GraphStep drawer = merged.then("toPoints", BoundingBoxToPointStep.builder()
+        GraphStep drawer = merged.then("toPoints", new BoundingBoxToPointStep()
                 .bboxName("img_bbox")
                 .method(BoundingBoxToPointStep.ConversionMethod.CENTER)
                 .keepOtherFields(true)
                 .outputName("img_points")
-                .build()
-        ).then("drawer", DrawHeatmapStep.builder()
+        ).then("drawer", new DrawHeatmapStep()
                 .image("image")
-                .point("img_points")
+                .points(Arrays.asList("img_points"))
                 .fadingFactor(1.0)
-                .radius(30)
-                .build());
+                .radius(30));
 
 
         //Show image in Java frame

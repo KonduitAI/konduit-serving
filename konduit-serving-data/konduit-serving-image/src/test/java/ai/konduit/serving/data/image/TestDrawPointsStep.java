@@ -28,6 +28,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class TestDrawPointsStep {
@@ -40,13 +41,12 @@ public class TestDrawPointsStep {
         colorMap.put("bar", "green");
 
         Pipeline p = SequencePipeline.builder()
-                .add(DrawPointsStep.builder()
+                .add(new DrawPointsStep()
                         .classColors(colorMap)
-                        .point("points")
+                        .points(Collections.singletonList("points"))
                         .width(100)
                         .height(200)
-                        .outputName("image")
-                        .build())
+                        .outputName("image"))
                 .add(new ShowImagePipelineStep())
                 .build();
 

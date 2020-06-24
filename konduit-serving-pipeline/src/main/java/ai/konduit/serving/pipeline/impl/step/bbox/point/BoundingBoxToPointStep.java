@@ -21,7 +21,6 @@ package ai.konduit.serving.pipeline.impl.step.bbox.point;
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -35,7 +34,6 @@ import lombok.experimental.Accessors;
  * the output will be a single value; if the input is a list, the output will be a list.<br>
  */
 @Data
-@Builder
 @Accessors(fluent = true)
 @AllArgsConstructor
 @NoArgsConstructor

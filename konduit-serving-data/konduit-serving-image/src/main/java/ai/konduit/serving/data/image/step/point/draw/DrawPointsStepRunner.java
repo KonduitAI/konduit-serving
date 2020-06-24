@@ -62,6 +62,10 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
             out.copyFrom(key, data);
         }
 
+        if(step.points() == null || step.points().size() == 0){
+            throw new IllegalArgumentException("No point input data fields defined. Nothing to draw.");
+        }
+
         // collect points
         List<Point> points = new LinkedList<>();
         for (String pointName : step.points()) {

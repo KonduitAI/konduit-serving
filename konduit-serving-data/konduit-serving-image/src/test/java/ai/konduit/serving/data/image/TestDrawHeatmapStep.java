@@ -30,6 +30,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class TestDrawHeatmapStep {
 
@@ -37,12 +38,11 @@ public class TestDrawHeatmapStep {
     @Test
     public void testSingleStep() throws Exception {
         Pipeline p = SequencePipeline.builder()
-                .add(DrawHeatmapStep.builder()
-                        .point("points")
+                .add(new DrawHeatmapStep()
+                        .points(Collections.singletonList("points"))
                         .width(100)
                         .height(200)
-                        .outputName("image")
-                        .build())
+                        .outputName("image"))
                 .add(new ShowImagePipelineStep())
                 .build();
 
@@ -65,13 +65,12 @@ public class TestDrawHeatmapStep {
     @Test
     public void testMultiStep() throws Exception {
         Pipeline p = SequencePipeline.builder()
-                .add(DrawHeatmapStep.builder()
-                        .point("points")
+                .add(new DrawHeatmapStep()
+                        .points(Collections.singletonList("points"))
                         .width(100)
                         .height(200)
                         .outputName("image")
-                        .radius(10)
-                        .build())
+                        .radius(10))
                 .add(new ShowImagePipelineStep())
                 .build();
 
