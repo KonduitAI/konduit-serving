@@ -54,7 +54,7 @@ public class ImageTransformProcessStepRunner extends BaseStepRunner {
 
         imageLoaders = imageLoadingStepConfig.getInputNames().stream()
                 .map(inputName -> {
-                    Long[] values = imageLoadingStepConfig.dimensionsConfigs().getOrDefault(inputName, null);
+                    Long[] values = imageLoadingStepConfig.getDimensionsConfigs().getOrDefault(inputName, null);
                     if (values != null) {
                         return new Pair<>(inputName, new NativeImageLoader(values[0], values[1], values[2]));
                     } else {
@@ -73,8 +73,8 @@ public class ImageTransformProcessStepRunner extends BaseStepRunner {
         NativeImageLoader nativeImageLoader = imageLoaders.get(inputName);
 
         ImageTransformProcess imageTransformProcess = null;
-        if (imageLoadingStepConfig.imageTransformProcesses() != null) {
-            imageTransformProcess = imageLoadingStepConfig.imageTransformProcesses().get(inputName);
+        if (imageLoadingStepConfig.getImageTransformProcesses() != null) {
+            imageTransformProcess = imageLoadingStepConfig.getImageTransformProcesses().get(inputName);
         }
 
         INDArray input;
@@ -94,7 +94,7 @@ public class ImageTransformProcessStepRunner extends BaseStepRunner {
 
             INDArray output;
 
-            if (imageLoadingStepConfig.updateOrderingBeforeTransform()) {
+            if (imageLoadingStepConfig.isUpdateOrderingBeforeTransform()) {
                 output = applyTransform(imageTransformProcess, nativeImageLoader, permuteImageOrder(input));
             } else {
                 output = permuteImageOrder(applyTransform(imageTransformProcess, nativeImageLoader, input));
@@ -109,8 +109,8 @@ public class ImageTransformProcessStepRunner extends BaseStepRunner {
     private INDArray permuteImageOrder(INDArray input) {
         if (!imageLoadingStepConfig.initialImageLayoutMatchesFinal()) {
             return ImagePermuter.permuteOrder(input,
-                    imageLoadingStepConfig.imageProcessingInitialLayout(),
-                    imageLoadingStepConfig.imageProcessingRequiredLayout());
+                    imageLoadingStepConfig.getImageProcessingInitialLayout(),
+                    imageLoadingStepConfig.getImageProcessingRequiredLayout());
         } else {
             return input;
         }

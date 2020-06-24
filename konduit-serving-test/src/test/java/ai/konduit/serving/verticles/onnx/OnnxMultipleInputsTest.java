@@ -83,9 +83,10 @@ public class OnnxMultipleInputsTest extends BaseVerticleTest {
             FileUtils.copyURLToFile(new URL("https://raw.githubusercontent.com/onnx/onnx/master/onnx/backend/test/data/node/test_add/model.onnx"), model);
         }
 
-        ServingConfig servingConfig = new ServingConfig()
+        ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.NUMPY)
-                .httpPort(port);
+                .httpPort(port)
+                .build();
 
         OnnxStep modelPipelineConfig = OnnxStep.builder()
                 .path(model.getAbsolutePath())

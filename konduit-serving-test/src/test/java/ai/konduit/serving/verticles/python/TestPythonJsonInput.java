@@ -42,8 +42,6 @@ import org.junit.runner.RunWith;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import java.util.Collections;
-
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
@@ -77,15 +75,17 @@ public class TestPythonJsonInput extends BaseMultiNumpyVerticalTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        PythonConfig pythonConfig = new PythonConfig()
+        PythonConfig pythonConfig = PythonConfig.builder()
                 .pythonCode("first += 2; second = first")
-                .pythonInputs(Collections.singletonMap("first", "INT"))
-                .pythonOutputs(Collections.singletonMap("second", "INT"));
+                .pythonInput("first", "INT")
+                .pythonOutput("second", "INT")
+                .build();
 
         PythonStep pythonStepConfig = new PythonStep(pythonConfig);
 
-        ServingConfig servingConfig = new ServingConfig()
-                .httpPort(port);
+        ServingConfig servingConfig = ServingConfig.builder()
+                .httpPort(port)
+                .build();
 
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .step(pythonStepConfig)

@@ -81,9 +81,10 @@ public class SameDiffVerticleNd4jTest extends BaseVerticleTest {
         sameDiff.asFlatFile(tmpSameDiffFile);
         SameDiff values = SameDiff.fromFlatFile(tmpSameDiffFile);
 
-        ServingConfig servingConfig = new ServingConfig()
+        ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.ND4J)
-                .httpPort(port);
+                .httpPort(port)
+                .build();
 
         SameDiffStep modelPipelineConfig = SameDiffStep.builder()
                 .path(tmpSameDiffFile.getAbsolutePath())

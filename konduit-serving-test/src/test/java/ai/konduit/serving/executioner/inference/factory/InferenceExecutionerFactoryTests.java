@@ -71,7 +71,7 @@ public class InferenceExecutionerFactoryTests {
         assertTrue(tensorflowModelLoader.getCastingOutputTypes().isEmpty());
 
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = tensorflowInferenceExecutionerFactory.create(modelPipelineStep);
-        InferenceExecutioner inferenceExecutioner = initializedInferenceExecutionerConfig.inferenceExecutioner();
+        InferenceExecutioner inferenceExecutioner = initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(inferenceExecutioner);
 
         TensorflowInferenceExecutioner tensorflowInferenceExecutioner = (TensorflowInferenceExecutioner) inferenceExecutioner;
@@ -102,7 +102,7 @@ public class InferenceExecutionerFactoryTests {
 
         KerasInferenceExecutionerFactory factory = new KerasInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
-        MultiLayerNetworkInferenceExecutioner multiLayerNetworkInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.inferenceExecutioner();
+        MultiLayerNetworkInferenceExecutioner multiLayerNetworkInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(multiLayerNetworkInferenceExecutioner);
         assertNotNull(multiLayerNetworkInferenceExecutioner.model());
         assertNotNull(multiLayerNetworkInferenceExecutioner.modelLoader());
@@ -122,7 +122,7 @@ public class InferenceExecutionerFactoryTests {
                 .build();
 
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = tensorflowInferenceExecutionerFactory.create(modelPipelineStep);
-        InferenceExecutioner inferenceExecutioner = initializedInferenceExecutionerConfig.inferenceExecutioner();
+        InferenceExecutioner inferenceExecutioner = initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(inferenceExecutioner);
 
         SameDiffInferenceExecutioner tensorflowInferenceExecutioner = (SameDiffInferenceExecutioner) inferenceExecutioner;
@@ -147,7 +147,7 @@ public class InferenceExecutionerFactoryTests {
 
         Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
-        MultiLayerNetworkInferenceExecutioner multiLayerNetworkInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.inferenceExecutioner();
+        MultiLayerNetworkInferenceExecutioner multiLayerNetworkInferenceExecutioner = (MultiLayerNetworkInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(multiLayerNetworkInferenceExecutioner);
         assertNotNull(multiLayerNetworkInferenceExecutioner.model());
         assertNotNull(multiLayerNetworkInferenceExecutioner.modelLoader());
@@ -170,7 +170,7 @@ public class InferenceExecutionerFactoryTests {
 
         Dl4jInferenceExecutionerFactory factory = new Dl4jInferenceExecutionerFactory();
         InitializedInferenceExecutionerConfig initializedInferenceExecutionerConfig = factory.create(modelPipelineStep);
-        MultiComputationGraphInferenceExecutioner multiComputationGraphInferenceExecutioner = (MultiComputationGraphInferenceExecutioner) initializedInferenceExecutionerConfig.inferenceExecutioner();
+        MultiComputationGraphInferenceExecutioner multiComputationGraphInferenceExecutioner = (MultiComputationGraphInferenceExecutioner) initializedInferenceExecutionerConfig.getInferenceExecutioner();
         assertNotNull(multiComputationGraphInferenceExecutioner);
         assertNotNull(multiComputationGraphInferenceExecutioner.model());
         assertNotNull(multiComputationGraphInferenceExecutioner.modelLoader());

@@ -70,10 +70,10 @@ public class Dl4jInferenceExecutionerFactory implements InferenceExecutionerFact
                 List<String> outputNames = computationGraph2.getConfiguration().getNetworkOutputs();
                 log.info("Loaded computation graph with input names {} and output names {}", inputNames, outputNames);
 
-                return new InitializedInferenceExecutionerConfig()
+                return InitializedInferenceExecutionerConfig.builder()
                         .inferenceExecutioner(inferenceExecutioner)
-                        .inputNames(inputNames).outputNames(outputNames);
-
+                        .inputNames(inputNames).outputNames(outputNames)
+                        .build();
             } else {
                 String finalErrorMessage = String.format("The given file at path %s is not a valid DL4J model.\n" +
                                 " --- Errors while loading file as a MultiLayerNetwork ---\n%s\n" +

@@ -231,7 +231,7 @@ public class PipelineExecutioner implements Closeable {
                             + startingPipelineStep.getClass().getName() + " expected input types were "
                             + Arrays.toString(startingPipelineStep.validInputTypes())
                             + ". If this list is null or empty, then any type is considered valid.");
-            Preconditions.checkState(finalPipelineStep.isValidOutputType(config.getServingConfig().outputDataFormat()),
+            Preconditions.checkState(finalPipelineStep.isValidOutputType(config.getServingConfig().getOutputDataFormat()),
                     "Configured output type is invalid for final pipeline step of type "
                             + finalPipelineStep.getClass().getName() + ". Expected output types were "
                             + Arrays.toString(finalPipelineStep.validOutputTypes())
@@ -281,7 +281,7 @@ public class PipelineExecutioner implements Closeable {
 
             if (pipelineStep instanceof ImageLoadingStep) {
                 ImageLoadingStep imageLoadingStepConfig = (ImageLoadingStep) pipelineStep;
-                objectDetectionConfig = imageLoadingStepConfig.objectDetectionConfig();
+                objectDetectionConfig = imageLoadingStepConfig.getObjectDetectionConfig();
             }
         }
 
@@ -308,9 +308,9 @@ public class PipelineExecutioner implements Closeable {
         //custom labels input stream for custom labels for yolo and ssd
         InputStream customLabelsInputStream = null;
 
-        if (objectDetectionConfig != null && objectDetectionConfig.labelsPath() != null) {
-            customLabelsInputStream = new FileInputStream(objectDetectionConfig.labelsPath());
-            ssdLabels = SSDOutputAdapter.getLabels(customLabelsInputStream, objectDetectionConfig.numLabels());
+        if (objectDetectionConfig != null && objectDetectionConfig.getLabelsPath() != null) {
+            customLabelsInputStream = new FileInputStream(objectDetectionConfig.getLabelsPath());
+            ssdLabels = SSDOutputAdapter.getLabels(customLabelsInputStream, objectDetectionConfig.getNumLabels());
             yoloLabels = ssdLabels;
         }
 
@@ -323,21 +323,21 @@ public class PipelineExecutioner implements Closeable {
                         "Missing object recognition configuration!");
                 multiOutputAdapter = YOLOOutputAdapter.builder()
                         .labels(yoloLabels)
-                        .boundingBoxPriors(objectDetectionConfig.priors())
-                        .inputShape(objectDetectionConfig.inputShape())
-                        .numLabels(objectDetectionConfig.numLabels())
-                        .threshold(objectDetectionConfig.threshold())
+                        .boundingBoxPriors(objectDetectionConfig.getPriors())
+                        .inputShape(objectDetectionConfig.getInputShape())
+                        .numLabels(objectDetectionConfig.getNumLabels())
+                        .threshold(objectDetectionConfig.getThreshold())
                         .build();
                 break;
             case SSD:
                 Preconditions.checkState(objectDetectionConfig != null,
                         "Missing object recognition configuration!");
                 if (customLabelsInputStream == null)
-                    multiOutputAdapter = new SSDOutputAdapter(objectDetectionConfig.threshold(),
-                            objectDetectionConfig.numLabels());
+                    multiOutputAdapter = new SSDOutputAdapter(objectDetectionConfig.getThreshold(),
+                            objectDetectionConfig.getNumLabels());
                 else
-                    multiOutputAdapter = new SSDOutputAdapter(objectDetectionConfig.threshold(),
-                            customLabelsInputStream, objectDetectionConfig.numLabels());
+                    multiOutputAdapter = new SSDOutputAdapter(objectDetectionConfig.getThreshold(),
+                            customLabelsInputStream, objectDetectionConfig.getNumLabels());
                 break;
             case RAW:
                 multiOutputAdapter = new RawMultiOutputAdapter();
@@ -644,7 +644,7 @@ public class PipelineExecutioner implements Closeable {
 
     private void logTimings(long startTime) {
         long stopTime = System.nanoTime();
-        if (config.getServingConfig().logTimings()) {
+        if (config.getServingConfig().isLogTimings()) {
             long diff = stopTime - startTime;
             long millis = TimeUnit.NANOSECONDS.toMillis(diff);
             log.info("Post write response timing in ms " + millis);

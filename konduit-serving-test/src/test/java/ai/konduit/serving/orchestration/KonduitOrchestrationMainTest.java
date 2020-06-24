@@ -28,8 +28,9 @@ public class KonduitOrchestrationMainTest {
 
         int port = getRandomPort();
 
-        ServingConfig servingConfig = new ServingConfig()
-                .httpPort(port);
+        ServingConfig servingConfig = ServingConfig.builder()
+                .httpPort(port)
+                .build();
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .build();

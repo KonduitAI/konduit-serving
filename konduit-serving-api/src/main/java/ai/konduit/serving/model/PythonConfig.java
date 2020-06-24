@@ -23,7 +23,6 @@
 package ai.konduit.serving.model;
 
 import lombok.*;
-import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -44,7 +43,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Slf4j
-@Accessors(fluent=true)
+@Builder
 @AllArgsConstructor
 public class PythonConfig implements Serializable {
 

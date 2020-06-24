@@ -5,7 +5,6 @@ import ai.konduit.serving.config.metrics.MetricsConfig;
 import ai.konduit.serving.util.ObjectMappers;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.*;
-import lombok.experimental.Accessors;
 import org.nd4j.linalg.dataset.api.preprocessor.serializer.NormalizerType;
 
 import java.util.ArrayList;
@@ -21,13 +20,16 @@ import java.util.Map;
  * @author Adam Gibson
  */
 @Data
-@Accessors(fluent=true)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegressionMetricsConfig implements MetricsConfig {
 
+    @Builder.Default
     private List<String> regressionColumnLabels = new ArrayList<>(0);
+    @Builder.Default
     private List<SampleType> sampleTypes = new ArrayList<>(0);
+    @Builder.Default
     private List<ColumnDistribution> columnDistributions = new ArrayList<>(0);
 
     @Override

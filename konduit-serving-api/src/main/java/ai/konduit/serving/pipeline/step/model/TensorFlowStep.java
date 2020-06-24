@@ -24,7 +24,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
 
@@ -33,7 +32,6 @@ import org.nd4j.tensorflow.conversion.graphrunner.SavedModelConfig;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder

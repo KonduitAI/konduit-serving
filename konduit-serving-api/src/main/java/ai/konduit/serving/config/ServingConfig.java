@@ -30,7 +30,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
@@ -42,7 +41,7 @@ import java.util.List;
  * Configuration of all properties regarding serving a pipeline.
  */
 @Data
-@Accessors(fluent=true)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({
@@ -53,20 +52,28 @@ import java.util.List;
 })
 public class ServingConfig implements Serializable, TextConfig {
 
+    @Builder.Default
     private int httpPort = 0;
 
+    @Builder.Default
     private String listenHost = "localhost";
 
+    @Builder.Default
     private Output.DataFormat outputDataFormat = Output.DataFormat.JSON;
 
+    @Builder.Default
     private String uploadsDirectory = DirectoryFetcher.getFileUploadsDir().getAbsolutePath();
 
+    @Builder.Default
     private boolean logTimings = false;
 
+    @Builder.Default
     private boolean createLoggingEndpoints = false;
 
+    @Builder.Default
     private List<MetricsConfig> metricsConfigurations = new ArrayList<>(0);
 
+    @Builder.Default
     private List<MetricType> metricTypes = Arrays.asList(
             MetricType.CLASS_LOADER,
             MetricType.JVM_MEMORY,

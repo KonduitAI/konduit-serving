@@ -36,8 +36,9 @@ public class MultiLabelClassificationMetricsTests {
 
     @Test
     public void testClassificationMetricsReset() {
-        MultiLabelMetricsConfig classificationMetricsConfig = new  MultiLabelMetricsConfig()
-                .labels(Arrays.asList("0"));
+        MultiLabelMetricsConfig classificationMetricsConfig = MultiLabelMetricsConfig.builder()
+                .labels(Arrays.asList("0"))
+                .build();
 
         MultiLabelMetrics classificationMetrics = new MultiLabelMetrics(classificationMetricsConfig);
         classificationMetrics.bindTo(new SimpleMeterRegistry());

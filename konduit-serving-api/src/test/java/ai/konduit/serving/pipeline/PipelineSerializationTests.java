@@ -37,7 +37,7 @@ public class PipelineSerializationTests {
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .step(new PythonStep())
                 .step(new PythonStep())
-                .servingConfig(new ServingConfig())
+                .servingConfig(ServingConfig.builder().build())
                 .build();
         assertEquals(inferenceConfiguration, InferenceConfiguration.fromYaml(inferenceConfiguration.toYaml()));
     }

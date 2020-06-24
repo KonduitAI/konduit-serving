@@ -71,10 +71,10 @@ public class OnnxInferenceExecutioner implements
         this.modelLoader = model;
         this.model = model();
         this.inference = new ONNXThreadPool.Builder(model)
-                .batchLimit(config.batchLimit())
-                .queueLimit(config.queueLimit())
-                .inferenceMode(config.inferenceMode())
-                .workers(config.workers())
+                .batchLimit(config.getBatchLimit())
+                .queueLimit(config.getQueueLimit())
+                .inferenceMode(config.getInferenceMode())
+                .workers(config.getWorkers())
                 .build();
     }
 

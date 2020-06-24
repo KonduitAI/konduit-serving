@@ -50,7 +50,7 @@ public class ConfigJsonCoverageTrackingTests {
     private static final Set<Class<? extends TextConfig>> seen = new LinkedHashSet<>();
 
     @BeforeClass
-    public static void before() {
+    public static void before(){
 
         //Collect all classes implementing TextConfig interface (i.e., has JSON and YAML conversion support)
 
@@ -58,9 +58,9 @@ public class ConfigJsonCoverageTrackingTests {
         Set<Class<? extends TextConfig>> subTypes = reflections.getSubTypesOf(TextConfig.class);
 
         System.out.println(String.format("All subtypes of %s:", TextConfig.class.getCanonicalName()));
-        for (Class<? extends TextConfig> c : subTypes) {
+        for(Class<? extends TextConfig> c : subTypes ){
             int mod = c.getModifiers();
-            if (Modifier.isAbstract(mod) || Modifier.isInterface(mod))
+            if(Modifier.isAbstract(mod) || Modifier.isInterface(mod))
                 continue;
             allClasses.add(c);
             System.out.println(c);
@@ -68,17 +68,17 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @AfterClass
-    public static void afterClass() {
-        if (!seen.containsAll(allClasses)) {
+    public static void afterClass(){
+        if(!seen.containsAll(allClasses)) {
             List<String> notTested = new ArrayList<>();
-            for (Class<?> c : allClasses) {
-                if (!seen.contains(c)) {
+            for(Class<?> c : allClasses){
+                if(!seen.contains(c)) {
                     notTested.add(c.getName());
                 }
             }
 
             Collections.sort(notTested);
-            for (String s : notTested) {
+            for(String s : notTested){
                 log.warn("Class was not tested for JSON/YAML serialization/deserialization: {}", s);
             }
 
@@ -87,9 +87,9 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     public static void testConfigSerDe(TextConfig c) {
-        try {
+        try{
             testConfigSerDeHelper(c);
-        } catch (Exception e) {
+        } catch (Exception e){
             throw new RuntimeException(e);
         }
     }
@@ -117,20 +117,20 @@ public class ConfigJsonCoverageTrackingTests {
         return m;
     }
 
-    private static Method findStaticFromYaml(TextConfig c) {
+    private static Method findStaticFromYaml(TextConfig c){
         Method m = findStaticSingleStringArgMethodWithName(c.getClass(), "fromYaml");
         Preconditions.checkState(m != null, "No fromJson(String) method is defined on class " + c.getClass().getName() +
                 " or any superclasses of this class. All classes implementing TextConfig should also have a static fromYaml(String) method");
         return m;
     }
 
-    private static Method findStaticSingleStringArgMethodWithName(Class<?> c, String methodName) {
+    private static Method findStaticSingleStringArgMethodWithName(Class<?> c, String methodName){
         Class<?> current = c;
-        while (current != Object.class) {
+        while(current != Object.class){
             Method[] methods = current.getDeclaredMethods();
-            for (Method m : methods) {
-                if (m.getName().equals(methodName) && m.getParameterCount() == 1 && Modifier.isStatic(m.getModifiers()) &&
-                        !Modifier.isAbstract(m.getModifiers()) && m.getParameterTypes()[0] == String.class) {
+            for(Method m : methods){
+                if(m.getName().equals(methodName) && m.getParameterCount() == 1 && Modifier.isStatic(m.getModifiers()) &&
+                        !Modifier.isAbstract(m.getModifiers()) && m.getParameterTypes()[0] == String.class){
                     return m;
                 }
             }
@@ -143,12 +143,12 @@ public class ConfigJsonCoverageTrackingTests {
     public void testInferenceConfiguration() {
         InferenceConfiguration conf = InferenceConfiguration.builder()
                 .step(PythonStep.builder()
-                        .pythonConfig("x", new PythonConfig().pythonCode("import numpy as np\nreturn np.ones(1)"))
+                        .pythonConfig("x", PythonConfig.builder().pythonCode("import numpy as np\nreturn np.ones(1)").build())
                         .inputNames(Collections.singletonList("x"))
                         .outputNames(Collections.singletonList("z"))
                         .build())
                 .step(Dl4jStep.builder().path("/my/model/path.bin").build())
-                .servingConfig(new ServingConfig().httpPort(12345).logTimings(true))
+                .servingConfig(ServingConfig.builder().httpPort(12345).logTimings(true).build())
                 .build();
 
 //        System.out.println(conf.toYaml());
@@ -157,22 +157,22 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @Test
-    public void testServingConfig() {
-        testConfigSerDe(new ServingConfig().httpPort(12345).logTimings(true)
+    public void testServingConfig(){
+        testConfigSerDe(ServingConfig.builder().httpPort(12345).logTimings(true)
                 .metricTypes(Arrays.asList(MetricType.JVM_GC, MetricType.CLASS_LOADER, MetricType.JVM_MEMORY, MetricType.JVM_THREAD))
-                .outputDataFormat(Output.DataFormat.JSON));
+                .outputDataFormat(Output.DataFormat.JSON).build());
     }
 
     @Test
-    public void testArrayConcatenationStep() {
-        testConfigSerDe(ArrayConcatenationStep.builder().concatDimension(1, 2).build());
+    public void testArrayConcatenationStep(){
+        testConfigSerDe(ArrayConcatenationStep.builder().concatDimension(1,2).build());
     }
 
     @Test
-    public void testJsonExpanderTransformStep() {
+    public void testJsonExpanderTransformStep(){
         testConfigSerDe(JsonExpanderTransformStep.builder()
                 .inputNames(Arrays.asList("x", "y"))
-                .outputNames(Arrays.asList("z", "a"))
+                .outputNames(Arrays.asList("z","a"))
                 .inputSchema("x", Arrays.asList(SchemaType.NDArray, SchemaType.Boolean))
                 .outputSchema("z", Arrays.asList(SchemaType.Image, SchemaType.Categorical))
                 .build());
@@ -195,103 +195,108 @@ public class ConfigJsonCoverageTrackingTests {
     }
 
     @Test
-    public void testCustomPipelineStep() {
+    public void testCustomPipelineStep(){
         testConfigSerDe(CustomPipelineStep.builder().customUdfClazz("my.clazz.name.Here").build());
     }
 
     @Test
-    public void testPmmlStep() {
-        testConfigSerDe(PmmlStep.builder().inputName("x").outputNames(Arrays.asList("y", "z")).build());
+    public void testPmmlStep(){
+        testConfigSerDe(PmmlStep.builder().inputName("x").outputNames(Arrays.asList("y","z")).build());
     }
 
     @Test
-    public void testPythonStep() {
+    public void testPythonStep(){
         testConfigSerDe(PythonStep.builder()
-                .pythonConfig("x", new PythonConfig().pythonCode("import numpy as np\nreturn np.ones(1)"))
+                .pythonConfig("x", PythonConfig.builder().pythonCode("import numpy as np\nreturn np.ones(1)").build())
                 .inputNames(Collections.singletonList("x"))
                 .outputNames(Collections.singletonList("z"))
                 .build());
     }
 
     @Test
-    public void testImageLoadingStep() {
+    public void testImageLoadingStep(){
         testConfigSerDe(ImageLoadingStep.builder()
                 .inputNames(Collections.singletonList("image_tensor"))
                 .outputNames(Collections.singletonList("detection_classes"))
-                .objectDetectionConfig(new ObjectDetectionConfig().numLabels(80))
+                .objectDetectionConfig(ObjectDetectionConfig.builder().numLabels(80).build())
                 .build());
     }
 
     @Test
     public void testMetricConfig() {
-        ServingConfig servingConfig = new ServingConfig()
-                .metricsConfigurations(Arrays.asList(new NoOpMetricsConfig(),
-                        new ClassificationMetricsConfig().
-                                classificationLabels(Collections.singletonList("0")),
-                        new RegressionMetricsConfig()
+        ServingConfig servingConfig = ServingConfig.builder()
+                .metricsConfigurations(Arrays.asList(NoOpMetricsConfig.builder().build(),
+                        ClassificationMetricsConfig
+                                .builder().classificationLabels(Collections.singletonList("0")).build(),
+                        RegressionMetricsConfig
+                                .builder()
                                 .regressionColumnLabels(Collections.singletonList("0"))
                                 .sampleTypes(Collections.singletonList(RegressionMetricsConfig.SampleType.MAX))
-                        )
-                );
+                                .build()))
+                .build();
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.builder()
                 .servingConfig(servingConfig)
                 .build();
-        assertEquals(inferenceConfiguration, InferenceConfiguration.fromJson(inferenceConfiguration.toJson()));
+        assertEquals(inferenceConfiguration,InferenceConfiguration.fromJson(inferenceConfiguration.toJson()));
 
         testConfigSerDe(ColumnDistribution.builder().build());
-        testConfigSerDe(new NoOpMetricsConfig());
-        testConfigSerDe(new MultiLabelMetricsConfig().labels(Collections.singletonList("0")));
-        testConfigSerDe(new ClassificationMetricsConfig().classificationLabels(Collections.singletonList("0")));
-        testConfigSerDe(new RegressionMetricsConfig()
+        testConfigSerDe(NoOpMetricsConfig
+                .builder().build());
+        testConfigSerDe(MultiLabelMetricsConfig
+                .builder().labels(Collections.singletonList("0")).build());
+        testConfigSerDe(ClassificationMetricsConfig
+                .builder().classificationLabels(Collections.singletonList("0")).build());
+        testConfigSerDe(RegressionMetricsConfig
+                .builder()
                 .regressionColumnLabels(Collections.singletonList("0"))
                 .sampleTypes(Collections.singletonList(RegressionMetricsConfig.SampleType.MAX))
-        );
+                .build());
     }
 
     @Test
     public void testMemMapConfig() {
-        testConfigSerDe(new MemMapConfig().arrayPath("/my/array/path").initialMemmapSize(100000).unkVectorPath("/my/array/unknown"));
+        testConfigSerDe(MemMapConfig.builder().arrayPath("/my/array/path").initialMemmapSize(100000).unkVectorPath("/my/array/unknown").build());
     }
 
     @Test
-    public void testParallelInferenceConfig() {
-        testConfigSerDe(new ParallelInferenceConfig().defaultConfig());
-        testConfigSerDe(new ParallelInferenceConfig().batchLimit(5).workers(3).queueLimit(2).inferenceMode(InferenceMode.SEQUENTIAL));
+    public void testParallelInferenceConfig(){
+        testConfigSerDe(ParallelInferenceConfig.defaultConfig());
+        testConfigSerDe(ParallelInferenceConfig.builder().batchLimit(5).workers(3).queueLimit(2).inferenceMode(InferenceMode.SEQUENTIAL).build());
     }
 
     @Test
-    public void testOnnxConfig() {
+    public void testOnnxConfig(){
         testConfigSerDe(OnnxStep.builder().path("/Some/Path/Here").build());
     }
 
     @Test
-    public void testDL4JConfig() {
+    public void testDL4JConfig(){
         testConfigSerDe(Dl4jStep.builder().path("/Some/Path/Here").build());
     }
 
     @Test
-    public void testKerasConfig() {
+    public void testKerasConfig(){
         testConfigSerDe(KerasStep.builder().path("/path/to/model.kdf5").build());
     }
 
     @Test
-    public void testPmmlConfig() {
+    public void testPmmlConfig(){
         testConfigSerDe(PmmlStep.builder().build());
         testConfigSerDe(PmmlStep.builder().evaluatorFactoryName("my.factory.class").build());
     }
 
     @Test
-    public void testSameDiffConfig() {
+    public void testSameDiffConfig(){
         testConfigSerDe(SameDiffStep.builder().path("/my/model/path.fb").build());
     }
 
     @Test
-    public void testTensorFlowConfig() {
+    public void testTensorFlowConfig(){
         testConfigSerDe(TensorFlowStep.builder().build());
     }
 
     @Test
-    public void testModelConfigType() {
+    public void testModelConfigType(){
         testConfigSerDe(KerasStep.builder().path("/path/to/keras.hdf5").build());
     }
 

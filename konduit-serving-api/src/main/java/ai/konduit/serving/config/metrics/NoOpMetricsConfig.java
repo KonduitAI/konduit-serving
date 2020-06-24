@@ -27,7 +27,6 @@ import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
 import java.util.Collections;
 import java.util.Map;
@@ -38,7 +37,7 @@ import java.util.Map;
  *
  * @author Adam Gibson
  */
-@Accessors(fluent=true)
+@Builder
 @NoArgsConstructor
 @Data
 public class NoOpMetricsConfig implements MetricsConfig {

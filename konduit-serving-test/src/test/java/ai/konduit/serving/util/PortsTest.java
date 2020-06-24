@@ -73,7 +73,7 @@ public class PortsTest {
         DeployKonduitServing.deployInference(getConfig(testContext, 0),
                 handler -> {
                     if(handler.succeeded()) {
-                        int port = handler.result().getServingConfig().httpPort();
+                        int port = handler.result().getServingConfig().getHttpPort();
 
                         testContext.assertTrue(port > 0 && port <= 0xFFFF);
 
@@ -98,7 +98,7 @@ public class PortsTest {
 
         DeployKonduitServing.deployInference(inferenceConfiguration, outerHandler -> {
             if (outerHandler.succeeded()) {
-                int port = outerHandler.result().getServingConfig().httpPort();
+                int port = outerHandler.result().getServingConfig().getHttpPort();
 
                 testContext.assertTrue(port > 0 && port <= 0xFFFF);
 
@@ -141,7 +141,7 @@ public class PortsTest {
                 getConfig(testContext, -1), // this port number will be ignored in this case because the port value will be taken from the environment VerticleConstants#KONDUIT_SERVING_PORT
                 handler -> {
                     if(handler.succeeded()) {
-                        int port = handler.result().getServingConfig().httpPort();
+                        int port = handler.result().getServingConfig().getHttpPort();
 
                         testContext.assertEquals(port, selectedPort);
 
@@ -201,7 +201,7 @@ public class PortsTest {
         DeployKonduitServing.deployInference(getConfig(testContext, selectedPort),
                 handler -> {
                     if(handler.succeeded()) {
-                        int port = handler.result().getServingConfig().httpPort();
+                        int port = handler.result().getServingConfig().getHttpPort();
 
                         testContext.assertEquals(port, selectedPort);
 
@@ -240,8 +240,9 @@ public class PortsTest {
         outputSchemaBuilder.addColumnDouble("virginica");
         Schema outputSchema = outputSchemaBuilder.build();
 
-        ServingConfig servingConfig = new ServingConfig()
-                .httpPort(port);
+        ServingConfig servingConfig = ServingConfig.builder()
+                .httpPort(port)
+                .build();
 
         Dl4jStep modelPipelineStep = Dl4jStep.builder()
                 .inputName("default")

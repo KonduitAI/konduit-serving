@@ -88,9 +88,10 @@ public class PmmlIrisTest extends BaseVerticleTest {
 
     @Override
     public JsonObject getConfigObject() throws Exception {
-        ServingConfig servingConfig = new ServingConfig()
+        ServingConfig servingConfig = ServingConfig.builder()
                 .httpPort(port)
-                .outputDataFormat(ai.konduit.serving.config.Output.DataFormat.JSON);
+                .outputDataFormat(ai.konduit.serving.config.Output.DataFormat.JSON)
+                .build();
 
         PmmlStep pmmlPipelineStep = PmmlStep.builder()
                 .path(new ClassPathResource("/inference/iris/classification/IrisTree.xml").getFile().getAbsolutePath())

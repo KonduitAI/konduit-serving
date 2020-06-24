@@ -91,37 +91,37 @@ public class PythonStepRunner extends BaseStepRunner {
             Preconditions.checkState(pipelineStep.hasInputName(configEntry.getKey()),
                     "Invalid input name specified for transform " + configEntry.getKey());
             PythonConfig currConfig = configEntry.getValue();
-            if (currConfig.pythonPath() != null && !setPath) {
-                log.info("Over riding python path " + currConfig.pythonPath());
-                System.setProperty(PythonExecutioner.DEFAULT_PYTHON_PATH_PROPERTY, currConfig.pythonPath());
+            if (currConfig.getPythonPath() != null && !setPath) {
+                log.info("Over riding python path " + currConfig.getPythonPath());
+                System.setProperty(PythonExecutioner.DEFAULT_PYTHON_PATH_PROPERTY, currConfig.getPythonPath());
                 setPath = true;
             }
 
-            String code = configEntry.getValue().pythonCode();
+            String code = configEntry.getValue().getPythonCode();
             if (code == null) {
                 try {
-                    code = FileUtils.readFileToString(new File(currConfig.pythonCodePath()), StandardCharsets.UTF_8);
+                    code = FileUtils.readFileToString(new File(currConfig.getPythonCodePath()), StandardCharsets.UTF_8);
                 } catch (IOException e) {
-                    log.error("Unable to read code from " + currConfig.pythonCodePath());
+                    log.error("Unable to read code from " + currConfig.getPythonCodePath());
                 }
-                log.info("Resolving code from " + currConfig.pythonCodePath());
+                log.info("Resolving code from " + currConfig.getPythonCodePath());
             }
 
             Preconditions.checkNotNull(code, "No code to run!");
             Preconditions.checkState(!code.isEmpty(), "Code resolved to an empty string!");
             PythonTransformBuilder pythonTransformBuilder = PythonTransform.builder();
             pythonTransformBuilder.code(code)
-                    .returnAllInputs(currConfig.returnAllInputs())
-                    .setupAndRun(currConfig.setupAndRun());
+                    .returnAllInputs(currConfig.isReturnAllInputs())
+                    .setupAndRun(currConfig.isSetupAndRun());
             PythonVariables pythonVariables = null;
-            if(currConfig.pythonInputs() != null) {
-                pythonVariables = PythonVariables.schemaFromMap(currConfig.pythonInputs());
+            if(currConfig.getPythonInputs() != null) {
+                pythonVariables = PythonVariables.schemaFromMap(currConfig.getPythonInputs());
                 pythonTransformBuilder.inputs(pythonVariables);
                 pythonTransformBuilder.inputSchema(schemaForVariables(pythonVariables));
             }
 
-            if(currConfig.pythonOutputs() != null) {
-                PythonVariables outputs = PythonVariables.schemaFromMap(currConfig.pythonOutputs());
+            if(currConfig.getPythonOutputs() != null) {
+                PythonVariables outputs = PythonVariables.schemaFromMap(currConfig.getPythonOutputs());
                 if(outputs.isEmpty()) {
                     pythonTransformBuilder.outputs(pythonVariables);
                     pythonTransformBuilder.outputSchema(schemaForVariables(pythonVariables));

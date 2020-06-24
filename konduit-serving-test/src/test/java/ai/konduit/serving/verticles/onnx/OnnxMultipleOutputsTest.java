@@ -78,9 +78,10 @@ public class OnnxMultipleOutputsTest extends BaseVerticleTest {
             FileUtils.copyURLToFile(new URL("https://raw.githubusercontent.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB/master/models/onnx/version-RFB-320.onnx"), model);
         }
 
-        ServingConfig servingConfig = new ServingConfig()
+        ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.JSON)
-                .httpPort(port);
+                .httpPort(port)
+                .build();
 
         OnnxStep modelPipelineConfig = OnnxStep.builder()
                 .path(model.getAbsolutePath())

@@ -36,8 +36,9 @@ public class ClassificationMetricsTests {
 
     @Test
     public void testClassificationMetricsReset() {
-        ClassificationMetricsConfig classificationMetricsConfig = new ClassificationMetricsConfig()
-                .classificationLabels(Arrays.asList("0"));
+        ClassificationMetricsConfig classificationMetricsConfig = ClassificationMetricsConfig.builder()
+                .classificationLabels(Arrays.asList("0"))
+                .build();
 
         ClassificationMetrics classificationMetrics = new ClassificationMetrics(classificationMetricsConfig);
         classificationMetrics.bindTo(new SimpleMeterRegistry());

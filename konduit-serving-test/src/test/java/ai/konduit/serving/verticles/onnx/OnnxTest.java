@@ -77,9 +77,10 @@ public class OnnxTest extends BaseVerticleTest {
             FileUtils.copyURLToFile(new URL("https://s3.amazonaws.com/onnx-model-zoo/squeezenet/squeezenet1.1/squeezenet1.1.onnx"), model);
         }
 
-        ServingConfig servingConfig = new ServingConfig()
+        ServingConfig servingConfig = ServingConfig.builder()
                 .outputDataFormat(Output.DataFormat.NUMPY)
-                .httpPort(port);
+                .httpPort(port)
+                .build();
 
         OnnxStep modelPipelineConfig = OnnxStep.builder()
                 .path(model.getAbsolutePath())

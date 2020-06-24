@@ -62,12 +62,12 @@ public abstract class BaseMemMapTest extends BaseVerticleTest {
         org.apache.commons.io.FileUtils.writeByteArrayToFile(tmpFile, save);
         InferenceConfiguration inferenceConfiguration =
                 InferenceConfiguration.builder()
-                        .servingConfig(new ServingConfig()
+                        .servingConfig(ServingConfig.builder()
                                 .httpPort(port)
-                                )
-                        .memMapConfig(new MemMapConfig()
+                                .build())
+                        .memMapConfig(MemMapConfig.builder()
                                 .arrayPath(tmpFile.getAbsolutePath())
-                                )
+                                .build())
                         .build();
 
         return new JsonObject(inferenceConfiguration.toJson());

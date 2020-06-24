@@ -17,11 +17,12 @@ public class RegressionMetricsTest {
 
     @Test
     public void testRegressionValue() {
-        RegressionMetricsConfig regressionMetricsConfig = new  RegressionMetricsConfig()
+        RegressionMetricsConfig regressionMetricsConfig = RegressionMetricsConfig.builder()
                 .regressionColumnLabels(Arrays.asList("test"))
                 .sampleTypes(Arrays.asList(RegressionMetricsConfig.SampleType.MEAN))
                 .columnDistributions(Arrays.asList(ColumnDistribution.builder()
-                .max(1.0).min(0.0).normalizerType(NormalizerType.MIN_MAX).build()));
+                .max(1.0).min(0.0).normalizerType(NormalizerType.MIN_MAX).build()))
+                .build();
 
         RegressionMetrics regressionMetrics = new RegressionMetrics(regressionMetricsConfig);
         regressionMetrics.bindTo(new SimpleMeterRegistry());

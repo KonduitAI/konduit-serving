@@ -146,12 +146,12 @@ public class MultiLabelMetrics implements MetricsRenderer {
 
     @Override
     public void bindTo(MeterRegistry registry) {
-        for(int i = 0; i < multiLabelMetricsConfig.labels().size(); i++) {
+        for(int i = 0; i < multiLabelMetricsConfig.getLabels().size(); i++) {
             CurrentClassTrackerCount classTrackerCount = new CurrentClassTrackerCount();
             classTrackerCounts.add(classTrackerCount);
-            classCounterIncrement.add(Gauge.builder(multiLabelMetricsConfig.labels().get(i),classTrackerCount)
+            classCounterIncrement.add(Gauge.builder(multiLabelMetricsConfig.getLabels().get(i),classTrackerCount)
                     .tags(tags)
-                    .description("Multi-label Classification counts seen so far for label " + multiLabelMetricsConfig.labels().get(i))
+                    .description("Multi-label Classification counts seen so far for label " + multiLabelMetricsConfig.getLabels().get(i))
                     .baseUnit("multilabelclassification.outcome")
                     .register(registry));
 
