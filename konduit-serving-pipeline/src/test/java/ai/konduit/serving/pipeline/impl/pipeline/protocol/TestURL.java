@@ -63,7 +63,7 @@ public class TestURL {
 
     @Before
     public void setUp() throws Exception {
-        server = new TestServer(PORT, testDir.getRoot());
+        server = new TestServer(PORT, null);
         server.start();
         configData = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("config/config.json"),
                 "UTF-8");
