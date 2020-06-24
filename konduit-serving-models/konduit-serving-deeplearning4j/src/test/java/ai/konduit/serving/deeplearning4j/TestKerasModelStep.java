@@ -23,6 +23,7 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
+import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -87,7 +88,7 @@ public class TestKerasModelStep {
         File f = Resources.asFile("lstm_functional_tf_keras_2.h5");
         File dir = testDir.newFolder();
         File modelFile = new File(dir, "model.h5");
-        FileUtils.copyFile(f, modelFile);;
+        FileUtils.copyFile(f, modelFile);
         String path = modelFile.toURI().toString();
 
         INDArray arr = Nd4j.rand(DataType.FLOAT, 1, 10, 4);

@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.cli.launcher.command;
 
+import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import io.vertx.core.cli.CLIException;
@@ -30,6 +31,7 @@ import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
@@ -106,7 +108,17 @@ public class KonduitRunCommand extends RunCommand {
     @Override
     protected JsonObject getJsonFromFileOrString(String jsonOrYamlFileOrString, String argName) {
         if (jsonOrYamlFileOrString != null) {
-            try (Scanner scanner = new Scanner(new File(jsonOrYamlFileOrString), "UTF-8").useDelimiter("\\A")) {
+            File scanFile = null;
+            try {
+                scanFile = URIResolver.isUrl(jsonOrYamlFileOrString) ?
+                        URIResolver.getFile(jsonOrYamlFileOrString) :
+                        new File(jsonOrYamlFileOrString);
+            } catch (IOException e) {
+                log.error("Failed to load model " + jsonOrYamlFileOrString, e);
+                return null;
+            }
+
+            try (Scanner scanner = new Scanner(scanFile, "UTF-8").useDelimiter("\\A")) {
                 return readConfiguration(scanner.next());
             } catch (FileNotFoundException e) {
                 return readConfiguration(jsonOrYamlFileOrString);

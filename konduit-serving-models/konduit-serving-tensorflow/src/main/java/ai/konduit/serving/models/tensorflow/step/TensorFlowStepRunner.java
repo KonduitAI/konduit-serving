@@ -23,6 +23,7 @@ import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.impl.data.ValueNotFoundException;
@@ -140,8 +141,10 @@ public class TensorFlowStepRunner implements PipelineStepRunner {
     }
 
     protected void initHelper() throws Exception {
-        File origFile = new File(new URI(step.getModelUri()));
-        Preconditions.checkState(origFile.exists(), "Model file does not exist: " + step.getModelUri());
+        //File origFile = new File(new URI(step.getModelUri()));
+        String uri = step.getModelUri();
+        File origFile = URIResolver.getFile(uri);
+        Preconditions.checkState(origFile.exists(), "Model file does not exist: " + uri);
 
 
         //Try to load frozen model:

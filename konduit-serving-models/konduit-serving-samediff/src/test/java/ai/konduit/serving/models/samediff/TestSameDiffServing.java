@@ -49,16 +49,7 @@ public class TestSameDiffServing {
         Nd4j.getRandom().setSeed(12345);
         INDArray inArr = Nd4j.rand(DataType.FLOAT, 3, 784);
 
-        SameDiff sd = SameDiff.create();
-        SDVariable in = sd.placeHolder("in", DataType.FLOAT, -1, 784);
-
-        SDVariable w1 = sd.var("w1", Nd4j.rand(DataType.FLOAT, 784, 100));
-        SDVariable b1 = sd.var("b1", Nd4j.rand(DataType.FLOAT, 100));
-        SDVariable a1 = sd.nn.tanh(in.mmul(w1).add(b1));
-
-        SDVariable w2 = sd.var("w2", Nd4j.rand(DataType.FLOAT, 100, 10));
-        SDVariable b2 = sd.var("b2", Nd4j.rand(DataType.FLOAT, 10));
-        SDVariable out = sd.nn.softmax("out", a1.mmul(w2).add(b2));
+        SameDiff sd = getModel();
 
         INDArray outExp = sd.outputSingle(Collections.singletonMap("in", inArr), "out");
 
@@ -87,6 +78,21 @@ public class TestSameDiffServing {
         Data dOut2 = p2.executor().exec(d);
         INDArray outArr2 = dOut2.getNDArray("out").getAs(INDArray.class);
         assertEquals(outExp, outArr2);
+    }
+
+    public static SameDiff getModel(){
+        Nd4j.getRandom().setSeed(12345);
+        SameDiff sd = SameDiff.create();
+        SDVariable in = sd.placeHolder("in", DataType.FLOAT, -1, 784);
+
+        SDVariable w1 = sd.var("w1", Nd4j.rand(DataType.FLOAT, 784, 100));
+        SDVariable b1 = sd.var("b1", Nd4j.rand(DataType.FLOAT, 100));
+        SDVariable a1 = sd.nn.tanh(in.mmul(w1).add(b1));
+
+        SDVariable w2 = sd.var("w2", Nd4j.rand(DataType.FLOAT, 100, 10));
+        SDVariable b2 = sd.var("b2", Nd4j.rand(DataType.FLOAT, 10));
+        SDVariable out = sd.nn.softmax("out", a1.mmul(w2).add(b2));
+        return sd;
     }
 
 }

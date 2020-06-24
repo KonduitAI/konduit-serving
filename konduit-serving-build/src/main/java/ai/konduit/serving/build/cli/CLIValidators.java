@@ -168,6 +168,7 @@ public class CLIValidators {
 
         @Override
         public void validate(String name, List<String> value) throws ParameterException {
+
             for(String s : value){
                 String[] split = s.split("=");
                 if(split.length != 2){

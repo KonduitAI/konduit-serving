@@ -21,6 +21,7 @@ import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.exception.ModelLoadingException;
+import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.impl.data.JData;
@@ -55,9 +56,9 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     public DL4JPipelineStepRunner(KerasModelStep step) {
         this.kStep = step;
-        File f = getFile(step.modelUri());
         KerasModelBuilder b;
         try{
+            File f = URIResolver.getFile(step.modelUri());
             String path = f.isAbsolute() ? f.getAbsolutePath() : f.getPath();
             b = new KerasModel().modelBuilder().modelHdf5Filename(path)
                     .enforceTrainingConfig(false);
@@ -92,8 +93,12 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
 
     public DL4JPipelineStepRunner(DL4JModelPipelineStep step) {
         this.step = step;
-        File f = getFile(step.modelUri());  //TODO DON'T ASSUME LOCAL FILE URI!
-
+        File f;
+        try {
+            f = URIResolver.getFile(step.modelUri());
+        } catch (IOException e) {
+            throw new ModelLoadingException("Failed to load Deeplearning4J model (MultiLayerNetwork or ComputationGraph) from URI " + step.modelUri(), e);
+        }
         boolean isMLN = DL4JModelValidator.validateMultiLayerNetwork(f).isValid();
         boolean isCG = !isMLN && DL4JModelValidator.validateComputationGraph(f).isValid();
 
@@ -114,20 +119,6 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
                 throw new ModelLoadingException("Failed to load Deeplearning4J ComputationGraph from URI " + step.modelUri(), e);
             }
         }
-    }
-
-    protected static File getFile(String uri) {
-        Preconditions.checkState(uri != null && !uri.isEmpty(), "No model URI was provided (model URI was null or empty)");
-
-        File f;
-        if(uri.startsWith("file:/")){
-            f = new File(URI.create(uri));
-        } else {
-            f = new File(uri);
-        }
-
-        Preconditions.checkState(f.exists(), "No model file exists at URI: %s", uri);
-        return f;
     }
 
 

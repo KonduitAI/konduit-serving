@@ -135,6 +135,10 @@ public class TestDL4JModelStep {
 
     public File createIrisMLNFile() throws Exception {
         File dir = testDir.newFolder();
+        return createIrisMLNFile(dir);
+    }
+
+    public static File createIrisMLNFile(File dir) throws Exception {
         File netFile = new File(dir, "testMLN.zip");
         createIrisMLN().save(netFile);
         return netFile;
@@ -147,7 +151,7 @@ public class TestDL4JModelStep {
         return netFile;
     }
 
-    public MultiLayerNetwork createIrisMLN(){
+    public static MultiLayerNetwork createIrisMLN(){
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .updater(new Adam(0.01))
                 .list()
