@@ -43,9 +43,8 @@ public class TestCLI {
 
     @Before
     public void setUp() throws Exception {
-        System.setProperty("java.protocol.handler.pkgs",
-                "ai.konduit.serving.pipeline.api.protocol");
-        server = new TestServer("http://", "localhost", 9090);
+
+        server = new TestServer(9090, testDir.getRoot());
         server.start();
     }
 
