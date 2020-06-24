@@ -108,7 +108,7 @@ public class TestGradleGeneration {
         mfContent = mfContent.replace("\n ", "");
         boolean found = false;
         for(String line : mfContent.split("\n")){
-            if (line.contains("Main-Class") && line.contains("ai.konduit.serving.build.cli.launcher.extension.KonduitServingBuildLauncher")) {
+            if (line.contains("Main-Class") && line.contains("ai.konduit.serving.cli.launcher.KonduitServingLauncher")) {
                 found = true;
                 break;
             }

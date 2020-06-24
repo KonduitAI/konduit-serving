@@ -195,7 +195,7 @@ public class GradleBuild {
                 }
                 kts.append("\toutfile = \"" + exeName + ".exe\"\n");
                 //kts.append("destinationDirectory.set(file(\"" + escaped + "\"))\n");
-                kts.append("\tmainClassName = \"ai.konduit.serving.build.cli.launcher.extension.KonduitServingBuildLauncher\"\n");
+                kts.append("\tmainClassName = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n");
                 kts.append("}\n");
                 kts.append(createCopyTask("copyExe", outputDir.getAbsolutePath(), ((ExeDeployment)deployment).outputDir(),
                         "*.exe", "launch4j"));
@@ -360,7 +360,7 @@ public class GradleBuild {
                 .append("tasks.withType(Jar::class) {\n")
                 .append("    manifest {\n")
                 .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
-                .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.build.cli.launcher.extension.KonduitServingBuildLauncher\"\n")
+                .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
                 .append("    }\n")
                 .append("}\n\n");
     }
@@ -389,7 +389,7 @@ public class GradleBuild {
                     .append("tasks.withType(Jar::class) {\n")
                     .append("    manifest {\n")
                     .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
-                    .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.build.cli.launcher.extension.KonduitServingBuildLauncher\"\n")
+                    .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
                     .append("        attributes[\"Class-Path\"] = configurations.runtimeClasspath.get().getFiles().joinToString(separator=\" \")\n")
                     .append("    }\n");
 

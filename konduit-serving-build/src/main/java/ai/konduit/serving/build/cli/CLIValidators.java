@@ -71,7 +71,8 @@ public class CLIValidators {
 
     public static class DeploymentTypeValueValidator implements IValueValidator<List<String>> {
 
-        public static final List<String> VALUES = Arrays.asList(Deployment.JAR, Deployment.UBERJAR, Deployment.DOCKER, Deployment.EXE,
+        public static final List<String> VALUES = Arrays.asList(Deployment.CLASSPATH,
+                Deployment.JAR, Deployment.UBERJAR, Deployment.DOCKER, Deployment.EXE,
                 Deployment.WAR, Deployment.RPM, Deployment.DEB, Deployment.TAR);
 
         @Override

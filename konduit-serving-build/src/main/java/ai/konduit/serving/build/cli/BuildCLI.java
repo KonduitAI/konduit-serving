@@ -144,7 +144,16 @@ public class BuildCLI {
         }
         out.println("\n");
 
-        List<Deployment> deployments = parseDeployments();
+        Map<String,String> propsIn = new HashMap<>();
+
+        if(config != null){
+            for(String s : config){
+                String[] split = s.split("=");
+                propsIn.put(split[0], split[1]);
+            }
+        }
+
+        List<Deployment> deployments = parseDeployments(propsIn);
         for( int i=0; i<deployments.size(); i++ ){
             Deployment d = deployments.get(i);
             if(deployments.size() > 1){
@@ -181,25 +190,12 @@ public class BuildCLI {
             serving.add(Serving.valueOf(s.toUpperCase()));
         }
 
-
         Config c = new Config()
                 .pipelinePath(pipeline)
                 .target(t)
                 .deployments(deployments)
                 .serving(serving)
                 .additionalDependencies(additionalDependencies);
-
-        if(config != null){
-            Map<String,String> props = new HashMap<>();
-            for(String s : config){
-                String[] split = s.split("=");
-                props.put(split[0], split[1]);
-            }
-            for(Deployment d : deployments){
-                d.fromProperties(props);
-            }
-        }
-
 
         int width2 = 36;
         if(pipeline != null){
@@ -395,15 +391,21 @@ public class BuildCLI {
     }
 
 
-    public List<Deployment> parseDeployments(){
-        //TODO we need to have configuration
+    public List<Deployment> parseDeployments(Map<String, String> props){
         List<Deployment> out = new ArrayList<>();
         for(String s : deploymentTypes){
             switch (s){
+                case Deployment.CLASSPATH:
+                    ClassPathDeployment classPathDeployment =
+                            new ClassPathDeployment().type(ClassPathDeployment.Type.JAR_MANIFEST).outputFile("manifest.jar");
+                    classPathDeployment.fromProperties(props);
+                    out.add(classPathDeployment);
+                    break;
                 case Deployment.JAR:
                 case Deployment.UBERJAR:
-                    File f = new File("");
-                    out.add(new UberJarDeployment(f.getAbsolutePath()));
+                    UberJarDeployment uberJarDeployment = new UberJarDeployment().outputDir(new File("").getAbsolutePath());
+                    uberJarDeployment.fromProperties(props);
+                    out.add(uberJarDeployment);
                     break;
                 default:
                     throw new RuntimeException("Deployment type not yet implemented: " + s);
