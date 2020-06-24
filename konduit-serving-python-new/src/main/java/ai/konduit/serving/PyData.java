@@ -66,15 +66,7 @@ public class PyData extends PythonType<Data> {
                 break;
             case BYTES:
                 for (byte[] item : (List<byte[]>) val) {
-                    ByteBuffer buff = ByteBuffer.allocateDirect(item.length);
-                    for (int i = 0; i < item.length; i++) {
-                        buff.put(i, item[i]);
-                    }
-                    buff.rewind();
-                    BytePointer bp = new BytePointer(buff);
-                    bp.capacity(item.length);
-                    bp.limit(item.length);
-                    list.add(PythonTypes.MEMORYVIEW.toPython(new BytePointer(buff)));
+                    list.add(PythonTypes.BYTES.toPython(item));
                 }
                 break;
             case NDARRAY:
@@ -138,10 +130,10 @@ public class PyData extends PythonType<Data> {
                 jVal.add(PythonTypes.FLOAT.toJava(val.get(i)));
             }
             return new Pair<>(jVal, ValueType.DOUBLE);
-        } else if (Python.isinstance(item0, Python.memoryviewType())) {
+        } else if (Python.isinstance(item0, Python.bytesType())) {
             List<byte[]> jVal = new ArrayList<>();
             for (int i = 0; i < size; i++) {
-                jVal.add(PythonTypes.MEMORYVIEW.toJava(val.get(i)).getStringBytes());
+                jVal.add(PythonTypes.BYTES.toJava(val.get(i)));
             }
             return new Pair<>(jVal, ValueType.BYTES);
         } else if (Python.isinstance(item0, Python.importModule("numpy").attr("ndarray"))) {
@@ -205,9 +197,8 @@ public class PyData extends PythonType<Data> {
                 } else if (Python.isinstance(val, Python.floatType())) {
                     double jVal = PythonTypes.FLOAT.toJava(val);
                     data.put(strKey, jVal);
-                } else if (Python.isinstance(val, Python.memoryviewType())) {
-                    BytePointer bp = PythonTypes.MEMORYVIEW.toJava(val);
-                    byte[] jVal = bp.getStringBytes();
+                } else if (Python.isinstance(val, Python.bytesType())) {
+                    byte[] jVal = PythonTypes.BYTES.toJava(val);
                     data.put(strKey, jVal);
                 } else if (Python.isinstance(val, Python.importModule("numpy").attr("ndarray"))) {
                     INDArray arr = NumpyArray.INSTANCE.toJava(val);
@@ -268,11 +259,7 @@ public class PyData extends PythonType<Data> {
                         break;
                     case BYTES:
                         byte[] bytes = javaObject.getBytes(key);
-                        ByteBuffer buff = ByteBuffer.allocateDirect(bytes.length);
-                        for (int i = 0; i < bytes.length; i++) {
-                            buff.put(i, bytes[i]);
-                        }
-                        data.set(pyKey, PythonTypes.MEMORYVIEW.toPython(new BytePointer(buff)));
+                        data.set(pyKey, PythonTypes.BYTES.toPython(bytes));
                         break;
                     case NDARRAY:
                         data.set(pyKey, NumpyArray.INSTANCE.toPython(javaObject.getNDArray(key).getAs(INDArray.class)));

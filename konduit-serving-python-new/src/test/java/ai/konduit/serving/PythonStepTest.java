@@ -78,14 +78,14 @@ public class PythonStepTest {
         inputData.put("i1", 1);
         inputData.put("i2", 2);
         inputData.put("i3", 3);
-
+//
         inputData.put("f1", 10.1);
         inputData.put("f2", 20.1);
         inputData.put("f3", 30.1);
-
+//
         inputData.put("b1", true);
         inputData.put("b2", false);
-
+//
         inputData.put("a1", new byte[]{97, 98, 99}); //abc
 
         Data expected = new JData();

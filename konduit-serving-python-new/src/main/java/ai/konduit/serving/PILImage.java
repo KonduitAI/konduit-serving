@@ -21,6 +21,7 @@ import ai.konduit.serving.pipeline.impl.data.image.Png;
 import org.bytedeco.javacpp.BytePointer;
 import org.nd4j.python4j.*;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +76,8 @@ public class PILImage extends PythonType<Image> {
             List<PythonObject> args = Collections.singletonList(bytesIO);
             Map<String, String> kwargs = Collections.singletonMap("format", "PNG");
             pythonObject.attr("save").callWithArgsAndKwargs(args, kwargs);
-            PythonObject memview = Python.memoryview(bytesIO.attr("getvalue").call());
-            byte[] bytes = PythonTypes.MEMORYVIEW.toJava(memview).getStringBytes();
+            PythonObject pybytes = bytesIO.attr("getvalue").call();
+            byte[] bytes = PythonTypes.BYTES.toJava(pybytes);
             return Image.create(new Png(bytes));
         }
     }
@@ -86,13 +87,13 @@ public class PILImage extends PythonType<Image> {
         installPillow();
         Png png = javaObject.getAs(Png.class);
         byte[] bytes = png.getBytes();
-        BytePointer bp = new BytePointer(bytes);
         try (PythonGC gc = PythonGC.watch()) {
-            PythonObject memview = PythonTypes.MEMORYVIEW.toPython(bp);
-            PythonObject bytesIO = Python.importModule("io").attr("BytesIO").call(memview);
+            PythonObject pybytes = PythonTypes.BYTES.toPython(bytes);
+            PythonObject bytesIO = Python.importModule("io").attr("BytesIO").call(pybytes);
             PythonObject pilImage = Python.importModule("PIL.Image").attr("open").call(bytesIO);
             PythonGC.keep(pilImage);
             return pilImage;
+
         }
     }
 
