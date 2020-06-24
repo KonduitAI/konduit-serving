@@ -18,11 +18,11 @@
 
 package ai.konduit.serving.metrics.prometheus;
 
-import ai.konduit.serving.metrics.prometheus.test.MetricsTestingPipelineStep;
+import ai.konduit.serving.metrics.prometheus.test.MetricsTestingStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
 import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.InferenceDeploymentResult;
@@ -63,8 +63,8 @@ public class TestMetricsEndpoint {
         configuration = new InferenceConfiguration()
                 .protocol(ServerProtocol.HTTP)
                 .pipeline(SequencePipeline.builder()
-                        .add(new LoggingPipelineStep().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR))
-                        .add(new MetricsTestingPipelineStep())
+                        .add(new LoggingStep().log(LoggingStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR))
+                        .add(new MetricsTestingStep())
                         .build());
 
         Async async = testContext.async();

@@ -21,12 +21,12 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import org.nd4j.common.base.Preconditions;
 
-public class DL4JPipelineStepRunnerFactory implements PipelineStepRunnerFactory {
+public class DL4JStepRunnerFactory implements PipelineStepRunnerFactory {
 
 
     @Override
     public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof DL4JModelPipelineStep || pipelineStep instanceof KerasModelStep;
+        return pipelineStep instanceof DL4JModelStep || pipelineStep instanceof KerasModelStep;
     }
 
     @Override
@@ -35,10 +35,10 @@ public class DL4JPipelineStepRunnerFactory implements PipelineStepRunnerFactory 
 
         if(pipelineStep instanceof KerasModelStep){
             KerasModelStep ps = (KerasModelStep) pipelineStep;
-            return new DL4JPipelineStepRunner(ps);
+            return new DL4JRunner(ps);
         } else {
-            DL4JModelPipelineStep ps = (DL4JModelPipelineStep) pipelineStep;
-            return new DL4JPipelineStepRunner(ps);
+            DL4JModelStep ps = (DL4JModelStep) pipelineStep;
+            return new DL4JRunner(ps);
         }
     }
 }

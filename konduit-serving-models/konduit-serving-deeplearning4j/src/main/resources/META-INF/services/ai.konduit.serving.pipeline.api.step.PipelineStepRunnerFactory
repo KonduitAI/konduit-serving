@@ -14,4 +14,4 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################################
 
-ai.konduit.serving.models.deeplearning4j.step.DL4JPipelineStepRunnerFactory
+ai.konduit.serving.models.deeplearning4j.step.DL4JStepRunnerFactory

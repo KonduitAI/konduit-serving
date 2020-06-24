@@ -33,9 +33,9 @@ public class DrawGridStepRunnerFactory implements PipelineStepRunnerFactory {
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
         if(pipelineStep instanceof DrawGridStep){
-            return new DrawGridStepRunner((DrawGridStep) pipelineStep);
+            return new DrawGridRunner((DrawGridStep) pipelineStep);
         } else {
-            return new DrawGridStepRunner((DrawFixedGridStep) pipelineStep);
+            return new DrawGridRunner((DrawFixedGridStep) pipelineStep);
         }
 
     }

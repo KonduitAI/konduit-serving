@@ -41,17 +41,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @CanRun({DrawGridStep.class, DrawFixedGridStep.class})
-public class DrawGridStepRunner implements PipelineStepRunner {
+public class DrawGridRunner implements PipelineStepRunner {
 
     protected final DrawGridStep step;
     protected final DrawFixedGridStep fStep;
 
-    public DrawGridStepRunner(@NonNull DrawGridStep step){
+    public DrawGridRunner(@NonNull DrawGridStep step){
         this.step = step;
         this.fStep = null;
     }
 
-    public DrawGridStepRunner(@NonNull DrawFixedGridStep step){
+    public DrawGridRunner(@NonNull DrawFixedGridStep step){
         this.step = null;
         this.fStep = step;
     }

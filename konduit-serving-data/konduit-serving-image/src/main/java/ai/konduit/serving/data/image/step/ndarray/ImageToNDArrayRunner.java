@@ -39,11 +39,11 @@ import java.util.Arrays;
 import java.util.List;
 
 @CanRun(ImageToNDArrayStep.class)
-public class ImageToNDArrayStepRunner implements PipelineStepRunner {
+public class ImageToNDArrayRunner implements PipelineStepRunner {
 
     protected final ImageToNDArrayStep step;
 
-    public ImageToNDArrayStepRunner(@NonNull ImageToNDArrayStep step){
+    public ImageToNDArrayRunner(@NonNull ImageToNDArrayStep step){
         this.step = step;
     }
 

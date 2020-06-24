@@ -31,11 +31,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
+public class BoundingBoxFilterRunner implements PipelineStepRunner {
 
     protected final BoundingBoxFilterStep step;
 
-    public BoundingBoxFilterStepRunner(BoundingBoxFilterStep step) {
+    public BoundingBoxFilterRunner(BoundingBoxFilterStep step) {
         this.step = step;
         Preconditions.checkArgument(!ArrayUtils.isEmpty(this.step.classesToKeep),"Seems you forgets to set the classes to keep.");
     };
