@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.api.protocol;
 
+import com.jcabi.aspects.RetryOnFailure;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -42,7 +43,9 @@ public class URIResolver {
 
     private static File cacheDirectory;
     static {
-        File f = new File(System.getProperty("user.home"), ".konduit_cache/");
+        File f = new File(System.getProperty("user.home"), StringUtils.defaultIfEmpty(
+                                                            System.getProperty("konduit.serving.cache.location"),
+                                                            ".konduit_cache/"));
         if (!f.exists())
             f.mkdirs();
         cacheDirectory = f;
@@ -54,9 +57,26 @@ public class URIResolver {
         String fullPath = StringUtils.defaultIfEmpty(u.getScheme(), StringUtils.EMPTY);
         System.out.println(u.getPath());
         String[] dirs = u.getPath().split("/");
+        for (String dir : dirs) {
+            fullPath += File.separator + dir;
+        }
         fullPath += File.separator + FilenameUtils.getName(uri);
         File effectiveDirectory = new File(cacheDirectory, fullPath);
         return effectiveDirectory;
+    }
+
+    @RetryOnFailure(attempts = 3)
+    private static File load(URL url, File cachedFile) throws IOException {
+        URLConnection connection = url.openConnection();
+
+        if (connection.getContentLength() == cachedFile.length() &&
+            connection.getLastModified() == cachedFile.lastModified()) {
+            return cachedFile;
+        }
+        else {
+            cachedFile.delete();
+        }
+        return null;
     }
 
     public static File getFile(String uri) throws IOException {
@@ -67,12 +87,14 @@ public class URIResolver {
             return new File(u.getPath());
         }
         File cachedFile = getCachedFile(uri);
-        if (cachedFile.exists()) {
-            return cachedFile;
-        }
 
         URL url = u.toURL();
-        URLConnection connection = url.openConnection();
+        if (cachedFile.exists()) {
+            File verifiedFile = load(url, cachedFile);
+            if (verifiedFile != null) {
+                return verifiedFile;
+            }
+        }
         FileUtils.copyURLToFile(url, cachedFile);
 
         return cachedFile;

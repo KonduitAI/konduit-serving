@@ -16,13 +16,17 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-    <!--repositories>
-        <repository> <id>mapr-releases</id>
+    <repositories>
+        <!--repository> <id>mapr-releases</id>
             <url>http://repository.mapr.com/maven/</url>
             <snapshots><enabled>false</enabled></snapshots>
             <releases><enabled>true</enabled></releases>
-        </repository>
-    </repositories-->
+        </repository-->
+            <repository>
+                <id>oss.sonatype.org</id>
+                <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            </repository>
+    </repositories>
 
     <dependencies>
 
@@ -35,6 +39,17 @@
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-annotation</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jcabi</groupId>
+            <artifactId>jcabi-aspects</artifactId>
+            <version>0.22.6</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.validation</groupId>
+                    <artifactId>validation-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--dependency>
             <groupId>org.apache.hadoop</groupId>
