@@ -57,9 +57,6 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
 
     @Override
     public Data exec(Context ctx, Data data) {
-        // TODO: Ask Alex about consuming and non consuming Steps. It seems to me that unused inputs should
-        //       always go through unchanged
-        // TODO: Ask Alex about lombok val usage. What style is preferred?
         Data out = Data.empty();
         for(String key : data.keys()){
             out.copyFrom(key, data);
