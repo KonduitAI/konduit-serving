@@ -101,8 +101,8 @@ public class TensorflowModelLoader implements ModelLoader<TensorflowGraphHolder>
      */
     public static TensorflowModelLoader createFromConfig(ModelStep modelPipelineStepConfig) {
         TensorFlowStep tensorFlowStep = (TensorFlowStep) modelPipelineStepConfig;
-        String sessionConfigPath = tensorFlowStep.configProtoPath();
-        SavedModelConfig savedModelConfig = tensorFlowStep.savedModelConfig();
+        String sessionConfigPath = tensorFlowStep.getConfigProtoPath();
+        SavedModelConfig savedModelConfig = tensorFlowStep.getSavedModelConfig();
         List<String> inputNames = modelPipelineStepConfig.getInputNames();
         List<String> outputNames = modelPipelineStepConfig.getOutputNames();
         String modelConfigPath = tensorFlowStep.getPath();
