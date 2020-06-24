@@ -35,6 +35,7 @@ import lombok.experimental.Accessors;
  * the output will be a single value; if the input is a list, the output will be a list.<br>
  */
 @Data
+@Builder
 @Accessors(fluent = true)
 @AllArgsConstructor
 @NoArgsConstructor
