@@ -54,7 +54,7 @@ import java.util.List;
 public class DrawHeatmapStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "image";
 
-    @Schema(description = "Name of the input data fields containing the points used for the heatmap. Accepts both single points and lists of points.")
+    @Schema(description = "Name of the input data fields containing the points used for the heatmap. Accepts both single points and lists of points. Accepts both relative and absolute addressed points.")
     @Singular
     private List<String> points;
 
