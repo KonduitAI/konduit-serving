@@ -61,11 +61,11 @@ public class Profile {
     }
 
     public enum OperatingSystem {
-        LINUX, WINDOWS, MACOSX, ANDROID;
+        LINUX, WINDOWS, MAC;
 
         public static OperatingSystem forName(String s) {
             if ("MAC".equalsIgnoreCase(s) || "OSX".equalsIgnoreCase(s)) {
-                return MACOSX;
+                return MAC;
             }
 
             return valueOf(s.toUpperCase());
@@ -150,13 +150,13 @@ public class Profile {
     }
 
     @JsonGetter("serverTypes")
-    public String serverTypes() {
-        return this.serverTypes.stream().map(ServerProtocol::name).collect(Collectors.joining(" "));
+    public List<String> serverTypes() {
+        return this.serverTypes.stream().map(ServerProtocol::name).collect(Collectors.toList());
     }
 
     @JsonGetter("additionalDependencies")
-    public String additionalDependencies() {
-        return this.additionalDependencies != null ? String.join(" ", this.additionalDependencies): null;
+    public List<String> additionalDependencies() {
+        return this.additionalDependencies;
     }
 
     public static OperatingSystem getCurrentOS() {
@@ -165,9 +165,9 @@ public class Profile {
         } else if (SystemUtils.IS_OS_LINUX) {
             return OperatingSystem.LINUX;
         } else if (SystemUtils.IS_OS_MAC) {
-            return OperatingSystem.MACOSX;
-        } else { // todo: find a better solution for this.
-            return OperatingSystem.ANDROID;
+            return OperatingSystem.MAC;
+        } else { // todo: find other operating systems if valid.
+            throw new IllegalStateException("Invalid operating system specified. Should be one of: " + Arrays.asList(OperatingSystem.values()));
         }
     }
 }

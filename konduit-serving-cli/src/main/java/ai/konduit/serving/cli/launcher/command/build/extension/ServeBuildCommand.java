@@ -22,10 +22,7 @@ import ai.konduit.serving.cli.launcher.command.ServeCommand;
 import ai.konduit.serving.cli.launcher.command.build.extension.model.Profile;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
-import io.vertx.core.cli.annotations.Description;
-import io.vertx.core.cli.annotations.Name;
-import io.vertx.core.cli.annotations.Option;
-import io.vertx.core.cli.annotations.Summary;
+import io.vertx.core.cli.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.shade.guava.base.Strings;
@@ -36,6 +33,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 @Name(value = "serve", priority = 1)
@@ -57,10 +56,11 @@ import java.util.Scanner;
 @Slf4j
 public class ServeBuildCommand extends ServeCommand {
 
-    private String profileName;
+    private String profileName = "CPU";
 
     @Option(shortName = "p", longName = "profileName", argName = "profileName")
     @Description("Name of the profile to be used with the server launch.")
+    @DefaultValue("CPU")
     private void setProfileName(String profileName) {
         this.profileName = profileName;
     }
@@ -83,20 +83,29 @@ public class ServeBuildCommand extends ServeCommand {
                 Method buildCliMainMethod = buildCliClass.getMethod("exec", String[].class);
                 buildCliMainMethod.setAccessible(true);
 
-                Profile profile = ProfileCommand.getProfile(profileName != null ? profileName : "CPU");
+                Profile profile = ProfileCommand.getProfile(profileName);
 
-                String[] buildCliArgs = new String[] {
-                        "-p", savePath.getAbsolutePath(),
-                        "-c", String.format("classpath.outputFile=%s", mfJar.getAbsolutePath()), "classpath.type=JAR_MANIFEST",
-                        "-dt", "CLASSPATH",
-                        "-d", profile.computeDevice(),
-                        "-a", profile.cpuArchitecture(),
-                        "-o", profile.operatingSystem(),
-                        "-s", profile.serverTypes(),
-                        "-ad", profile.additionalDependencies()
-                };
+                List<String> args = new ArrayList<>();
+                args.add("-p"); args.add(savePath.getAbsolutePath());
+                args.add("-c"); args.add(String.format("classpath.outputFile=%s", mfJar.getAbsolutePath())); args.add("classpath.type=JAR_MANIFEST");
+                args.add("-dt"); args.add("CLASSPATH");
+                args.add("-d"); args.add(profile.computeDevice());
+                args.add("-a"); args.add(profile.cpuArchitecture());
+                args.add("-o"); args.add(profile.operatingSystem());
 
-                buildCliMainMethod.invoke(buildCli, (Object) buildCliArgs);
+                if(profile.serverTypes() != null && !profile.serverTypes().isEmpty()) {
+                    for(String serverType : profile.serverTypes()) {
+                        args.add("-s"); args.add(serverType);
+                    }
+                }
+
+                if(profile.additionalDependencies() != null && !profile.additionalDependencies().isEmpty()) {
+                    for(String additionalDependency : profile.additionalDependencies()) {
+                        args.add("-ad"); args.add(additionalDependency);
+                    }
+                }
+
+                buildCliMainMethod.invoke(buildCli, (Object) args.toArray(new String[args.size()]));
 
                 if (Strings.isNullOrEmpty(this.classpath)) {
                     this.classpath = mfJar.getAbsolutePath();

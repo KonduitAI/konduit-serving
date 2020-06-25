@@ -31,25 +31,26 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Consumer;
 
 @Name("profile")
 @Summary("Command to List, view, edit, create and delete konduit serving run profiles.")
 @Description("A utility command to create, view, edit, list and delete konduit serving run profiles. Run profiles " +
-        "configures the background run architecture such as CPU, GPU (CUDA). Konduit serving tries to identify the " +
-        "best profiles during the first server launch but you can manage your own profile configurations with this " +
-        "command. \n\n"+
+        "configures the background run architecture such as CPU, GPU (CUDA) along with additional dependencies, server " +
+        "types, operating system etc. Konduit serving tries to identify the best profiles during the first server " +
+        "launch but you can manage more of your own profile configurations with this command. \n\n"+
         "Example usages:\n" +
         "--------------\n" +
         "- Creates a CUDA 10.2 profile with the name 'CUDA-10.2':\n" +
-        "$ konduit profile create -t CUDA_10.2 -n CUDA-10.2\n\n" +
+        "$ konduit profile create CUDA-10.2 -t CUDA_10.2 \n\n" +
         "- Creates a simple profile for x86_avx2 architecture with name 'CPU-1':\n" +
-        "$ konduit profile create -t x86_avx2 -n CPU-1\n\n" +
+        "$ konduit profile create CPU-1 -t x86_avx2\n\n" +
         "- Listing all the profiles:\n" +
         "$ konduit profile list\n\n" +
         "- Viewing a profile:\n" +
         "$ konduit profile view CPU-1\n\n" +
         "- Edit a profile with name 'CPU-1' from old type to 'x86':\n" +
-        "$ konduit profile edit -n CPU-1 -t x86 \n\n" +
+        "$ konduit profile edit CPU-1 -t x86 \n\n" +
         "--------------")
 @Slf4j
 public class ProfileCommand extends DefaultCommand {
@@ -66,46 +67,50 @@ public class ProfileCommand extends DefaultCommand {
 
     @Argument(index = 0, argName = "subCommand")
     @Description("Sub command to be used with the profile command. Sub commands are: [create, list, view, edit, delete]")
-    private void setSubCommand(String subCommand) {
-        this.subCommand = SubCommand.valueOf(subCommand);
+    public void setSubCommand(String subCommand) {
+        this.subCommand = SubCommand.valueOf(subCommand.toUpperCase());
     }
 
-    @Option(shortName = "n", longName = "name", argName = "<profile_name>", required = true)
-    @Description("Name of the profile which needs to be viewed, created, edited or deleted")
-    private void setProfileName(String profileName) {
+    @Argument(index = 1, argName = "profile_name", required = false)
+    @Description("Name of the profile to create, view, edit or delete.")
+    public void setProfileName(String profileName) {
         this.profileName = profileName;
     }
 
     @Option(shortName = "a", longName = "arch", argName = "cpu_architecture")
+    @DefaultValue("x86_avx2")
     @Description("Name of the cpu architecture. Accepted values are: x86, x86_64, x86_avx2, x86-avx2, x86_64-a, " +
             "x86_avx5, x86-avx5, x86_64-a, arm64, armhf, ppc64le]")
-    private void setCpuArchitecture(String cpuArchitecture) {
+    public void setCpuArchitecture(String cpuArchitecture) {
         this.cpuArchitecture = cpuArchitecture;
     }
 
     @Option(shortName = "o", longName = "os", argName = "operating_system")
-    @Description("Operating system the server needs to run at. Accepted values are: [windows, linux, mac, osx, macosx, android]")
-    private void setOperatingSystem(String operatingSystem) {
+    @Description("Operating system the server needs to run at. Accepted values are: [windows, linux, mac]. Defaults to the current OS value.")
+    public void setOperatingSystem(String operatingSystem) {
         this.operatingSystem = operatingSystem;
     }
 
     @Option(shortName = "cd", longName = "computeDevice", argName = "computeDevice")
+    @DefaultValue("CPU")
     @Description("Compute device to use with the server. Accepted values are: [CPU, CUDA_10.0, CUDA_10.1, CUDA_10.2]")
-    private void setComputeDevice(String computeDevice) {
+    public void setComputeDevice(String computeDevice) {
         this.computeDevice = computeDevice;
     }
 
     @Option(shortName = "st", longName = "serverTypes", argName = "serverTypes", acceptMultipleValues = true)
+    @DefaultValue("HTTP GRPC")
     @Description("One or more space separated values, indicating the backend server type. Accepted values are: [HTTP, GRPC, MQTT]")
-    private void setServerTypes(List<String> serverTypes) {
+    public void setServerTypes(List<String> serverTypes) {
         this.serverTypes = serverTypes;
     }
 
     @Option(shortName = "ad", longName = "additionalDependencies", argName = "additionalDependencies", acceptMultipleValues = true)
+    @DefaultValue("ch.qos.logback:logback-classic:1.2.3")
     @Description("One or more space separated values (maven coordinates) indicating additional dependencies to be included with " +
             "the server launch. The pattern of additional dependencies should be either <group_id>:<artifact_id>:<version> or " +
             "<group_id>:<artifact_id>:<version>:<classifier>")
-    private void setAdditionalDependencies(List<String> additionalDependencies) {
+    public void setAdditionalDependencies(List<String> additionalDependencies) {
         this.additionalDependencies = additionalDependencies;
     }
 
@@ -115,6 +120,11 @@ public class ProfileCommand extends DefaultCommand {
 
     @Override
     public void run() {
+        if(profileName == null && !this.subCommand.equals(SubCommand.LIST)) {
+            out.println("Please specify a profile name.");
+            System.exit(1);
+        }
+
         switch (this.subCommand) {
             case LIST:
                 listProfiles();
@@ -144,7 +154,12 @@ public class ProfileCommand extends DefaultCommand {
 
     private void editProfile() {
         if(isProfileExists(profileName)) {
-            saveProfile(profileName, fillProfileValues(getProfile(profileName)));
+            if(profileName.equals("CPU") || profileName.equals("CUDA")) {
+                out.format("Cannot edit default profiles with name 'CPU' or 'CUDA'.%n");
+                System.exit(1);
+            } else {
+                saveProfile(profileName, fillProfileValues(getProfile(profileName)));
+            }
         } else {
             out.format("No profile found with the name of %s%n", profileName);
         }
@@ -160,10 +175,10 @@ public class ProfileCommand extends DefaultCommand {
         if(computeDevice != null) {
             profile.computeDevice(computeDevice);
         }
-        if(serverTypes != null) {
+        if(serverTypes != null && !serverTypes.isEmpty()) {
             profile.serverTypes(serverTypes);
         }
-        if(additionalDependencies != null) {
+        if(additionalDependencies != null && !additionalDependencies.isEmpty()) {
             profile.additionalDependencies(additionalDependencies);
         }
 
@@ -191,11 +206,17 @@ public class ProfileCommand extends DefaultCommand {
     }
 
     public static Map<String, Profile> getAllProfiles() {
-        if(profilesSavePath.exists()) {
+        if(!profilesSavePath.exists()) {
             return firstTimeProfilesSetup();
         } else {
             try {
-                return ObjectMappers.fromYaml(FileUtils.readFileToString(profilesSavePath, StandardCharsets.UTF_8), Map.class);
+                Map<String, Profile> profiles = new HashMap<>();
+                Map profilesMap = ObjectMappers.fromYaml(FileUtils.readFileToString(profilesSavePath, StandardCharsets.UTF_8), Map.class);
+                for(Object key : profilesMap.keySet()) {
+                    Profile profile = ObjectMappers.json().convertValue(profilesMap.get(key), Profile.class);
+                    profiles.put((String) key, profile);
+                }
+                return profiles;
             } catch (IOException e) {
                 log.error("Unable to read profiles data from {}.", profilesSavePath.getAbsolutePath(), e);
                 System.exit(1);
@@ -209,10 +230,11 @@ public class ProfileCommand extends DefaultCommand {
         if(profiles.containsKey(profileName)) {
             if(profileName.equals("CPU") || profileName.equals("CUDA")) {
                 out.format("Cannot delete default profiles with name 'CPU' or 'CUDA'.%n");
+                System.exit(1);
             } else {
                 profiles.remove(profileName);
                 saveProfiles(profiles);
-                out.format("Deleted profile: %s successfully.%n", profileName);
+                out.format("Deleted %s profile, successfully.%n", profileName);
             }
         } else {
             out.format("Profile with name: %s doesn't exist.%n", profileName);
@@ -241,13 +263,10 @@ public class ProfileCommand extends DefaultCommand {
     }
 
     private void saveProfile(String profileName, Profile profile) {
-        if(isProfileExists(profileName)) {
-            out.format("Profile with name %s already exists", profileName);
-        } else {
-            Map<String, Profile> profiles = getAllProfiles();
-            profiles.put(profileName, profile);
-            saveProfiles(profiles);
-        }
+        Map<String, Profile> profiles = getAllProfiles();
+        profiles.put(profileName, profile);
+        saveProfiles(profiles);
+        out.format("Profile %s saved with details:%n%s%n", profileName, ObjectMappers.toYaml(profile));
     }
 
     private static void saveProfiles(Map<String, Profile> profiles) {
