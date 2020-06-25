@@ -40,12 +40,12 @@ import java.util.List;
 
 @Slf4j
 @CanRun(DrawHeatmapStep.class)
-public class DrawHeatmapStepRunner implements PipelineStepRunner {
+public class DrawHeatmapRunner implements PipelineStepRunner {
 
     protected final DrawHeatmapStep step;
     protected Mat prev;
 
-    public DrawHeatmapStepRunner(@NonNull DrawHeatmapStep step) {
+    public DrawHeatmapRunner(@NonNull DrawHeatmapStep step) {
         this.step = step;
     }
 

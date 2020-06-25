@@ -18,8 +18,6 @@
 
 package ai.konduit.serving.data.image.step.segmentation.index;
 
-import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
-import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
@@ -34,6 +32,6 @@ public class DrawSegmentationStepRunnerFactory implements PipelineStepRunnerFact
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new DrawSegmentationStepRunner((DrawSegmentationStep)pipelineStep);
+        return new DrawSegmentationRunner((DrawSegmentationStep)pipelineStep);
     }
 }

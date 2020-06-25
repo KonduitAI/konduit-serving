@@ -35,12 +35,12 @@ import org.opencv.core.CvType;
 import java.util.*;
 
 @CanRun(DrawPointsStep.class)
-public class DrawPointsStepRunner implements PipelineStepRunner {
+public class DrawPointsRunner implements PipelineStepRunner {
 
     protected final DrawPointsStep step;
     protected Map<String, Scalar> labelMap;
 
-    public DrawPointsStepRunner(@NonNull DrawPointsStep step) {
+    public DrawPointsRunner(@NonNull DrawPointsStep step) {
         this.step = step;
     }
 

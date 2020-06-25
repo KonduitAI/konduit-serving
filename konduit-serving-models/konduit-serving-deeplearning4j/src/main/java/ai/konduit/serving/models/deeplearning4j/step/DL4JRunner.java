@@ -16,7 +16,7 @@
 package ai.konduit.serving.models.deeplearning4j.step;
 
 import ai.konduit.serving.annotation.runner.CanRun;
-import ai.konduit.serving.models.deeplearning4j.step.keras.KerasModelStep;
+import ai.konduit.serving.models.deeplearning4j.step.keras.KerasStep;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -38,23 +38,22 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
 @Slf4j
-@CanRun({DL4JModelPipelineStep.class, KerasModelStep.class})
-public class DL4JPipelineStepRunner implements PipelineStepRunner {
+@CanRun({DL4JStep.class, KerasStep.class})
+public class DL4JRunner implements PipelineStepRunner {
 
     public static final String DEFAULT_OUT_NAME_SINGLE = "default";
 
 
-    private DL4JModelPipelineStep step;
-    private KerasModelStep kStep;
+    private DL4JStep step;
+    private KerasStep kStep;
     private MultiLayerNetwork net;
     private ComputationGraph graph;
 
-    public DL4JPipelineStepRunner(KerasModelStep step) {
+    public DL4JRunner(KerasStep step) {
         this.kStep = step;
         KerasModelBuilder b;
         try{
@@ -66,7 +65,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
             throw new ModelLoadingException("Failed to load Keras model", e);
         } catch (InvalidKerasConfigurationException | UnsupportedKerasConfigurationException e) {
             throw new ModelLoadingException("Failed to load Keras model: model file is invalid or can't be loaded" +
-                    " by DL4JPipelineStepRunner", e);
+                    " by DL4JRunner", e);
         }
 
         try {
@@ -81,17 +80,17 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
                     graph = null;
                 } catch (Throwable t2) {
                     throw new ModelLoadingException("Failed to load Keras Sequential model: model file is invalid or can't be loaded" +
-                            " by DL4JPipelineStepRunner", t2);
+                            " by DL4JRunner", t2);
                 }
             } else {
                 throw new ModelLoadingException("Failed to load Keras model: model file is invalid or can't be loaded" +
-                        " by DL4JPipelineStepRunner", t);
+                        " by DL4JRunner", t);
             }
         }
         System.out.println();
     }
 
-    public DL4JPipelineStepRunner(DL4JModelPipelineStep step) {
+    public DL4JRunner(DL4JStep step) {
         this.step = step;
         File f;
         try {
@@ -146,7 +145,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
         //First: Get array
         //TODO HANDLE DIFFERENT NAMES (Not hardcoded)
         int numInputs = net != null ? 1 : graph.getNumInputArrays();
-        Preconditions.checkArgument(numInputs == data.size(), "Expected %s inputs to DL4JModelStep but got Data instance with %s inputs (keys: %s)",
+        Preconditions.checkArgument(numInputs == data.size(), "Expected %s inputs to DL4JStep but got Data instance with %s inputs (keys: %s)",
                 numInputs, data.size(), data.keys());
 
         if (net != null) {

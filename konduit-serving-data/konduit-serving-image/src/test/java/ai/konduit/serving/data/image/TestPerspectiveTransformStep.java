@@ -20,7 +20,7 @@ package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.step.point.perspective.convert.PerspectiveTransformStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
@@ -194,7 +194,7 @@ public class TestPerspectiveTransformStep {
                     .referenceHeight(32)
                     .build());
 
-            b.add(new ShowImagePipelineStep()
+            b.add(new ShowImageStep()
                     .displayName("Segment")
                     .imageName("out")
                     .width(256)
@@ -243,7 +243,7 @@ public class TestPerspectiveTransformStep {
                 .referenceImage("out")
                 .build());
 
-        b.add(new ShowImagePipelineStep()
+        b.add(new ShowImageStep()
                 .displayName("Segment")
                 .imageName("out")
                 .width(256)
@@ -283,7 +283,7 @@ public class TestPerspectiveTransformStep {
 //                                Point.create(590, 590)
 //                        ))
                         .build())
-                .add(new ShowImagePipelineStep().width(600).height(600))
+                .add(new ShowImageStep().width(600).height(600))
                 .build();
 
         File f = Resources.asFile("data/shelves.png");

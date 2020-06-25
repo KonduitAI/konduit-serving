@@ -34,17 +34,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@CanRun(ShowImagePipelineStep.class)
-public class ShowImageStepRunner implements PipelineStepRunner {
+@CanRun(ShowImageStep.class)
+public class ShowImageRunner implements PipelineStepRunner {
 
     private static final int MIN_HEIGHT = 64;
     private static final int MIN_WIDTH = 64;
 
-    private ShowImagePipelineStep step;
+    private ShowImageStep step;
     private boolean initialized;
     private List<CanvasFrame> canvas;
 
-    public ShowImageStepRunner(ShowImagePipelineStep step){
+    public ShowImageRunner(ShowImageStep step){
         this.step = step;
     }
 

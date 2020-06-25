@@ -32,6 +32,6 @@ public class DrawPointsStepRunnerFactory implements PipelineStepRunnerFactory {
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new DrawPointsStepRunner((DrawPointsStep)pipelineStep);
+        return new DrawPointsRunner((DrawPointsStep)pipelineStep);
     }
 }

@@ -42,11 +42,11 @@ import java.util.stream.DoubleStream;
 
 @Slf4j
 @CanRun(PerspectiveTransformStep.class)
-public class PerspectiveTransformStepRunner implements PipelineStepRunner {
+public class PerspectiveTransformRunner implements PipelineStepRunner {
 
     protected final PerspectiveTransformStep step;
 
-    public PerspectiveTransformStepRunner(@NonNull PerspectiveTransformStep step){
+    public PerspectiveTransformRunner(@NonNull PerspectiveTransformStep step){
         this.step = step;
     }
 
@@ -148,7 +148,7 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
             }
         }
         if(fields.size() == 0){
-            throw new IllegalStateException("No fields found where PerspectiveTransformStepRunner could be applied.");
+            throw new IllegalStateException("No fields found where PerspectiveTransformRunner could be applied.");
         }
 
         List<String> outNames = step.outputNames();

@@ -29,21 +29,20 @@ import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@CanRun(SameDiffModelPipelineStep.class)
-public class SameDiffPipelineStepRunner implements PipelineStepRunner {
+@CanRun(SameDiffStep.class)
+public class SameDiffRunner implements PipelineStepRunner {
 
     public static final String DEFAULT_OUT_NAME_SINGLE = "default";
 
 
-    private SameDiffModelPipelineStep step;
+    private SameDiffStep step;
     private final SameDiff sd;
 
-    public SameDiffPipelineStepRunner(SameDiffModelPipelineStep step) {
+    public SameDiffRunner(SameDiffStep step) {
         this.step = step;
 
         String uri = step.modelUri();
@@ -86,7 +85,7 @@ public class SameDiffPipelineStepRunner implements PipelineStepRunner {
         }
 
         List<String> outNames = step.outputNames();
-        Preconditions.checkState(outNames != null && !outNames.isEmpty(), "No output names were provided in the SameDiffModelPipelineStep configuration");
+        Preconditions.checkState(outNames != null && !outNames.isEmpty(), "No output names were provided in the SameDiffStep configuration");
 
         Map<String,INDArray> out = sd.output(m, outNames);
 
