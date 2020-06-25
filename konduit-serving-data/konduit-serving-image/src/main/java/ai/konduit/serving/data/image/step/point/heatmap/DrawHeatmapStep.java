@@ -19,6 +19,7 @@
 package ai.konduit.serving.data.image.step.point.heatmap;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -36,8 +37,9 @@ import java.util.List;
  * <ul>
  *     <li><b>points</b>: Names of the points to be used for the heatmap. Accepts both single points and lists of points.
  *     <li><b>radius</b>: Size of area influenced by a point.</li>
- *     <li><b>fadingFactor</b>: Optional. Value between 0 and 1. 0: No Fade, 1: Instant fade</li>
- *     <li><b>image</b>: Optional. Name of the image to use as size reference</li>
+ *     <li><b>fadingFactor</b>: Optional. Value between 0 and 1. 0: No Fade, 1: Instant fade; default: 0.9</li>
+ *     <li><b>image</b>: Optional. Name of the image to be drawn on</li>
+ *     <li><b>opacity</b>: Optional. Opacity of the heatmap. Between 0 and 1. 0: Fully transparent, 1: Fully opaque; default: 0.5</li>
  *     <li><b>width</b>: Must be provided when <b>image</b> isn't set. Used to resolve position of points with relative addressing (dimensions between 0 and 1)</li>
  *     <li><b>height</b>: Must be provided when <b>image</b> isn't set. Used to resolve position of points with relative addressing (dimensions between 0 and 1)</li>
  *     <li><b>outputName</b>: Name of the output image</li>
@@ -50,7 +52,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonName("DRAW_HEATMAP")
-@Schema(description = "A pipeline step that configures how to draw a 2D pipeline.")
+@Schema(description = "A pipeline step that configures how to draw a 2D heatmap on an image.")
 public class DrawHeatmapStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "image";
 
@@ -64,8 +66,11 @@ public class DrawHeatmapStep implements PipelineStep {
     @Schema(description = "Fading factor. 0: no fade, 1: instant fade")
     private Double fadingFactor;
 
-    @Schema(description = "An optional field, specifying the name of the image to use as size reference")
+    @Schema(description = "An optional field, specifying the name of the image to draw on")
     private String image;
+
+    @Schema(description = "Opacity of the heatmap. Between 0 and 1. 0: Fully transparent, 1: Fully opaque. Default: 0.5")
+    private Double opacity;
 
     @Schema(description = "Must be provided when \"image\" isn't set. Used to resolve position of points with relative addressing (dimensions between 0 and 1)")
     private Integer width;
@@ -76,4 +81,9 @@ public class DrawHeatmapStep implements PipelineStep {
     @Schema(description = "Name of the output image",
             defaultValue = DEFAULT_OUTPUT_NAME)
     private String outputName;
+
+    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig may be " +
+            "used to crop images before passing to the network, when the image aspect ratio doesn't match the NDArray " +
+            "aspect ratio. This allows the step to determine the subset of the image actually passed to the network.")
+    private ImageToNDArrayConfig imageToNDArrayConfig;
 }

@@ -19,9 +19,13 @@
 package ai.konduit.serving.data.image.step.point.draw;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.experimental.Accessors;
 
 import java.util.List;
@@ -37,7 +41,7 @@ import java.util.Map;
  *             Colors are mapped to named classes in alphabetical order, i.e. first color to class A, second color to class B, etc...</li>
  *     <li><b>points</b>: Names of the points to be drawn. Accepts both single points and lists of points.
  *     <li><b>radius</b>: Point radius on drawn image. </li>
- *     <li><b>image</b>: Optional. Name of the image to use as size reference</li>
+ *     <li><b>image</b>: Optional. Name of the image to be drawn on</li>
  *     <li><b>width</b>: Must be provided when <b>image</b> isn't set. Used to resolve position of points with relative addressing (dimensions between 0 and 1)</li>
  *     <li><b>height</b>: Must be provided when <b>image</b> isn't set. Used to resolve position of points with relative addressing (dimensions between 0 and 1)</li>
  *     <li><b>outputName</b>: Name of the output image</li>
@@ -50,7 +54,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonName("DRAW_POINTS")
-@Schema(description = "A pipeline step that configures how to draw 2D points.")
+@Schema(description = "A pipeline step that configures how to draw 2D points on an image.")
 public class DrawPointsStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "image";
 
@@ -67,7 +71,7 @@ public class DrawPointsStep implements PipelineStep {
     @Schema(description = "Optional. Point radius on drawn image. Default = 5px")
     private Integer radius;
 
-    @Schema(description = "An optional field, specifying the name of the image to use as size reference")
+    @Schema(description = "An optional field, specifying the name of the image to be drawn on")
     private String image;
 
     @Schema(description = "Must be provided when \"image\" isn't set. Used to resolve position of points with relative addressing (dimensions between 0 and 1)")
@@ -76,7 +80,10 @@ public class DrawPointsStep implements PipelineStep {
     @Schema(description = "Must be provided when \"image\" isn't set. Used to resolve position of points with relative addressing (dimensions between 0 and 1)")
     private Integer height;
 
-
+    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig may be " +
+            "used to crop images before passing to the network, when the image aspect ratio doesn't match the NDArray " +
+            "aspect ratio. This allows the step to determine the subset of the image actually passed to the network.")
+    private ImageToNDArrayConfig imageToNDArrayConfig;
 
     @Schema(description = "Name of the output image",
             defaultValue = DEFAULT_OUTPUT_NAME)
