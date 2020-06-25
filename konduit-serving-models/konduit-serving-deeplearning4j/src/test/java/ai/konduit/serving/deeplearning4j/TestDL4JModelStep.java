@@ -56,11 +56,11 @@ public class TestDL4JModelStep {
             File netFile = createIrisMLNFile();
 
             Pipeline p = SequencePipeline.builder()
-                    .add(DL4JModelPipelineStep.builder()
+                    .add(new DL4JModelPipelineStep()
                             .modelUri(netFile.toURI().toString())
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
                             .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
-                            .build())
+                            )
                     .build();
 
 
@@ -99,11 +99,11 @@ public class TestDL4JModelStep {
             File netFile = createIrisCGFile();
 
             Pipeline p = SequencePipeline.builder()
-                    .add(DL4JModelPipelineStep.builder()
+                    .add(new DL4JModelPipelineStep()
                             .modelUri(netFile.toURI().toString())
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
                             .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
-                            .build())
+                            )
                     .build();
 
             PipelineExecutor e = p.executor();

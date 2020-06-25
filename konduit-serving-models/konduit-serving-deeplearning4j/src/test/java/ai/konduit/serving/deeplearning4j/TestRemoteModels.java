@@ -64,9 +64,8 @@ public class TestRemoteModels extends BaseHttpUriTest {
         String uri = uriFor(filename);
 
         Pipeline p = SequencePipeline.builder()
-                .add(DL4JModelPipelineStep.builder()
-                        .modelUri(uri)
-                        .build())
+                .add(new DL4JModelPipelineStep()
+                        .modelUri(uri))
                 .build();
 
         PipelineExecutor e = p.executor();
@@ -83,11 +82,10 @@ public class TestRemoteModels extends BaseHttpUriTest {
         FileUtils.copyFile(Resources.asFile(filename), new File(httpDir, relativePath));
         String uri = uriFor(relativePath);
 
-        KerasModelStep step = KerasModelStep.builder()
+        KerasModelStep step = new KerasModelStep()
                 .modelUri(uri)
                 .inputNames(Collections.singletonList("in"))
-                .outputNames(Collections.singletonList("myPrediction"))
-                .build();
+                .outputNames(Collections.singletonList("myPrediction"));
 
         DL4JPipelineStepRunner runner = new DL4JPipelineStepRunner(step);
 

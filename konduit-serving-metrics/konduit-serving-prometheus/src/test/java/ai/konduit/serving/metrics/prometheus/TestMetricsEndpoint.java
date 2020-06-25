@@ -60,13 +60,12 @@ public class TestMetricsEndpoint {
 
     @BeforeClass
     public static void setUp(TestContext testContext) {
-        configuration = InferenceConfiguration.builder()
+        configuration = new InferenceConfiguration()
                 .protocol(ServerProtocol.HTTP)
                 .pipeline(SequencePipeline.builder()
-                        .add(LoggingPipelineStep.builder().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR).build())
+                        .add(new LoggingPipelineStep().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR))
                         .add(new MetricsTestingPipelineStep())
-                        .build())
-                .build();
+                        .build());
 
         Async async = testContext.async();
 

@@ -1,6 +1,6 @@
-package ai.konduit.serving.camera;
+package ai.konduit.serving.data.image;
 
-import ai.konduit.serving.camera.step.capture.CameraFrameCaptureStep;
+import ai.konduit.serving.data.image.step.capture.CameraFrameCaptureStep;
 import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -22,18 +22,18 @@ public class ManualTest {
         int w = 1280;
 
         Pipeline p = SequencePipeline.builder()
-                .add(CameraFrameCaptureStep.builder()
+                .add(new CameraFrameCaptureStep()
                         .camera(0)
                         .width(w)
                         .height(h)
                         .outputKey("myImage")
-                        .build())
-                .add(ShowImagePipelineStep.builder()
+                        )
+                .add(new ShowImagePipelineStep()
                         .displayName("Image Viewer")
                         .width(w)
                         .height(h)
                         .imageName("myImage")
-                        .build())
+                        )
                 .build();
 
         Data in = Data.empty();

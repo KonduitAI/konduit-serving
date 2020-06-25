@@ -59,11 +59,10 @@ public class TestKerasModelStep {
 
         for(boolean withNamesDefined : new boolean[]{false, true}) {
             Pipeline p = SequencePipeline.builder()
-                    .add(KerasModelStep.builder()
+                    .add( new KerasModelStep()
                             .modelUri(path)
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
-                            .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
-                            .build())
+                            .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null))
                     .build();
 
             PipelineExecutor e = p.executor();
@@ -96,11 +95,11 @@ public class TestKerasModelStep {
 
         for(boolean withNamesDefined : new boolean[]{false, true}) {
             Pipeline p = SequencePipeline.builder()
-                    .add(KerasModelStep.builder()
+                    .add(new KerasModelStep()
                             .modelUri(path)
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
                             .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
-                            .build())
+                            )
                     .build();
 
             PipelineExecutor e = p.executor();

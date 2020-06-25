@@ -23,6 +23,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -31,7 +32,7 @@ import java.util.List;
 //TODO move this to somewhere it can be used for non-DL4J execution
 @Data
 @Accessors(fluent = true)
-@Builder
+@NoArgsConstructor
 @JsonName("KERAS")
 @Schema(description = "A pipeline step that configures a Keras model that is to be executed.")
 public class KerasModelStep implements PipelineStep {

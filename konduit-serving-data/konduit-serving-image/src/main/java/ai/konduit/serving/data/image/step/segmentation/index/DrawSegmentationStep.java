@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.util.List;
@@ -47,10 +48,10 @@ import java.util.List;
  *
  * @author Alex Black
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("DRAW_SEGMENTATION")
 @Schema(description = "A pipeline step that configures how to draw a segmentation mask, optionally on an image.")
 public class DrawSegmentationStep implements PipelineStep {

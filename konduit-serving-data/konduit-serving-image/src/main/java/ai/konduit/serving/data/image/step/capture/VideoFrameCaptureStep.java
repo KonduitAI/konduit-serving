@@ -15,13 +15,14 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
-package ai.konduit.serving.camera.step.capture;
+package ai.konduit.serving.data.image.step.capture;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 /**
@@ -31,8 +32,9 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
  * Note that at present this makes it only practically useful for testing/demo purposes.
  * Other options for loading the video will be specified at a later date: https://github.com/KonduitAI/konduit-serving/issues/350
  */
-@Builder
 @Data
+@Accessors(fluent=true)
+@NoArgsConstructor
 @JsonName("VIDEO_CAPTURE")
 @Schema(description = "A pipeline step that configures how to extracts a single frame from a video each time inference is called." +
         " The video path is hardcoded, mainly used for testing/demo purposes given this")
@@ -41,12 +43,12 @@ public class VideoFrameCaptureStep implements PipelineStep {
     @Schema(description = "Location of the video file.")
     private String filePath;
 
-    @Builder.Default
+    
     @Schema(description = "Name of the output key where the image frame will be located.",
             defaultValue = "image")
     private String outputKey = "image";
 
-    @Builder.Default
+    
     @Schema(description = "Loop the video when it reaches the end?")
     private boolean loop = true;
 

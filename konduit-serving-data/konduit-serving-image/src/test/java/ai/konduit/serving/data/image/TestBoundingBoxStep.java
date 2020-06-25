@@ -55,7 +55,7 @@ public class TestBoundingBoxStep {
 
 
         Pipeline p = SequencePipeline.builder()
-                .add(DrawBoundingBoxStep.builder()
+                .add(new DrawBoundingBoxStep()
                         .imageName("image")
                         .bboxName("bbox")
                         .color("rgb(0,0,255)")
@@ -65,7 +65,7 @@ public class TestBoundingBoxStep {
                         .lineThickness(1)
                         .classColors(classColors)
 
-                    .build())
+                    )
                 .add(new ShowImagePipelineStep("image", "Display", 256, 256, false))
                 .build();
 

@@ -169,12 +169,12 @@ public class TestPerspectiveTransformStep {
     @Test
     public void testReferenceWithTargetImage() throws Exception {
         SequencePipeline.Builder b = SequencePipeline.builder()
-                .add(DrawSegmentationStep.builder()
+                .add(new DrawSegmentationStep()
                         .image(null)
                         .segmentArray("class_idxs")
                         .outputName("out")
                         .classColors(Arrays.asList("red", "green", "blue"))
-                        .build());
+                        );
 
             b.add(PerspectiveTransformStep.builder()
                     .inputName("out")
@@ -194,12 +194,12 @@ public class TestPerspectiveTransformStep {
                     .referenceHeight(32)
                     .build());
 
-            b.add(ShowImagePipelineStep.builder()
+            b.add(new ShowImagePipelineStep()
                     .displayName("Segment")
                     .imageName("out")
                     .width(256)
                     .height(256)
-                    .build());
+                    );
 
         Pipeline p = b.build();
 
@@ -219,12 +219,12 @@ public class TestPerspectiveTransformStep {
     @Test
     public void testReferenceImageWithTargetImage() throws Exception {
         SequencePipeline.Builder b = SequencePipeline.builder()
-                .add(DrawSegmentationStep.builder()
+                .add(new DrawSegmentationStep()
                         .image(null)
                         .segmentArray("class_idxs")
                         .outputName("out")
                         .classColors(Arrays.asList("red", "green", "blue"))
-                        .build());
+                        );
 
         b.add(PerspectiveTransformStep.builder()
                 .inputName("out")
@@ -243,12 +243,12 @@ public class TestPerspectiveTransformStep {
                 .referenceImage("out")
                 .build());
 
-        b.add(ShowImagePipelineStep.builder()
+        b.add(new ShowImagePipelineStep()
                 .displayName("Segment")
                 .imageName("out")
                 .width(256)
                 .height(256)
-                .build());
+                );
 
         Pipeline p = b.build();
 

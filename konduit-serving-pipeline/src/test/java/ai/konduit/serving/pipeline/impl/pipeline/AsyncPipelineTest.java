@@ -152,7 +152,7 @@ public class AsyncPipelineTest {
         for(Trigger t : new Trigger[]{new SimpleLoopTrigger(1000), new TimeLoopTrigger(1, TimeUnit.MINUTES), new TimeLoopTrigger(1, TimeUnit.MINUTES, 20000)}){
 
             Pipeline p = SequencePipeline.builder()
-                    .add(LoggingPipelineStep.builder().build())
+                    .add(new LoggingPipelineStep())
                     .build();
 
             Pipeline a1 = new AsyncPipeline(p, t);
@@ -168,7 +168,7 @@ public class AsyncPipelineTest {
             assertEquals(a1, a1y);
 
             GraphBuilder b = new GraphBuilder();
-            GraphStep s = b.input().then("log", LoggingPipelineStep.builder().build());
+            GraphStep s = b.input().then("log", new LoggingPipelineStep());
 
             Pipeline g = b.build(s);
 

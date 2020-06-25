@@ -37,7 +37,6 @@ import java.util.List;
  * @author Alex Black
  * @see CropGridStep
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor

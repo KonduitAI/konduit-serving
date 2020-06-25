@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.util.List;
@@ -35,10 +36,10 @@ import java.util.List;
  *
  * @author Alex Black
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("DRAW_FIXED_GRID")
 @Schema(description = "A pipeline step that draws a grid on an image. This is similar to DrawGridStep but the corner x/y" +
         " location values are hardcoded into the configuration (via points), instead of coming dynamically from the input Data instance.")
@@ -71,7 +72,6 @@ public class DrawFixedGridStep implements PipelineStep {
             "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private String gridColor;
 
-    @Builder.Default
     @Schema(description = "Line thickness to use to draw the border (in pixels).",
             defaultValue = "1")
     private int borderThickness = 1;
@@ -80,10 +80,5 @@ public class DrawFixedGridStep implements PipelineStep {
             "If null then the same value as the borderThickness is used")
     private Integer gridThickness;
 
-    public DrawFixedGridStep() {
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null or 0 etc
-        this.borderThickness = 1;
-    }
 
 }

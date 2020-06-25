@@ -74,7 +74,7 @@ public class DeployKonduitServing {
         deploymentOptions.setConfig(jsonConfiguration);
 
         vertx.deployVerticle(INFERENCE_SERVICE_IDENTIFIER + ":" +
-                        inferenceConfiguration.getProtocol().name().toLowerCase(),
+                        inferenceConfiguration.protocol().name().toLowerCase(),
                 deploymentOptions, handler -> {
             if (handler.failed()) {
                 log.error("Unable to deploy server for configuration \n{}",
@@ -87,7 +87,7 @@ public class DeployKonduitServing {
                 vertx.close();
             } else {
                 log.info("Deployed {} server with configuration \n{}",
-                        inferenceConfiguration.getProtocol(),
+                        inferenceConfiguration.protocol(),
                         jsonConfiguration.encodePrettily());
 
                 if (eventHandler != null) {

@@ -188,12 +188,8 @@ public class BuildCLI {
         if(config != null){
             Map<String,String> props = new HashMap<>();
             for(String s : config){
-                File localFile = URIResolver.getFile(s);
-                if (localFile.exists()) {
-                    String content = FileUtils.readFileToString(localFile, "UTF-8");
-                    String[] split = content.split("=");
-                    props.put(split[0], split[1]);
-                }
+                String[] split = s.split("=");
+                props.put(split[0], split[1]);
             }
             for(Deployment d : deployments){
                 d.fromProperties(props);

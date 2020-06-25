@@ -61,14 +61,14 @@ public class TestExtractBBStep {
                                         .width(600)
                                         .build())
                                  */
-                                .add(ExtractBoundingBoxStep.builder()
+                                .add(new ExtractBoundingBoxStep()
                                         .imageName(nullNames ? null : "image")
                                         .bboxName(nullNames ? null : "bbox")
                                         .aspectRatio(1.0)
                                         .resizeH(outHW ? oHW : null)
                                         .resizeW(outHW ? oHW : null)
                                         .outputName(outName ? null : "myOutput")
-                                        .build())
+                                        )
                                 /*
                                 .add(ShowImagePipelineStep.builder()
                                         .imageName("image")
@@ -122,13 +122,13 @@ public class TestExtractBBStep {
         for(boolean outHW : new boolean[]{true, false}) {
             for (boolean nullNames : new boolean[]{false, true}) {
                 Pipeline p = SequencePipeline.builder()
-                        .add(ExtractBoundingBoxStep.builder()
+                        .add(new ExtractBoundingBoxStep()
                                 .imageName(nullNames ? null : "image")
                                 .bboxName(nullNames ? null : "bbox")
                                 .aspectRatio(1.0)
                                 .resizeH(outHW ? oHW : null)
                                 .resizeW(outHW ? oHW : null)
-                                .build())
+                                )
                         .build();
 
 
@@ -189,10 +189,9 @@ public class TestExtractBBStep {
             Data in = Data.singleton("image", Image.create(bi));
             in.put("bbox", bb);
 
-            ImageToNDArrayConfig conf = ImageToNDArrayConfig.builder()
+            ImageToNDArrayConfig conf = new ImageToNDArrayConfig()
                     .height(oH)
-                    .width(oW)
-                    .build();
+                    .width(oW);
             Pipeline p = SequencePipeline.builder()
                     .add(new ExtractBoundingBoxStep()
                             .imageToNDArrayConfig(conf))
