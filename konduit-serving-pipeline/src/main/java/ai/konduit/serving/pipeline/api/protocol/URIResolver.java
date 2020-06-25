@@ -20,12 +20,14 @@ package ai.konduit.serving.pipeline.api.protocol;
 
 import com.jcabi.aspects.RetryOnFailure;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.nd4j.common.primitives.Pair;
 
 import java.io.*;
 import java.net.URI;
@@ -108,8 +110,17 @@ public class URIResolver {
     }
 
     @RetryOnFailure(attempts = 3)
-    private static File load(URL url, File cachedFile) throws IOException {
+    public static Pair<Long,Integer> getUrlProperties(URL url) throws IOException {
         URLConnection connection = url.openConnection();
+        Pair<Long,Integer> retVal = new Pair<>();
+        retVal.setFirst(connection.getLastModified());
+        retVal.setSecond(connection.getContentLength());
+        return retVal;
+    }
+
+    private static File load(URL url, File cachedFile) throws IOException {
+
+        val urlProps = getUrlProperties(url);
 
         int contentLength = 0;
         long lastModified = 0;
@@ -127,8 +138,7 @@ public class URIResolver {
                 }
             }
         }
-        if (lastModified > 0 && connection.getLastModified() == lastModified &&
-                                contentLength == connection.getContentLength()) {
+        if (lastModified > 0 && urlProps.getFirst() == lastModified && urlProps.getSecond() == contentLength) {
             // File is in cache and its timestamps are the same as of remote resource
             return cachedFile;
         }
@@ -145,8 +155,8 @@ public class URIResolver {
         }
         // File was either just deleted or didn't exist, so writing metadata here and caching in
         // the calling method.
-        String metaData = cachedFile.getAbsolutePath() + "," + connection.getContentLength() + "," +
-                connection.getLastModified() + "," + System.currentTimeMillis() + System.lineSeparator();
+        String metaData = cachedFile.getAbsolutePath() + "," + urlProps.getFirst() + "," +
+                urlProps.getSecond() + "," + System.currentTimeMillis() + System.lineSeparator();
         FileUtils.writeStringToFile(metaFile, metaData, "UTF-8", true);
         return null;
     }
