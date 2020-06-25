@@ -19,8 +19,8 @@
 package ai.konduit.serving.deeplearning4j;
 
 import ai.konduit.serving.common.test.BaseHttpUriTest;
-import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
-import ai.konduit.serving.models.deeplearning4j.step.DL4JPipelineStepRunner;
+import ai.konduit.serving.models.deeplearning4j.step.DL4JModelStep;
+import ai.konduit.serving.models.deeplearning4j.step.DL4JRunner;
 import ai.konduit.serving.models.deeplearning4j.step.keras.KerasModelStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -64,8 +64,9 @@ public class TestRemoteModels extends BaseHttpUriTest {
         String uri = uriFor(filename);
 
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep()
-                        .modelUri(uri))
+                .add(DL4JModelStep.builder()
+                        .modelUri(uri)
+                        .build())
                 .build();
 
         PipelineExecutor e = p.executor();
@@ -82,12 +83,13 @@ public class TestRemoteModels extends BaseHttpUriTest {
         FileUtils.copyFile(Resources.asFile(filename), new File(httpDir, relativePath));
         String uri = uriFor(relativePath);
 
-        KerasModelStep step = new KerasModelStep()
+        KerasModelStep step = KerasModelStep.builder()
                 .modelUri(uri)
                 .inputNames(Collections.singletonList("in"))
-                .outputNames(Collections.singletonList("myPrediction"));
+                .outputNames(Collections.singletonList("myPrediction"))
+                .build();
 
-        DL4JPipelineStepRunner runner = new DL4JPipelineStepRunner(step);
+        DL4JRunner runner = new DL4JRunner(step);
 
         INDArray arr = Nd4j.rand(DataType.FLOAT, 3, 4, 4);
         Data data = Data.singleton("in", NDArray.create(arr));

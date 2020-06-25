@@ -34,11 +34,11 @@ import java.util.Collections;
 import java.util.List;
 
 @CanRun(BoundingBoxToPointStep.class)
-public class BoundingBoxToPointStepRunner implements PipelineStepRunner {
+public class BoundingBoxToPointRunner implements PipelineStepRunner {
 
     protected final BoundingBoxToPointStep step;
 
-    public BoundingBoxToPointStepRunner(@NonNull BoundingBoxToPointStep step){
+    public BoundingBoxToPointRunner(@NonNull BoundingBoxToPointStep step){
         this.step = step;
     }
 

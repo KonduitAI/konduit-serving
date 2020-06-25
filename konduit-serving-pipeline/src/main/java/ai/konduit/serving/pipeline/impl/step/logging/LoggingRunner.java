@@ -29,13 +29,13 @@ import java.util.regex.Pattern;
 
 
 @Slf4j
-@CanRun(LoggingPipelineStep.class)
-public class LoggingPipelineStepRunner implements PipelineStepRunner {
+@CanRun(LoggingStep.class)
+public class LoggingRunner implements PipelineStepRunner {
 
-    private final LoggingPipelineStep step;
+    private final LoggingStep step;
     private final Pattern pattern;
 
-    public LoggingPipelineStepRunner(@NonNull LoggingPipelineStep step) {
+    public LoggingRunner(@NonNull LoggingStep step) {
         this.step = step;
         if(step.keyFilterRegex() != null){
             pattern = Pattern.compile(step.keyFilterRegex());
@@ -57,8 +57,8 @@ public class LoggingPipelineStepRunner implements PipelineStepRunner {
     @Override
     public Data exec(Context ctx, Data data) {
         Level logLevel = step.logLevel();
-        LoggingPipelineStep.Log toLog = step.log();
-        boolean keysOnly = toLog == LoggingPipelineStep.Log.KEYS;
+        LoggingStep.Log toLog = step.log();
+        boolean keysOnly = toLog == LoggingStep.Log.KEYS;
 
         //TODO does SLF4J have utility methods for this?
         boolean skip = logLevel == Level.ERROR && !log.isErrorEnabled() ||

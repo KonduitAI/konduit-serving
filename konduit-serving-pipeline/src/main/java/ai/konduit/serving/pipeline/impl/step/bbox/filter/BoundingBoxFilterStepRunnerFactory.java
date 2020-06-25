@@ -32,6 +32,6 @@ public class BoundingBoxFilterStepRunnerFactory implements PipelineStepRunnerFac
     @Override
     public PipelineStepRunner create(PipelineStep step) {
         Preconditions.checkState(canRun(step), "Unable to run step: %s", step);
-        return new BoundingBoxFilterStepRunner((BoundingBoxFilterStep) step);
+        return new BoundingBoxFilterRunner((BoundingBoxFilterStep) step);
     }
 }

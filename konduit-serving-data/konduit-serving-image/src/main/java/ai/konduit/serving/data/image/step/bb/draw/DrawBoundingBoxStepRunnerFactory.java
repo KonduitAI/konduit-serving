@@ -32,6 +32,6 @@ public class DrawBoundingBoxStepRunnerFactory implements PipelineStepRunnerFacto
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new DrawBoundingBoxStepRunner((DrawBoundingBoxStep) pipelineStep);
+        return new DrawBoundingBoxRunner((DrawBoundingBoxStep) pipelineStep);
     }
 }

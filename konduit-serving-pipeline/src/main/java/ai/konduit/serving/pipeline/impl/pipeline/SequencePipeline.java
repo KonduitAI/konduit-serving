@@ -19,7 +19,10 @@ import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -44,7 +47,6 @@ public class SequencePipeline implements Pipeline {
 
     @Schema(description = "A unique identifier that's used to differentiate among different executing pipelines. Used " +
             "for identifying a pipeline while reporting metrics.")
-    @EqualsAndHashCode.Exclude
     private String id;
 
     public SequencePipeline(@JsonProperty("steps") List<PipelineStep> steps, @JsonProperty("id") String id) {

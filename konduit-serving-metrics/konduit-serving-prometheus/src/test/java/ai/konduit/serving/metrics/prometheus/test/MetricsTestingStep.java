@@ -28,29 +28,29 @@ import lombok.AllArgsConstructor;
 import java.util.Collections;
 
 @AllArgsConstructor
-public class MetricsTestingPipelineStep implements PipelineStep {
+public class MetricsTestingStep implements PipelineStep {
 
     static {
         PipelineRegistry.registerStepRunnerFactory(new Factory());
-        ObjectMappers.registerSubtypes(Collections.singletonList(new JsonSubType("METRICS_TESTING", MetricsTestingPipelineStep.class, PipelineStep.class)));
+        ObjectMappers.registerSubtypes(Collections.singletonList(new JsonSubType("METRICS_TESTING", MetricsTestingStep.class, PipelineStep.class)));
     }
 
     public static class Factory implements PipelineStepRunnerFactory {
 
         @Override
         public boolean canRun(PipelineStep pipelineStep) {
-            return pipelineStep instanceof MetricsTestingPipelineStep;
+            return pipelineStep instanceof MetricsTestingStep;
         }
 
         @Override
         public PipelineStepRunner create(PipelineStep pipelineStep) {
-            return new Runner((MetricsTestingPipelineStep)pipelineStep, 0.0);
+            return new Runner((MetricsTestingStep)pipelineStep, 0.0);
         }
     }
 
     @AllArgsConstructor
     public static class Runner implements PipelineStepRunner {
-        private MetricsTestingPipelineStep step;
+        private MetricsTestingStep step;
         private double x;
 
         @Override

@@ -22,7 +22,7 @@ import ai.konduit.serving.data.image.step.grid.crop.CropFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.crop.CropGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -70,7 +70,7 @@ public class TestGridSteps {
                         .borderThickness(10)
                         .gridThickness(4)
                 )
-                .add(new ShowImagePipelineStep("image", "Display", null, null, false))
+                .add(new ShowImageStep("image", "Display", null, null, false))
                 .build();
 
         PipelineExecutor exec = p.executor();

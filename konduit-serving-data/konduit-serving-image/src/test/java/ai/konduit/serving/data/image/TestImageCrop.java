@@ -19,7 +19,6 @@
 package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.step.crop.ImageCropStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;

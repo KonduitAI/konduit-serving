@@ -18,20 +18,18 @@
 
 package ai.konduit.serving.models.tensorflow;
 
+import ai.konduit.serving.camera.step.capture.CameraFrameCaptureStep;
+import ai.konduit.serving.camera.step.capture.VideoFrameCaptureStep;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
 import ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep;
-import ai.konduit.serving.data.image.step.capture.CameraFrameCaptureStep;
-import ai.konduit.serving.data.image.step.capture.VideoFrameCaptureStep;
 import ai.konduit.serving.data.image.step.face.DrawFaceKeyPointsStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
-import ai.konduit.serving.data.image.step.point.draw.DrawPointsStep;
-import ai.konduit.serving.data.image.step.point.heatmap.DrawHeatmapStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -44,7 +42,6 @@ import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
 import ai.konduit.serving.pipeline.impl.step.bbox.filter.BoundingBoxFilterStep;
-import ai.konduit.serving.pipeline.impl.step.bbox.point.BoundingBoxToPointStep;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 import ai.konduit.serving.pipeline.util.ArchiveUtils;
 import ai.konduit.serving.pipeline.util.TestUtils;
@@ -141,7 +138,7 @@ public class TestTensorFlowStep {
          */
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("Face detection")
                 .imageName("image")
         );
@@ -350,7 +347,7 @@ public class TestTensorFlowStep {
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("person detection")
                 .imageName("image")
         );
@@ -444,7 +441,7 @@ public class TestTensorFlowStep {
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("person detection")
                 .imageName("image")
         );
@@ -528,7 +525,7 @@ public class TestTensorFlowStep {
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("image segmentation")
                 .imageName("out")
         );
@@ -625,7 +622,7 @@ public class TestTensorFlowStep {
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("bbox filter")
                 .imageName("image")
         );
@@ -785,199 +782,10 @@ public class TestTensorFlowStep {
         //Show image in Java frame
 
         GraphStep any = b.any("any", noBoxes, drawer);
-        GraphStep show = /*drawer.*/any.then("show", new ShowImagePipelineStep()
+        GraphStep show = /*drawer.*/any.then("show", new ShowImageStep()
                 .displayName("Face keypoints")
                 .imageName("image")
         );
-
-
-        GraphPipeline p = b.build(show);
-
-
-        PipelineExecutor exec = p.executor();
-
-        Data in = Data.empty();
-        for (int i = 0; i < 1000; i++) {
-            exec.exec(in);
-        }
-    }
-
-    @Test
-    @Ignore   //To be run manually due to need for webcam and frame output
-    public void testPersonDetectionHeatmap() throws Exception {
-        //Pretrained model source: https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models
-
-        String fileUrl = "http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz";
-        File testDir = TestUtils.testResourcesStorageDir();
-        File saveDir = new File(testDir, "konduit-serving-tensorflow/persondetection");
-        File f = new File(saveDir, "frozen_inference_graph.pb");
-
-        if (!f.exists()) {
-            log.info("Downloading model: {} -> {}", fileUrl, saveDir.getAbsolutePath());
-            File archive = new File(saveDir, "ssd_mobilenet_v1_coco_2018_01_28.tar.gz");
-            FileUtils.copyURLToFile(new URL(fileUrl), archive);
-            ArchiveUtils.tarGzExtractSingleFile(archive, f, "ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb");
-            log.info("Download complete");
-        }
-
-        String videoUrl = "http://www.robots.ox.ac.uk/ActiveVision/Research/Projects/2009bbenfold_headpose/Datasets/TownCentreXVID.avi";
-        File v = new File(saveDir, "TownCentreXVID.avi");
-        if (!v.exists()) {
-            log.info("Downloading demo video: {} -> {}", videoUrl, saveDir.getAbsolutePath());
-            FileUtils.copyURLToFile(new URL(videoUrl), v);
-            log.info("Download complete");
-        }
-
-        GraphBuilder b = new GraphBuilder();
-        GraphStep input = b.input();
-
-        //Capture frame from video
-        GraphStep camera = input.then("video", new VideoFrameCaptureStep()
-                .filePath(v.getAbsolutePath())
-                .outputKey("image"));
-
-        //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
-        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
-                .height(300)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
-                .width(300)   // size origin
-                .channelLayout(NDChannelLayout.RGB)
-                .includeMinibatchDim(true)
-                .format(NDFormat.CHANNELS_LAST)
-                .dataType(NDArrayType.UINT8)
-                .normalization(null);
-
-        GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
-                .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")));
-
-        //Run image in TF model
-        GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
-                .modelUri(f.toURI().toString())      //Face detection model
-                .build());
-
-        //Post process SSD outputs to BoundingBox objects
-        GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
-                .outputName("img_bbox"));
-
-        //Merge camera image with bounding boxes
-        GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
-
-        GraphStep drawer = merged.then("toPoints", new BoundingBoxToPointStep()
-                .bboxName("img_bbox")
-                .method(BoundingBoxToPointStep.ConversionMethod.CENTER)
-                .keepOtherFields(true)
-                .outputName("img_points")
-        ).then("drawer", new DrawHeatmapStep()
-                .image("image")
-                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
-                .points(Arrays.asList("img_points"))
-                .fadingFactor(1.0)
-                .radius(30));
-
-
-        //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
-                .displayName("person detection")
-                .imageName("image")
-                .width(800)
-                .height(450));
-
-
-        GraphPipeline p = b.build(show);
-
-
-        PipelineExecutor exec = p.executor();
-
-        Data in = Data.empty();
-        for (int i = 0; i < 1000; i++) {
-            exec.exec(in);
-        }
-    }
-
-    @Test
-    @Ignore   //To be run manually due to need for webcam and frame output
-    public void testPersonDetectionPoints() throws Exception {
-        //Pretrained model source: https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models
-
-        String fileUrl = "http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz";
-        File testDir = TestUtils.testResourcesStorageDir();
-        File saveDir = new File(testDir, "konduit-serving-tensorflow/persondetection");
-        File f = new File(saveDir, "frozen_inference_graph.pb");
-
-        if (!f.exists()) {
-            log.info("Downloading model: {} -> {}", fileUrl, saveDir.getAbsolutePath());
-            File archive = new File(saveDir, "ssd_mobilenet_v1_coco_2018_01_28.tar.gz");
-            FileUtils.copyURLToFile(new URL(fileUrl), archive);
-            ArchiveUtils.tarGzExtractSingleFile(archive, f, "ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb");
-            log.info("Download complete");
-        }
-
-        String videoUrl = "http://www.robots.ox.ac.uk/ActiveVision/Research/Projects/2009bbenfold_headpose/Datasets/TownCentreXVID.avi";
-        File v = new File(saveDir, "TownCentreXVID.avi");
-        if (!v.exists()) {
-            log.info("Downloading demo video: {} -> {}", videoUrl, saveDir.getAbsolutePath());
-            FileUtils.copyURLToFile(new URL(videoUrl), v);
-            log.info("Download complete");
-        }
-
-        GraphBuilder b = new GraphBuilder();
-        GraphStep input = b.input();
-
-        //Capture frame from video
-        GraphStep camera = input.then("video", new VideoFrameCaptureStep()
-                .filePath(v.getAbsolutePath())
-                .outputKey("image"));
-
-        //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
-        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
-                .height(300)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
-                .width(300)   // size origin
-                .channelLayout(NDChannelLayout.RGB)
-                .includeMinibatchDim(true)
-                .format(NDFormat.CHANNELS_LAST)
-                .dataType(NDArrayType.UINT8)
-                .normalization(null);
-
-        GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
-                .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")));
-
-        //Run image in TF model
-        GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
-                .modelUri(f.toURI().toString())      //Face detection model
-                .build());
-
-        //Post process SSD outputs to BoundingBox objects
-        GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep().outputName("img_bbox"));
-
-        //Merge camera image with bounding boxes
-        GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
-
-        GraphStep drawer = merged.then("toPoints", new BoundingBoxToPointStep()
-                .bboxName("img_bbox")
-                .method(BoundingBoxToPointStep.ConversionMethod.CENTER)
-                .keepOtherFields(true)
-                .outputName("img_points")
-        ).then("drawer", new DrawPointsStep()
-                .image("image")
-                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
-                .points(Arrays.asList("img_points"))
-                .classColors(Collections.singletonMap(null, "red"))
-                .radius(5));
-
-
-        //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
-                .displayName("person detection")
-                .imageName("image")
-                .width(800)
-                .height(450));
 
 
         GraphPipeline p = b.build(show);

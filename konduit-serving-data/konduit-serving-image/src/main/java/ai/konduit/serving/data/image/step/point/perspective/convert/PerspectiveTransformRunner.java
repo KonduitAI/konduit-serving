@@ -42,11 +42,11 @@ import java.util.stream.DoubleStream;
 
 @Slf4j
 @CanRun(PerspectiveTransformStep.class)
-public class PerspectiveTransformStepRunner implements PipelineStepRunner {
+public class PerspectiveTransformRunner implements PipelineStepRunner {
 
     protected final PerspectiveTransformStep step;
 
-    public PerspectiveTransformStepRunner(@NonNull PerspectiveTransformStep step){
+    public PerspectiveTransformRunner(@NonNull PerspectiveTransformStep step){
         this.step = step;
     }
 

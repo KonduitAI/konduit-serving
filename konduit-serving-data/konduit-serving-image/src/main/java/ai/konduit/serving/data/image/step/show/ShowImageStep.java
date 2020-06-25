@@ -33,7 +33,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @JsonName("SHOW_IMAGE")
 @Schema(description = "A pipeline step that configures how to show/render an image from a previous step in an application " +
         "frame. Usually only used for testing and debugging locally, not when serving from HTTP/GRPC etc endpoints")
-public class ShowImagePipelineStep implements PipelineStep {
+public class ShowImageStep implements PipelineStep {
 
     
     @Schema(description = "Name of the incoming input image key.",
@@ -56,9 +56,9 @@ public class ShowImagePipelineStep implements PipelineStep {
     @Schema(description = "Allow multiple images to be shown.")
     private boolean allowMultiple = false;
 
-    public ShowImagePipelineStep(@JsonProperty("imageName") String imageName, @JsonProperty("displayName") String displayName,
-                                 @JsonProperty("width") Integer width, @JsonProperty("height") Integer height,
-                                 @JsonProperty("allowMultiple") boolean allowMultiple){
+    public ShowImageStep(@JsonProperty("imageName") String imageName, @JsonProperty("displayName") String displayName,
+                         @JsonProperty("width") Integer width, @JsonProperty("height") Integer height,
+                         @JsonProperty("allowMultiple") boolean allowMultiple){
         this.imageName = imageName;
         this.displayName = displayName;
         this.width = width;

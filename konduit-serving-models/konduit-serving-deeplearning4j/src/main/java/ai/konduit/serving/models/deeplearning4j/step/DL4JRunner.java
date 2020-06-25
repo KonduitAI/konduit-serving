@@ -38,23 +38,22 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
 @Slf4j
-@CanRun({DL4JModelPipelineStep.class, KerasModelStep.class})
-public class DL4JPipelineStepRunner implements PipelineStepRunner {
+@CanRun({DL4JModelStep.class, KerasModelStep.class})
+public class DL4JRunner implements PipelineStepRunner {
 
     public static final String DEFAULT_OUT_NAME_SINGLE = "default";
 
 
-    private DL4JModelPipelineStep step;
+    private DL4JModelStep step;
     private KerasModelStep kStep;
     private MultiLayerNetwork net;
     private ComputationGraph graph;
 
-    public DL4JPipelineStepRunner(KerasModelStep step) {
+    public DL4JRunner(KerasModelStep step) {
         this.kStep = step;
         KerasModelBuilder b;
         try{
@@ -91,7 +90,7 @@ public class DL4JPipelineStepRunner implements PipelineStepRunner {
         System.out.println();
     }
 
-    public DL4JPipelineStepRunner(DL4JModelPipelineStep step) {
+    public DL4JRunner(DL4JModelStep step) {
         this.step = step;
         File f;
         try {

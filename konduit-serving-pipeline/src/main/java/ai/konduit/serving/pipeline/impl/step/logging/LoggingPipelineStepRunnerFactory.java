@@ -24,12 +24,12 @@ import org.nd4j.common.base.Preconditions;
 public class LoggingPipelineStepRunnerFactory implements PipelineStepRunnerFactory {
     @Override
     public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep.getClass() == LoggingPipelineStep.class;
+        return pipelineStep.getClass() == LoggingStep.class;
     }
 
     @Override
     public PipelineStepRunner create(@NonNull PipelineStep pipelineStep) {
         Preconditions.checkArgument(canRun(pipelineStep), "Unable to execute pipeline step of type: {}", pipelineStep.getClass());
-        return new LoggingPipelineStepRunner((LoggingPipelineStep) pipelineStep);
+        return new LoggingRunner((LoggingStep) pipelineStep);
     }
 }

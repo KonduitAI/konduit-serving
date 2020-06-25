@@ -24,7 +24,7 @@ import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import ai.konduit.serving.build.steps.RunnerInfo;
 import ai.konduit.serving.build.util.ModuleUtils;
-import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
+import ai.konduit.serving.models.deeplearning4j.step.DL4JModelStep;
 import ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -78,7 +78,7 @@ public class TestResolving {
 
                     PipelineStep step;
                     if (testNum == 0) {
-                        step = new DL4JModelPipelineStep("file:///some/model/path.zip", null, null);
+                        step = new DL4JModelStep("file:///some/model/path.zip", null, null);
                         System.out.println("----- DL4J - " + t + " -----");
                     } else {
                         step = new SameDiffModelPipelineStep("file://some/model/path.fb", null);
