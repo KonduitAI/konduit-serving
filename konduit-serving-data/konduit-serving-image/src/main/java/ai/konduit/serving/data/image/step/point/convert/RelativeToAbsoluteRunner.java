@@ -80,7 +80,7 @@ public class RelativeToAbsoluteRunner implements PipelineStepRunner {
             ValueType vt = data.type(s);
             boolean list = vt == ValueType.LIST;
 
-            if(vt != ValueType.POINT && vt != ValueType.BOUNDING_BOX && (!list || (data.listType(s) == ValueType.POINT || data.listType(s) == ValueType.BOUNDING_BOX))){
+            if(vt != ValueType.POINT && vt != ValueType.BOUNDING_BOX && (!list || !(data.listType(s) == ValueType.POINT || data.listType(s) == ValueType.BOUNDING_BOX))){
                 String type = list ? "List<" + data.listType(s) + ">" : vt.toString();
                 throw new IllegalStateException("Error in RelativeToAbsoluteStep: Value for input \"" + s + "\" must be POINT, BOUNDING_BOX, " +
                         "LIST<POINT> or LIST<BOUNDING_BOX> but was " + type);

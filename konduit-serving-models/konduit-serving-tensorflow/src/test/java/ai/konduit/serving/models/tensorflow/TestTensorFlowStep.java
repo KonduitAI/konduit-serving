@@ -45,7 +45,7 @@ import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
 import ai.konduit.serving.pipeline.impl.step.bbox.filter.BoundingBoxFilterStep;
 import ai.konduit.serving.pipeline.impl.step.bbox.point.BoundingBoxToPointStep;
-import ai.konduit.serving.data.image.step.ml.ssd.SSDToBoundingBoxStep;
+import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 import ai.konduit.serving.pipeline.util.ArchiveUtils;
 import ai.konduit.serving.pipeline.util.TestUtils;
 import lombok.extern.slf4j.Slf4j;
