@@ -19,10 +19,12 @@
 package ai.konduit.serving.cli.launcher.command.build.extension;
 
 import ai.konduit.serving.cli.launcher.command.ServeCommand;
+import ai.konduit.serving.cli.launcher.command.build.extension.model.Profile;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
+import io.vertx.core.cli.annotations.Option;
 import io.vertx.core.cli.annotations.Summary;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -55,6 +57,14 @@ import java.util.Scanner;
 @Slf4j
 public class ServeBuildCommand extends ServeCommand {
 
+    private String profileName;
+
+    @Option(shortName = "p", longName = "profileName", argName = "profileName")
+    @Description("Name of the profile to be used with the server launch.")
+    private void setProfileName(String profileName) {
+        this.profileName = profileName;
+    }
+
     @Override
     public void run() {
         File savePath = new File(DirectoryFetcher.getBuildDir(), String.format("%s-pipeline.json", getId()));
@@ -72,29 +82,21 @@ public class ServeBuildCommand extends ServeCommand {
                 Object buildCli = buildCliClass.getConstructor().newInstance();
                 Method buildCliMainMethod = buildCliClass.getMethod("exec", String[].class);
                 buildCliMainMethod.setAccessible(true);
+
+                Profile profile = ProfileCommand.getProfile(profileName != null ? profileName : "CPU");
+
                 String[] buildCliArgs = new String[] {
                         "-p", savePath.getAbsolutePath(),
                         "-c", String.format("classpath.outputFile=%s", mfJar.getAbsolutePath()), "classpath.type=JAR_MANIFEST",
                         "-dt", "CLASSPATH",
-                        "-d", "CPU", // make configurable
-                        "-a", "x86_avx2", // make configurable
-                        "-o", "MAC", // make configurable
-                        "-s", "HTTP", // make configurable
-                        "-ad", "ch.qos.logback:logback-classic:1.2.3" // make configurable through profiles
+                        "-d", profile.computeDevice(),
+                        "-a", profile.cpuArchitecture(),
+                        "-o", profile.operatingSystem(),
+                        "-s", profile.serverTypes(),
+                        "-ad", profile.additionalDependencies()
                 };
 
                 buildCliMainMethod.invoke(buildCli, (Object) buildCliArgs);
-
-                /*Config c = new Config()
-                        .pipelinePath(savePath.getAbsolutePath())
-                        .target(Target.WINDOWS_X86_AVX2)
-                        .serving(Serving.valueOf(inferenceConfiguration.getProtocol().name()))
-                        .deployments(
-                                new ClassPathDeployment().type(ClassPathDeployment.Type.JAR_MANIFEST).outputFile(mfJar.getAbsolutePath())
-                        );
-
-                GradleBuild.generateGradleBuildFiles(gradleDir, c);
-                GradleBuild.runGradleBuild(gradleDir, c);*/
 
                 if (Strings.isNullOrEmpty(this.classpath)) {
                     this.classpath = mfJar.getAbsolutePath();

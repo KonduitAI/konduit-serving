@@ -38,6 +38,11 @@ public class Constants {
     public static final String DEFAULT_BUILD_DIR_NAME = "build";
 
     /**
+     * The name of the default konduit-serving profiles data directory .
+     */
+    public static final String DEFAULT_PROFILES_DIR_NAME = "profiles";
+
+    /**
      * Default base directory name for the endpoints log (/logs).
      */
     public static final String DEFAULT_ENDPOINT_LOGS_DIR_NAME = "endpoint_logs";

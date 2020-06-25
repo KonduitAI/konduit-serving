@@ -63,6 +63,20 @@ public class DirectoryFetcher {
     }
 
     /**
+     * Creates the profiles directory if missing and fetches it.
+     * @return konduit-serving profiles directory.
+     */
+    public static File getProfilesDir() {
+        return createAndValidateDirectory(
+                fetchValueBasedOnPriority(
+                        System.getenv(EnvironmentConstants.PROFILES_DIR),
+                        System.getProperty(PropertiesConstants.PROFILES_DIR),
+                        getDefaultProfilesDir()
+                )
+        );
+    }
+
+    /**
      * Creates the server data directory if missing and fetches it.
      * @return konduit-serving server data directory
      */
@@ -134,6 +148,14 @@ public class DirectoryFetcher {
      */
     public static String getDefaultBuildDir() {
         return createAndValidateDirectory(new File(getWorkingDir(), Constants.DEFAULT_BUILD_DIR_NAME)).getAbsolutePath();
+    }
+
+    /**
+     * Creates the default profiles directory if missing and fetches it.
+     * @return konduit-serving default profiles directory absolute path.
+     */
+    public static String getDefaultProfilesDir() {
+        return createAndValidateDirectory(new File(getWorkingDir(), Constants.DEFAULT_PROFILES_DIR_NAME)).getAbsolutePath();
     }
 
     /**

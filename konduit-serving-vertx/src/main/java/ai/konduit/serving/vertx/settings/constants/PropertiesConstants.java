@@ -42,6 +42,11 @@ public class PropertiesConstants {
     public static final String BUILD_DIR = "konduit.build.dir";
 
     /**
+     * System property specifying profiles data directory where details of individual profiles are kept.
+     */
+    public static final String PROFILES_DIR = "konduit.profiles.dir";
+
+    /**
      * This system property is responsible for setting the path where the log files for a konduit server
      * is kept for the `/logs` endpoint.
      */
