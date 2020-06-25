@@ -89,23 +89,34 @@ public class RelativeToAbsoluteRunner implements PipelineStepRunner {
             if(vt == ValueType.POINT){
                 Point p = data.getPoint(s);
                 p = ImageUtils.accountForCrop(p, w, h, step.imageToNDArrayConfig());
+                p = p.toAbsolute(w, h);
                 out.put(s, p);
             } else if(vt == ValueType.BOUNDING_BOX){
-                BoundingBox bb = data.getBoundingBox(s);
-                bb = ImageUtils.accountForCrop(bb, w, h, step.imageToNDArrayConfig());
-                out.put(s, bb);
+                BoundingBox b = ImageUtils.accountForCrop(data.getBoundingBox(s), w, h, step.imageToNDArrayConfig());
+                BoundingBox absolute = b;
+                if(b.cx() < 1.0 && b.cy() < 1.0){
+                    absolute = BoundingBox.create(b.cx()*w, b.cy()*h, b.height()*h, b.width()*w);
+                }
+                out.put(s, absolute);
             } else if(data.listType(s) == ValueType.POINT){
                 List<Point> lIn = data.getListPoint(s);
                 List<Point> lOut = new ArrayList<>();
                 for(Point p : lIn){
-                    lOut.add(ImageUtils.accountForCrop(p, w, h, step.imageToNDArrayConfig()));
+                    p = ImageUtils.accountForCrop(p, w, h, step.imageToNDArrayConfig());
+                    p = p.toAbsolute(w, h);
+                    lOut.add(p);
                 }
                 out.putListPoint(s, lOut);
             } else if(data.listType(s) == ValueType.BOUNDING_BOX){
                 List<BoundingBox> lIn = data.getListBoundingBox(s);
                 List<BoundingBox> lOut = new ArrayList<>();
                 for(BoundingBox bb : lIn){
-                    lOut.add(ImageUtils.accountForCrop(bb, w, h, step.imageToNDArrayConfig()));
+                    BoundingBox b = ImageUtils.accountForCrop(bb, w, h, step.imageToNDArrayConfig());
+                    BoundingBox absolute = b;
+                    if(b.cx() < 1.0 && b.cy() < 1.0){
+                        absolute = BoundingBox.create(b.cx()*w, b.cy()*h, b.height()*h, b.width()*w);
+                    }
+                    lOut.add(absolute);
                 }
                 out.putListBoundingBox(s, lOut);
             } else {
