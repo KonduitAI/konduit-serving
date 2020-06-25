@@ -19,12 +19,11 @@
 package ai.konduit.serving.data.image.step.point.draw;
 
 import ai.konduit.serving.annotation.runner.CanRun;
+import ai.konduit.serving.data.image.convert.ImageToNDArray;
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.Point;
-import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;
@@ -123,7 +122,7 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
         // turn points with relative addressing to absolute addressing
         List<Point> absPoints = new ArrayList<>(points.size());
         for (Point point : points) {
-            absPoints.add(point.toAbsolute(width, height));
+            absPoints.add(accountForCrop(point, width, height, step.imageToNDArrayConfig()));
         }
 
         // draw points on image with color according to labels
@@ -148,6 +147,23 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
         // return image
         out.put(step.outputName() == null ? DrawPointsStep.DEFAULT_OUTPUT_NAME : step.outputName(), Image.create(image));
         return out;
+    }
+
+    private Point accountForCrop(Point relPoint, int width, int height, ImageToNDArrayConfig imageToNDArrayConfig) {
+        if(imageToNDArrayConfig == null){
+            return relPoint.toAbsolute(width, height);
+        }
+
+        BoundingBox cropRegion = ImageToNDArray.getCropRegion(width, height, imageToNDArrayConfig);
+        double cropWidth = cropRegion.width();
+        double cropHeight = cropRegion.height();
+
+        return Point.create(
+                cropRegion.x1() + cropWidth * relPoint.x(),
+                cropRegion.y1() + cropHeight * relPoint.y(),
+                relPoint.label(),
+                relPoint.probability()
+        ).toAbsolute(width, height);
     }
 
     private void initColors(Map<String, String> classColors, int max) {

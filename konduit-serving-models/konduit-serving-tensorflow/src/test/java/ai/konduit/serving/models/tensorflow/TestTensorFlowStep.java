@@ -886,6 +886,7 @@ public class TestTensorFlowStep {
                 .outputName("img_points")
         ).then("drawer", new DrawHeatmapStep()
                 .image("image")
+                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
                 .points(Arrays.asList("img_points"))
                 .fadingFactor(1.0)
                 .radius(30));
@@ -985,6 +986,7 @@ public class TestTensorFlowStep {
                 .outputName("img_points")
         ).then("drawer", new DrawPointsStep()
                 .image("image")
+                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
                 .points(Arrays.asList("img_points"))
                 .classColors(Collections.singletonMap(null, "red"))
                 .radius(5));

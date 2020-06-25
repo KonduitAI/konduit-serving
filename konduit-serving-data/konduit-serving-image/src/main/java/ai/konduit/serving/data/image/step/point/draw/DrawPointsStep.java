@@ -19,6 +19,7 @@
 package ai.konduit.serving.data.image.step.point.draw;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -79,7 +80,10 @@ public class DrawPointsStep implements PipelineStep {
     @Schema(description = "Must be provided when \"image\" isn't set. Used to resolve position of points with relative addressing (dimensions between 0 and 1)")
     private Integer height;
 
-
+    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig may be " +
+            "used to crop images before passing to the network, when the image aspect ratio doesn't match the NDArray " +
+            "aspect ratio. This allows the step to determine the subset of the image actually passed to the network.")
+    private ImageToNDArrayConfig imageToNDArrayConfig;
 
     @Schema(description = "Name of the output image",
             defaultValue = DEFAULT_OUTPUT_NAME)
