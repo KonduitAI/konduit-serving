@@ -28,10 +28,10 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.indexer.DoubleIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.opencv.core.CvType;
 
@@ -44,6 +44,7 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
 
     protected final DrawHeatmapStep step;
     protected Mat prev;
+    protected Mat brush;
 
     public DrawHeatmapStepRunner(@NonNull DrawHeatmapStep step) {
         this.step = step;
@@ -115,24 +116,55 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
             }
         }
 
+        int radius = step.radius() == null ? 15 : step.radius();
+        int kSize = radius * 8 + 1;
+        if(brush == null){
+            Size kernelSize = new Size(kSize, kSize);
+            brush = new Mat();
+            brush.put(Mat.zeros(kSize, kSize, CvType.CV_64FC1));
+            brush.createIndexer().putDouble(new long[]{kSize / 2, kSize / 2}, 255);
+            opencv_imgproc.GaussianBlur(brush, brush, kernelSize, radius, radius, opencv_core.BORDER_ISOLATED);
+        }
+
         Mat mat = new Mat();
         mat.put(Mat.zeros(height, width, CvType.CV_64FC1));
-        DoubleIndexer idx = mat.createIndexer();
         for (Point point : points) {
             int row = (int) point.y();
             int col = (int) point.x();
             if(row > height || col > width){
                 log.warn("{} is out of bounds ({}, {})", point, width, height);
             }else {
-                idx.put(row, col, idx.get(row, col) + 255);
+                int offsetRow = row - kSize / 2;
+                int offsetCol = col - kSize / 2;
+
+                int brushWidth = kSize;
+                int brushHeight = kSize;
+                int brushOffsetRow = 0;
+                int brushOffsetCol = 0;
+
+                if(offsetRow < 0){
+                    brushHeight += offsetRow;
+                    brushOffsetRow -= offsetRow;
+                    offsetRow = 0;
+                }
+                if(offsetCol < 0){
+                    brushWidth += offsetCol;
+                    brushOffsetCol -= offsetCol;
+                    offsetCol = 0;
+                }
+
+                if(offsetRow + brushHeight > mat.arrayHeight()){
+                    brushHeight = mat.arrayHeight() - offsetRow;
+                }
+                if(offsetCol + brushWidth > mat.arrayWidth()){
+                    brushWidth = mat.arrayWidth() - offsetCol;
+                }
+
+                Mat region = mat.apply(new Rect(offsetCol, offsetRow, brushWidth, brushHeight));
+                Mat brushRegion = brush.apply(new Rect(brushOffsetCol, brushOffsetRow, brushWidth, brushHeight));
+                opencv_core.add(region, brushRegion, region);
             }
         }
-
-        int radius = step.radius() == null ? 15 : step.radius();
-        int kSize = radius * 8 + 1;
-
-        Size kernelSize = new Size(kSize, kSize);
-        opencv_imgproc.GaussianBlur(mat, mat, kernelSize, radius, radius, opencv_core.BORDER_ISOLATED);
 
         opencv_core.addWeighted(prev, step.fadingFactor() == null ? 0.9 : step.fadingFactor(), mat, 1.0, 0, mat);
         prev.close();
@@ -153,9 +185,8 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
         if(targetImage == null){
             outputImage = Image.create(image);
         }else{
-            Mat composed = new Mat();
-            opencv_core.addWeighted(targetImage, 1.0, image, step.opacity() == null ? 0.5 : step.opacity(), 0, composed);
-            outputImage = Image.create(composed);
+            opencv_core.addWeighted(targetImage, 1.0, image, step.opacity() == null ? 0.5 : step.opacity(), 0, image);
+            outputImage = Image.create(image);
         }
         out.put(step.outputName() == null ? DrawHeatmapStep.DEFAULT_OUTPUT_NAME : step.outputName(), outputImage);
         return out;
