@@ -3,7 +3,8 @@
 These docs are designed to explain the architecture of Konduit Serving (for the "new" API as of 05/2020).
 
 See `ADRs/0003-Pipeline-API_Rewrite.md` for background and motivation on the current design.  
-See also: dev_docs/BuildToolReadme.md for details on the Konduit Serving build tool (reading this first is recommended)
+See also: dev_docs/BuildToolReadme.md for details on the Konduit Serving build tool (reading this first is recommended). <br> 
+See also: dev_docs/ClientsAndDocsGeneration.md for details on how we're generating client code along with its reference documentation.
 
 ## Core classes:
 
@@ -554,4 +555,4 @@ It's fine to have sub-packages (i.e., any X in `ai.konduit.serving.data.nd4j.X` 
 in the same package - i.e., modules X and Y can't both define classes directly in the same namespace.
 The reason is to avoid split packages issues for OSGi and Java 9 Modules. We will likely use OSGi extensively in the future.
 
- 
+

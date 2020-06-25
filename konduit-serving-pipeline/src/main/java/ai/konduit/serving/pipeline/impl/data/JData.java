@@ -427,6 +427,8 @@ public class JData implements Data {
             instance.put(key, (BoundingBox)data);
         } else if(data instanceof Point){
             instance.put(key, (Point)data);
+        } else if (data instanceof NDArray) {
+            instance.put(key, (NDArray) data);
         }
 //        else if (data instanceof Object) {
 //            instance.put(key, (Object)data);
