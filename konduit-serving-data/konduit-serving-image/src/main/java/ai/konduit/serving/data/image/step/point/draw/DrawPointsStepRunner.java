@@ -19,12 +19,11 @@
 package ai.konduit.serving.data.image.step.point.draw;
 
 import ai.konduit.serving.annotation.runner.CanRun;
+import ai.konduit.serving.data.image.convert.ImageToNDArray;
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.context.Context;
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.Point;
-import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;
@@ -91,24 +90,31 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
         // Initialize colors first if they weren't initialized at all
         if(labelMap == null) {
             Map<String, String> classColors = step.classColors();
+            if(classColors == null){
+                throw new IllegalArgumentException("A label to color configuration has to be passed!");
+            }
             initColors(classColors, classColors.size());
         }
 
-        // get reference size
+        // get reference size and initialize image
         int width;
         int height;
+        Mat image;
         if(step.image() != null){
             ValueType type = data.type(step.image());
             if(type == ValueType.IMAGE){
-                Image image = data.getImage(step.image());
-                width = image.width();
-                height = image.height();
+                Image img = data.getImage(step.image());
+                width = img.width();
+                height = img.height();
+                image = img.getAs(Mat.class);
             }else{
                 throw new IllegalArgumentException("The configured reference image input "+step.image()+" is not an Image!");
             }
         }else if(step.width() != null && step.height() != null){
             width = step.width();
             height = step.height();
+            image = new Mat();
+            image.put(Mat.zeros(height, width, CvType.CV_8UC3));
         }else{
             throw new IllegalArgumentException("You have to provide either a reference image or width AND height!");
         }
@@ -116,12 +122,8 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
         // turn points with relative addressing to absolute addressing
         List<Point> absPoints = new ArrayList<>(points.size());
         for (Point point : points) {
-            absPoints.add(point.toAbsolute(width, height));
+            absPoints.add(accountForCrop(point, width, height, step.imageToNDArrayConfig()));
         }
-
-        // create empty image
-        Mat image = new Mat();
-        image.put(Mat.zeros(height, width, CvType.CV_8UC3));
 
         // draw points on image with color according to labels
         int radius = step.radius() == null ? 5 : step.radius();
@@ -145,6 +147,23 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
         // return image
         out.put(step.outputName() == null ? DrawPointsStep.DEFAULT_OUTPUT_NAME : step.outputName(), Image.create(image));
         return out;
+    }
+
+    private Point accountForCrop(Point relPoint, int width, int height, ImageToNDArrayConfig imageToNDArrayConfig) {
+        if(imageToNDArrayConfig == null){
+            return relPoint.toAbsolute(width, height);
+        }
+
+        BoundingBox cropRegion = ImageToNDArray.getCropRegion(width, height, imageToNDArrayConfig);
+        double cropWidth = cropRegion.width();
+        double cropHeight = cropRegion.height();
+
+        return Point.create(
+                cropRegion.x1() + cropWidth * relPoint.x(),
+                cropRegion.y1() + cropHeight * relPoint.y(),
+                relPoint.label(),
+                relPoint.probability()
+        ).toAbsolute(width, height);
     }
 
     private void initColors(Map<String, String> classColors, int max) {

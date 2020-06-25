@@ -19,11 +19,10 @@
 package ai.konduit.serving.data.image.step.point.heatmap;
 
 import ai.konduit.serving.annotation.runner.CanRun;
+import ai.konduit.serving.data.image.convert.ImageToNDArray;
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.context.Context;
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.Point;
-import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;
@@ -70,12 +69,14 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
         // get reference size
         int width;
         int height;
+        Mat targetImage = null;
         if(step.image() != null){
             ValueType type = data.type(step.image());
             if(type == ValueType.IMAGE){
                 Image image = data.getImage(step.image());
                 width = image.width();
                 height = image.height();
+                targetImage = image.getAs(Mat.class);
             }else{
                 throw new IllegalArgumentException("The configured reference image input "+step.image()+" is not an Image!");
             }
@@ -100,14 +101,14 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
                 if(point.dimensions() != 2){
                     throw new IllegalArgumentException("Point in input "+pointName+" has "+point.dimensions()+" dimensions, but only 2 dimensional points are supported for drawing!");
                 }
-                points.add(point.toAbsolute(width, height));
+                points.add(accountForCrop(point, width, height, step.imageToNDArrayConfig()));
             }else if(type == ValueType.LIST){
                 List<Point> pointList = data.getListPoint(pointName);
                 for (Point point : pointList) {
                     if(point.dimensions() != 2){
                         throw new IllegalArgumentException("Point in input "+pointName+" has "+point.dimensions()+" dimensions, but only 2 dimensional points are supported for drawing!");
                     }
-                    points.add(point.toAbsolute(width, height));
+                    points.add(accountForCrop(point, width, height, step.imageToNDArrayConfig()));
                 }
             }else {
                 throw new IllegalArgumentException("The configured input "+pointName+" is neither a point nor a list of points!");
@@ -133,7 +134,7 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
         Size kernelSize = new Size(kSize, kSize);
         opencv_imgproc.GaussianBlur(mat, mat, kernelSize, radius, radius, opencv_core.BORDER_ISOLATED);
 
-        mat.put(opencv_core.add(opencv_core.multiply(prev, step.fadingFactor() == null ? 0.9 : step.fadingFactor()), mat));
+        opencv_core.addWeighted(prev, step.fadingFactor() == null ? 0.9 : step.fadingFactor(), mat, 1.0, 0, mat);
         prev.close();
         prev = mat;
 
@@ -148,7 +149,32 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
         opencv_imgproc.applyColorMap(scaledOut, image, opencv_imgproc.COLORMAP_TURBO);
 
         // return image
-        out.put(step.outputName() == null ? DrawHeatmapStep.DEFAULT_OUTPUT_NAME : step.outputName(), Image.create(image));
+        Image outputImage;
+        if(targetImage == null){
+            outputImage = Image.create(image);
+        }else{
+            Mat composed = new Mat();
+            opencv_core.addWeighted(targetImage, 1.0, image, step.opacity() == null ? 0.5 : step.opacity(), 0, composed);
+            outputImage = Image.create(composed);
+        }
+        out.put(step.outputName() == null ? DrawHeatmapStep.DEFAULT_OUTPUT_NAME : step.outputName(), outputImage);
         return out;
+    }
+
+    private Point accountForCrop(Point relPoint, int width, int height, ImageToNDArrayConfig imageToNDArrayConfig) {
+        if(imageToNDArrayConfig == null){
+            return relPoint.toAbsolute(width, height);
+        }
+
+        BoundingBox cropRegion = ImageToNDArray.getCropRegion(width, height, imageToNDArrayConfig);
+        double cropWidth = cropRegion.width();
+        double cropHeight = cropRegion.height();
+
+        return Point.create(
+                cropRegion.x1() + cropWidth * relPoint.x(),
+                cropRegion.y1() + cropHeight * relPoint.y(),
+                relPoint.label(),
+                relPoint.probability()
+        ).toAbsolute(width, height);
     }
 }
