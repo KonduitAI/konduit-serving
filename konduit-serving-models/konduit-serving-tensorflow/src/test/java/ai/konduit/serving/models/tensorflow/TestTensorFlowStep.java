@@ -927,27 +927,24 @@ public class TestTensorFlowStep {
         GraphStep input = b.input();
 
         //Capture frame from video
-        GraphStep camera = input.then("video", VideoFrameCaptureStep.builder()
+        GraphStep camera = input.then("video", new VideoFrameCaptureStep()
                 .filePath(v.getAbsolutePath())
-                .outputKey("image")
-                .build());
+                .outputKey("image"));
 
         //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
-        ImageToNDArrayConfig c = ImageToNDArrayConfig.builder()
+        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
                 .height(300)  // https://github.com/tensorflow/models/blob/master/research/object_detection/samples/configs/ssd_mobilenet_v1_coco.config#L43L46
                 .width(300)   // size origin
                 .channelLayout(NDChannelLayout.RGB)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
                 .dataType(NDArrayType.UINT8)
-                .normalization(null)
-                .build();
+                .normalization(null);
 
-        GraphStep i2n = camera.then("image2NDArray", ImageToNDArrayStep.builder()
+        GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
-                .build());
+                .outputNames(Arrays.asList("image_tensor")));
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", builder()
@@ -957,9 +954,7 @@ public class TestTensorFlowStep {
                 .build());
 
         //Post process SSD outputs to BoundingBox objects
-        GraphStep ssdProc = tf.then("bbox", SSDToBoundingBoxStep.builder()
-                .outputName("img_bbox")
-                .build());
+        GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep().outputName("img_bbox"));
 
         //Merge camera image with bounding boxes
         GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
@@ -978,12 +973,11 @@ public class TestTensorFlowStep {
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", ShowImagePipelineStep.builder()
+        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
                 .displayName("person detection")
                 .imageName("image")
                 .width(800)
-                .height(450)
-                .build());
+                .height(450));
 
 
         GraphPipeline p = b.build(show);
