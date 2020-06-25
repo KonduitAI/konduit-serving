@@ -91,24 +91,31 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
         // Initialize colors first if they weren't initialized at all
         if(labelMap == null) {
             Map<String, String> classColors = step.classColors();
+            if(classColors == null){
+                throw new IllegalArgumentException("A label to color configuration has to be passed!");
+            }
             initColors(classColors, classColors.size());
         }
 
-        // get reference size
+        // get reference size and initialize image
         int width;
         int height;
+        Mat image;
         if(step.image() != null){
             ValueType type = data.type(step.image());
             if(type == ValueType.IMAGE){
-                Image image = data.getImage(step.image());
-                width = image.width();
-                height = image.height();
+                Image img = data.getImage(step.image());
+                width = img.width();
+                height = img.height();
+                image = img.getAs(Mat.class);
             }else{
                 throw new IllegalArgumentException("The configured reference image input "+step.image()+" is not an Image!");
             }
         }else if(step.width() != null && step.height() != null){
             width = step.width();
             height = step.height();
+            image = new Mat();
+            image.put(Mat.zeros(height, width, CvType.CV_8UC3));
         }else{
             throw new IllegalArgumentException("You have to provide either a reference image or width AND height!");
         }
@@ -118,10 +125,6 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
         for (Point point : points) {
             absPoints.add(point.toAbsolute(width, height));
         }
-
-        // create empty image
-        Mat image = new Mat();
-        image.put(Mat.zeros(height, width, CvType.CV_8UC3));
 
         // draw points on image with color according to labels
         int radius = step.radius() == null ? 5 : step.radius();
