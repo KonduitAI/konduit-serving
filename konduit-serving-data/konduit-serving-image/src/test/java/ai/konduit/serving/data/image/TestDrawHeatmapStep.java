@@ -52,7 +52,8 @@ public class TestDrawHeatmapStep {
                         Point.create(2, 2, "bar", 0.1),
                         Point.create(0.1, 0.1, "foo", 0.2),
                         Point.create(0.5, 0.8, "bar", 0.3),
-                        Point.create(30, 59, "foo", 0.4)
+                        Point.create(30, 59, "foo", 0.4),
+                        Point.create(0.99, 0.99, "foo", 0.5)
                 )
         );
 
