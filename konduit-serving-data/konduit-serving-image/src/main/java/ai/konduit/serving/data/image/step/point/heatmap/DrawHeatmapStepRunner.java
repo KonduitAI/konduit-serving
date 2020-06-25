@@ -70,12 +70,14 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
         // get reference size
         int width;
         int height;
+        Mat targetImage = null;
         if(step.image() != null){
             ValueType type = data.type(step.image());
             if(type == ValueType.IMAGE){
                 Image image = data.getImage(step.image());
                 width = image.width();
                 height = image.height();
+                targetImage = image.getAs(Mat.class);
             }else{
                 throw new IllegalArgumentException("The configured reference image input "+step.image()+" is not an Image!");
             }
@@ -133,7 +135,7 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
         Size kernelSize = new Size(kSize, kSize);
         opencv_imgproc.GaussianBlur(mat, mat, kernelSize, radius, radius, opencv_core.BORDER_ISOLATED);
 
-        mat.put(opencv_core.add(opencv_core.multiply(prev, step.fadingFactor() == null ? 0.9 : step.fadingFactor()), mat));
+        opencv_core.addWeighted(prev, step.fadingFactor() == null ? 0.9 : step.fadingFactor(), mat, 1.0, 0, mat);
         prev.close();
         prev = mat;
 
@@ -148,7 +150,15 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
         opencv_imgproc.applyColorMap(scaledOut, image, opencv_imgproc.COLORMAP_TURBO);
 
         // return image
-        out.put(step.outputName() == null ? DrawHeatmapStep.DEFAULT_OUTPUT_NAME : step.outputName(), Image.create(image));
+        Image outputImage;
+        if(targetImage == null){
+            outputImage = Image.create(image);
+        }else{
+            Mat composed = new Mat();
+            opencv_core.addWeighted(targetImage, 1.0, image, step.opacity() == null ? 0.5 : step.opacity(), 0, composed);
+            outputImage = Image.create(composed);
+        }
+        out.put(step.outputName() == null ? DrawHeatmapStep.DEFAULT_OUTPUT_NAME : step.outputName(), outputImage);
         return out;
     }
 }
