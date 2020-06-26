@@ -19,7 +19,6 @@
 package ai.konduit.serving.data.image.step.point.perspective.convert;
 
 import ai.konduit.serving.annotation.json.JsonName;
-import ai.konduit.serving.data.image.step.point.heatmap.DrawHeatmapStep;
 import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.*;
@@ -47,14 +46,9 @@ public class PerspectiveTransformStep implements PipelineStep {
     /**
      * If null: just find any Points, Bounding Boxes and Images
      */
-    @Singular
     private List<String> inputNames;
 
-
-    @Singular
     private List<String> outputNames;
-
-
     /**
      * When you provide source points as an input, they must be provided as a list of 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */

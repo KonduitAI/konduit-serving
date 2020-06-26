@@ -21,8 +21,11 @@ package ai.konduit.serving.models.tensorflow.step;
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.models.tensorflow.TensorFlowConfiguration;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import lombok.experimental.Tolerate;
@@ -32,11 +35,12 @@ import java.util.Arrays;
 import java.util.List;
 
 @Data
-@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 @Accessors(fluent = true)
 @JsonName("TENSORFLOW")
 @Schema(description = "A pipeline step that configures a TensorFlow model that is to be executed.")
-public class TensorFlowStep extends BaseModelPipelineStep<TensorFlowConfiguration> {
+public class TensorFlowStep implements PipelineStep {
 
     @Schema(description = "A list of names of the input placeholders.")
     private List<String> inputNames;
@@ -46,16 +50,10 @@ public class TensorFlowStep extends BaseModelPipelineStep<TensorFlowConfiguratio
     private List<String> outputNames;
 
 
-    public TensorFlowStep(String modelUri, TensorFlowConfiguration config) {
-        super(modelUri, config);
-    }
+    @Schema(description = "Uniform Resource Identifier of model")
+    private String modelUri;
 
-    public TensorFlowStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("config") TensorFlowConfiguration config,
-                          @JsonProperty("inputNames") List<String> inputNames, @JsonProperty("outputNames") List<String> outputNames) {
-        super(modelUri, config);
-        this.inputNames = inputNames;
-        this.outputNames = outputNames;
-    }
+
 
     @Tolerate
     public TensorFlowStep inputNames(String... inputNames) {
