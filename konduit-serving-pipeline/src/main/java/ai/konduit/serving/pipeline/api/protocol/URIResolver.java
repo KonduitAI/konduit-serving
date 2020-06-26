@@ -95,7 +95,7 @@ public class URIResolver {
     }
 
     protected static File getIfFile(String path){
-        if(path.matches("\\w+://.*"))
+        if(path.matches("\\w+://.*") || path.startsWith("file:/"))       //Regex does not catch file:/C:/... out of (new File(...).toURI().toString()
             return null;
 
         try{
