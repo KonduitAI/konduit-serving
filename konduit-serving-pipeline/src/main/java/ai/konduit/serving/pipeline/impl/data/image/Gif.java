@@ -21,6 +21,7 @@ package ai.konduit.serving.pipeline.impl.data.image;
 import ai.konduit.serving.pipeline.impl.data.image.base.BaseImageFile;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 
 public class Gif extends BaseImageFile {
 
@@ -38,6 +39,14 @@ public class Gif extends BaseImageFile {
 
     public Gif(byte[] bytes, Integer height, Integer width){
         super(bytes, height, width);
+    }
+
+    public Gif(ByteBuffer byteBuffer){
+        super(byteBuffer);
+    }
+
+    public Gif(ByteBuffer byteBuffer, Integer height, Integer width){
+        super(byteBuffer, height, width);
     }
 
     @Override

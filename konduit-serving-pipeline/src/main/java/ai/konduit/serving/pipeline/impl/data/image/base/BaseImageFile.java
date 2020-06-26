@@ -20,7 +20,6 @@ package ai.konduit.serving.pipeline.impl.data.image.base;
 
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.exception.DataLoadingException;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 
@@ -31,7 +30,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-@AllArgsConstructor
 public abstract class BaseImageFile {
 
     @Getter
@@ -58,7 +56,15 @@ public abstract class BaseImageFile {
     }
 
     public BaseImageFile(byte[] bytes, Integer height, Integer width){
-        this.fileBytes = ByteBuffer.wrap(bytes);
+        this(ByteBuffer.wrap(bytes), height, width);
+    }
+
+    public BaseImageFile(ByteBuffer fileBytes){
+        this(fileBytes, null, null);
+    }
+
+    public BaseImageFile(ByteBuffer fileBytes, Integer height, Integer width){
+        this.fileBytes = fileBytes;
         this.height = height;
         this.width = width;
     }

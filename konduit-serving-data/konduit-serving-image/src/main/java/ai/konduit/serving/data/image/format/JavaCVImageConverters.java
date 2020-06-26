@@ -19,17 +19,15 @@
 package ai.konduit.serving.data.image.format;
 
 import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.exception.DataConversionException;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.format.JavaImageConverters;
-import ai.konduit.serving.pipeline.util.FileUtils;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.UUID;
+import java.nio.ByteBuffer;
 
 public class JavaCVImageConverters {
 
@@ -72,20 +70,12 @@ public class JavaCVImageConverters {
 
         @Override
         protected <T> T doConversion(Image from, Class<T> to) {
-            //TODO It may be possible to do this without the temp file
             Mat m = (Mat) from.get();
-            File tempDir = FileUtils.getTempFileDir("konduit-serving-javacv");
-            File f = new File(tempDir, UUID.randomUUID().toString() + ".png");
-            String path = f.getAbsolutePath();
+            BytePointer out = new BytePointer();
+            org.bytedeco.opencv.global.opencv_imgcodecs.imencode(".png", m, out);
 
-            org.bytedeco.opencv.global.opencv_imgcodecs.imwrite(path, m);
-            try {
-                byte[] bytes = org.apache.commons.io.FileUtils.readFileToByteArray(f);
-                f.delete();
-                return (T) new Png(bytes);
-            } catch (IOException e){
-                throw new DataConversionException("Error connverting Mat to Png", e);
-            }
+            out.position(0);
+            return (T) new Png(out.asByteBuffer());
         }
     }
 
@@ -96,20 +86,12 @@ public class JavaCVImageConverters {
 
         @Override
         protected <T> T doConversion(Image from, Class<T> to) {
-            //TODO is there a way to do this without the temp file?
             Png p = (Png) from.get();
-            byte[] bytes = p.getBytes();
-            File tempDir = FileUtils.getTempFileDir("konduit-serving-javacv");
-            File f = new File(tempDir, UUID.randomUUID().toString() + ".png");
-            Mat mat;
-            try {
-                org.apache.commons.io.FileUtils.writeByteArrayToFile(f, bytes);
-                mat = org.bytedeco.opencv.global.opencv_imgcodecs.imread(f.getAbsolutePath());
-            } catch (IOException e){
-                throw new DataConversionException("Error writing to temporary file for Png->Mat conversion", e);
-            }
-            f.delete();
-            return (T) mat;
+            ByteBuffer fileBytes = p.getFileBytes();
+            fileBytes.position(0);
+            Mat m = new Mat(new BytePointer(fileBytes), false);
+            Mat out = org.bytedeco.opencv.global.opencv_imgcodecs.imdecode(m, opencv_imgcodecs.IMREAD_UNCHANGED);
+            return (T) out;
         }
     }
 
