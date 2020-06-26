@@ -38,9 +38,11 @@ import org.mockftpserver.fake.filesystem.WindowsFakeFileSystem;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
 public class TestURL {
@@ -72,6 +74,16 @@ public class TestURL {
     @After
     public void tearDown() throws Exception {
         server.stop();
+    }
+
+    @Test
+    public void testFilePath() throws Exception {
+        File folder = testDir.newFolder();
+        File myFile = new File(folder, "myFile.txt");
+        FileUtils.writeStringToFile(myFile, "My string!", StandardCharsets.UTF_8);
+
+        File f2 = URIResolver.getFile(myFile.getAbsolutePath());
+        assertEquals(myFile, f2);
     }
 
     @Test
