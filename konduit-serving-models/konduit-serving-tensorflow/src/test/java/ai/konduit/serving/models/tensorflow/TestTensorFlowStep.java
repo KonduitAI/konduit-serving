@@ -103,7 +103,7 @@ public class TestTensorFlowStep {
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                .outputNames("image_tensor") //TODO varargs builder method
         );
 
         //Run image in TF model
