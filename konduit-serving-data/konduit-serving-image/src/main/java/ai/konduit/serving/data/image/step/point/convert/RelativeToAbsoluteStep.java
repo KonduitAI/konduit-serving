@@ -22,9 +22,14 @@ import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -68,4 +73,8 @@ public class RelativeToAbsoluteStep implements PipelineStep {
             " If not set, the step will convert any/all fields of those types")
     protected List<String> toConvert;
 
+    @Tolerate
+    public RelativeToAbsoluteStep toConvert(String... toConvert){
+        return toConvert(Arrays.asList(toConvert));
+    }
 }
