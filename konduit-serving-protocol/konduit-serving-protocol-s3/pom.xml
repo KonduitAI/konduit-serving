@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>konduit-serving-pipeline</artifactId>
+    <artifactId>konduit-serving-protocol-s3</artifactId>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,19 +22,18 @@
             <snapshots><enabled>false</enabled></snapshots>
             <releases><enabled>true</enabled></releases>
         </repository-->
-            <repository>
-                <id>oss.sonatype.org</id>
-                <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            </repository>
+        <repository>
+            <id>oss.sonatype.org</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
     </repositories>
 
     <dependencies>
-
-            <!--dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>20200518</version>
-            </dependency-->
+        <!--dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20200518</version>
+        </dependency-->
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-annotation</artifactId>
@@ -56,11 +55,11 @@
             <artifactId>commons-csv</artifactId>
             <version>1.4</version>
         </dependency>
-        <!--dependency>
+        <!---dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-core</artifactId>
             <version>1.2.1</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>net.java.dev.jets3t</groupId>
             <artifactId>jets3t</artifactId>
@@ -83,13 +82,6 @@
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency-->
-
-        <!-- TODO - remove this to avoid version issues? We only really use it for a small number of utils... Preconditions for example -->
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-common</artifactId>
-            <version>${nd4j.version}</version>
         </dependency>
 
         <!-- TODO - do we replace this with non-shaded Jackson? May need OSGi to avoid dependency conflicts however -->
@@ -98,7 +90,6 @@
             <artifactId>jackson</artifactId>
             <version>${dl4j.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -126,37 +117,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java-util</artifactId>
-            <version>${protobuf.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.code.gson</groupId>
-                    <artifactId>gson</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
-            <version>3.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-core</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>${swagger-stack.version}</version>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-pipeline</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -165,50 +128,10 @@
             <scope>test</scope>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.mockftpserver</groupId>
-            <artifactId>MockFtpServer</artifactId>
-            <version>2.7.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.oshi</groupId>
-            <artifactId>oshi-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.oshi</groupId>
-            <artifactId>oshi-json</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>com.github.os72</groupId>
-                <artifactId>protoc-jar-maven-plugin</artifactId>
-                <version>${protobuf.version}</version>
-                <executions>
-                    <execution>
-                        <id>protobuf</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <protocVersion>${protobuf.version}</protocVersion>
-                            <extension>.proto</extension>
-                            <inputDirectories>
-                                <include>src/main/java/ai/konduit/serving/pipeline/api/protobuf</include>
-                            </inputDirectories>
-                            <addSources>main</addSources>
-                            <cleanOutputFolder>false</cleanOutputFolder>
-                            <outputDirectory>src/main/java</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.6</version>
@@ -233,5 +156,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

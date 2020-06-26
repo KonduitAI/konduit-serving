@@ -18,10 +18,16 @@
 
 package ai.konduit.serving.pipeline.api.protocol;
 
+import com.jcabi.aspects.RetryOnFailure;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.nd4j.common.primitives.Pair;
 
 import java.io.*;
 import java.net.URI;
@@ -40,39 +46,140 @@ public class URIResolver {
         return false;
     }
 
+    public static void removeOutdatedCacheEntries(File metaFile) throws IOException {
+        String lifeTimeProp = System.getProperty("konduit.serving.cache.lifetime");
+        if (StringUtils.isEmpty(lifeTimeProp))
+            return;
+        final int daysTimeout = Integer.parseInt(lifeTimeProp);
+        if (daysTimeout <= 0)
+            return;
+        File tempFile = new File(cacheDirectory, "metafile.temp");
+
+        try (BufferedReader in = new BufferedReader(new FileReader(metaFile));
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(tempFile)))) {
+            String line = StringUtils.EMPTY;
+            while((line =in.readLine())!=null) {
+                Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(new StringReader(line));
+                for (CSVRecord record : records) {
+                    long accessedTimestamp = Long.parseLong(record.get(3));
+                    long elapsedMillis = System.currentTimeMillis() - accessedTimestamp;
+                    long elapsedDays = elapsedMillis / (1000 * 60 * 60 * 24);
+                    if (elapsedDays <= daysTimeout) {
+                        writer.write(line);
+                    } else {
+                        log.info("Removing outdated cached file " + record.get(0));
+                        new File(record.get(0)).delete();
+                    }
+                }
+            }
+            FileUtils.moveFile(tempFile, metaFile);
+        }
+    }
+
     private static File cacheDirectory;
+    private static File metaFile;
     static {
-        File f = new File(System.getProperty("user.home"), ".konduit_cache/");
+        File f = new File(System.getProperty("user.home"), StringUtils.defaultIfEmpty(
+                                                            System.getProperty("konduit.serving.cache.location"),
+                                                            ".konduit_cache/"));
         if (!f.exists())
             f.mkdirs();
         cacheDirectory = f;
+        metaFile = new File(cacheDirectory, ".metadata");
+        try {
+           if (!metaFile.exists()) {
+               metaFile.createNewFile();
+           }
+           removeOutdatedCacheEntries(metaFile);
+        } catch (IOException e) {
+                log.error("Cache initialization failed", e);
+        }
     }
-
 
     public static File getCachedFile(String uri) {
         URI u = URI.create(uri);
         String fullPath = StringUtils.defaultIfEmpty(u.getScheme(), StringUtils.EMPTY);
         System.out.println(u.getPath());
         String[] dirs = u.getPath().split("/");
+        for (int i = 0; i < dirs.length-1; ++i) {
+            fullPath += File.separator + dirs[i];
+        }
         fullPath += File.separator + FilenameUtils.getName(uri);
         File effectiveDirectory = new File(cacheDirectory, fullPath);
         return effectiveDirectory;
     }
 
-    public static File getFile(String uri) throws IOException {
+    @RetryOnFailure(attempts = 3)
+    public static Pair<Long,Integer> getUrlProperties(URL url) throws IOException {
+        URLConnection connection = url.openConnection();
+        Pair<Long,Integer> retVal = new Pair<>();
+        retVal.setFirst(connection.getLastModified());
+        retVal.setSecond(connection.getContentLength());
+        return retVal;
+    }
 
-        URI u = URI.create(uri);
-        String scheme = u.getScheme();
-        if (scheme.equals("file")) {
-            return new File(u.getPath());
+    private static File load(URL url, File cachedFile) throws IOException {
+
+        val urlProps = getUrlProperties(url);
+
+        int contentLength = 0;
+        long lastModified = 0;
+
+        BufferedReader in = new BufferedReader(new FileReader(metaFile));
+        String line = StringUtils.EMPTY;
+        while ((line = in.readLine()) != null) {
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT
+                    .parse(new StringReader(line));
+            for (CSVRecord record : records) {
+                if (record.get(0).equals(cachedFile.getAbsolutePath())) {
+                    contentLength = Integer.parseInt(record.get(1));
+                    lastModified = Long.parseLong(record.get(2));
+                    break;
+                }
+            }
         }
-        File cachedFile = getCachedFile(uri);
-        if (cachedFile.exists()) {
+        if (lastModified > 0 && urlProps.getFirst() == lastModified && urlProps.getSecond() == contentLength) {
+            // File is in cache and its timestamps are the same as of remote resource
             return cachedFile;
         }
+        else {
+            String warnOnly = StringUtils.defaultIfEmpty(System.getProperty("konduit.serving.cache.validation.warnonly"),"true");
+            if (warnOnly.equals("true")) {
+                log.error("Cached file " + cachedFile.getAbsolutePath() + " has inconsistent state.");
+                return cachedFile;
+            }
+            else {
+                log.error("Cached file " + cachedFile.getAbsolutePath() + " has inconsistent state and will be removed");
+                cachedFile.delete();
+            }
+        }
+        // File was either just deleted or didn't exist, so writing metadata here and caching in
+        // the calling method.
+        String metaData = cachedFile.getAbsolutePath() + "," + urlProps.getFirst() + "," +
+                urlProps.getSecond() + "," + System.currentTimeMillis() + System.lineSeparator();
+        FileUtils.writeStringToFile(metaFile, metaData, "UTF-8", true);
+        return null;
+    }
 
-        URL url = u.toURL();
-        URLConnection connection = url.openConnection();
+    public static File getFile(String uri) throws IOException {
+        URI u = URI.create(uri);
+        return getFile(u);
+    }
+
+    public static File getFile(URI uri) throws IOException {
+        String scheme = uri.getScheme();
+        if (scheme.equals("file")) {
+            return new File(uri.getPath());
+        }
+        File cachedFile = getCachedFile(uri.getPath());
+
+        URL url = uri.toURL();
+        if (cachedFile.exists()) {
+            File verifiedFile = load(url, cachedFile);
+            if (verifiedFile != null) {
+                return verifiedFile;
+            }
+        }
         FileUtils.copyURLToFile(url, cachedFile);
 
         return cachedFile;
