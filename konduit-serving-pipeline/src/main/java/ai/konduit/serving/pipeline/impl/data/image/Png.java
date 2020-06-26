@@ -21,6 +21,7 @@ package ai.konduit.serving.pipeline.impl.data.image;
 import ai.konduit.serving.pipeline.impl.data.image.base.BaseImageFile;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 
 public class Png extends BaseImageFile {
 
@@ -38,6 +39,14 @@ public class Png extends BaseImageFile {
 
     public Png(byte[] bytes, Integer height, Integer width){
         super(bytes, height, width);
+    }
+
+    public Png(ByteBuffer byteBuffer){
+        super(byteBuffer);
+    }
+
+    public Png(ByteBuffer byteBuffer, Integer height, Integer width){
+        super(byteBuffer, height, width);
     }
 
     @Override
