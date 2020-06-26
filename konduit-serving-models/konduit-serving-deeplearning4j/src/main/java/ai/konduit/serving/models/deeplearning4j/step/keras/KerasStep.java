@@ -35,7 +35,7 @@ import java.util.List;
 @NoArgsConstructor
 @JsonName("KERAS")
 @Schema(description = "A pipeline step that configures a Keras model that is to be executed.")
-public class KerasModelStep implements PipelineStep {
+public class KerasStep implements PipelineStep {
 
     @Schema(description = "Specifies the location of a saved model file.")
     private String modelUri;
@@ -48,14 +48,14 @@ public class KerasModelStep implements PipelineStep {
             "from the computation graph output - INDArray[] to data keys).")
     private List<String> outputNames;
 
-    public KerasModelStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputNames") List<String> inputNames,
-                                 @JsonProperty("outputNames") List<String> outputNames){
+    public KerasStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputNames") List<String> inputNames,
+                     @JsonProperty("outputNames") List<String> outputNames){
         this.modelUri = modelUri;
         this.inputNames = inputNames;
         this.outputNames = outputNames;
     }
 
-    public KerasModelStep(String modelUri){
+    public KerasStep(String modelUri){
         this.modelUri = modelUri;
     }
 

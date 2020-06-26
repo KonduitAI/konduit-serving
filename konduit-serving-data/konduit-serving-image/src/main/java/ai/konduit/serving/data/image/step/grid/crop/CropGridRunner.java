@@ -34,17 +34,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @CanRun({CropGridStep.class, CropFixedGridStep.class})
-public class CropGridStepRunner implements PipelineStepRunner {
+public class CropGridRunner implements PipelineStepRunner {
 
     protected final CropGridStep step;
     protected final CropFixedGridStep fStep;
 
-    public CropGridStepRunner(@NonNull CropGridStep step) {
+    public CropGridRunner(@NonNull CropGridStep step) {
         this.step = step;
         this.fStep = null;
     }
 
-    public CropGridStepRunner(@NonNull CropFixedGridStep step) {
+    public CropGridRunner(@NonNull CropFixedGridStep step) {
         this.step = null;
         this.fStep = step;
     }

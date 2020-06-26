@@ -27,7 +27,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 import org.slf4j.event.Level;
 
 /**
- * LoggingPipelineStep simply logs the input Data keys (and optionally values) and returns the input data unchanged
+ * LoggingStep simply logs the input Data keys (and optionally values) and returns the input data unchanged
  *
  * @author Alex Black
  */
@@ -37,7 +37,7 @@ import org.slf4j.event.Level;
 @JsonName("LOGGING")
 @Schema(description = "A pipeline step that simply logs the input Data keys (and optionally values) and returns " +
         "the input data unchanged.")
-public class LoggingPipelineStep implements PipelineStep {
+public class LoggingStep implements PipelineStep {
 
     @Schema(description = "An enum specifying what part of a data instance should be logged. <br><br>" +
             "KEYS -> only output data keys, <br>" +
@@ -54,7 +54,7 @@ public class LoggingPipelineStep implements PipelineStep {
     @Schema(description = "A regular expression that allows filtering of keys - i.e., only those that match the regex will be logged.")
     public String keyFilterRegex = null;
 
-    public LoggingPipelineStep(@JsonProperty("logLevel") Level logLevel, @JsonProperty("log") Log log, @JsonProperty("keyfilterRegex") String keyFilterRegex) {
+    public LoggingStep(@JsonProperty("logLevel") Level logLevel, @JsonProperty("log") Log log, @JsonProperty("keyfilterRegex") String keyFilterRegex) {
         this.logLevel = logLevel;
         this.log = log;
         this.keyFilterRegex = keyFilterRegex;

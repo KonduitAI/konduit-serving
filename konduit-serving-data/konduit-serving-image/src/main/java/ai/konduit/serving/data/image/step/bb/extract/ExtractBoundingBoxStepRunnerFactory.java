@@ -32,6 +32,6 @@ public class ExtractBoundingBoxStepRunnerFactory implements PipelineStepRunnerFa
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new ExtractBoundingBoxStepRunner((ExtractBoundingBoxStep) pipelineStep);
+        return new ExtractBoundingBoxRunner((ExtractBoundingBoxStep) pipelineStep);
     }
 }

@@ -19,7 +19,7 @@
 package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -50,7 +50,7 @@ public class TestDrawSegmentation {
                         );
 
         if(show) {
-                b.add(new ShowImagePipelineStep()
+                b.add(new ShowImageStep()
                     .displayName("Segment")
                     .imageName("out")
                     .width(256)
@@ -84,7 +84,7 @@ public class TestDrawSegmentation {
                         .backgroundClass(0)     //Don't draw background color if this is set
                         );
         if (show) {
-            b.add( new ShowImagePipelineStep()
+            b.add( new ShowImageStep()
                     .displayName("Segment")
                     .imageName("out")
                     .width(535)

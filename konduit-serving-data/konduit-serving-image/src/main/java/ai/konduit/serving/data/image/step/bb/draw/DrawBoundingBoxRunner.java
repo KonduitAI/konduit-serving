@@ -41,11 +41,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 @CanRun(DrawBoundingBoxStep.class)
-public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
+public class DrawBoundingBoxRunner implements PipelineStepRunner {
 
     protected final DrawBoundingBoxStep step;
 
-    public DrawBoundingBoxStepRunner(@NonNull DrawBoundingBoxStep step){
+    public DrawBoundingBoxRunner(@NonNull DrawBoundingBoxStep step){
         this.step = step;
     }
 

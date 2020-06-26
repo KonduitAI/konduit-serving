@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.deeplearning4j;
 
-import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
+import ai.konduit.serving.models.deeplearning4j.step.DL4JStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -43,7 +43,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestDL4JModelStep {
+public class TestDL4JStep {
 
     @Rule
     public TemporaryFolder testDir = new TemporaryFolder();
@@ -56,11 +56,10 @@ public class TestDL4JModelStep {
             File netFile = createIrisMLNFile();
 
             Pipeline p = SequencePipeline.builder()
-                    .add(new DL4JModelPipelineStep()
+                    .add(new DL4JStep()
                             .modelUri(netFile.getAbsolutePath())
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
-                            .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
-                            )
+                            .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null))
                     .build();
 
 
@@ -99,7 +98,7 @@ public class TestDL4JModelStep {
             File netFile = createIrisCGFile();
 
             Pipeline p = SequencePipeline.builder()
-                    .add(new DL4JModelPipelineStep()
+                    .add(new DL4JStep()
                             .modelUri(netFile.toURI().toString())
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
                             .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)

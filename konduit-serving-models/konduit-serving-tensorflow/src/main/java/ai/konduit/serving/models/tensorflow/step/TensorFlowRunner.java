@@ -37,19 +37,18 @@ import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 
 import java.io.File;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-@CanRun(TensorFlowPipelineStep.class)
-public class TensorFlowStepRunner implements PipelineStepRunner {
+@CanRun(TensorFlowStep.class)
+public class TensorFlowRunner implements PipelineStepRunner {
 
-    private final TensorFlowPipelineStep step;
+    private final TensorFlowStep step;
     private Graph graph;
     private Session sess;
 
-    public TensorFlowStepRunner(@NonNull TensorFlowPipelineStep step) {
+    public TensorFlowRunner(@NonNull TensorFlowStep step) {
         this.step = step;
         init();
     }
