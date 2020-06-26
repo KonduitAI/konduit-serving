@@ -50,18 +50,10 @@ public class PerspectiveTransformStep implements PipelineStep {
     @Singular
     private List<String> inputNames;
 
-    @Tolerate
-    public PerspectiveTransformStep inputNames(String... inputNames){
-        return this.inputNames(Arrays.asList(inputNames));
-    }
 
     @Singular
     private List<String> outputNames;
 
-    @Tolerate
-    public PerspectiveTransformStep outputNames(String... outputNames){
-        return this.outputNames(Arrays.asList(outputNames));
-    }
 
     /**
      * When you provide source points as an input, they must be provided as a list of 4 points [topLeft, topRight, bottomLeft, bottomRight]
@@ -96,23 +88,34 @@ public class PerspectiveTransformStep implements PipelineStep {
      */
     private List<Point> sourcePoints;
 
-    @Tolerate
-    public PerspectiveTransformStep sourcePoints(Point... sourcePoints){
-        return this.sourcePoints(Arrays.asList(sourcePoints));
-    }
 
     /**
      * takes exactly 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
     private List<Point> targetPoints;
 
+
+    private boolean keepOtherFields = true;
+
     @Tolerate
-    public PerspectiveTransformStep targetPoints(Point... targetPoints){
+    public PerspectiveTransformStep inputNames(String... inputNames) {
+        return this.inputNames(Arrays.asList(inputNames));
+    }
+
+    @Tolerate
+    public PerspectiveTransformStep outputNames(String... outputNames) {
+        return this.outputNames(Arrays.asList(outputNames));
+    }
+
+    @Tolerate
+    public PerspectiveTransformStep sourcePoints(Point... sourcePoints) {
+        return this.sourcePoints(Arrays.asList(sourcePoints));
+    }
+
+    @Tolerate
+    public PerspectiveTransformStep targetPoints(Point... targetPoints) {
         return this.targetPoints(Arrays.asList(targetPoints));
     }
 
-
-
-    private boolean keepOtherFields = true;
 
 }

@@ -63,10 +63,6 @@ public class DrawHeatmapStep implements PipelineStep {
     @Singular
     private List<String> points;
 
-    @Tolerate
-    public DrawHeatmapStep points(String... points){
-        return this.points(Arrays.asList(points));
-    }
 
     @Schema(description = "Size of area influenced by a point")
     private Integer radius;
@@ -98,4 +94,9 @@ public class DrawHeatmapStep implements PipelineStep {
             "used to crop images before passing to the network, when the image aspect ratio doesn't match the NDArray " +
             "aspect ratio. This allows the step to determine the subset of the image actually passed to the network.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
+
+    @Tolerate
+    public DrawHeatmapStep points(String... points) {
+        return this.points(Arrays.asList(points));
+    }
 }

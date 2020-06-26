@@ -41,27 +41,30 @@ public class TensorFlowStep extends BaseModelPipelineStep<TensorFlowConfiguratio
     @Schema(description = "A list of names of the input placeholders.")
     private List<String> inputNames;
 
-    @Tolerate
-    public TensorFlowStep inputNames(String... inputNames){
-        return this.inputNames(Arrays.asList(inputNames));
-    }
 
     @Schema(description = "A list of names of the output arrays - i.e., what should be predicted.")
     private List<String> outputNames;
 
-    @Tolerate
-    public TensorFlowStep outputNames(String... outputNames){
-        return this.outputNames(Arrays.asList(outputNames));
-    }
 
     public TensorFlowStep(String modelUri, TensorFlowConfiguration config) {
         super(modelUri, config);
     }
 
     public TensorFlowStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("config") TensorFlowConfiguration config,
-                          @JsonProperty("inputNames") List<String> inputNames, @JsonProperty("outputNames") List<String> outputNames){
+                          @JsonProperty("inputNames") List<String> inputNames, @JsonProperty("outputNames") List<String> outputNames) {
         super(modelUri, config);
         this.inputNames = inputNames;
         this.outputNames = outputNames;
     }
+
+    @Tolerate
+    public TensorFlowStep inputNames(String... inputNames) {
+        return this.inputNames(Arrays.asList(inputNames));
+    }
+
+    @Tolerate
+    public TensorFlowStep outputNames(String... outputNames) {
+        return this.outputNames(Arrays.asList(outputNames));
+    }
 }
+
