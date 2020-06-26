@@ -52,6 +52,8 @@
         <module>konduit-serving-metrics</module>
         <module>konduit-serving-clients</module>
         <module>konduit-serving-endpoint</module>
+        <module>konduit-serving-protocol</module>
+        <module>konduit-serving-protocol-hdfs</module>
     </modules>
 
     <name>konduit-serving</name>
