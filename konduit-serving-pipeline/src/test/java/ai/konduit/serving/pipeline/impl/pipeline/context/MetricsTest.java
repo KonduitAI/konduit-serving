@@ -21,13 +21,12 @@ import ai.konduit.serving.pipeline.api.context.*;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
-import ai.konduit.serving.pipeline.impl.util.CallbackPipelineStep;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
+import ai.konduit.serving.pipeline.impl.util.CallbackStep;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.event.Level;
 
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -70,9 +69,9 @@ public class MetricsTest {
         AtomicInteger count1 = new AtomicInteger();
         AtomicInteger count2 = new AtomicInteger();
 
-        PipelineStep step1 = new CallbackPipelineStep(d -> count1.getAndIncrement());
-        PipelineStep step2 = new LoggingPipelineStep().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO);
-        PipelineStep step3 = new CallbackPipelineStep(d -> count2.getAndIncrement());
+        PipelineStep step1 = new CallbackStep(d -> count1.getAndIncrement());
+        PipelineStep step2 = new LoggingStep().log(LoggingStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO);
+        PipelineStep step3 = new CallbackStep(d -> count2.getAndIncrement());
 
         Pipeline p = SequencePipeline.builder()
                 .add(step1)

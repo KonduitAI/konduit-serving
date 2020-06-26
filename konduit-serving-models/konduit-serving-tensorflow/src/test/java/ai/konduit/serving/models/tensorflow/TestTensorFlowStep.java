@@ -31,7 +31,7 @@ import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.point.draw.DrawPointsStep;
 import ai.konduit.serving.data.image.step.point.heatmap.DrawHeatmapStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -60,7 +60,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep.builder;
+import static ai.konduit.serving.models.tensorflow.step.TensorFlowStep.builder;
 import static org.junit.Assert.assertEquals;
 
 @Slf4j
@@ -141,7 +141,7 @@ public class TestTensorFlowStep {
          */
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("Face detection")
                 .imageName("image")
         );
@@ -350,7 +350,7 @@ public class TestTensorFlowStep {
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("person detection")
                 .imageName("image")
         );
@@ -445,7 +445,7 @@ public class TestTensorFlowStep {
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("person detection")
                 .imageName("image")
         );
@@ -537,7 +537,7 @@ public class TestTensorFlowStep {
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("image segmentation")
                 .imageName("out")
         );
@@ -634,7 +634,7 @@ public class TestTensorFlowStep {
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("bbox filter")
                 .imageName("image")
         );
@@ -794,7 +794,7 @@ public class TestTensorFlowStep {
         //Show image in Java frame
 
         GraphStep any = b.any("any", noBoxes, drawer);
-        GraphStep show = /*drawer.*/any.then("show", new ShowImagePipelineStep()
+        GraphStep show = /*drawer.*/any.then("show", new ShowImageStep()
                 .displayName("Face keypoints")
                 .imageName("image")
         );
@@ -888,7 +888,7 @@ public class TestTensorFlowStep {
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("person detection")
                 .imageName("image")
                 .width(800)
@@ -982,7 +982,7 @@ public class TestTensorFlowStep {
 
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("person detection")
                 .imageName("image")
                 .width(800)

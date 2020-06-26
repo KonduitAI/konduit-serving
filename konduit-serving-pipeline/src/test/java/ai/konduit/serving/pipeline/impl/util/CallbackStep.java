@@ -13,45 +13,45 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ******************************************************************************/
-package ai.konduit.serving.metrics.prometheus.test;
+package ai.konduit.serving.pipeline.impl.util;
 
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
-import ai.konduit.serving.pipeline.util.ObjectMappers;
 import lombok.AllArgsConstructor;
 
-import java.util.Collections;
+import java.util.function.Consumer;
 
 @AllArgsConstructor
-public class MetricsTestingPipelineStep implements PipelineStep {
+public class CallbackStep implements PipelineStep {
 
     static {
         PipelineRegistry.registerStepRunnerFactory(new Factory());
-        ObjectMappers.registerSubtypes(Collections.singletonList(new JsonSubType("METRICS_TESTING", MetricsTestingPipelineStep.class, PipelineStep.class)));
     }
+
+
+    private Consumer<Data> consumer;
+
 
     public static class Factory implements PipelineStepRunnerFactory {
 
         @Override
         public boolean canRun(PipelineStep pipelineStep) {
-            return pipelineStep instanceof MetricsTestingPipelineStep;
+            return pipelineStep instanceof CallbackStep;
         }
 
         @Override
         public PipelineStepRunner create(PipelineStep pipelineStep) {
-            return new Runner((MetricsTestingPipelineStep)pipelineStep, 0.0);
+            return new Runner((CallbackStep)pipelineStep);
         }
     }
 
     @AllArgsConstructor
     public static class Runner implements PipelineStepRunner {
-        private MetricsTestingPipelineStep step;
-        private double x;
+        private CallbackStep step;
 
         @Override
         public void close() {
@@ -65,9 +65,7 @@ public class MetricsTestingPipelineStep implements PipelineStep {
 
         @Override
         public Data exec(Context ctx, Data data) {
-            ctx.metrics().counter("counter").increment();
-            ctx.metrics().gauge("gauge", x);
-            x += 0.1;
+            step.consumer.accept(data);
             return data;
         }
     }

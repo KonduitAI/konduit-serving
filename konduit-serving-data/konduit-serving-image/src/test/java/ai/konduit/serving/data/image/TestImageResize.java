@@ -20,7 +20,7 @@ package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
 import ai.konduit.serving.data.image.step.resize.ImageResizeStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -69,7 +69,7 @@ public class TestImageResize {
                                 .aspectRatioHandling(h)
                                 .height(32)
                                 .width(32))
-//                        .add(new ShowImagePipelineStep().displayName(s))
+//                        .add(new ShowImageStep().displayName(s))
                         .build();
 
                 Data in = Data.singleton("img", i);
@@ -147,7 +147,7 @@ public class TestImageResize {
                         .aspectRatioHandling(AspectRatioHandling.CENTER_CROP)
                         .height(1024)
                         .width(768))
-                        .add(new ShowImagePipelineStep())
+                        .add(new ShowImageStep())
                 .build();
 
         p.executor().exec(d);

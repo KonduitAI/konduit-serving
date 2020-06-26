@@ -18,12 +18,11 @@
 
 package ai.konduit.serving.deeplearning4j;
 
-import ai.konduit.serving.models.deeplearning4j.step.keras.KerasModelStep;
+import ai.konduit.serving.models.deeplearning4j.step.keras.KerasStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
-import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -40,7 +39,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 @Slf4j
-public class TestKerasModelStep {
+public class TestKerasStep {
 
     @Rule
     public TemporaryFolder testDir = new TemporaryFolder();
@@ -59,7 +58,7 @@ public class TestKerasModelStep {
 
         for(boolean withNamesDefined : new boolean[]{false, true}) {
             Pipeline p = SequencePipeline.builder()
-                    .add( new KerasModelStep()
+                    .add( new KerasStep()
                             .modelUri(path)
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
                             .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null))
@@ -95,7 +94,7 @@ public class TestKerasModelStep {
 
         for(boolean withNamesDefined : new boolean[]{false, true}) {
             Pipeline p = SequencePipeline.builder()
-                    .add(new KerasModelStep()
+                    .add(new KerasStep()
                             .modelUri(path)
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
                             .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)

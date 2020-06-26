@@ -34,9 +34,9 @@ public class FrameCaptureStepRunnerFactory implements PipelineStepRunnerFactory 
         Preconditions.checkState(canRun(step), "Unable to run pipeline step of type %s", step.getClass());
 
         if(step instanceof CameraFrameCaptureStep){
-            return new FrameCaptureStepRunner((CameraFrameCaptureStep) step);
+            return new FrameCaptureRunner((CameraFrameCaptureStep) step);
         }else{
-            return new FrameCaptureStepRunner((VideoFrameCaptureStep) step);
+            return new FrameCaptureRunner((VideoFrameCaptureStep) step);
         }
     }
 }

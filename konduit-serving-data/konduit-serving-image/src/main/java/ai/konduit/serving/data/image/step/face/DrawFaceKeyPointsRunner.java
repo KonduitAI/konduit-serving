@@ -37,12 +37,12 @@ import static ai.konduit.serving.data.image.step.face.CropUtil.accountForCrop;
 import static ai.konduit.serving.data.image.step.face.CropUtil.scaleIfRequired;
 
 @CanRun(DrawFaceKeyPointsStep.class)
-public class DrawFaceKeyPointsStepRunner implements PipelineStepRunner {
+public class DrawFaceKeyPointsRunner implements PipelineStepRunner {
 
 
     protected final DrawFaceKeyPointsStep step;
 
-    public DrawFaceKeyPointsStepRunner(@NonNull DrawFaceKeyPointsStep step) {
+    public DrawFaceKeyPointsRunner(@NonNull DrawFaceKeyPointsStep step) {
         this.step = step;
     }
 

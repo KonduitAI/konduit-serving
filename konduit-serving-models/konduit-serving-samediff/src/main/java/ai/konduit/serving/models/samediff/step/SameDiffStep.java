@@ -30,7 +30,7 @@ import java.util.List;
 @Accessors(fluent = true)
 @JsonName("SAMEDIFF")
 @Schema(description = "A pipeline step that configures a SameDiff model that is to be executed.")
-public class SameDiffModelPipelineStep implements PipelineStep {
+public class SameDiffStep implements PipelineStep {
 
     @Schema(description = "Specifies the location of a saved model file.")
     private String modelUri;
@@ -38,7 +38,7 @@ public class SameDiffModelPipelineStep implements PipelineStep {
     @Schema(description = "A list of names of the output arrays - i.e., the names of the arrays to predict/return.")
     private List<String> outputNames;
 
-    public SameDiffModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("outputNames") List<String> outputNames){
+    public SameDiffStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("outputNames") List<String> outputNames){
         this.modelUri = modelUri;
         this.outputNames = outputNames;
     }

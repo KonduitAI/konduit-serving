@@ -31,7 +31,7 @@ import java.util.List;
 @Accessors(fluent = true)
 @JsonName("DEEPLEARNING4J")
 @Schema(description = "A pipeline step that configures a DL4J model that is to be executed.")
-public class DL4JModelPipelineStep implements PipelineStep {
+public class DL4JStep implements PipelineStep {
 
     @Schema(description = "Specifies the location of a saved model file.")
     private String modelUri;
@@ -44,8 +44,8 @@ public class DL4JModelPipelineStep implements PipelineStep {
             "from the computation graph output - INDArray[] to data keys).")
     private List<String> outputNames;
 
-    public DL4JModelPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputNames") List<String> inputNames,
-                                 @JsonProperty("outputNames") List<String> outputNames){
+    public DL4JStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputNames") List<String> inputNames,
+                    @JsonProperty("outputNames") List<String> outputNames){
         this.modelUri = modelUri;
         this.inputNames = inputNames;
         this.outputNames = outputNames;
