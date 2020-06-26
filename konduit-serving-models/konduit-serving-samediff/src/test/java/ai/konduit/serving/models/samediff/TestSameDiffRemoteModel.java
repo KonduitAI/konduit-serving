@@ -17,7 +17,7 @@ package ai.konduit.serving.models.samediff;
 
 import ai.konduit.serving.common.test.BaseHttpUriTest;
 import ai.konduit.serving.common.test.TestServer;
-import ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep;
+import ai.konduit.serving.models.samediff.step.SameDiffStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -25,11 +25,8 @@ import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.api.protocol.handlers.KSStreamHandlerFactory;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.nd4j.autodiff.samediff.SameDiff;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -70,7 +67,7 @@ public class TestSameDiffRemoteModel extends BaseHttpUriTest {
         INDArray outExp = sd.outputSingle(Collections.singletonMap("in", inArr), "out");
 
         Pipeline p = SequencePipeline.builder()
-                .add(SameDiffModelPipelineStep.builder()
+                .add(SameDiffStep.builder()
                         .modelUri(uri)
                         .outputNames(Collections.singletonList("out"))
                         .build())

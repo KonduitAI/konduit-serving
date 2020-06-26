@@ -18,11 +18,11 @@
 
 package ai.konduit.serving.metrics.prometheus;
 
-import ai.konduit.serving.metrics.prometheus.test.MetricsTestingPipelineStep;
+import ai.konduit.serving.metrics.prometheus.test.MetricsTestingStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
 import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.InferenceDeploymentResult;
@@ -63,8 +63,8 @@ public class TestMetricsEndpoint {
         configuration = new InferenceConfiguration()
                 .protocol(ServerProtocol.HTTP)
                 .pipeline(SequencePipeline.builder()
-                        .add(new LoggingPipelineStep().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR))
-                        .add(new MetricsTestingPipelineStep())
+                        .add(new LoggingStep().log(LoggingStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR))
+                        .add(new MetricsTestingStep())
                         .build());
 
         Async async = testContext.async();
@@ -118,10 +118,10 @@ public class TestMetricsEndpoint {
             for(String str : s.split("\n")){
                 if(str.startsWith("#"))
                     continue;
-                if(str.contains("MetricsTestingPipelineStep") && str.contains("counter")){
+                if(str.contains("MetricsTestingStep") && str.contains("counter")){
                     String[] split = str.split(" ");
                     counter = Double.parseDouble(split[1]);
-                } else if(str.contains("MetricsTestingPipelineStep") && str.contains("gauge")){
+                } else if(str.contains("MetricsTestingStep") && str.contains("gauge")){
                     String[] split = str.split(" ");
                     gauge = Double.parseDouble(split[1]);
                 }

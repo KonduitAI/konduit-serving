@@ -42,14 +42,14 @@ import java.util.List;
 import java.util.Random;
 
 @CanRun(DrawSegmentationStep.class)
-public class DrawSegmentationStepRunner implements PipelineStepRunner {
+public class DrawSegmentationRunner implements PipelineStepRunner {
 
     protected final DrawSegmentationStep step;
     protected int[] colorsB;
     protected int[] colorsG;
     protected int[] colorsR;
 
-    public DrawSegmentationStepRunner(@NonNull DrawSegmentationStep step) {
+    public DrawSegmentationRunner(@NonNull DrawSegmentationStep step) {
         this.step = step;
     }
 

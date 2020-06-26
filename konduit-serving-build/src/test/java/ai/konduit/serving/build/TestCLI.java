@@ -19,7 +19,7 @@
 package ai.konduit.serving.build;
 
 import ai.konduit.serving.build.cli.BuildCLI;
-import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
+import ai.konduit.serving.models.deeplearning4j.step.DL4JStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.apache.commons.io.FileUtils;
@@ -62,7 +62,7 @@ public class TestCLI {
     public void test() throws Exception {
 
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep("file:///some/model/file.bin", null, null))
+                .add(new DL4JStep("file:///some/model/file.bin", null, null))
                 .build();
 
         File dir = testDir.newFolder();
@@ -89,7 +89,7 @@ public class TestCLI {
         //server.start();
 
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep("file:///some/model/file.bin", null, null))
+                .add(new DL4JStep("file:///some/model/file.bin", null, null))
                 .build();
 
         File dir = testDir.newFolder();

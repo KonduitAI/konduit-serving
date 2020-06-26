@@ -40,11 +40,11 @@ import java.util.Collections;
 import java.util.List;
 
 @CanRun(ExtractBoundingBoxStep.class)
-public class ExtractBoundingBoxStepRunner implements PipelineStepRunner {
+public class ExtractBoundingBoxRunner implements PipelineStepRunner {
 
     protected final ExtractBoundingBoxStep step;
 
-    public ExtractBoundingBoxStepRunner(@NonNull ExtractBoundingBoxStep step){
+    public ExtractBoundingBoxRunner(@NonNull ExtractBoundingBoxStep step){
         this.step = step;
     }
 

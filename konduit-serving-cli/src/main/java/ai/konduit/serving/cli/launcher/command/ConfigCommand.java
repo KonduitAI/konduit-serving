@@ -26,7 +26,7 @@ import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataIntSwitchFn;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataStringSwitchFn;
-import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.ServerProtocol;
@@ -478,7 +478,7 @@ public class ConfigCommand extends DefaultCommand {
                                     false, false, 1.33, "crop");
                 case DL4J:
                     moduleName = "konduit-serving-deeplearning4j";
-                    clazz = Class.forName("ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep");
+                    clazz = Class.forName("ai.konduit.serving.models.deeplearning4j.step.DL4JStep");
                     Class<?> dl4jConfigClazz = Class.forName("ai.konduit.serving.models.deeplearning4j.DL4JConfiguration");
                     return (PipelineStep) clazz
                             .getConstructor(String.class, dl4jConfigClazz, List.class, List.class)
@@ -562,13 +562,13 @@ public class ConfigCommand extends DefaultCommand {
                             .newInstance(imageToNDArrayConfigObject3, Arrays.asList("key1", "key2"),
                                     Arrays.asList("output1", "output2"), true, false, "@ImageToNDArrayStepMetadata");
                 case LOGGING:
-                    return new LoggingPipelineStep()
-                            .log(LoggingPipelineStep.Log.KEYS_AND_VALUES);
+                    return new LoggingStep()
+                            .log(LoggingStep.Log.KEYS_AND_VALUES);
                 case SSD_TO_BOUNDING_BOX:
                     return new SSDToBoundingBoxStep();
                 case SAMEDIFF:
                     moduleName = "konduit-serving-samediff";
-                    clazz = Class.forName("ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep");
+                    clazz = Class.forName("ai.konduit.serving.models.samediff.step.SameDiffStep");
                     Class<?> sameDiffConfigClazz = Class.forName("ai.konduit.serving.models.samediff.SameDiffConfig");
                     return (PipelineStep) clazz
                             .getConstructor(String.class, sameDiffConfigClazz, List.class)
@@ -576,13 +576,13 @@ public class ConfigCommand extends DefaultCommand {
                                     Arrays.asList("11", "22"));
                 case SHOW_IMAGE:
                     moduleName = "konduit-serving-image";
-                    clazz = Class.forName("ai.konduit.serving.data.image.step.show.ShowImagePipelineStep");
+                    clazz = Class.forName("ai.konduit.serving.data.image.step.show.ShowImageStep");
                     return (PipelineStep) clazz
                             .getConstructor(String.class, String.class, Integer.class, Integer.class, boolean.class)
                             .newInstance("image", "image", 1280, 720, false);
                 case TENSORFLOW:
                     moduleName = "konduit-serving-tensorflow";
-                    clazz = Class.forName("ai.konduit.serving.models.tensorflow.step.TensorFlowPipelineStep");
+                    clazz = Class.forName("ai.konduit.serving.models.tensorflow.step.TensorFlowStep");
                     Class<?> tensorflowConfigClazz = Class.forName("ai.konduit.serving.models.tensorflow.TensorFlowConfiguration");
                     return (PipelineStep) clazz
                             .getConstructor(String.class, tensorflowConfigClazz, List.class, List.class)
