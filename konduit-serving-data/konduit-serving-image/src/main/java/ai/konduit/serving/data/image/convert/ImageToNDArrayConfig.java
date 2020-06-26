@@ -29,6 +29,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 /**
  * Configuration for converting {@link ai.konduit.serving.pipeline.api.data.Image}s to {@link ai.konduit.serving.pipeline.api.data.NDArray}s.
@@ -74,7 +75,6 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(fluent = true)
-@AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "Configuration for converting an image into an n-dimensional array.")
 public class ImageToNDArrayConfig {
@@ -135,6 +135,20 @@ public class ImageToNDArrayConfig {
     private ListHandling listHandling = ListHandling.NONE;
 
 
+    public ImageToNDArrayConfig(@JsonProperty("height") Integer height, @JsonProperty("width") Integer width, @JsonProperty("dataType") NDArrayType dataType,
+                                @JsonProperty("includeMinibatchDim") boolean includeMinibatchDim, @JsonProperty("aspectRatioHandling") AspectRatioHandling aspectRatioHandling,
+                                @JsonProperty("format") NDFormat format, @JsonProperty("channelLayout") NDChannelLayout channelLayout,
+                                @JsonProperty("normalization") ImageNormalization normalization, @JsonProperty("listHandling") ListHandling listHandling){
+        this.height = height;
+        this.width = width;
+        this.dataType = dataType;
+        this.includeMinibatchDim = includeMinibatchDim;
+        this.aspectRatioHandling = aspectRatioHandling;
+        this.format = format;
+        this.channelLayout = channelLayout;
+        this.normalization = normalization;
+        this.listHandling = listHandling;
+    }
 
 
 }

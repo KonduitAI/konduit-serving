@@ -21,6 +21,7 @@ package ai.konduit.serving.data.image.step.bb.extract;
 import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.util.ImageUtils;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -101,7 +102,7 @@ public class ExtractBoundingBoxStepRunner implements PipelineStepRunner {
         Mat img = i.getAs(Mat.class);
         List<Image> out = new ArrayList<>();
         for(BoundingBox bb : list) {
-            bb = accountForCrop(i, bb, im2ndConf);
+            bb = ImageUtils.accountForCrop(i, bb, im2ndConf);
 
             if(step.aspectRatio() != null){
                 double desiredAR = step.aspectRatio();
@@ -163,22 +164,5 @@ public class ExtractBoundingBoxStepRunner implements PipelineStepRunner {
             }
         }
         return d;
-    }
-
-    protected BoundingBox accountForCrop(Image image, BoundingBox bbox, ImageToNDArrayConfig config){
-        if(config == null)
-            return bbox;
-
-        BoundingBox cropRegion = ImageToNDArray.getCropRegion(image, config);
-
-        double cropWidth = cropRegion.width();
-        double cropHeight = cropRegion.height();
-
-        double x1 = cropRegion.x1() + cropWidth * bbox.x1();
-        double x2 = cropRegion.x1() + cropWidth * bbox.x2();
-        double y1 = cropRegion.y1() + cropHeight * bbox.y1();
-        double y2 = cropRegion.y1() + cropHeight * bbox.y2();
-
-        return BoundingBox.createXY(x1, x2, y1, y2, bbox.label(), bbox.probability());
     }
 }

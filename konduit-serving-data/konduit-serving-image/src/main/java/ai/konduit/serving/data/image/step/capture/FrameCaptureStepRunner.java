@@ -83,6 +83,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
                 grabber.setFrameNumber(0);
                 frame = grabber.grab();
             }
+            frame = frame.clone();  //Clone otherwise buffer will be reused and async overwritten in async pipelines
             Image i = Image.create(frame);
             //System.out.println("IMAGE: h=" + i.height() + ", w=" + i.width());
             return Data.singleton(outputKey, i);

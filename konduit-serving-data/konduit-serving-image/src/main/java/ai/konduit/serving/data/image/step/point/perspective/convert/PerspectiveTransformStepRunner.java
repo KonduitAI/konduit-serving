@@ -166,6 +166,8 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
             }
         }
 
+        int rW = refWidth;
+        int rH = refHeight;
         for (int i = 0; i < fields.size(); i++) {
             String key = fields.get(i);
             ValueType keyType = data.type(key);
@@ -178,7 +180,7 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
                     case POINT:
                         out.putListPoint(
                                 outKey,
-                                data.getListPoint(key).stream().map(it -> transform(transMat, it)).collect(Collectors.toList())
+                                data.getListPoint(key).stream().map(it -> transform(transMat, it, rW, rH)).collect(Collectors.toList())
                         );
                         break;
                     case IMAGE:
@@ -190,7 +192,7 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
                     case BOUNDING_BOX:
                         out.putListBoundingBox(
                                 outKey,
-                                data.getListBoundingBox(key).stream().map(it -> transform(transMat, it)).collect(Collectors.toList())
+                                data.getListBoundingBox(key).stream().map(it -> transform(transMat, it, rW, rH)).collect(Collectors.toList())
                         );
                         break;
                     default:
@@ -200,13 +202,13 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
             }else{
                 switch (keyType){
                     case POINT:
-                        out.put(outKey, transform(transMat, data.getPoint(key)));
+                        out.put(outKey, transform(transMat, data.getPoint(key), rW, rH));
                         break;
                     case IMAGE:
                         out.put(outKey, transform(transMat, data.getImage(key)));
                         break;
                     case BOUNDING_BOX:
-                        out.put(outKey, transform(transMat, data.getBoundingBox(key)));
+                        out.put(outKey, transform(transMat, data.getBoundingBox(key), rW, rH));
                         break;
                     default:
                         throw new IllegalStateException("Field "+key+" with data type "+keyType+" is not supported for perspective transform!");
@@ -217,7 +219,8 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
         return out;
     }
 
-    private Point transform(Mat transform, Point it) {
+    private Point transform(Mat transform, Point it, int refW, int refH) {
+        it = it.toAbsolute(refW, refH);
         Mat dst = new Mat();
         Mat src = new Mat(1, 1, CvType.CV_64FC(it.dimensions()));
         DoubleIndexer idx = src.createIndexer();
@@ -233,8 +236,8 @@ public class PerspectiveTransformStepRunner implements PipelineStepRunner {
         return Point.create(coords, it.label(), it.probability());
     }
 
-    private BoundingBox transform(Mat transform, BoundingBox it) {
-        Point transformedCenter = transform(transform, Point.create(it.cx(), it.cy()));
+    private BoundingBox transform(Mat transform, BoundingBox it, int refW, int refH) {
+        Point transformedCenter = transform(transform, Point.create(it.cx(), it.cy()), refW, refH);
         return BoundingBox.create(transformedCenter.x(), transformedCenter.y(), it.width(), it.height(), it.label(), it.probability());
     }
 

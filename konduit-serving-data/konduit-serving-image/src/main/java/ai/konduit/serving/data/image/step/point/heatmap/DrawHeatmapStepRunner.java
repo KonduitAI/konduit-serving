@@ -21,6 +21,7 @@ package ai.konduit.serving.data.image.step.point.heatmap;
 import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.util.ImageUtils;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -63,8 +64,10 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
     @Override
     public Data exec(Context ctx, Data data) {
         Data out = Data.empty();
-        for(String key : data.keys()){
-            out.copyFrom(key, data);
+        if(step.keepOtherValues()) {
+            for (String key : data.keys()) {
+                out.copyFrom(key, data);
+            }
         }
 
         // get reference size
@@ -102,14 +105,14 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
                 if(point.dimensions() != 2){
                     throw new IllegalArgumentException("Point in input "+pointName+" has "+point.dimensions()+" dimensions, but only 2 dimensional points are supported for drawing!");
                 }
-                points.add(accountForCrop(point, width, height, step.imageToNDArrayConfig()));
+                points.add(ImageUtils.accountForCrop(point, width, height, step.imageToNDArrayConfig()));
             }else if(type == ValueType.LIST){
                 List<Point> pointList = data.getListPoint(pointName);
                 for (Point point : pointList) {
                     if(point.dimensions() != 2){
                         throw new IllegalArgumentException("Point in input "+pointName+" has "+point.dimensions()+" dimensions, but only 2 dimensional points are supported for drawing!");
                     }
-                    points.add(accountForCrop(point, width, height, step.imageToNDArrayConfig()));
+                    points.add(ImageUtils.accountForCrop(point, width, height, step.imageToNDArrayConfig()));
                 }
             }else {
                 throw new IllegalArgumentException("The configured input "+pointName+" is neither a point nor a list of points!");
@@ -190,22 +193,5 @@ public class DrawHeatmapStepRunner implements PipelineStepRunner {
         }
         out.put(step.outputName() == null ? DrawHeatmapStep.DEFAULT_OUTPUT_NAME : step.outputName(), outputImage);
         return out;
-    }
-
-    private Point accountForCrop(Point relPoint, int width, int height, ImageToNDArrayConfig imageToNDArrayConfig) {
-        if(imageToNDArrayConfig == null){
-            return relPoint.toAbsolute(width, height);
-        }
-
-        BoundingBox cropRegion = ImageToNDArray.getCropRegion(width, height, imageToNDArrayConfig);
-        double cropWidth = cropRegion.width();
-        double cropHeight = cropRegion.height();
-
-        return Point.create(
-                cropRegion.x1() + cropWidth * relPoint.x(),
-                cropRegion.y1() + cropHeight * relPoint.y(),
-                relPoint.label(),
-                relPoint.probability()
-        ).toAbsolute(width, height);
     }
 }
