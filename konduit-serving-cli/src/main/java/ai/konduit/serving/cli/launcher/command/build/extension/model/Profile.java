@@ -41,11 +41,9 @@ public class Profile {
                 case "x86_64":
                     return CpuArchitecture.x86;
                 case "x86_avx2":
-                case "x86-avx2":
                 case "x86_64-avx2":
                     return CpuArchitecture.x86_avx2;
                 case "x86_avx512":
-                case "x86-avx512":
                 case "x86_64-avx512":
                     return CpuArchitecture.x86_avx512;
                 case "arm64":

@@ -26,13 +26,20 @@ import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.nd4j.common.primitives.Pair;
 import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
 import oshi.hardware.GraphicsCard;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Name("profile")
 @Summary("Command to List, view, edit, create and delete konduit serving run profiles.")
@@ -193,16 +200,57 @@ public class ProfileCommand extends DefaultCommand {
     public static Map<String, Profile> firstTimeProfilesSetup() {
         log.error("Performing first time profiles setup.");
 
-        Map<String, Profile> profiles = new HashMap<>();
+        SystemInfo systemInfo = new SystemInfo();
+        CentralProcessor.ProcessorIdentifier processorIdentifier = systemInfo.getHardware().getProcessor().getProcessorIdentifier();
+        String cpuArch = processorIdentifier.getMicroarchitecture();
 
-        for(GraphicsCard graphicsCard : new SystemInfo().getHardware().getGraphicsCards()) {
-            log.error(graphicsCard.toString());
+        Map<String, Profile> profiles = new HashMap<>();
+        Profile cpuProfile = new Profile();
+        if(cpuArch != null) {
+            if (StringUtils.containsIgnoreCase(cpuArch, "arm")) {
+                if(processorIdentifier.isCpu64bit()) {
+                    cpuProfile.cpuArchitecture("arm64");
+                } else {
+                    cpuProfile.cpuArchitecture("armhf");
+                }
+            }
         }
 
-        // todo: detect pre-installed cuda version or cuda compatible gpus and cpu architecture.
-        profiles.put("CPU", new Profile());
-        profiles.put("CUDA", new Profile("CUDA_10.2", "x86_avx2", Profile.getCurrentOS().name(),
-                Arrays.asList("HTTP", "GRPC"), Collections.singletonList("ch.qos.logback:logback-classic:1.2.3")));
+        profiles.put("CPU", cpuProfile);
+
+        log.error("Looking for CUDA compatible devices in the current system...");
+        List<GraphicsCard> nvidiaGraphicsCard = new ArrayList<>();
+        for(GraphicsCard graphicsCard : systemInfo.getHardware().getGraphicsCards()) {
+            String vendor = graphicsCard.getVendor();
+            if (vendor != null && StringUtils.containsIgnoreCase(vendor, "nvidia")) {
+                nvidiaGraphicsCard.add(graphicsCard);
+            }
+        }
+
+        if(!nvidiaGraphicsCard.isEmpty() && !cpuProfile.operatingSystem().equalsIgnoreCase("mac")) {
+            log.error("Found the following cuda compatible devices in the local system: {}", nvidiaGraphicsCard);
+
+            String defaultCudaVersion =  "CUDA_10.1";
+            Profile cudaProfile = new Profile(defaultCudaVersion,
+                    cpuProfile.cpuArchitecture(), cpuProfile.operatingSystem(), Arrays.asList("HTTP", "GRPC"),
+                    Collections.singletonList("ch.qos.logback:logback-classic:1.2.3"));
+
+            Pair<String, String> cudaInstall = findCudaInstall();
+            if(cudaInstall != null) {
+                log.error("Found CUDA install -- Version: {} | Path: {}", cudaInstall.getKey(), cudaInstall.getValue() != null ? cudaInstall.getValue() : "(Unable to identify)");
+
+                cudaProfile.computeDevice(String.format("CUDA_%s", cudaInstall.getKey().trim()));
+            } else {
+                log.error("Unable to find a valid cuda install in the local system. The server will try to " +
+                        "automatically download the CUDA redist 10.1 package on runtime build");
+
+                cudaProfile.additionalDependencies().add("org.bytedeco:cuda-platform-redist:10.1-7.6-1.5.2");
+            }
+
+            profiles.put("CUDA", cudaProfile);
+        } else {
+            log.error("No cuda compatible devices found in the current system.");
+        }
 
         log.error("Created profiles: {}", ObjectMappers.toYaml(profiles));
 
@@ -283,5 +331,81 @@ public class ProfileCommand extends DefaultCommand {
             log.error("Unable to save profiles to {}", profilesSavePath.getAbsolutePath(), e);
             System.exit(1);
         }
+    }
+
+    private static Pair<String, String> findCudaInstall() {
+        Pair<String, String> cudaInstallFromNvcc = findCudaInstallFromNvcc();
+        if(cudaInstallFromNvcc != null) {
+            return cudaInstallFromNvcc;
+        } else {
+            return findCudaInstallFromNvidiaSmi();
+        }
+    }
+
+    private static Pair<String, String> findCudaInstallFromNvcc() {
+        String mainCommand = "nvcc";
+
+        try {
+            String cudaVersion = findCudaVersion(Arrays.asList(mainCommand, "--version"), Pattern.compile("release (.*),"));
+            if(cudaVersion == null) {
+                return null;
+            } else {
+                return new Pair<>(cudaVersion, findCudaInstallPath(mainCommand, cudaVersion));
+            }
+        } catch (Exception exception) {
+            log.error("Couldn't find cuda version from {} command", mainCommand, exception);
+            System.exit(1);
+            return null;
+        }
+    }
+
+    private static Pair<String, String> findCudaInstallFromNvidiaSmi() {
+        String mainCommand = "nvidia-smi";
+
+        try {
+            String cudaVersion = findCudaVersion(Collections.singletonList(mainCommand), Pattern.compile("CUDA Version:\b+(.*)\b+"));
+            if(cudaVersion == null) {
+                return null;
+            } else {
+                return new Pair<>(cudaVersion, findCudaInstallPath(mainCommand, cudaVersion));
+            }
+        } catch (Exception exception) {
+            log.error("Couldn't find cuda version from {} command", mainCommand, exception);
+            System.exit(1);
+            return null;
+        }
+    }
+
+    private static String findCudaVersion(List<String> command,  Pattern pattern) throws IOException {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ProcessBuilder(command).start().getInputStream()))) {
+            String line = bufferedReader.readLine();
+            while (line != null) {
+                Matcher matcher = pattern.matcher(line);
+                if(matcher.find()) {
+                    return matcher.group(1).trim();
+                }
+                line = bufferedReader.readLine();
+            }
+        }
+
+        return null;
+    }
+
+    private static String findCudaInstallPath(String mainCommandName, String cudaVersion) throws IOException {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ProcessBuilder(Arrays.asList("where", mainCommandName)).start().getInputStream()))) {
+            String line = bufferedReader.readLine();
+            while (line != null) {
+                if(line.contains(cudaVersion)) {
+                    File parentFile = new File(line.trim()).getParentFile().getParentFile(); // to go back from <cuda_install_path>/bin/nvcc to <cuda_install_path>
+                    if(parentFile.exists()) {
+                        return parentFile.getAbsolutePath();
+                    }
+                    break;
+                }
+                line = bufferedReader.readLine();
+            }
+        }
+
+        return null;
     }
 }
