@@ -20,7 +20,9 @@ package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.impl.data.image.Bmp;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
+import ai.konduit.serving.pipeline.impl.data.image.base.BaseImageFile;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -73,20 +75,8 @@ public class TestConversion {
         Frame f2 = iFrame.getAs(Frame.class);
         assertTrue(equalFrames(f1, f2));
 
-
-
-        //To PNG:
-        Png p1 = iMat.getAs(Png.class);
-        Png p2 = iFrame.getAs(Png.class);
-        assertTrue(equalPngs(p1, p2));
-
-        //From PNG:
-        Image png = checkSize(Image.create(p1));
-        Mat pm = png.getAs(Mat.class);
-        Frame pf = png.getAs(Frame.class);
-        assertTrue(equalMats(mat, pm));
-        assertTrue(equalFrames(frame, pf));
-
+        checkEncodingConversion(mat, frame, iMat, iFrame, Png.class);
+        checkEncodingConversion(mat, frame, iMat, iFrame, Bmp.class);
 
 
         //Test Data
@@ -99,6 +89,20 @@ public class TestConversion {
         }
     }
 
+    private <T extends BaseImageFile> void checkEncodingConversion(Mat mat, Frame frame, Image iMat, Image iFrame, Class<T> type) {
+        //To encoded:
+        T p1 = iMat.getAs(type);
+        T p2 = iFrame.getAs(type);
+        assertTrue(equalImages(p1, p2));
+
+        //From encoded:
+        Image png = checkSize(Image.create(p1));
+        Mat pm = png.getAs(Mat.class);
+        Frame pf = png.getAs(Frame.class);
+        assertTrue(equalMats(mat, pm));
+        assertTrue(equalFrames(frame, pf));
+    }
+
     public Image checkSize(Image i){
         assertEquals(32, i.height());
         assertEquals(32, i.width());
@@ -108,19 +112,19 @@ public class TestConversion {
     protected static boolean equalMats(Mat m1, Mat m2){
         Png p1 = Image.create(m1).getAs(Png.class);
         Png p2 = Image.create(m2).getAs(Png.class);
-        return equalPngs(p1, p2);
+        return equalImages(p1, p2);
     }
 
     protected static boolean equalFrames(Frame f1, Frame f2){
         Png p1 = Image.create(f1).getAs(Png.class);
         Png p2 = Image.create(f2).getAs(Png.class);
-        return equalPngs(p1, p2);
+        return equalImages(p1, p2);
     }
 
-    protected static boolean equalPngs(Png png1, Png png2){
+    protected static boolean equalImages(BaseImageFile f1, BaseImageFile f2){
         try {
-            BufferedImage bi1 = ImageIO.read(new ByteArrayInputStream(png1.getBytes()));
-            BufferedImage bi2 = ImageIO.read(new ByteArrayInputStream(png2.getBytes()));
+            BufferedImage bi1 = ImageIO.read(new ByteArrayInputStream(f1.getBytes()));
+            BufferedImage bi2 = ImageIO.read(new ByteArrayInputStream(f2.getBytes()));
             return bufferedImagesEqual(bi1, bi2);
         } catch (Throwable t){
             throw new RuntimeException(t);
