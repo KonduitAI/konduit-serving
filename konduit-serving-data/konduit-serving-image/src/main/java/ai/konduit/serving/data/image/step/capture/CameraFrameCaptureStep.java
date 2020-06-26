@@ -56,7 +56,8 @@ public class CameraFrameCaptureStep implements PipelineStep {
     private String outputKey = "image";
 
     public CameraFrameCaptureStep(@JsonProperty("camera") int camera, @JsonProperty("width") int width,
-                                  @JsonProperty("height") int height, @JsonProperty("outputKey") String outputKey){
+                                  @JsonProperty("height") int height, @JsonProperty("outputKey") String outputKey,
+                                  @JsonProperty("skipFrames") Integer skipFrames){
         this.camera = camera;
         this.width = width;
         this.height = height;

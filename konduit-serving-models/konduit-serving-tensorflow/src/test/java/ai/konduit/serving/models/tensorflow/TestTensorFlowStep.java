@@ -399,6 +399,7 @@ public class TestTensorFlowStep {
         //Capture frame from video
         GraphStep camera = input.then("video", new VideoFrameCaptureStep()
                 .filePath(v.getAbsolutePath())
+                .skipFrames(3)
                 .outputKey("image")
         );
 
@@ -451,6 +452,14 @@ public class TestTensorFlowStep {
 
 
         GraphPipeline p = b.build(show);
+
+        String json = p.toJson();
+        String yaml = p.toYaml();
+
+        Pipeline pj = Pipeline.fromJson(json);
+        Pipeline py = Pipeline.fromYaml(yaml);
+        assertEquals(p, pj);
+        assertEquals(p, py);
 
 
         PipelineExecutor exec = p.executor();
