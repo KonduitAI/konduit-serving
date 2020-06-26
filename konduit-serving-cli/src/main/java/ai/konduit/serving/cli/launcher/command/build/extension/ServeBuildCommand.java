@@ -93,13 +93,13 @@ public class ServeBuildCommand extends ServeCommand {
                 args.add("-a"); args.add(profile.cpuArchitecture());
                 args.add("-o"); args.add(profile.operatingSystem());
 
-                if(profile.serverTypes() != null && !profile.serverTypes().isEmpty()) {
+                if(profile.serverTypes() != null) {
                     for(String serverType : profile.serverTypes()) {
                         args.add("-s"); args.add(serverType);
                     }
                 }
 
-                if(profile.additionalDependencies() != null && !profile.additionalDependencies().isEmpty()) {
+                if(profile.additionalDependencies() != null) {
                     for(String additionalDependency : profile.additionalDependencies()) {
                         args.add("-ad"); args.add(additionalDependency);
                     }

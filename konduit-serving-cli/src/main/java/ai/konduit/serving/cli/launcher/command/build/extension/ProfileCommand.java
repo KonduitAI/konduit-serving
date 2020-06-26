@@ -26,12 +26,13 @@ import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import oshi.SystemInfo;
+import oshi.hardware.GraphicsCard;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Consumer;
 
 @Name("profile")
 @Summary("Command to List, view, edit, create and delete konduit serving run profiles.")
@@ -50,7 +51,7 @@ import java.util.function.Consumer;
         "- Viewing a profile:\n" +
         "$ konduit profile view CPU-1\n\n" +
         "- Edit a profile with name 'CPU-1' from old type to 'x86':\n" +
-        "$ konduit profile edit CPU-1 -t x86 \n\n" +
+        "$ konduit profile edit CPU-1 -t x86 \n" +
         "--------------")
 @Slf4j
 public class ProfileCommand extends DefaultCommand {
@@ -79,7 +80,7 @@ public class ProfileCommand extends DefaultCommand {
 
     @Option(shortName = "a", longName = "arch", argName = "cpu_architecture")
     @DefaultValue("x86_avx2")
-    @Description("Name of the cpu architecture. Accepted values are: x86, x86_64, x86_avx2, x86-avx2, x86_64-a, " +
+    @Description("Name of the cpu architecture. Accepted values are: [x86, x86_64, x86_avx2, x86-avx2, x86_64-a, " +
             "x86_avx5, x86-avx5, x86_64-a, arm64, armhf, ppc64le]")
     public void setCpuArchitecture(String cpuArchitecture) {
         this.cpuArchitecture = cpuArchitecture;
@@ -105,7 +106,7 @@ public class ProfileCommand extends DefaultCommand {
         this.serverTypes = serverTypes;
     }
 
-    @Option(shortName = "ad", longName = "additionalDependencies", argName = "additionalDependencies", acceptMultipleValues = true)
+    @Option(shortName = "ad", longName = "addDep", argName = "additionalDependencies", acceptMultipleValues = true)
     @DefaultValue("ch.qos.logback:logback-classic:1.2.3")
     @Description("One or more space separated values (maven coordinates) indicating additional dependencies to be included with " +
             "the server launch. The pattern of additional dependencies should be either <group_id>:<artifact_id>:<version> or " +
@@ -193,6 +194,10 @@ public class ProfileCommand extends DefaultCommand {
         log.error("Performing first time profiles setup.");
 
         Map<String, Profile> profiles = new HashMap<>();
+
+        for(GraphicsCard graphicsCard : new SystemInfo().getHardware().getGraphicsCards()) {
+            log.error(graphicsCard.toString());
+        }
 
         // todo: detect pre-installed cuda version or cuda compatible gpus and cpu architecture.
         profiles.put("CPU", new Profile());
