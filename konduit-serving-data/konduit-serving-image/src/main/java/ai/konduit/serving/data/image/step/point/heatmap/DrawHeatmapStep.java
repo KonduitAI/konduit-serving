@@ -20,6 +20,7 @@ package ai.konduit.serving.data.image.step.point.heatmap;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -59,6 +62,11 @@ public class DrawHeatmapStep implements PipelineStep {
     @Schema(description = "Name of the input data fields containing the points used for the heatmap. Accepts both single points and lists of points. Accepts both relative and absolute addressed points.")
     @Singular
     private List<String> points;
+
+    @Tolerate
+    public DrawHeatmapStep points(String... points){
+        return this.points(Arrays.asList(points));
+    }
 
     @Schema(description = "Size of area influenced by a point")
     private Integer radius;

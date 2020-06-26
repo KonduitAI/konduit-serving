@@ -27,7 +27,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -63,6 +65,11 @@ public class DrawSegmentationStep implements PipelineStep {
             "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
             "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private List<String> classColors;
+
+    @Tolerate
+    public DrawSegmentationStep classColors(String... classColors){
+        return this.classColors(Arrays.asList(classColors));
+    }
 
     @Schema(description = "Name of the NDArray with the class indices, 0 to numClasses-1. Shape [1, height, width].")
     private String segmentArray;
