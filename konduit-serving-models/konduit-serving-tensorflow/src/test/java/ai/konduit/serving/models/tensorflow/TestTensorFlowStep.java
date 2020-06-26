@@ -102,7 +102,7 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
+                .keys("image")
                 .outputNames("image_tensor") //TODO varargs builder method
         );
 
@@ -187,7 +187,7 @@ public class TestTensorFlowStep {
         Pipeline p = SequencePipeline.builder()
                 .add(new ImageToNDArrayStep()
                         .config(c)
-                        .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                        .outputNames("image_tensor") //TODO varargs builder method
                 )
                 .add(builder()
                         .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
@@ -320,8 +320,8 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                .keys("image")
+                .outputNames("image_tensor") //TODO varargs builder method
         );
 
         //Run image in TF model
@@ -414,8 +414,8 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                .keys("image")
+                .outputNames("image_tensor") //TODO varargs builder method
         );
 
         //Run image in TF model
@@ -501,7 +501,7 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
+                .keys("image")
                 .outputNames(Arrays.asList("ImageTensor")) //TODO varargs builder method
                 );
 
@@ -582,8 +582,8 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                .keys("image")
+                .outputNames("image_tensor") //TODO varargs builder method
                 );
 
         //Run image in TF model
@@ -848,8 +848,8 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")));
+                .keys("image")
+                .outputNames("image_tensor"));
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", builder()
@@ -943,8 +943,8 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")));
+                .keys("image")
+                .outputNames("image_tensor"));
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", builder()
