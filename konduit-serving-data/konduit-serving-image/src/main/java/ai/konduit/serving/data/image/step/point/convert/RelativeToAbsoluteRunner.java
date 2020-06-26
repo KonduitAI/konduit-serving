@@ -104,7 +104,7 @@ public class RelativeToAbsoluteRunner implements PipelineStepRunner {
                 BoundingBox b = ImageUtils.accountForCrop(data.getBoundingBox(s), w, h, step.imageToNDArrayConfig());
                 BoundingBox absolute = b;
                 if(b.cx() < 1.0 && b.cy() < 1.0){
-                    absolute = BoundingBox.create(b.cx()*w, b.cy()*h, b.height()*h, b.width()*w);
+                    absolute = BoundingBox.create(b.cx()*w, b.cy()*h, b.height()*h, b.width()*w, b.label(), b.probability());
                 }
                 out.put(s, absolute);
             } else if(data.listType(s) == ValueType.POINT){
@@ -123,7 +123,7 @@ public class RelativeToAbsoluteRunner implements PipelineStepRunner {
                     BoundingBox b = ImageUtils.accountForCrop(bb, w, h, step.imageToNDArrayConfig());
                     BoundingBox absolute = b;
                     if(b.cx() < 1.0 && b.cy() < 1.0){
-                        absolute = BoundingBox.create(b.cx()*w, b.cy()*h, b.height()*h, b.width()*w);
+                        absolute = BoundingBox.create(b.cx()*w, b.cy()*h, b.height()*h, b.width()*w, b.label(), b.probability());
                     }
                     lOut.add(absolute);
                 }

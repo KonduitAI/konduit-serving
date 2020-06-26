@@ -41,8 +41,8 @@ public class TestRelativeToAbsoluteStep {
         Data d = Data.empty();
         d.put("pt", Point.create(0.3, 0.4));
         d.putListPoint("ptList", Arrays.asList(Point.create(0.3, 0.4)));
-        d.put("box", BoundingBox.create(0.5, 0.6, 0.2, 0.3));
-        d.putListBoundingBox("boxList", Arrays.asList(BoundingBox.create(0.5, 0.6, 0.2, 0.3)));
+        d.put("box", BoundingBox.create(0.5, 0.6, 0.2, 0.3, "myLabel", 0.99));
+        d.putListBoundingBox("boxList", Arrays.asList(BoundingBox.create(0.5, 0.6, 0.2, 0.3, "myLabel", 0.99)));
 
         Pipeline p = SequencePipeline.builder()
                 .add(new RelativeToAbsoluteStep().imageH(200).imageW(300))
@@ -52,17 +52,15 @@ public class TestRelativeToAbsoluteStep {
         PipelineExecutor exec = p.executor();
         Data out = exec.exec(d);
 
-        System.out.println(out.toJson());
-
 
         Point exp = Point.create(0.3*300, 0.4*200);
-        BoundingBox bb = BoundingBox.create(0.4*300, 0.3*200, 0.2*200, 0.3*300);
+        BoundingBox bb = BoundingBox.create(0.5*300, 0.6*200, 0.2*200, 0.3*300, "myLabel", 0.99);
 
         assertEquals(exp, out.getPoint("pt"));
         assertEquals(bb, out.getBoundingBox("box"));
 
         assertEquals(Collections.singletonList(exp), out.getListPoint("ptList"));
-        assertEquals(Collections.singletonList(bb), out.getListBoundingBox("ptBox"));
+        assertEquals(bb, out.getListBoundingBox("boxList").get(0));
 
 
         String json = p.toJson();
@@ -72,9 +70,6 @@ public class TestRelativeToAbsoluteStep {
 
         assertEquals(p, pj);
         assertEquals(p, py);
-
-
-
     }
 
 }
