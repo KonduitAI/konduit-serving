@@ -95,7 +95,7 @@ public class DrawBoundingBoxRunner implements PipelineStepRunner {
             throw new IllegalStateException("Data[" + bboxName + "] is neither a BoundingBox or List<BoundingBox> - is " + vt);
         }
 
-        Mat m = i.getAs(Mat.class);
+        Mat m = i.getAs(Mat.class).clone();     //Make a copy to avoid modiying input data that might be used elsewhere (if in graph pipeline)
         Map<String,String> cc = step.classColors();
         String dc = step.color();
 

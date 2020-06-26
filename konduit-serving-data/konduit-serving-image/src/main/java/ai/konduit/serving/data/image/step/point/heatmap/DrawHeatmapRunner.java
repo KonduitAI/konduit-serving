@@ -21,6 +21,7 @@ package ai.konduit.serving.data.image.step.point.heatmap;
 import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.util.ImageUtils;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -28,10 +29,10 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.indexer.DoubleIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.opencv.core.CvType;
 
@@ -44,6 +45,7 @@ public class DrawHeatmapRunner implements PipelineStepRunner {
 
     protected final DrawHeatmapStep step;
     protected Mat prev;
+    protected Mat brush;
 
     public DrawHeatmapRunner(@NonNull DrawHeatmapStep step) {
         this.step = step;
@@ -62,8 +64,10 @@ public class DrawHeatmapRunner implements PipelineStepRunner {
     @Override
     public Data exec(Context ctx, Data data) {
         Data out = Data.empty();
-        for(String key : data.keys()){
-            out.copyFrom(key, data);
+        if(step.keepOtherValues()) {
+            for (String key : data.keys()) {
+                out.copyFrom(key, data);
+            }
         }
 
         // get reference size
@@ -101,38 +105,69 @@ public class DrawHeatmapRunner implements PipelineStepRunner {
                 if(point.dimensions() != 2){
                     throw new IllegalArgumentException("Point in input "+pointName+" has "+point.dimensions()+" dimensions, but only 2 dimensional points are supported for drawing!");
                 }
-                points.add(accountForCrop(point, width, height, step.imageToNDArrayConfig()));
+                points.add(ImageUtils.accountForCrop(point, width, height, step.imageToNDArrayConfig()));
             }else if(type == ValueType.LIST){
                 List<Point> pointList = data.getListPoint(pointName);
                 for (Point point : pointList) {
                     if(point.dimensions() != 2){
                         throw new IllegalArgumentException("Point in input "+pointName+" has "+point.dimensions()+" dimensions, but only 2 dimensional points are supported for drawing!");
                     }
-                    points.add(accountForCrop(point, width, height, step.imageToNDArrayConfig()));
+                    points.add(ImageUtils.accountForCrop(point, width, height, step.imageToNDArrayConfig()));
                 }
             }else {
                 throw new IllegalArgumentException("The configured input "+pointName+" is neither a point nor a list of points!");
             }
         }
 
+        int radius = step.radius() == null ? 15 : step.radius();
+        int kSize = radius * 8 + 1;
+        if(brush == null){
+            Size kernelSize = new Size(kSize, kSize);
+            brush = new Mat();
+            brush.put(Mat.zeros(kSize, kSize, CvType.CV_64FC1));
+            brush.createIndexer().putDouble(new long[]{kSize / 2, kSize / 2}, 255);
+            opencv_imgproc.GaussianBlur(brush, brush, kernelSize, radius, radius, opencv_core.BORDER_ISOLATED);
+        }
+
         Mat mat = new Mat();
         mat.put(Mat.zeros(height, width, CvType.CV_64FC1));
-        DoubleIndexer idx = mat.createIndexer();
         for (Point point : points) {
             int row = (int) point.y();
             int col = (int) point.x();
             if(row > height || col > width){
                 log.warn("{} is out of bounds ({}, {})", point, width, height);
             }else {
-                idx.put(row, col, idx.get(row, col) + 255);
+                int offsetRow = row - kSize / 2;
+                int offsetCol = col - kSize / 2;
+
+                int brushWidth = kSize;
+                int brushHeight = kSize;
+                int brushOffsetRow = 0;
+                int brushOffsetCol = 0;
+
+                if(offsetRow < 0){
+                    brushHeight += offsetRow;
+                    brushOffsetRow -= offsetRow;
+                    offsetRow = 0;
+                }
+                if(offsetCol < 0){
+                    brushWidth += offsetCol;
+                    brushOffsetCol -= offsetCol;
+                    offsetCol = 0;
+                }
+
+                if(offsetRow + brushHeight > mat.arrayHeight()){
+                    brushHeight = mat.arrayHeight() - offsetRow;
+                }
+                if(offsetCol + brushWidth > mat.arrayWidth()){
+                    brushWidth = mat.arrayWidth() - offsetCol;
+                }
+
+                Mat region = mat.apply(new Rect(offsetCol, offsetRow, brushWidth, brushHeight));
+                Mat brushRegion = brush.apply(new Rect(brushOffsetCol, brushOffsetRow, brushWidth, brushHeight));
+                opencv_core.add(region, brushRegion, region);
             }
         }
-
-        int radius = step.radius() == null ? 15 : step.radius();
-        int kSize = radius * 8 + 1;
-
-        Size kernelSize = new Size(kSize, kSize);
-        opencv_imgproc.GaussianBlur(mat, mat, kernelSize, radius, radius, opencv_core.BORDER_ISOLATED);
 
         opencv_core.addWeighted(prev, step.fadingFactor() == null ? 0.9 : step.fadingFactor(), mat, 1.0, 0, mat);
         prev.close();
@@ -153,28 +188,10 @@ public class DrawHeatmapRunner implements PipelineStepRunner {
         if(targetImage == null){
             outputImage = Image.create(image);
         }else{
-            Mat composed = new Mat();
-            opencv_core.addWeighted(targetImage, 1.0, image, step.opacity() == null ? 0.5 : step.opacity(), 0, composed);
-            outputImage = Image.create(composed);
+            opencv_core.addWeighted(targetImage, 1.0, image, step.opacity() == null ? 0.5 : step.opacity(), 0, image);
+            outputImage = Image.create(image);
         }
         out.put(step.outputName() == null ? DrawHeatmapStep.DEFAULT_OUTPUT_NAME : step.outputName(), outputImage);
         return out;
-    }
-
-    private Point accountForCrop(Point relPoint, int width, int height, ImageToNDArrayConfig imageToNDArrayConfig) {
-        if(imageToNDArrayConfig == null){
-            return relPoint.toAbsolute(width, height);
-        }
-
-        BoundingBox cropRegion = ImageToNDArray.getCropRegion(width, height, imageToNDArrayConfig);
-        double cropWidth = cropRegion.width();
-        double cropHeight = cropRegion.height();
-
-        return Point.create(
-                cropRegion.x1() + cropWidth * relPoint.x(),
-                cropRegion.y1() + cropHeight * relPoint.y(),
-                relPoint.label(),
-                relPoint.probability()
-        ).toAbsolute(width, height);
     }
 }

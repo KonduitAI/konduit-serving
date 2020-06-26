@@ -57,6 +57,9 @@ import java.util.Map;
 @Schema(description = "A pipeline step that configures how to draw 2D points on an image.")
 public class DrawPointsStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "image";
+    public static final String DEFAULT_NO_POINT_COLOR = "lime";
+
+    private String noClassColor;
 
     @Schema(description = "This is an optional field which specifies the mapping of colors to use for each class. " +
             "The color can be a hex/HTML string like" +
