@@ -54,7 +54,16 @@ public class RelativeToAbsoluteRunner implements PipelineStepRunner {
     public Data exec(Context ctx, Data data) {
 
         List<String> toConvert = step.toConvert();
-        Preconditions.checkState(toConvert != null, "No Data field names were set for conversion via RelativeToAbsolute.toConvert");
+        if(toConvert == null || toConvert.isEmpty()){
+            toConvert = new ArrayList<>();
+            for(String s : data.keys()){
+                if(data.type(s) == ValueType.POINT || data.type(s) == ValueType.BOUNDING_BOX){
+                    toConvert.add(s);
+                } else if(data.type(s) == ValueType.LIST && (data.listType(s) == ValueType.POINT || data.listType(s) == ValueType.BOUNDING_BOX)){
+                    toConvert.add(s);
+                }
+            }
+        }
 
         //Work out image dims
         int h;
