@@ -19,6 +19,7 @@
 package providers;
 
 import handlers.HdfsHandler;
+import org.apache.hadoop.fs.FsUrlStreamHandlerFactory;
 
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
@@ -27,8 +28,8 @@ public class HdfsStreamHandlerFactory implements URLStreamHandlerFactory {
 
     @Override
     public URLStreamHandler createURLStreamHandler(String protocol) {
-        if ("s3".equals(protocol)) {
-            return new HdfsHandler();
+        if ("hdfs".equals(protocol)) {
+            return new FsUrlStreamHandlerFactory().createURLStreamHandler("hdfs");
         }
         return null;
     }

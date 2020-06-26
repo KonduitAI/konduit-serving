@@ -19,9 +19,12 @@ package providers;
 
 import ai.konduit.serving.pipeline.api.protocol.Credentials;
 import ai.konduit.serving.pipeline.api.protocol.URLAccessProvider;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public class HdfsAccessProvider implements URLAccessProvider {
@@ -38,7 +41,13 @@ public class HdfsAccessProvider implements URLAccessProvider {
     }
 
     @Override
-    public InputStream connect(URL url, Credentials credentials) throws IOException {
-        return null;
+    public InputStream connect(URL url, Credentials credentials) throws IOException, URISyntaxException {
+        Configuration conf = new Configuration();
+        InputStream retVal = null;
+
+        try (org.apache.hadoop.fs.FileSystem fs = org.apache.hadoop.fs.FileSystem.get(url.toURI(),conf)) {
+            retVal = fs.open(new Path(url.toURI()));
+        }
+        return retVal;
     }
 }

@@ -19,14 +19,17 @@
 package handlers;
 
 import ai.konduit.serving.pipeline.api.protocol.Credentials;
+import lombok.extern.slf4j.Slf4j;
 import providers.HdfsAccessProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
+@Slf4j
 public class HdfsHandler extends URLStreamHandler {
 
     protected URLConnection openConnection(URL url) throws IOException {
@@ -36,7 +39,12 @@ public class HdfsHandler extends URLStreamHandler {
             @Override
             public InputStream getInputStream() throws IOException {
                 HdfsAccessProvider accessProvider = new HdfsAccessProvider();
-                return accessProvider.connect(url, new Credentials("user", "secret");
+                try {
+                    return accessProvider.connect(url, accessProvider.getCredentials());
+                } catch (URISyntaxException e) {
+                    log.error("Failed connection to " + url, e);
+                    throw new IOException(e);
+                }
             }
 
             @Override
