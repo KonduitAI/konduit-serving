@@ -95,10 +95,22 @@ public class PerspectiveTransformStep implements PipelineStep {
      * takes exactly 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
     private List<Point> sourcePoints;
+
+    @Tolerate
+    public PerspectiveTransformStep sourcePoints(Point... sourcePoints){
+        return this.sourcePoints(Arrays.asList(sourcePoints));
+    }
+
     /**
      * takes exactly 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
     private List<Point> targetPoints;
+
+    @Tolerate
+    public PerspectiveTransformStep targetPoints(Point... targetPoints){
+        return this.targetPoints(Arrays.asList(targetPoints));
+    }
+
 
 
     private boolean keepOtherFields = true;
