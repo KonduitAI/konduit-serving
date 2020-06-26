@@ -24,8 +24,8 @@ import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import ai.konduit.serving.build.steps.RunnerInfo;
 import ai.konduit.serving.build.util.ModuleUtils;
-import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
-import ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep;
+import ai.konduit.serving.models.deeplearning4j.step.DL4JStep;
+import ai.konduit.serving.models.samediff.step.SameDiffStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
@@ -54,7 +54,7 @@ public class TestResolving {
         Map<String, RunnerInfo> runners = ModuleUtils.pipelineClassToRunnerClass();
         assertTrue(runners.containsKey("ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep"));
         assertEquals("konduit-serving-image", runners.get("ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep").module().name());
-        assertEquals("konduit-serving-deeplearning4j", runners.get("ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep").module().name());
+        assertEquals("konduit-serving-deeplearning4j", runners.get("ai.konduit.serving.models.deeplearning4j.step.DL4JStep").module().name());
     }
 
     @Test
@@ -78,10 +78,10 @@ public class TestResolving {
 
                     PipelineStep step;
                     if (testNum == 0) {
-                        step = new DL4JModelPipelineStep("file:///some/model/path.zip", null, null);
+                        step = new DL4JStep("file:///some/model/path.zip", null, null);
                         System.out.println("----- DL4J - " + t + " -----");
                     } else {
-                        step = new SameDiffModelPipelineStep("file://some/model/path.fb", null);
+                        step = new SameDiffStep("file://some/model/path.fb", null);
                         //System.out.println("----- SameDiff - " + t + " -----");
                     }
 

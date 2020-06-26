@@ -19,7 +19,7 @@ import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -34,7 +34,7 @@ public class TestJsonYaml {
     @Test
     public void testJsonYamlSimple(){
         Pipeline p = SequencePipeline.builder()
-                .add(new LoggingPipelineStep())
+                .add(new LoggingStep())
                 .build();
 
         String json = p.toJson();
@@ -50,7 +50,7 @@ public class TestJsonYaml {
     @Test @Ignore
     public void testJsonYamlSimpleGraph(){
         fail("Not yet re-implemented");
-        Map<String, PipelineStep> m = Collections.singletonMap("logging", new LoggingPipelineStep());
+        Map<String, PipelineStep> m = Collections.singletonMap("logging", new LoggingStep());
         Pipeline p = new GraphPipeline(null, null, "myGraphPipeline");
 
         String json = p.toJson();

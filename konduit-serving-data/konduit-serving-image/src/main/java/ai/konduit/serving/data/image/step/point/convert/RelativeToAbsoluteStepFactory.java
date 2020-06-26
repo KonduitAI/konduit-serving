@@ -16,22 +16,22 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.image.step.point.heatmap;
+package ai.konduit.serving.data.image.step.point.convert;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import org.nd4j.common.base.Preconditions;
 
-public class DrawHeatmapStepRunnerFactory implements PipelineStepRunnerFactory {
+public class RelativeToAbsoluteStepFactory implements PipelineStepRunnerFactory {
     @Override
-    public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof DrawHeatmapStep;
+    public boolean canRun(PipelineStep step) {
+        return step instanceof RelativeToAbsoluteStep;
     }
 
     @Override
-    public PipelineStepRunner create(PipelineStep pipelineStep) {
-        Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new DrawHeatmapRunner((DrawHeatmapStep)pipelineStep);
+    public PipelineStepRunner create(PipelineStep step) {
+        Preconditions.checkState(canRun(step), "Unable to run step: %s", step);
+        return new RelativeToAbsoluteRunner((RelativeToAbsoluteStep) step);
     }
 }

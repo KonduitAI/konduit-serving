@@ -54,7 +54,7 @@ public class TestExtractBBStep {
 
                         Pipeline p = SequencePipeline.builder()
                                 /*
-                                .add(ShowImagePipelineStep.builder()
+                                .add(ShowImageStep.builder()
                                         .imageName("image")
                                         .displayName("Original")
                                         .height(897)
@@ -70,7 +70,7 @@ public class TestExtractBBStep {
                                         .outputName(outName ? null : "myOutput")
                                         )
                                 /*
-                                .add(ShowImagePipelineStep.builder()
+                                .add(ShowImageStep.builder()
                                         .imageName("image")
                                         .height(0)
                                         .width(0)

@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.models.samediff;
 
-import ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep;
+import ai.konduit.serving.models.samediff.step.SameDiffStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -58,7 +58,7 @@ public class TestSameDiffServing {
         sd.save(f, false);
 
         Pipeline p = SequencePipeline.builder()
-                .add(SameDiffModelPipelineStep.builder()
+                .add(SameDiffStep.builder()
                         .modelUri(f.toURI().toString())
                         .outputNames(Collections.singletonList("out"))
                         .build())

@@ -25,14 +25,14 @@ public class SameDiffPipelineStepRunnerFactory implements PipelineStepRunnerFact
 
     @Override
     public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof SameDiffModelPipelineStep;
+        return pipelineStep instanceof SameDiffStep;
     }
 
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run pipeline step: %s", pipelineStep.getClass());
 
-        SameDiffModelPipelineStep ps = (SameDiffModelPipelineStep)pipelineStep;
-        return new SameDiffPipelineStepRunner(ps);
+        SameDiffStep ps = (SameDiffStep)pipelineStep;
+        return new SameDiffRunner(ps);
     }
 }

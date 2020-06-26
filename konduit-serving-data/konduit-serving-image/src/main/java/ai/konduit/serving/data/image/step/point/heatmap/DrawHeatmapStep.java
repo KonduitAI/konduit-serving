@@ -90,6 +90,10 @@ public class DrawHeatmapStep implements PipelineStep {
             defaultValue = DEFAULT_OUTPUT_NAME)
     private String outputName;
 
+    @Schema(description = "True by default. If true, copy all the other (non-converted/non-image) entries in the input data to the output data",
+            defaultValue = "true")
+    private boolean keepOtherValues = true;
+
     @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig may be " +
             "used to crop images before passing to the network, when the image aspect ratio doesn't match the NDArray " +
             "aspect ratio. This allows the step to determine the subset of the image actually passed to the network.")

@@ -19,7 +19,7 @@
 package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.step.point.draw.DrawPointsStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -47,7 +47,7 @@ public class TestDrawPointsStep {
                         .width(100)
                         .height(200)
                         .outputName("image"))
-                .add(new ShowImagePipelineStep())
+                .add(new ShowImageStep())
                 .build();
 
         Data data = Data.empty();

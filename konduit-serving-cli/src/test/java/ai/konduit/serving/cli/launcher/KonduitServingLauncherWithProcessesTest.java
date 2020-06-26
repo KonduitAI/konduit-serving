@@ -20,7 +20,7 @@ package ai.konduit.serving.cli.launcher;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import io.vertx.core.json.JsonObject;
@@ -266,8 +266,8 @@ public class KonduitServingLauncherWithProcessesTest {
 
         assertEquals(inferenceConfigurationJson, new InferenceConfiguration()
                 .pipeline(SequencePipeline.builder()
-                        .add(new LoggingPipelineStep()
-                                .log(LoggingPipelineStep.Log.KEYS_AND_VALUES)
+                        .add(new LoggingStep()
+                                .log(LoggingStep.Log.KEYS_AND_VALUES)
                                 )
                         .build())
                 .toJson());

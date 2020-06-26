@@ -19,7 +19,6 @@
 package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.step.crop.ImageCropStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
@@ -144,7 +143,7 @@ public class TestImageCrop {
 
                         Pipeline p = SequencePipeline.builder()
                                 .add(s)
-                                //.add(new ShowImagePipelineStep().displayName(strCase))
+                                //.add(new ShowImageStep().displayName(strCase))
                                 .build();
 
                         PipelineExecutor exec = p.executor();

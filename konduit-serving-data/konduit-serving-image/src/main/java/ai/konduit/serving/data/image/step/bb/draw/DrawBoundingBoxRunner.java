@@ -41,11 +41,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 @CanRun(DrawBoundingBoxStep.class)
-public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
+public class DrawBoundingBoxRunner implements PipelineStepRunner {
 
     protected final DrawBoundingBoxStep step;
 
-    public DrawBoundingBoxStepRunner(@NonNull DrawBoundingBoxStep step){
+    public DrawBoundingBoxRunner(@NonNull DrawBoundingBoxStep step){
         this.step = step;
     }
 
@@ -95,7 +95,7 @@ public class DrawBoundingBoxStepRunner implements PipelineStepRunner {
             throw new IllegalStateException("Data[" + bboxName + "] is neither a BoundingBox or List<BoundingBox> - is " + vt);
         }
 
-        Mat m = i.getAs(Mat.class);
+        Mat m = i.getAs(Mat.class).clone();     //Make a copy to avoid modiying input data that might be used elsewhere (if in graph pipeline)
         Map<String,String> cc = step.classColors();
         String dc = step.color();
 

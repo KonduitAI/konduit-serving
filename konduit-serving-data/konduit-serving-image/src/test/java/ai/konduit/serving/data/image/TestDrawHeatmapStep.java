@@ -19,7 +19,7 @@
 package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.step.point.heatmap.DrawHeatmapStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.data.ValueType;
@@ -43,7 +43,7 @@ public class TestDrawHeatmapStep {
                         .width(100)
                         .height(200)
                         .outputName("image"))
-                .add(new ShowImagePipelineStep())
+                .add(new ShowImageStep())
                 .build();
 
         Data data = Data.empty();
@@ -52,7 +52,8 @@ public class TestDrawHeatmapStep {
                         Point.create(2, 2, "bar", 0.1),
                         Point.create(0.1, 0.1, "foo", 0.2),
                         Point.create(0.5, 0.8, "bar", 0.3),
-                        Point.create(30, 59, "foo", 0.4)
+                        Point.create(30, 59, "foo", 0.4),
+                        Point.create(0.99, 0.99, "foo", 0.5)
                 )
         );
 
@@ -71,7 +72,7 @@ public class TestDrawHeatmapStep {
                         .height(200)
                         .outputName("image")
                         .radius(10))
-                .add(new ShowImagePipelineStep())
+                .add(new ShowImageStep())
                 .build();
 
         Data data = Data.empty();

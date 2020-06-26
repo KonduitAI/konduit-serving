@@ -36,13 +36,13 @@ import java.util.List;
 @Accessors(fluent = true)
 @JsonName("TENSORFLOW")
 @Schema(description = "A pipeline step that configures a TensorFlow model that is to be executed.")
-public class TensorFlowPipelineStep extends BaseModelPipelineStep<TensorFlowConfiguration> {
+public class TensorFlowStep extends BaseModelPipelineStep<TensorFlowConfiguration> {
 
     @Schema(description = "A list of names of the input placeholders.")
     private List<String> inputNames;
 
     @Tolerate
-    public TensorFlowPipelineStep inputNames(String... inputNames){
+    public TensorFlowStep inputNames(String... inputNames){
         return this.inputNames(Arrays.asList(inputNames));
     }
 
@@ -50,16 +50,16 @@ public class TensorFlowPipelineStep extends BaseModelPipelineStep<TensorFlowConf
     private List<String> outputNames;
 
     @Tolerate
-    public TensorFlowPipelineStep outputNames(String... outputNames){
+    public TensorFlowStep outputNames(String... outputNames){
         return this.outputNames(Arrays.asList(outputNames));
     }
 
-    public TensorFlowPipelineStep(String modelUri, TensorFlowConfiguration config) {
+    public TensorFlowStep(String modelUri, TensorFlowConfiguration config) {
         super(modelUri, config);
     }
 
-    public TensorFlowPipelineStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("config") TensorFlowConfiguration config,
-                                 @JsonProperty("inputNames") List<String> inputNames, @JsonProperty("outputNames") List<String> outputNames){
+    public TensorFlowStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("config") TensorFlowConfiguration config,
+                          @JsonProperty("inputNames") List<String> inputNames, @JsonProperty("outputNames") List<String> outputNames){
         super(modelUri, config);
         this.inputNames = inputNames;
         this.outputNames = outputNames;

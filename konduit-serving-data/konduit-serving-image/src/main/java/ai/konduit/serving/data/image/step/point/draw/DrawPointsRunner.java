@@ -35,12 +35,12 @@ import org.opencv.core.CvType;
 import java.util.*;
 
 @CanRun(DrawPointsStep.class)
-public class DrawPointsStepRunner implements PipelineStepRunner {
+public class DrawPointsRunner implements PipelineStepRunner {
 
     protected final DrawPointsStep step;
     protected Map<String, Scalar> labelMap;
 
-    public DrawPointsStepRunner(@NonNull DrawPointsStep step) {
+    public DrawPointsRunner(@NonNull DrawPointsStep step) {
         this.step = step;
     }
 
@@ -87,14 +87,6 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
                 throw new IllegalArgumentException("The configured input "+pointName+" is neither a point nor a list of points!");
             }
         }
-        // Initialize colors first if they weren't initialized at all
-        if(labelMap == null) {
-            Map<String, String> classColors = step.classColors();
-            if(classColors == null){
-                throw new IllegalArgumentException("A label to color configuration has to be passed!");
-            }
-            initColors(classColors, classColors.size());
-        }
 
         // get reference size and initialize image
         int width;
@@ -128,9 +120,26 @@ public class DrawPointsStepRunner implements PipelineStepRunner {
         // draw points on image with color according to labels
         int radius = step.radius() == null ? 5 : step.radius();
         for (Point point : absPoints) {
-            Scalar color = labelMap.get(point.label());
-            if(color == null){
-                throw new IllegalArgumentException("No color provided for label "+point.label());
+            Scalar color;
+            if(point.label() == null){
+                if(step.noClassColor() == null){
+                    color = ColorUtil.stringToColor(DrawPointsStep.DEFAULT_NO_POINT_COLOR);
+                } else {
+                    color = ColorUtil.stringToColor(step.noClassColor());
+                }
+            } else {
+                // Initialize colors first if they weren't initialized at all
+                if(labelMap == null) {
+                    Map<String, String> classColors = step.classColors();
+                    if(classColors == null){
+                        throw new IllegalArgumentException("A label to color configuration has to be passed!");
+                    }
+                    initColors(classColors, classColors.size());
+                }
+                color = labelMap.get(point.label());
+                if(color == null){
+                    throw new IllegalArgumentException("No color provided for label " + point.label());
+                }
             }
 
             opencv_imgproc.circle(

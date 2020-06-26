@@ -28,7 +28,7 @@ import org.bytedeco.javacv.*;
 
 @Slf4j
 @CanRun(CameraFrameCaptureStep.class)
-public class FrameCaptureStepRunner implements PipelineStepRunner {
+public class FrameCaptureRunner implements PipelineStepRunner {
 
     protected final PipelineStep step;
     protected final String outputKey;
@@ -38,7 +38,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
     protected boolean loop = false;
     private Runnable init;
 
-    public FrameCaptureStepRunner(CameraFrameCaptureStep step){
+    public FrameCaptureRunner(CameraFrameCaptureStep step){
         this.outputKey = step.outputKey();
         this.step = step;
         init = () -> {
@@ -46,7 +46,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
         };
     }
 
-    public FrameCaptureStepRunner(VideoFrameCaptureStep step){
+    public FrameCaptureRunner(VideoFrameCaptureStep step){
         this.outputKey = step.outputKey();
         this.step = step;
         init = () -> {
@@ -83,6 +83,7 @@ public class FrameCaptureStepRunner implements PipelineStepRunner {
                 grabber.setFrameNumber(0);
                 frame = grabber.grab();
             }
+            frame = frame.clone();  //Clone otherwise buffer will be reused and async overwritten in async pipelines
             Image i = Image.create(frame);
             //System.out.println("IMAGE: h=" + i.height() + ", w=" + i.width());
             return Data.singleton(outputKey, i);
