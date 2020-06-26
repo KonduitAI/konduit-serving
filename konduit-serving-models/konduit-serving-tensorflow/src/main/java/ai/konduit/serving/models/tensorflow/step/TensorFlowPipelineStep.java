@@ -23,13 +23,17 @@ import ai.konduit.serving.models.tensorflow.TensorFlowConfiguration;
 import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
+import lombok.experimental.Tolerate;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Data
 @SuperBuilder
+@Accessors(fluent = true)
 @JsonName("TENSORFLOW")
 @Schema(description = "A pipeline step that configures a TensorFlow model that is to be executed.")
 public class TensorFlowPipelineStep extends BaseModelPipelineStep<TensorFlowConfiguration> {
@@ -37,8 +41,18 @@ public class TensorFlowPipelineStep extends BaseModelPipelineStep<TensorFlowConf
     @Schema(description = "A list of names of the input placeholders.")
     private List<String> inputNames;
 
+    @Tolerate
+    public TensorFlowPipelineStep inputNames(String... inputNames){
+        return this.inputNames(Arrays.asList(inputNames));
+    }
+
     @Schema(description = "A list of names of the output arrays - i.e., what should be predicted.")
     private List<String> outputNames;
+
+    @Tolerate
+    public TensorFlowPipelineStep outputNames(String... outputNames){
+        return this.outputNames(Arrays.asList(outputNames));
+    }
 
     public TensorFlowPipelineStep(String modelUri, TensorFlowConfiguration config) {
         super(modelUri, config);

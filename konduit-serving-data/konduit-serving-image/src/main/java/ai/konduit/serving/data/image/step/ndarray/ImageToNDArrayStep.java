@@ -27,6 +27,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
@@ -81,8 +82,18 @@ public class ImageToNDArrayStep implements PipelineStep {
     @Schema(description = "May be null. If non-null, these are the names of images in the Data instance to convert.")
     private List<String> keys;
 
+    @Tolerate
+    public ImageToNDArrayStep keys(String... keys){
+        return this.keys(Arrays.asList(keys));
+    }
+
     @Schema(description = "May be null. If non-null, the input images are renamed to this in the output Data instance after conversion to n-dimensional array.")
     private List<String> outputNames;
+
+    @Tolerate
+    public ImageToNDArrayStep outputNames(String... outputNames){
+        return this.outputNames(Arrays.asList(outputNames));
+    }
 
     
     @Schema(description = "True by default. If true, copy all the other (non-converted/non-image) entries in the input data to the output data",
