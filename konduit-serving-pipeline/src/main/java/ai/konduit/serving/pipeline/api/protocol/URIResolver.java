@@ -95,9 +95,12 @@ public class URIResolver {
     }
 
     protected static File getIfFile(String path){
+        if(path.matches("\\w+://.*"))
+            return null;
+
         try{
             File f = new File(path);
-            f.getCanonicalPath();   //Throws an exception if not a valid file path
+            f.getCanonicalPath();   //Throws an IOException if not a valid file path
             return f;
         } catch (IOException e2){
             return null;
