@@ -57,10 +57,9 @@ public class TestDL4JStep {
 
             Pipeline p = SequencePipeline.builder()
                     .add(new DL4JStep()
-                            .modelUri(netFile.toURI().toString())
+                            .modelUri(netFile.getAbsolutePath())
                             .inputNames(withNamesDefined ? Collections.singletonList("in") : null)
-                            .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null)
-                            )
+                            .outputNames(withNamesDefined ? Collections.singletonList("myPrediction") : null))
                     .build();
 
 
