@@ -101,7 +101,7 @@ public class SSDToBoundingBoxRunner implements PipelineStepRunner {
                 }
 
 
-                float label = lArr[0][0];
+                float label = lArr[0][i];
                 if (step.classLabels.length > 0 && (int) label > step.classLabels.length) {
                     throw new ArrayIndexOutOfBoundsException(String.format("Predicted label index was %s but only %s labels were provided", (int) label, step.classLabels.length));
                 }
