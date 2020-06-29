@@ -88,8 +88,7 @@ public class ProfileCommand extends DefaultCommand {
 
     @Option(shortName = "a", longName = "arch", argName = "cpu_architecture")
     @DefaultValue("x86_avx2")
-    @Description("Name of the cpu architecture. Accepted values are: [x86, x86_64, x86_avx2, x86-avx2, x86_64-a, " +
-            "x86_avx5, x86-avx5, x86_64-a, arm64, armhf, ppc64le]")
+    @Description("Name of the cpu architecture. Accepted values are: [x86, x86_64, x86_avx2, x86_avx512, arm64, armhf, ppc64le]")
     public void setCpuArchitecture(String cpuArchitecture) {
         this.cpuArchitecture = cpuArchitecture;
     }
