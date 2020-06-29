@@ -56,11 +56,10 @@ import java.util.Scanner;
 @Slf4j
 public class ServeBuildCommand extends ServeCommand {
 
-    private String profileName = "CPU";
+    private String profileName;
 
     @Option(shortName = "p", longName = "profileName", argName = "profile_name")
     @Description("Name of the profile to be used with the server launch.")
-    @DefaultValue("CPU")
     public void setProfileName(String profileName) {
         this.profileName = profileName;
     }
@@ -83,7 +82,16 @@ public class ServeBuildCommand extends ServeCommand {
                 Method buildCliMainMethod = buildCliClass.getMethod("exec", String[].class);
                 buildCliMainMethod.setAccessible(true);
 
-                Profile profile = ProfileCommand.getProfile(profileName);
+                Profile profile = profileName != null ? ProfileCommand.getProfile(profileName) : ProfileCommand.getDefaultProfile();
+                if(profile == null) {
+                    if(profileName == null) {
+                        out.println("Couldn't find a default profile. Starting server with 'CPU' profile");
+                    } else {
+                        out.format("Couldn't find a profile with the specified name: '%s'. Starting server with 'CPU' profile.%n", profileName);
+                    }
+
+                    profile = ProfileCommand.getProfile("CPU");
+                }
 
                 List<String> args = new ArrayList<>();
                 args.add("-p"); args.add(savePath.getAbsolutePath());
