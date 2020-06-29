@@ -26,6 +26,7 @@ import ai.konduit.serving.build.deployments.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
@@ -366,6 +367,8 @@ public class GradleBuild {
     }
 
     private static void addClassPathTask(StringBuilder kts, ClassPathDeployment cpd){
+        String filePrefix = "file:/" + (SystemUtils.IS_OS_WINDOWS ? "" : "/");
+
         //Adapted from: https://stackoverflow.com/a/54159784
         if(cpd.type() == ClassPathDeployment.Type.TEXT_FILE) {
             kts.append("//Task: ClassPathDeployment - writes the absolute path of all JAR files for the build to the specified text file, one per line\n")
@@ -390,7 +393,7 @@ public class GradleBuild {
                     .append("    manifest {\n")
                     .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
                     .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
-                    .append("        attributes[\"Class-Path\"] = \"file:/\" + configurations.runtimeClasspath.get().getFiles().joinToString(separator=\" file:/\")\n")
+                    .append("        attributes[\"Class-Path\"] = \"" + filePrefix + "\" + configurations.runtimeClasspath.get().getFiles().joinToString(separator=\" " + filePrefix + "\")\n")
                     .append("    }\n");
 
             if(cpd.outputFile() != null){
