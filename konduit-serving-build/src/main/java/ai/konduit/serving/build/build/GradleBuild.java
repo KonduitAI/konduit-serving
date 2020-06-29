@@ -390,7 +390,7 @@ public class GradleBuild {
                     .append("    manifest {\n")
                     .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
                     .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
-                    .append("        attributes[\"Class-Path\"] = configurations.runtimeClasspath.get().getFiles().joinToString(separator=\" \")\n")
+                    .append("        attributes[\"Class-Path\"] = \"file:/\" + configurations.runtimeClasspath.get().getFiles().joinToString(separator=\" file:/\")\n")
                     .append("    }\n");
 
             if(cpd.outputFile() != null){

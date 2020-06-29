@@ -76,7 +76,7 @@ public class KonduitServingLauncher extends Launcher {
             .unregister("test")
             .unregister("version")
             //.register(JoinCommand.class, JoinCommand::new) // TODO: Uncomment this after implementation and testing
-            .register(ServeCommand.class, ServeBuildCommand::new)
+            .register(ServeBuildCommand.class, ServeBuildCommand::new)
             .register(ListCommand.class, ListCommand::new)
             .register(StopCommand.class, StopCommand::new)
             .register(PredictCommand.class, PredictCommand::new)

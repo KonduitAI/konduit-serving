@@ -232,7 +232,7 @@ public class ProfileCommand extends DefaultCommand {
 
             String defaultCudaVersion =  "CUDA_10.1";
             Profile cudaProfile = new Profile(defaultCudaVersion,
-                    cpuProfile.cpuArchitecture(), cpuProfile.operatingSystem(), Arrays.asList("HTTP", "GRPC"),
+                    "x86", cpuProfile.operatingSystem(), Arrays.asList("HTTP", "GRPC"),
                     Collections.singletonList("ch.qos.logback:logback-classic:1.2.3"));
 
             Pair<String, String> cudaInstall = findCudaInstall();
@@ -244,7 +244,7 @@ public class ProfileCommand extends DefaultCommand {
                 log.error("Unable to find a valid cuda install in the local system. The server will try to " +
                         "automatically download the CUDA redist 10.1 package on runtime build");
 
-                cudaProfile.additionalDependencies().add("org.bytedeco:cuda-platform-redist:10.1-7.6-1.5.2");
+                cudaProfile.additionalDependencies().add("org.bytedeco:cuda-platform-redist:10.1-7.6-1.5.2:");
             }
 
             profiles.put("CUDA", cudaProfile);
@@ -252,7 +252,7 @@ public class ProfileCommand extends DefaultCommand {
             log.error("No cuda compatible devices found in the current system.");
         }
 
-        log.error("Created profiles: {}", ObjectMappers.toYaml(profiles));
+        log.error("Created profiles: \n{}", ObjectMappers.toYaml(profiles));
 
         saveProfiles(profiles);
         return profiles;

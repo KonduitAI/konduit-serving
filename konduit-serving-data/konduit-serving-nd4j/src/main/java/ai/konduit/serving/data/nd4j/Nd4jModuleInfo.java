@@ -31,11 +31,11 @@ import ai.konduit.serving.annotation.module.*;
         }),
 
         //OR it requires CUDA 10.0, 10.1 or 10.2 + one of the classifiers
-        @Requires(requires = Req.ALL, value = {@Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.0", ver = "1.0.0-beta7"),
+        @Requires(requires = Req.ALL, value = {@Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.0-platform", ver = "1.0.0-beta7"),
                 @Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.0", ver = "1.0.0-beta7", classifier = {"linux-x86_64", "linux-ppc64le", "linux-arm64","windows-x86_64"})}),
-        @Requires(requires = Req.ALL, value = {@Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.1", ver = "1.0.0-beta7"),
+        @Requires(requires = Req.ALL, value = {@Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.1-platform", ver = "1.0.0-beta7"),
                 @Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.1", ver = "1.0.0-beta7", classifier = {"linux-x86_64", "linux-ppc64le", /*"linux-arm64",*/ "windows-x86_64"})}),      //Note 1.0.0-beta7 was only released for linux-arm64 for CUDA 10.0
-        @Requires(requires = Req.ALL, value = {@Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.2", ver = "1.0.0-beta7"),
+        @Requires(requires = Req.ALL, value = {@Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.2-platform", ver = "1.0.0-beta7"),
                 @Dependency(gId = "org.nd4j", aId = "nd4j-cuda-10.2", ver = "1.0.0-beta7", classifier = {"linux-x86_64", "linux-ppc64le", /*"linux-arm64",*/ "windows-x86_64"})})
 })
 public class Nd4jModuleInfo {

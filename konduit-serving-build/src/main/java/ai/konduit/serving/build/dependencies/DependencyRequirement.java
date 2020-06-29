@@ -44,9 +44,9 @@ public interface DependencyRequirement {
             //Need ND4J backend (no classifier)
             new AnyRequirement("nd4j backend",
                     new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null),
-                    new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-beta7", null),
-                    new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-beta7", null),
-                    new Dependency("org.nd4j", "nd4j-cuda-10.2", "1.0.0-beta7", null)),
+                    new Dependency("org.nd4j", "nd4j-cuda-10.0-platform", "1.0.0-beta7", null),
+                    new Dependency("org.nd4j", "nd4j-cuda-10.1-platform", "1.0.0-beta7", null),
+                    new Dependency("org.nd4j", "nd4j-cuda-10.2-platform", "1.0.0-beta7", null)),
             //ND4J backend classifiers
             new AnyRequirement("nd4j backend classifier",
                     new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64"),

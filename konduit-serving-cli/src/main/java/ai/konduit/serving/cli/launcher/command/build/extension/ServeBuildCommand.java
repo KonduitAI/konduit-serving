@@ -58,10 +58,10 @@ public class ServeBuildCommand extends ServeCommand {
 
     private String profileName = "CPU";
 
-    @Option(shortName = "p", longName = "profileName", argName = "profileName")
+    @Option(shortName = "p", longName = "profileName", argName = "profile_name")
     @Description("Name of the profile to be used with the server launch.")
     @DefaultValue("CPU")
-    private void setProfileName(String profileName) {
+    public void setProfileName(String profileName) {
         this.profileName = profileName;
     }
 
