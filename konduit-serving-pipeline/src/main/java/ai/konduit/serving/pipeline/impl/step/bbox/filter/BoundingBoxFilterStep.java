@@ -42,11 +42,11 @@ public class BoundingBoxFilterStep implements PipelineStep {
     private boolean keepOtherValues = true;
 
     @Schema(description = "A list of class labels for which bounding boxes will be drawn")
-    private List<String> classesToKeep;
+    protected List<String> classesToKeep;
 
-    private String inputName = "input";
+    protected String inputName = "input";
 
-    private String outputName = DEFAULT_OUTPUT_NAME;
+    protected String outputName = DEFAULT_OUTPUT_NAME;
 
     @Tolerate
     public BoundingBoxFilterStep classesToKeep(String... classesToKeep) {
