@@ -32,6 +32,7 @@ import ai.konduit.serving.data.image.step.point.draw.DrawPointsStep;
 import ai.konduit.serving.data.image.step.point.heatmap.DrawHeatmapStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImageStep;
+import ai.konduit.serving.models.tensorflow.step.TensorFlowStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -60,7 +61,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static ai.konduit.serving.models.tensorflow.step.TensorFlowStep.builder;
 import static org.junit.Assert.assertEquals;
 
 @Slf4j
@@ -102,16 +102,16 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                .keys("image")
+                .outputNames("image_tensor")
         );
 
         //Run image in TF model
-        GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
+        GraphStep tf = i2n.then("tf", new TensorFlowStep()
+                .inputNames("image_tensor")
+                .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(f.toURI().toString())      //Face detection model
-                .build());
+        );
 
         //Post process SSD outputs to BoundingBox objects
         GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
@@ -187,13 +187,13 @@ public class TestTensorFlowStep {
         Pipeline p = SequencePipeline.builder()
                 .add(new ImageToNDArrayStep()
                         .config(c)
-                        .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                        .outputNames("image_tensor")
                 )
-                .add(builder()
-                        .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                        .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
+                .add(new TensorFlowStep()
+                        .inputNames("image_tensor")
+                        .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                         .modelUri(f.toURI().toString())      //Face detection model
-                        .build())
+                )
                 .add(new SSDToBoundingBoxStep()
                         .keepOtherValues(false)
                         .outputName("bbox")
@@ -252,11 +252,11 @@ public class TestTensorFlowStep {
                 .add(new ImageToNDArrayStep()
                         .config(c)
                 )
-                .add(builder()
+                .add(new TensorFlowStep()
+                        .inputNames("image_tensor")
+                        .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                         .modelUri(f.toURI().toString())
-                        .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                        .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
-                        .build())
+                )
                 .add(new SSDToBoundingBoxStep())
                 .build();
 
@@ -320,16 +320,16 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                .keys("image")
+                .outputNames("image_tensor")
         );
 
         //Run image in TF model
-        GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
+        GraphStep tf = i2n.then("tf", new TensorFlowStep()
+                .inputNames("image_tensor")
+                .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(f.toURI().toString())      //Face detection model
-                .build());
+        );
 
         //Post process SSD outputs to BoundingBox objects
         GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
@@ -415,16 +415,16 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
+                .keys("image")
+                .outputNames("image_tensor")
         );
 
         //Run image in TF model
-        GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
+        GraphStep tf = i2n.then("tf", new TensorFlowStep()
+                .inputNames("image_tensor")
+                .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(f.toURI().toString())      //Face detection model
-                .build());
+        );
 
         //Post process SSD outputs to BoundingBox objects
         GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
@@ -510,16 +510,16 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("ImageTensor")) //TODO varargs builder method
-                );
+                .keys("image")
+                .outputNames(Arrays.asList("ImageTensor"))
+        );
 
         //Run image in TF model
-        GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("ImageTensor"))      //TODO varargs builder method
-                .outputNames(Arrays.asList("SemanticPredictions"))
+        GraphStep tf = i2n.then("tf", new TensorFlowStep()
+                .inputNames("ImageTensor")
+                .outputNames("SemanticPredictions")
                 .modelUri(f.toURI().toString())
-                .build());
+        );
 
 
         //Merge camera image with bounding boxes
@@ -591,16 +591,16 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")) //TODO varargs builder method
-                );
+                .keys("image")
+                .outputNames("image_tensor")
+        );
 
         //Run image in TF model
-        GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
+        GraphStep tf = i2n.then("tf", new TensorFlowStep()
+                .inputNames("image_tensor")
+                .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(f.toURI().toString())
-                .build());
+        );
 
         //Post process SSD outputs to BoundingBox objects
         String[] COCO_LABELS = new String[]{"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "street sign", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "hat", "backpack", "umbrella", "shoe", "eye glasses", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "plate", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "mirror", "dining table", "window", "desk", "toilet", "door", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "blender", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush", "hair brush"};
@@ -709,13 +709,13 @@ public class TestTensorFlowStep {
         GraphStep i2n = camera.then("image2NDArrayFaceDetectorInference", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Collections.singletonList("image"))
-                .outputNames(Collections.singletonList("image_tensor")) //TODO varargs builder method
+                .outputNames(Collections.singletonList("image_tensor"))
         );
 
-        GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
-                .modelUri(face_detector_graph.toURI().toString()).build()
+        GraphStep tf = i2n.then("tf", new TensorFlowStep()
+                .inputNames("image_tensor")
+                .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
+                .modelUri(face_detector_graph.toURI().toString())
         );
 
         GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
@@ -774,11 +774,11 @@ public class TestTensorFlowStep {
 
 
         //Detect keypoints on the face boxes
-        GraphStep tf_keydetector = face2n.then("keydetector", builder()
-                .inputNames(Collections.singletonList("input_image_tensor"))
-                .outputNames(Arrays.asList("logits/BiasAdd"))
+        GraphStep tf_keydetector = face2n.then("keydetector", new TensorFlowStep()
+                .inputNames("input_image_tensor")
+                .outputNames("logits/BiasAdd")
                 .modelUri(keypoints_graph.toURI().toString())
-                .build());
+        );
 
         //  Merge camera image with face keypoints
         GraphStep merged = camera.mergeWith("facial-keypoints", ssdProc, tf_keydetector);
@@ -857,15 +857,15 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")));
+                .keys("image")
+                .outputNames("image_tensor"));
 
         //Run image in TF model
-        GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
+        GraphStep tf = i2n.then("tf", new TensorFlowStep()
+                .inputNames("image_tensor")
+                .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(f.toURI().toString())      //Face detection model
-                .build());
+        );
 
         //Post process SSD outputs to BoundingBox objects
         GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
@@ -952,15 +952,15 @@ public class TestTensorFlowStep {
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
-                .keys(Arrays.asList("image"))
-                .outputNames(Arrays.asList("image_tensor")));
+                .keys("image")
+                .outputNames("image_tensor"));
 
         //Run image in TF model
-        GraphStep tf = i2n.then("tf", builder()
-                .inputNames(Collections.singletonList("image_tensor"))      //TODO varargs builder method
-                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
-                .modelUri(f.toURI().toString())      //Face detection model
-                .build());
+        GraphStep tf = i2n.then("tf", new TensorFlowStep()
+                .inputNames("image_tensor")
+                .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
+                .modelUri(f.toURI().toString()     //Face detection model
+                ));
 
         //Post process SSD outputs to BoundingBox objects
         GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep().outputName("img_bbox"));

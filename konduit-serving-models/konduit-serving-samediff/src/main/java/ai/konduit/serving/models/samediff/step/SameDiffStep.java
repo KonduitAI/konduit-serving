@@ -21,8 +21,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
+import lombok.experimental.Tolerate;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.List;
 
 @SuperBuilder
@@ -41,5 +43,10 @@ public class SameDiffStep implements PipelineStep {
     public SameDiffStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("outputNames") List<String> outputNames){
         this.modelUri = modelUri;
         this.outputNames = outputNames;
+    }
+
+    @Tolerate
+    public SameDiffStep outputNames(String... outputNames) {
+        return this.outputNames(Arrays.asList(outputNames));
     }
 }

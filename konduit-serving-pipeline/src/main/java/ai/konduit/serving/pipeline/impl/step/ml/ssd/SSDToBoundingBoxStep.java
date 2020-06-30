@@ -20,12 +20,17 @@ package ai.konduit.serving.pipeline.impl.step.ml.ssd;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.impl.step.bbox.filter.BoundingBoxFilterStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -57,7 +62,7 @@ public class SSDToBoundingBoxStep implements PipelineStep {
 
     
     @Schema(description = "A list of class labels.")
-    protected String[] classLabels = null;
+    protected List<String> classLabels ;
 
     
     @Schema(description = "If true, other data key and values from the previous step are kept and passed on to the next step as well.",
@@ -77,6 +82,12 @@ public class SSDToBoundingBoxStep implements PipelineStep {
     @Schema(description = "Output key name where the bounding box will be contained in.",
             defaultValue = DEFAULT_OUTPUT_NAME)
     protected String outputName = DEFAULT_OUTPUT_NAME;
+
+    @Tolerate
+    public SSDToBoundingBoxStep classLabels(String... classLabels) {
+        return this.classLabels(Arrays.asList(classLabels));
+    }
+
 
 
 

@@ -24,7 +24,6 @@ import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.util.DataUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.nd4j.shade.guava.base.Preconditions;
 
 import java.util.Arrays;
@@ -37,7 +36,7 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
 
     public BoundingBoxFilterStepRunner(BoundingBoxFilterStep step) {
         this.step = step;
-        Preconditions.checkArgument(!ArrayUtils.isEmpty(this.step.classesToKeep),"Seems you forgets to set the classes to keep.");
+        Preconditions.checkArgument(!this.step.classesToKeep.isEmpty(),"Seems you forget to set the classes to keep.");
     };
 
     @Override
@@ -62,7 +61,7 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
             String err = "No input name was set in the BoundingBoxFilterStep configuration and input name could not be guessed based on type";
             DataUtils.inferField(data, ValueType.BOUNDING_BOX, true, err + " (multiple keys)", err + " (no List<BoundingBox> values)");
         }
-        String[] classesToKeep = step.classesToKeep();
+        String[] classesToKeep = (String[]) step.classesToKeep.toArray();
         List<BoundingBox> boundingBoxes = data
                 .getListBoundingBox(inputName)
                 .stream()

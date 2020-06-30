@@ -22,8 +22,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -50,4 +52,15 @@ public class DL4JStep implements PipelineStep {
         this.inputNames = inputNames;
         this.outputNames = outputNames;
     }
+
+    @Tolerate
+    public DL4JStep inputNames(String... inputNames) {
+        return this.inputNames(Arrays.asList(inputNames));
+    }
+
+    @Tolerate
+    public DL4JStep outputNames(String... outputNames) {
+        return this.outputNames(Arrays.asList(outputNames));
+    }
+
 }
