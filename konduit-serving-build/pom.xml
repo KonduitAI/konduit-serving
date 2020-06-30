@@ -170,7 +170,7 @@
             </plugin>
 
             <!-- Maven shade plugin. konduit-serving-build is intended to be a standalone tool. Note that it has few
-                 compiletime dependencies to the actual build tool uberjar size is small (less than 20mb total)-->
+                 compile-time dependencies to the actual build tool uberjar size is small (less than 20mb total)-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
