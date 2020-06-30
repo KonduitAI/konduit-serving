@@ -65,9 +65,9 @@ public class NativeDependencyRegistry {
         put(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null), Target.LWM_X86);
 
         //CUDA
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.0-platform", "1.0.0-beta7", null), Target.LINUX_CUDA_10_0, Target.WINDOWS_CUDA_10_0);
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.1-platform", "1.0.0-beta7", null), Target.LINUX_CUDA_10_1, Target.WINDOWS_CUDA_10_1);
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.2-platform", "1.0.0-beta7", null), Target.LINUX_CUDA_10_2, Target.WINDOWS_CUDA_10_2);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-beta7", null), Target.LINUX_CUDA_10_0, Target.WINDOWS_CUDA_10_0);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-beta7", null), Target.LINUX_CUDA_10_1, Target.WINDOWS_CUDA_10_1);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.2", "1.0.0-beta7", null), Target.LINUX_CUDA_10_2, Target.WINDOWS_CUDA_10_2);
         //CUDA classifiers
         put(new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-beta7", LINUX_X86_64), Target.LINUX_CUDA_10_0);
         put(new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-beta7", LINUX_X86_64), Target.LINUX_CUDA_10_1);
