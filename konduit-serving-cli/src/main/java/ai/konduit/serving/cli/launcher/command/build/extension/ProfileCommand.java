@@ -129,7 +129,7 @@ public class ProfileCommand extends DefaultCommand {
     @Override
     public void run() {
         if(profileName == null && !this.subCommand.equals(SubCommand.LIST)) {
-            out.println("Please specify a profile name.");
+            out.println("A profile name must be specified for command \"" + subCommand + "\" - for example, \"konduit profile create my_profile\"");
             System.exit(1);
         }
 
@@ -286,6 +286,9 @@ public class ProfileCommand extends DefaultCommand {
     }
 
     public static boolean isProfileExists(String profileName) {
+        if(!profilesSavePath.exists()){
+            return false;
+        }
         return getAllProfiles().containsKey(profileName);
     }
 
@@ -385,10 +388,10 @@ public class ProfileCommand extends DefaultCommand {
             } else {
                 profiles.remove(profileName);
                 saveProfiles(profiles);
-                out.format("Deleted %s profile, successfully.%n", profileName);
+                out.format("Profile \"%s\" deleted successfully.%n", profileName);
             }
         } else {
-            out.format("Profile with name: %s doesn't exist.%n", profileName);
+            out.format("Profile with name \"%s\" does not exist.%n", profileName);
         }
     }
 

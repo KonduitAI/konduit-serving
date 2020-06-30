@@ -19,6 +19,7 @@
 package ai.konduit.serving.cli.launcher.command.build.extension.model;
 
 import ai.konduit.serving.vertx.config.ServerProtocol;
+import lombok.Data;
 import org.apache.commons.lang3.SystemUtils;
 import org.nd4j.shade.jackson.annotation.JsonGetter;
 import org.nd4j.shade.jackson.annotation.JsonSetter;
@@ -28,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Data
 public class Profile {
 
     private static final List<String> validComputeDevices = Arrays.asList("CPU", "CUDA_10.0", "CUDA_10.1", "CUDA_10.2");
