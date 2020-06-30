@@ -103,12 +103,12 @@ public class TestTensorFlowStep {
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys("image")
-                .outputNames("image_tensor") //TODO varargs builder method
+                .outputNames("image_tensor")
         );
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", new TensorFlowStep()
-                .inputNames("image_tensor")      //TODO varargs builder method
+                .inputNames("image_tensor")
                 .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(f.toURI().toString())      //Face detection model
         );
@@ -187,10 +187,10 @@ public class TestTensorFlowStep {
         Pipeline p = SequencePipeline.builder()
                 .add(new ImageToNDArrayStep()
                         .config(c)
-                        .outputNames("image_tensor") //TODO varargs builder method
+                        .outputNames("image_tensor")
                 )
                 .add(new TensorFlowStep()
-                        .inputNames("image_tensor")      //TODO varargs builder method
+                        .inputNames("image_tensor")
                         .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                         .modelUri(f.toURI().toString())      //Face detection model
                 )
@@ -253,7 +253,7 @@ public class TestTensorFlowStep {
                         .config(c)
                 )
                 .add(new TensorFlowStep()
-                        .inputNames("image_tensor")    //TODO varargs builder method
+                        .inputNames("image_tensor")
                         .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                         .modelUri(f.toURI().toString())
                 )
@@ -321,12 +321,12 @@ public class TestTensorFlowStep {
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys("image")
-                .outputNames("image_tensor") //TODO varargs builder method
+                .outputNames("image_tensor")
         );
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", new TensorFlowStep()
-                .inputNames("image_tensor")      //TODO varargs builder method
+                .inputNames("image_tensor")
                 .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(f.toURI().toString())      //Face detection model
         );
@@ -415,12 +415,12 @@ public class TestTensorFlowStep {
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys("image")
-                .outputNames("image_tensor") //TODO varargs builder method
+                .outputNames("image_tensor")
         );
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", new TensorFlowStep()
-                .inputNames("image_tensor")      //TODO varargs builder method
+                .inputNames("image_tensor")
                 .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(f.toURI().toString())      //Face detection model
         );
@@ -502,12 +502,12 @@ public class TestTensorFlowStep {
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys("image")
-                .outputNames(Arrays.asList("ImageTensor")) //TODO varargs builder method
+                .outputNames(Arrays.asList("ImageTensor"))
         );
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", new TensorFlowStep()
-                .inputNames("ImageTensor")      //TODO varargs builder method
+                .inputNames("ImageTensor")
                 .outputNames("SemanticPredictions")
                 .modelUri(f.toURI().toString())
         );
@@ -583,12 +583,12 @@ public class TestTensorFlowStep {
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys("image")
-                .outputNames("image_tensor") //TODO varargs builder method
+                .outputNames("image_tensor")
         );
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", new TensorFlowStep()
-                .inputNames("image_tensor")      //TODO varargs builder method
+                .inputNames("image_tensor")
                 .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(f.toURI().toString())
         );
@@ -700,11 +700,11 @@ public class TestTensorFlowStep {
         GraphStep i2n = camera.then("image2NDArrayFaceDetectorInference", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Collections.singletonList("image"))
-                .outputNames(Collections.singletonList("image_tensor")) //TODO varargs builder method
+                .outputNames(Collections.singletonList("image_tensor"))
         );
 
         GraphStep tf = i2n.then("tf", new TensorFlowStep()
-                .inputNames("image_tensor")      //TODO varargs builder method
+                .inputNames("image_tensor")
                 .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(face_detector_graph.toURI().toString())
         );
@@ -853,7 +853,7 @@ public class TestTensorFlowStep {
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", new TensorFlowStep()
-                .inputNames("image_tensor")     //TODO varargs builder method
+                .inputNames("image_tensor")
                 .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(f.toURI().toString())      //Face detection model
         );
@@ -948,7 +948,7 @@ public class TestTensorFlowStep {
 
         //Run image in TF model
         GraphStep tf = i2n.then("tf", new TensorFlowStep()
-                .inputNames("image_tensor")      //TODO varargs builder method
+                .inputNames("image_tensor")
                 .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
                 .modelUri(f.toURI().toString()     //Face detection model
                 ));
