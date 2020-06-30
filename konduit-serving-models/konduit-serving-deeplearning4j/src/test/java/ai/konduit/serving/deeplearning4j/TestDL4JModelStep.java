@@ -147,7 +147,7 @@ public class TestDL4JModelStep {
         return netFile;
     }
 
-    public MultiLayerNetwork createIrisMLN(){
+    public static MultiLayerNetwork createIrisMLN(){
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .updater(new Adam(0.01))
                 .list()

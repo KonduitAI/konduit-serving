@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.cli.launcher.command.build.extension;
 
+import ai.konduit.serving.build.cli.BuildCLI;
 import ai.konduit.serving.cli.launcher.command.ServeCommand;
 import ai.konduit.serving.cli.launcher.command.build.extension.model.Profile;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
@@ -77,11 +78,6 @@ public class ServeBuildCommand extends ServeCommand {
             } else {
                 FileUtils.writeStringToFile(savePath, jsonConfiguration.get("pipeline").toString(), StandardCharsets.UTF_8);
 
-                Class<?> buildCliClass = Class.forName("ai.konduit.serving.build.cli.BuildCLI");
-                Object buildCli = buildCliClass.getConstructor().newInstance();
-                Method buildCliMainMethod = buildCliClass.getMethod("exec", String[].class);
-                buildCliMainMethod.setAccessible(true);
-
                 Profile profile = profileName != null ? ProfileCommand.getProfile(profileName) : ProfileCommand.getDefaultProfile();
                 if(profile == null) {
                     if(profileName == null) {
@@ -113,7 +109,7 @@ public class ServeBuildCommand extends ServeCommand {
                     }
                 }
 
-                buildCliMainMethod.invoke(buildCli, (Object) args.toArray(new String[args.size()]));
+                BuildCLI.main(args.toArray(new String[0]));     //TODO we could just call build tool directly isntead of via CLI (more robust to refactoring, compile time args checking etc)
 
                 if (Strings.isNullOrEmpty(this.classpath)) {
                     this.classpath = mfJar.getAbsolutePath();
