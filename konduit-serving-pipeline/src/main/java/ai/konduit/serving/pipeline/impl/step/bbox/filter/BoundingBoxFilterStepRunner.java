@@ -36,7 +36,7 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
 
     public BoundingBoxFilterStepRunner(BoundingBoxFilterStep step) {
         this.step = step;
-        Preconditions.checkArgument(this.step.classesToKeep.isEmpty(),"Seems you forgets to set the classes to keep.");
+        Preconditions.checkArgument(!this.step.classesToKeep.isEmpty(),"Seems you forget to set the classes to keep.");
     };
 
     @Override
