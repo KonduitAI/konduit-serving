@@ -17,6 +17,7 @@
  */
 package ai.konduit.serving.pipeline.impl.step.bbox.filter;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,7 @@ import java.util.List;
 @Accessors(fluent = true)
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonName("BOUNDING_BOX_FILTER")
 public class BoundingBoxFilterStep implements PipelineStep {
 
     public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";

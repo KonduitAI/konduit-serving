@@ -31,6 +31,7 @@ import org.bytedeco.javacv.*;
 public class FrameCaptureRunner implements PipelineStepRunner {
 
     protected final PipelineStep step;
+    protected final int skip;
     protected final String outputKey;
     protected boolean initialized;
     protected FrameGrabber grabber;
@@ -44,6 +45,7 @@ public class FrameCaptureRunner implements PipelineStepRunner {
         init = () -> {
             this.initOpenCVFrameGrabber(step);
         };
+        this.skip = -1;
     }
 
     public FrameCaptureRunner(VideoFrameCaptureStep step){
@@ -52,6 +54,7 @@ public class FrameCaptureRunner implements PipelineStepRunner {
         init = () -> {
             this.initFFmpegFrameGrabber(step);
         };
+        this.skip = step.skipFrames() == null ? 0 : step.skipFrames();
     }
 
     @Override
@@ -80,12 +83,31 @@ public class FrameCaptureRunner implements PipelineStepRunner {
         try {
             Frame frame = grabber.grab();
             if(frame == null && loop){
-                grabber.setFrameNumber(0);
                 frame = grabber.grab();
             }
             frame = frame.clone();  //Clone otherwise buffer will be reused and async overwritten in async pipelines
             Image i = Image.create(frame);
             //System.out.println("IMAGE: h=" + i.height() + ", w=" + i.width());
+
+            if(skip > 0){
+                //using setFrameNumber can be costly - seems to require decoding from the last keyframe?
+                //i.e., cost of calling setFrameNumber grows linearly over time, then jumps back to a few MS periodically
+                // (presumably once it hits next keyframe)
+                int maxFrames = grabber.getLengthInFrames();
+                if(skip >= 20){     //TODO this threshold should be selected based
+                    int currFrame = grabber.getFrameNumber();
+                    int setFrame = Math.min(maxFrames, currFrame + skip);
+                    grabber.setFrameNumber(setFrame);
+                } else {
+                    for( int j=0; j<skip; j++ ) {
+                        if(grabber.grab() == null)
+                            break;
+                    }
+                }
+
+
+            }
+
             return Data.singleton(outputKey, i);
         } catch (Throwable t){
             throw new RuntimeException("Error getting frame", t);
@@ -113,6 +135,7 @@ public class FrameCaptureRunner implements PipelineStepRunner {
 
     protected void initFFmpegFrameGrabber(VideoFrameCaptureStep step){
         grabber = new FFmpegFrameGrabber(step.filePath());
+
         loop = step.loop();
         converter = new OpenCVFrameConverter.ToIplImage();
 

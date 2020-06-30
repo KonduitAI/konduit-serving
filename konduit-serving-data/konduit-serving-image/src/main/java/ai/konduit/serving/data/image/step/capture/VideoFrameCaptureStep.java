@@ -52,10 +52,19 @@ public class VideoFrameCaptureStep implements PipelineStep {
     @Schema(description = "Loop the video when it reaches the end?")
     private boolean loop = true;
 
-    public VideoFrameCaptureStep(@JsonProperty("filePath") String filePath, @JsonProperty("outputKey") String outputKey, @JsonProperty("loop") boolean loop){
+
+    @Schema(description = "Optional - Number of frames to skip between returned frames. If not set: No frames are skipped.<br> " +
+            "Values 0 is equivalent to no skipping. Value 1: skip 1 frame between returned frames (i.e., return every 2nd frame)." +
+            "Value 3: skip 2 frames between returned frames (i.e., return every 3rd frame) and so on.",
+            defaultValue = "image")
+    private Integer skipFrames;
+
+    public VideoFrameCaptureStep(@JsonProperty("filePath") String filePath, @JsonProperty("outputKey") String outputKey,
+                                 @JsonProperty("loop") boolean loop, @JsonProperty("skipFrames") Integer skipFrames){
         this.filePath = filePath;
         this.outputKey = outputKey;
         this.loop = loop;
+        this.skipFrames = skipFrames;
     }
 
 }
