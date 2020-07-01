@@ -21,6 +21,7 @@ package ai.konduit.serving.pipeline.impl.format;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
+import org.nd4j.common.base.Preconditions;
 
 public class JavaNDArrays {
 
@@ -37,6 +38,20 @@ public class JavaNDArrays {
         @Override
         public long[] shape() {
             return array.getShape();
+        }
+
+        @Override
+        public long size(int dimension) {
+            int rank = rank();
+            Preconditions.checkState(dimension >= -rank && dimension < rank, "Invalid dimension: Got %s for rank %s array", dimension, rank);
+            if(dimension < 0)
+                dimension += rank;
+            return array.getShape()[dimension];
+        }
+
+        @Override
+        public int rank() {
+            return array.getShape().length;
         }
     }
 
@@ -55,6 +70,20 @@ public class JavaNDArrays {
         @Override
         public long[] shape() {
             return shape;
+        }
+
+        @Override
+        public long size(int dimension) {
+            int rank = rank();
+            Preconditions.checkState(dimension >= -rank && dimension < rank, "Invalid dimension: Got %s for rank %s array", dimension, rank);
+            if(dimension < 0)
+                dimension += rank;
+            return shape[dimension];
+        }
+
+        @Override
+        public int rank() {
+            return shape.length;
         }
     }
 
@@ -103,6 +132,20 @@ public class JavaNDArrays {
         @Override
         public long[] shape() {
             return shape;
+        }
+
+        @Override
+        public long size(int dimension) {
+            int rank = rank();
+            Preconditions.checkState(dimension >= -rank && dimension < rank, "Invalid dimension: Got %s for rank %s array", dimension, rank);
+            if(dimension < 0)
+                dimension += rank;
+            return shape[dimension];
+        }
+
+        @Override
+        public int rank() {
+            return shape.length;
         }
     }
 
@@ -153,6 +196,20 @@ public class JavaNDArrays {
         public long[] shape() {
             return shape;
         }
+
+        @Override
+        public long size(int dimension) {
+            int rank = rank();
+            Preconditions.checkState(dimension >= -rank && dimension < rank, "Invalid dimension: Got %s for rank %s array", dimension, rank);
+            if(dimension < 0)
+                dimension += rank;
+            return shape[dimension];
+        }
+
+        @Override
+        public int rank() {
+            return shape.length;
+        }
     }
 
     public static class Bool1Array extends BaseBoolArray<boolean[]>{
@@ -201,6 +258,20 @@ public class JavaNDArrays {
         @Override
         public long[] shape() {
             return shape;
+        }
+
+        @Override
+        public long size(int dimension) {
+            int rank = rank();
+            Preconditions.checkState(dimension >= -rank && dimension < rank, "Invalid dimension: Got %s for rank %s array", dimension, rank);
+            if(dimension < 0)
+                dimension += rank;
+            return shape[dimension];
+        }
+
+        @Override
+        public int rank() {
+            return shape.length;
         }
     }
 
@@ -251,6 +322,20 @@ public class JavaNDArrays {
         public long[] shape() {
             return shape;
         }
+
+        @Override
+        public long size(int dimension) {
+            int rank = rank();
+            Preconditions.checkState(dimension >= -rank && dimension < rank, "Invalid dimension: Got %s for rank %s array", dimension, rank);
+            if(dimension < 0)
+                dimension += rank;
+            return shape[dimension];
+        }
+
+        @Override
+        public int rank() {
+            return shape.length;
+        }
     }
 
     public static class Int161Array extends BaseInt16Array<short[]>{
@@ -300,6 +385,20 @@ public class JavaNDArrays {
         public long[] shape() {
             return shape;
         }
+
+        @Override
+        public long size(int dimension) {
+            int rank = rank();
+            Preconditions.checkState(dimension >= -rank && dimension < rank, "Invalid dimension: Got %s for rank %s array", dimension, rank);
+            if(dimension < 0)
+                dimension += rank;
+            return shape[dimension];
+        }
+
+        @Override
+        public int rank() {
+            return shape.length;
+        }
     }
 
     public static class Int321Array extends BaseInt32Array<int[]>{
@@ -348,6 +447,20 @@ public class JavaNDArrays {
         @Override
         public long[] shape() {
             return shape;
+        }
+
+        @Override
+        public long size(int dimension) {
+            int rank = rank();
+            Preconditions.checkState(dimension >= -rank && dimension < rank, "Invalid dimension: Got %s for rank %s array", dimension, rank);
+            if(dimension < 0)
+                dimension += rank;
+            return shape[dimension];
+        }
+
+        @Override
+        public int rank() {
+            return shape.length;
         }
     }
 

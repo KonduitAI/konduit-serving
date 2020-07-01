@@ -67,4 +67,54 @@ public class NDArrayUtils {
         }
         return new double[]{max, maxIdx};
     }
+
+    /**
+     * Convert a NCHW (channels first) float array to NHWC (channels last) format
+     * @param nchw NCHW array
+     * @return NHWC array
+     */
+    public static float[][][][] nchwToNhwc(float[][][][] nchw){
+        int n = nchw.length;
+        int c = nchw[0].length;
+        int h = nchw[0][0].length;
+        int w = nchw[0][0][0].length;
+
+        float[][][][] nhwc = new float[n][h][w][c];
+        for( int i=0; i<n; i++ ){
+            for( int j=0; j<h; j++ ){
+                for( int k=0; k<w; k++ ){
+                    for( int l=0; l<c; l++ ){
+                        nhwc[i][j][k][l] = nchw[i][l][j][k];
+                    }
+                }
+            }
+        }
+
+        return nhwc;
+    }
+
+    /**
+     * Convert a NHWC (channels last) float array to a NCHW (channels first) format
+     * @param nhwc NHWC array
+     * @return NCHW array
+     */
+    public static float[][][][] nhwcToNchw(float[][][][] nhwc){
+        int n = nhwc.length;
+        int h = nhwc[0].length;
+        int w = nhwc[0][0].length;
+        int c = nhwc[0][0][0].length;
+
+        float[][][][] nchw = new float[n][c][h][w];
+        for( int i=0; i<n; i++ ){
+            for( int j=0; j<h; j++ ){
+                for( int k=0; k<w; k++ ){
+                    for( int l=0; l<c; l++ ){
+                        nchw[i][l][j][k] = nhwc[i][j][k][l];
+                    }
+                }
+            }
+        }
+
+        return nchw;
+    }
 }

@@ -30,6 +30,10 @@ public interface NDArray {
 
     long[] shape();
 
+    long size(int dimension);
+
+    int rank();
+
     Object get();
 
     <T> T getAs(NDArrayFormat<T> format);
