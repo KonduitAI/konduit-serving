@@ -78,8 +78,8 @@ public class PipelineProfilerTest {
         assertEquals(6, events.length);
         assertEquals("Runner", events[0].getName());
         assertEquals("Runner", events[1].getName());
-        assertEquals("LoggingPipelineRunner", events[2].getName());
-        assertEquals("LoggingPipelineRunner", events[3].getName());
+        assertEquals("LoggingRunner", events[2].getName());
+        assertEquals("LoggingRunner", events[3].getName());
         assertEquals("Runner", events[4].getName());
     }
 
@@ -116,12 +116,12 @@ public class PipelineProfilerTest {
     public void testEventsJson() throws JsonProcessingException {
         String content = "[{\"name\":\"Runner\",\"cat\":\"START\",\"ts\":577532080904,\"pid\":17104,\"tid\":1,\"ph\":\"B\"},\n" +
                 "{\"name\":\"Runner\",\"cat\":\"END\",\"ts\":577532194829,\"pid\":17104,\"tid\":1,\"ph\":\"E\"},\n" +
-                "{\"name\":\"LoggingPipelineRunner\",\"cat\":\"START\",\"ts\":577532194878,\"pid\":17104,\"tid\":1,\"ph\":\"B\"},\n" +
-                "{\"name\":\"LoggingPipelineRunner\",\"cat\":\"END\",\"ts\":577532195804,\"pid\":17104,\"tid\":1,\"ph\":\"E\"},\n" +
+                "{\"name\":\"LoggingRunner\",\"cat\":\"START\",\"ts\":577532194878,\"pid\":17104,\"tid\":1,\"ph\":\"B\"},\n" +
+                "{\"name\":\"LoggingRunner\",\"cat\":\"END\",\"ts\":577532195804,\"pid\":17104,\"tid\":1,\"ph\":\"E\"},\n" +
                 "{\"name\":\"Runner\",\"cat\":\"START\",\"ts\":577532195829,\"pid\":17104,\"tid\":1,\"ph\":\"B\"}]";
         TraceEvent[] events = new ObjectMapper().readValue(content, TraceEvent[].class);
         assertEquals("Runner", events[0].getName());
-        assertEquals("LoggingPipelineRunner", events[2].getName());
+        assertEquals("LoggingRunner", events[2].getName());
     }
 
 

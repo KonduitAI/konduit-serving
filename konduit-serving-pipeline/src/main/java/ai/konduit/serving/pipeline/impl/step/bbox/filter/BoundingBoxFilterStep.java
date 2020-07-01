@@ -24,6 +24,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
+
+import java.util.Arrays;
 
 @Data
 @Accessors(fluent = true)
@@ -41,5 +44,11 @@ public class BoundingBoxFilterStep implements PipelineStep {
     protected String inputName = "input";
 
     protected String outputName = DEFAULT_OUTPUT_NAME;
+
+//    @Tolerate
+//    public BoundingBoxFilterStep classesToKeep(String... classesToKeep){
+//        return this.classesToKeep(new String[]{classesToKeep});
+
+
 
 }
