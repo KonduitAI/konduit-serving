@@ -44,10 +44,12 @@ public class KerasStepTest {
     private INDArray[] inputs;
     private INDArray[] outputs;
     @Parameterized.Parameters
-    private static Object[] getTestModels(){
+    public static Object[] getTestModels(){
         if (!PythonProcess.isPackageInstalled("tensorflow")){
             PythonProcess.pipInstall("tensorflow");
         }
+
+        // TODO use test resources instead
         try(PythonGC gc = PythonGC.watch()){
             PythonObject keras = Python.importModule("tensorflow").attr("keras");
             PythonObject layers = keras.attr("layers");
