@@ -20,3 +20,4 @@ ai.konduit.serving.pipeline.impl.step.bbox.filter.BoundingBoxFilterStepRunnerFac
 ai.konduit.serving.pipeline.impl.step.bbox.point.BoundingBoxToPointStepRunnerFactory
 ai.konduit.serving.pipeline.impl.step.ml.regression.RegressionOutputRunnerFactory
 ai.konduit.serving.pipeline.impl.step.ml.classifier.ClassifierOutputRunnerFactory
+ai.konduit.serving.pipeline.impl.step.bbox.yolo.YoloToBoundingBoxStepFactory

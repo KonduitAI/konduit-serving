@@ -16,35 +16,22 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.data.nd4j.data;
+package ai.konduit.serving.pipeline.impl.step.bbox.yolo;
 
-import ai.konduit.serving.data.nd4j.util.ND4JUtil;
-import ai.konduit.serving.pipeline.api.data.NDArrayType;
-import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
-import org.nd4j.linalg.api.ndarray.INDArray;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import org.nd4j.common.base.Preconditions;
 
-public class ND4JNDArray extends BaseNDArray<INDArray> {
-    public ND4JNDArray(INDArray array) {
-        super(array);
+public class YoloToBoundingBoxStepFactory implements PipelineStepRunnerFactory {
+    @Override
+    public boolean canRun(PipelineStep step) {
+        return step instanceof YoloToBoundingBoxStep;
     }
 
     @Override
-    public NDArrayType type() {
-        return ND4JUtil.typeNd4jToNDArrayType(array.dataType());
-    }
-
-    @Override
-    public long[] shape() {
-        return array.shape();
-    }
-
-    @Override
-    public long size(int dimension) {
-        return array.size(dimension);
-    }
-
-    @Override
-    public int rank() {
-        return array.rank();
+    public PipelineStepRunner create(PipelineStep step) {
+        Preconditions.checkState(canRun(step), "Unable to run step of type: %s", step.getClass());
+        return new YoloToBoundingBoxRunner((YoloToBoundingBoxStep) step);
     }
 }
