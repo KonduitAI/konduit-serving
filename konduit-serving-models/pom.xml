@@ -33,6 +33,7 @@
         <module>konduit-serving-deeplearning4j</module>
         <module>konduit-serving-tensorflow</module>
         <module>konduit-serving-samediff</module>
+        <module>konduit-serving-tf2</module>
     </modules>
 
 </project>
