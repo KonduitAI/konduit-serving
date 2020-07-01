@@ -20,7 +20,6 @@ package ai.konduit.serving.pipeline.impl.step.bbox.yolo;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import com.sun.org.glassfish.gmbal.Description;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -32,7 +31,7 @@ import java.util.List;
 /**
  * Convert an NDArray for the predictions of a YOLO model to {@code List<BoundingBox>}.<br>
  * The NDArray is assumed to be in "standard" YOLO output format, after activations (sigmoid/softmax) have been applied.<br>
- * Input must be a float/double NDArray with shape [minibatch, B*(5+C), H, W]    ->      Reshape to [minibatch, B, 5+C, H, W]<br>
+ * Input must be a float/double NDArray with shape [minibatch, B*(5+C), H, W] (if nchw=true) or [minibatch, H, W, B*(5+C)] (if nchw=false)<br>
  * B = number of bounding box priors<br>
  * C = number of classes<br>
  * H = output/label height<br>
@@ -52,6 +51,26 @@ import java.util.List;
  * 6.5 would be 6.5/13 = 0.5 of the image (208 pixels).
  *
  */
+@Schema(description = "Convert an NDArray for the predictions of a YOLO model to {@code List<BoundingBox>}.<br>" +
+        "The NDArray is assumed to be in \"standard\" YOLO output format, after activations (sigmoid/softmax) have been applied.<br>" +
+        "Input must be a float/double NDArray with shape [minibatch, B*(5+C), H, W] (if nchw=true) or [minibatch, H, W, B*(5+C)] (if nchw=false)<br> " +
+        "B = number of bounding box priors<br>" +
+        "C = number of classes<br>" +
+        "H = output/label height<br>" +
+        "W = output/label width<br>" +
+        "Along the channel dimension (for each box prior), we have the following values:" +
+        "0: px = predicted x location within grid cell, 0.0 to 1.0<br>" +
+        "1: py = predicted y location within grid cell, 0.0 to 1.0<br>" +
+        "2: pw = predicted width, in grid cell, for example 0.0 to H (for example, pw = 2.0 -> 2.0/W fraction of image)<br>" +
+        "3: ph = predicted height, in grid cell, for example 0.0 to H (for example, ph = 2.0 -> 2.0/H fraction of image)<br>" +
+        "4: c = object confidence - i.e., probability an object is present or not, 0.0 to 1.0<br>" +
+        "5 to 4+C = probability of class (given an object is present), 0.0 to 1.0, with values summing to 1.0<br>" +
+        "<br>" +
+        "Note that the height/width dimensions are grid cell units - for example, with 416x416 input, 32x downsampling by the network" +
+        "we have 13x13 grid cells (each corresponding to 32 pixels in the input image). Thus, a centerX of 5.5 would be xPixels=5.5x32" +
+        "= 176 pixels from left.<br>" +
+        "Widths and heights are similar: in this example, a with of 13 would be the entire image (416 pixels), and a height of" +
+        "6.5 would be 6.5/13 = 0.5 of the image (208 pixels).")
 @Data
 @Accessors(fluent = true)
 @JsonName("YOLO_BBOX")
