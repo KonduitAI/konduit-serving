@@ -17,7 +17,7 @@
 
 package ai.konduit.serving;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import org.nd4j.python4j.*;
 
 public class KerasModel {
@@ -63,20 +63,24 @@ public class KerasModel {
         pyModel = pythonObject;
     }
 
-    public INDArray[] predict(INDArray... inputs) {
+    public NumpyArray[] predict(NumpyArray... inputs) {
         try (PythonGC gc = PythonGC.watch()) {
             PythonObject predictF = pyModel.attr("predict");
-            PythonObject inputList = new PythonObject(inputs);
+            PythonObject[] pyInputs = new PythonObject[inputs.length];
+            for (int i = 0; i < inputs.length; i++) {
+                pyInputs[i] = inputs[i].getPythonObject();
+            }
+            PythonObject inputList = new PythonObject(pyInputs);
             PythonObject pyOut = predictF.call(inputList);
-            INDArray[] out;
+            PythonGC.keep(pyOut);
+            NumpyArray[] out;
             if (Python.isinstance(pyOut, Python.listType())) {
-                out = new INDArray[Python.len(pyOut).toInt()];
+                out = new NumpyArray[Python.len(pyOut).toInt()];
                 for (int i = 0; i < out.length; i++) {
-                    out[i] = NumpyArray.INSTANCE.toJava(pyOut.get(i));
+                    out[i] = new NumpyArray(pyOut.get(i));
                 }
             } else {
-                out = new INDArray[]{
-                        NumpyArray.INSTANCE.toJava(pyOut)};
+                out = new NumpyArray[]{new NumpyArray(pyOut)};
             }
             return out;
         }

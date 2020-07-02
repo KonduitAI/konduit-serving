@@ -17,7 +17,6 @@
 
 package ai.konduit.serving;
 
-import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -26,7 +25,6 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import lombok.experimental.Accessors;
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.python4j.PythonGIL;
 
 
@@ -79,13 +77,13 @@ public class KerasStep implements PipelineStep {
         @Override
         public Data exec(Context ctx, Data input) {
             try (PythonGIL gil = PythonGIL.lock()) {
-                INDArray[] inputArrays;
+                NumpyArray[] inputArrays;
                 if (step.inputKeys == null || step.inputKeys.length == 0) {
-                    inputArrays = new INDArray[1];
+                    inputArrays = new NumpyArray[1];
                     int numInputArrays = 0;
                     for (String key : input.keys()) {
                         if (input.type(key) == ValueType.NDARRAY) {
-                            inputArrays[0] = input.getNDArray(key).getAs(INDArray.class);
+                            inputArrays[0] = input.getNDArray(key).getAs(NumpyArray.class);
                             numInputArrays += 1;
                         }
                     }
@@ -95,15 +93,14 @@ public class KerasStep implements PipelineStep {
                         throw new IllegalArgumentException("Multiple NDarray values received for single input model. Specify input key explicitly.");
                     }
                 } else {
-                    inputArrays = new INDArray[step.inputKeys.length];
+                    inputArrays = new NumpyArray[step.inputKeys.length];
                     for (int i = 0; i < inputArrays.length; i++) {
-                        inputArrays[i] = input.getNDArray(step.inputKeys[i]).getAs(INDArray.class);
+                        inputArrays[i] = input.getNDArray(step.inputKeys[i]).getAs(NumpyArray.class);
                     }
                 }
-
-                INDArray[] out = model.predict(inputArrays);
+                NumpyArray[] out = model.predict(inputArrays);
                 for (int i = 0; i < step.outputKeys.length; i++) {
-                    input.put(step.outputKeys[i], NDArray.create(out[i]));
+                    input.put(step.outputKeys[i], new NumpyArray.NumpyNDArray(out[i]));
                 }
                 return input;
             }
