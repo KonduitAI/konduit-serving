@@ -26,13 +26,11 @@ import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import ai.konduit.serving.pipeline.impl.pipeline.loop.SimpleLoopTrigger;
 import ai.konduit.serving.pipeline.impl.pipeline.loop.TimeLoopTrigger;
-import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
 import ai.konduit.serving.pipeline.impl.testpipelines.count.CountStep;
 import ai.konduit.serving.pipeline.impl.testpipelines.time.TimeStep;
 import org.junit.Test;
-import org.slf4j.event.Level;
 
-import java.nio.channels.Pipe;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -152,7 +150,7 @@ public class AsyncPipelineTest {
         for(Trigger t : new Trigger[]{new SimpleLoopTrigger(1000), new TimeLoopTrigger(1, TimeUnit.MINUTES), new TimeLoopTrigger(1, TimeUnit.MINUTES, 20000)}){
 
             Pipeline p = SequencePipeline.builder()
-                    .add(LoggingPipelineStep.builder().build())
+                    .add(new LoggingStep())
                     .build();
 
             Pipeline a1 = new AsyncPipeline(p, t);
@@ -168,7 +166,7 @@ public class AsyncPipelineTest {
             assertEquals(a1, a1y);
 
             GraphBuilder b = new GraphBuilder();
-            GraphStep s = b.input().then("log", LoggingPipelineStep.builder().build());
+            GraphStep s = b.input().then("log", new LoggingStep());
 
             Pipeline g = b.build(s);
 

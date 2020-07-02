@@ -21,7 +21,7 @@ package ai.konduit.serving.vertx.protocols.http;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
 import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.InferenceDeploymentResult;
@@ -60,13 +60,12 @@ public class InferenceVerticleHttpTest {
 
     @BeforeClass
     public static void setUp(TestContext testContext) {
-        configuration = InferenceConfiguration.builder()
+        configuration = new InferenceConfiguration()
                 .protocol(ServerProtocol.HTTP)
                 .pipeline(SequencePipeline.builder()
-                        .add(LoggingPipelineStep.builder().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR).build())
+                        .add(new LoggingStep().log(LoggingStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR))
                         .add(new FailureTestingPipelineStep())
-                        .build())
-                .build();
+                        .build());
 
         Async async = testContext.async();
 

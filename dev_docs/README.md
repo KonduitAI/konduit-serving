@@ -3,7 +3,8 @@
 These docs are designed to explain the architecture of Konduit Serving (for the "new" API as of 05/2020).
 
 See `ADRs/0003-Pipeline-API_Rewrite.md` for background and motivation on the current design.  
-See also: dev_docs/BuildToolReadme.md for details on the Konduit Serving build tool (reading this first is recommended)
+See also: dev_docs/BuildToolReadme.md for details on the Konduit Serving build tool (reading this first is recommended). <br> 
+See also: dev_docs/ClientsAndDocsGeneration.md for details on how we're generating client code along with its reference documentation.
 
 ## Core classes:
 
@@ -38,8 +39,6 @@ The list below briefly describes those implemented so far (as of 04/06/2020)- th
     * konduit-serving-nd4j: Mainly NDArray integration/functionality for ND4J. Used also by deeplearning4j and samediff modules
     * konduit-serving-image: Image conversion functionality using JavaCV; also Image -> NDArray functionality, and a bunch of utility
       steps for showing images, drawing segmentation masks on images, drawing/croping from a grid, and drawing bounding boxes
-* konduit-serving-io: Parent module for I/O functionality - sensors, cameras, etc - and maybe later things like HDFS, S3, etc
-    * konduit-serving-camera: Steps related to capturing data from device-connected cameras (WIP)
 * konduit-serving-metadata
     * konduit-serving-meta: collects metadata from all modules - what. More on this later.
     * konduit-serving-annotations: Annotations: `@JsonName`, `@ModuleInfo`,  `@CanRun` and `@RequiresDependencyAny`, `@RequiresDependencyAll`, `@InheritRequiredDependencies`.
@@ -554,4 +553,4 @@ It's fine to have sub-packages (i.e., any X in `ai.konduit.serving.data.nd4j.X` 
 in the same package - i.e., modules X and Y can't both define classes directly in the same namespace.
 The reason is to avoid split packages issues for OSGi and Java 9 Modules. We will likely use OSGi extensively in the future.
 
- 
+

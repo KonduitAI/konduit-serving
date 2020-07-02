@@ -159,8 +159,8 @@ public class PredictCommand extends DefaultCommand {
                         }
 
                         HttpRequest<Buffer> request = WebClient.create(vertx)
-                                .head(inferenceConfiguration.getPort(),
-                                        inferenceConfiguration.getHost(),
+                                .head(inferenceConfiguration.port(),
+                                        inferenceConfiguration.host(),
                                         "/predict")
                                 .putHeader(CONTENT_TYPE.toString(), contentType)
                                 .putHeader(ACCEPT.toString(), accept)
@@ -204,7 +204,7 @@ public class PredictCommand extends DefaultCommand {
                         }
 
                         InferenceGrpc.newVertxStub(VertxChannelBuilder
-                                .forAddress(vertx, inferenceConfiguration.getHost(), inferenceConfiguration.getPort())
+                                .forAddress(vertx, inferenceConfiguration.host(), inferenceConfiguration.port())
                                 .usePlaintext(true)
                                 .build())
                                 .predict(DataProtoMessage.DataScheme.parseFrom(

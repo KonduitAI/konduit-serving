@@ -33,9 +33,9 @@ public class CropGridStepRunnerFactory implements PipelineStepRunnerFactory {
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
         if(pipelineStep instanceof CropGridStep){
-            return new CropGridStepRunner((CropGridStep) pipelineStep);
+            return new CropGridRunner((CropGridStep) pipelineStep);
         } else {
-            return new CropGridStepRunner((CropFixedGridStep) pipelineStep);
+            return new CropGridRunner((CropFixedGridStep) pipelineStep);
         }
 
     }

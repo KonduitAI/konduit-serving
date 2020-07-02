@@ -42,6 +42,9 @@ public class CLIValidators {
 
         @Override
         public void validate(String name, List<String> value) throws ParameterException {
+            if(value == null || value.isEmpty())
+                return; //Infer OS
+
             for(String s : value){
                 if(!LINUX.equalsIgnoreCase(s) && !WINDOWS.equalsIgnoreCase(s) && !MAC.equalsIgnoreCase(s)){
                     throw new ParameterException("Invalid operating system: got \"" + s + "\" but must be one or more of {" + LINUX + "," + WINDOWS + "," + MAC + "} (case insensitive)");
@@ -166,6 +169,7 @@ public class CLIValidators {
 
         @Override
         public void validate(String name, List<String> value) throws ParameterException {
+
             for(String s : value){
                 String[] split = s.split("=");
                 if(split.length != 2){

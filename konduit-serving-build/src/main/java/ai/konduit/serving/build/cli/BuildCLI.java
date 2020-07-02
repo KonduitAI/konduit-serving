@@ -29,9 +29,11 @@ import ai.konduit.serving.build.dependencies.ModuleRequirements;
 import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import ai.konduit.serving.build.config.Module;
+import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import com.beust.jcommander.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
 import java.util.*;
@@ -62,8 +64,9 @@ public class BuildCLI {
     @Parameter(names = {"-p", "--pipeline"})
     private String pipeline;
 
-    @Parameter(names = {"-o", "--os"}, required = true, validateValueWith = CLIValidators.OSValueValidator.class,
-            description = "Operating systems to build for. Valid values: {linux, windows, mac} (case insensitive)")
+    @Parameter(names = {"-o", "--os"}, validateValueWith = CLIValidators.OSValueValidator.class,
+            description = "Operating systems to build for. Valid values: {linux, windows, mac} (case insensitive).\n" +
+                    "If not set, the current system OS will be used")
     private List<String> os;
 
     @Parameter(names = {"-a", "--arch"}, validateValueWith = CLIValidators.ArchValueValidator.class,
@@ -122,6 +125,11 @@ public class BuildCLI {
             jCommander.usage();
             return;
         }
+
+        //Infer OS if necessary
+        if(os == null || os.isEmpty())
+            inferOS();
+
 
         //------------------------------------- Build Configuration --------------------------------------
 
@@ -414,4 +422,15 @@ public class BuildCLI {
         return out;
     }
 
+    protected void inferOS(){
+        if(SystemUtils.IS_OS_LINUX) {
+            os = Collections.singletonList(OS.LINUX.name());
+        } else if(SystemUtils.IS_OS_WINDOWS){
+            os = Collections.singletonList(OS.WINDOWS.name());
+        } else  if(SystemUtils.IS_OS_MAC){
+            os = Collections.singletonList(OS.MACOSX.name());
+        } else {
+            throw new IllegalStateException("No OS was provided and operating system could not be inferred");
+        }
+    }
 }

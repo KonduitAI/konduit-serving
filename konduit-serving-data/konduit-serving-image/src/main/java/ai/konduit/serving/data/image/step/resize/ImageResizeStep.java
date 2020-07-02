@@ -25,8 +25,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,7 +53,7 @@ import java.util.List;
  */
 @Data
 @Accessors(fluent = true)
-@JsonName("RESIZE")
+@JsonName("IMAGE_RESIZE")
 @NoArgsConstructor
 @Schema(description = "A pipeline step that resizes an image, scaling up or down as needed to comply with the " +
         "specified output height/width. Usually, both <height> and <width> are specified. However, if only one is specified, " +
@@ -95,5 +97,10 @@ public class ImageResizeStep implements PipelineStep {
         this.height = height;
         this.width = width;
         this.aspectRatioHandling = aspectRatioHandling;
+    }
+
+    @Tolerate
+    public ImageResizeStep inputNames(String... inputNames) {
+        return this.inputNames(Arrays.asList(inputNames));
     }
 }

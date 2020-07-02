@@ -89,7 +89,7 @@ public class ImageNormalization {
         VGG_SUBTRACT_MEAN
     }
 
-    @Builder.Default
+    
     @Schema(description = "An enum that specifies the type of normalization applied.",
             defaultValue = "SCALE")
     public Type type = Type.SCALE;

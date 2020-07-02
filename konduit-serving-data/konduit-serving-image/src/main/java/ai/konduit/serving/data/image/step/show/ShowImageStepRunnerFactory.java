@@ -26,12 +26,12 @@ import org.nd4j.common.base.Preconditions;
 public class ShowImageStepRunnerFactory implements PipelineStepRunnerFactory {
     @Override
     public boolean canRun(PipelineStep pipelineStep) {
-        return pipelineStep instanceof ShowImagePipelineStep;
+        return pipelineStep instanceof ShowImageStep;
     }
 
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run pipeline of type %s", pipelineStep);
-        return new ShowImageStepRunner((ShowImagePipelineStep) pipelineStep);
+        return new ShowImageRunner((ShowImageStep) pipelineStep);
     }
 }

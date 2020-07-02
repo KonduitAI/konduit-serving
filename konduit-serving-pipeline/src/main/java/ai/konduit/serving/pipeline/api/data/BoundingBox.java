@@ -2,7 +2,11 @@ package ai.konduit.serving.pipeline.api.data;
 
 import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
 import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
+import ai.konduit.serving.pipeline.impl.pipeline.serde.BoundingBoxDeserializer;
+import ai.konduit.serving.pipeline.impl.pipeline.serde.BoundingBoxSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
+import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
 
 import java.util.Objects;
 
@@ -27,6 +31,8 @@ import java.util.Objects;
         "As a general rule, bounding box coordinates are specified as a fraction of the image - with coordinates (x,y)=(0.0, 0.0) " +
         "being top left of the image, and (x,y)=(1.0, 1.0) being the bottom right of the image. However, in some use cases, " +
         "specifying x/y locations in pixels might be used.")
+@JsonSerialize(using = BoundingBoxSerializer.class)
+@JsonDeserialize(using = BoundingBoxDeserializer.class)
 public interface BoundingBox {
 
     /**

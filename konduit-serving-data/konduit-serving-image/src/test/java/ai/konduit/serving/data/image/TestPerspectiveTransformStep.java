@@ -20,7 +20,7 @@ package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.step.point.perspective.convert.PerspectiveTransformStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
@@ -42,9 +42,8 @@ public class TestPerspectiveTransformStep {
     @Test
     public void testNoReferenceWithTarget() throws Exception {
         Pipeline p = SequencePipeline.builder()
-                .add(PerspectiveTransformStep.builder()
-                        .inputName("point")
-                        .inputName("boundingBox")
+                .add(new PerspectiveTransformStep()
+                        .inputNames("point", "boundingBox")
                         .sourcePoints(Arrays.asList(
                                 Point.create(3, 3),
                                 Point.create(0, 3),
@@ -57,7 +56,7 @@ public class TestPerspectiveTransformStep {
                                 Point.create(0, 3),
                                 Point.create(3, 3)
                         ))
-                        .build())
+                        )
                 .build();
 
         Data data = Data.empty();
@@ -76,16 +75,15 @@ public class TestPerspectiveTransformStep {
     @Test
     public void testNoReferenceNoTarget() throws Exception {
         Pipeline p = SequencePipeline.builder()
-                .add(PerspectiveTransformStep.builder()
-                        .inputName("point")
-                        .inputName("boundingBox")
+                .add(new PerspectiveTransformStep()
+                        .inputNames("point", "boundingBox")
                         .sourcePoints(Arrays.asList(
                                 Point.create(4, 4),
                                 Point.create(0, 4),
                                 Point.create(4, 0),
                                 Point.create(0, 0)
                         ))
-                        .build())
+                        )
                 .build();
 
         Data data = Data.empty();
@@ -104,9 +102,8 @@ public class TestPerspectiveTransformStep {
     @Test
     public void testWithReferenceWithTarget() throws Exception {
         Pipeline p = SequencePipeline.builder()
-                .add(PerspectiveTransformStep.builder()
-                        .inputName("point")
-                        .inputName("boundingBox")
+                .add(new PerspectiveTransformStep()
+                        .inputNames("point", "boundingBox")
                         .sourcePoints(Arrays.asList(
                                 Point.create(1, 0),
                                 Point.create(2, 0),
@@ -121,7 +118,7 @@ public class TestPerspectiveTransformStep {
                         ))
                         .referenceHeight(3)
                         .referenceWidth(3)
-                        .build())
+        )
                 .build();
 
         Data data = Data.empty();
@@ -140,16 +137,15 @@ public class TestPerspectiveTransformStep {
     @Test
     public void testReferenceNoTarget() throws Exception {
         Pipeline p = SequencePipeline.builder()
-                .add(PerspectiveTransformStep.builder()
-                        .inputName("point")
-                        .inputName("boundingBox")
+                .add(new PerspectiveTransformStep()
+                        .inputNames("point", "boundingBox")
                         .sourcePoints(Arrays.asList(
                                 Point.create(4, 4),
                                 Point.create(0, 4),
                                 Point.create(4, 0),
                                 Point.create(0, 0)
                         ))
-                        .build())
+                        )
                 .build();
 
         Data data = Data.empty();
@@ -169,15 +165,15 @@ public class TestPerspectiveTransformStep {
     @Test
     public void testReferenceWithTargetImage() throws Exception {
         SequencePipeline.Builder b = SequencePipeline.builder()
-                .add(DrawSegmentationStep.builder()
+                .add(new DrawSegmentationStep()
                         .image(null)
                         .segmentArray("class_idxs")
                         .outputName("out")
                         .classColors(Arrays.asList("red", "green", "blue"))
-                        .build());
+                        );
 
-            b.add(PerspectiveTransformStep.builder()
-                    .inputName("out")
+            b.add(new PerspectiveTransformStep()
+                    .inputNames("out")
                     .sourcePoints(Arrays.asList(
                             Point.create(3, 3),
                             Point.create(0, 3),
@@ -192,14 +188,14 @@ public class TestPerspectiveTransformStep {
                     ))
                     .referenceWidth(32)
                     .referenceHeight(32)
-                    .build());
+                    );
 
-            b.add(ShowImagePipelineStep.builder()
+            b.add(new ShowImageStep()
                     .displayName("Segment")
                     .imageName("out")
                     .width(256)
                     .height(256)
-                    .build());
+                    );
 
         Pipeline p = b.build();
 
@@ -219,15 +215,15 @@ public class TestPerspectiveTransformStep {
     @Test
     public void testReferenceImageWithTargetImage() throws Exception {
         SequencePipeline.Builder b = SequencePipeline.builder()
-                .add(DrawSegmentationStep.builder()
+                .add(new DrawSegmentationStep()
                         .image(null)
                         .segmentArray("class_idxs")
                         .outputName("out")
                         .classColors(Arrays.asList("red", "green", "blue"))
-                        .build());
+                        );
 
-        b.add(PerspectiveTransformStep.builder()
-                .inputName("out")
+        b.add(new PerspectiveTransformStep()
+                .inputNames("out")
                 .sourcePoints(Arrays.asList(
                         Point.create(3, 3),
                         Point.create(0, 3),
@@ -241,14 +237,14 @@ public class TestPerspectiveTransformStep {
                         Point.create(3, 3)
                 ))
                 .referenceImage("out")
-                .build());
+                );
 
-        b.add(ShowImagePipelineStep.builder()
+        b.add(new ShowImageStep()
                 .displayName("Segment")
                 .imageName("out")
                 .width(256)
                 .height(256)
-                .build());
+                );
 
         Pipeline p = b.build();
 
@@ -268,8 +264,8 @@ public class TestPerspectiveTransformStep {
     @Test
     public void testImage() throws Exception {
         Pipeline p = SequencePipeline.builder()
-                .add(PerspectiveTransformStep.builder()
-                        .inputName("image")
+                .add(new PerspectiveTransformStep()
+                        .inputNames("image")
                         .sourcePoints(Arrays.asList(
                                 Point.create(12, 196),
                                 Point.create(496, 253),
@@ -282,8 +278,8 @@ public class TestPerspectiveTransformStep {
 //                                Point.create(10, 590),
 //                                Point.create(590, 590)
 //                        ))
-                        .build())
-                .add(new ShowImagePipelineStep().width(600).height(600))
+                        )
+                .add(new ShowImageStep().width(600).height(600))
                 .build();
 
         File f = Resources.asFile("data/shelves.png");

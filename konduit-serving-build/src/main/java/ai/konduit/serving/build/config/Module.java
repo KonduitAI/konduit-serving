@@ -49,7 +49,6 @@ public class Module {
     public static final Module SAMEDIFF = forName("konduit-serving-samediff");
     public static final Module TENSORFLOW = forName("konduit-serving-samediff");
     public static final Module IMAGE = forName("konduit-serving-image");
-    public static final Module CAMERA = forName("konduit-serving-camera");
 
     //CLI module can't be defined using forName (from konduit-serving-metadata files) due to it not being in metadata module
     // (to avoid cyclical dependency: cli -> meta -> build -> cli

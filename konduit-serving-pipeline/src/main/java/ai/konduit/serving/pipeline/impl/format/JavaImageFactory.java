@@ -39,6 +39,7 @@ public class JavaImageFactory implements ImageFactory {
         s.add(Path.class);
         s.add(Png.class);
         s.add(Jpeg.class);
+        s.add(Bmp.class);
         s.add(BufferedImage.class);
     }
 
@@ -68,6 +69,8 @@ public class JavaImageFactory implements ImageFactory {
                 return new PngImage(new Png(f));
             } else if(name.endsWith(".jpg") || name.endsWith(".jpeg")){
                 return new JpegImage(new Jpeg(f));
+            } else if(name.endsWith(".bmp")){
+                return new BmpImage(new Bmp(f));
             }
             throw new DataLoadingException("Unable to create Image object: unable to guess image file format from File" +
                     " path/filename, or format not supported - " + f.getAbsolutePath());
@@ -75,6 +78,8 @@ public class JavaImageFactory implements ImageFactory {
             return new PngImage((Png) o);
         } else if(o instanceof Jpeg){
             return new JpegImage((Jpeg)o);
+        } else if(o instanceof Bmp){
+            return new BmpImage((Bmp)o);
         } else if(o instanceof BufferedImage){
             return new BImage((BufferedImage) o);
         } else {

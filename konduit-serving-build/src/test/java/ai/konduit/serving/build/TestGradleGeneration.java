@@ -24,7 +24,8 @@ import ai.konduit.serving.build.config.Serving;
 import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.*;
-import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
+import ai.konduit.serving.build.build.GradleBuild;
+import ai.konduit.serving.models.deeplearning4j.step.DL4JStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import io.micrometer.core.instrument.util.StringUtils;
@@ -54,7 +55,7 @@ public class TestGradleGeneration {
     public void testBasicGeneration() throws Exception {
 
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
+                .add(new DL4JStep("file:///some/model/path.zip", null, null))
                 .build();
 
         File dir = testDir.newFolder();
@@ -120,7 +121,7 @@ public class TestGradleGeneration {
     @Test
     public void testManifestJarCreation() throws Exception {
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
+                .add(new DL4JStep("file:///some/model/path.zip", null, null))
                 .build();
 
         File dir = testDir.newFolder();
@@ -172,7 +173,7 @@ public class TestGradleGeneration {
     public void testRpmGeneration() throws Exception {
 
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
+                .add(new DL4JStep("file:///some/model/path.zip", null, null))
                 .build();
 
         File dir = testDir.newFolder();
@@ -209,7 +210,7 @@ public class TestGradleGeneration {
     public void testDebGeneration() throws Exception {
 
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
+                .add(new DL4JStep("file:///some/model/path.zip", null, null))
                 .build();
 
         File dir = testDir.newFolder();
@@ -243,7 +244,7 @@ public class TestGradleGeneration {
     public void testExeGeneration() throws Exception {
 
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
+                .add(new DL4JStep("file:///some/model/path.zip", null, null))
                 .build();
 
         File dir = testDir.newFolder();
@@ -284,7 +285,7 @@ public class TestGradleGeneration {
     public void testDockerImageGeneration() throws Exception {
 
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
+                .add(new DL4JStep("file:///some/model/path.zip", null, null))
                 .build();
 
         File dir = testDir.newFolder();
@@ -320,7 +321,7 @@ public class TestGradleGeneration {
     public void testTarGeneration() throws Exception {
 
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
+                .add(new DL4JStep("file:///some/model/path.zip", null, null))
                 .build();
 
         File dir = testDir.newFolder();
@@ -359,7 +360,7 @@ public class TestGradleGeneration {
     @Test
     public void testManifestJarAdditionalDependency() throws Exception {
         Pipeline p = SequencePipeline.builder()
-                .add(new DL4JModelPipelineStep("file:///some/model/path.zip", null, null))
+                .add(new DL4JStep("file:///some/model/path.zip", null, null))
                 .build();
 
         File dir = testDir.newFolder();
