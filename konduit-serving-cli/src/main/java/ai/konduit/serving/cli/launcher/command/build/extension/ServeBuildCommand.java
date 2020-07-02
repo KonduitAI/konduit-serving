@@ -171,7 +171,7 @@ public class ServeBuildCommand extends ServeCommand {
             return ObjectMappers.json().readTree(configurationString);
         } catch (Exception jsonProcessingErrors) {
             try {
-                JsonNode jsonNode =ObjectMappers.yaml().readTree(configurationString);
+                JsonNode jsonNode = ObjectMappers.yaml().readTree(configurationString);
                 if(jsonNode instanceof TextNode) {
                     throw new IllegalStateException("Expected JsonNode to be ObjectNode but was TextNode while parsing as a YAML object. " +
                             "This usually indicates that the YAML was not parsed as expected. Could be a bad configuration file path in: " + configurationString);
