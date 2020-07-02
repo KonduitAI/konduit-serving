@@ -145,6 +145,7 @@ public interface Data {
     void putListNDArray(String key, List<NDArray> data);
     void putListBoundingBox(String key, List<BoundingBox> data);
     void putListPoint(String key, List<Point> data);
+    void putList(String key, List<?> data, ValueType vt);
     void put(String key, Data data);
 
     boolean hasMetaData();
@@ -395,7 +396,8 @@ public interface Data {
                         putListData(key, (List<Data>)l);
                         break;
                     case LIST:
-                        throw new UnsupportedOperationException("List<List> copyFrom not yet implemented");
+                        putList(key, l, ValueType.LIST);
+                        break;
                     default:
                         throw new UnsupportedOperationException("Not supported: " + vt);
                 }

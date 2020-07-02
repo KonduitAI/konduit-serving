@@ -94,8 +94,7 @@ public class TestExtractBBStep {
                             assertEquals(oHW, img.height());
                             assertEquals(oHW, img.width());
                         } else {
-                            assertEquals(1077, img.height());
-                            assertEquals(721, img.width());
+                            assertEquals(img.height(), img.width());    //Aspect ratio = 1.0 --> same H/W
                         }
 
                         if(keepOthers){
@@ -116,37 +115,46 @@ public class TestExtractBBStep {
     @Test
     public void testList(){
         File f = Resources.asFile("data/mona_lisa.png");
+        Image inImg = Image.create(f);
 
         int oHW = 64;
 
         for(boolean outHW : new boolean[]{true, false}) {
             for (boolean nullNames : new boolean[]{false, true}) {
-                Pipeline p = SequencePipeline.builder()
-                        .add(new ExtractBoundingBoxStep()
-                                .imageName(nullNames ? null : "image")
-                                .bboxName(nullNames ? null : "bbox")
-                                .aspectRatio(1.0)
-                                .resizeH(outHW ? oHW : null)
-                                .resizeW(outHW ? oHW : null)
-                                )
-                        .build();
+                for(Double ar : new Double[]{null, 1.0}) {
+                    Pipeline p = SequencePipeline.builder()
+                            .add(new ExtractBoundingBoxStep()
+                                    .imageName(nullNames ? null : "image")
+                                    .bboxName(nullNames ? null : "bbox")
+                                    .aspectRatio(ar)
+                                    .resizeH(outHW ? oHW : null)
+                                    .resizeW(outHW ? oHW : null)
+                            )
+                            .build();
 
 
-                Data in = Data.singleton("image", Image.create(f));
-                List<BoundingBox> lbb = Arrays.asList(BoundingBox.create(0.5, 0.22, 0.25, 0.3), BoundingBox.create(0.5, 0.22, 0.25, 0.3));
-                in.putListBoundingBox("bbox", lbb);
+                    Data in = Data.singleton("image", inImg);
+                    List<BoundingBox> lbb = Arrays.asList(BoundingBox.create(0.5, 0.22, 0.25, 0.3), BoundingBox.create(0.5, 0.22, 0.25, 0.3));
+                    in.putListBoundingBox("bbox", lbb);
 
-                Data out = p.executor().exec(in);
+                    Data out = p.executor().exec(in);
 
-                List<Image> lOut = out.getListImage("image");
-                assertEquals(2, lOut.size());
-                for(Image img : lOut) {
-                    if (outHW) {
-                        assertEquals(oHW, img.height());
-                        assertEquals(oHW, img.width());
-                    } else {
-                        assertEquals(1077, img.height());
-                        assertEquals(721, img.width());
+                    List<Image> lOut = out.getListImage("image");
+                    assertEquals(2, lOut.size());
+                    for (Image img : lOut) {
+                            if (outHW) {
+                                assertEquals(oHW, img.height());
+                                assertEquals(oHW, img.width());
+                            } else {
+                                if(ar == null) {
+                                    int h = (int) Math.round(0.25*inImg.height());
+                                    int w = (int) Math.round(0.3*inImg.width());
+                                    assertEquals(h, img.height());
+                                    assertEquals(w, img.width());
+                                } else {
+                                    assertEquals(img.height(), img.width());        //AR = 1.0 --> same H/W
+                                }
+                            }
                     }
                 }
             }
