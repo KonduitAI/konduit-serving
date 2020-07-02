@@ -161,12 +161,6 @@
             <artifactId>oshi-json</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.9.9</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
