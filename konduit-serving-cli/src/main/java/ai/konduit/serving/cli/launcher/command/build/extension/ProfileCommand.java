@@ -63,8 +63,13 @@ import java.util.regex.Pattern;
 @Slf4j
 public class ProfileCommand extends DefaultCommand {
 
-    private static final File profilesSavePath = new File(DirectoryFetcher.getProfilesDir(), "profiles.yaml");
-    private static final File defaultProfileNamePath = new File(DirectoryFetcher.getProfilesDir(), "default");
+    public static final String DEFAULT_CPU_PROFILE_NAME = "CPU";
+    public static final String DEFAULT_CUDA_PROFILE_NAME = "CUDA";
+    public static final String DEFAULT_CUDA_DEVICE = "CUDA_10.1";
+    public static final String CUDA_10_1_REDIST_DEPENDENCY = "org.bytedeco:cuda-platform-redist:10.1-7.6-1.5.2";
+    public static final String CUDA_10_2_REDIST_DEPENDENCY = "org.bytedeco:cuda-platform-redist:10.2-7.6-1.5.3";
+    private static final File PROFILES_SAVE_PATH = new File(DirectoryFetcher.getProfilesDir(), "profiles.yaml");
+    private static final File DEFAULT_PROFILE_NAME_PATH = new File(DirectoryFetcher.getProfilesDir(), "default");
 
     private SubCommand subCommand;
     private String profileName;
@@ -100,7 +105,7 @@ public class ProfileCommand extends DefaultCommand {
     }
 
     @Option(shortName = "d", longName = "device", argName = "device")
-    @DefaultValue("CPU")
+    @DefaultValue(DEFAULT_CPU_PROFILE_NAME)
     @Description("Compute device to use with the server. Accepted values are: [CPU, CUDA_10.0, CUDA_10.1, CUDA_10.2]")
     public void setComputeDevice(String computeDevice) {
         this.computeDevice = computeDevice;
@@ -114,7 +119,6 @@ public class ProfileCommand extends DefaultCommand {
     }
 
     @Option(shortName = "ad", longName = "addDep", argName = "additionalDependencies", acceptMultipleValues = true)
-    @DefaultValue("ch.qos.logback:logback-classic:1.2.3")
     @Description("One or more space separated values (maven coordinates) indicating additional dependencies to be included with " +
             "the server launch. The pattern of additional dependencies should be either <group_id>:<artifact_id>:<version> or " +
             "<group_id>:<artifact_id>:<version>:<classifier>")
@@ -157,11 +161,11 @@ public class ProfileCommand extends DefaultCommand {
 
     public static void setDefaultProfile(String profileName) {
         if(!isProfileExists(profileName)) {
-            log.error("No profile with name {} exists.", profileName);
+            log.info("No profile with name {} exists.", profileName);
         } else {
             try {
-                FileUtils.writeStringToFile(defaultProfileNamePath, profileName, StandardCharsets.UTF_8);
-                log.error("Successfully set '{}' profile as default.", profileName);
+                FileUtils.writeStringToFile(DEFAULT_PROFILE_NAME_PATH, profileName, StandardCharsets.UTF_8);
+                log.info("Successfully set '{}' profile as default.", profileName);
             } catch (IOException e) {
                 log.error("Unable to set default profile", e);
             }
@@ -170,8 +174,18 @@ public class ProfileCommand extends DefaultCommand {
 
     public static Profile getDefaultProfile() {
         try {
-            String profileName = FileUtils.readFileToString(defaultProfileNamePath, StandardCharsets.UTF_8);
-            return getProfile(profileName);
+            if(DEFAULT_PROFILE_NAME_PATH.exists()) {
+                return getProfile(FileUtils.readFileToString(DEFAULT_PROFILE_NAME_PATH, StandardCharsets.UTF_8));
+            } else {
+                Map<String, Profile> profiles = getAllProfiles();
+                if(profiles.containsKey(DEFAULT_CUDA_PROFILE_NAME)) {
+                    setDefaultProfile(DEFAULT_CUDA_PROFILE_NAME);
+                    return profiles.get(DEFAULT_CUDA_PROFILE_NAME);
+                } else {
+                    setDefaultProfile(DEFAULT_CPU_PROFILE_NAME);
+                    return profiles.get(DEFAULT_CPU_PROFILE_NAME);
+                }
+            }
         } catch (IOException e) {
             log.error("Unable to get default profile", e);
             return null;
@@ -188,12 +202,7 @@ public class ProfileCommand extends DefaultCommand {
 
     private void editProfile() {
         if(isProfileExists(profileName)) {
-            if(profileName.equals("CPU") || profileName.equals("CUDA")) {
-                out.format("Cannot edit pre-set profiles with name 'CPU' or 'CUDA'.%n");
-                System.exit(1);
-            } else {
-                saveProfile(profileName, fillProfileValues(getProfile(profileName)));
-            }
+            saveProfile(profileName, fillProfileValues(getProfile(profileName)));
         } else {
             out.format("No profile found with the name of %s%n", profileName);
         }
@@ -212,7 +221,7 @@ public class ProfileCommand extends DefaultCommand {
         }
 
         if(StringUtils.containsIgnoreCase(profile.computeDevice(), "cuda")) {
-            profile.cpuArchitecture("x86");
+            profile.cpuArchitecture(getCpuArchitectureForCudaDevice(profile.cpuArchitecture()));
         }
 
         if(serverTypes != null && !serverTypes.isEmpty()) {
@@ -230,14 +239,15 @@ public class ProfileCommand extends DefaultCommand {
                 switch (cudaVersion) {
                     case "10.0":
                         out.format("No CUDA install found and no available redist package for cuda version: '%s' found. " +
-                                "Make sure to install CUDA from: %s before starting a konduit server.%n", cudaVersion,
+                                "You can set device to CUDA 10.1 or 10.2 as an alternative. Otherwise, make sure to install CUDA " +
+                                        "from: %s before starting a konduit server.%n", cudaVersion,
                                 "https://developer.nvidia.com/cuda-10.0-download-archive");
                         break;
                     case "10.1":
-                        cudaRedistPackage = "org.bytedeco:cuda-platform-redist:10.1-7.6-1.5.2";
+                        cudaRedistPackage = CUDA_10_1_REDIST_DEPENDENCY;
                         break;
                     case "10.2":
-                        cudaRedistPackage = "org.bytedeco:cuda-platform-redist:10.2-7.6-1.5.3";
+                        cudaRedistPackage = CUDA_10_2_REDIST_DEPENDENCY;
                         break;
                     default:
                         throw new IllegalStateException("Unsupported cuda version: " + cudaVersion);
@@ -245,11 +255,10 @@ public class ProfileCommand extends DefaultCommand {
 
                 if(cudaRedistPackage != null && !profile.additionalDependencies().contains(cudaRedistPackage)) {
                     out.format("No cuda install found. Adding cuda redist package: %s as an additional dependency. " +
-                            "This will be downloaded and setup automatically on runtime konduit server start build.%n",
+                            "This will be downloaded and setup automatically on runtime konduit server build.%n",
                             cudaRedistPackage);
-                    List<String> additionalDependencies = new ArrayList<>(profile.additionalDependencies());
-                    additionalDependencies.add(cudaRedistPackage);
-                    profile.additionalDependencies(additionalDependencies);
+
+                    addDependencies(profile, cudaRedistPackage);
                 }
             } else {
                 if(!cudaVersion.equals(cudaInstall.getKey())) {
@@ -262,10 +271,10 @@ public class ProfileCommand extends DefaultCommand {
                                     "https://developer.nvidia.com/cuda-10.0-download-archive");
                             break;
                         case "10.1":
-                            cudaRedistPackage = "org.bytedeco:cuda-platform-redist:10.1-7.6-1.5.2";
+                            cudaRedistPackage = CUDA_10_1_REDIST_DEPENDENCY;
                             break;
                         case "10.2":
-                            cudaRedistPackage = "org.bytedeco:cuda-platform-redist:10.2-7.6-1.5.3";
+                            cudaRedistPackage = CUDA_10_2_REDIST_DEPENDENCY;
                             break;
                         default:
                             throw new IllegalStateException("Unsupported cuda version: " + cudaVersion);
@@ -274,9 +283,8 @@ public class ProfileCommand extends DefaultCommand {
                         out.format("Adding cuda redist package: %s as an additional dependency. This will be " +
                                         "downloaded and setup automatically on runtime konduit server start build.%n",
                                 cudaRedistPackage);
-                        List<String> additionalDependencies = new ArrayList<>(profile.additionalDependencies());
-                        additionalDependencies.add(cudaRedistPackage);
-                        profile.additionalDependencies(additionalDependencies);
+
+                        addDependencies(profile, cudaRedistPackage);
                     }
                 }
             }
@@ -285,94 +293,124 @@ public class ProfileCommand extends DefaultCommand {
         return profile;
     }
 
+    private static void addDependencies(@NonNull Profile profile, String dependency) {
+        List<String> dependencies = profile.additionalDependencies() == null ?
+                new ArrayList<>() :
+                new ArrayList<>(profile.additionalDependencies());
+
+        dependencies.add(dependency);
+        profile.additionalDependencies(dependencies);
+    }
+
     public static boolean isProfileExists(String profileName) {
-        if(!profilesSavePath.exists()){
+        if(!PROFILES_SAVE_PATH.exists()){
             return false;
         }
         return getAllProfiles().containsKey(profileName);
     }
 
     public static Map<String, Profile> firstTimeProfilesSetup() {
-        log.error("Performing first time profiles setup.");
-
-        SystemInfo systemInfo = new SystemInfo();
-        CentralProcessor.ProcessorIdentifier processorIdentifier = systemInfo.getHardware().getProcessor().getProcessorIdentifier();
-        String cpuArch = processorIdentifier.getMicroarchitecture();
+        log.info("Performing first time profiles setup.");
 
         Map<String, Profile> profiles = new HashMap<>();
-        Profile cpuProfile = new Profile();
-        if(cpuArch != null) {
-            if (StringUtils.containsIgnoreCase(cpuArch, "arm")) {
-                if(processorIdentifier.isCpu64bit()) {
-                    cpuProfile.cpuArchitecture("arm64");
-                } else {
-                    cpuProfile.cpuArchitecture("armhf");
-                }
-            }
-        }
+        Profile cpuProfile = new Profile().cpuArchitecture(getCpuArchitecture());
 
-        String cpuProfileName = "CPU";
-        profiles.put(cpuProfileName, cpuProfile);
+        profiles.put(DEFAULT_CPU_PROFILE_NAME, cpuProfile);
 
-        log.error("Looking for CUDA compatible devices in the current system...");
+        log.info("Looking for CUDA compatible devices in the current system...");
         List<GraphicsCard> nvidiaGraphicsCard = new ArrayList<>();
-        for(GraphicsCard graphicsCard : systemInfo.getHardware().getGraphicsCards()) {
+        for(GraphicsCard graphicsCard : new SystemInfo().getHardware().getGraphicsCards()) {
             String vendor = graphicsCard.getVendor();
             if (vendor != null && StringUtils.containsIgnoreCase(vendor, "nvidia")) {
                 nvidiaGraphicsCard.add(graphicsCard);
             }
         }
 
-        if(!nvidiaGraphicsCard.isEmpty() && !cpuProfile.operatingSystem().equalsIgnoreCase("mac")) {
-            log.error("Found the following cuda compatible devices in the local system: {}", nvidiaGraphicsCard);
+        if(!nvidiaGraphicsCard.isEmpty() && !cpuProfile.operatingSystem().equalsIgnoreCase(Profile.OperatingSystem.MAC.name())) {
+            log.info("Found the following cuda compatible devices in the local system: {}", nvidiaGraphicsCard);
 
-            String defaultCudaVersion =  "CUDA_10.1";
-            Profile cudaProfile = new Profile(defaultCudaVersion,
-                    "x86", cpuProfile.operatingSystem(), Arrays.asList("HTTP", "GRPC"),
-                    Collections.singletonList("ch.qos.logback:logback-classic:1.2.3"));
+            Profile cudaProfile = new Profile()
+                    .computeDevice(DEFAULT_CUDA_DEVICE)
+                    .operatingSystem(cpuProfile.operatingSystem())
+                    .cpuArchitecture(getCpuArchitectureForCudaDevice(cpuProfile.cpuArchitecture()));
 
             Pair<String, String> cudaInstall = findCudaInstall();
             if(cudaInstall != null) {
-                log.error("Found CUDA install -- Version: {} | Path: {}", cudaInstall.getKey(), cudaInstall.getValue() != null ? cudaInstall.getValue() : "(Unable to identify)");
+                log.info("Found CUDA install -- Version: {} | Path: {}", cudaInstall.getKey(), cudaInstall.getValue() != null ? cudaInstall.getValue() : "(Unable to identify)");
 
                 cudaProfile.computeDevice(String.format("CUDA_%s", cudaInstall.getKey().trim()));
             } else {
-                log.error("Unable to find a valid cuda install in the local system. The server will try to " +
+                log.info("Unable to find a valid cuda install in the local system. The server will try to " +
                         "automatically download the CUDA redist 10.1 package on runtime build");
 
-                List<String> additionalDependencies = new ArrayList<>(cudaProfile.additionalDependencies());
-                additionalDependencies.add("org.bytedeco:cuda-platform-redist:10.1-7.6-1.5.2");
-                cudaProfile.additionalDependencies(additionalDependencies);
+                addDependencies(cudaProfile, CUDA_10_1_REDIST_DEPENDENCY);
             }
 
-            String cudaProfileName = "CUDA";
-            profiles.put(cudaProfileName, cudaProfile);
-            setDefaultProfile(cudaProfileName);
+            profiles.put(DEFAULT_CUDA_PROFILE_NAME, cudaProfile);
+
+            saveProfiles(profiles);
+            setDefaultProfile(DEFAULT_CUDA_PROFILE_NAME);
         } else {
-            log.error("No cuda compatible devices found in the current system.");
-            setDefaultProfile(cpuProfileName);
+            log.info("No cuda compatible devices found in the current system.");
+
+            saveProfiles(profiles);
+            setDefaultProfile(DEFAULT_CPU_PROFILE_NAME);
         }
 
-        log.error("Created profiles: \n{}", ObjectMappers.toYaml(profiles));
+        log.info("Created profiles: \n{}", ObjectMappers.toYaml(profiles));
 
-        saveProfiles(profiles);
         return profiles;
     }
 
+    private static String getCpuArchitecture() {
+        SystemInfo systemInfo = new SystemInfo();
+        CentralProcessor.ProcessorIdentifier processorIdentifier = systemInfo.getHardware().getProcessor().getProcessorIdentifier();
+        String cpuArch = processorIdentifier.getMicroarchitecture();
+        if(cpuArch != null) {
+            if (StringUtils.containsIgnoreCase(cpuArch, "arm")) {
+                if(processorIdentifier.isCpu64bit()) {
+                    return Profile.CpuArchitecture.arm64.name();
+                } else {
+                    return Profile.CpuArchitecture.armhf.name();
+                }
+            } else if(StringUtils.containsIgnoreCase(cpuArch, "ppc")) {
+                return Profile.CpuArchitecture.ppc64le.name();
+            } else {
+                return Profile.CpuArchitecture.x86_avx2.name();
+            }
+        } else {
+            return Profile.CpuArchitecture.x86_avx2.name();
+        }
+    }
+
+    private static String getCpuArchitectureForCudaDevice(String cpuArchitecture) {
+        if(cpuArchitecture != null) {
+            if (StringUtils.containsIgnoreCase(cpuArchitecture, "x86")) {
+                return Profile.CpuArchitecture.x86.name();
+            } else if (StringUtils.containsIgnoreCase(cpuArchitecture, "arm")) {
+                return Profile.CpuArchitecture.arm64.name();
+            } else {
+                return Profile.CpuArchitecture.ppc64le.name();
+            }
+        } else {
+            return null;
+        }
+    }
+
     public static Map<String, Profile> getAllProfiles() {
-        if(!profilesSavePath.exists()) {
+        if(!PROFILES_SAVE_PATH.exists()) {
             return firstTimeProfilesSetup();
         } else {
             try {
                 Map<String, Profile> profiles = new HashMap<>();
-                Map profilesMap = ObjectMappers.fromYaml(FileUtils.readFileToString(profilesSavePath, StandardCharsets.UTF_8), Map.class);
+                Map profilesMap = ObjectMappers.fromYaml(FileUtils.readFileToString(PROFILES_SAVE_PATH, StandardCharsets.UTF_8), Map.class);
                 for(Object key : profilesMap.keySet()) {
                     Profile profile = ObjectMappers.json().convertValue(profilesMap.get(key), Profile.class);
                     profiles.put((String) key, profile);
                 }
                 return profiles;
             } catch (IOException e) {
-                log.error("Unable to read profiles data from {}.", profilesSavePath.getAbsolutePath(), e);
+                log.error("Unable to read profiles data from {}.", PROFILES_SAVE_PATH.getAbsolutePath(), e);
                 System.exit(1);
                 return null;
             }
@@ -382,8 +420,8 @@ public class ProfileCommand extends DefaultCommand {
     public void deleteProfile(String profileName) {
         Map<String, Profile> profiles = getAllProfiles();
         if(profiles.containsKey(profileName)) {
-            if(profileName.equals("CPU") || profileName.equals("CUDA")) {
-                out.format("Cannot delete pre-set profiles with name 'CPU' or 'CUDA'.%n");
+            if(profileName.equals(DEFAULT_CPU_PROFILE_NAME) || profileName.equals(DEFAULT_CUDA_PROFILE_NAME)) {
+                out.format("Cannot delete pre-set profiles with name '%s' or '%s'.%n", DEFAULT_CPU_PROFILE_NAME, DEFAULT_CUDA_PROFILE_NAME);
                 System.exit(1);
             } else {
                 profiles.remove(profileName);
@@ -399,7 +437,7 @@ public class ProfileCommand extends DefaultCommand {
         if(isProfileExists(profileName)) {
             return getAllProfiles().get(profileName);
         } else {
-            log.error("Profile with name: {} doesn't exist.", profileName);
+            log.info("Profile with name: {} doesn't exist.", profileName);
             return null;
         }
     }
@@ -413,7 +451,11 @@ public class ProfileCommand extends DefaultCommand {
     }
 
     private void listProfiles() {
-        out.println(ObjectMappers.toYaml(getAllProfiles()));
+        if(PROFILES_SAVE_PATH.exists()) {
+            out.println(ObjectMappers.toYaml(getAllProfiles()));
+        } else {
+            getAllProfiles();
+        }
     }
 
     private void saveProfile(String profileName, Profile profile) {
@@ -425,11 +467,11 @@ public class ProfileCommand extends DefaultCommand {
 
     private static void saveProfiles(Map<String, Profile> profiles) {
         try {
-            FileUtils.writeStringToFile(profilesSavePath,
+            FileUtils.writeStringToFile(PROFILES_SAVE_PATH,
                     ObjectMappers.toYaml(profiles),
                     StandardCharsets.UTF_8);
         } catch (IOException e) {
-            log.error("Unable to save profiles to {}", profilesSavePath.getAbsolutePath(), e);
+            log.error("Unable to save profiles to {}", PROFILES_SAVE_PATH.getAbsolutePath(), e);
             System.exit(1);
         }
     }

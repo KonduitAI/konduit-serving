@@ -23,16 +23,19 @@ import ai.konduit.serving.cli.launcher.command.ServeCommand;
 import ai.konduit.serving.cli.launcher.command.build.extension.model.Profile;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
-import io.vertx.core.cli.annotations.*;
+import io.vertx.core.cli.annotations.Description;
+import io.vertx.core.cli.annotations.Name;
+import io.vertx.core.cli.annotations.Option;
+import io.vertx.core.cli.annotations.Summary;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.shade.guava.base.Strings;
 import org.nd4j.shade.jackson.databind.JsonNode;
+import org.nd4j.shade.jackson.databind.node.TextNode;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,26 +70,37 @@ public class ServeBuildCommand extends ServeCommand {
 
     @Override
     public void run() {
-        File savePath = new File(DirectoryFetcher.getBuildDir(), String.format("%s-pipeline.json", getId()));
-        File mfJar = new File(DirectoryFetcher.getBuildDir(), String.format("%s-manifest.jar", getId()));
+        File profileRootDir = new File(DirectoryFetcher.getBuildDir(), getId());
+        if((!profileRootDir.exists() || !profileRootDir.isDirectory()) && !profileRootDir.mkdir()) {
+            log.error("Unable to create build directory for path: {}.", profileRootDir.getAbsolutePath());
+            System.exit(1);
+        }
+
+        File savePath = new File(profileRootDir, "pipeline.json");
+        File mfJar = new File(profileRootDir, "manifest.jar");
 
         try {
             JsonNode jsonConfiguration = getConfigurationFromFileOrString(configuration);
             if (jsonConfiguration == null) {
-                out.format("Invalid configuration defined by: %s", configuration);
+                out.format("Invalid JSON/YAML configuration or invalid configuration file path defined by: %n%s", configuration);
                 System.exit(1);
             } else {
-                FileUtils.writeStringToFile(savePath, jsonConfiguration.get("pipeline").toString(), StandardCharsets.UTF_8);
+                Object pipeline = jsonConfiguration.get("pipeline");
+                if(pipeline == null) {
+                    out.format("Invalid JSON/YAML configuration or invalid configuration file path defined by: %n%s", configuration);
+                    System.exit(1);
+                }
+
+                FileUtils.writeStringToFile(savePath, pipeline.toString(), StandardCharsets.UTF_8);
 
                 Profile profile = profileName != null ? ProfileCommand.getProfile(profileName) : ProfileCommand.getDefaultProfile();
                 if(profile == null) {
                     if(profileName == null) {
-                        out.println("Couldn't find a default profile. Starting server with 'CPU' profile");
+                        out.println("Couldn't find a default profile.");
                     } else {
-                        out.format("Couldn't find a profile with the specified name: '%s'. Starting server with 'CPU' profile.%n", profileName);
+                        out.format("Couldn't find a profile with the specified name: '%s'.%n", profileName);
                     }
-
-                    profile = ProfileCommand.getProfile("CPU");
+                    System.exit(1);
                 }
 
                 List<String> args = new ArrayList<>();
@@ -109,7 +123,8 @@ public class ServeBuildCommand extends ServeCommand {
                     }
                 }
 
-                BuildCLI.main(args.toArray(new String[0]));     //TODO we could just call build tool directly isntead of via CLI (more robust to refactoring, compile time args checking etc)
+                // Issue: https://github.com/KonduitAI/konduit-serving/issues/437
+                BuildCLI.main(args.toArray(new String[0]));     //TODO we could just call build tool directly instead of via CLI (more robust to refactoring, compile time args checking etc)
 
                 if (Strings.isNullOrEmpty(this.classpath)) {
                     this.classpath = mfJar.getAbsolutePath();
@@ -120,8 +135,6 @@ public class ServeBuildCommand extends ServeCommand {
         } catch (IOException e) {
             log.error("Unable to write build pipeline data to {}.", savePath.getAbsolutePath(), e);
             System.exit(1);
-        } catch (ClassNotFoundException e) {
-            out.println("Unable to find classes for building manifest jar. Continuing without runtime build...");
         } catch (Exception e) {
             log.error("Unable to build classpath manifest jar for the given pipeline and profile.", e);
             System.exit(1);
@@ -158,9 +171,15 @@ public class ServeBuildCommand extends ServeCommand {
             return ObjectMappers.json().readTree(configurationString);
         } catch (Exception jsonProcessingErrors) {
             try {
-                return ObjectMappers.yaml().readTree(configurationString);
+                JsonNode jsonNode =ObjectMappers.yaml().readTree(configurationString);
+                if(jsonNode instanceof TextNode) {
+                    throw new IllegalStateException("Expected JsonNode to be ObjectNode but was TextNode while parsing as a YAML object. " +
+                            "This usually indicates that the YAML was not parsed as expected. Could be a bad configuration file path in: " + configurationString);
+                } else {
+                    return jsonNode;
+                }
             } catch (Exception yamlProcessingErrors) {
-                log.error("Given configuration: {} does not contain a valid JSON/YAML object", configurationString);
+                log.error("Given configuration: '{}' does not contain a valid JSON/YAML object", configurationString);
                 log.error("\n\nErrors while processing as a json string:", jsonProcessingErrors);
                 log.error("\n\nErrors while processing as a yaml string:", yamlProcessingErrors);
                 return null;

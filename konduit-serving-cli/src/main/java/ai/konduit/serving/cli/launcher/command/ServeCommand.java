@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.nd4j.common.io.ClassPathResource;
+import org.nd4j.common.io.StringUtils;
 import org.nd4j.shade.guava.base.Strings;
 
 import java.io.*;
@@ -204,7 +205,11 @@ public class ServeCommand extends DefaultCommand {
             }
         } else if (isLaunchedAsFatJar()) {
             ExecUtils.addArgument(cmd, "-jar");
-            ExecUtils.addArgument(cmd, CommandLineUtils.getJar());
+            if(classpath != null && classpath.contains(id) && StringUtils.endsWithIgnoreCase(classpath, "manifest.jar")) {
+                cmd.add(classpath);
+            } else {
+                ExecUtils.addArgument(cmd, CommandLineUtils.getJar());
+            }
             ExecUtils.addArgument(cmd, "run");
         } else {
             // probably a `vertx` command line usage, or in IDE.

@@ -25,7 +25,6 @@ import org.nd4j.shade.jackson.annotation.JsonGetter;
 import org.nd4j.shade.jackson.annotation.JsonSetter;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,7 +82,7 @@ public class Profile {
         this.cpuArchitecture = CpuArchitecture.x86_avx2;
         this.operatingSystem = getCurrentOS();
         this.serverTypes = Arrays.asList(ServerProtocol.HTTP, ServerProtocol.GRPC);
-        this.additionalDependencies = Collections.singletonList("ch.qos.logback:logback-classic:1.2.3");
+        this.additionalDependencies = null;
     }
 
     public Profile(String computeDevice, String cpuArchitecture, String operatingSystem, List<String> serverTypes,
@@ -96,42 +95,55 @@ public class Profile {
     }
 
     @JsonSetter("computeDevice")
-    public void computeDevice(String computeDevice) {
+    public Profile computeDevice(String computeDevice) {
         if (validComputeDevices.contains(computeDevice)) {
             this.computeDevice = computeDevice;
         } else {
-            throw new UnsupportedOperationException("Invalid, unknown, not supported or not yet implemented device type: " + computeDevice);
+            throw new UnsupportedOperationException("Invalid, unknown, not supported or not yet implemented device type: " + computeDevice +
+                    ". Valid values are: " + validComputeDevices);
         }
+
+        return this;
     }
 
     @JsonSetter("operatingSystem")
-    public void operatingSystem(String operatingSystem) {
+    public Profile operatingSystem(String operatingSystem) {
         this.operatingSystem = OperatingSystem.forName(operatingSystem);
+
+        return this;
     }
 
     @JsonSetter("cpuArchitecture")
-    public void cpuArchitecture(String cpuArchitecture) {
+    public Profile cpuArchitecture(String cpuArchitecture) {
         this.cpuArchitecture = CpuArchitecture.forName(cpuArchitecture);
+
+        return this;
     }
 
     @JsonSetter("serverTypes")
-    public void serverTypes(List<String> serverTypes) {
+    public Profile serverTypes(List<String> serverTypes) {
         this.serverTypes = serverTypes != null ?
                 serverTypes.stream().map(ServerProtocol::valueOf).collect(Collectors.toList()) :
                 Arrays.asList(ServerProtocol.HTTP, ServerProtocol.GRPC);
+
+        return this;
     }
 
     @JsonSetter("additionalDependencies")
-    public void additionalDependencies(List<String> additionalDependencies) {
-        for(String additionalDependency : additionalDependencies){
-            String[] split = additionalDependency.split(":");
-            if(split.length != 3 && split.length != 4){
-                throw new IllegalStateException("Invalid additionalDependency setting: Dependencies must " +
-                        "be specified in \"group_id:artifact_id:version\" or \"group_id:artifact_id:version:classifier\" format. Got " + additionalDependency);
+    public Profile additionalDependencies(List<String> additionalDependencies) {
+        if(additionalDependencies != null) {
+            for (String additionalDependency : additionalDependencies) {
+                String[] split = additionalDependency.split(":");
+                if (split.length != 3 && split.length != 4) {
+                    throw new IllegalStateException("Invalid additionalDependency setting: Dependencies must " +
+                            "be specified in \"group_id:artifact_id:version\" or \"group_id:artifact_id:version:classifier\" format. Got " + additionalDependency);
+                }
             }
         }
 
         this.additionalDependencies = additionalDependencies;
+
+        return this;
     }
 
     @JsonGetter("computeDevice")
