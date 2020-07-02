@@ -6,6 +6,7 @@ import ai.konduit.serving.pipeline.impl.step.bbox.point.BoundingBoxToPointStep;
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
 import ai.konduit.serving.pipeline.impl.step.ml.regression.RegressionOutputStep;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
 import org.junit.Test;
 import org.slf4j.event.Level;
 
@@ -19,6 +20,16 @@ public class JsonCoverageTest  extends BaseJsonCoverageTest {
     @Override
     public String getPackageName() {
         return "ai.konduit.serving.pipeline";
+    }
+
+    @Override
+    public Object fromJson(Class<?> c, String json) {
+        return ObjectMappers.fromJson(json, c);
+    }
+
+    @Override
+    public Object fromYaml(Class<?> c, String yaml) {
+        return ObjectMappers.fromYaml(yaml, c);
     }
 
 
@@ -60,7 +71,7 @@ public class JsonCoverageTest  extends BaseJsonCoverageTest {
 
         testConfigSerDe(new RegressionOutputStep()
                 .inputName("in")
-                .names(hashMap))
+                .names(hashMap));
     }
 
 

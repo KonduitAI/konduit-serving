@@ -17,28 +17,37 @@ import static org.junit.Assert.fail;
 @Slf4j
 public abstract  class BaseJsonCoverageTest {
 
-    private static final Set<Class<? extends TextConfig>> allClasses = new LinkedHashSet<>();
-    private static final Set<Class<? extends TextConfig>> seen = new LinkedHashSet<>();
+    protected static Set<Class<?>> allClasses;
+    protected static Set<Class<?>> seen;
 
     public abstract String getPackageName();
 
+    public abstract Object fromJson(Class<?> c, String json);
+    public abstract Object fromYaml(Class<?> c, String yaml);
+
     @Before
-    public void before() {
+    public void before() throws Exception {
 
-        //Collect all classes implementing TextConfig interface (i.e., has JSON and YAML conversion support)
+        if(allClasses == null) {
+            //Perform initialization only once
+            //Collect all classes implementing TextConfig interface (i.e., has JSON and YAML conversion support)
+             allClasses = new LinkedHashSet<>();
+             seen = new LinkedHashSet<>();
 
-        Reflections reflections = new Reflections("ai.konduit");
-        Set<Class<? extends TextConfig>> subTypes = reflections.getSubTypesOf(TextConfig.class);
+            Reflections reflections = new Reflections(getPackageName());
+            Class<Object> tcClass = (Class<Object>) Class.forName("ai.konduit.serving.pipeline.api.TextConfig");
+            Set<Class<?>> subTypes = reflections.getSubTypesOf(tcClass);
 
-        System.out.println(String.format("All subtypes of %s:", TextConfig.class.getCanonicalName()));
-        for(Class<? extends TextConfig> c : subTypes ){
-            int mod = c.getModifiers();
-            if(Modifier.isAbstract(mod) || Modifier.isInterface(mod))
-                continue;
-            allClasses.add(c);
-            System.out.println(c);
+            System.out.println(String.format("All subtypes of %s:", tcClass.getCanonicalName()));
+            for (Class<?> c : subTypes) {
+                int mod = c.getModifiers();
+                if (Modifier.isAbstract(mod) || Modifier.isInterface(mod))
+                    continue;
+                allClasses.add(c);
+                System.out.println(c);
+            }
+
         }
-
     }
 
     @AfterClass
@@ -61,61 +70,28 @@ public abstract  class BaseJsonCoverageTest {
 
     }
 
-    public static void testConfigSerDe(TextConfig c) {
+    public void testConfigSerDe(Object o) {
         try{
-            testConfigSerDeHelper(c);
+            testConfigSerDeHelper(o);
         } catch (Exception e){
             throw new RuntimeException(e);
         }
     }
 
-    protected static void testConfigSerDeHelper(TextConfig c) throws Exception {
-        seen.add(c.getClass());     //Record class for coverage tracking
+    protected void testConfigSerDeHelper(Object o) throws Exception {
+        seen.add(o.getClass());     //Record class for coverage tracking
 
-        String json = c.toJson();
-        String yaml = c.toYaml();
+        Class<Object> tcClass = (Class<Object>) Class.forName("ai.konduit.serving.pipeline.api.TextConfig");
+        Method toJsonMethod = tcClass.getDeclaredMethod("toJson");
+        Method fromYamlMethod = tcClass.getDeclaredMethod("toYaml");
 
-        Method jsonMethod = findStaticFromJson(c);
-        Method yamlMethod = findStaticFromYaml(c);
+        String json = (String) toJsonMethod.invoke(o);
+        String yaml = (String) fromYamlMethod.invoke(o);
 
-        TextConfig fromJson = (TextConfig) jsonMethod.invoke(null, json);
-        TextConfig fromYaml = (TextConfig) yamlMethod.invoke(null, yaml);
+        Object fromJson = fromJson(o.getClass(), json);
+        Object fromYaml = fromYaml(o.getClass(), yaml);
 
-        assertEquals("to/from JSON object is not equal", c, fromJson);
-        assertEquals("to/from YAML object is not equal ", c, fromYaml);
+        assertEquals("to/from JSON object is not equal", o, fromJson);
+        assertEquals("to/from YAML object is not equal ", o, fromYaml);
     }
-
-    private static Method findStaticFromJson(TextConfig c) {
-        Method m = findStaticSingleStringArgMethodWithName(c.getClass(), "fromJson");
-        Preconditions.checkState(m != null, "No fromJson(String) method is defined on class " + c.getClass().getName() +
-                " or any superclasses of this class. All classes implementing TextConfig should also have a static fromJson(String) method");
-        return m;
-    }
-
-    private static Method findStaticFromYaml(TextConfig c){
-        Method m = findStaticSingleStringArgMethodWithName(c.getClass(), "fromYaml");
-        Preconditions.checkState(m != null, "No fromJson(String) method is defined on class " + c.getClass().getName() +
-                " or any superclasses of this class. All classes implementing TextConfig should also have a static fromYaml(String) method");
-        return m;
-    }
-
-    private static Method findStaticSingleStringArgMethodWithName(Class<?> c, String methodName){
-        Class<?> current = c;
-        while(current != Object.class){
-            Method[] methods = current.getDeclaredMethods();
-            for(Method m : methods){
-                if(m.getName().equals(methodName) && m.getParameterCount() == 1 && Modifier.isStatic(m.getModifiers()) &&
-                        !Modifier.isAbstract(m.getModifiers()) && m.getParameterTypes()[0] == String.class){
-                    return m;
-                }
-            }
-            current = current.getSuperclass();
-        }
-        return null;
-    }
-
-
-
-
-
 }
