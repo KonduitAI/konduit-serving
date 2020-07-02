@@ -163,8 +163,8 @@
                         <configuration>
                             <target>
                                 <mkdir dir="${project.build.directory}/unpacked/"/>
-                                <echo message="unjar ${project.build.directory}/${artifactId}-${version}.jar to ${project.build.directory}/unpacked/" />
-                                <unzip src="${project.build.directory}/${artifactId}-${version}.jar" dest="${project.build.directory}/unpacked/" />
+                                <echo message="unjar ${project.build.directory}/${project.artifactId}-${project.version}.jar to ${project.build.directory}/unpacked/" />
+                                <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.jar" dest="${project.build.directory}/unpacked/" />
                                 <echo message="rename file: META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun" />
                                 <move force="true" file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.runner.CanRun"
                                       tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/PipelineStepRunner" />
@@ -173,7 +173,7 @@
                                 <move force="true" file="${project.build.directory}/unpacked/META-INF/konduit-serving/ai.konduit.serving.annotation.module.RequiresDependencies"
                                       tofile="${project.build.directory}/unpacked/META-INF/konduit-serving/ModuleRequiresDependencies" />
                                 <echo message="jar back" />
-                                <jar destfile="${project.build.directory}/${artifactId}-${version}.jar" basedir="${project.build.directory}/unpacked" />
+                                <jar destfile="${project.build.directory}/${project.artifactId}-${project.version}.jar" basedir="${project.build.directory}/unpacked" />
                             </target>
                         </configuration>
                         <goals>

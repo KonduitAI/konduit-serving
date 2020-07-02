@@ -590,7 +590,6 @@ public class ConfigCommand extends DefaultCommand {
                 case SAMEDIFF:
                     moduleName = "konduit-serving-samediff";
                     clazz = Class.forName("ai.konduit.serving.models.samediff.step.SameDiffStep");
-                    Class<?> sameDiffConfigClazz = Class.forName("ai.konduit.serving.models.samediff.SameDiffConfig");
                     return (PipelineStep) clazz
                             .getConstructor(String.class, List.class)
                             .newInstance("<path_to_model>", Arrays.asList("11", "22"));
@@ -603,11 +602,9 @@ public class ConfigCommand extends DefaultCommand {
                 case TENSORFLOW:
                     moduleName = "konduit-serving-tensorflow";
                     clazz = Class.forName("ai.konduit.serving.models.tensorflow.step.TensorFlowStep");
-                    Class<?> tensorflowConfigClazz = Class.forName("ai.konduit.serving.models.tensorflow.TensorFlowConfiguration");
                     return (PipelineStep) clazz
-                            .getConstructor(String.class, tensorflowConfigClazz, List.class, List.class)
-                            .newInstance("<path_to_model>", tensorflowConfigClazz.getConstructor().newInstance(),
-                                    Arrays.asList("1", "2"), Arrays.asList("11", "22"));
+                            .getConstructor(List.class, List.class, String.class)
+                            .newInstance(Arrays.asList("1", "2"), Arrays.asList("11", "22"), "<path_to_model>");
                 default:
                     out.format("Invalid step type '%s'. Allowed values are %s%n", type, Arrays.asList(PipelineStepType.values()));
                     System.exit(1);

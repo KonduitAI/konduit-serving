@@ -27,6 +27,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.nd4j.common.primitives.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
@@ -46,7 +47,7 @@ import java.util.regex.Pattern;
 @Description("A utility command to create, view, edit, list and delete konduit serving run profiles. Run profiles " +
         "configures the background run architecture such as CPU, GPU (CUDA) along with additional dependencies, server " +
         "types, operating system etc. Konduit serving tries to identify the best profiles during the first server " +
-        "launch but you can manage more of your own profile configurations with this command. \n\n"+
+        "launch but you can manage more of your own profile configurations with this command. \n\n" +
         "Example usages:\n" +
         "--------------\n" +
         "- Creates a CUDA 10.2 profile with the name 'CUDA-10.2':\n" +
@@ -319,6 +320,7 @@ public class ProfileCommand extends DefaultCommand {
 
         log.info("Looking for CUDA compatible devices in the current system...");
         List<GraphicsCard> nvidiaGraphicsCard = new ArrayList<>();
+
         for(GraphicsCard graphicsCard : new SystemInfo().getHardware().getGraphicsCards()) {
             String vendor = graphicsCard.getVendor();
             if (vendor != null && StringUtils.containsIgnoreCase(vendor, "nvidia")) {
@@ -327,7 +329,7 @@ public class ProfileCommand extends DefaultCommand {
         }
 
         if(!nvidiaGraphicsCard.isEmpty() && !cpuProfile.operatingSystem().equalsIgnoreCase(Profile.OperatingSystem.MAC.name())) {
-            log.info("Found the following cuda compatible devices in the local system: {}", nvidiaGraphicsCard);
+            log.info("Found the following CUDA compatible devices in the local system: {}", nvidiaGraphicsCard);
 
             Profile cudaProfile = new Profile()
                     .computeDevice(DEFAULT_CUDA_DEVICE)
@@ -351,7 +353,7 @@ public class ProfileCommand extends DefaultCommand {
             saveProfiles(profiles);
             setDefaultProfile(DEFAULT_CUDA_PROFILE_NAME);
         } else {
-            log.info("No cuda compatible devices found in the current system.");
+            log.info("No CUDA compatible devices found in the current system.");
 
             saveProfiles(profiles);
             setDefaultProfile(DEFAULT_CPU_PROFILE_NAME);
@@ -535,7 +537,7 @@ public class ProfileCommand extends DefaultCommand {
     }
 
     private static String findCudaInstallPath(String mainCommandName, String cudaVersion) throws IOException {
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ProcessBuilder(Arrays.asList("where", mainCommandName)).start().getInputStream()))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ProcessBuilder(Arrays.asList(SystemUtils.IS_OS_WINDOWS ? "where" : "which", mainCommandName)).start().getInputStream()))) {
             String line = bufferedReader.readLine();
             while (line != null) {
                 if(line.contains(cudaVersion)) {
