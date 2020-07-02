@@ -2,6 +2,7 @@ package ai.konduit.serving.pipeline.util;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.ValueType;
+import lombok.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +39,13 @@ public class DataUtils {
         return true;
     }
 
-    public static String inferField(Data d, ValueType vt, boolean allowLists, String errMultipleKeys, String errNoKeys){
+    public static String inferField(@NonNull Data d, @NonNull ValueType vt, boolean allowLists, @NonNull String errPrefix){
+        String errMultipleKeys = errPrefix + ": " + vt + " was not provided could not be inferred: multiple " + vt + " fields exist: %s and %s";
+        String errNoKeys = errPrefix + ": " + vt + " field name was not provided and could not be inferred: no " + vt + " fields exist";
+        return inferField(d, vt, allowLists, errMultipleKeys, errNoKeys);
+    }
+
+    public static String inferField(@NonNull Data d, @NonNull ValueType vt, boolean allowLists, @NonNull String errMultipleKeys, @NonNull String errNoKeys){
 
         String field = null;
         for(String s : d.keys()){
@@ -63,7 +70,13 @@ public class DataUtils {
         return field;
     }
 
-    public static String inferListField(Data d, ValueType vt, String errMultipleKeys, String errNoKeys){
+    public static String inferListField(@NonNull Data d, @NonNull ValueType vt, @NonNull String errPrefix){
+        String errMultipleKeys = errPrefix + ": List<" + vt + "> field name was not provided and could not be inferred: multiple List<" + vt + "> fields exist: %s and %s";
+        String errNoKeys = errPrefix + ": List<" + vt + "> field name was not provided and could not be inferred: no List<" + vt + "> fields exist";
+        return inferListField(d, vt, errMultipleKeys, errNoKeys);
+    }
+
+    public static String inferListField(@NonNull Data d, @NonNull ValueType vt, @NonNull String errMultipleKeys, @NonNull String errNoKeys){
         String field = null;
         for(String s : d.keys()){
             if(d.type(s) == ValueType.LIST && d.listType(s) == vt){
