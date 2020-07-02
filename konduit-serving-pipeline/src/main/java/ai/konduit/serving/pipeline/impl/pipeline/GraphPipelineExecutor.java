@@ -155,7 +155,11 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
                 PipelineStepRunner exec = runners.get(next);
                 Data inData = stepOutputData.get(inputs.get(0));
                 Preconditions.checkState(inData != null, "Input data is null for step %s - input %s", next, 0);
-                stepOut = exec.exec(null, inData);
+                try {
+                    stepOut = exec.exec(null, inData);
+                } catch (Throwable t){
+                    throw new RuntimeException("Execution failed in pipeline step \"" + next + "\" of type " + exec.getPipelineStep().getClass().getSimpleName(), t);
+                }
             } else {
                 throw new UnsupportedOperationException("Execution support not yet implemented: " + gs);
             }

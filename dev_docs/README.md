@@ -39,8 +39,6 @@ The list below briefly describes those implemented so far (as of 04/06/2020)- th
     * konduit-serving-nd4j: Mainly NDArray integration/functionality for ND4J. Used also by deeplearning4j and samediff modules
     * konduit-serving-image: Image conversion functionality using JavaCV; also Image -> NDArray functionality, and a bunch of utility
       steps for showing images, drawing segmentation masks on images, drawing/croping from a grid, and drawing bounding boxes
-* konduit-serving-io: Parent module for I/O functionality - sensors, cameras, etc - and maybe later things like HDFS, S3, etc
-    * konduit-serving-camera: Steps related to capturing data from device-connected cameras (WIP)
 * konduit-serving-metadata
     * konduit-serving-meta: collects metadata from all modules - what. More on this later.
     * konduit-serving-annotations: Annotations: `@JsonName`, `@ModuleInfo`,  `@CanRun` and `@RequiresDependencyAny`, `@RequiresDependencyAll`, `@InheritRequiredDependencies`.

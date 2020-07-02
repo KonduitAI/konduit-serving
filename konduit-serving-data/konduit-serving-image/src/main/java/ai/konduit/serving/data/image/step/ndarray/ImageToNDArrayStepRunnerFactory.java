@@ -34,6 +34,6 @@ public class ImageToNDArrayStepRunnerFactory implements PipelineStepRunnerFactor
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run pipeline step: %s", pipelineStep.getClass());
-        return new ImageToNDArrayStepRunner((ImageToNDArrayStep) pipelineStep);
+        return new ImageToNDArrayRunner((ImageToNDArrayStep) pipelineStep);
     }
 }

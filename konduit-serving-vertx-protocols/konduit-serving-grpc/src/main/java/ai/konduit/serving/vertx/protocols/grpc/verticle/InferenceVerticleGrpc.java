@@ -50,7 +50,7 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
                 return;
             }
         } else {
-            port = inferenceConfiguration.getPort();
+            port = inferenceConfiguration.port();
         }
 
         if (port < 0 || port > 0xFFFF) {
@@ -59,7 +59,7 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
         }
 
         VertxServer rpcServer = VertxServerBuilder
-                .forAddress(vertx, inferenceConfiguration.getHost(), inferenceConfiguration.getPort())
+                .forAddress(vertx, inferenceConfiguration.host(), inferenceConfiguration.port())
                 .addService(new InferenceGrpc.InferenceImplBase() {
                     @Override
                     public void predict(DataScheme request, StreamObserver<DataScheme> responseObserver) {
@@ -79,7 +79,7 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
             if(handler.succeeded()) {
                 int actualPort = rpcServer.getPort();
 
-                inferenceConfiguration.setPort(actualPort);
+                inferenceConfiguration.port(actualPort);
 
                 try {
                     ((ContextInternal) context).getDeployment()
@@ -93,7 +93,7 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
                     // Periodically checks for configuration updates and save them.
                     vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
 
-                    log.info("Inference gRPC server is listening on host: '{}'", inferenceConfiguration.getHost());
+                    log.info("Inference gRPC server is listening on host: '{}'", inferenceConfiguration.host());
                     log.info("Inference gRPC server started on port {} with {} pipeline steps", actualPort, pipeline.size());
                     startPromise.complete();
                 } catch (Throwable throwable) {

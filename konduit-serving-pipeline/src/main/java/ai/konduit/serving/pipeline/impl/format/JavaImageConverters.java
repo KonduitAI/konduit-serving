@@ -28,10 +28,12 @@ import ai.konduit.serving.pipeline.impl.data.image.Gif;
 import ai.konduit.serving.pipeline.impl.data.image.Jpeg;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.image.base.BaseImageFile;
+import com.sun.imageio.plugins.common.ImageUtil;
 import lombok.AllArgsConstructor;
 import org.nd4j.common.base.Preconditions;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -149,6 +151,7 @@ public class JavaImageConverters {
         @Override
         protected <T> T doConversion(Image from, Class<T> to) {
             BufferedImage bi = (BufferedImage) from.get();
+            bi = removeAlpha(bi);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
                 ImageIO.write(bi, formatName(), os);
@@ -303,5 +306,19 @@ public class JavaImageConverters {
             Gif j = Image.create(bi).getAs(Gif.class);
             return (T) j;
         }
+    }
+
+    public static BufferedImage removeAlpha(BufferedImage in){
+        if(!in.getColorModel().hasAlpha())
+            return in;
+
+        BufferedImage out = new BufferedImage(in.getWidth(), in.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = out.createGraphics();
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, in.getWidth(), in.getHeight());
+        g.drawImage(in, 0, 0, null);
+        g.dispose();
+
+        return out;
     }
 }

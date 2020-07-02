@@ -32,6 +32,6 @@ public class PerspectiveTransformStepRunnerFactory implements PipelineStepRunner
     @Override
     public PipelineStepRunner create(PipelineStep pipelineStep) {
         Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
-        return new PerspectiveTransformStepRunner((PerspectiveTransformStep) pipelineStep);
+        return new PerspectiveTransformRunner((PerspectiveTransformStep) pipelineStep);
     }
 }

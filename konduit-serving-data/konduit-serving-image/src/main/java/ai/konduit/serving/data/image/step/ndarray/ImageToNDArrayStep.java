@@ -25,7 +25,9 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
@@ -47,7 +49,7 @@ import java.util.List;
  *     <li><b>metadataKey</b>: Sets the key that the metadata will be stored under. Default: {@link #DEFAULT_METADATA_KEY}. Not relevant if
  *         metadata == false</li>
  * </ul>
- *
+ * <p>
  * Note that metadata will have the following format:<br>
  * If a single image is converted, the metadata Data instance will have a nested Data instance
  * i.e.:
@@ -58,9 +60,9 @@ import java.util.List;
  *
  * @author Alex Black
  */
-@Builder
 @Data
 @Accessors(fluent = true)
+@NoArgsConstructor
 @JsonName("IMAGE_TO_NDARRAY")
 @Schema(description = "A PipelineStep for converting images to n-dimensional arrays. " +
         "The exact way that images are converted is highly configurable (formats, channels, output sizes, " +
@@ -80,10 +82,11 @@ public class ImageToNDArrayStep implements PipelineStep {
     @Schema(description = "May be null. If non-null, these are the names of images in the Data instance to convert.")
     private List<String> keys;
 
+
     @Schema(description = "May be null. If non-null, the input images are renamed to this in the output Data instance after conversion to n-dimensional array.")
     private List<String> outputNames;
 
-    @Builder.Default
+
     @Schema(description = "True by default. If true, copy all the other (non-converted/non-image) entries in the input data to the output data",
             defaultValue = "true")
     private boolean keepOtherValues = true;
@@ -92,14 +95,14 @@ public class ImageToNDArrayStep implements PipelineStep {
             "and the original input size.")
     private boolean metadata;
 
-    @Builder.Default
+
     @Schema(description = "Sets the key that the metadata will be stored under. Not relevant if metadata == false.",
             defaultValue = DEFAULT_METADATA_KEY)
     private String metadataKey = DEFAULT_METADATA_KEY;
 
     public ImageToNDArrayStep(@JsonProperty("config") ImageToNDArrayConfig config, @JsonProperty("keys") List<String> keys,
                               @JsonProperty("outputNames") List<String> outputNames, @JsonProperty("keepOtherValues") boolean keepOtherValues,
-                              @JsonProperty("metadata") boolean metadata, @JsonProperty("metadataKey") String metadataKey){
+                              @JsonProperty("metadata") boolean metadata, @JsonProperty("metadataKey") String metadataKey) {
         this.config = config;
         this.keys = keys;
         this.outputNames = outputNames;
@@ -108,10 +111,15 @@ public class ImageToNDArrayStep implements PipelineStep {
         this.metadataKey = metadataKey;
     }
 
-    public ImageToNDArrayStep(){
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null or 0 etc
-        keepOtherValues = true;
-        metadataKey = DEFAULT_METADATA_KEY;
+    @Tolerate
+    public ImageToNDArrayStep outputNames(String... outputNames) {
+        return this.outputNames(Arrays.asList(outputNames));
     }
+
+    @Tolerate
+    public ImageToNDArrayStep keys(String... keys) {
+        return this.keys(Arrays.asList(keys));
+    }
+
+
 }

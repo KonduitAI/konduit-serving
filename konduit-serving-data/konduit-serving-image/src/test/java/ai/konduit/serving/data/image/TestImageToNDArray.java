@@ -39,12 +39,12 @@ public class TestImageToNDArray {
         Data in = Data.singleton("image", i);
 
         Pipeline p = SequencePipeline.builder()
-                .add(ImageToNDArrayStep.builder()
-                        .config(ImageToNDArrayConfig.builder()
+                .add(new ImageToNDArrayStep()
+                        .config(new ImageToNDArrayConfig()
                                 .height(128)
                                 .width(128)
-                        .build())
-                .build())
+                        )
+                )
                 .build();
 
         PipelineExecutor exec = p.executor();
@@ -81,16 +81,16 @@ public class TestImageToNDArray {
                             System.out.println(color + " - rgb=" + rgb + " - " + f + " - scaleNorm = " + scaleNorm);
 
                             Pipeline p = SequencePipeline.builder()
-                                    .add(ImageToNDArrayStep.builder()
-                                            .config(ImageToNDArrayConfig.builder()
+                                    .add(new ImageToNDArrayStep()
+                                            .config( new ImageToNDArrayConfig()
                                                     .height(h)
                                                     .width(w)
                                                     .channelLayout(rgb ? NDChannelLayout.RGB : NDChannelLayout.BGR)
                                                     .format(f)
                                                     .includeMinibatchDim(leadingDim)
                                                     .normalization(new ImageNormalization(scaleNorm ? ImageNormalization.Type.SCALE_01 : ImageNormalization.Type.NONE))
-                                                    .build())
-                                            .build())
+                                                    )
+                                            )
                                     .build();
 
                             PipelineExecutor exec = p.executor();
@@ -212,16 +212,16 @@ public class TestImageToNDArray {
                         for (boolean leadingDim : new boolean[]{false, true}) {
                             System.out.println(t + " - " + color + " - rgb=" + rgb + " - " + f);
                             Pipeline p = SequencePipeline.builder()
-                                    .add(ImageToNDArrayStep.builder()
-                                            .config(ImageToNDArrayConfig.builder()
+                                    .add(new ImageToNDArrayStep()
+                                            .config(new ImageToNDArrayConfig()
                                                     .height(h)
                                                     .width(w)
                                                     .channelLayout(rgb ? NDChannelLayout.RGB : NDChannelLayout.BGR)
                                                     .format(f)
                                                     .includeMinibatchDim(leadingDim)
                                                     .dataType(t)
-                                                    .build())
-                                            .build())
+                                                    )
+                                            )
                                     .build();
 
                             PipelineExecutor exec = p.executor();
@@ -394,9 +394,9 @@ public class TestImageToNDArray {
 
 
                     Pipeline p = SequencePipeline.builder()
-                            .add(ImageToNDArrayStep.builder()
+                            .add(new ImageToNDArrayStep()
                                     .outputNames(Collections.singletonList("im2ndarray"))
-                                    .config(ImageToNDArrayConfig.builder()
+                                    .config(new ImageToNDArrayConfig()
                                             .normalization(norm)
                                             .height(32)
                                             .width(32)
@@ -404,8 +404,8 @@ public class TestImageToNDArray {
                                             .format(f)
                                             .includeMinibatchDim(false)
                                             .dataType(NDArrayType.FLOAT)
-                                            .build())
-                                    .build())
+                                            )
+                                    )
                             .build();
 
                     PipelineExecutor exec = p.executor();
@@ -487,17 +487,17 @@ public class TestImageToNDArray {
             int oW = outHW.getSecond();
 
             Pipeline p = SequencePipeline.builder()
-                    .add(ImageToNDArrayStep.builder()
+                    .add(new ImageToNDArrayStep()
                             .metadata(true)
                             .metadataKey("Metakey")
                             .outputNames(Arrays.asList("myNDArray"))
-                            .config(ImageToNDArrayConfig.builder()
+                            .config(new ImageToNDArrayConfig()
                                     .height(oH)
                                     .width(oW)
                                     .includeMinibatchDim(false)
                                     .dataType(NDArrayType.FLOAT)
-                                    .build())
-                            .build())
+                                    )
+                            )
                     .build();
 
             PipelineExecutor exec = p.executor();
@@ -589,16 +589,16 @@ public class TestImageToNDArray {
         File f = Resources.asFile("data/mona_lisa.png");
 
         Pipeline p = SequencePipeline.builder()
-                .add(ImageToNDArrayStep.builder()
+                .add(new ImageToNDArrayStep()
                         .metadata(false)
-                        .config(ImageToNDArrayConfig.builder()
+                        .config(new ImageToNDArrayConfig()
                                 .height(oH)
                                 .width(oW)
                                 .includeMinibatchDim(false)
                                 .dataType(NDArrayType.FLOAT)
                                 .normalization(null)
-                                .build())
-                        .build())
+                                )
+                        )
                 .build();
 
         Data in = Data.singleton("image", Image.create(f));
@@ -625,16 +625,16 @@ public class TestImageToNDArray {
             INDArray exp = expFloat.castTo(ndt);
 
             Pipeline p2 = SequencePipeline.builder()
-                    .add(ImageToNDArrayStep.builder()
+                    .add(new ImageToNDArrayStep()
                             .metadata(false)
-                            .config(ImageToNDArrayConfig.builder()
+                            .config(new ImageToNDArrayConfig()
                                     .height(oH)
                                     .width(oW)
                                     .includeMinibatchDim(false)
                                     .dataType(t)
                                     .normalization(null)
-                                    .build())
-                            .build())
+                                    )
+                            )
                     .build();
 
             Data out2 = p2.executor().exec(in);
@@ -676,9 +676,9 @@ public class TestImageToNDArray {
                                 .stdRgb(needsStd ? stdRgb : null);
 
                         Pipeline p = SequencePipeline.builder()
-                                .add(ImageToNDArrayStep.builder()
+                                .add(new ImageToNDArrayStep()
                                         .metadata(false)
-                                        .config(ImageToNDArrayConfig.builder()
+                                        .config(new ImageToNDArrayConfig()
                                                 .height(oH)
                                                 .width(oW)
                                                 .includeMinibatchDim(incMB)
@@ -686,16 +686,16 @@ public class TestImageToNDArray {
                                                 .normalization(norm)
                                                 .listHandling(lh)
                                                 .format(f)
-                                                .build())
+                                                )
                                         .keys(Collections.singletonList("images"))
                                         .outputNames(Collections.singletonList("out"))
-                                        .build())
+                                        )
                                 .build();
 
                         Pipeline pSingle = SequencePipeline.builder()
-                                .add(ImageToNDArrayStep.builder()
+                                .add(new ImageToNDArrayStep()
                                         .metadata(false)
-                                        .config(ImageToNDArrayConfig.builder()
+                                        .config(new ImageToNDArrayConfig()
                                                 .height(oH)
                                                 .width(oW)
                                                 .includeMinibatchDim(incMB)
@@ -703,10 +703,10 @@ public class TestImageToNDArray {
                                                 .normalization(norm)
                                                 .listHandling(ImageToNDArrayConfig.ListHandling.NONE)
                                                 .format(f)
-                                                .build())
+                                                )
                                         .keys(Collections.singletonList("images"))
                                         .outputNames(Collections.singletonList("out"))
-                                        .build())
+                                        )
                                 .build();
 
 
