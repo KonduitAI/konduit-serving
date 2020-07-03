@@ -8,7 +8,10 @@ import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import lombok.AllArgsConstructor;
 import org.nd4j.python4j.*;
 
+import java.lang.reflect.Field;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.List;
 
 public class NumpyArrayConverters {
@@ -65,15 +68,38 @@ public class NumpyArrayConverters {
             }
 
             ByteBuffer bb = from.getBuffer();
-            byte[] bytes = bb.array();
 
-            try (PythonGC gc = PythonGC.watch()) {
-                PythonObject fromBuffer = Python.importModule("numpy").attr("frombuffer");
-                PythonObject npArr = fromBuffer.call(bytes, npDType);
-                npArr = npArr.attr("reshape").call(from.getShape());
-                PythonGC.keep(npArr);
-                return new NumpyArray(npArr);
+            if (bb.isDirect()) {
+                long address;
+                try {
+                    //DirectBuffer dBuff = (DirectBuffer)bb; // (java: package sun.nio.ch does not exist)
+                    Field addressField = Buffer.class.getDeclaredField("address");
+                    addressField.setAccessible(true);
+                    address = addressField.getLong(bb);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                try (PythonGC gc = PythonGC.watch()) {
+                    PythonObject ctypes = Python.importModule("ctypes");
+                    PythonObject cArr = ctypes.attr("c_byte")
+                            .mul(new PythonObject(bb.capacity()))
+                            .attr("from_address").call(address);
+                    PythonObject npArr = Python.importModule("numpy").attr("frombuffer").call(cArr, npDType);
+                    npArr = npArr.attr("reshape").call(from.getShape());
+                    PythonGC.keep(npArr);
+                    return new NumpyArray(npArr);
+                }
+            } else {
+                byte[] bytes = bb.array();
+                try (PythonGC gc = PythonGC.watch()) {
+                    PythonObject fromBuffer = Python.importModule("numpy").attr("frombuffer");
+                    PythonObject npArr = fromBuffer.call(bytes, npDType);
+                    npArr = npArr.attr("reshape").call(from.getShape());
+                    PythonGC.keep(npArr);
+                    return new NumpyArray(npArr);
+                }
             }
+
 
         }
     }
@@ -130,10 +156,23 @@ public class NumpyArrayConverters {
                 List shapeList = PythonTypes.LIST.toJava(from.getPythonObject().attr("shape"));
                 long[] shape = new long[shapeList.size()];
                 for (int i = 0; i < shape.length; i++) {
-                    shape[i] = (Long)shapeList.get(i);
+                    shape[i] = (Long) shapeList.get(i);
                 }
-                byte[] bytes = PythonTypes.BYTES.toJava(Python.bytes(from.getPythonObject()));
-                return new SerializedNDArray(type, shape, ByteBuffer.wrap(bytes));
+                try {
+                    long address = Long.parseLong(from.getPythonObject().attr("__array_interface__").get("data").get(0).toString());
+                    Field addressField = Buffer.class.getDeclaredField("address");
+                    addressField.setAccessible(true);
+                    Field limitField = Buffer.class.getDeclaredField("limit");
+                    limitField.setAccessible(true);
+                    ByteBuffer buff = ByteBuffer.allocateDirect(0).order(ByteOrder.nativeOrder());
+                    addressField.setLong(buff, address);
+                    limitField.setInt(buff, from.getPythonObject().attr("nbytes").toInt());
+                    return new SerializedNDArray(type, shape, buff);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+//                byte[] bytes = PythonTypes.BYTES.toJava(Python.bytes(from.getPythonObject()));
+//                return new SerializedNDArray(type, shape, ByteBuffer.wrap(bytes));
             }
 
         }
