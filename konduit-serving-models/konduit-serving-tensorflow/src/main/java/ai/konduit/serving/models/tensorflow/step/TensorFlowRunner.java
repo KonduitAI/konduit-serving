@@ -70,10 +70,10 @@ public class TensorFlowRunner implements PipelineStepRunner {
 
     @Override
     public Data exec(Context ctx, Data data) {
-        Preconditions.checkState(step.getInputNames() != null, "TensorFlowStep input array names are not set (null)");
+        Preconditions.checkState(step.inputNames() != null, "TensorFlowStep input array names are not set (null)");
 
         Session.Runner r = sess.runner();
-        for (String s : step.getInputNames()) {
+        for (String s : step.inputNames()) {
             if(!data.has(s)){
                 throw new ValueNotFoundException( "Error in TensorFlowStep: Input data does not have a value corresponding to TensorFlowStep.inputNames value \"" +
                         s + "\" - data keys = " + data.keys());
@@ -90,7 +90,7 @@ public class TensorFlowRunner implements PipelineStepRunner {
             r.feed(s, t);
         }
 
-        List<String> outNames = step.getOutputNames();
+        List<String> outNames = step.outputNames();
         for (String s : outNames) {
             String name;
             int idx;
@@ -112,7 +112,7 @@ public class TensorFlowRunner implements PipelineStepRunner {
         } catch (Throwable t){
             StringBuilder sb = new StringBuilder();
             sb.append("TensorFlow exception in TensorFlowStep (" + name() + "). Input shapes:\n");
-            for(String s : step.getInputNames()){
+            for(String s : step.inputNames()){
                 NDArray arr = data.getNDArray(s);
                 sb.append(s).append(": ").append(Arrays.toString(arr.shape())).append("\n");
             }
@@ -141,7 +141,7 @@ public class TensorFlowRunner implements PipelineStepRunner {
 
     protected void initHelper() throws Exception {
         //File origFile = new File(new URI(step.getModelUri()));
-        String uri = step.getModelUri();
+        String uri = step.modelUri();
         File origFile = URIResolver.getFile(uri);
         Preconditions.checkState(origFile.exists(), "Model file does not exist: " + uri);
 

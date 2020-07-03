@@ -20,6 +20,8 @@ package ai.konduit.serving.data.image.step.point.draw;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
+import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -27,7 +29,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -68,7 +72,6 @@ public class DrawPointsStep implements PipelineStep {
     private Map<String, String> classColors;
 
     @Schema(description = "Name of the input data fields containing the points to be drawn. Accepts both single points and lists of points. Accepts both relative and absolute addressed points.")
-    @Singular
     private List<String> points;
 
     @Schema(description = "Optional. Point radius on drawn image. Default = 5px")
@@ -91,4 +94,9 @@ public class DrawPointsStep implements PipelineStep {
     @Schema(description = "Name of the output image",
             defaultValue = DEFAULT_OUTPUT_NAME)
     private String outputName;
+
+    @Tolerate
+    public DrawPointsStep points(String... points) {
+        return this.points(Arrays.asList(points));
+    }
 }

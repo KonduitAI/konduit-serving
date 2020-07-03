@@ -21,23 +21,31 @@ package ai.konduit.serving.data.image;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.impl.data.image.Bmp;
+import ai.konduit.serving.pipeline.impl.data.image.Jpeg;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.image.base.BaseImageFile;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.nd4j.common.resources.Resources;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestConversion {
+
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
+
 
     @Test
     public void testConversion(){
@@ -150,4 +158,86 @@ public class TestConversion {
         return true;
     }
 
+
+
+    @Test
+    public void testBufferedImageConversion() throws Exception {
+        //https://github.com/KonduitAI/konduit-serving/issues/426
+        //https://github.com/KonduitAI/konduit-serving/issues/424
+
+        String[] format = new String[]{"bi", "png", "jpg", "mat"};
+
+        File dir = testDir.newFolder();
+
+        Random r = new Random(12345);
+        for(boolean alpha : new boolean[]{false, true}) {
+            for (String from : format) {
+                if(alpha && "jpg".equals(from))
+                    continue;
+
+                Image in;
+                switch (from){
+                    case "bi":
+                        in = Image.create(randomBI(r, alpha));
+                        break;
+                    case "png":
+                        File fPng = new File(dir, "test.png");
+                        ImageIO.write(randomBI(r, alpha), "png", fPng);
+                        in = Image.create(fPng);
+                        break;
+                    case "jpg":
+                        File fjpg = new File(dir, "test.jpg");
+                        ImageIO.write(randomBI(r, alpha), "jpg", fjpg);
+                        in = Image.create(fjpg);
+                        break;
+                    case "mat":
+                        File fPng2 = new File(dir, "test2.png");
+                        ImageIO.write(randomBI(r, alpha), "png", fPng2);
+                        in = Image.create(org.bytedeco.opencv.global.opencv_imgcodecs.imread(fPng2.getAbsolutePath()));
+                        break;
+                    default:
+                        throw new RuntimeException();
+                }
+
+                for (String to : format) {
+                    switch (to){
+                        case "bi":
+                            in.getAs(BufferedImage.class);
+                            break;
+                        case "png":
+                            in.getAs(Png.class);
+                            break;
+                        case "jpg":
+                            in.getAs(Jpeg.class);
+                            break;
+                        case "mat":
+                            in.getAs(Mat.class);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    protected BufferedImage randomBI(Random r, boolean alpha){
+        BufferedImage bi = new BufferedImage(32, 32, alpha ? BufferedImage.TYPE_4BYTE_ABGR: BufferedImage.TYPE_3BYTE_BGR);
+        for( int i=0; i<32; i++ ){
+            for( int j=0; j<32; j++ ){
+                bi.setRGB(i, j, rgb(r, alpha));
+            }
+        }
+        return bi;
+    }
+
+    private static int rgb(Random rng, boolean alpha){
+        int r = rng.nextInt(255);
+        int g = rng.nextInt(255);
+        int b = rng.nextInt(255);
+        int rgb = r << 16 | g << 8 | b;
+        if(alpha){
+            int a = rng.nextInt(255);
+            rgb |= a << 24;
+        }
+        return rgb;
+    }
 }

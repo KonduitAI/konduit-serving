@@ -27,7 +27,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -64,6 +66,7 @@ public class DrawSegmentationStep implements PipelineStep {
             "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private List<String> classColors;
 
+
     @Schema(description = "Name of the NDArray with the class indices, 0 to numClasses-1. Shape [1, height, width].")
     private String segmentArray;
 
@@ -88,5 +91,10 @@ public class DrawSegmentationStep implements PipelineStep {
             "aspect ratio. This allows the step to determine the subset of the image actually passed to the network that " +
             "produced the segmentation prediction to be drawn.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
+
+    @Tolerate
+    public DrawSegmentationStep classColors(String... classColors) {
+        return this.classColors(Arrays.asList(classColors));
+    }
 
 }

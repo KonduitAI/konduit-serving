@@ -19,6 +19,7 @@
 package ai.konduit.serving.data.image.step.grid.draw;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import ai.konduit.serving.data.image.step.grid.crop.CropFixedGridStep;
 import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,7 +28,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -79,6 +82,11 @@ public class DrawFixedGridStep implements PipelineStep {
     @Schema(description = "Line thickness to use to draw the border (in pixels). " +
             "If null then the same value as the borderThickness is used")
     private Integer gridThickness;
+
+    @Tolerate
+    public DrawFixedGridStep points(Point... points) {
+        return this.points(Arrays.asList(points));
+    }
 
 
 }

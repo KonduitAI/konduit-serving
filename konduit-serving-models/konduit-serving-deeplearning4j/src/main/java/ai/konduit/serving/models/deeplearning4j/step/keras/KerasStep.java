@@ -19,14 +19,17 @@
 package ai.konduit.serving.models.deeplearning4j.step.keras;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import ai.konduit.serving.models.deeplearning4j.step.DL4JStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.List;
 
 //TODO move this to somewhere it can be used for non-DL4J execution
@@ -57,6 +60,16 @@ public class KerasStep implements PipelineStep {
 
     public KerasStep(String modelUri){
         this.modelUri = modelUri;
+    }
+
+    @Tolerate
+    public KerasStep inputNames(String... inputNames) {
+        return this.inputNames(Arrays.asList(inputNames));
+    }
+
+    @Tolerate
+    public KerasStep outputNames(String... outputNames) {
+        return this.outputNames(Arrays.asList(outputNames));
     }
 
 }

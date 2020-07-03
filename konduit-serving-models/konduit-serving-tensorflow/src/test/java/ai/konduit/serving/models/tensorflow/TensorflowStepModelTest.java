@@ -55,11 +55,10 @@ public class TensorflowStepModelTest {
     @Test
     public void testTFStepRunner() {
         String uri = "http://localhost:9090/src/test/resources/models/frozen_model.pb";
-        TensorFlowStep step = TensorFlowStep.builder().
+        TensorFlowStep step = new TensorFlowStep().
                 modelUri(uri).
                 inputNames(Collections.singletonList("in")).
-                outputNames(Collections.singletonList("out")).
-                build();
+                outputNames(Collections.singletonList("out"));
         TensorFlowRunner runner = new TensorFlowRunner(step);
         INDArray arr = Nd4j.rand(DataType.FLOAT, 3, 4, 4);
         Data data = Data.singleton("in", NDArray.create(arr));

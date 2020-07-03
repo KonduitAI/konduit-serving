@@ -19,14 +19,16 @@ package ai.konduit.serving.pipeline.impl.step.bbox.filter;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.Tolerate;
 
 import java.util.Arrays;
+import java.util.List;
+
 
 @Data
 @Accessors(fluent = true)
@@ -37,18 +39,18 @@ public class BoundingBoxFilterStep implements PipelineStep {
 
     public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";
 
-    protected boolean keepOtherValues = true;
+    private boolean keepOtherValues = true;
 
-    protected String[] classesToKeep = new String[]{};
+    @Schema(description = "A list of class labels for which bounding boxes will be drawn")
+    protected List<String> classesToKeep;
 
     protected String inputName = "input";
 
     protected String outputName = DEFAULT_OUTPUT_NAME;
 
-//    @Tolerate
-//    public BoundingBoxFilterStep classesToKeep(String... classesToKeep){
-//        return this.classesToKeep(new String[]{classesToKeep});
-
-
+    @Tolerate
+    public BoundingBoxFilterStep classesToKeep(String... classesToKeep) {
+        return this.classesToKeep(Arrays.asList(classesToKeep));
+    }
 
 }

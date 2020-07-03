@@ -27,7 +27,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -76,4 +78,9 @@ public class CropFixedGridStep implements PipelineStep {
 
     @Schema(description = "Name of the key of all the cropped output images from this step.")
     private String outputName;
+
+    @Tolerate
+    public CropFixedGridStep points(Point... points) {
+        return this.points(Arrays.asList(points));
+    }
 }

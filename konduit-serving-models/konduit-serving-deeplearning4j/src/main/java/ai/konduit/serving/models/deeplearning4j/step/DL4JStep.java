@@ -22,8 +22,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -44,10 +46,26 @@ public class DL4JStep implements PipelineStep {
             "from the computation graph output - INDArray[] to data keys).")
     private List<String> outputNames;
 
+    @Schema(description = "Optional, usually unnecessary. Specifies a class used to load the model if customization in how " +
+            "model loading is performed, instead of the usual MultiLayerNetwork.load or ComputationGraph.load methods. " +
+            "Must be a java.util.Function<String,MultiLayerNetwork> or java.util.Function<String,ComputationGraph>")
+    private String loaderClass;
+
     public DL4JStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputNames") List<String> inputNames,
                     @JsonProperty("outputNames") List<String> outputNames){
         this.modelUri = modelUri;
         this.inputNames = inputNames;
         this.outputNames = outputNames;
     }
+
+    @Tolerate
+    public DL4JStep inputNames(String... inputNames) {
+        return this.inputNames(Arrays.asList(inputNames));
+    }
+
+    @Tolerate
+    public DL4JStep outputNames(String... outputNames) {
+        return this.outputNames(Arrays.asList(outputNames));
+    }
+
 }

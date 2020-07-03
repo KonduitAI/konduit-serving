@@ -21,12 +21,11 @@ package ai.konduit.serving.data.image.step.point.perspective.convert;
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Singular;
+import lombok.*;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -38,18 +37,17 @@ import java.util.List;
  * Note: supports both single values and lists. If the input is as single value,
  * the output will be a single value; if the input is a list, the output will be a list.<br>
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("PERSPECTIVE_TRANSFORM")
 public class PerspectiveTransformStep implements PipelineStep {
     /**
      * If null: just find any Points, Bounding Boxes and Images
      */
-    @Singular
     private List<String> inputNames;
-    @Singular
+
     private List<String> outputNames;
     /**
      * When you provide source points as an input, they must be provided as a list of 4 points [topLeft, topRight, bottomLeft, bottomRight]
@@ -83,19 +81,35 @@ public class PerspectiveTransformStep implements PipelineStep {
      * takes exactly 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
     private List<Point> sourcePoints;
+
+
     /**
      * takes exactly 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
     private List<Point> targetPoints;
 
 
-    @Builder.Default
     private boolean keepOtherFields = true;
 
-
-    public PerspectiveTransformStep() {
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the boolean default would be false, the enum would be null
-        keepOtherFields = true;
+    @Tolerate
+    public PerspectiveTransformStep inputNames(String... inputNames) {
+        return this.inputNames(Arrays.asList(inputNames));
     }
+
+    @Tolerate
+    public PerspectiveTransformStep outputNames(String... outputNames) {
+        return this.outputNames(Arrays.asList(outputNames));
+    }
+
+    @Tolerate
+    public PerspectiveTransformStep sourcePoints(Point... sourcePoints) {
+        return this.sourcePoints(Arrays.asList(sourcePoints));
+    }
+
+    @Tolerate
+    public PerspectiveTransformStep targetPoints(Point... targetPoints) {
+        return this.targetPoints(Arrays.asList(targetPoints));
+    }
+
+
 }

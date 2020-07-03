@@ -21,6 +21,7 @@ package ai.konduit.serving.models.tensorflow.format;
 import ai.konduit.serving.models.tensorflow.util.TensorFlowUtil;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
+import org.nd4j.common.base.Preconditions;
 import org.tensorflow.DataType;
 import org.tensorflow.Tensor;
 
@@ -40,6 +41,20 @@ public class TFNDArray extends BaseNDArray<Tensor> {
     @Override
     public long[] shape() {
         return array.shape();
+    }
+
+    @Override
+    public long size(int dimension) {
+        int rank = rank();
+        Preconditions.checkState(dimension >= -rank && dimension < rank, "Invalid dimension: Got %s for rank %s array", dimension, rank);
+        if(dimension < 0)
+            dimension += rank;
+        return array.shape()[dimension];
+    }
+
+    @Override
+    public int rank() {
+        return array.shape().length;
     }
 
     @Override

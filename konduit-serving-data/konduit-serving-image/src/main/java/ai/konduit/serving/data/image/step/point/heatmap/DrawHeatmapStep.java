@@ -20,6 +20,7 @@ package ai.konduit.serving.data.image.step.point.heatmap;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,6 +63,7 @@ public class DrawHeatmapStep implements PipelineStep {
     @Singular
     private List<String> points;
 
+
     @Schema(description = "Size of area influenced by a point")
     private Integer radius;
 
@@ -90,4 +94,9 @@ public class DrawHeatmapStep implements PipelineStep {
             "used to crop images before passing to the network, when the image aspect ratio doesn't match the NDArray " +
             "aspect ratio. This allows the step to determine the subset of the image actually passed to the network.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
+
+    @Tolerate
+    public DrawHeatmapStep points(String... points) {
+        return this.points(Arrays.asList(points));
+    }
 }
