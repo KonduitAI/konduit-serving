@@ -21,7 +21,9 @@ package ai.konduit.serving.pipeline.impl.pipeline.graph;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,11 +32,13 @@ import java.util.List;
  * An Input node for {@link GraphBuilder}
  * @author Alex Black
  */
-@AllArgsConstructor
+@Data
 @EqualsAndHashCode(exclude = {"builder"})
 public class Input implements GraphStep {
 
     private final GraphBuilder builder;
+
+    public Input(@JsonProperty("builder") GraphBuilder builder ){ this.builder = builder; }
 
     @Override
     public String name() {

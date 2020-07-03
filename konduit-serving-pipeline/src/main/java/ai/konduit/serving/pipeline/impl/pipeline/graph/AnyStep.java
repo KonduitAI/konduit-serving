@@ -20,7 +20,9 @@ package ai.konduit.serving.pipeline.impl.pipeline.graph;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -31,14 +33,14 @@ import java.util.List;
  *
  * @author Alex Black
  */
-@EqualsAndHashCode(callSuper = true)
+@Data
 @JsonName(GraphConstants.GRAPH_ANY_JSON_KEY)
 @Schema(description = "A graph pipeline step that forwards the first available input to the output. Usually used in " +
         "conjunction with an earlier Switch step - i.e., input -> Switch -> (left branch, right branch) -> Any." +
         " If more than one of the inputs is available to AnyStep, the output is undefined (it could return any of the inputs)")
 public class AnyStep extends BaseMergeStep implements GraphStep {
 
-    public AnyStep(GraphBuilder b, List<String> steps, String name) {
+    public AnyStep(@JsonProperty("GraphBuilder") GraphBuilder b, @JsonProperty("steps") List<String> steps, @JsonProperty("name") String name) {
         super(b, steps, name);
     }
 

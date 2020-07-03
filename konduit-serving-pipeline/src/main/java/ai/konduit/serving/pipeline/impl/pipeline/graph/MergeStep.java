@@ -21,7 +21,9 @@ package ai.konduit.serving.pipeline.impl.pipeline.graph;
 import ai.konduit.serving.annotation.json.JsonName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -33,13 +35,14 @@ import java.util.List;
  * @author Alex Black
  */
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@Data
 @JsonName(GraphConstants.GRAPH_MERGE_JSON_KEY)
 @Schema(description = "A graph pipeline step the configures how to merge the output Data instances of multiple graph " +
         "steps into a single Data instance.")
 public class MergeStep extends BaseMergeStep implements GraphStep {
 
-    public MergeStep(GraphBuilder b, List<String> steps, String name) {
+    public MergeStep(@JsonProperty("GraphBuilder") GraphBuilder b, @JsonProperty("steps") List<String> steps,
+                     @JsonProperty("name")  String name) {
         super(b, steps, name);
     }
 
