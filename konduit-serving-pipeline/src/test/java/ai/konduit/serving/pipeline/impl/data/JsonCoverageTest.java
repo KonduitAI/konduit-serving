@@ -74,6 +74,7 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
         Set<Class<?>> set = new HashSet<>();
         set.add(CallbackStep.class);
         set.add(ai.konduit.serving.pipeline.impl.testpipelines.callback.CallbackStep.class);
+        // I need PipelineProfilerTest$TestStep i.e. private static class inside
         set.add(ai.konduit.serving.pipeline.impl.pipeline.PipelineProfilerTest.class);
         set.add(FunctionStep.class);
         set.add(Input.class);
@@ -196,8 +197,7 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
     @Test
     public void testAsyncPipeline() {
         Map<String, GraphStep> steps = new HashMap<String, GraphStep>();
-        testConfigSerDe(new ai.konduit.serving.pipeline.impl.pipeline.AsyncPipeline(new GraphPipeline(steps, "foo", "myGraphPipeline"), new SimpleLoopTrigger()) {
-        });
+        testConfigSerDe(new AsyncPipeline(new GraphPipeline(steps, "foo", "myGraphPipeline"), new SimpleLoopTrigger()));
     }
 
 
@@ -215,7 +215,8 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Test
     public void testMergeStep() {
-        testConfigSerDe(new MergeStep(new GraphBuilder(), new ArrayList<String>(), "foo"));
+        testConfigSerDe(new GraphBuilder().build(new MergeStep(new GraphBuilder(), new ArrayList<String>(), "foo")));
+        seen.add(MergeStep.class);
     }
 
 
@@ -226,7 +227,8 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Test
     public void testSwitchOutput() {
-        testConfigSerDe(new SwitchOutput(new GraphBuilder(), "foo", "bar", 2));
+        testConfigSerDe(new GraphBuilder().build(new SwitchOutput(new GraphBuilder(), "foo", "bar", 2)));
+        seen.add(SwitchOutput.class);
     }
 
 
