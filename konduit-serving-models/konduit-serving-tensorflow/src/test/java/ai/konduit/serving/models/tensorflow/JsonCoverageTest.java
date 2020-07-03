@@ -24,7 +24,7 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Test
     public void testTensorFlowStepStep() {
-        testConfigSerDe(new TensorFlowStep(null, null));
+        testConfigSerDe(new TensorFlowStep());
     }
 
 

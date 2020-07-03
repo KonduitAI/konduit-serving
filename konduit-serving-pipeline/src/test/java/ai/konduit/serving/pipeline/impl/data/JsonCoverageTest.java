@@ -14,6 +14,7 @@ import ai.konduit.serving.pipeline.impl.pipeline.loop.SimpleLoopTrigger;
 import ai.konduit.serving.pipeline.impl.pipeline.loop.TimeLoopTrigger;
 import ai.konduit.serving.pipeline.impl.step.bbox.filter.BoundingBoxFilterStep;
 import ai.konduit.serving.pipeline.impl.step.bbox.point.BoundingBoxToPointStep;
+import ai.konduit.serving.pipeline.impl.step.bbox.yolo.YoloToBoundingBoxStep;
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
 import ai.konduit.serving.pipeline.impl.step.ml.classifier.ClassifierOutputStep;
 import ai.konduit.serving.pipeline.impl.step.ml.regression.RegressionOutputStep;
@@ -92,6 +93,12 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
                 .inputName("in")
                 .names(hashMap));
     }
+
+    @Test
+    public void testYoloStep() {
+        testConfigSerDe(new YoloToBoundingBoxStep());
+    }
+
 
 
     @Test
