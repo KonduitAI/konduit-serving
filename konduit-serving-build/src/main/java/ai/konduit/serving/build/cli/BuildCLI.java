@@ -20,25 +20,26 @@ package ai.konduit.serving.build.cli;
 
 import ai.konduit.serving.build.build.GradleBuild;
 import ai.konduit.serving.build.config.*;
-import ai.konduit.serving.build.config.Arch;
-import ai.konduit.serving.build.config.OS;
-import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.dependencies.DependencyRequirement;
 import ai.konduit.serving.build.dependencies.ModuleRequirements;
 import ai.konduit.serving.build.deployments.ClassPathDeployment;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
-import ai.konduit.serving.build.config.Module;
-import ai.konduit.serving.pipeline.api.protocol.URIResolver;
-import com.beust.jcommander.*;
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import io.vertx.core.cli.CLIException;
+import io.vertx.core.cli.annotations.Description;
+import io.vertx.core.cli.annotations.Name;
+import io.vertx.core.cli.annotations.Option;
+import io.vertx.core.cli.annotations.Summary;
+import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
-
-import static java.lang.System.out;
 
 /**
  * Command line interface for performing Konduit Serving builds
@@ -53,58 +54,84 @@ import static java.lang.System.out;
  *
  * @author Alex black
  */
+@Name("build")
+@Summary("Command line interface for performing Konduit Serving builds.")
+@Description("Allows the user to build a JAR or artifact such as a docker image suitable " +
+        "for performing inference on a given pipeline on a given deployment target (defined " +
+        "as an operating system, CPU architecture and optionally compute device). " +
+        "For example, can be used to build for any of the following: \n" +
+        "-> HTTP (REST) server on x86 Windows (CPU), packaged as a stand-alone .exe\n" +
+        "-> HTTP and GRPC server on CUDA 10.2 + Linux, packaged as a docker image \n" +
+        "And many more combinations\n\n" +
+        "Example usages:\n" +
+        "--------------\n" +
+        "- Creates a deployment for classpath manifest jar for a CPU device:\n" +
+        "$ konduit build -dt classpath -c classpath.outputFile=manifest.jar \n" +
+        "  classpath.type=jar_manifest -p pipeline.json -d CPU \n\n" +
+        "- Creates a uber jar deployment for a CUDA 10.1 device:\n" +
+        "$ konduit build -dt classpath -c jar.outputdir=build jar.name=uber.jar \n" +
+        "  -p pipeline.json -d CUDA_10.1 \n" +
+        "--------------")
 @Slf4j
-public class BuildCLI {
+public class BuildCLI extends DefaultCommand {
 
     public static final String HTTP = "HTTP";
     public static final String GRPC = "GRPC";
 
+    public static final String PIPELINE_OPTION_DESCRIPTION = "Path to a pipeline json file";
+    public static final String OS_OPTION_DESCRIPTION = "Operating systems to build for. Valid values: {linux, windows, mac} (case insensitive).\n" +
+            "If not set, the current system OS will be used";
+    public static final String ARCHITECTURE_OPTION_DESCRIPTION = "The target CPU architecture. Must be one of {x86, x86_avx2, x86_avx512, armhf, arm64, ppc64le}.\n " +
+            "Note that most modern desktops can be built with x86_avx2, which is the default";
+    public static final String DEVICE_OPTION_DESCRIPTION = "Compute device to be used. If not set: artifacts are build for CPU only.\n" +
+            "Valid values: CPU, CUDA_10.0, CUDA_10.1, CUDA_10.2 (case insensitive)";
+    public static final String MODULES_OPTION_DESCRIPTION = "Names of the Konduit Serving modules to include, as a comma-separated list of values.\nNote that " +
+            "this is not necessary when a pipeline is included (via -p/--pipeline), as the modules will be inferred " +
+            "automatically based on the pipeline contents";
+    public static final String DEPLOYMENT_TYPE_OPTION_DESCRIPTION = "The deployment types to use: JAR, DOCKER, EXE, WAR, RPM, DEB or TAR (case insensitive)";
+    public static final String SERVER_TYPE_OPTION_DESCRIPTION = "Type of server - HTTP or GRPC (case insensitive)";
+    public static final String ADDITIONAL_DEPENDENCIES_OPTION_DESCRIPTION = "Additional dependencies to include, in GAV(C) format: \"group_id:artifact_id:version\" / \"group_id:artifact_id:version:classifier\"";
+    public static final String CONFIG_OPTION_DESCRIPTION = "Configuration for the deployment types specified via -dt/--deploymentType.\n" +
+            "For example, \"-c jar.outputdir=/some/dir jar.name=my.jar\" etc.\n" +
+            "Configuration keys:\n" +
+            UberJarDeployment.CLI_KEYS + "\n" +
+            ClassPathDeployment.CLI_KEYS + "\n";
 
-
-    @Parameter(names = {"-p", "--pipeline"})
+    @Parameter(names = {"-p", "--pipeline"}, description = PIPELINE_OPTION_DESCRIPTION)
     private String pipeline;
 
     @Parameter(names = {"-o", "--os"}, validateValueWith = CLIValidators.OSValueValidator.class,
-            description = "Operating systems to build for. Valid values: {linux, windows, mac} (case insensitive).\n" +
-                    "If not set, the current system OS will be used")
+            description = OS_OPTION_DESCRIPTION)
     private List<String> os;
 
     @Parameter(names = {"-a", "--arch"}, validateValueWith = CLIValidators.ArchValueValidator.class,
-            description = "The target CPU architecture. Must be one of {x86, x86_avx2, x86_avx512, armhf, arm64, ppc64le}.\n " +
-                    "Note that most modern desktops can be built with x86_avx2, which is the default")
+            description = ARCHITECTURE_OPTION_DESCRIPTION)
     private String arch = Arch.x86_avx2.toString();
 
     @Parameter(names = {"-d", "--device"}, validateValueWith = CLIValidators.DeviceValidator.class,
-            description = "Compute device to be used. If not set: artifacts are build for CPU only.\n" +
-                    "Valid values: CPU, CUDA_10.0, CUDA_10.1, CUDA_10.2 (case insensitive)")
+            description = DEVICE_OPTION_DESCRIPTION)
     private String device;
 
     @Parameter(names = {"-m", "--modules"}, validateValueWith = CLIValidators.ModuleValueValidator.class,
-            description = "Names of the Konduit Serving modules to include, as a comma-separated list of values.\nNote that " +
-                    "this is not necessary when a pipeline is included (via -p/--pipeline), as the modules will be inferred " +
-                    "automatically based on the pipeline contents")
+            description = MODULES_OPTION_DESCRIPTION)
     private List<String> modules;
 
     @Parameter(names = {"-dt", "--deploymentType"}, validateValueWith = CLIValidators.DeploymentTypeValueValidator.class,
-            description = "The deployment types to use: JAR, DOCKER, EXE, WAR, RPM, DEB or TAR (case insensitive)")
+            description = DEPLOYMENT_TYPE_OPTION_DESCRIPTION)
     private List<String> deploymentTypes = Collections.singletonList(Deployment.JAR);
 
     @Parameter(names = {"-s", "--serverType"},
-            description = "Type of server - HTTP or GRPC (case insensitive)",
+            description = SERVER_TYPE_OPTION_DESCRIPTION,
             validateValueWith = CLIValidators.ServerTypeValidator.class)
     private List<String> serverTypes = Arrays.asList(HTTP, GRPC);
 
-    @Parameter(names = {"-ad", "--additionalDependencies"},
-            description = "Additional dependencies to include, in GAV(C) format: \"group_id:artifact_id:version\" / \"group_id:artifact_id:version:classifier\"",
+    @Parameter(names = {"-ad", "--addDep"},
+            description = ADDITIONAL_DEPENDENCIES_OPTION_DESCRIPTION,
             validateValueWith = CLIValidators.AdditionalDependenciesValidator.class)
     private List<String> additionalDependencies;
 
     @Parameter(names = {"-c", "--config"},
-            description = "Configuration for the deployment types specified via -dt/--deploymentType.\n" +
-                    "For example, \"-c jar.outputdir=/some/dir jar.name=my.jar\" etc.\n" +
-                    "Configuration keys:\n" +
-                    UberJarDeployment.CLI_KEYS + "\n" +
-                    ClassPathDeployment.CLI_KEYS + "\n",
+            description = CONFIG_OPTION_DESCRIPTION,
             variableArity = true,
             validateValueWith = CLIValidators.ConfigValidator.class)
     private List<String> config;
@@ -112,11 +139,105 @@ public class BuildCLI {
     @Parameter(names = {"-h", "--help"}, help = true, arity = 0)
     private boolean help;
 
+    @Option(shortName = "p", longName = "pipeline")
+    @Description(PIPELINE_OPTION_DESCRIPTION)
+    public void setPipeline(String pipeline) {
+        this.pipeline = pipeline;
+    }
+
+    @Option(shortName = "o", longName = "os", acceptMultipleValues = true)
+    @Description(OS_OPTION_DESCRIPTION)
+    public void setOperatingSystem(List<String> operatingSystem) {
+        try {
+            new CLIValidators.OSValueValidator().validate("os", operatingSystem);
+        } catch (Exception e) {
+            System.exit(1);
+        }
+        this.os = operatingSystem;
+    }
+
+    @Option(shortName = "a", longName = "arch")
+    @Description(ARCHITECTURE_OPTION_DESCRIPTION)
+    public void setArchitecture(String architecture) {
+        try {
+            new CLIValidators.ArchValueValidator().validate("arch", architecture);
+        } catch (Exception e) {
+            System.exit(1);
+        }
+        this.arch = architecture;
+    }
+
+    @Option(shortName = "d", longName = "device")
+    @Description(DEVICE_OPTION_DESCRIPTION)
+    public void setDevice(String device) {
+        try {
+            new CLIValidators.DeviceValidator().validate("device", device);
+        } catch (Exception e) {
+            System.exit(1);
+        }
+        this.device = device;
+    }
+
+    @Option(shortName = "m", longName = "modules", acceptMultipleValues = true)
+    @Description(MODULES_OPTION_DESCRIPTION)
+    public void setModules(List<String> modules) {
+        try {
+            new CLIValidators.ModuleValueValidator().validate("modules", modules);
+        } catch (Exception e) {
+            System.exit(1);
+        }
+        this.modules = modules;
+    }
+
+    @Option(shortName = "dt", longName = "deploymentType", acceptMultipleValues = true)
+    @Description(DEPLOYMENT_TYPE_OPTION_DESCRIPTION)
+    public void setDeploymentTypes(List<String> deploymentTypes) {
+        try {
+            new CLIValidators.DeploymentTypeValueValidator().validate("deploymentType", deploymentTypes);
+        } catch (Exception e) {
+            System.exit(1);
+        }
+        this.deploymentTypes = deploymentTypes;
+    }
+
+    @Option(shortName = "s", longName = "serverType", acceptMultipleValues = true)
+    @Description(SERVER_TYPE_OPTION_DESCRIPTION)
+    public void setServerTypes(List<String> serverTypes) {
+        try {
+            new CLIValidators.ServerTypeValidator().validate("serverType", serverTypes);
+        } catch (Exception e) {
+            System.exit(1);
+        }
+        this.serverTypes = serverTypes;
+    }
+
+    @Option(shortName = "ad", longName = "addDep", acceptMultipleValues = true)
+    @Description(ADDITIONAL_DEPENDENCIES_OPTION_DESCRIPTION)
+    public void setAdditionalDependencies(List<String> additionalDependencies) {
+        try {
+            new CLIValidators.AdditionalDependenciesValidator().validate("additionalDependencies", additionalDependencies);
+        } catch (Exception e) {
+            System.exit(1);
+        }
+        this.additionalDependencies = additionalDependencies;
+    }
+
+    @Option(shortName = "c", longName = "config", acceptMultipleValues = true)
+    @Description(CONFIG_OPTION_DESCRIPTION)
+    public void setConfig(List<String> config) {
+        try {
+            new CLIValidators.ConfigValidator().validate("config", config);
+        } catch (Exception e) {
+            System.exit(1);
+        }
+        this.config = config;
+    }
+
     public static void main(String... args) throws Exception {
         new BuildCLI().exec(args);
     }
 
-    public void exec(String[] args) throws Exception {
+    public void exec(String[] args) {
         JCommander jCommander = new JCommander();
         jCommander.addObject(this);
         jCommander.parse(args);
@@ -126,10 +247,14 @@ public class BuildCLI {
             return;
         }
 
+        run();
+    }
+
+    @Override
+    public void run() throws CLIException {
         //Infer OS if necessary
         if(os == null || os.isEmpty())
             inferOS();
-
 
         //------------------------------------- Build Configuration --------------------------------------
 
@@ -320,12 +445,20 @@ public class BuildCLI {
         File tempDir = new File(FileUtils.getTempDirectory(), UUID.randomUUID().toString());
 
         out.println("Generating build files...");
-        GradleBuild.generateGradleBuildFiles(tempDir, c);
+        try {
+            GradleBuild.generateGradleBuildFiles(tempDir, c);
+        } catch (IOException cause) {
+            throw new CLIException("Failed to generate gradle build files.", cause);
+        }
         out.println(">> Build file generation complete\n\n");
 
         out.println("Starting build...");
         long start = System.currentTimeMillis();
-        GradleBuild.runGradleBuild(tempDir, c);
+        try {
+            GradleBuild.runGradleBuild(tempDir, c);
+        } catch (IOException cause) {
+            throw new CLIException("Gradle build failed", cause);
+        }
         long end = System.currentTimeMillis();
 
         out.println(">> Build complete\n\n");
