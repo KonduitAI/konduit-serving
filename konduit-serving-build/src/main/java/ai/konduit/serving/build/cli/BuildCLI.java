@@ -252,6 +252,10 @@ public class BuildCLI extends DefaultCommand {
 
     @Override
     public void run() throws CLIException {
+        if (out == null) {
+            out = System.out;
+        }
+
         //Infer OS if necessary
         if(os == null || os.isEmpty())
             inferOS();
