@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.cli.launcher;
 
+import ai.konduit.serving.build.cli.BuildCLI;
 import ai.konduit.serving.cli.launcher.command.*;
 import ai.konduit.serving.cli.launcher.command.build.extension.ProfileCommand;
 import ai.konduit.serving.cli.launcher.command.build.extension.ServeBuildCommand;
@@ -84,7 +85,8 @@ public class KonduitServingLauncher extends Launcher {
             .register(ConfigCommand.class, ConfigCommand::new)
             .register(InspectCommand.class, InspectCommand::new)
             .register(LogsCommand.class, LogsCommand::new)
-            .register(ProfileCommand.class, ProfileCommand::new);
+            .register(ProfileCommand.class, ProfileCommand::new)
+            .register(BuildCLI.class, BuildCLI::new);
     }
 
     public String commandLinePrefix() {
