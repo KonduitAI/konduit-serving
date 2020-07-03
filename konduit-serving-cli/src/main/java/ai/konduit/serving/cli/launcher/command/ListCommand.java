@@ -29,10 +29,7 @@ import io.vertx.core.spi.launcher.DefaultCommand;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.shade.jackson.databind.JsonNode;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -126,8 +123,12 @@ public class ListCommand extends DefaultCommand {
             hostAndPort = String.format("%s:%s", jsonNode.get("host"), jsonNode.get("port")).replaceAll("\"", "");
             status = "started";
         } catch (IOException exception) {
-            out.println("Error occurred while reading server configuration file:");
-            exception.printStackTrace(out);
+            if (exception instanceof FileNotFoundException) {
+                status = String.format("failed: Check '%s' logs for more details...", id);
+            } else {
+                out.println("Error occurred listing servers:");
+                exception.printStackTrace(out);
+            }
         }
 
         out.format(printFormat, index, id, getServiceType(line), hostAndPort, pid, status);

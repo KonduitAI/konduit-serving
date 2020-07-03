@@ -80,10 +80,18 @@ public class ProfileCommand extends DefaultCommand {
     private List<String> serverTypes;
     private List<String> additionalDependencies;
 
-    @Argument(index = 0, argName = "subCommand")
-    @Description("Sub command to be used with the profile command. Sub commands are: [default, create, list, view, edit, delete]")
+    @Argument(index = 0, argName = "sub_command", required = false)
+    @DefaultValue("LISTs")
+    @Description("Sub command to be used with the profile command. Sub commands are: [default, create, list, view, edit, delete]. " +
+            "Defaults to 'LIST'")
     public void setSubCommand(String subCommand) {
-        this.subCommand = SubCommand.valueOf(subCommand.toUpperCase());
+        try {
+            this.subCommand = SubCommand.valueOf(subCommand.toUpperCase());
+        } catch (Exception e) {
+            System.out.format("Invalid sub command name: '%s'. Allowed values are: %s -> (case insensitive).",
+                    subCommand, Arrays.toString(SubCommand.values()));
+            System.exit(1);
+        }
     }
 
     @Argument(index = 1, argName = "profile_name", required = false)
@@ -94,7 +102,8 @@ public class ProfileCommand extends DefaultCommand {
 
     @Option(shortName = "a", longName = "arch", argName = "cpu_architecture")
     @DefaultValue("x86_avx2")
-    @Description("Name of the cpu architecture. Accepted values are: [x86, x86_64, x86_avx2, x86_avx512, arm64, armhf, ppc64le]")
+    @Description("Name of the cpu architecture. Accepted values are: [x86, x86_64, x86_avx2, x86_64-avx2, x86_64_avx2, x86_avx512, x86_64-avx512, " +
+            "x86_64_avx512, armhf, arm64, ppc64le;].")
     public void setCpuArchitecture(String cpuArchitecture) {
         this.cpuArchitecture = cpuArchitecture;
     }
@@ -107,22 +116,22 @@ public class ProfileCommand extends DefaultCommand {
 
     @Option(shortName = "d", longName = "device", argName = "device")
     @DefaultValue(DEFAULT_CPU_PROFILE_NAME)
-    @Description("Compute device to use with the server. Accepted values are: [CPU, CUDA_10.0, CUDA_10.1, CUDA_10.2]")
+    @Description("Compute device to use with the server. Accepted values are: [CPU, CUDA_10.0, CUDA_10.1, CUDA_10.2].")
     public void setComputeDevice(String computeDevice) {
         this.computeDevice = computeDevice;
     }
 
-    @Option(shortName = "st", longName = "serverTypes", argName = "serverTypes", acceptMultipleValues = true)
+    @Option(shortName = "st", longName = "server_types", argName = "serverTypes", acceptMultipleValues = true)
     @DefaultValue("HTTP GRPC")
-    @Description("One or more space separated values, indicating the backend server type. Accepted values are: [HTTP, GRPC, MQTT]")
+    @Description("One or more space separated values, indicating the backend server type. Accepted values are: [HTTP, GRPC, MQTT].")
     public void setServerTypes(List<String> serverTypes) {
         this.serverTypes = serverTypes;
     }
 
-    @Option(shortName = "ad", longName = "addDep", argName = "additionalDependencies", acceptMultipleValues = true)
+    @Option(shortName = "ad", longName = "addDep", argName = "additional_dependencies", acceptMultipleValues = true)
     @Description("One or more space separated values (maven coordinates) indicating additional dependencies to be included with " +
             "the server launch. The pattern of additional dependencies should be either <group_id>:<artifact_id>:<version> or " +
-            "<group_id>:<artifact_id>:<version>:<classifier>")
+            "<group_id>:<artifact_id>:<version>:<classifier>.")
     public void setAdditionalDependencies(List<String> additionalDependencies) {
         this.additionalDependencies = additionalDependencies;
     }
@@ -522,7 +531,10 @@ public class ProfileCommand extends DefaultCommand {
     }
 
     private static String findCudaVersion(List<String> command,  Pattern pattern) throws IOException {
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ProcessBuilder(command).start().getInputStream()))) {
+        try (BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(
+                        new ProcessBuilder(command).start().getInputStream()
+                ))) {
             String line = bufferedReader.readLine();
             while (line != null) {
                 Matcher matcher = pattern.matcher(line);
@@ -537,11 +549,16 @@ public class ProfileCommand extends DefaultCommand {
     }
 
     private static String findCudaInstallPath(String mainCommandName, String cudaVersion) throws IOException {
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ProcessBuilder(Arrays.asList(SystemUtils.IS_OS_WINDOWS ? "where" : "which", mainCommandName)).start().getInputStream()))) {
+        try (BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(
+                        new ProcessBuilder(Arrays.asList(SystemUtils.IS_OS_WINDOWS ? "where" : "which", mainCommandName))
+                                .start().getInputStream()
+                ))) {
             String line = bufferedReader.readLine();
             while (line != null) {
                 if(line.contains(cudaVersion)) {
-                    File parentFile = new File(line.trim()).getParentFile().getParentFile(); // to go back from <cuda_install_path>/bin/nvcc to <cuda_install_path>
+                    // to go back from <cuda_install_path>/bin/nvcc to <cuda_install_path>
+                    File parentFile = new File(line.trim()).getParentFile().getParentFile();
                     if(parentFile.exists()) {
                         return parentFile.getAbsolutePath();
                     }

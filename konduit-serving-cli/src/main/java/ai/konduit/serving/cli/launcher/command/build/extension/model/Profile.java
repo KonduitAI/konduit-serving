@@ -36,19 +36,24 @@ public class Profile {
     private static final List<String> validComputeDevices = Arrays.asList("CPU", "CUDA_10.0", "CUDA_10.1", "CUDA_10.2");
 
     public enum CpuArchitecture {
-        x86, x86_avx2, x86_avx512, armhf, arm64, ppc64le;
+        x86, x86_64, x86_avx2, x86_64_avx2, x86_avx512, x86_64_avx512, armhf, arm64, ppc64le;
 
         public static CpuArchitecture forName(String s) {
             switch (s.toLowerCase()) {
                 case "x86":
-                case "x86_64":
                     return CpuArchitecture.x86;
+                case "x86_64":
+                    return CpuArchitecture.x86_64;
                 case "x86_avx2":
-                case "x86_64-avx2":
                     return CpuArchitecture.x86_avx2;
+                case "x86_64-avx2":
+                case "x86_64_avx2":
+                    return CpuArchitecture.x86_64_avx2;
                 case "x86_avx512":
-                case "x86_64-avx512":
                     return CpuArchitecture.x86_avx512;
+                case "x86_64-avx512":
+                case "x86_64_avx512":
+                    return CpuArchitecture.x86_64_avx512;
                 case "arm64":
                     return CpuArchitecture.arm64;
                 case "armhf":
@@ -125,7 +130,16 @@ public class Profile {
     @JsonSetter("serverTypes")
     public Profile serverTypes(List<String> serverTypes) {
         this.serverTypes = serverTypes != null ?
-                serverTypes.stream().map(ServerProtocol::valueOf).collect(Collectors.toList()) :
+                serverTypes.stream().map(serverType ->  {
+                    try {
+                        return ServerProtocol.valueOf(serverType);
+                    } catch (Exception e) {
+                        System.out.format("Invalid server type: '%s'. Allowed values are: %s -> (case insensitive).",
+                                serverType, Arrays.toString(ServerProtocol.values()));
+                        System.exit(1);
+                        return null;
+                    }
+                }).collect(Collectors.toList()) :
                 Arrays.asList(ServerProtocol.HTTP, ServerProtocol.GRPC);
 
         return this;
