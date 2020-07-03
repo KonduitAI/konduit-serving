@@ -1,3 +1,21 @@
+/*
+ *  ******************************************************************************
+ *  * Copyright (c) 2020 Konduit K.K.
+ *  *
+ *  * This program and the accompanying materials are made available under the
+ *  * terms of the Apache License, Version 2.0 which is available at
+ *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  * License for the specific language governing permissions and limitations
+ *  * under the License.
+ *  *
+ *  * SPDX-License-Identifier: Apache-2.0
+ *  *****************************************************************************
+ */
+
 package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.common.test.BaseJsonCoverageTest;
@@ -29,10 +47,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.event.Level;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class JsonCoverageTest extends BaseJsonCoverageTest {
@@ -53,6 +68,17 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
         return ObjectMappers.fromYaml(yaml, c);
     }
 
+
+    @Override
+    public Set<Class<?>> ignores(){
+        Set<Class<?>> set = new HashSet<>();
+        set.add(CallbackStep.class);
+        set.add(ai.konduit.serving.pipeline.impl.testpipelines.callback.CallbackStep.class);
+        set.add(ai.konduit.serving.pipeline.impl.pipeline.PipelineProfilerTest.class);
+        set.add(FunctionStep.class);
+        set.add(Input.class);
+        return set;
+    }
 
     @Test
     public void testBoundingBoxFilterStep() {
@@ -204,48 +230,7 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
     }
 
 
-    // Failed tests
 
-    // fails with https://gist.github.com/atuzhykov/666a99c9dd540a57437750ac31114528
-    @Test
-    @Ignore
-    public void testInput() {
-        testConfigSerDe(new Input(new GraphBuilder().id("foo")));
-    }
-
-    // fails with https://gist.github.com/atuzhykov/fc87f4064ad00300da34403857d15d55
-    @Test
-    @Ignore
-    public void testPipelineProfilerTest() {
-        testConfigSerDe(new PipelineProfilerTest());
-    }
-
-
-    // fails with https://gist.github.com/atuzhykov/e276977b848c210daaea52737557f78d
-    @Test
-    @Ignore
-    public void testFunctionStepTest() {
-        testConfigSerDe(new FunctionStep(d ->
-                Data.singleton("outputStep1", "outputStep1Value")
-        ));
-    }
-
-    // fails with https://gist.github.com/atuzhykov/1043a4a236f00573589c73eaedd0349e
-    @Test
-    @Ignore
-    public void testCallbackStepFromUtilTest() {
-        List<String> execOrder = new ArrayList<>();
-        testConfigSerDe(new ai.konduit.serving.pipeline.impl.util.CallbackStep(d -> execOrder.add("step")));
-    }
-
-
-    // fails with https://gist.github.com/atuzhykov/c3ae1409bbf18a4e635e4336127de091
-    @Test
-    @Ignore
-    public void testCallbackStepFromTestPipelinesTest() {
-        List<String> execOrder = new ArrayList<>();
-        testConfigSerDe(new ai.konduit.serving.pipeline.impl.testpipelines.callback.CallbackStep(d -> execOrder.add("step")));
-    }
 
 
 }

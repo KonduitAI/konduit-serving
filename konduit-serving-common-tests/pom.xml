@@ -38,7 +38,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -61,14 +60,7 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.9</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>2.4.8</version>
-            <scope>compile</scope>
+            <version>${reflections.version}</version>
         </dependency>
         <dependency>
             <groupId>org.nd4j</groupId>
@@ -77,19 +69,12 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-            <version>3.9.1</version>
-            <scope>compile</scope>
+
         </dependency>
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-common</artifactId>
             <version>1.0.0-beta7</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

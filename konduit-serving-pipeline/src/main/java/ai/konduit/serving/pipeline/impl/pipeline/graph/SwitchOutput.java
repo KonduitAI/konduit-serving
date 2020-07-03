@@ -35,6 +35,7 @@ import java.util.List;
  * @author Alex Black
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
 @JsonName(GraphConstants.GRAPH_SWITCH_OUTPUT_JSON_KEY)
 @Schema(description = "A graph pipeline step that is a single item in a list of multiple switch step outputs.")

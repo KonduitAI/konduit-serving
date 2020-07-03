@@ -36,6 +36,7 @@ import java.util.List;
  */
 @AllArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = true)
 @JsonName(GraphConstants.GRAPH_MERGE_JSON_KEY)
 @Schema(description = "A graph pipeline step the configures how to merge the output Data instances of multiple graph " +
         "steps into a single Data instance.")

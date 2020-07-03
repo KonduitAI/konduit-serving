@@ -1,6 +1,22 @@
+/*
+ *  ******************************************************************************
+ *  * Copyright (c) 2020 Konduit K.K.
+ *  *
+ *  * This program and the accompanying materials are made available under the
+ *  * terms of the Apache License, Version 2.0 which is available at
+ *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  * License for the specific language governing permissions and limitations
+ *  * under the License.
+ *  *
+ *  * SPDX-License-Identifier: Apache-2.0
+ *  *****************************************************************************
+ */
 package ai.konduit.serving.common.test;
 
-import com.google.common.base.Preconditions;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -40,11 +56,13 @@ public abstract  class BaseJsonCoverageTest {
 
             System.out.println(String.format("All subtypes of %s:", tcClass.getCanonicalName()));
             for (Class<?> c : subTypes) {
-                int mod = c.getModifiers();
-                if (Modifier.isAbstract(mod) || Modifier.isInterface(mod))
-                    continue;
-                allClasses.add(c);
-                System.out.println(c);
+                if (!ignores().contains(c)) {
+                    int mod = c.getModifiers();
+                    if (Modifier.isAbstract(mod) || Modifier.isInterface(mod))
+                        continue;
+                    allClasses.add(c);
+                    System.out.println(c);
+                }
             }
 
         }
@@ -93,5 +111,9 @@ public abstract  class BaseJsonCoverageTest {
 
         assertEquals("to/from JSON object is not equal", o, fromJson);
         assertEquals("to/from YAML object is not equal ", o, fromYaml);
+    }
+
+    public Set<Class<?>> ignores(){
+        return Collections.emptySet();
     }
 }

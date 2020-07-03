@@ -34,6 +34,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @JsonIgnoreProperties("builder")
 public class PipelineGraphStep extends BaseGraphStep {
     private GraphBuilder builder;
