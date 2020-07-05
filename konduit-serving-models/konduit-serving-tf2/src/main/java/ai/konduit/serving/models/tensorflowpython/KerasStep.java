@@ -15,21 +15,24 @@
  ******************************************************************************/
 
 
-package ai.konduit.serving;
+package ai.konduit.serving.models.tensorflowpython;
 
+import ai.konduit.serving.annotation.json.JsonName;
+import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import ai.konduit.serving.pipeline.util.DataUtils;
 import lombok.experimental.Accessors;
 import org.nd4j.python4j.PythonGIL;
 
 
 @lombok.Data
 @Accessors(fluent = true)
+@JsonName("KERAS")
 public class KerasStep implements PipelineStep {
     private String modelPath;
     private String[] inputKeys;
@@ -47,6 +50,7 @@ public class KerasStep implements PipelineStep {
         }
     }
 
+    //@CanRun(KerasStep.class)
     public static class Runner implements PipelineStepRunner {
         private final KerasStep step;
         private final KerasModel model;
@@ -79,19 +83,11 @@ public class KerasStep implements PipelineStep {
             try (PythonGIL gil = PythonGIL.lock()) {
                 NumpyArray[] inputArrays;
                 if (step.inputKeys == null || step.inputKeys.length == 0) {
-                    inputArrays = new NumpyArray[1];
-                    int numInputArrays = 0;
-                    for (String key : input.keys()) {
-                        if (input.type(key) == ValueType.NDARRAY) {
-                            inputArrays[0] = input.getNDArray(key).getAs(NumpyArray.class);
-                            numInputArrays += 1;
-                        }
-                    }
-                    if (numInputArrays == 0) {
-                        throw new IllegalArgumentException("No NDarray values received..");
-                    } else if (numInputArrays > 1) {
-                        throw new IllegalArgumentException("Multiple NDarray values received for single input model. Specify input key explicitly.");
-                    }
+                    String errMultipleKeys = "Multiple NDarray values received for single input model. Specify input key explicitly.";
+                    String errNoKeys = "No NDarray values received.";
+                    String key = DataUtils.inferField(input, ValueType.NDARRAY, false, errMultipleKeys, errNoKeys);
+                    inputArrays = new NumpyArray[]{input.getNDArray(key).getAs(NumpyArray.class)};
+
                 } else {
                     inputArrays = new NumpyArray[step.inputKeys.length];
                     for (int i = 0; i < inputArrays.length; i++) {

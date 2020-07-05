@@ -15,9 +15,8 @@
  ******************************************************************************/
 
 
-package ai.konduit.serving;
+package ai.konduit.serving.models.tensorflowpython;
 
-import ai.konduit.serving.pipeline.api.data.NDArray;
 import org.nd4j.python4j.*;
 
 public class KerasModel {

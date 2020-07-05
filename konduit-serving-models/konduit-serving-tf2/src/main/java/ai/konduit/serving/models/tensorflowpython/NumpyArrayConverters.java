@@ -1,5 +1,6 @@
-package ai.konduit.serving;
+package ai.konduit.serving.models.tensorflowpython;
 
+import ai.konduit.serving.models.tensorflowpython.NumpyArray;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.api.format.NDArrayConverter;

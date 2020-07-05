@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 
-package ai.konduit.serving;
+package ai.konduit.serving.models.tensorflowpython;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;

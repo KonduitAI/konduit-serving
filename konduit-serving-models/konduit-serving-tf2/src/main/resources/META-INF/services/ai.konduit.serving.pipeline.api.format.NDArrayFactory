@@ -17,4 +17,4 @@
 #
 
 
-ai.konduit.serving.NumpyArray$Factory
+ai.konduit.serving.models.tensorflowpython.NumpyArray$Factory
