@@ -116,7 +116,10 @@ public class ModuleUtils {
 
     public static Module moduleForJsonType(String jsonType){
         Map<String,List<RunnerInfo>> map = jsonNameToRunnerClass();
-        Preconditions.checkState(map.containsKey(jsonType), "No JSON subtype known for: %s", jsonType);
+        if(!map.containsKey(jsonType)){
+            log.warn("No JSON subtype known for: {} (safe to ignore for custom pipeline steps)", jsonType);
+            return null;
+        }
 
         List<RunnerInfo> l = map.get(jsonType);
         if(l == null || l.isEmpty()){
