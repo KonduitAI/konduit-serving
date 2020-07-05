@@ -155,23 +155,29 @@ public class TestResolving {
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer, "windows-x86_64-avx2"));
                     } else if (t.equals(Target.LINUX_CUDA_10_2)) {
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.2-7.6-1.5.3", "linux-x86_64"));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer, "linux-x86_64"));
                     } else if (t.equals(Target.LINUX_CUDA_10_1)) {
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer, "linux-x86_64"));
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.1-7.6-1.5.2", "linux-x86_64"));
                     } else if (t.equals(Target.LINUX_CUDA_10_0)) {
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer, "linux-x86_64"));
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.0-7.4-1.5", "linux-x86_64"));
                     } else if (t.equals(Target.WINDOWS_CUDA_10_2)) {
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.2-7.6-1.5.3", "windows-x86_64"));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer, "windows-x86_64"));
                     } else if (t.equals(Target.WINDOWS_CUDA_10_1)) {
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer, "windows-x86_64"));
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.1-7.6-1.5.2", "windows-x86_64"));
                     } else if (t.equals(Target.WINDOWS_CUDA_10_0)) {
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer, "windows-x86_64"));
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.0-7.4-1.5", "windows-x86_64"));
                     } else {
                         throw new UnsupportedOperationException(t.toString());
                     }
