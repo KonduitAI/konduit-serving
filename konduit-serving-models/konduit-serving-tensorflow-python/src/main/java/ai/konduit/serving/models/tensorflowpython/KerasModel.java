@@ -17,6 +17,7 @@
 
 package ai.konduit.serving.models.tensorflowpython;
 
+import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import org.nd4j.python4j.*;
 
 public class KerasModel {
@@ -45,6 +46,7 @@ public class KerasModel {
     }
 
     private static PythonObject loadModel(String s) {
+        //String path = URIResolver.getCachedFile(s).getAbsolutePath();     //TODO this isn't resolving "no path" URIs like "model.h5" instead of "C:/Data/model.h5"
         try (PythonGC gc = PythonGC.watch()) {
             PythonObject models = getKerasModule().attr("models");
             PythonObject loadModelF = models.attr("load_model");

@@ -23,8 +23,8 @@ import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.nd4j.python4j.Python;
@@ -32,10 +32,16 @@ import org.nd4j.python4j.PythonGC;
 import org.nd4j.python4j.PythonObject;
 import org.nd4j.python4j.PythonProcess;
 
+import java.io.File;
 import java.util.Collections;
 
 @RunWith(Parameterized.class)
 public class KerasStepTest {
+
+    @ClassRule
+    public static TemporaryFolder testDir = new TemporaryFolder();
+    public static String modelFileH5 = null;
+    public static String modelFileSM = null;
 
     private String modelPath;
     private String[] inputKeys;
@@ -52,7 +58,7 @@ public class KerasStepTest {
     }
 
     @Parameterized.Parameters
-    public static Object[] getTestModels() {
+    public static Object[] getTestModels() throws Exception {
         if (!PythonProcess.isPackageInstalled("tensorflow")) {
             PythonProcess.pipInstall("tensorflow");
         }
@@ -65,11 +71,20 @@ public class KerasStepTest {
         PythonObject model;
         NDArray[] inputs;
         NDArray[] outputs;
+
+        testDir.create();
+        File dir = testDir.newFolder();
+        File pathH5 = new File(dir, "model1.h5");
+        File pathSM = new File(dir, "savedModel1");
+        modelFileH5 = pathH5.getAbsolutePath();
+        modelFileSM = pathSM.getAbsolutePath();
+
         // single input/output sequential
         model = models.attr("Sequential").call();
         model.attr("add").call(layers.attr("Dense").callWithArgsAndKwargs(Collections.singletonList(10), Collections.singletonMap("input_dim", 5)));
-        model.attr("save").call("model1.h5");
-        model.attr("save").call("savedModel1");
+        model.attr("save").call(modelFileH5);
+        model.attr("save").call(modelFileSM);
+
 
         inputs = new NDArray[]{rand(32, 5)};
         NumpyArray[] npOuts = new KerasModel(model).predict(inputs[0].getAs(NumpyArray.class));
@@ -79,10 +94,10 @@ public class KerasStepTest {
         }
 
         return new Object[]{
-                new Object[]{"model1.h5", inputs, outputs, null, new String[]{"out"}},
-                new Object[]{"model1.h5", inputs, outputs, new String[]{"inp"}, new String[]{"out"}},
-                new Object[]{"savedModel1", inputs, outputs, null, new String[]{"out"}},
-                new Object[]{"savedModel1", inputs, outputs, new String[]{"inp"}, new String[]{"out"}},
+                new Object[]{modelFileH5, inputs, outputs, null, new String[]{"out"}},
+                new Object[]{modelFileH5, inputs, outputs, new String[]{"inp"}, new String[]{"out"}},
+                new Object[]{modelFileSM, inputs, outputs, null, new String[]{"out"}},
+                new Object[]{modelFileSM, inputs, outputs, new String[]{"inp"}, new String[]{"out"}},
         };
 
     }
@@ -113,6 +128,22 @@ public class KerasStepTest {
         for (int i = 0; i < outputKeys.length; i++) {
             Assert.assertEquals(outputs[i], out.getNDArray(outputKeys[i]));
         }
+    }
+
+    @Test @Ignore
+    public void testKerasStepBadPath() {
+        PipelineStep step = new KerasStep().modelUri("C:/this_doesnt_exist").inputKeys(inputKeys).outputKeys(outputKeys);
+        Pipeline pipeline = SequencePipeline.builder().add(step).build();
+        Data inp = new JData();
+        if (inputKeys == null) {
+            inp.put("xxx", inputs[0]);
+        } else {
+            for (int i = 0; i < inputs.length; i++) {
+                inp.put(inputKeys[i], inputs[i]);
+            }
+        }
+
+        Data out = pipeline.executor().exec(inp);
     }
 
 }

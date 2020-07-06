@@ -26,6 +26,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import ai.konduit.serving.pipeline.util.DataUtils;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.python4j.PythonGIL;
@@ -35,6 +36,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @lombok.Data
 @Accessors(fluent = true)
 @JsonName("KERAS")
+@NoArgsConstructor
 public class KerasStep implements PipelineStep {
     private String modelUri;
     private String[] inputKeys;

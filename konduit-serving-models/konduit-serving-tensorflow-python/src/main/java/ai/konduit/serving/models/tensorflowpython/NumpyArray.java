@@ -61,6 +61,16 @@ public class NumpyArray {
                 return shape;
             }
         }
+
+        @Override
+        public long size(int dimension) {
+            return shape()[dimension];
+        }
+
+        @Override
+        public int rank() {
+            return shape().length;
+        }
     }
 
     public PythonObject getPythonObject() {
