@@ -27,16 +27,27 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import ai.konduit.serving.pipeline.util.DataUtils;
 import lombok.experimental.Accessors;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.python4j.PythonGIL;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 
 @lombok.Data
 @Accessors(fluent = true)
 @JsonName("KERAS")
 public class KerasStep implements PipelineStep {
-    private String modelPath;
+    private String modelUri;
     private String[] inputKeys;
     private String[] outputKeys;
+
+
+    public KerasStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputKeys") String[] inputKeys,
+                     @JsonProperty("outputKeys") String[] outputKeys){
+        this.modelUri = modelUri;
+        this.inputKeys = inputKeys;
+        this.outputKeys = outputKeys;
+    }
+
 
     public static class Factory implements PipelineStepRunnerFactory {
         @Override
@@ -46,6 +57,7 @@ public class KerasStep implements PipelineStep {
 
         @Override
         public PipelineStepRunner create(PipelineStep step) {
+            Preconditions.checkState(step instanceof KerasStep, "Unable to run step of type %s", step);
             return new Runner((KerasStep) step);
         }
     }
@@ -58,22 +70,22 @@ public class KerasStep implements PipelineStep {
         private void validateStep() {
             if (step.inputKeys == null || step.inputKeys.length == 0) {
                 if (model.numInputs() > 1) {
-                    throw new IllegalArgumentException("Keras model has multiple inputs, but input keys were not provided.");
+                    throw new IllegalArgumentException("Error in KerasStep: Keras model has multiple inputs, but input keys were not provided.");
                 }
             } else if (step.inputKeys.length != model.numInputs()) {
-                throw new IllegalArgumentException("Keras model has " + model.numInputs() + " inputs but " + step.inputKeys.length + " input keys were provided.");
+                throw new IllegalArgumentException("Error in KerasStep: Keras model has " + model.numInputs() + " inputs but " + step.inputKeys.length + " input keys were provided.");
             }
             if (step.outputKeys == null || step.outputKeys.length == 0) {
-                throw new IllegalArgumentException("Output keys not specified");
+                throw new IllegalArgumentException("Error in KerasStep: Output keys not specified");
             } else if (step.outputKeys.length != model.numOutputs()) {
-                throw new IllegalArgumentException("Keras model has " + model.numOutputs() + " outputs but " + step.outputKeys.length + " output keys were provided.");
+                throw new IllegalArgumentException("Error in KerasStep: Keras model has " + model.numOutputs() + " outputs but " + step.outputKeys.length + " output keys were provided.");
             }
         }
 
         public Runner(KerasStep step) {
             try (PythonGIL gil = PythonGIL.lock()) {
                 this.step = step;
-                this.model = new KerasModel(step.modelPath);
+                this.model = new KerasModel(step.modelUri);
                 validateStep();
             }
         }

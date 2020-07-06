@@ -97,7 +97,7 @@ public class KerasStepTest {
 
     @Test
     public void testKerasStep() {
-        PipelineStep step = new KerasStep().modelPath(modelPath).inputKeys(inputKeys).outputKeys(outputKeys);
+        PipelineStep step = new KerasStep().modelUri(modelPath).inputKeys(inputKeys).outputKeys(outputKeys);
         Pipeline pipeline = SequencePipeline.builder().add(step).build();
         Data inp = new JData();
         if (inputKeys == null) {
