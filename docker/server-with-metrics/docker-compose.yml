@@ -17,14 +17,14 @@ services:
     ports:
       - 65322:65322
     volumes:
-      - ./config.json:/usr/share/config.json
+      - ./config.yaml:/usr/share/config.yaml
     entrypoint:
       - java
       - -cp
       - /srv/konduit-serving.jar
       - ai.konduit.serving.configprovider.KonduitServingMain
       - --configPath
-      - /usr/share/config.json
+      - /usr/share/config.yaml
 
   # ---------------------------
   # grafana

@@ -126,7 +126,7 @@ def server_from_file(file_path, start_server=False, use_yaml=True):
     jar_path = pop_data(serving_data, "jar_path")
     config_path = pop_data(serving_data, "config_path")
     if not config_path:
-        config_path = "config.json"
+        config_path = "config.yaml"
 
     serving_config = ServingConfig(**serving_data)
 

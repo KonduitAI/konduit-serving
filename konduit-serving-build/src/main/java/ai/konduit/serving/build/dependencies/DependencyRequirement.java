@@ -37,23 +37,4 @@ public interface DependencyRequirement {
     boolean satisfiedBy(Target target, Collection<Dependency> currentDeps);
 
     List<DependencyAddition> suggestDependencies(Target target, Collection<Dependency> currentDeps);
-
-
-    public static final ModuleRequirements ND4J_BACKEND_REQ = new ModuleRequirements(Collections.unmodifiableList(Arrays.asList(
-            //TODO not hardcoded version
-            //Need ND4J backend (no classifier)
-            new AnyRequirement("nd4j backend",
-                    new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null),
-                    new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-beta7", null),
-                    new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-beta7", null),
-                    new Dependency("org.nd4j", "nd4j-cuda-10.2", "1.0.0-beta7", null)),
-            //ND4J backend classifiers
-            new AnyRequirement("nd4j backend classifier",
-                    new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64"),
-                    new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64-avx2"),
-                    new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64-avx512"),
-                    new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "windows-x86_64"),
-                    new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "windows-x86_64-avx2"))
-            //TODO others
-    )));
 }

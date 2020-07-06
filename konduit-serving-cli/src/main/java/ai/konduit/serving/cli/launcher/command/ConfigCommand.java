@@ -40,6 +40,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -91,6 +92,7 @@ public class ConfigCommand extends DefaultCommand {
         CROP_GRID,
         CROP_FIXED_GRID,
         DL4J,
+        KERAS,
         DRAW_BOUNDING_BOX,
         DRAW_FIXED_GRID,
         DRAW_GRID,
@@ -135,7 +137,7 @@ public class ConfigCommand extends DefaultCommand {
     @Option(longName = "pipeline", shortName = "p", argName = "config", required = true)
     @Description("A comma-separated list of sequence/graph pipeline steps to create boilerplate configuration from. " +
             "For sequences, allowed values are: " +
-            "[crop_grid, crop_fixed_grid, dl4j, draw_bounding_box, draw_fixed_grid, draw_grid, " +
+            "[crop_grid, crop_fixed_grid, dl4j, keras, draw_bounding_box, draw_fixed_grid, draw_grid, " +
             "draw_segmentation, extract_bounding_box, camera_frame_capture, video_frame_capture" +
             "image_to_ndarray, logging, ssd_to_bounding_box, samediff, show_image, tensorflow]. " +
             "For graphs, the list item should be in the format '<output>=<type>(<inputs>)' or " +
@@ -464,26 +466,38 @@ public class ConfigCommand extends DefaultCommand {
                     moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.grid.crop.CropGridStep");
                     return (PipelineStep) clazz
-                            .getConstructor(String.class, String.class, String.class, int.class, int.class,
+                            .getConstructor(String.class, String.class, int.class, int.class,
                                     boolean.class, String.class, boolean.class, boolean.class, Double.class, String.class)
-                            .newInstance("image1", "x", "y", 10, 10, true, "box", false, false, 1.33,
+                            .newInstance("image1", "topLeft,topRight,bottomLeft,bottomRight", 10, 10, true, "box", false, false, 1.33,
                                     (String) clazz.getField("DEFAULT_OUTPUT_NAME").get(null));
                 case CROP_FIXED_GRID:
                     moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.grid.crop.CropFixedGridStep");
+                    Class<?> pointClazz1 = Class.forName("ai.konduit.serving.pipeline.impl.data.point");
+                    Constructor<?> pointConstructor1 = pointClazz1.getConstructor(double[].class, String.class, Double.class);
+                    List<?> pointList1 = Arrays.asList(
+                            pointConstructor1.newInstance(new double[] {0, 1}, "label", 60.0),
+                            pointConstructor1.newInstance(new double[] {1, 1}, "label", 60.0),
+                            pointConstructor1.newInstance(new double[] {0, 0}, "label", 60.0),
+                            pointConstructor1.newInstance(new double[] {1, 0}, "label", 60.0)
+                    );
                     return (PipelineStep) clazz
-                            .getConstructor(String.class, double[].class, double[].class, int.class, int.class,
+                            .getConstructor(String.class, List.class, int.class, int.class,
                                     boolean.class, String.class, boolean.class, boolean.class, Double.class, String.class)
-                            .newInstance("image2", new double[]{ 1, 2 }, new double[]{ 1, 2 }, 100, 100, true, "box",
+                            .newInstance("image2", pointList1, 100, 100, true, "box",
                                     false, false, 1.33, "crop");
                 case DL4J:
                     moduleName = "konduit-serving-deeplearning4j";
                     clazz = Class.forName("ai.konduit.serving.models.deeplearning4j.step.DL4JStep");
-                    Class<?> dl4jConfigClazz = Class.forName("ai.konduit.serving.models.deeplearning4j.DL4JConfiguration");
                     return (PipelineStep) clazz
-                            .getConstructor(String.class, dl4jConfigClazz, List.class, List.class)
-                            .newInstance("<path_to_model>", dl4jConfigClazz.getConstructor().newInstance(),
-                                    Arrays.asList("1", "2"), Arrays.asList("11", "22"));
+                            .getConstructor(String.class, List.class, List.class)
+                            .newInstance("<path_to_model>", Arrays.asList("1", "2"), Arrays.asList("11", "22"));
+                case KERAS:
+                    moduleName = "konduit-serving-deeplearning4j";
+                    clazz = Class.forName("ai.konduit.serving.models.deeplearning4j.step.keras.KerasModelStep");
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, List.class, List.class)
+                            .newInstance("<path_to_model>", Arrays.asList("1", "2"), Arrays.asList("11", "22"));
                 case DRAW_BOUNDING_BOX:
                     moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep");
@@ -502,18 +516,25 @@ public class ConfigCommand extends DefaultCommand {
                 case DRAW_FIXED_GRID:
                     moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep");
+                    Class<?> pointClazz2 = Class.forName("ai.konduit.serving.pipeline.impl.data.point");
+                    Constructor<?> pointConstructor2 = pointClazz2.getConstructor(double[].class, String.class, Double.class);
+                    List<?> pointList2 = Arrays.asList(
+                            pointConstructor2.newInstance(new double[] {0, 1}, "label", 60.0),
+                            pointConstructor2.newInstance(new double[] {1, 1}, "label", 60.0),
+                            pointConstructor2.newInstance(new double[] {0, 0}, "label", 60.0),
+                            pointConstructor2.newInstance(new double[] {1, 0}, "label", 60.0)
+                    );
                     return (PipelineStep) clazz
-                            .getConstructor(String.class, double[].class, double[].class, int.class, int.class,
+                            .getConstructor(String.class, List.class, int.class, int.class,
                                     boolean.class, String.class, String.class, int.class, Integer.class)
-                            .newInstance("image4", new double[]{ 1, 2 }, new double[]{ 1, 2 }, 10, 10, true,
-                                    "blue", "red", 1, 1);
+                            .newInstance("image4", pointList2, 10, 10, true, "blue", "red", 1, 1);
                 case DRAW_GRID:
                     moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.grid.draw.DrawGridStep");
                     return (PipelineStep) clazz
-                            .getConstructor(String.class, String.class, String.class, int.class, int.class,
+                            .getConstructor(String.class, String.class, int.class, int.class,
                                     boolean.class, String.class, String.class, int.class, Integer.class)
-                            .newInstance("image1", "x", "y", 10, 10, true, "blue", "red", 1, 1);
+                            .newInstance("image1", "topLeft,topRight,bottomLeft,bottomRight", 10, 10, true, "blue", "red", 1, 1);
                 case DRAW_SEGMENTATION:
                     moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep");
@@ -569,11 +590,9 @@ public class ConfigCommand extends DefaultCommand {
                 case SAMEDIFF:
                     moduleName = "konduit-serving-samediff";
                     clazz = Class.forName("ai.konduit.serving.models.samediff.step.SameDiffStep");
-                    Class<?> sameDiffConfigClazz = Class.forName("ai.konduit.serving.models.samediff.SameDiffConfig");
                     return (PipelineStep) clazz
-                            .getConstructor(String.class, sameDiffConfigClazz, List.class)
-                            .newInstance("<path_to_model>", sameDiffConfigClazz.getConstructor().newInstance(),
-                                    Arrays.asList("11", "22"));
+                            .getConstructor(String.class, List.class)
+                            .newInstance("<path_to_model>", Arrays.asList("11", "22"));
                 case SHOW_IMAGE:
                     moduleName = "konduit-serving-image";
                     clazz = Class.forName("ai.konduit.serving.data.image.step.show.ShowImageStep");
@@ -583,11 +602,9 @@ public class ConfigCommand extends DefaultCommand {
                 case TENSORFLOW:
                     moduleName = "konduit-serving-tensorflow";
                     clazz = Class.forName("ai.konduit.serving.models.tensorflow.step.TensorFlowStep");
-                    Class<?> tensorflowConfigClazz = Class.forName("ai.konduit.serving.models.tensorflow.TensorFlowConfiguration");
                     return (PipelineStep) clazz
-                            .getConstructor(String.class, tensorflowConfigClazz, List.class, List.class)
-                            .newInstance("<path_to_model>", tensorflowConfigClazz.getConstructor().newInstance(),
-                                    Arrays.asList("1", "2"), Arrays.asList("11", "22"));
+                            .getConstructor(List.class, List.class, String.class)
+                            .newInstance(Arrays.asList("1", "2"), Arrays.asList("11", "22"), "<path_to_model>");
                 default:
                     out.format("Invalid step type '%s'. Allowed values are %s%n", type, Arrays.asList(PipelineStepType.values()));
                     System.exit(1);
