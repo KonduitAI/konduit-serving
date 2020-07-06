@@ -42,7 +42,6 @@ import lombok.experimental.Accessors;
  * @author Alex Black
  * @see CropFixedGridStep
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor

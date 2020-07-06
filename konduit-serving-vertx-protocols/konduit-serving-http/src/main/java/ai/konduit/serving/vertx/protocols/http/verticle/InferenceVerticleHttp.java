@@ -72,7 +72,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                 return;
             }
         } else {
-            port = inferenceConfiguration.getPort();
+            port = inferenceConfiguration.port();
         }
 
         if (port < 0 || port > 0xFFFF) {
@@ -83,12 +83,12 @@ public class InferenceVerticleHttp extends InferenceVerticle {
         vertx.createHttpServer()
                 .requestHandler(createRouter())
                 .exceptionHandler(throwable -> log.error("Could not start HTTP server", throwable))
-                .listen(port, inferenceConfiguration.getHost(), handler -> {
+                .listen(port, inferenceConfiguration.host(), handler -> {
                     if (handler.failed()) {
                         startPromise.fail(handler.cause());
                     } else {
                         int actualPort = handler.result().actualPort();
-                        inferenceConfiguration.setPort(actualPort);
+                        inferenceConfiguration.port(actualPort);
 
                         try {
                             ((ContextInternal) context).getDeployment()
@@ -102,7 +102,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                             // Periodically checks for configuration updates and save them.
                             vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
 
-                            log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.getHost());
+                            log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.host());
                             log.info("Inference HTTP server started on port {} with {} pipeline steps", actualPort, pipeline.size());
                             startPromise.complete();
                         } catch (Throwable throwable) {
@@ -179,7 +179,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
 
 
         //Custom endpoints:
-        if (inferenceConfiguration.getCustomEndpoints() != null && !inferenceConfiguration.getCustomEndpoints().isEmpty()) {
+        if (inferenceConfiguration.customEndpoints() != null && !inferenceConfiguration.customEndpoints().isEmpty()) {
             addCustomEndpoints(inferenceHttpApi, inferenceRouter);
         }
 
@@ -201,7 +201,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
     }
 
     private void addCustomEndpoints(InferenceHttpApi inferenceHttpApi, Router inferenceRouter) {
-        List<String> e = inferenceConfiguration.getCustomEndpoints();
+        List<String> e = inferenceConfiguration.customEndpoints();
         PipelineExecutor pe = inferenceHttpApi.getPipelineExecutor();
         Pipeline p = pe.getPipeline();
         for (String s : e) {

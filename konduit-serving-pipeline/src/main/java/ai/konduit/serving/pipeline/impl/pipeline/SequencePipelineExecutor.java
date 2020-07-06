@@ -49,7 +49,7 @@ public class SequencePipelineExecutor extends BasePipelineExecutor {
 
         //Initialize
         runners = new ArrayList<>();
-        List<PipelineStep> steps = p.getSteps();
+        List<PipelineStep> steps = p.steps();
 
         for (PipelineStep ps : steps) {
             PipelineStepRunner r = getRunner(ps);

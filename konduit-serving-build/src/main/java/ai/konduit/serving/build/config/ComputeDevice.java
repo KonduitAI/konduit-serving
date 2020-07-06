@@ -31,12 +31,12 @@ public interface ComputeDevice {
 
 
     static ComputeDevice forName(String name){
-        if(name.toLowerCase().equals(CPU)) {
-
-        }else if(name.toLowerCase().contains("cuda")){
+        if(name.equalsIgnoreCase(CPU)) {
+            return null;
+        } else if(name.toLowerCase().contains("cuda")){
             return CUDADevice.forName(name);
         }
-        throw new UnsupportedOperationException("Invalid, unknown, not supported or not yet implemneted device type: " + name);
+        throw new UnsupportedOperationException("Invalid, unknown, not supported or not yet implemented device type: " + name);
     }
 
 }

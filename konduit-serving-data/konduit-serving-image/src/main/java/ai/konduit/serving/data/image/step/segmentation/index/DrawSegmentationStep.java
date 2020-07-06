@@ -25,8 +25,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -47,10 +50,10 @@ import java.util.List;
  *
  * @author Alex Black
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("DRAW_SEGMENTATION")
 @Schema(description = "A pipeline step that configures how to draw a segmentation mask, optionally on an image.")
 public class DrawSegmentationStep implements PipelineStep {
@@ -62,6 +65,7 @@ public class DrawSegmentationStep implements PipelineStep {
             "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
             "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
     private List<String> classColors;
+
 
     @Schema(description = "Name of the NDArray with the class indices, 0 to numClasses-1. Shape [1, height, width].")
     private String segmentArray;
@@ -87,5 +91,10 @@ public class DrawSegmentationStep implements PipelineStep {
             "aspect ratio. This allows the step to determine the subset of the image actually passed to the network that " +
             "produced the segmentation prediction to be drawn.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
+
+    @Tolerate
+    public DrawSegmentationStep classColors(String... classColors) {
+        return this.classColors(Arrays.asList(classColors));
+    }
 
 }

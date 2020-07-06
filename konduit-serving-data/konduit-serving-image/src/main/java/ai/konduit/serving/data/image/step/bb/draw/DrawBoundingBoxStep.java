@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.util.Map;
@@ -39,10 +40,10 @@ import java.util.Map;
  * </ul>
  *
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("DRAW_BOUNDING_BOX")
 @Schema(description = "A pipeline step that configures how to draw a bounding box onto an image. The bounding box data, that's to " +
         "be drawn, is taken from the previous step's data instance.")
@@ -79,12 +80,12 @@ public class DrawBoundingBoxStep implements PipelineStep {
             defaultValue = DEFAULT_COLOR)
     private String color;
 
-    @Builder.Default
+    
     @Schema(description = "Line thickness to use to draw the bounding box (in pixels).",
             defaultValue = "1")
     private int lineThickness = 1;
 
-    @Builder.Default
+    
     @Schema(description = "The scaling policy to use for scaling the bounding boxes.",
             defaultValue = "NONE")
     private Scale scale = Scale.NONE;
@@ -114,11 +115,5 @@ public class DrawBoundingBoxStep implements PipelineStep {
     - Line width
      */
 
-    public DrawBoundingBoxStep(){
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null
-        this.scale = Scale.NONE;
-        this.lineThickness = 1;
-    }
 
 }

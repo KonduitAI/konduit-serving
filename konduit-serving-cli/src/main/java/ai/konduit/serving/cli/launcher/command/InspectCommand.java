@@ -94,7 +94,7 @@ public class InspectCommand extends DefaultCommand {
                             if("pid".equalsIgnoreCase(key)) {
                                 result = String.valueOf(pid);
                             } else if ("size".equalsIgnoreCase(key)){
-                                result = String.valueOf(inferenceConfiguration.getPipeline().size());
+                                result = String.valueOf(inferenceConfiguration.pipeline().size());
                             } else {
                                 Object outputObject = JsonPath.read(json, "$." + matcher.group(1));
                                 if(outputObject instanceof LinkedHashMap) {

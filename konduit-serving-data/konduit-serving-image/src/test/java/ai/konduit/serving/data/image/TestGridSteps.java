@@ -22,7 +22,7 @@ import ai.konduit.serving.data.image.step.grid.crop.CropFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.crop.CropGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawGridStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
@@ -59,7 +59,7 @@ public class TestGridSteps {
 
 
         Pipeline p = SequencePipeline.builder()
-                .add(DrawGridStep.builder()
+                .add(new DrawGridStep()
                         .borderColor("green")
                         .gridColor("blue")
                         .coordsArePixels(false)
@@ -69,8 +69,8 @@ public class TestGridSteps {
                         .imageName("image")
                         .borderThickness(10)
                         .gridThickness(4)
-                        .build())
-                .add(new ShowImagePipelineStep("image", "Display", null, null, false))
+                )
+                .add(new ShowImageStep("image", "Display", null, null, false))
                 .build();
 
         PipelineExecutor exec = p.executor();
@@ -119,89 +119,85 @@ public class TestGridSteps {
         Image i = Image.create(f);
 
 
-
         int gx = 2;
         int gy = 4;
 
-        for(boolean fixed : new boolean[]{false, true}) {
-        for (boolean px : new boolean[]{false, true}) {
-            Data in = Data.singleton("image", i);
-            List<Point> points;
-            if (px) {
-                points = Arrays.asList(Point.create(0.015 * i.width(), 0.33 * i.height()), Point.create(0.815 * i.width(), 0.42 * i.height()),
-                        Point.create(0.04 * i.width(), 0.70 * i.height()), Point.create(0.795 * i.width(), 0.83 * i.height()));
-            } else {
-                points = Arrays.asList(Point.create(0.015, 0.33), Point.create(0.815, 0.42),
-                        Point.create(0.04, 0.70), Point.create(0.795, 0.83));
-            }
-            in.put("key", "value");
-            if(!fixed){
-                in.putListPoint("points", points);
-            }
+        for (boolean fixed : new boolean[]{false, true}) {
+            for (boolean px : new boolean[]{false, true}) {
+                Data in = Data.singleton("image", i);
+                List<Point> points;
+                if (px) {
+                    points = Arrays.asList(Point.create(0.015 * i.width(), 0.33 * i.height()), Point.create(0.815 * i.width(), 0.42 * i.height()),
+                            Point.create(0.04 * i.width(), 0.70 * i.height()), Point.create(0.795 * i.width(), 0.83 * i.height()));
+                } else {
+                    points = Arrays.asList(Point.create(0.015, 0.33), Point.create(0.815, 0.42),
+                            Point.create(0.04, 0.70), Point.create(0.795, 0.83));
+                }
+                in.put("key", "value");
+                if (!fixed) {
+                    in.putListPoint("points", points);
+                }
 
-            for(boolean outName : new boolean[]{false, true}) {
-                for (boolean keep : new boolean[]{false, true}) {
-                    for(boolean bb : new boolean[]{false, true}) {
-                        PipelineStep s;
-                        PipelineStep draw;
-                        if(fixed){
-                            s = CropFixedGridStep.builder()
-                                    .coordsArePixels(false)
-                                    .points(points)
-                                    .gridX(gx)
-                                    .gridY(gy)
-                                    .imageName("image")
-                                    .keepOtherFields(keep)
-                                    .outputName(outName ? "output" : null)
-                                    .boundingBoxName(bb ? "bbox" : null)
-                                    .coordsArePixels(px)
+                for (boolean outName : new boolean[]{false, true}) {
+                    for (boolean keep : new boolean[]{false, true}) {
+                        for (boolean bb : new boolean[]{false, true}) {
+                            PipelineStep s;
+                            PipelineStep draw;
+                            if (fixed) {
+                                s = new CropFixedGridStep()
+                                        .coordsArePixels(false)
+                                        .points(points)
+                                        .gridX(gx)
+                                        .gridY(gy)
+                                        .imageName("image")
+                                        .keepOtherFields(keep)
+                                        .outputName(outName ? "output" : null)
+                                        .boundingBoxName(bb ? "bbox" : null)
+                                        .coordsArePixels(px);
 //                                    .aspectRatio(1.0)
-                                    .build();
 
-                            draw = DrawFixedGridStep.builder()
-                                    .borderColor("green")
-                                    .gridColor("blue")
-                                    .coordsArePixels(px)
-                                    .gridX(gx)
-                                    .gridY(gy)
-                                    .points(points)
-                                    .imageName("image")
-                                    .borderThickness(4)
-                                    .gridThickness(2)
-                                    .build();
-                        } else {
-                            s = CropGridStep.builder()
-                                    .coordsArePixels(false)
-                                    .gridX(gx)
-                                    .gridY(gy)
-                                    .pointsName("points")
-                                    .imageName("image")
-                                    .keepOtherFields(keep)
-                                    .outputName(outName ? "output" : null)
-                                    .boundingBoxName(bb ? "bbox" : null)
-                                    .coordsArePixels(px)
+                                draw = new DrawFixedGridStep()
+                                        .borderColor("green")
+                                        .gridColor("blue")
+                                        .coordsArePixels(px)
+                                        .gridX(gx)
+                                        .gridY(gy)
+                                        .points(points)
+                                        .imageName("image")
+                                        .borderThickness(4)
+                                        .gridThickness(2);
+                            } else {
+                                s = new CropGridStep()
+                                        .coordsArePixels(false)
+                                        .gridX(gx)
+                                        .gridY(gy)
+                                        .pointsName("points")
+                                        .imageName("image")
+                                        .keepOtherFields(keep)
+                                        .outputName(outName ? "output" : null)
+                                        .boundingBoxName(bb ? "bbox" : null)
+                                        .coordsArePixels(px)
 //                                    .aspectRatio(1.0)
-                                    .build();
+                                ;
 
-                            draw = DrawGridStep.builder()
-                                    .borderColor("green")
-                                    .gridColor("blue")
-                                    .coordsArePixels(px)
-                                    .gridX(gx)
-                                    .gridY(gy)
-                                    .pointsName("points")
-                                    .imageName("image")
-                                    .borderThickness(4)
-                                    .gridThickness(2)
-                                    .build();
-                        }
+                                draw = new DrawGridStep()
+                                        .borderColor("green")
+                                        .gridColor("blue")
+                                        .coordsArePixels(px)
+                                        .gridX(gx)
+                                        .gridY(gy)
+                                        .pointsName("points")
+                                        .imageName("image")
+                                        .borderThickness(4)
+                                        .gridThickness(2);
+                            }
 
 
                             Pipeline p = SequencePipeline.builder()
                                     .add(draw)
-//                                    .add(new ShowImagePipelineStep().imageName("image").height(null).width(null))
+//                                    .add(new ShowImageStep().imageName("image").height(null).width(null))
                                     .add(s)
-//                                    .add(new ShowImagePipelineStep().imageName(outName ? "output" : CropGridStep.DEFAULT_OUTPUT_NAME).displayName("Display").width(null).height(null).allowMultiple(true))
+//                                    .add(new ShowImageStep().imageName(outName ? "output" : CropGridStep.DEFAULT_OUTPUT_NAME).displayName("Display").width(null).height(null).allowMultiple(true))
                                     .build();
 
                             PipelineExecutor exec = p.executor();

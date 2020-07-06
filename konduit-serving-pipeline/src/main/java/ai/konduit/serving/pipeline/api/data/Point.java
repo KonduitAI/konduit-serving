@@ -163,4 +163,21 @@ public interface Point {
                         (p1.probability() != null && Math.abs(p1.probability() - p2.probability()) < probEps));
     }
 
+
+    /**
+     * Turn relative defined coordinates into absolute coordinates
+     */
+    default Point toAbsolute(double... absoluteSizes){
+        // if the first point is absolute (not between 0 and 1), all others should be too
+        if(!(0.0 < x() && x() < 1.0)) { return this; }
+
+        double[] coords = new double[dimensions()];
+        if(coords.length != absoluteSizes.length){
+            throw new IllegalArgumentException("An absolute size has to be defined for each dimension of the point!");
+        }
+        for (int i = 0; i < coords.length; i++) {
+            coords[i] = absoluteSizes[i] * get(i);
+        }
+        return Point.create(coords, label(), probability());
+    }
 }

@@ -24,8 +24,8 @@ import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
 import ai.konduit.serving.build.steps.RunnerInfo;
 import ai.konduit.serving.build.util.ModuleUtils;
-import ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep;
-import ai.konduit.serving.models.samediff.step.SameDiffModelPipelineStep;
+import ai.konduit.serving.models.deeplearning4j.step.DL4JStep;
+import ai.konduit.serving.models.samediff.step.SameDiffStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
@@ -54,7 +54,7 @@ public class TestResolving {
         Map<String, RunnerInfo> runners = ModuleUtils.pipelineClassToRunnerClass();
         assertTrue(runners.containsKey("ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep"));
         assertEquals("konduit-serving-image", runners.get("ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep").module().name());
-        assertEquals("konduit-serving-deeplearning4j", runners.get("ai.konduit.serving.models.deeplearning4j.step.DL4JModelPipelineStep").module().name());
+        assertEquals("konduit-serving-deeplearning4j", runners.get("ai.konduit.serving.models.deeplearning4j.step.DL4JStep").module().name());
     }
 
     @Test
@@ -78,10 +78,10 @@ public class TestResolving {
 
                     PipelineStep step;
                     if (testNum == 0) {
-                        step = new DL4JModelPipelineStep("file:///some/model/path.zip", null, null);
+                        step = new DL4JStep("file:///some/model/path.zip", null, null);
                         System.out.println("----- DL4J - " + t + " -----");
                     } else {
-                        step = new SameDiffModelPipelineStep("file://some/model/path.fb", null);
+                        step = new SameDiffStep("file://some/model/path.fb", null);
                         //System.out.println("----- SameDiff - " + t + " -----");
                     }
 
@@ -155,23 +155,29 @@ public class TestResolving {
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer, "windows-x86_64-avx2"));
                     } else if (t.equals(Target.LINUX_CUDA_10_2)) {
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.2-7.6-1.5.3", "linux-x86_64"));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer, "linux-x86_64"));
                     } else if (t.equals(Target.LINUX_CUDA_10_1)) {
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer, "linux-x86_64"));
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.1-7.6-1.5.2", "linux-x86_64"));
                     } else if (t.equals(Target.LINUX_CUDA_10_0)) {
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer, "linux-x86_64"));
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.0-7.4-1.5", "linux-x86_64"));
                     } else if (t.equals(Target.WINDOWS_CUDA_10_2)) {
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.2-7.6-1.5.3", "windows-x86_64"));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.2", ossVer, "windows-x86_64"));
                     } else if (t.equals(Target.WINDOWS_CUDA_10_1)) {
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.1", ossVer, "windows-x86_64"));
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.1-7.6-1.5.2", "windows-x86_64"));
                     } else if (t.equals(Target.WINDOWS_CUDA_10_0)) {
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-cuda-10.0", ossVer, "windows-x86_64"));
+                        expectedDeps.add(new Dependency("org.bytedeco", "cuda", "10.0-7.4-1.5", "windows-x86_64"));
                     } else {
                         throw new UnsupportedOperationException(t.toString());
                     }

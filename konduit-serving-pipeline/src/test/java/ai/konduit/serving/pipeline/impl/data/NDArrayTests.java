@@ -87,6 +87,16 @@ public class NDArrayTests {
         public long[] shape() {
             return new long[0];
         }
+
+        @Override
+        public long size(int dimension) {
+            return 0;
+        }
+
+        @Override
+        public int rank() {
+            return 0;
+        }
     }
 
     public  static class TestNDArrayFactory implements NDArrayFactory {

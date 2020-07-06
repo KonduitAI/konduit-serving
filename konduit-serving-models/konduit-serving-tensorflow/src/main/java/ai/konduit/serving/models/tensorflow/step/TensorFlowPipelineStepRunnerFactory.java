@@ -26,12 +26,12 @@ import org.nd4j.common.base.Preconditions;
 public class TensorFlowPipelineStepRunnerFactory implements PipelineStepRunnerFactory {
     @Override
     public boolean canRun(PipelineStep step) {
-        return step instanceof TensorFlowPipelineStep;
+        return step instanceof TensorFlowStep;
     }
 
     @Override
     public PipelineStepRunner create(PipelineStep step) {
         Preconditions.checkState(canRun(step), "Unable to run step of type: %s", step.getClass());
-        return new TensorFlowStepRunner((TensorFlowPipelineStep) step);
+        return new TensorFlowRunner((TensorFlowStep) step);
     }
 }

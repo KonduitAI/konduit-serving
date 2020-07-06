@@ -19,8 +19,8 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import ai.konduit.serving.pipeline.impl.step.logging.LoggingPipelineStep;
-import ai.konduit.serving.pipeline.impl.util.CallbackPipelineStep;
+import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
+import ai.konduit.serving.pipeline.impl.util.CallbackStep;
 import org.junit.Test;
 import org.slf4j.event.Level;
 
@@ -36,9 +36,9 @@ public class TestPipelineSteps {
         AtomicInteger count1 = new AtomicInteger();
         AtomicInteger count2 = new AtomicInteger();
         Pipeline p = SequencePipeline.builder()
-                .add(new CallbackPipelineStep(d -> count1.getAndIncrement()))
-                .add(LoggingPipelineStep.builder().log(LoggingPipelineStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO).build())
-                .add(new CallbackPipelineStep(d -> count2.getAndIncrement()))
+                .add(new CallbackStep(d -> count1.getAndIncrement()))
+                .add(new LoggingStep().log(LoggingStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO))
+                .add(new CallbackStep(d -> count2.getAndIncrement()))
                 .build();
 
         PipelineExecutor pe = p.executor();

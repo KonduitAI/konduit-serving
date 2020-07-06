@@ -37,4 +37,14 @@ public class ND4JNDArray extends BaseNDArray<INDArray> {
     public long[] shape() {
         return array.shape();
     }
+
+    @Override
+    public long size(int dimension) {
+        return array.size(dimension);
+    }
+
+    @Override
+    public int rank() {
+        return array.rank();
+    }
 }

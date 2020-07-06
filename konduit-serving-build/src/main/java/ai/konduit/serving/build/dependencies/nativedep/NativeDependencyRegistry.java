@@ -123,11 +123,11 @@ public class NativeDependencyRegistry {
     public static ComputeDevice deviceFor(Dependency d){
         //TODO this won't work for things like CUDA! And isn't robust to new versions... Need a more robust approach to this...
         String a = d.artifactId().toLowerCase();
-        if(a.contains("cuda-10.0")){
+        if(a.contains("cuda-10.0") || (a.contains("cuda") && d.version().contains("10.0"))){        //Second condition - for example: org.bytedeco:cuda:10.2-7.6-1.5.3:linux-x86_64
             return new CUDADevice("10.0");
-        } else if(a.contains("cuda-10.1")){
+        } else if(a.contains("cuda-10.1") || (a.contains("cuda") && d.version().contains("10.1"))){
             return new CUDADevice("10.1");
-        } else if(a.contains("cuda-10.2")){
+        } else if(a.contains("cuda-10.2") || (a.contains("cuda") && d.version().contains("10.2"))){
             return new CUDADevice("10.2");
         }
         return null;
