@@ -1,14 +1,15 @@
 package ai.konduit.serving.common.test;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.junit.Before;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.reflections.Reflections;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.fail;
@@ -17,20 +18,13 @@ import static org.junit.Assert.fail;
 public abstract class BaseSwaggerAnnotationCheck {
 
 
-    protected static Set<Class<?>> allClasses;
-    protected static Set<Class<?>> seen;
+
 
     public abstract String getPackageName();
 
-    @Before
     public void runTest() throws ClassNotFoundException {
 
-        if (allClasses == null) {
-            //Perform initialization only once
-            //Collect all classes implementing TextConfig interface (i.e., has JSON and YAML conversion support)
-            allClasses = new LinkedHashSet<>();
-            seen = new LinkedHashSet<>();
-
+            Set<Class<?>> failedClasses = new HashSet<Class<?>>();
             Reflections reflections = new Reflections(getPackageName());
             Class<Object> tcClass = (Class<Object>) Class.forName("ai.konduit.serving.pipeline.api.step.PipelineStep");
             Set<Class<?>> subTypes = reflections.getSubTypesOf(tcClass);
@@ -57,16 +51,28 @@ public abstract class BaseSwaggerAnnotationCheck {
                     }
 
                     if (!foundSchemaAnnotation) {
-                        fail("MISSING ANNOTATION: " + c + " - field " + f.getName());
+                        log.warn("MISSING ANNOTATION: " + c + " - field " + f.getName());
+                        failedClasses.add(c);
+
                     }
                 }
 
 
+
             }
+
+            if (!failedClasses.isEmpty()){
+                ArrayUtils.toString(failedClasses.stream().peek(s -> System.out.println("Class: " + s.getCanonicalName())));
+                fail();
+
+            }
+
         }
 
 
-    }
+
+
+
 
     public Set<Class<?>> ignores() {
         return Collections.emptySet();
