@@ -50,7 +50,7 @@ public class KerasStep implements PipelineStep {
         }
     }
 
-    //@CanRun(KerasStep.class)
+    @CanRun(KerasStep.class)
     public static class Runner implements PipelineStepRunner {
         private final KerasStep step;
         private final KerasModel model;
