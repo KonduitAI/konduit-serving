@@ -23,6 +23,10 @@
         </encoder>
     </appender>
 
+    <logger name="ai.konduit.serving.cli.launcher.command.build.extension" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
     <root level="ERROR">
         <appender-ref ref="CONSOLE"/>
     </root>

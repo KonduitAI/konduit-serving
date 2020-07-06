@@ -21,7 +21,6 @@ package ai.konduit.serving.cli.launcher.command;
 import ai.konduit.serving.cli.launcher.KonduitServingLauncher;
 import ai.konduit.serving.cli.launcher.LauncherUtils;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
-import com.google.common.reflect.ClassPath;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
@@ -30,6 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.nd4j.common.io.ClassPathResource;
+import org.nd4j.common.io.StringUtils;
+import org.nd4j.shade.guava.base.Strings;
 
 import java.io.*;
 import java.util.*;
@@ -53,15 +54,15 @@ import static ai.konduit.serving.cli.launcher.command.KonduitRunCommand.DEFAULT_
 @Slf4j
 public class ServeCommand extends DefaultCommand {
 
-    private String id;
-    private String launcher;
-    private int instances = 1;
-    private String classpath;
-    private String service;
-    private String configuration;
+    protected String id;
+    protected String launcher;
+    protected int instances = 1;
+    protected String classpath;
+    protected String service;
+    protected String configuration;
 
-    private boolean redirect;
-    private String jvmOptions;
+    protected boolean redirect;
+    protected String jvmOptions;
 
     /**
      * Sets the number of instance of the verticle to create.
@@ -184,9 +185,13 @@ public class ServeCommand extends DefaultCommand {
 
         cliArguments.addAll(getArguments());
 
+        String finalClassPath = Strings.isNullOrEmpty(classpath) ? System.getProperty("java.class.path") : classpath;
+
         // Add the classpath to env.
         builder.environment().putAll(System.getenv());
-        builder.environment().put("CLASSPATH", System.getProperty("java.class.path"));
+        builder.environment().put("CLASSPATH", finalClassPath);
+
+        out.format("Using classpath: %s%n", finalClassPath);
 
         if (launcher != null) {
             ExecUtils.addArgument(cmd, launcher);
@@ -200,7 +205,11 @@ public class ServeCommand extends DefaultCommand {
             }
         } else if (isLaunchedAsFatJar()) {
             ExecUtils.addArgument(cmd, "-jar");
-            ExecUtils.addArgument(cmd, CommandLineUtils.getJar());
+            if(classpath != null && classpath.contains(id) && StringUtils.endsWithIgnoreCase(classpath, "manifest.jar")) {
+                cmd.add(classpath);
+            } else {
+                ExecUtils.addArgument(cmd, CommandLineUtils.getJar());
+            }
             ExecUtils.addArgument(cmd, "run");
         } else {
             // probably a `vertx` command line usage, or in IDE.
@@ -233,6 +242,7 @@ public class ServeCommand extends DefaultCommand {
     private void runAndTailOutput(ProcessBuilder builder) throws IOException {
         Process process = builder.start();
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+            Thread.sleep(2000);
             while (LauncherUtils.isProcessExists(id)) {
                 while(reader.ready()){
                     out.println(reader.readLine());
@@ -335,7 +345,7 @@ public class ServeCommand extends DefaultCommand {
         return args;
     }
 
-    private String getId() {
+    protected String getId() {
         if (id == null) {
             id = UUID.randomUUID().toString().substring(0, 8);
         }

@@ -26,14 +26,12 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.util.DataUtils;
 import org.nd4j.shade.guava.base.Preconditions;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
 
     protected final BoundingBoxFilterStep step;
-
     public BoundingBoxFilterStepRunner(BoundingBoxFilterStep step) {
         this.step = step;
         Preconditions.checkArgument(!this.step.classesToKeep.isEmpty(),"Seems you forget to set the classes to keep.");
@@ -61,11 +59,12 @@ public class BoundingBoxFilterStepRunner implements PipelineStepRunner {
             String err = "No input name was set in the BoundingBoxFilterStep configuration and input name could not be guessed based on type";
             DataUtils.inferField(data, ValueType.BOUNDING_BOX, true, err + " (multiple keys)", err + " (no List<BoundingBox> values)");
         }
-        String[] classesToKeep = (String[]) step.classesToKeep.toArray();
+
+        List<String> classesToKeep = step.classesToKeep;
         List<BoundingBox> boundingBoxes = data
                 .getListBoundingBox(inputName)
                 .stream()
-                .filter(i -> Arrays.stream(classesToKeep).anyMatch(i.label()::equals))
+                .filter(i -> classesToKeep.contains(i.label()))
                 .collect(Collectors.toList());
 
 

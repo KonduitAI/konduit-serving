@@ -18,14 +18,13 @@
 
 package ai.konduit.serving.pipeline.impl.pipeline.protocol;
 
+import ai.konduit.serving.common.test.TestServer;
 import ai.konduit.serving.pipeline.api.protocol.FtpClient;
 import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.api.protocol.handlers.KSStreamHandlerFactory;
-import ai.konduit.serving.common.test.TestServer;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
@@ -40,8 +39,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
@@ -134,7 +133,7 @@ public class TestURL {
 
         URLConnection conn = url.openConnection();
         try (InputStream is = conn.getInputStream()) {
-            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            Reader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String received = IOUtils.toString(reader);
             System.out.println(received);
         }
@@ -148,7 +147,7 @@ public class TestURL {
 
         URLConnection conn = url.openConnection();
         try (InputStream is = conn.getInputStream()) {
-            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            Reader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String received = IOUtils.toString(reader);
             System.out.println(received);
         }

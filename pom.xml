@@ -156,7 +156,7 @@
         <snakeyaml.version>1.20</snakeyaml.version>
         <reflections.version>0.9.10</reflections.version>
 
-        <oshi.version>3.13.4</oshi.version>
+        <oshi.version>5.2.0</oshi.version>
 
         <sysout-over-slf4j.version>1.0.2</sysout-over-slf4j.version>
         <guava.version>20.0</guava.version>
@@ -251,16 +251,6 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.oshi</groupId>
-                <artifactId>oshi-core</artifactId>
-                <version>${oshi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.oshi</groupId>
-                <artifactId>oshi-json</artifactId>
-                <version>${oshi.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
