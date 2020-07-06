@@ -21,6 +21,7 @@ package ai.konduit.serving.pipeline.impl.pipeline.graph;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import lombok.*;
 import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 import org.nd4j.shade.jackson.annotation.JsonUnwrapped;
 
 import java.util.Collections;
@@ -32,8 +33,8 @@ import java.util.List;
  * @author Alex Black
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @JsonIgnoreProperties("builder")
 public class PipelineGraphStep extends BaseGraphStep {
     private GraphBuilder builder;
@@ -42,7 +43,7 @@ public class PipelineGraphStep extends BaseGraphStep {
     private String name;
     private String input;
 
-    public PipelineGraphStep(GraphBuilder builder, PipelineStep step, String name, String input) {
+    public PipelineGraphStep(@JsonProperty("GraphBuilder") GraphBuilder builder, @JsonProperty("step") PipelineStep step, @JsonProperty("name") String name, @JsonProperty("input") String input) {
         super(builder, name);
         this.step = step;
         this.input = input;

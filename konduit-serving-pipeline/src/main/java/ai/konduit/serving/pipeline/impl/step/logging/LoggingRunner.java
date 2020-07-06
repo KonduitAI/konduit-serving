@@ -30,12 +30,12 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @CanRun(LoggingStep.class)
-public class LoggingPipelineRunner implements PipelineStepRunner {
+public class LoggingRunner implements PipelineStepRunner {
 
     private final LoggingStep step;
     private final Pattern pattern;
 
-    public LoggingPipelineRunner(@NonNull LoggingStep step) {
+    public LoggingRunner(@NonNull LoggingStep step) {
         this.step = step;
         if(step.keyFilterRegex() != null){
             pattern = Pattern.compile(step.keyFilterRegex());

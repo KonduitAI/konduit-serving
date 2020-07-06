@@ -21,7 +21,6 @@ import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -29,6 +28,7 @@ import lombok.experimental.Tolerate;
 
 import java.util.Arrays;
 import java.util.List;
+
 
 @Data
 @Accessors(fluent = true)

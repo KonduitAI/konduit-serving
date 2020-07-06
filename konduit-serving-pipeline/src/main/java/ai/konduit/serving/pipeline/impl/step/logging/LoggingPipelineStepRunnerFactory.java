@@ -30,6 +30,6 @@ public class LoggingPipelineStepRunnerFactory implements PipelineStepRunnerFacto
     @Override
     public PipelineStepRunner create(@NonNull PipelineStep pipelineStep) {
         Preconditions.checkArgument(canRun(pipelineStep), "Unable to execute pipeline step of type: {}", pipelineStep.getClass());
-        return new LoggingPipelineRunner((LoggingStep) pipelineStep);
+        return new LoggingRunner((LoggingStep) pipelineStep);
     }
 }

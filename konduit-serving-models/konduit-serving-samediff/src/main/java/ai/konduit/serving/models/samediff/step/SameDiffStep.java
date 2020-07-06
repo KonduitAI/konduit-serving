@@ -19,6 +19,7 @@ import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import lombok.experimental.Tolerate;
@@ -31,6 +32,7 @@ import java.util.List;
 @Data
 @Accessors(fluent = true)
 @JsonName("SAMEDIFF")
+@NoArgsConstructor
 @Schema(description = "A pipeline step that configures a SameDiff model that is to be executed.")
 public class SameDiffStep implements PipelineStep {
 

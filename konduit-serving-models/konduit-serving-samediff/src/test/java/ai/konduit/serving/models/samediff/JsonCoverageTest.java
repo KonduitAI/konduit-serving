@@ -16,29 +16,37 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.pipeline.impl.testpipelines.switchfn;
+package ai.konduit.serving.models.samediff;
 
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import ai.konduit.serving.common.test.BaseJsonCoverageTest;
+import ai.konduit.serving.models.samediff.step.SameDiffStep;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
+import org.junit.Test;
 
-@EqualsAndHashCode
-@lombok.Data
-@NoArgsConstructor
-@Accessors(fluent = true)
-public class TestSwitchFn implements SwitchFn {
-
-    public int branch;
+public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Override
-    public int numOutputs() {
-        return 2;
+    public String getPackageName() {
+        return "ai.konduit.serving.models.samediff";
     }
 
     @Override
-    public int selectOutput(Data data) {
-        return branch;
+    public Object fromJson(Class<?> c, String json) {
+        return ObjectMappers.fromJson(json, c);
     }
+
+    @Override
+    public Object fromYaml(Class<?> c, String yaml) {
+        return ObjectMappers.fromYaml(yaml, c);
+    }
+
+    @Test
+    public void testSameDiffStep() {
+        testConfigSerDe(new SameDiffStep().outputNames("outputNames")
+                .modelUri("modelUri"));
+    }
+
+
+
+
 }
