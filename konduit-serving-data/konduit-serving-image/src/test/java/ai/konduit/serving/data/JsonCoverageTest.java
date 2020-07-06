@@ -62,7 +62,8 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
             .format(NDFormat.CHANNELS_LAST)
             .dataType(NDArrayType.UINT8)
             .aspectRatioHandling(AspectRatioHandling.STRETCH)
-            .normalization(new ImageNormalization(ImageNormalization.Type.SUBTRACT_MEAN));
+            .normalization(new ImageNormalization(ImageNormalization.Type.SUBTRACT_MEAN)
+                    .meanRgb(new double[]{0.3, 0.3}).stdRgb(new double[]{0.3, 0.3}).maxValue(3.0));
 
     @Override
     public String getPackageName() {
