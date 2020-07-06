@@ -19,11 +19,9 @@
 package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.common.test.BaseJsonCoverageTest;
-import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.pipeline.AsyncPipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
-import ai.konduit.serving.pipeline.impl.pipeline.PipelineProfilerTest;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.*;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataIntSwitchFn;
@@ -43,7 +41,6 @@ import ai.konduit.serving.pipeline.impl.testpipelines.switchfn.TestSwitchFn;
 import ai.konduit.serving.pipeline.impl.testpipelines.time.TimeStep;
 import ai.konduit.serving.pipeline.impl.util.CallbackStep;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.event.Level;
 
@@ -224,7 +221,9 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Test
     public void testAnyStep() {
-        testConfigSerDe(new AnyStep(new GraphBuilder(), new ArrayList<String>(), "foo"));
+        testConfigSerDe(new GraphBuilder().build(new AnyStep(new GraphBuilder(), new ArrayList<String>(), "foo")));
+        seen.add(AnyStep.class);
+
     }
 
 
