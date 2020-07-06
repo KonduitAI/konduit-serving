@@ -151,6 +151,7 @@ public class BuildCLI extends DefaultCommand {
         try {
             new CLIValidators.OSValueValidator().validate("os", operatingSystem);
         } catch (Exception e) {
+            out.println("Error validating OS (-o/--os): " + e.getMessage());
             System.exit(1);
         }
         this.os = operatingSystem;
@@ -162,6 +163,7 @@ public class BuildCLI extends DefaultCommand {
         try {
             new CLIValidators.ArchValueValidator().validate("arch", architecture);
         } catch (Exception e) {
+            out.println("Error validating architecture (-a/--arch): " + e.getMessage());
             System.exit(1);
         }
         this.arch = architecture;
@@ -173,6 +175,7 @@ public class BuildCLI extends DefaultCommand {
         try {
             new CLIValidators.DeviceValidator().validate("device", device);
         } catch (Exception e) {
+            out.println("Error validating device (-d/--device): " + e.getMessage());
             System.exit(1);
         }
         this.device = device;
@@ -184,6 +187,7 @@ public class BuildCLI extends DefaultCommand {
         try {
             new CLIValidators.ModuleValueValidator().validate("modules", modules);
         } catch (Exception e) {
+            out.println("Error validating modules (-m/--modules): " + e.getMessage());
             System.exit(1);
         }
         this.modules = modules;
@@ -195,6 +199,7 @@ public class BuildCLI extends DefaultCommand {
         try {
             new CLIValidators.DeploymentTypeValueValidator().validate("deploymentType", deploymentTypes);
         } catch (Exception e) {
+            out.println("Error validating OS (-dt/--deploymentType): " + e.getMessage());
             System.exit(1);
         }
         this.deploymentTypes = deploymentTypes;
@@ -206,6 +211,7 @@ public class BuildCLI extends DefaultCommand {
         try {
             new CLIValidators.ServerTypeValidator().validate("serverType", serverTypes);
         } catch (Exception e) {
+            out.println("Error validating server type (-s/--serverType): " + e.getMessage());
             System.exit(1);
         }
         this.serverTypes = serverTypes;
@@ -217,6 +223,7 @@ public class BuildCLI extends DefaultCommand {
         try {
             new CLIValidators.AdditionalDependenciesValidator().validate("additionalDependencies", additionalDependencies);
         } catch (Exception e) {
+            out.println("Error validating additional dependencies (-a/--addDep): " + e.getMessage());
             System.exit(1);
         }
         this.additionalDependencies = additionalDependencies;
@@ -228,6 +235,7 @@ public class BuildCLI extends DefaultCommand {
         try {
             new CLIValidators.ConfigValidator().validate("config", config);
         } catch (Exception e) {
+            out.println("Error validating config (-c/--config): " + e.getMessage());
             System.exit(1);
         }
         this.config = config;
