@@ -34,6 +34,7 @@ import java.util.List;
  * @author Alex Black
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @JsonName(GraphConstants.GRAPH_ANY_JSON_KEY)
 @Schema(description = "A graph pipeline step that forwards the first available input to the output. Usually used in " +
         "conjunction with an earlier Switch step - i.e., input -> Switch -> (left branch, right branch) -> Any." +

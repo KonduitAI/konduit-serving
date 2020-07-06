@@ -53,6 +53,7 @@ import java.util.List;
 
 public class JsonCoverageTest extends BaseJsonCoverageTest {
 
+
     private ImageToNDArrayConfig c = new ImageToNDArrayConfig()
             .height(256)
             .width(256)
@@ -60,6 +61,7 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
             .includeMinibatchDim(true)
             .format(NDFormat.CHANNELS_LAST)
             .dataType(NDArrayType.UINT8)
+            .aspectRatioHandling(AspectRatioHandling.STRETCH)
             .normalization(new ImageNormalization(ImageNormalization.Type.SUBTRACT_MEAN));
 
     @Override
@@ -79,14 +81,13 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Test
     public void testImageToNDArrayStep() {
-        testConfigSerDe(new ImageToNDArrayStep().config(new ImageToNDArrayConfig()
-                .height(128)
-                .width(128)));
+        testConfigSerDe(new ImageToNDArrayStep().config(c).keys("key1","key2")
+                .keepOtherValues(false).metadata(true).metadataKey("metadataKey"));
     }
 
     @Test
     public void testImageCropStep() {
-        testConfigSerDe(new ImageCropStep());
+        testConfigSerDe(new ImageCropStep().cropName("cropName").coordsArePixels(true).imageName("imageName").cropPoints(Collections.singletonList(Point.create(2,2))));
     }
 
     @Test

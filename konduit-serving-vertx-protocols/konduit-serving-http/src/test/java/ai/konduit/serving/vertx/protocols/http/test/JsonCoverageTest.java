@@ -1,4 +1,4 @@
-package ai.konduit.serving.vertx.protocols.http.test;/*
+/*
  *  ******************************************************************************
  *  * Copyright (c) 2020 Konduit K.K.
  *  *
@@ -15,6 +15,8 @@ package ai.konduit.serving.vertx.protocols.http.test;/*
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
+
+package ai.konduit.serving.vertx.protocols.http.test;
 
 import ai.konduit.serving.common.test.BaseJsonCoverageTest;
 import ai.konduit.serving.pipeline.util.ObjectMappers;

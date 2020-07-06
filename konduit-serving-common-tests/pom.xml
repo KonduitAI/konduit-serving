@@ -74,7 +74,7 @@
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-common</artifactId>
-            <version>1.0.0-beta7</version>
+            <version>${nd4j.version}</version>
         </dependency>
     </dependencies>
 </project>
