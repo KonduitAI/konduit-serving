@@ -75,7 +75,7 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
         set.add(CallbackStep.class);
         set.add(ai.konduit.serving.pipeline.impl.testpipelines.callback.CallbackStep.class);
         // I need PipelineProfilerTest$TestStep i.e. private static class inside
-        set.add(ai.konduit.serving.pipeline.impl.pipeline.PipelineProfilerTest.class);
+        set.add(ai.konduit.serving.pipeline.impl.pipeline.PipelineProfilerTest.TestStep.class);
         set.add(FunctionStep.class);
         set.add(Input.class);
         return set;
@@ -91,7 +91,7 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Test
     public void testLoggingStep() {
-        testConfigSerDe(new LoggingStep().log(LoggingStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO));
+        testConfigSerDe(new LoggingStep().log(LoggingStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO).keyFilterRegex("\\d{3}"));
     }
 
 
@@ -99,13 +99,21 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
     public void testBoundingBoxToPointStep() {
         testConfigSerDe(new BoundingBoxToPointStep()
                 .bboxName("x")
-                .outputName("y"));
+                .outputName("y")
+                .keepOtherFields(false)
+                .method(BoundingBoxToPointStep.ConversionMethod.BOTTOM_LEFT));
     }
 
     @Test
     public void testSSDToBoundingBoxStep() {
         testConfigSerDe(new SSDToBoundingBoxStep()
-                .outputName("y"));
+                .outputName("y")
+                .aspectRatio(0.5)
+                .classLabels("a","b","c")
+                .keepOtherValues(false)
+                .scale(0.5)
+                .threshold(0.5));
+
     }
 
 
@@ -123,7 +131,14 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Test
     public void testYoloStep() {
-        testConfigSerDe(new YoloToBoundingBoxStep());
+        testConfigSerDe(new YoloToBoundingBoxStep()
+                .classLabels("a","b","c")
+                .keepOtherValues(false)
+                .nchw(false)
+                .nmsThreshold(0.2)
+                .numClasses(3)
+                .input("foo")
+                .threshold(0.5));
     }
 
 

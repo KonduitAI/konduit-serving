@@ -15,7 +15,6 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
-package ai.konduit.serving.data;
 
 import ai.konduit.serving.common.test.BaseJsonCoverageTest;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
@@ -25,7 +24,7 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Override
     public String getPackageName() {
-        return "ai.konduit.serving.data.nd4j";
+        return "ai.konduit.serving.vertx";
     }
 
     @Override

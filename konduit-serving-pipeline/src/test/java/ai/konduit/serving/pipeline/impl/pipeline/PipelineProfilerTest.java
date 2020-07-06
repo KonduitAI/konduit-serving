@@ -192,7 +192,7 @@ public class PipelineProfilerTest {
     }
 
     @AllArgsConstructor
-    private static class TestStep implements PipelineStep {
+    public static class TestStep implements PipelineStep {
 
         private String[] toOpen;
     }

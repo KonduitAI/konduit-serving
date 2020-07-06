@@ -24,7 +24,8 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Test
     public void testSameDiffStep() {
-        testConfigSerDe(new SameDiffStep(null, null));
+        testConfigSerDe(new SameDiffStep().outputNames("outputNames")
+                .modelUri("modelUri"));
     }
 
 

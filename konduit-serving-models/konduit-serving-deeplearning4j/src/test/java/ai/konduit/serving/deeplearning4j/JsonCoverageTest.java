@@ -25,12 +25,15 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Test
     public void testDL4JStep() {
-        testConfigSerDe(new DL4JStep());
+        testConfigSerDe(new DL4JStep()
+                .inputNames("inputNames").loaderClass("loaderClass")
+                .modelUri("modelUri").outputNames("outputNames"));
     }
 
     @Test
     public void testKerasStep() {
-        testConfigSerDe(new KerasStep());
+        testConfigSerDe(new KerasStep().inputNames("inputNames").outputNames("outputNames")
+                .modelUri("modelUri"));
     }
 
 
