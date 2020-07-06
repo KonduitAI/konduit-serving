@@ -24,7 +24,7 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
 
     @Override
     public String getPackageName() {
-        return "ai.konduit.serving.vertx";
+        return "ai.konduit.serving.codegen";
     }
 
     @Override
