@@ -97,8 +97,8 @@ public class KerasStep implements PipelineStep {
             try (PythonGIL gil = PythonGIL.lock()) {
                 NumpyArray[] inputArrays;
                 if (step.inputKeys == null || step.inputKeys.length == 0) {
-                    String errMultipleKeys = "Multiple NDarray values received for single input model. Specify input key explicitly.";
-                    String errNoKeys = "No NDarray values received.";
+                    String errMultipleKeys = "Error in KerasStep: Multiple NDarray values (%s and %s) received for single input model. Specify input key explicitly.";
+                    String errNoKeys = "Error in KerasStep: No NDarray values received.";
                     String key = DataUtils.inferField(input, ValueType.NDARRAY, false, errMultipleKeys, errNoKeys);
                     inputArrays = new NumpyArray[]{input.getNDArray(key).getAs(NumpyArray.class)};
 

@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class NumpyArray {
 
-    private PythonObject pythonObject;
+    private final PythonObject pythonObject;
 
     public NumpyArray(PythonObject pythonObject) {
         // TODO validate python object

@@ -1,13 +1,15 @@
 package ai.konduit.serving.models.tensorflowpython;
 
-import ai.konduit.serving.models.tensorflowpython.NumpyArray;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.api.format.NDArrayConverter;
 import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import lombok.AllArgsConstructor;
-import org.nd4j.python4j.*;
+import org.nd4j.python4j.Python;
+import org.nd4j.python4j.PythonGC;
+import org.nd4j.python4j.PythonObject;
+import org.nd4j.python4j.PythonTypes;
 
 import java.lang.reflect.Field;
 import java.nio.Buffer;
