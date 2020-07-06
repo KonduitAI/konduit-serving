@@ -17,8 +17,16 @@
  */
 
 import ai.konduit.serving.common.test.BaseJsonCoverageTest;
+import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
+import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
+import ai.konduit.serving.vertx.config.InferenceConfiguration;
+import ai.konduit.serving.vertx.config.ServerProtocol;
 import org.junit.Test;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JsonCoverageTest extends BaseJsonCoverageTest {
 
@@ -38,8 +46,13 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
     }
 
     @Test
-    public void test(){
-        //Empty test to ensure @Before is run at least one and @AfterClass is run
+    public void InferenceConfiguration(){
+        Map<String, GraphStep> steps = new HashMap<String, GraphStep>();
+       testConfigSerDe(new InferenceConfiguration()
+               .customEndpoints(Collections.singletonList("0"))
+               .port(80).protocol(ServerProtocol.HTTP)
+               .pipeline(new GraphPipeline(steps, "foo", "myGraphPipeline"))
+       );
     }
 
 
