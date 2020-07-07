@@ -2,7 +2,6 @@ package ai.konduit.serving.common.test;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.reflections.Reflections;
 
 import java.lang.annotation.Annotation;
@@ -11,6 +10,7 @@ import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.fail;
 
@@ -61,11 +61,12 @@ public abstract class BaseSwaggerAnnotationCheck {
 
             }
 
-            if (!failedClasses.isEmpty()){
-                ArrayUtils.toString(failedClasses.stream().peek(s -> System.out.println("Class: " + s.getCanonicalName())));
-                fail();
+           if (!failedClasses.isEmpty()){
+                fail("There are still " + failedClasses.size() + " classes with missing annotation:\n" + failedClasses.stream()
+                        .map(n -> n.getCanonicalName())
+                        .collect(Collectors.joining("\n")));
 
-            }
+           }
 
         }
 
