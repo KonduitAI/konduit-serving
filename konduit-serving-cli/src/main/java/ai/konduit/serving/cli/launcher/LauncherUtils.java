@@ -52,8 +52,8 @@ public class LauncherUtils {
      * utilizes.
      */
     public static void setCommonVertxProperties() {
-        setProperty("vertx.cwd", DirectoryFetcher.getWorkingDir().getAbsolutePath()); // For setting the vertx working directory for runtime files.
-        setProperty(CACHE_DIR_BASE_PROP_NAME, DirectoryFetcher.getWorkingDir().getAbsolutePath()); // For setting caching directory for vertx related optimizations.
+        setProperty("vertx.cwd", DirectoryFetcher.getVertxDir().getAbsolutePath()); // For setting the vertx working directory for runtime files.
+        setProperty(CACHE_DIR_BASE_PROP_NAME, DirectoryFetcher.getVertxDir().getAbsolutePath()); // For setting caching directory for vertx related optimizations.
     }
 
     /**

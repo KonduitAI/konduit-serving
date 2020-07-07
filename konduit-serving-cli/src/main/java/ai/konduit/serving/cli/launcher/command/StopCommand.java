@@ -18,18 +18,21 @@
 
 package ai.konduit.serving.cli.launcher.command;
 
+import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static ai.konduit.serving.cli.launcher.LauncherUtils.getPidFromServerId;
 import static ai.konduit.serving.cli.launcher.LauncherUtils.isProcessExists;
 
 @Name(value = "stop", priority = 1)
@@ -41,6 +44,7 @@ import static ai.konduit.serving.cli.launcher.LauncherUtils.isProcessExists;
         "- Stops the server with an id of 'inf_server':\n" +
         "$ konduit stop inf_server\n" +
         "--------------")
+@Slf4j
 public class StopCommand extends DefaultCommand {
 
     private String id;
@@ -83,6 +87,16 @@ public class StopCommand extends DefaultCommand {
         if(!isProcessExists(id)) {
             out.println(String.format("No konduit server exists with an id: '%s'.", id));
             return;
+        } else {
+            // Cleaning up current server data file
+            File serverDataFile = new File(DirectoryFetcher.getServersDataDir(), getPidFromServerId(id) + ".data");
+            try {
+                FileUtils.forceDelete(serverDataFile);
+            } catch (IOException exception) {
+                if(!(exception instanceof FileNotFoundException)) { // Ignoring FileNotFoundException since the file won't need to be deleted then.
+                    log.error("Unable to delete server data file at: {}", serverDataFile.getAbsolutePath(), exception);
+                }
+            }
         }
 
         out.println("Stopping konduit server '" + id + "'");

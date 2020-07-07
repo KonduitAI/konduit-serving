@@ -37,7 +37,12 @@ public class PropertiesConstants {
     public static final String WORKING_DIR = "konduit.working.dir";
 
     /**
-     * System property specifying build data directory where build logs for the build CLI are kept.
+     * System property specifying a directory for keeping vertx runtime and cache files.
+     */
+    public static final String VERTX_DIR = "konduit.vertx.dir";
+
+    /**
+     * System property specifying build data directory where files for the build CLI are kept.
      */
     public static final String BUILD_DIR = "konduit.build.dir";
 
