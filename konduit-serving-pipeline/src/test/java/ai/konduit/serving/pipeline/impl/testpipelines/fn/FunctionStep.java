@@ -21,6 +21,7 @@ package ai.konduit.serving.pipeline.impl.testpipelines.fn;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.function.Function;
 
@@ -31,6 +32,7 @@ public class FunctionStep implements PipelineStep {
         PipelineRegistry.registerStepRunnerFactory(new FunctionPipelineFactory());
     }
 
+    @Schema(description = "Input function")
     private final Function<Data,Data> fn;
 
     public FunctionStep(Function<Data,Data> fn){

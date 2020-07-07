@@ -20,6 +20,7 @@ package ai.konduit.serving.pipeline.impl.step.bbox.point;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,8 +42,17 @@ import lombok.experimental.Accessors;
 public class BoundingBoxToPointStep implements PipelineStep {
     public enum ConversionMethod {TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, CENTER}
 
-    private String bboxName;       //If null: just find any BB's
+    @Schema(description = "Name of the bounding boxes key from the previous step. If set to null, it will try to find any bounding box in the incoming data instance.")
+    private String bboxName;
+
+    @Schema(description = "Name of the key of point representation from this step")
     private String outputName;
+
+    @Schema(description = "If true, other data key and values from the previous step are kept and passed on to the next step as well.",
+            defaultValue = "true")
     private boolean keepOtherFields = true;
+
+    @Schema(description =  "You can choose from the following methods of converting the bounding box to a point: TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT,\n" +
+            "BOTTOM_RIGHT, CENTER. Set to CENTER by default")
     private ConversionMethod method = ConversionMethod.CENTER;
 }

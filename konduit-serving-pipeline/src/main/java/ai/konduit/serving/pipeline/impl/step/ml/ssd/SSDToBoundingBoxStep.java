@@ -20,10 +20,8 @@ package ai.konduit.serving.pipeline.impl.step.ml.ssd;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.impl.step.bbox.filter.BoundingBoxFilterStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -54,8 +52,12 @@ import java.util.List;
 @JsonName("SSD_TO_BBOX")
 @Schema(description = "A pipeline step that configures extraction of bounding boxes from an SSD model output.")
 public class SSDToBoundingBoxStep implements PipelineStep {
+
+    @Schema(description = "default output name", defaultValue ="bounding_boxes")
     public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";
+
     // You can do new SSDToBoundingBoxStep().classLabels(SSDToBoundingBoxStep.COCO_LABELS)
+    @Schema(description = "COCO labels")
     public static final String[] COCO_LABELS = new String[]{"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "street sign", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "hat", "backpack", "umbrella", "shoe", "eye glasses", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "plate", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "mirror", "dining table", "window", "desk", "toilet", "door", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "blender", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush", "hair brush"};
 
     //TODO config
@@ -74,7 +76,16 @@ public class SSDToBoundingBoxStep implements PipelineStep {
             defaultValue = "0.5")
     protected double threshold = 0.5;
 
+    @Schema(description = "An optional way to increase the size of the bounding boxes by some fraction. If specified, a value\n" +
+            "of 1.0 is equivalent to no scaling. A scale of 2.0 means the center is unchanged, but the width and height are now\n" +
+            "2.0x larger than it would otherwise be")
     protected Double scale = null;
+
+    @Schema(description = "An optional way to control the output shape (aspect ratio) of the bounding boxes. Defined in\n" +
+            "terms of \"width / height\" - if specified, an aspect ratio of 1.0 gives a square output; an aspect ratio of 2.0 gives\n" +
+            "twice as wide as it is high. Note that for making the output the correct aspect ratio, one of the height or width\n" +
+            "will be increased; the other dimension will not change. That is, the pre-aspect-ratio-corrected box will be contained\n" +
+            "fully within the output box")
     protected Double aspectRatio = null;
 
 

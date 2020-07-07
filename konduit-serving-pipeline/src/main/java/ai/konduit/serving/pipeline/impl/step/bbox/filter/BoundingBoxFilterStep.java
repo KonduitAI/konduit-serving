@@ -39,13 +39,18 @@ public class BoundingBoxFilterStep implements PipelineStep {
 
     public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";
 
+    @Schema(description = "If true, other data key and values from the previous step are kept and passed on to the next step as well.",
+            defaultValue = "true")
     private boolean keepOtherValues = true;
 
     @Schema(description = "A list of class labels for which bounding boxes will be drawn")
     protected List<String> classesToKeep;
 
+    @Schema(description = "Input name where the all bounding box are be contained in", defaultValue = "input")
     protected String inputName = "input";
 
+    @Schema(description = "Output key name where the bounding box will be contained in.",
+            defaultValue = DEFAULT_OUTPUT_NAME)
     protected String outputName = DEFAULT_OUTPUT_NAME;
 
     @Tolerate
