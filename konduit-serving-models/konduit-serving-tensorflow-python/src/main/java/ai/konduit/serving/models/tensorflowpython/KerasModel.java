@@ -18,6 +18,7 @@
 package ai.konduit.serving.models.tensorflowpython;
 
 import ai.konduit.serving.pipeline.api.protocol.URIResolver;
+import ai.konduit.serving.pipeline.util.BuildUtils;
 import org.nd4j.python4j.*;
 
 public class KerasModel {
@@ -30,8 +31,9 @@ public class KerasModel {
     }
 
     private static void installTF() {
-        if (!PythonProcess.isPackageInstalled("tensorflow")) {
-            PythonProcess.pipInstall("tensorflow");
+        String tfPackage = BuildUtils.isCudaBuild() ? "tensorflow-gpu" : "tensorflow";
+        if (!PythonProcess.isPackageInstalled(tfPackage)) {
+            PythonProcess.pipInstall(tfPackage);
         }
     }
 
