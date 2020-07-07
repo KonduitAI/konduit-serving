@@ -21,6 +21,7 @@ package ai.konduit.serving.data.image.step.point.perspective.convert;
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.experimental.Tolerate;
@@ -46,16 +47,20 @@ public class PerspectiveTransformStep implements PipelineStep {
     /**
      * If null: just find any Points, Bounding Boxes and Images
      */
+    @Schema(description = "A list of names of the input placeholders.")
     private List<String> inputNames;
 
+    @Schema(description = "A list of names of the output arrays - i.e., what should be predicted.")
     private List<String> outputNames;
     /**
      * When you provide source points as an input, they must be provided as a list of 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
+    @Schema(description = "List of 4 source points [topLeft, topRight, bottomLeft, bottomRight]")
     private String sourcePointsName;
     /**
      * When you provide target points as an input, they must be provided as a list of 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
+    @Schema(description = "List of 4 target points [topLeft, topRight, bottomLeft, bottomRight]")
     private String targetPointsName;
 
     /**
@@ -63,32 +68,40 @@ public class PerspectiveTransformStep implements PipelineStep {
      * Can also reference a list of images, in which case <b>only the first</b> image is used as the reference.<br>
      * The adjustment is applied to all inputs of the step.
      */
+    @Schema(description = "When a referenceImage is provided, the transform will be adjusted to ensure the entire transformed image fits into the output image (up to 4096x4096)<br>\n" +
+            "Can also reference a list of images, in which case <b>only the first</b> image is used as the reference.<br>\n" +
+            "The adjustment is applied to all inputs of the step.")
     private String referenceImage;
 
     /**
      * When a reference width and height are provided, the transform will be adjusted to make sure the entire area fits into the output image (up to 4096x4096)<br>
      * The adjustment is applied to all inputs of the step.
      */
+    @Schema(description = "When a reference width and height are provided, the transform will be adjusted to make sure the entire area fits into the output image (up to 4096x4096)<br> The adjustment is applied to all inputs of the step.")
     private Integer referenceWidth;
     /**
      * When a reference width and height are provided, the transform will be adjusted to make sure the entire area fits into the output image (up to 4096x4096)<br>
      * The adjustment is applied to all inputs of the step.
      */
+    @Schema(description = "When a reference width and height are provided, the transform will be adjusted to make sure the entire area fits into the output image (up to 4096x4096)<br> The adjustment is applied to all inputs of the step.")
     private Integer referenceHeight;
 
 
     /**
      * takes exactly 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
+    @Schema(description = "Takes exactly 4 source points [topLeft, topRight, bottomLeft, bottomRight]" )
     private List<Point> sourcePoints;
 
 
     /**
      * takes exactly 4 points [topLeft, topRight, bottomLeft, bottomRight]
      */
+    @Schema(description = "Takes exactly 4 target points [topLeft, topRight, bottomLeft, bottomRight]" )
     private List<Point> targetPoints;
 
-
+    @Schema(description = "If true, other data key and values from the previous step are kept and passed on to the next step as well.",
+            defaultValue = "true")
     private boolean keepOtherFields = true;
 
     @Tolerate
