@@ -61,11 +61,18 @@ import java.util.Scanner;
 public class ServeBuildCommand extends ServeCommand {
 
     private String profileName;
+    private List<String> additionalDependencies;
 
     @Option(shortName = "p", longName = "profileName", argName = "profile_name")
     @Description("Name of the profile to be used with the server launch.")
     public void setProfileName(String profileName) {
         this.profileName = profileName;
+    }
+
+    @Option(shortName = "ad", longName = "addDep", argName = "additional_dependencies")
+    @Description("Additional dependencies to include with the launch")
+    public void setAdditionalDependencies(List<String> additionalDependencies) {
+        this.additionalDependencies = additionalDependencies;
     }
 
     @Override
@@ -117,11 +124,21 @@ public class ServeBuildCommand extends ServeCommand {
                     }
                 }
 
-                if(profile.additionalDependencies() != null) {
-                    for(String additionalDependency : profile.additionalDependencies()) {
-                        args.add("-ad"); args.add(additionalDependency);
+                List<String> additionalDeps = null;
+                if(profile.additionalDependencies() != null && !profile.additionalDependencies().isEmpty()) {
+                    additionalDeps = new ArrayList<>(profile.additionalDependencies());
+                }
+                if(this.additionalDependencies != null && !this.additionalDependencies.isEmpty()){
+                    additionalDeps = new ArrayList<>();
+                    additionalDeps.addAll(this.additionalDependencies);
+                }
+
+                if(additionalDeps != null){
+                    for(String ad : additionalDeps) {
+                        args.add("-ad"); args.add(ad);
                     }
                 }
+
 
                 // Issue: https://github.com/KonduitAI/konduit-serving/issues/437
                 BuildCLI.main(args.toArray(new String[0]));     //TODO we could just call build tool directly instead of via CLI (more robust to refactoring, compile time args checking etc)
