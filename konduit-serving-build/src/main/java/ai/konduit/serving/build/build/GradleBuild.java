@@ -147,12 +147,12 @@ public class GradleBuild {
                 if(jarName.endsWith(".jar")){
                     jarName = jarName.substring(0, jarName.length()-4);
                 }
-                addUberJarTask(kts, jarName, escaped);
+                addUberJarTask(kts, jarName, escaped, config);
             }
             else if (deployment instanceof RpmDeployment) {
                 RpmDeployment r = (RpmDeployment)deployment;
                 String escaped = r.outputDir().replace("\\","\\\\");
-                addUberJarTask(kts,  "ks", escaped);
+                addUberJarTask(kts,  "ks", escaped, config);
 
                 String rpmName = r.rpmName();
                 kts.append("ospackage { \n");
@@ -170,7 +170,7 @@ public class GradleBuild {
             }
             else if (deployment instanceof DebDeployment) {
                 String escaped = ((DebDeployment)deployment).outputDir().replace("\\","\\\\");
-                addUberJarTask(kts,  "ks", escaped);
+                addUberJarTask(kts,  "ks", escaped, config);
 
                 String rpmName = ((DebDeployment)deployment).rpmName();
                 kts.append("ospackage {\n");
@@ -186,7 +186,7 @@ public class GradleBuild {
                 kts.append(createCopyTask("copyDeb", outputDir.getAbsolutePath(), ((DebDeployment)deployment).outputDir(),
                         "*.deb", "distributions"));
             } else if(deployment instanceof ClassPathDeployment){
-                addClassPathTask(kts, (ClassPathDeployment) deployment);
+                addClassPathTask(kts, (ClassPathDeployment) deployment, config);
             }
             else if (deployment instanceof ExeDeployment) {
                 String exeName = ((ExeDeployment)deployment).exeName();
@@ -226,7 +226,7 @@ public class GradleBuild {
             }
             else if (deployment instanceof TarDeployment) {
                 String escaped = ((TarDeployment)deployment).outputDir().replace("\\","\\\\");
-                addUberJarTask(kts,  "ks", escaped);
+                addUberJarTask(kts,  "ks", escaped, config);
                 List<String> fromFiles = ((TarDeployment)deployment).files();
                 if (fromFiles.size() > 0) {
                     String rpmName = ((TarDeployment) deployment).archiveName();
@@ -350,7 +350,7 @@ public class GradleBuild {
         }
     }
 
-    private static void addUberJarTask(StringBuilder kts, String fileName, String directoryName) {
+    private static void addUberJarTask(StringBuilder kts, String fileName, String directoryName, Config config) {
         kts.append("tasks.withType<ShadowJar> {\n");
         String jarName = fileName;
         kts.append("\tbaseName = \"" + jarName + "\"\n");
@@ -362,11 +362,12 @@ public class GradleBuild {
                 .append("    manifest {\n")
                 .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
                 .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
+                .append("        attributes[\"Konduit-Serving-Build\"] = \"").append(config.toJsonMinimal().replace("\"", "\\\"")).append("\"\n")
                 .append("    }\n")
                 .append("}\n\n");
     }
 
-    private static void addClassPathTask(StringBuilder kts, ClassPathDeployment cpd){
+    private static void addClassPathTask(StringBuilder kts, ClassPathDeployment cpd, Config config){
         String filePrefix = "file:/" + (SystemUtils.IS_OS_WINDOWS ? "" : "/");
 
         //Adapted from: https://stackoverflow.com/a/54159784
@@ -394,6 +395,7 @@ public class GradleBuild {
                     .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
                     .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
                     .append("        attributes[\"Class-Path\"] = \"" + filePrefix + "\" + configurations.runtimeClasspath.get().getFiles().joinToString(separator=\" " + filePrefix + "\")\n")
+                    .append("        attributes[\"Konduit-Serving-Build\"] = \"").append(config.toJsonMinimal().replace("\"", "\\\"")).append("\"\n")
                     .append("    }\n");
 
             if(cpd.outputFile() != null){
