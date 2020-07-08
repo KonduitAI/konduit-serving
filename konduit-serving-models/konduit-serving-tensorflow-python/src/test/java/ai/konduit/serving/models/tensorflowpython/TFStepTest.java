@@ -49,7 +49,7 @@ public class TFStepTest {
 
     private String modelPath;
     private String[] inputKeys;
-    private String[] outputKeys;
+    private String outputKey;
     private NDArray[] inputs;
     private NDArray[] outputs;
 
@@ -95,17 +95,17 @@ public class TFStepTest {
         }
 
         return new Object[]{
-                new Object[]{modelFileSM, inputs, outputs, null, new String[]{"out"}}
+                new Object[]{modelFileSM, inputs, outputs, null, "out"}
         };
 
     }
 
-    public TFStepTest(String modelPath, NDArray[] inputs, NDArray[] outputs, String inputKeys[], String outputKeys[]) {
+    public TFStepTest(String modelPath, NDArray[] inputs, NDArray[] outputs, String inputKeys[], String outputKey) {
         this.modelPath = modelPath;
         this.inputs = inputs;
         this.outputs = outputs;
         this.inputKeys = inputKeys;
-        this.outputKeys = outputKeys;
+        this.outputKey = outputKey;
     }
 
     @Test
@@ -120,7 +120,7 @@ public class TFStepTest {
                 inputKeyMap.put(k, k);
             }
         }
-        PipelineStep step = new TFStep().modelUri(modelPath).inputKeyMap(inputKeyMap).outputKeys(outputKeys);
+        PipelineStep step = new TFStep().modelUri(modelPath).inputKeyMap(inputKeyMap).outputKey(outputKey);
         Pipeline pipeline = SequencePipeline.builder().add(step).build();
         Data inp = new JData();
         if (inputKeys == null) {
@@ -133,9 +133,8 @@ public class TFStepTest {
 
         Data out = pipeline.executor().exec(inp);
 
-        for (int i = 0; i < outputKeys.length; i++) {
-            Assert.assertEquals(outputs[i], out.getNDArray(outputKeys[i]));
-        }
+        Assert.assertEquals(outputs[0], out.getNDArray(outputKey));
+
     }
 
 

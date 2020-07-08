@@ -42,7 +42,8 @@ import java.util.Map;
 public class TFStep implements PipelineStep {
     private String modelUri;
     private Map<String, String> inputKeyMap;
-    private String[] outputKeys;
+    private Map<String, String> outputKeyMap;
+    private String outputKey;
     public static class Factory implements PipelineStepRunnerFactory{
         @Override
         public boolean canRun(PipelineStep step) {
@@ -50,29 +51,36 @@ public class TFStep implements PipelineStep {
         }
         @Override
         public PipelineStepRunner create(PipelineStep step) {
-            Preconditions.checkState(step instanceof KerasStep, "Unable to run step of type %s", step);
+            Preconditions.checkState(step instanceof TFStep, "Unable to run step of type %s", step);
             return new TFStep.Runner((TFStep) step);
         }
     }
 
-    //@CanRun(TFStep.class)
+    @CanRun(TFStep.class)
     public static class Runner implements PipelineStepRunner{
         private final TFStep step;
         private final TFModel model;
-
+        private final Map<String, String> outputKeyMap;
 
         private void validateStep() {
             if (step.inputKeyMap == null || step.inputKeyMap.isEmpty()) {
                 if (model.numInputs() > 1) {
-                    throw new IllegalArgumentException("Error in KerasStep: Keras model has multiple inputs, but input keys were not provided.");
+                    throw new IllegalArgumentException("Error in TFStep: Keras model has multiple inputs, but input keys were not provided.");
                 }
             } else if (step.inputKeyMap.size() != model.numInputs()) {
                 throw new IllegalArgumentException("Error in KerasStep: Keras model has " + model.numInputs() + " inputs but " + step.inputKeyMap.size() + " input keys were provided.");
             }
-            if (step.outputKeys == null || step.outputKeys.length == 0) {
-                throw new IllegalArgumentException("Error in KerasStep: Output keys not specified");
-            } else if (step.outputKeys.length != model.numOutputs()) {
-                throw new IllegalArgumentException("Error in KerasStep: Keras model has " + model.numOutputs() + " outputs but " + step.outputKeys.length + " output keys were provided.");
+            if (step.outputKeyMap == null || step.outputKeyMap.isEmpty()) {
+                if (step.outputKey != null){
+                    if (model.numOutputs() > 1){
+                        throw new IllegalArgumentException("Error in TFStep: Model has multiple outputs. Provide outputKeyMap.");
+                    }
+                }else{
+                    throw new IllegalArgumentException("Error in TFStep: outputKeyMap not specified");
+                }
+
+            } else if (step.outputKeyMap.size() != model.numOutputs()) {
+                throw new IllegalArgumentException("Error in TFStep: Model has " + model.numOutputs() + " outputs but " + step.outputKeyMap.size() + " output keys were provided.");
             }
         }
         public Runner(TFStep step) {
@@ -80,6 +88,11 @@ public class TFStep implements PipelineStep {
                 this.step = step;
                 this.model = new TFModel(step.modelUri);
                 validateStep();
+                if (step.outputKeyMap == null){
+                    this.outputKeyMap = Collections.singletonMap(this.model.outputNames()[0], step.outputKey);
+                }else{
+                    this.outputKeyMap = step.outputKeyMap;
+                }
             }
         }
 
@@ -88,8 +101,8 @@ public class TFStep implements PipelineStep {
             try (PythonGIL gil = PythonGIL.lock()) {
                 Map<String, NumpyArray> inputArrays;
                 if (step.inputKeyMap == null || step.inputKeyMap.isEmpty()) {
-                    String errMultipleKeys = "Error in KerasStep: Multiple NDarray values (%s and %s) received for single input model. Specify input key explicitly.";
-                    String errNoKeys = "Error in KerasStep: No NDarray values received.";
+                    String errMultipleKeys = "Error in TFStep: Multiple NDarray values (%s and %s) received for single input model. Specify input key explicitly.";
+                    String errNoKeys = "Error in TFStep: No NDarray values received.";
                     String key = DataUtils.inferField(input, ValueType.NDARRAY, false, errMultipleKeys, errNoKeys);
                     inputArrays = Collections.singletonMap(model.inputNames()[0], input.getNDArray(key).getAs(NumpyArray.class));
 
@@ -99,9 +112,9 @@ public class TFStep implements PipelineStep {
                         inputArrays.put(e.getKey(), input.getNDArray(e.getValue()).getAs(NumpyArray.class));
                     }
                 }
-                NumpyArray[] out = model.predict(inputArrays);
-                for (int i = 0; i < step.outputKeys.length; i++) {
-                    input.put(step.outputKeys[i], new NumpyArray.NumpyNDArray(out[i]));
+                Map<String, NumpyArray> out = model.predict(inputArrays);
+                for(Map.Entry<String, String> e: outputKeyMap.entrySet()){
+                    input.put(e.getValue(), new NumpyArray.NumpyNDArray(out.get(e.getKey())));
                 }
                 return input;
             }

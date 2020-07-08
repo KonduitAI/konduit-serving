@@ -15,3 +15,4 @@
 ################################################################################
 
 ai.konduit.serving.models.tensorflowpython.KerasStep$Factory
+ai.konduit.serving.models.tensorflowpython.TFStep$Factory

@@ -5,6 +5,7 @@ import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
 import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
 import org.nd4j.python4j.PythonGC;
 import org.nd4j.python4j.PythonObject;
+import org.nd4j.python4j.PythonTypes;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,28 @@ public class NumpyArray {
     public NumpyArray(PythonObject pythonObject) {
         // TODO validate python object
         this.pythonObject = pythonObject;
+    }
+
+    public long[] shape(){
+        try (PythonGC gc = PythonGC.watch()){
+            List ls = PythonTypes.LIST.toJava(pythonObject.attr("shape"));
+            long[] ret = new long[ls.size()];
+            for (int i=0; i < ls.size();i++){
+                ret[i] = (Long)ls.get(i);
+            }
+            return ret;
+        }
+    }
+
+    public String dtype(){
+        try(PythonGC gc = PythonGC.watch()){
+            return pythonObject.attr("dtype").attr("name").toString();
+        }
+    }
+
+    @Override
+    public String toString(){
+        return pythonObject.toString();
     }
 
     public static class NumpyNDArray extends BaseNDArray<NumpyArray> {
