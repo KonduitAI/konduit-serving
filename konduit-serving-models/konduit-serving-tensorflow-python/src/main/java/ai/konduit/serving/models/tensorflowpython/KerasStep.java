@@ -26,6 +26,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import ai.konduit.serving.pipeline.util.DataUtils;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.common.base.Preconditions;
@@ -33,16 +34,30 @@ import org.nd4j.python4j.PythonGIL;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 
+/**
+ * A pipeline step that configures a Keras model that is to be executed.
+ */
 @lombok.Data
 @Accessors(fluent = true)
 @JsonName("KERAS")
 @NoArgsConstructor
+@Schema(description = "A pipeline step that configures a Keras model that is to be executed.")
 public class KerasStep implements PipelineStep {
+
+    @Schema(description = "Path to Keras model (.h5 file or saved model directory).")
     private String modelUri;
+    @Schema(description = "Names of NDArray fields which should be input to the model.")
     private String[] inputKeys;
+    @Schema(description = "Names of output fields to which output arrays will be written).")
     private String[] outputKeys;
 
 
+    /**
+     *
+     * @param modelUri Path to Keras model (.h5 file or saved model directory).
+     * @param inputKeys Names of NDArray fields which should be input to the model.
+     * @param outputKeys Names of output fields to which output arrays will be written.
+     */
     public KerasStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputKeys") String[] inputKeys,
                      @JsonProperty("outputKeys") String[] outputKeys){
         this.modelUri = modelUri;

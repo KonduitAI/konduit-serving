@@ -26,24 +26,36 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import ai.konduit.serving.pipeline.util.DataUtils;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.python4j.PythonGIL;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+
+/**
+ * A pipeline step that configures a TF model that is to be executed.
+ */
 @lombok.Data
 @Accessors(fluent = true)
 @JsonName("TF")
 @NoArgsConstructor
+@Schema(description = "A pipeline step that configures a TF model that is to be executed.")
 public class TFStep implements PipelineStep {
+    @Schema(description = "Path to TF saved model.")
     private String modelUri;
+    @Schema(description = "Mapping from model input names to Data field names.")
     private Map<String, String> inputKeyMap;
+    @Schema(description = "Applicable only for single input models. NDArray field name.")
     private String inputKey;
+    @Schema(description = "Mapping from model output names to Data field names.")
     private Map<String, String> outputKeyMap;
+    @Schema(description = "Applicable only for single output models. NDArray field name.")
     private String outputKey;
     public static class Factory implements PipelineStepRunnerFactory{
         @Override
@@ -56,6 +68,26 @@ public class TFStep implements PipelineStep {
             return new TFStep.Runner((TFStep) step);
         }
     }
+
+
+    /**
+     *
+     * @param modelUri Path to Keras model (.h5 file or saved model directory).
+     * @param inputKeyMap Mapping from model input names to Data field names.
+     * @param inputKey Applicable only for single input models. NDArray field name.
+     * @param outputKeyMap Mapping from model output names to Data field names.
+     * @param  outputKey Applicable only for single output models. NDArray field name.
+     */
+    public TFStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputKeyMap") Map<String, String> inputKeyMap,
+                     @JsonProperty("inputKey") String inputKey, @JsonProperty("outputKeyMap") Map<String, String> outputKeyMap,
+                  @JsonProperty("outputKey") String outputKey){
+        this.modelUri = modelUri;
+        this.inputKeyMap = inputKeyMap;
+        this.inputKey = inputKey;
+        this.outputKeyMap = outputKeyMap;
+        this.outputKey = outputKey;
+    }
+
 
     @CanRun(TFStep.class)
     public static class Runner implements PipelineStepRunner{
