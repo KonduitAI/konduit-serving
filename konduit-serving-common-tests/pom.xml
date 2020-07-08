@@ -77,5 +77,11 @@
             <artifactId>nd4j-common</artifactId>
             <version>${nd4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>2.1.2</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

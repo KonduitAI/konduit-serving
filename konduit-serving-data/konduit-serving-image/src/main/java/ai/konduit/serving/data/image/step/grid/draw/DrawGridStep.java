@@ -19,6 +19,7 @@
 package ai.konduit.serving.data.image.step.grid.draw;
 
 import ai.konduit.serving.annotation.json.JsonName;
+import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -70,14 +71,10 @@ public class DrawGridStep implements PipelineStep {
     @Schema(description = "If true, the lists are in pixels coordinates, not from 0 to 1.")
     private boolean coordsArePixels;
 
-    @Schema(description = "Color of the border. The color can be a hex/HTML string like" +
-            "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
-            "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
+    @Schema(description = "Color of the border. " + ColorUtil.COLOR_DESCRIPTION)
     private String borderColor;
 
-    @Schema(description = "Color of the grid. The color can be a hex/HTML string like" +
-            "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
-            "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
+    @Schema(description = "Color of the grid. " + ColorUtil.COLOR_DESCRIPTION)
     private String gridColor;
 
     @Schema(description = "Line thickness to use to draw the border (in pixels).",
