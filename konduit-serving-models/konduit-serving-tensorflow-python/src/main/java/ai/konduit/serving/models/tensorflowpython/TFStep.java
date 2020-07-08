@@ -42,6 +42,7 @@ import java.util.Map;
 public class TFStep implements PipelineStep {
     private String modelUri;
     private Map<String, String> inputKeyMap;
+    private String inputKey;
     private Map<String, String> outputKeyMap;
     private String outputKey;
     public static class Factory implements PipelineStepRunnerFactory{
@@ -61,6 +62,7 @@ public class TFStep implements PipelineStep {
         private final TFStep step;
         private final TFModel model;
         private final Map<String, String> outputKeyMap;
+        private final Map<String, String> inputKeyMap;
 
         private void validateStep() {
             if (step.inputKeyMap == null || step.inputKeyMap.isEmpty()) {
@@ -93,6 +95,11 @@ public class TFStep implements PipelineStep {
                 }else{
                     this.outputKeyMap = step.outputKeyMap;
                 }
+                if (step.inputKeyMap == null && step.inputKey != null){
+                    this.inputKeyMap = Collections.singletonMap(this.model.inputNames()[0], step.inputKey);
+                }else{
+                    this.inputKeyMap = step.inputKeyMap;
+                }
             }
         }
 
@@ -108,7 +115,7 @@ public class TFStep implements PipelineStep {
 
                 } else {
                     inputArrays = new HashMap<>();
-                    for (Map.Entry<String, String> e: step.inputKeyMap.entrySet()){
+                    for (Map.Entry<String, String> e: this.inputKeyMap.entrySet()){
                         inputArrays.put(e.getKey(), input.getNDArray(e.getValue()).getAs(NumpyArray.class));
                     }
                 }
