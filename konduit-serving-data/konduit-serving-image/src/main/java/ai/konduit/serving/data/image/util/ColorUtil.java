@@ -28,7 +28,7 @@ public class ColorUtil {
 
     public static final String COLOR_DESCRIPTION = "The color can be a hex/HTML string like" +
             "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
-            "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]"
+            "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]";
 
     public static final String INVALID_COLOR = "Invalid color: Must be in one of the following formats: hex/HTML - #788E87, " +
             "RGB - rgb(128,0,255), or a HTML color name such as \"green\" (https://en.wikipedia.org/wiki/Web_colors#HTML_color_names) - got \"%s\"";
