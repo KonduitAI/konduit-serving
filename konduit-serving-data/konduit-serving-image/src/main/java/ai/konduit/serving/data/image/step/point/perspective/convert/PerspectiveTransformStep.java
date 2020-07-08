@@ -47,10 +47,10 @@ public class PerspectiveTransformStep implements PipelineStep {
     /**
      * If null: just find any Points, Bounding Boxes and Images
      */
-    @Schema(description = "A list of names of the input placeholders.")
+    @Schema(description = "A list of names of the input fields to process. May be points, bounding boxes, images, or lists of these. If input names are not set, the fields of these types will be inferred automatically.")
     private List<String> inputNames;
 
-    @Schema(description = "A list of names of the output arrays - i.e., what should be predicted.")
+    @Schema(description = "A list of names of the output field. If not set, the output has the same name as the input field.")
     private List<String> outputNames;
     /**
      * When you provide source points as an input, they must be provided as a list of 4 points [topLeft, topRight, bottomLeft, bottomRight]

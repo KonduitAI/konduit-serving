@@ -15,6 +15,7 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
+package ai.konduit.serving.vertx;
 
 import ai.konduit.serving.common.test.BaseJsonCoverageTest;
 import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;

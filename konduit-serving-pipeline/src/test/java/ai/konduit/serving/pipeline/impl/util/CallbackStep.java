@@ -21,7 +21,6 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -39,7 +38,7 @@ public class CallbackStep implements PipelineStep {
         PipelineRegistry.registerStepRunnerFactory(new Factory());
     }
 
-    @Schema(description = "A function which takes in argument and produces a result")
+
     private Consumer<Data> consumer;
 
 

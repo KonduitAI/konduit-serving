@@ -52,14 +52,18 @@ public class DrawFaceKeyPointsStep implements PipelineStep {
     private int resizeW;
 
 
-    @Schema(description = "To draw bounding box around face")
+    @Schema(description = "To draw bounding box around face. If set to true: a bounding box will be drawn around the face. If false: No bounding box will be drawn")
     @Builder.Default
     private boolean drawFaceBox = true;
 
-    @Schema(description = "A color of bounding box around face", defaultValue = DEFAULT_BOX_COLOR)
+    @Schema(description = "Specifies the color of bounding box around face. The color can be a hex/HTML string like\" +\n" +
+            "            \"\\\"#788E87\\\", an RGB value like RGB - \\\"rgb(128,0,255)\\\" or  it can be from a set of predefined HTML color names: \" +\n" +
+            "            \"[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]\"", defaultValue = DEFAULT_BOX_COLOR)
     private String faceBoxColor;
 
-    @Schema(description = "A color of face keypoints", defaultValue = DEFAULT_POINT_COLOR)
+    @Schema(description = "Specifies the color of face keypoints. The color can be a hex/HTML string like\" +\n" +
+            "            \"\\\"#788E87\\\", an RGB value like RGB - \\\"rgb(128,0,255)\\\" or  it can be from a set of predefined HTML color names: \" +\n" +
+            "            \"[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]", defaultValue = DEFAULT_POINT_COLOR)
     private String pointColor;
 
     @Schema(description = "Size of face key points", defaultValue = "1")

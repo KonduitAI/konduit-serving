@@ -15,7 +15,7 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
-package ai.konduit.serving.data;
+package ai.konduit.serving.vertx;
 
 import ai.konduit.serving.common.test.BaseSwaggerAnnotationCheck;
 import org.junit.Test;
@@ -23,7 +23,7 @@ import org.junit.Test;
 public class SwaggerAnnotationCheck extends BaseSwaggerAnnotationCheck {
     @Override
     public String getPackageName() {
-        return "ai.konduit.serving.data.image";
+        return "ai.konduit.serving.vertx";
     }
 
 

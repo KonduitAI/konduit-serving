@@ -22,7 +22,6 @@ import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.NoArgsConstructor;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -41,7 +40,6 @@ public class CountStep implements PipelineStep {
         ObjectMappers.registerSubtypes(Collections.singletonList(new JsonSubType("COUNT_STEP", CountStep.class, PipelineStep.class)));
     }
 
-    @Schema(description = "Step`s count")
     public int count;
 
 

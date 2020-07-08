@@ -45,7 +45,7 @@ public class BoundingBoxToPointStep implements PipelineStep {
     @Schema(description = "Name of the bounding boxes key from the previous step. If set to null, it will try to find any bounding box in the incoming data instance.")
     private String bboxName;
 
-    @Schema(description = "Name of the key of point representation from this step")
+    @Schema(description = "Name of the point extracted from the input bounding box. If null, the input field name is used.")
     private String outputName;
 
     @Schema(description = "If true, other data key and values from the previous step are kept and passed on to the next step as well.",
@@ -53,6 +53,6 @@ public class BoundingBoxToPointStep implements PipelineStep {
     private boolean keepOtherFields = true;
 
     @Schema(description =  "You can choose from the following methods of converting the bounding box to a point: TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT,\n" +
-            "BOTTOM_RIGHT, CENTER. Set to CENTER by default")
+            "BOTTOM_RIGHT, CENTER. Set to CENTER by default", defaultValue = "CENTER")
     private ConversionMethod method = ConversionMethod.CENTER;
 }
