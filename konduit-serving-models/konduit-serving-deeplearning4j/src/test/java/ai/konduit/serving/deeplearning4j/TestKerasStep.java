@@ -24,7 +24,6 @@ import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import ai.konduit.serving.pipeline.util.TestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
@@ -37,7 +36,6 @@ import org.nd4j.linalg.factory.Nd4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Collections;
 
 @Slf4j
@@ -118,49 +116,6 @@ public class TestKerasStep {
             Pipeline pYaml = Pipeline.fromYaml(yaml);
             pYaml.executor().exec(d).getNDArray(outName).getAs(INDArray.class);
         }
-    }
-
-
-    @Test
-    public void testFaceMask() throws IOException {
-        // model source https://github.com/AIZOOTech/FaceMaskDetection
-        String fileUrl = "https://github.com/AIZOOTech/FaceMaskDetection/raw/master/models/face_mask_detection.hdf5";
-        File testDir = TestUtils.testResourcesStorageDir();
-        File saveDir = new File(testDir, "konduit-serving-keras/facedetection");
-        File f = new File(saveDir, "face_mask_detection.hdf5");
-
-        if (!f.exists()) {
-            log.info("Downloading model: {} -> {}", fileUrl, f.getAbsolutePath());
-            FileUtils.copyURLToFile(new URL(fileUrl), f);
-            log.info("Download complete");
-        }
-
-
-        //NHWC pic
-        INDArray arr = Nd4j.rand(DataType.FLOAT, 1, 160, 160, 3);
-
-            Pipeline p = SequencePipeline.builder()
-                    .add( new KerasStep()
-                            .modelUri(f.toURI().toString())
-                            .inputNames(Collections.singletonList("in") )
-                            .outputNames(Collections.singletonList("myPrediction")))
-                    .build();
-
-            PipelineExecutor e = p.executor();
-            String outName = "myPrediction";
-
-            Data d = Data.singleton("in", NDArray.create(arr));
-
-            Data out = e.exec(d);
-
-            String json = p.toJson();
-            Pipeline pJson = Pipeline.fromJson(json);
-            pJson.executor().exec(d).getNDArray(outName).getAs(INDArray.class);
-
-            String yaml = p.toYaml();
-            Pipeline pYaml = Pipeline.fromYaml(yaml);
-            pYaml.executor().exec(d).getNDArray(outName).getAs(INDArray.class);
-
     }
 
 }
