@@ -21,6 +21,7 @@ package ai.konduit.serving.models.tensorflowpython;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
 import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.python4j.PythonGC;
 import org.nd4j.python4j.PythonObject;
 import org.nd4j.python4j.PythonTypes;
@@ -136,14 +137,8 @@ public class NumpyArray {
 
         @Override
         public NumpyNDArray create(Object o) {
-            NumpyArray a;
-            if (o instanceof NumpyArray) {
-                a = (NumpyArray) o;
-            } else {
-                throw new IllegalStateException();
-            }
-
-            return new NumpyNDArray(a);
+            Preconditions.checkState(canCreateFrom(o), "Can not create NumpyNDArray from " + o.getClass());
+            return new NumpyNDArray((NumpyArray)o);
         }
     }
 }
