@@ -19,6 +19,7 @@
 package ai.konduit.serving.data.image.step.face;
 
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
+import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -56,14 +57,10 @@ public class DrawFaceKeyPointsStep implements PipelineStep {
     @Builder.Default
     private boolean drawFaceBox = true;
 
-    @Schema(description = "Specifies the color of bounding box around face. The color can be a hex/HTML string like\" +\n" +
-            "            \"\\\"#788E87\\\", an RGB value like RGB - \\\"rgb(128,0,255)\\\" or  it can be from a set of predefined HTML color names: \" +\n" +
-            "            \"[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]\"", defaultValue = DEFAULT_BOX_COLOR)
+    @Schema(description = "Specifies the color of bounding box around face. " + ColorUtil.COLOR_DESCRIPTION, defaultValue = DEFAULT_BOX_COLOR)
     private String faceBoxColor;
 
-    @Schema(description = "Specifies the color of face keypoints. The color can be a hex/HTML string like\" +\n" +
-            "            \"\\\"#788E87\\\", an RGB value like RGB - \\\"rgb(128,0,255)\\\" or  it can be from a set of predefined HTML color names: \" +\n" +
-            "            \"[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]", defaultValue = DEFAULT_POINT_COLOR)
+    @Schema(description = "Specifies the color of face keypoints. " + ColorUtil.COLOR_DESCRIPTION, defaultValue = DEFAULT_POINT_COLOR)
     private String pointColor;
 
     @Schema(description = "Size of face key points", defaultValue = "1")

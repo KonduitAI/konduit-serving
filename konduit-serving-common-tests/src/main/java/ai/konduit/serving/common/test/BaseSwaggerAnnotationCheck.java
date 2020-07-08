@@ -48,8 +48,9 @@ public abstract class BaseSwaggerAnnotationCheck {
 
             Class<?> schemaClass = Schema.class;
 
+            Set<Class<?>> ignores = ignores();
             for (Class<?> c : subTypes) {
-                if (ignores().contains(c))
+                if (ignores.contains(c))
                     continue;   //Skip
 
                 Field[] fields = c.getDeclaredFields();

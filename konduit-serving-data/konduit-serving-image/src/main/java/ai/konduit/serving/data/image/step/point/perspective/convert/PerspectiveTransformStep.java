@@ -68,8 +68,8 @@ public class PerspectiveTransformStep implements PipelineStep {
      * Can also reference a list of images, in which case <b>only the first</b> image is used as the reference.<br>
      * The adjustment is applied to all inputs of the step.
      */
-    @Schema(description = "When a referenceImage is provided, the transform will be adjusted to ensure the entire transformed image fits into the output image (up to 4096x4096)<br>\n" +
-            "Can also reference a list of images, in which case <b>only the first</b> image is used as the reference.<br>\n" +
+    @Schema(description = "When a referenceImage is provided, the transform will be adjusted to ensure the entire transformed image fits into the output image (up to 4096x4096)." +
+            "Can also reference a list of images, in which case <b>only the first</b> image is used as the reference." +
             "The adjustment is applied to all inputs of the step.")
     private String referenceImage;
 
