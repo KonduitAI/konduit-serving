@@ -123,7 +123,7 @@ public class TFStep implements PipelineStep {
         @Override
 
         public void close() {
-
+            model.close();
         }
 
         @Override

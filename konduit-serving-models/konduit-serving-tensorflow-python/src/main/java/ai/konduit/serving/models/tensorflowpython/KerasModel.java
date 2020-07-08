@@ -164,4 +164,8 @@ public class KerasModel {
             return shape;
         }
     }
+
+    public void close(){
+        pyModel.del();
+    }
 }

@@ -120,7 +120,7 @@ public class KerasStep implements PipelineStep {
         @Override
 
         public void close() {
-
+            model.close();
         }
 
         @Override

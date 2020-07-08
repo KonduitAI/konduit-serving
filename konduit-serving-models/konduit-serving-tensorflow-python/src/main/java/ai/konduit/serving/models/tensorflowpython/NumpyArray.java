@@ -25,6 +25,7 @@ import org.nd4j.python4j.PythonGC;
 import org.nd4j.python4j.PythonObject;
 import org.nd4j.python4j.PythonTypes;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +53,17 @@ public class NumpyArray {
     public String dtype(){
         try(PythonGC gc = PythonGC.watch()){
             return pythonObject.attr("dtype").attr("name").toString();
+        }
+    }
+
+    public long size(){
+        try(PythonGC gc = PythonGC.watch()){
+            return pythonObject.attr("size").toLong();
+        }
+    }
+    public int ndim(){
+        try(PythonGC gc = PythonGC.watch()){
+            return pythonObject.attr("ndim").toInt();
         }
     }
 
@@ -93,14 +105,7 @@ public class NumpyArray {
 
         @Override
         public long[] shape() {
-            try (PythonGC gc = PythonGC.watch()){
-                List shapeList = ((NumpyArray)get()).getPythonObject().attr("shape").toList();
-                long[] shape = new long[shapeList.size()];
-                for (int i =0; i<shape.length;i++){
-                    shape[i] = (Long)shapeList.get(i);
-                }
-                return shape;
-            }
+            return ((NumpyArray)get()).shape();
         }
 
         @Override
@@ -110,7 +115,7 @@ public class NumpyArray {
 
         @Override
         public int rank() {
-            return shape().length;
+            return ((NumpyArray)get()).ndim();
         }
     }
 
@@ -121,9 +126,7 @@ public class NumpyArray {
     public static class Factory implements NDArrayFactory {
         @Override
         public Set<Class<?>> supportedTypes() {
-            Set<Class<?>> s = new HashSet<>();
-            s.add(NumpyArray.class);
-            return s;
+            return Collections.singleton(NumpyArray.class);
         }
 
         @Override

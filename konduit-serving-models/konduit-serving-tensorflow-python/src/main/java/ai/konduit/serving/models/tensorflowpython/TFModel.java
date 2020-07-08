@@ -112,4 +112,8 @@ public class TFModel {
         return predict(Collections.singletonMap(inputNames[0], input));
     }
 
+    public void close(){
+        pyModel.del();
+    }
+
 }
