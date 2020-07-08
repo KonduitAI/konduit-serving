@@ -18,6 +18,10 @@
 
 package ai.konduit.serving.vertx.protocols.http.verticle;
 
+import ai.konduit.serving.endpoint.Endpoint;
+import ai.konduit.serving.endpoint.HttpEndpoints;
+import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
+import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.metrics.MetricsProvider;
 import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
@@ -32,6 +36,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -40,7 +45,9 @@ import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ServiceLoader;
 
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
@@ -65,7 +72,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                 return;
             }
         } else {
-            port = inferenceConfiguration.getPort();
+            port = inferenceConfiguration.port();
         }
 
         if (port < 0 || port > 0xFFFF) {
@@ -76,12 +83,12 @@ public class InferenceVerticleHttp extends InferenceVerticle {
         vertx.createHttpServer()
                 .requestHandler(createRouter())
                 .exceptionHandler(throwable -> log.error("Could not start HTTP server", throwable))
-                .listen(port, inferenceConfiguration.getHost(), handler -> {
+                .listen(port, inferenceConfiguration.host(), handler -> {
                     if (handler.failed()) {
                         startPromise.fail(handler.cause());
                     } else {
                         int actualPort = handler.result().actualPort();
-                        inferenceConfiguration.setPort(actualPort);
+                        inferenceConfiguration.port(actualPort);
 
                         try {
                             ((ContextInternal) context).getDeployment()
@@ -95,7 +102,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                             // Periodically checks for configuration updates and save them.
                             vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
 
-                            log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.getHost());
+                            log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.host());
                             log.info("Inference HTTP server started on port {} with {} pipeline steps", actualPort, pipeline.size());
                             startPromise.complete();
                         } catch (Throwable throwable) {
@@ -112,7 +119,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
         ServiceLoader<MetricsProvider> sl = ServiceLoader.load(MetricsProvider.class);
         Iterator<MetricsProvider> iterator = sl.iterator();
         MetricsProvider metricsProvider = null;
-        if (iterator.hasNext()){
+        if (iterator.hasNext()) {
             metricsProvider = iterator.next();
         }
 
@@ -154,7 +161,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                         }
                     }
 
-                    if(throwable instanceof KonduitServingHttpException) {
+                    if (throwable instanceof KonduitServingHttpException) {
                         sendErrorResponse(failureHandler, ((KonduitServingHttpException) throwable).getErrorResponse());
                     } else {
                         failureHandler.response()
@@ -169,6 +176,12 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                 .produces(APPLICATION_JSON.toString())
                 .produces(APPLICATION_OCTET_STREAM.toString())
                 .handler(inferenceHttpApi::predict);
+
+
+        //Custom endpoints:
+        if (inferenceConfiguration.customEndpoints() != null && !inferenceConfiguration.customEndpoints().isEmpty()) {
+            addCustomEndpoints(inferenceHttpApi, inferenceRouter);
+        }
 
         return inferenceRouter;
     }
@@ -185,5 +198,71 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                         .errorCode(errorCode)
                         .errorMessage(errorMessage)
                         .build()));
+    }
+
+    private void addCustomEndpoints(InferenceHttpApi inferenceHttpApi, Router inferenceRouter) {
+        List<String> e = inferenceConfiguration.customEndpoints();
+        PipelineExecutor pe = inferenceHttpApi.getPipelineExecutor();
+        Pipeline p = pe.getPipeline();
+        for (String s : e) {
+            //TODO this won't work for OSGi!
+            Class<?> c;
+            try {
+                c = Class.forName(s);
+            } catch (ClassNotFoundException ex) {
+                log.error("Error loading custom endpoint for class {}: class not found. Skipping this endpoint", s, ex);
+                continue;
+            }
+
+            if (!HttpEndpoints.class.isAssignableFrom(c)) {
+                log.error("Error loading custom endpoint for class {}: class does not implement ai.konduit.serving.endpoint.HttpEndpoint. Skipping this endpoint", s);
+                continue;
+            }
+
+            HttpEndpoints h;
+            try {
+                h = (HttpEndpoints) c.getConstructor().newInstance();
+            } catch (NoSuchMethodException | SecurityException ex) {
+                log.error("Error loading custom endpoint for class {}: no zero-arg contsructor was found/accessible. Skipping this endpoint", s, ex);
+                continue;
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                log.error("Error loading custom endpoint for class {}: error creating new instance of class. Skipping this endpoint", s, ex);
+                continue;
+            }
+
+            List<Endpoint> endpoints;
+            try {
+                endpoints = h.endpoints(p, pe);
+            } catch (Throwable t) {
+                log.error("Error loading custom endpoint for class {}: error getting endpoints via HttpEndpoint.endpoints(Pipeline, PipelineExecutor). Skipping this endpoint", s, t);
+                continue;
+            }
+
+            if (endpoints != null && !endpoints.isEmpty()) {  //May be null/empty if endpoint is pipeline-specific, and not applicable for this pipeline
+                for (Endpoint ep : endpoints) {
+                    try {
+                        String path = ep.path();
+                        if (!path.startsWith("/"))
+                            path = "/" + path;
+                        Route r = inferenceRouter.route(ep.type(), path);
+                        if (ep.consumes() != null && !ep.consumes().isEmpty()) {
+                            for (String consume : ep.consumes()) {
+                                r.consumes(consume);
+                            }
+                        }
+
+                        if (ep.produces() != null && !ep.produces().isEmpty()) {
+                            for (String produces : ep.produces()) {
+                                r.produces(produces);
+                            }
+                        }
+
+                        r.handler(ep.handler());
+                    } catch (Throwable t) {
+                        log.error("Error loading custom endpoint for class {}: error creating route in Vert.x. Skipping this endpoint: {}", s, ep, t);
+                    }
+                }
+            }
+        }
     }
 }

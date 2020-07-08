@@ -134,7 +134,7 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
         return Image.create(png);
     }
 
-    protected BoundingBox deserializeBB(JsonNode n2){
+    public static BoundingBox deserializeBB(JsonNode n2){
         String label = null;
         Double prob = null;
         if(n2.has("label") ){

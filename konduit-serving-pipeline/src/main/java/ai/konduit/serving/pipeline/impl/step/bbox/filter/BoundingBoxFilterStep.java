@@ -17,39 +17,40 @@
  */
 package ai.konduit.serving.pipeline.impl.step.bbox.filter;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.experimental.Tolerate;
 
-@Builder
+import java.util.Arrays;
+import java.util.List;
+
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
+@JsonName("BOUNDING_BOX_FILTER")
 public class BoundingBoxFilterStep implements PipelineStep {
 
     public static final String DEFAULT_OUTPUT_NAME = "bounding_boxes";
 
-    @Builder.Default
-    protected boolean keepOtherValues = true;
+    private boolean keepOtherValues = true;
 
-    @Builder.Default
-    protected String[] classesToKeep = new String[]{};
+    @Schema(description = "A list of class labels for which bounding boxes will be drawn")
+    protected List<String> classesToKeep;
 
-    @Builder.Default
     protected String inputName = "input";
 
-    @Builder.Default
     protected String outputName = DEFAULT_OUTPUT_NAME;
 
-
-    public BoundingBoxFilterStep(){
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null
-        this.classesToKeep = new String[]{};
-        this.keepOtherValues = true;
-        this.outputName = DEFAULT_OUTPUT_NAME;
-        this.inputName = "input";
+    @Tolerate
+    public BoundingBoxFilterStep classesToKeep(String... classesToKeep) {
+        return this.classesToKeep(Arrays.asList(classesToKeep));
     }
+
 }

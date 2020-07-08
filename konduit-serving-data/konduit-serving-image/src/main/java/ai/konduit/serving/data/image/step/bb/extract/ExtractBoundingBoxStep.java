@@ -21,9 +21,11 @@ package ai.konduit.serving.data.image.step.bb.extract;
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -40,27 +42,44 @@ import lombok.experimental.Accessors;
  * Note: If resizeH and resizeW are specified, the cropped images will be resized to the specified size
  *
  */
-@Builder
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonName("EXTRACT_BOUNDING_BOX")
+@Schema(description = "A pipeline step that extracts sub-images from an input image, based on the locations of input bounding boxes. " +
+        "Returns List<Image> for the cropped image regions")
 public class ExtractBoundingBoxStep implements PipelineStep {
-    private String imageName;       //If null: just find any image
-    private String bboxName;       //If null: just find any BB's
+
+    @Schema(description = "Name of the input image key from the previous step. If set to null, it will try to find any image in the incoming data instance.")
+    private String imageName;
+
+    @Schema(description = "Name of the bounding boxes key from the previous step. If set to null, it will try to find any bounding box in the incoming data instance.")
+    private String bboxName;
+
+    @Schema(description = "Name of the output key that will contain the output as images the input image " +
+            "region covered by the bounding boxes.")
     private String outputName;
-    @Builder.Default
+
+    
+    @Schema(description = "If true, other data key and values from the previous step are kept and passed on to the next step as well.",
+            defaultValue = "true")
     private boolean keepOtherFields = true;
+
+    @Schema(description = "If set, the smaller dimensions will be increased to keep the aspect ratio correct (which may crop outside the image border).")
     private Double aspectRatio = null;
+
+    @Schema(description = "If specified, the cropped images will be resized to the specified height.")
     private Integer resizeH;
+
+    @Schema(description = "If specified, the cropped images will be resized to the specified width.")
     private Integer resizeW;
 
-    //Used to account for the fact that ImageToNDArray can crop images
+    @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig may be " +
+            "used to crop images before passing to the network, when the image aspect ratio doesn't match the NDArray " +
+            "aspect ratio. This allows the step to determine the subset of the image actually passed to the network that " +
+            "produced the bounding boxes.")
     private ImageToNDArrayConfig imageToNDArrayConfig;
 
-    public ExtractBoundingBoxStep() {
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the boolean default would be false
-        keepOtherFields = true;
-    }
+
 }

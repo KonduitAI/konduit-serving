@@ -23,6 +23,7 @@ import ai.konduit.serving.build.config.Arch;
 import ai.konduit.serving.build.config.OS;
 import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.deployments.UberJarDeployment;
+import ai.konduit.serving.build.config.Module;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

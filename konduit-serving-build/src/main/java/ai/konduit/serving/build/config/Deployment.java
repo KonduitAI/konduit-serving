@@ -23,6 +23,8 @@ import ai.konduit.serving.build.deployments.UberJarDeployment;
 import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +36,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @JsonTypeInfo(use = NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 public interface Deployment {
 
+    String CLASSPATH = "CLASSPATH";
     String JAR = "JAR";
     String UBERJAR = "UBERJAR";
     String DOCKER = "DOCKER";
@@ -66,5 +69,11 @@ public interface Deployment {
 
     List<GradlePlugin> gradlePlugins();
 
-    String gradleTaskName();
+    List<String> gradleTaskNames();
+
+    static String defaultVersion(){
+        long time = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMDD-HHmmss.SSS");
+        return sdf.format(new Date(time));
+    }
 }

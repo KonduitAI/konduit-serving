@@ -19,6 +19,10 @@
 ai.konduit.serving.data.image.format.JavaCVImageConverters$FrameToMatConverter
 ai.konduit.serving.data.image.format.JavaCVImageConverters$MatToFrameConverter
 ai.konduit.serving.data.image.format.JavaCVImageConverters$MatToPng
+ai.konduit.serving.data.image.format.JavaCVImageConverters$MatToJpeg
+ai.konduit.serving.data.image.format.JavaCVImageConverters$MatToBmp
 ai.konduit.serving.data.image.format.JavaCVImageConverters$PngToMat
+ai.konduit.serving.data.image.format.JavaCVImageConverters$JpegToMat
+ai.konduit.serving.data.image.format.JavaCVImageConverters$BmpToMat
 ai.konduit.serving.data.image.format.JavaCVImageConverters$FrameToPng
 ai.konduit.serving.data.image.format.JavaCVImageConverters$PngToFrame

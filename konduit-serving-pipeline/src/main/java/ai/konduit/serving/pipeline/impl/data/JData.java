@@ -200,15 +200,20 @@ public class JData implements Data {
     }
 
     @Override
-    public List<Point> getListPoint(String key) {
-        return listIfFound(key, ValueType.POINT);
+    public List<Data> getListData(String key) {
+        return listIfFound(key, ValueType.DATA);
     }
 
     @Override
-    public List<List<?>> getListData(String key) {
+    public List<List<?>> getListList(String key) {
         return listIfFound(key, ValueType.LIST);
     }
-
+  
+    @Override
+    public List<Point> getListPoint(String key) {
+        return listIfFound(key, ValueType.POINT);
+    }
+  
     @Override
     public List<Image> getListImage(String key) {
         return listIfFound(key, ValueType.IMAGE);
@@ -322,6 +327,12 @@ public class JData implements Data {
     }
 
     @Override
+    public void putListList(String key, List<List<?>> data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new ListValue(data, ValueType.LIST));
+    }
+
+    @Override
     public void putListImage(String key, List<Image> data) {
         Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, ValueType.IMAGE));
@@ -343,6 +354,7 @@ public class JData implements Data {
         dataMap.put(key, new ListValue(data, ValueType.POINT));
     }
 
+    @Override
     public void putList(String key, List<?> data, ValueType vt){
         Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, vt));
@@ -427,6 +439,8 @@ public class JData implements Data {
             instance.put(key, (BoundingBox)data);
         } else if(data instanceof Point){
             instance.put(key, (Point)data);
+        } else if (data instanceof NDArray) {
+            instance.put(key, (NDArray) data);
         }
 //        else if (data instanceof Object) {
 //            instance.put(key, (Object)data);

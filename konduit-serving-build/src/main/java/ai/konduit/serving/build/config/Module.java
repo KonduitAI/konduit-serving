@@ -37,6 +37,7 @@ import java.util.*;
 @Data
 @Accessors(fluent = true)
 public class Module {
+    public static final String CURRENT_KS_VERSION = "0.1.0-SNAPSHOT";   //TODO auto infer - maybe from git.properties?
     private static final Map<String, Module> MODULES = loadModuleInfo();
 
     public static final Module PIPELINE = forName("konduit-serving-pipeline");
@@ -48,7 +49,10 @@ public class Module {
     public static final Module SAMEDIFF = forName("konduit-serving-samediff");
     public static final Module TENSORFLOW = forName("konduit-serving-samediff");
     public static final Module IMAGE = forName("konduit-serving-image");
-    public static final Module CAMERA = forName("konduit-serving-camera");
+
+    //CLI module can't be defined using forName (from konduit-serving-metadata files) due to it not being in metadata module
+    // (to avoid cyclical dependency: cli -> meta -> build -> cli
+    public static final Module CLI = new Module("konduit-serving-cli", new Dependency("ai.konduit.serving", "konduit-serving-cli", CURRENT_KS_VERSION), null, null);
 
     private final String name;
     private final Dependency dependency;
@@ -322,6 +326,6 @@ public class Module {
 
     protected static Dependency ksModule(String name) {
         //TODO don't hardcode versions
-        return new Dependency("ai.konduit.serving", name, "0.1.0-SNAPSHOT", null);
+        return new Dependency("ai.konduit.serving", name, CURRENT_KS_VERSION, null);
     }
 }

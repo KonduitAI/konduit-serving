@@ -20,10 +20,10 @@ package ai.konduit.serving.vertx.protocols.http.api;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
-import ai.konduit.serving.pipeline.util.ObjectMappers;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.nd4j.shade.guava.base.Strings;
 
 import java.nio.charset.StandardCharsets;
@@ -34,11 +34,12 @@ import static io.vertx.core.http.HttpHeaders.ACCEPT;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 @AllArgsConstructor
+@Getter
 public class InferenceHttpApi {
 
     protected final PipelineExecutor pipelineExecutor;
 
-    private Data extractData(String contentType, RoutingContext ctx) {
+    public static Data extractData(String contentType, RoutingContext ctx) {
         try {
             if (contentType.contains(APPLICATION_JSON.toString())) {
                 return Data.fromJson(ctx.getBodyAsString());

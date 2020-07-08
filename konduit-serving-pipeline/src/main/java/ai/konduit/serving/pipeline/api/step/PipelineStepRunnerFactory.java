@@ -17,7 +17,7 @@ package ai.konduit.serving.pipeline.api.step;
 
 /**
  * PipelineRunnerFactory is used to instantiate a {@link PipelineStepRunner} from a {@link PipelineStep}
- * i.e., get the pipeline step execution class from the pipeline step definitionh/configuration class.
+ * i.e., get the pipeline step execution class from the pipeline step definition/configuration class.
  * <p>
  * This design is used for a number of reasons:
  * (a) It allows for multiple PipelineStepRunner implementations that are able to run a given pipeline step

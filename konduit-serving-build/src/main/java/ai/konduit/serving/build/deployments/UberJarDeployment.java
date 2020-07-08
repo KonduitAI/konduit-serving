@@ -45,6 +45,9 @@ public class UberJarDeployment implements Deployment {
     public static final String PROP_AID = "jar.artifactid";
     public static final String PROP_VER = "jar.version";
 
+    public static final String CLI_KEYS = "JAR deployment config keys: " + PROP_OUTPUTDIR + ", " + PROP_JARNAME + ","
+            + PROP_GID + ", " + PROP_AID + ", " + PROP_VER;
+
     private String outputDir;
     private String jarName;
     private String groupId;
@@ -112,16 +115,19 @@ public class UberJarDeployment implements Deployment {
         StringBuilder sb = new StringBuilder();
         sb.append("JAR location:        ").append(outFile.getAbsolutePath()).append("\n");
         String size;
+        String filename = "";
         if(outFile.exists()){
             long bytes = outFile.length();
             double bytesPerMB = 1024 * 1024;
             double mb = bytes / bytesPerMB;
             size = String.format("%.2f", mb) + " MB";
+            filename = outFile.getName();
         } else {
             size = "<JAR not found>";
+            filename = "<jar file name>";
         }
         sb.append("JAR size:            ").append(size).append("\n");
-        sb.append("JAR launch command:  java -cp konduit-serving-deployment.jar <TODO args>\n");
+        sb.append("JAR launch command:  java -jar ").append(filename).append(" <serve|list|stop|inpect|logs>\n");
         return sb.toString();
     }
 
@@ -136,7 +142,7 @@ public class UberJarDeployment implements Deployment {
     }
 
     @Override
-    public String gradleTaskName() {
-        return "shadowJar";
+    public List<String> gradleTaskNames() {
+        return Collections.singletonList("shadowJar");
     }
 }

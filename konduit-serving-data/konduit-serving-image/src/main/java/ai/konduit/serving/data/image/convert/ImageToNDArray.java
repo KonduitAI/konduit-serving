@@ -39,8 +39,6 @@ import org.nd4j.common.util.ArrayUtil;
 import java.nio.*;
 import java.util.function.IntToDoubleFunction;
 
-import static org.bytedeco.opencv.global.opencv_imgproc.resize;
-
 /**
  * Utility method for converting Image objects to NDArrays.
  * See {@link ImageToNDArrayConfig} for more details
@@ -69,21 +67,23 @@ public class ImageToNDArray {
     }
 
     public static BoundingBox getCropRegion(Image image, ImageToNDArrayConfig config){
-
-        Integer outH = config.height();
-        Integer outW = config.width();
-        if (outH == null)
-            outH = image.height();
-        if (outW == null)
-            outW = image.width();
-
         int imgH = image.height();
         int imgW = image.width();
 
+        return getCropRegion(imgW, imgH, config);
+    }
+
+    public static BoundingBox getCropRegion(int imgW, int imgH, ImageToNDArrayConfig config){
+        Integer outH = config.height();
+        Integer outW = config.width();
+        if (outH == null)
+            outH = imgH;
+        if (outW == null)
+            outW = imgW;
+
 
         //Resize if necessary
-        boolean correctSize = outH == image.height() && outW == image.width();
-        Mat m = image.getAs(Mat.class);
+        boolean correctSize = outH == imgH && outW == imgW;
         if (!correctSize) {
             AspectRatioHandling h = config.aspectRatioHandling();
             if (h == AspectRatioHandling.CENTER_CROP) {
@@ -98,8 +98,8 @@ public class ImageToNDArray {
         } else {
             return BoundingBox.createXY(0.0, 1.0, 0.0, 1.0);
         }
-
     }
+
 
     public static long[] getOutputShape(ImageToNDArrayConfig config){
         int rank = config.includeMinibatchDim() ? 4 : 3;
@@ -187,7 +187,7 @@ public class ImageToNDArray {
         return new Pair<>(NDArray.create(arr), bbMeta);
     }
 
-    protected static Pair<Mat,BoundingBox> centerCrop(Mat image, int outH, int outW, boolean withBB) {
+    public static Pair<Mat,BoundingBox> centerCrop(Mat image, int outH, int outW, boolean withBB) {
         int imgH = image.rows();
         int imgW = image.cols();
 
@@ -214,7 +214,7 @@ public class ImageToNDArray {
         } else {
             //Need to crop from the height dimension
             croppedW = imgW;
-            croppedH = (int)(image.rows() / aspectOut);
+            croppedH = (int)(image.cols() / aspectOut);
             int delta = imgH - croppedH;
             x0 = 0;
             y0 = delta / 2;

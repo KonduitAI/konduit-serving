@@ -19,7 +19,7 @@
 package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
-import ai.konduit.serving.data.image.step.show.ShowImagePipelineStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -42,20 +42,20 @@ public class TestDrawSegmentation {
     @Test
     public void testDrawSegment() throws Exception {
         SequencePipeline.Builder b = SequencePipeline.builder()
-                .add(DrawSegmentationStep.builder()
+                .add( new DrawSegmentationStep()
                         .image(null)
                         .segmentArray("class_idxs")
                         .outputName("out")
                         .classColors(Arrays.asList("red", "green", "blue"))
-                        .build());
+                        );
 
         if(show) {
-                b.add(ShowImagePipelineStep.builder()
+                b.add(new ShowImageStep()
                     .displayName("Segment")
                     .imageName("out")
                     .width(256)
                     .height(256)
-                    .build());
+                    );
         }
         Pipeline p = b.build();
 
@@ -75,21 +75,21 @@ public class TestDrawSegmentation {
     @Test
     public void testDrawSegmentOpacity() throws Exception {
         SequencePipeline.Builder b = SequencePipeline.builder()
-                .add(DrawSegmentationStep.builder()
+                .add(new DrawSegmentationStep()
                         .image("image")
                         .segmentArray("class_idxs")
                         .outputName("out")
                         .classColors(Arrays.asList("red", "green"))     //2 colors for 3 classes -> should auto generate the 3rd
                         .opacity(0.5)
                         .backgroundClass(0)     //Don't draw background color if this is set
-                        .build());
+                        );
         if (show) {
-            b.add(ShowImagePipelineStep.builder()
+            b.add( new ShowImageStep()
                     .displayName("Segment")
                     .imageName("out")
                     .width(535)
                     .height(800)
-                    .build());
+                    );
         }
         Pipeline p = b.build();
 

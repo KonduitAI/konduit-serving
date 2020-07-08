@@ -20,22 +20,32 @@ package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
+import ai.konduit.serving.pipeline.impl.data.image.Bmp;
+import ai.konduit.serving.pipeline.impl.data.image.Jpeg;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
+import ai.konduit.serving.pipeline.impl.data.image.base.BaseImageFile;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.nd4j.common.resources.Resources;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestConversion {
+
+    @Rule
+    public TemporaryFolder testDir = new TemporaryFolder();
+
 
     @Test
     public void testConversion(){
@@ -73,20 +83,8 @@ public class TestConversion {
         Frame f2 = iFrame.getAs(Frame.class);
         assertTrue(equalFrames(f1, f2));
 
-
-
-        //To PNG:
-        Png p1 = iMat.getAs(Png.class);
-        Png p2 = iFrame.getAs(Png.class);
-        assertTrue(equalPngs(p1, p2));
-
-        //From PNG:
-        Image png = checkSize(Image.create(p1));
-        Mat pm = png.getAs(Mat.class);
-        Frame pf = png.getAs(Frame.class);
-        assertTrue(equalMats(mat, pm));
-        assertTrue(equalFrames(frame, pf));
-
+        checkEncodingConversion(mat, frame, iMat, iFrame, Png.class);
+        checkEncodingConversion(mat, frame, iMat, iFrame, Bmp.class);
 
 
         //Test Data
@@ -99,6 +97,20 @@ public class TestConversion {
         }
     }
 
+    private <T extends BaseImageFile> void checkEncodingConversion(Mat mat, Frame frame, Image iMat, Image iFrame, Class<T> type) {
+        //To encoded:
+        T p1 = iMat.getAs(type);
+        T p2 = iFrame.getAs(type);
+        assertTrue(equalImages(p1, p2));
+
+        //From encoded:
+        Image png = checkSize(Image.create(p1));
+        Mat pm = png.getAs(Mat.class);
+        Frame pf = png.getAs(Frame.class);
+        assertTrue(equalMats(mat, pm));
+        assertTrue(equalFrames(frame, pf));
+    }
+
     public Image checkSize(Image i){
         assertEquals(32, i.height());
         assertEquals(32, i.width());
@@ -108,26 +120,26 @@ public class TestConversion {
     protected static boolean equalMats(Mat m1, Mat m2){
         Png p1 = Image.create(m1).getAs(Png.class);
         Png p2 = Image.create(m2).getAs(Png.class);
-        return equalPngs(p1, p2);
+        return equalImages(p1, p2);
     }
 
     protected static boolean equalFrames(Frame f1, Frame f2){
         Png p1 = Image.create(f1).getAs(Png.class);
         Png p2 = Image.create(f2).getAs(Png.class);
-        return equalPngs(p1, p2);
+        return equalImages(p1, p2);
     }
 
-    protected static boolean equalPngs(Png png1, Png png2){
+    protected static boolean equalImages(BaseImageFile f1, BaseImageFile f2){
         try {
-            BufferedImage bi1 = ImageIO.read(new ByteArrayInputStream(png1.getBytes()));
-            BufferedImage bi2 = ImageIO.read(new ByteArrayInputStream(png2.getBytes()));
+            BufferedImage bi1 = ImageIO.read(new ByteArrayInputStream(f1.getBytes()));
+            BufferedImage bi2 = ImageIO.read(new ByteArrayInputStream(f2.getBytes()));
             return bufferedImagesEqual(bi1, bi2);
         } catch (Throwable t){
             throw new RuntimeException(t);
         }
     }
 
-    protected static boolean bufferedImagesEqual(BufferedImage img1, BufferedImage img2) {
+    public static boolean bufferedImagesEqual(BufferedImage img1, BufferedImage img2) {
         if (img1.getHeight() != img2.getHeight() || img1.getWidth() != img2.getWidth()) {
             return false;
         }
@@ -136,7 +148,9 @@ public class TestConversion {
 
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-                if (img1.getRGB(i,j) != img2.getRGB(i,j)) {
+                int rgb1 = img1.getRGB(i,j);
+                int rgb2 = img2.getRGB(i,j);
+                if (rgb1 != rgb2) {
                     return false;
                 }
             }
@@ -144,4 +158,86 @@ public class TestConversion {
         return true;
     }
 
+
+
+    @Test
+    public void testBufferedImageConversion() throws Exception {
+        //https://github.com/KonduitAI/konduit-serving/issues/426
+        //https://github.com/KonduitAI/konduit-serving/issues/424
+
+        String[] format = new String[]{"bi", "png", "jpg", "mat"};
+
+        File dir = testDir.newFolder();
+
+        Random r = new Random(12345);
+        for(boolean alpha : new boolean[]{false, true}) {
+            for (String from : format) {
+                if(alpha && "jpg".equals(from))
+                    continue;
+
+                Image in;
+                switch (from){
+                    case "bi":
+                        in = Image.create(randomBI(r, alpha));
+                        break;
+                    case "png":
+                        File fPng = new File(dir, "test.png");
+                        ImageIO.write(randomBI(r, alpha), "png", fPng);
+                        in = Image.create(fPng);
+                        break;
+                    case "jpg":
+                        File fjpg = new File(dir, "test.jpg");
+                        ImageIO.write(randomBI(r, alpha), "jpg", fjpg);
+                        in = Image.create(fjpg);
+                        break;
+                    case "mat":
+                        File fPng2 = new File(dir, "test2.png");
+                        ImageIO.write(randomBI(r, alpha), "png", fPng2);
+                        in = Image.create(org.bytedeco.opencv.global.opencv_imgcodecs.imread(fPng2.getAbsolutePath()));
+                        break;
+                    default:
+                        throw new RuntimeException();
+                }
+
+                for (String to : format) {
+                    switch (to){
+                        case "bi":
+                            in.getAs(BufferedImage.class);
+                            break;
+                        case "png":
+                            in.getAs(Png.class);
+                            break;
+                        case "jpg":
+                            in.getAs(Jpeg.class);
+                            break;
+                        case "mat":
+                            in.getAs(Mat.class);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    protected BufferedImage randomBI(Random r, boolean alpha){
+        BufferedImage bi = new BufferedImage(32, 32, alpha ? BufferedImage.TYPE_4BYTE_ABGR: BufferedImage.TYPE_3BYTE_BGR);
+        for( int i=0; i<32; i++ ){
+            for( int j=0; j<32; j++ ){
+                bi.setRGB(i, j, rgb(r, alpha));
+            }
+        }
+        return bi;
+    }
+
+    private static int rgb(Random rng, boolean alpha){
+        int r = rng.nextInt(255);
+        int g = rng.nextInt(255);
+        int b = rng.nextInt(255);
+        int rgb = r << 16 | g << 8 | b;
+        if(alpha){
+            int a = rng.nextInt(255);
+            rgb |= a << 24;
+        }
+        return rgb;
+    }
 }

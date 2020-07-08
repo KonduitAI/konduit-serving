@@ -59,6 +59,7 @@ public interface Data {
     String RESERVED_KEY_BB_W = "@w";
     String RESERVED_KEY_POINT = "@Point";
     String RESERVED_KEY_POINT_COORDS = "@Coords";
+    String RESERVED_KEY_ASYNC_TRIGGER = "@AsyncTrigger";
 
 
 
@@ -69,7 +70,7 @@ public interface Data {
                 RESERVED_KEY_NDARRAY_DATA_ARRAY, RESERVED_KEY_METADATA,
                 RESERVED_KEY_BB_X1, RESERVED_KEY_BB_X2, RESERVED_KEY_BB_Y1, RESERVED_KEY_BB_Y2,
                 RESERVED_KEY_BB_CX, RESERVED_KEY_BB_CY, RESERVED_KEY_BB_H, RESERVED_KEY_BB_W,
-                RESERVED_KEY_POINT, RESERVED_KEY_POINT_COORDS);
+                RESERVED_KEY_POINT, RESERVED_KEY_POINT_COORDS, RESERVED_KEY_ASYNC_TRIGGER);
     }
 
     int size();
@@ -118,8 +119,10 @@ public interface Data {
     List<Boolean> getListBoolean(String key);
     List<byte[]> getListBytes(String key);
     List<Double> getListDouble(String key);
+
+    List<Data> getListData(String key);
+    List<List<?>> getListList(String key);
     List<Point> getListPoint(String key);
-    List<List<?>> getListData(String key);
     List<Image> getListImage(String key);
     List<NDArray> getListNDArray(String key);
     List<BoundingBox> getListBoundingBox(String key);
@@ -140,10 +143,12 @@ public interface Data {
     void putListBytes(String key, List<byte[]> data);
     void putListDouble(String key, List<Double> data);
     void putListData(String key, List<Data> data);
+    void putListList(String key, List<List<?>> data);
     void putListImage(String key, List<Image> data);
     void putListNDArray(String key, List<NDArray> data);
     void putListBoundingBox(String key, List<BoundingBox> data);
     void putListPoint(String key, List<Point> data);
+    void putList(String key, List<?> data, ValueType vt);
     void put(String key, Data data);
 
     boolean hasMetaData();
@@ -394,7 +399,8 @@ public interface Data {
                         putListData(key, (List<Data>)l);
                         break;
                     case LIST:
-                        throw new UnsupportedOperationException("List<List> copyFrom not yet implemented");
+                        putList(key, l, ValueType.LIST);
+                        break;
                     default:
                         throw new UnsupportedOperationException("Not supported: " + vt);
                 }

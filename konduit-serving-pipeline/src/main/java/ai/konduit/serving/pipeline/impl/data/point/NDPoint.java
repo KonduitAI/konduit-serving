@@ -21,6 +21,7 @@ package ai.konduit.serving.pipeline.impl.data.point;
 import ai.konduit.serving.pipeline.api.data.Point;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 @Data
 @Accessors(fluent = true)
@@ -28,6 +29,12 @@ public class NDPoint implements Point {
     private final double[] coords;
     private final String label;
     private final Double probability;
+
+    public NDPoint(@JsonProperty("coords") double[] coords, @JsonProperty("label") String label, @JsonProperty("probability") Double probability){
+        this.coords = coords;
+        this.label = label;
+        this.probability = probability;
+    }
 
     @Override
     public double get(int n) {

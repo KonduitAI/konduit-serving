@@ -23,10 +23,13 @@ import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 /**
  * Configuration for converting {@link ai.konduit.serving.pipeline.api.data.Image}s to {@link ai.konduit.serving.pipeline.api.data.NDArray}s.
@@ -34,7 +37,7 @@ import lombok.experimental.Accessors;
  * The following can be configured:<br>
  * <ul>
  *     <li><b>height</b>: Output NDArray image height: leave null to convert to the same size as the input. Default: null</li>
- *     <li><b>width</b>: Output NDArray image height: leave null to convert to the same size as the input. Default: null</li>
+ *     <li><b>width</b>: Output NDArray image width: leave null to convert to the same size as the input. Default: null</li>
  *     <li><b>datatype</b>: {@link NDArrayType} (data type) of the output array</li>
  *     <li><b>includeMinibatchDim</b>: If true: the output array will be rank 4 with shape [1, c, h, w] or [1, h, w, c].
  *         If false: return rank 3 array with shape [c, h, w] or [h, w, c]. Default: true</li>
@@ -72,41 +75,79 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(fluent = true)
-@Builder
-@AllArgsConstructor
+@NoArgsConstructor
+@Schema(description = "Configuration for converting an image into an n-dimensional array.")
 public class ImageToNDArrayConfig {
     /**
      * See {@link ImageToNDArrayConfig} - listHandling field
      */
-    public static enum ListHandling {NONE, BATCH, LIST_OUT, FIRST}
+    @Schema(description = "An enum to specify how to handle a list of input images. <br><br>" +
+            "NONE -> No list handling i.e. Simply convert an image to n-dimensional array (assuming the input is not a list of images), <br>" +
+            "BATCH -> Convert a list of images to a batch of n-dimensional array (whose first axis will be first image index), <br>" +
+            "LIST_OUT -> Convert a list of images to a list of n-dimensional array, <br>" +
+            "FIRST -> Convert the first image in the list of images to an n-dimensional array.")
+    public enum ListHandling {NONE, BATCH, LIST_OUT, FIRST}
 
 
+    @Schema(description = "Output array image height. Leave null to convert to the same size as the image height.")
     private Integer height;
+
+    @Schema(description = "Output array image width. Leave null to convert to the same size as the image width.")
     private Integer width;
-    @Builder.Default
+
+    
+    @Schema(description = "Data type of the n-dimensional array.", defaultValue = "FLOAT")
     private NDArrayType dataType = NDArrayType.FLOAT;
-    @Builder.Default
+
+    
+    @Schema(description = "If true, the output array will contain an extra dimension for the minibatch number. This " +
+            "will look like (1, Channels, Height, Width) instead of (Channels, Height, Width) for format == CHANNELS_FIRST " +
+            "or (1, Height, Width, Channels) instead of (Height, Width, Channels) for format == CHANNELS_LAST.",
+            defaultValue = "true")
     private boolean includeMinibatchDim = true;
-    @Builder.Default
+    
+
+    @Schema(description = "An enum to Handle the situation where the input image and output NDArray have different aspect ratios. <br><br>" +
+            "CENTER_CROP (crop larger dimension then resize if necessary), <br>" +
+            "PAD (pad smaller dimension then resize if necessary), <br>" +
+            "STRETCH (simply resize, distorting if necessary).",
+            defaultValue = "CENTER_CROP")
     private AspectRatioHandling aspectRatioHandling = AspectRatioHandling.CENTER_CROP;
-    @Builder.Default
+
+    
+    @Schema(description = "The format to be used when converting an Image to an NDArray.",
+            defaultValue = "CHANNELS_FIRST")
     private NDFormat format = NDFormat.CHANNELS_FIRST;
-    @Builder.Default
+
+    
+    @Schema(description = "An enum that represents the type (and order) of the color channels for an image after it has " +
+            "been converted to an NDArray. For example, RGB vs. BGR etc",
+            defaultValue = "RGB")
     private NDChannelLayout channelLayout = NDChannelLayout.RGB;
-    @Builder.Default
+
+    
+    @Schema(description = "Configuration that specifies the normalization type of an image array values.")
     private ImageNormalization normalization = new ImageNormalization(ImageNormalization.Type.SCALE);
-    @Builder.Default
+
+    
+    @Schema(description = "An enum to specify how to handle a list of input images.",
+            defaultValue = "NONE")
     private ListHandling listHandling = ListHandling.NONE;
 
-    public ImageToNDArrayConfig() {
-        //Normally this would be unnecessary to set default values here - but @Builder.Default values are NOT treated as normal default values.
-        //Without setting defaults here again like this, the fields would actually be null
-        this.dataType = NDArrayType.FLOAT;
-        this.includeMinibatchDim = true;
-        this.aspectRatioHandling = AspectRatioHandling.CENTER_CROP;
-        this.format = NDFormat.CHANNELS_FIRST;
-        this.channelLayout = NDChannelLayout.RGB;
-        this.normalization = new ImageNormalization(ImageNormalization.Type.SCALE);
+
+    public ImageToNDArrayConfig(@JsonProperty("height") Integer height, @JsonProperty("width") Integer width, @JsonProperty("dataType") NDArrayType dataType,
+                                @JsonProperty("includeMinibatchDim") boolean includeMinibatchDim, @JsonProperty("aspectRatioHandling") AspectRatioHandling aspectRatioHandling,
+                                @JsonProperty("format") NDFormat format, @JsonProperty("channelLayout") NDChannelLayout channelLayout,
+                                @JsonProperty("normalization") ImageNormalization normalization, @JsonProperty("listHandling") ListHandling listHandling){
+        this.height = height;
+        this.width = width;
+        this.dataType = dataType;
+        this.includeMinibatchDim = includeMinibatchDim;
+        this.aspectRatioHandling = aspectRatioHandling;
+        this.format = format;
+        this.channelLayout = channelLayout;
+        this.normalization = normalization;
+        this.listHandling = listHandling;
     }
 
 

@@ -4,7 +4,7 @@
 
 replicaCount: 1
 
-configPath: /usr/share/config.json
+configPath: /usr/share/config.yaml
 
 serverClassPath: /srv/konduit.jar
 
