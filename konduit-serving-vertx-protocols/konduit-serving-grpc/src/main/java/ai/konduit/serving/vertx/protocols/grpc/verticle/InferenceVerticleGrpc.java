@@ -37,6 +37,13 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
+        try {
+            initialize();
+        } catch (Exception exception) {
+            startPromise.fail(exception);
+            return;
+        }
+
         int port;
 
         String portEnvValue = System.getenv(EnvironmentConstants.KONDUIT_SERVING_PORT);
