@@ -27,13 +27,11 @@ import ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep;
 import ai.konduit.serving.data.image.step.capture.CameraFrameCaptureStep;
 import ai.konduit.serving.data.image.step.capture.VideoFrameCaptureStep;
 import ai.konduit.serving.data.image.step.face.DrawFaceKeyPointsStep;
-import ai.konduit.serving.data.image.step.facemask.DrawFaceMaskStep;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.image.step.point.draw.DrawPointsStep;
 import ai.konduit.serving.data.image.step.point.heatmap.DrawHeatmapStep;
 import ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep;
 import ai.konduit.serving.data.image.step.show.ShowImageStep;
-import ai.konduit.serving.models.deeplearning4j.step.keras.KerasStep;
 import ai.konduit.serving.models.tensorflow.step.TensorFlowStep;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
@@ -60,6 +58,7 @@ import org.nd4j.common.resources.Resources;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -1005,86 +1004,6 @@ public class TestTensorFlowStep {
         }
     }
 
-    @Test
-    public void testFaceMask() throws Exception {
-
-        //Pretrained model source:
-        // https://drive.google.com/drive/folders/1oLIPBOkCuhej-iNTre_qnlQ3b-fWZeEy
-        // https://towardsdatascience.com/real-time-face-mask-detector-with-tensorflow-keras-and-opencv-38b552660b64
-        String fileUrl = "https://www.dropbox.com/s/0v32oor6gc2catc/model-017.model?dl=0";
-        File testDir = TestUtils.testResourcesStorageDir();
-        File saveDir = new File(testDir, "konduit-serving-keras/facemask-detector");
-        File f = new File(saveDir, "facemask.model");
-
-        if (!f.exists()) {
-            log.info("Downloading model: {} -> {}", fileUrl, f.getAbsolutePath());
-            FileUtils.copyURLToFile(new URL(fileUrl), f);
-            log.info("Download complete");
-        }
-
-        GraphBuilder b = new GraphBuilder();
-        GraphStep input = b.input();
-
-        //Capture frame from webcam
-        GraphStep camera = input.then("camera", new CameraFrameCaptureStep()
-                .camera(0)
-                .outputKey("image")
-        );
-
-        //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
-        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
-                .height(100)
-                .width(100)
-                .channelLayout(NDChannelLayout.RGB)
-                .includeMinibatchDim(true)
-                .format(NDFormat.CHANNELS_LAST)
-                .dataType(NDArrayType.UINT8)
-                .normalization(null);
-
-        GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
-                .config(c)
-                .keys("image")
-                .outputNames(Arrays.asList("ImageTensor"))
-        );
-
-        //Run image in TF model
-        GraphStep tf = i2n.then("tf", new KerasStep()
-                .modelUri(f.toURI().toString()
-                )
-        );
-
-
-        //Merge camera image with bounding boxes
-        GraphStep merged = camera.mergeWith("img_segmentation", tf);
-
-        //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", new DrawSegmentationStep()
-                .image("image")
-                .segmentArray("SemanticPredictions")
-                .opacity(0.5)
-                .outputName("out")
-                .imageToNDArrayConfig(c)
-                .backgroundClass(0)
-        );
-
-
-        //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImageStep()
-                .displayName("image segmentation")
-                .imageName("out")
-        );
-
-
-        GraphPipeline p = b.build(show);
-
-
-        PipelineExecutor exec = p.executor();
-
-        Data in = Data.empty();
-        for (int i = 0; i < 1000; i++) {
-            exec.exec(in);
-        }
-    }
 
     @Test
     @Ignore   //To be run manually due to need for webcam and frame output
@@ -1103,7 +1022,6 @@ public class TestTensorFlowStep {
         }
 
 
-
         GraphBuilder b = new GraphBuilder();
         GraphStep input = b.input();
 
@@ -1111,7 +1029,7 @@ public class TestTensorFlowStep {
         GraphStep camera = input.then("camera", new CameraFrameCaptureStep()
                 .camera(0)
                 .outputKey("image")
-                );
+        );
 
         //Detect faces using mobilenet model: image -> NDArray -> TF -> SSD post processor
         ImageToNDArrayConfig c = new ImageToNDArrayConfig()
@@ -1121,7 +1039,7 @@ public class TestTensorFlowStep {
                 .dataType(NDArrayType.FLOAT)
                 .normalization(null);
 
-        GraphStep i2n = camera.then("image2NDArray", new  ImageToNDArrayStep()
+        GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Collections.singletonList("image"))
                 .outputNames(Collections.singletonList("data_1")));
@@ -1131,24 +1049,27 @@ public class TestTensorFlowStep {
                 .outputNames(Arrays.asList("cls_branch_concat_1/concat"))
                 .modelUri(f.toURI().toString()));
 
-        PythonStep python = new PythonStep().
+        String resourceName = "data/mask_detector_postprocessing.py";
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource(resourceName).getFile());
+        String code = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+
+        GraphStep pythonPostProcessing = tf.then("pythonPostProcessing", new PythonStep()
+                .code(code).setupMethod("setup").runMethod("run"));
+
+
 
         //  Merge camera image with face keypoints
-        GraphStep merged = camera.mergeWith("facemask-points", tf);
+        GraphStep merged = camera.mergeWith("facemask-points", pythonPostProcessing);
+
 
         //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", new DrawFaceMaskStep()
-                .landmarkArray("cls_branch_concat_1/concat"));
-
-
-
+        GraphStep drawer = merged.then("drawer", new DrawBoundingBoxStep());
 
         //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImagePipelineStep()
+        GraphStep show = drawer.then("show", new ShowImageStep()
                 .displayName("person in mask")
-                .imageName("image")
-                .build());
-
+                .imageName("image"));
 
         GraphPipeline p = b.build(show);
 
@@ -1157,9 +1078,9 @@ public class TestTensorFlowStep {
         Data in = Data.empty();
         for (int i = 0; i < 1000; i++) {
             exec.exec(in);
-        }}
+        }
 
-
+    }
 
 }
 
