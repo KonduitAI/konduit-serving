@@ -223,7 +223,7 @@ public class LauncherUtils {
         if(SystemUtils.IS_OS_WINDOWS) {
             args = Arrays.asList("WMIC", "PROCESS", "WHERE", "ProcessId=" + pid, "GET", "CommandLine", "/VALUE");
         } else {
-            args = Arrays.asList("sh", "-c", "ps ax | grep \"\\b+" + pid + "\\b+\"");
+            args = Arrays.asList("sh", "-c", "ps ax | grep \"^\\b" + pid + "\\b\"");
         }
 
         Process process = new ProcessBuilder(args).start();
