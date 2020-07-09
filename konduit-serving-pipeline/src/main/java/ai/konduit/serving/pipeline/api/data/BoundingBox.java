@@ -1,6 +1,6 @@
 package ai.konduit.serving.pipeline.api.data;
 
-import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxCWH;
 import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
 import ai.konduit.serving.pipeline.impl.pipeline.serde.BoundingBoxDeserializer;
 import ai.konduit.serving.pipeline.impl.pipeline.serde.BoundingBoxSerializer;
@@ -55,7 +55,7 @@ public interface BoundingBox {
      * @return BoundingBox instance
      */
     static BoundingBox create(double cx, double cy, double w, double h, String label, Double probability) {
-        return new BBoxCHW(cx, cy, h, w, label, probability);
+        return new BBoxCWH(cx, cy, w, h, label, probability);
     }
 
 
