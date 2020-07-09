@@ -20,14 +20,12 @@ package ai.konduit.serving.data.image.step.point.draw;
 
 import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
-import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
-import ai.konduit.serving.pipeline.api.data.Point;
+import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Singular;
 import lombok.experimental.Accessors;
 import lombok.experimental.Tolerate;
 
@@ -63,12 +61,10 @@ public class DrawPointsStep implements PipelineStep {
     public static final String DEFAULT_OUTPUT_NAME = "image";
     public static final String DEFAULT_NO_POINT_COLOR = "lime";
 
+    @Schema(description = "Color belongs to non-label data", defaultValue = DEFAULT_NO_POINT_COLOR)
     private String noClassColor;
 
-    @Schema(description = "This is an optional field which specifies the mapping of colors to use for each class. " +
-            "The color can be a hex/HTML string like" +
-            "\"#788E87\", an RGB value like RGB - \"rgb(128,0,255)\" or  it can be from a set of predefined HTML color names: " +
-            "[white, silver, gray, black, red, maroon, yellow, olive, lime, green, aqua, teal, blue, navy, fuchsia, purple]")
+    @Schema(description = "This is an optional field which specifies the mapping of colors to use for each class. " + ColorUtil.COLOR_DESCRIPTION)
     private Map<String, String> classColors;
 
     @Schema(description = "Name of the input data fields containing the points to be drawn. Accepts both single points and lists of points. Accepts both relative and absolute addressed points.")

@@ -15,26 +15,20 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
+package ai.konduit.serving.deeplearning4j;
 
-package ai.konduit.serving.pipeline.impl.testpipelines.callback;
+import ai.konduit.serving.common.test.BaseSwaggerAnnotationCheck;
+import org.junit.Test;
 
-import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.step.PipelineStep;
-import ai.konduit.serving.pipeline.registry.PipelineRegistry;
-
-import java.util.function.Consumer;
-
-@lombok.Data
-public class CallbackStep implements PipelineStep {
-
-    static {
-        PipelineRegistry.registerStepRunnerFactory(new CallbackPipelineFactory());
+public class SwaggerAnnotationCheck extends BaseSwaggerAnnotationCheck {
+    @Override
+    public String getPackageName() {
+        return "ai.konduit.serving.models.deeplearning4j";
     }
 
-    private final Consumer<Data> consumer;
 
-    public CallbackStep(Consumer<Data> consumer){
-        this.consumer = consumer;
+    @Test
+    public void checkAnnotations() throws ClassNotFoundException {
+        runTest();
     }
-
 }
