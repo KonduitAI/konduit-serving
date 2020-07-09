@@ -237,6 +237,8 @@ public class ServeCommand extends DefaultCommand {
             e.printStackTrace(out);
             ExecUtils.exitBecauseOfProcessIssue();
         }
+
+        LauncherUtils.cleanServerDataFilesOnceADay();
     }
 
     private void runAndTailOutput(ProcessBuilder builder) throws IOException {

@@ -23,7 +23,10 @@ import io.vertx.core.impl.launcher.commands.ExecUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOCase;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang3.SystemUtils;
 
@@ -31,10 +34,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.time.Instant;
+import java.util.*;
 
 import static io.vertx.core.file.impl.FileResolver.CACHE_DIR_BASE_PROP_NAME;
 import static java.lang.System.setProperty;
@@ -45,6 +48,8 @@ import static java.lang.System.setProperty;
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LauncherUtils {
+
+    public static final int SECONDS_IN_DAY = 86400;
 
     /**
      * This sets some of the common properties for vertx and logs. This will set the working directory
@@ -149,5 +154,81 @@ public class LauncherUtils {
 
         Collections.reverse(result);
         return String.join(System.lineSeparator(), result);
+    }
+
+    /**
+     * Cleans up the server data files daily.
+     */
+    public static void cleanServerDataFilesOnceADay() {
+        Date timeNow = Date.from(Instant.now());
+
+        File lastCheckedFile = new File(DirectoryFetcher.getServersDataDir(), "lastChecked");
+        Date lastChecked = timeNow;
+        boolean firstTime = false;
+        if(lastCheckedFile.exists()) {
+            try {
+                lastChecked = DateFormat.getInstance().parse(FileUtils.readFileToString(lastCheckedFile, StandardCharsets.UTF_8));
+            } catch (IOException | ParseException exception) {
+                log.error("Unable to identify last server data file cleanup check", exception);
+                return; // Stop cleaning up
+            }
+        } else {
+            firstTime = true;
+        }
+
+        if(timeNow.toInstant().getEpochSecond() - lastChecked.toInstant().getEpochSecond() > SECONDS_IN_DAY || firstTime) {
+            cleanServerDataFiles();
+        }
+
+        try {
+            FileUtils.writeStringToFile(lastCheckedFile, DateFormat.getInstance().format(timeNow), StandardCharsets.UTF_8);
+        } catch (IOException exception) {
+            log.error("Unable to set last checked clean up time at: {}", lastCheckedFile.getAbsolutePath(), exception);
+        }
+    }
+
+    /**
+     * Cleans extra server files with the name of <pid>.data at {@link DirectoryFetcher#getServersDataDir} which
+     * doesn't have a process associated with it.
+     */
+    public static void cleanServerDataFiles() {
+        for(File file : FileUtils.listFiles(DirectoryFetcher.getServersDataDir(), new RegexFileFilter("\\d+.data",
+                IOCase.INSENSITIVE), null)) {
+
+            String pid = file.getName().split("\\.")[0];
+            boolean deleting = false;
+            try {
+                if (!LauncherUtils.isKonduitServer(pid)) {
+                    deleting = true;
+                    FileUtils.forceDelete(file);
+                }
+            } catch (IOException exception) {
+                if(deleting) {
+                    log.error("Unable to delete server data file at: {}", file.getAbsolutePath(), exception);
+                } else {
+                    log.error("Unable to identify a konduit serving process on the given id: {}", pid);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the process identified by the given pid is a konduit serving process
+     * @param pid Process pid
+     * @return true if it's a konduit serving process otherwise false
+     */
+    private static boolean isKonduitServer(String pid) throws IOException {
+        List<String> args;
+
+        if(SystemUtils.IS_OS_WINDOWS) {
+            args = Arrays.asList("WMIC", "PROCESS", "WHERE", "ProcessId=" + pid, "GET", "CommandLine", "/VALUE");
+        } else {
+            args = Arrays.asList("sh", "-c", "ps ax | grep \"\\b+" + pid + "\\b+\"");
+        }
+
+        Process process = new ProcessBuilder(args).start();
+        String output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+
+        return output.contains("Dserving.id=");
     }
 }

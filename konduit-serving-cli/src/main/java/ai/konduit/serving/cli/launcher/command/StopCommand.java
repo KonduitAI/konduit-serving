@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.cli.launcher.command;
 
+import ai.konduit.serving.cli.launcher.LauncherUtils;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
@@ -81,21 +82,25 @@ public class StopCommand extends DefaultCommand {
         if (id == null) {
             out.println("Application id not specified. See `stop --help` for more info.");
             executionContext.execute("list");
+
+            LauncherUtils.cleanServerDataFilesOnceADay();
             return;
         }
 
         if(!isProcessExists(id)) {
             out.println(String.format("No konduit server exists with an id: '%s'.", id));
+
+            LauncherUtils.cleanServerDataFilesOnceADay();
             return;
         } else {
             // Cleaning up current server data file
             File serverDataFile = new File(DirectoryFetcher.getServersDataDir(), getPidFromServerId(id) + ".data");
             try {
                 FileUtils.forceDelete(serverDataFile);
+            } catch (FileNotFoundException exception) {
+                // Ignoring FileNotFoundException since the file won't need to be deleted then.
             } catch (IOException exception) {
-                if(!(exception instanceof FileNotFoundException)) { // Ignoring FileNotFoundException since the file won't need to be deleted then.
-                    log.error("Unable to delete server data file at: {}", serverDataFile.getAbsolutePath(), exception);
-                }
+                log.error("Unable to delete server data file at: {}", serverDataFile.getAbsolutePath(), exception);
             }
         }
 
@@ -105,6 +110,8 @@ public class StopCommand extends DefaultCommand {
         } else {
             terminateLinuxApplication();
         }
+
+        LauncherUtils.cleanServerDataFilesOnceADay();
     }
 
     private void terminateLinuxApplication() {
