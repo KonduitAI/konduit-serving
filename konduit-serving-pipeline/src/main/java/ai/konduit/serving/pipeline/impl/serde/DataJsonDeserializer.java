@@ -155,7 +155,7 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
             double cy = n2.get(Data.RESERVED_KEY_BB_CY).doubleValue();
             double h = n2.get(Data.RESERVED_KEY_BB_H).doubleValue();
             double w = n2.get(Data.RESERVED_KEY_BB_W).doubleValue();
-            return BoundingBox.create(cx, cy, h, w, label, prob);
+            return BoundingBox.create(cx, cy, w, h, label, prob);
         } else {
             double x1 = n2.get(Data.RESERVED_KEY_BB_X1).doubleValue();
             double x2 = n2.get(Data.RESERVED_KEY_BB_X2).doubleValue();

@@ -132,7 +132,7 @@ public class YoloToBoundingBoxRunner implements PipelineStepRunner {
                             lbl = classLabels.get(pIdx);
                         }
 
-                        out.add(BoundingBox.create(px/w, py/h, ph/h, pw/w, lbl, (double)prob));
+                        out.add(BoundingBox.create(px/w, py/h, pw/w,ph/h, lbl, (double)prob));
                     }
                 }
             }

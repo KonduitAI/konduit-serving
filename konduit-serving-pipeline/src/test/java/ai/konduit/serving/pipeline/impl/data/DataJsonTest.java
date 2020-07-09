@@ -152,7 +152,7 @@ public class DataJsonTest {
                     break;
                 case BOUNDING_BOX:
                     List<BoundingBox> bbList = Arrays.asList(BoundingBox.createXY(0.2, 0.4, 0.7, 0.9, "myLabel", 0.8),
-                            BoundingBox.create(0.4, 0.5, 0.3, 0.1, "otherlabel", 0.99));
+                            BoundingBox.create(0.4, 0.5, 0.1, 0.3, "otherlabel", 0.99));
                     d = Data.singletonList("key", bbList, ValueType.BOUNDING_BOX);
                     break;
                 case POINT:
