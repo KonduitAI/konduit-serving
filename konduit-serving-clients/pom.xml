@@ -96,6 +96,50 @@
                     </gitDescribe>
                 </configuration>
             </plugin>
+            <!--
+                The plugin below is used for creating a maven property "konduit.test.class.path"
+                that will contain the classpath value. This was needed because the tests run sometimes have different
+                value for the system property "java.class.path" than the actual classpath.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <id>build-classpath</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>build-classpath</goal>
+                        </goals>
+                        <configuration>
+                            <outputProperty>konduit.generator.class.path</outputProperty>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-classpath</argument>
+                                <argument>${konduit.generator.class.path}${path.separator}${project.build.directory}/${project.build.finalName}.jar</argument>
+                                <argument>-Dkonduit.generator.clients.directory=${project.basedir}/../clients</argument>
+                                <argument>ai.konduit.serving.clients.generators.GenerateRestClients</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
