@@ -1,4 +1,4 @@
-ba#!/bin/bash
+#!/bin/bash
 
 export KONDUIT_WORKING_DIR=${KONDUIT_WORKING_DIR:-$(pwd)/cli-dev}
 
