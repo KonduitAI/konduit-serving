@@ -136,6 +136,8 @@ public class GenerateRestClients {
         javaClientCodegen.setGroupId("ai.konduit.serving");
         javaClientCodegen.setArtifactId("konduit-serving-client");
         javaClientCodegen.setArtifactVersion("0.1.0-SNAPSHOT");
+        javaClientCodegen.setTemplateDir("konduit-client-templates/Java");
+
 
         List<File> generatedJavaClientFiles = defaultGenerator
                 .opts(new ClientOptInput()
@@ -146,6 +148,7 @@ public class GenerateRestClients {
 
         PythonClientCodegen pythonClientCodegen = new PythonClientCodegen();
         pythonClientCodegen.setOutputDir(new File(clientsDirectory, "python").getAbsolutePath());
+        pythonClientCodegen.setTemplateDir("konduit-client-templates/python");
 
         ClientOpts pythonClientOpts = new ClientOpts();
         pythonClientOpts.getProperties().put(CodegenConstants.PACKAGE_NAME, "konduit");
@@ -171,6 +174,30 @@ public class GenerateRestClients {
                         StandardCharsets.UTF_8);
 
                 log.info("Replaced &lt;br&gt; to <br> in {}", file.getAbsolutePath());
+            }
+
+            if(file.getAbsolutePath().endsWith(".md")) {
+                FileUtils.writeStringToFile(file,
+                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replace("&quot;", "\""),
+                        StandardCharsets.UTF_8);
+
+                log.info("Replaced &quot; to \" in {}", file.getAbsolutePath());
+            }
+
+            if(file.getAbsolutePath().endsWith(".md")) {
+                FileUtils.writeStringToFile(file,
+                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replace("&lt;", "<"),
+                        StandardCharsets.UTF_8);
+
+                log.info("Replaced &lt; to < in {}", file.getAbsolutePath());
+            }
+
+            if(file.getAbsolutePath().endsWith(".md")) {
+                FileUtils.writeStringToFile(file,
+                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replace("&gt;", ">"),
+                        StandardCharsets.UTF_8);
+
+                log.info("Replaced &gt; to > in {}", file.getAbsolutePath());
             }
 
             if(file.getAbsolutePath().endsWith(".py")) {
