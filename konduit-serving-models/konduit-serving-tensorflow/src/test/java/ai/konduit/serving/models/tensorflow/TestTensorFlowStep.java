@@ -1034,6 +1034,7 @@ public class TestTensorFlowStep {
         //Detect faces using mobilenet model: image -> NDArray -> TF -> SSD post processor
         ImageToNDArrayConfig c = new ImageToNDArrayConfig()
                 .channelLayout(NDChannelLayout.RGB)
+                .width(260).height(260) // https://github.com/AIZOOTech/FaceMaskDetection/blob/master/tensorflow_infer.py#L116
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
                 .dataType(NDArrayType.FLOAT)
@@ -1046,7 +1047,7 @@ public class TestTensorFlowStep {
 
         GraphStep tf = i2n.then("tf", new TensorFlowStep()
                 .inputNames(Collections.singletonList("data_1"))
-                .outputNames(Arrays.asList("cls_branch_concat_1/concat"))
+                .outputNames(Arrays.asList("loc_branch_concat_1/concat","cls_branch_concat_1/concat"))
                 .modelUri(f.toURI().toString()));
 
         String resourceName = "data/mask_detector_postprocessing.py";
@@ -1064,7 +1065,7 @@ public class TestTensorFlowStep {
 
 
         //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", new DrawBoundingBoxStep());
+        GraphStep drawer = merged.then("drawer", new DrawBoundingBoxStep().bboxName("facemask_bboxes"));
 
         //Show image in Java frame
         GraphStep show = drawer.then("show", new ShowImageStep()

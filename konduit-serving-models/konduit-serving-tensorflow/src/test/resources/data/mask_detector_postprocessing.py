@@ -5,6 +5,24 @@ def setup():
 
 def run(input):
 
+
+    def tf_inference(sess, detection_graph, img_arr):
+        '''
+        Receive an image array and run inference
+        :param sess: tensorflow session.
+        :param detection_graph: tensorflow graph.
+        :param img_arr: 3D numpy array, RGB order.
+        :return:
+        '''
+        image_tensor = detection_graph.get_tensor_by_name('data_1:0')
+        detection_bboxes = detection_graph.get_tensor_by_name('loc_branch_concat_1/concat:0')
+        detection_scores = detection_graph.get_tensor_by_name('cls_branch_concat_1/concat:0')
+        # image_np_expanded = np.expand_dims(img_arr, axis=0)
+        bboxes, scores = sess.run([detection_bboxes, detection_scores],
+                                feed_dict={image_tensor: img_arr})
+
+        return bboxes, scores
+
     def generate_anchors(feature_map_sizes, anchor_sizes, anchor_ratios, offset=0.5):
         '''
         generate anchors.
@@ -136,8 +154,8 @@ def run(input):
     conf_thresh=0.5
     iou_thresh=0.4
 
-    y_bboxes_output = input['cls_branch_concat_1/concat'][0]
-    y_cls_output = input['cls_branch_concat_1/concat'][1]
+    y_bboxes_output= input['loc_branch_concat_1/concat']
+    y_cls_output = input['cls_branch_concat_1/concat']
 
 
     # generate anchors
@@ -157,9 +175,11 @@ def run(input):
     keep_idxs = single_class_non_max_suppression(y_bboxes,
                                                      bbox_max_scores,
                                                      conf_thresh=conf_thresh,
-                                                     iou_thresh=iou_thresh,
+                                                     iou_thresh=iou_thresh,)
 
-    bboxes = []                                             )
+    ret = Data()
+    bboxes = []
+    height, width = 260,260
     for idx in keep_idxs:
            conf = float(bbox_max_scores[idx])
            class_id = bbox_max_score_classes[idx]
@@ -169,17 +189,23 @@ def run(input):
            ymin = max(0, int(bbox[1] * height))
            xmax = min(int(bbox[2] * width), width)
            ymax = min(int(bbox[3] * height), height)
-           bboxes.append([xmin,ymin,xmax,ymax])
 
-    ret['out'] = bboxes
+           ret[str(idx)] = BoundingBox(xmin,ymin,xmax,ymax, 'facemask', conf)
+
+    # python4j part
+#     print(bboxes)
+#     ret = Data()
+#     ret['facemask_bboxes'] = np.array(bboxes)
+
+    return ret
 
 
 
 
 
 
-
-
+# data = {"loc_branch_concat_1/concat": np.random.rand(1,5972,4),"cls_branch_concat_1/concat":np.random.rand(1,5972,2)}
+# print(run(data))
 
 
 
