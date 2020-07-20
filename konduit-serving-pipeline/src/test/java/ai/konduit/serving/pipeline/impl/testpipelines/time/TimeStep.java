@@ -20,7 +20,11 @@ package ai.konduit.serving.pipeline.impl.testpipelines.time;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@Data
 public class TimeStep implements PipelineStep {
 
     static {

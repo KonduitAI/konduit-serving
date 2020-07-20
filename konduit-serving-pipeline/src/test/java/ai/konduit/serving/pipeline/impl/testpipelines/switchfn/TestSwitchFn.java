@@ -21,8 +21,13 @@ package ai.konduit.serving.pipeline.impl.testpipelines.switchfn;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 @EqualsAndHashCode
+@lombok.Data
+@NoArgsConstructor
+@Accessors(fluent = true)
 public class TestSwitchFn implements SwitchFn {
 
     public int branch;

@@ -28,6 +28,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
 
 /**
@@ -59,7 +60,7 @@ public class AsyncPipeline implements Pipeline, AutoCloseable {
     @ToString.Exclude
     protected AsyncPipelineExecutor executor;
 
-    public AsyncPipeline(@NonNull Pipeline underlying, @NonNull Trigger trigger){
+    public AsyncPipeline(@NonNull @JsonProperty("underlying") Pipeline underlying, @NonNull @JsonProperty("trigger") Trigger trigger){
         this.underlying = underlying;
         this.trigger = trigger;
     }
