@@ -18,17 +18,14 @@
 
 package ai.konduit.serving.pipeline.impl.testpipelines.count;
 
-import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.Collections;
-import java.util.function.Consumer;
 
 @lombok.Data
 @NoArgsConstructor
