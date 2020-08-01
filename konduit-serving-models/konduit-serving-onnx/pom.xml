@@ -6,7 +6,6 @@
 
   <groupId>ai.konduit.serving</groupId>
   <artifactId>konduit-serving-onnx</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
 
   <name>konduit-serving-onnx</name>
   <url>https://konduit.ai/</url>
