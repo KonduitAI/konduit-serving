@@ -32,12 +32,15 @@ import org.datavec.python.PythonContextManager;
 import org.datavec.python.PythonJob;
 import org.datavec.python.PythonType;
 import org.datavec.python.PythonVariables;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @CanRun(PythonStep.class)
@@ -89,7 +92,11 @@ public class PythonRunner implements PipelineStepRunner {
                     pythonVariables.addFloat(key,aDouble);
                     break;
                 case LIST:
-                    throw new IllegalArgumentException("Illegal type " + data.type(key));
+                    Preconditions.checkState(pythonStep.pythonConfig().getListTypesForVariableName().containsKey(key),"No input type specified for list with key " + key);
+                    ValueType valueType = pythonStep.pythonConfig().getListTypesForVariableName().get(key);
+                    List<Object> list = data.getList(key, valueType);
+                    pythonVariables.addList(key,list.toArray(new Object[list.size()]));
+                    break;
                 case INT64:
                     long aLong = data.getLong(key);
                     pythonVariables.addInt(key,aLong);
@@ -132,31 +139,17 @@ public class PythonRunner implements PipelineStepRunner {
                     }
                     else if(image instanceof FrameImage) {
                         FrameImage frameImage = (FrameImage) image;
-                        Frame frame = frameImage.getAs(Frame.class);
                         ret.put(key,frameImage);
                     }
                     else if(image instanceof MatImage) {
                         MatImage matImage = (MatImage) image;
-                        Mat as = matImage.getAs(Mat.class);
                         ret.put(key,matImage);
-
                     }
 
                     break;
                 case BOUNDING_BOX:
                     BoundingBox boundingBox = data.getBoundingBox(key);
-                    Map<String,Object> boundingBoxValues = new LinkedHashMap<>();
-                    boundingBoxValues.put("cx",boundingBox.cx());
-                    boundingBoxValues.put("cy",boundingBox.cy());
-                    boundingBoxValues.put("width",boundingBox.width());
-                    boundingBoxValues.put("height",boundingBox.height());
-                    boundingBoxValues.put("label",boundingBox.label());
-                    boundingBoxValues.put("probability",boundingBox.probability());
-                    boundingBoxValues.put("cy",boundingBox.cy());
-                    boundingBoxValues.put("x1",boundingBox.x1());
-                    boundingBoxValues.put("x2",boundingBox.x2());
-                    boundingBoxValues.put("y1",boundingBox.y1());
-                    boundingBoxValues.put("y2",boundingBox.y2());
+                    Map<String,Object> boundingBoxValues = DictUtils.toBoundingBoxDict(boundingBox);
                     pythonVariables.addDict(key,boundingBoxValues);
                     break;
                 case POINT:
@@ -183,12 +176,95 @@ public class PythonRunner implements PipelineStepRunner {
         }
 
         pythonJob.exec(pythonVariables,outputs);
+
         for(String variable : outputs.getVariables()) {
             switch(outputs.getType(variable).getName()) {
                 case BOOL:
                     ret.put(variable,outputs.getBooleanValue(variable));
                     break;
                 case LIST:
+                    Preconditions.checkState(pythonStep.pythonConfig().getListTypesForVariableName().containsKey(variable),"No input type specified for list with key " + variable);
+                    List listValue = outputs.getListValue(variable);
+                    ValueType valueType = pythonStep.pythonConfig().getListTypesForVariableName().get(variable);
+                    switch(valueType) {
+                        case IMAGE:
+                            /**
+                             * TODO: LIKELY DOES NOT WORK. NEED TO LOOK IN TO IMAGE FACTORIES.
+                             */
+                            List<Image> images = new ArrayList<>(listValue.size());
+                            for(Object  o : listValue) {
+                                Image image = Image.create(o);
+                                images.add(image);
+                            }
+                            ret.putListImage(variable,images);
+                            break;
+                        case DOUBLE:
+                            List<Double> doubles = new ArrayList<>(listValue.size());
+                            for(Object o : listValue) {
+                                Number number = (Number) o;
+                                doubles.add(number.doubleValue());
+                            }
+                            ret.putListDouble(variable,doubles);
+                            break;
+                        case INT64:
+                            List<Long> longs = new ArrayList<>(listValue.size());
+                            for(Object o : listValue) {
+                                Number number = (Number) o;
+                                longs.add(number.longValue());
+                            }
+                            ret.putListInt64(variable,longs);
+                            break;
+                        case BOOLEAN:
+                            List<Boolean> booleans = new ArrayList<>(listValue.size());
+                            for(Object o : listValue) {
+                                Boolean b = (Boolean) o;
+                                booleans.add(b);
+                            }
+                            ret.putListBoolean(variable,booleans);
+                            break;
+                        case BOUNDING_BOX:
+                            List<BoundingBox> boundingBoxes = new ArrayList<>(listValue.size());
+                            for(Object input : listValue) {
+                                Map<String,Object> dict = (Map<String,Object>) input;
+                                BoundingBox boundingBox = DictUtils.boundingBoxFromDict(dict);
+                                boundingBoxes.add(boundingBox);
+                            }
+                            ret.putListBoundingBox(variable,boundingBoxes);
+                            break;
+                        case STRING:
+                            List<String> strings = new ArrayList<>(listValue.size());
+                            for(Object o : listValue) {
+                                strings.add(o.toString());
+                            }
+                            break;
+                        case POINT:
+                            List<Point> points = new ArrayList<>();
+                            for(Object o : listValue) {
+                                Map<String,Object> dict = (Map<String,Object>) o;
+                                points.add(DictUtils.fromPointDict(dict));
+                            }
+                            ret.putListPoint(variable,points);
+                            break;
+                        case DATA:
+                            throw new IllegalArgumentException("Unable to de serialize dat from python");
+                        case NDARRAY:
+                            List<INDArray> ndArrays = new ArrayList<>(listValue.size());
+                            for(Object o : listValue) {
+                                INDArray arr = (INDArray) o;
+                                ndArrays.add(arr);
+                            }
+                            break;
+                        case BYTES:
+                            List<byte[]> bytes = new ArrayList<>(listValue.size());
+                            for(Object o : listValue) {
+                                byte[] arr = (byte[]) o;
+                                bytes.add(arr);
+                            }
+                            ret.putListBytes(variable,bytes);
+                            break;
+                        case LIST:
+                            throw new IllegalArgumentException("List of lists not allowed");
+                    }
                     throw new IllegalArgumentException("Illegal output type " + outputs.getType(variable).getName());
                 case BYTES:
                     ret.put(variable,outputs.getBytesValue(variable).getStringBytes());
@@ -200,7 +276,37 @@ public class PythonRunner implements PipelineStepRunner {
                     ret.put(variable,outputs.getStrValue(variable));
                     break;
                 case DICT:
-                    break;
+                    ValueType dictValueType = pythonStep.pythonConfig().getTypeForDictionaryForOutputVariableNames().get(variable);
+                    Map<String,Object> items = (Map<String, Object>) outputs.getDictValue(variable);
+                    /**
+                     * TODO: Figure out how to handle attributes
+                     */
+                    throw new IllegalArgumentException("Unable to handle dictionary attributes");
+      /*           switch(dictValueType) {
+                     case BYTES:
+                         break;
+                     case LIST:
+                         break;
+                     case NDARRAY:
+                         break;
+                     case DATA:
+                         break;
+                     case POINT:
+                         break;
+                     case STRING:
+                         break;
+                     case BOUNDING_BOX:
+                          break;
+                     case BOOLEAN:
+                         break;
+                     case INT64:
+                         break;
+                     case DOUBLE:
+                         break;
+                     case IMAGE:
+                         break;
+                 }
+                    break;*/
                 case INT:
                     ret.put(variable,outputs.getIntValue(variable));
                     break;

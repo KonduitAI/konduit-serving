@@ -22,37 +22,55 @@ public class PythonRunnerTests {
         StringBuffer codeBuffer = new StringBuffer();
 
         Data data = Data.empty();
-
+        Data assertion = Data.empty();
         for(int i = 0; i < values.length; i++) {
+            String varName = "i" + String.valueOf(i);
+            String codeSnippet = varName + " += 1\n";
             switch(values[i]) {
                 case FLOAT:
                     builder.pythonInput(String.valueOf(i),values[i].name());
-                    data.put("i" + String.valueOf(i),1.0f);
+                    builder.pythonOutput(varName,values[i].name());
+                    codeBuffer.append(codeSnippet);
+                    data.put(varName,1.0f);
+                    assertion.put(varName,2.0f);
                     break;
                 case INT:
-                    builder.pythonInput(String.valueOf(i),values[i].name());
-                    data.put("i" + String.valueOf(i),1);
+                    builder.pythonInput(varName,values[i].name());
+                    builder.pythonOutput(varName,values[i].name());
+                    codeBuffer.append(codeSnippet);
+                    data.put(varName,1);
+                    assertion.put(varName,2);
                     break;
-           /*     case DICT:
-                    builder.pythonInput(String.valueOf(i),values[i].name());
-                    data.put(String.valueOf(i), Collections.singletonMap(String.valueOf(i),1));
-                    break;*/
+                case DICT:
+                    break;
                 case STR:
-                    builder.pythonInput(String.valueOf(i),values[i].name());
-                    data.put("i" + String.valueOf(i),String.valueOf(1));
+                    builder.pythonInput(varName,values[i].name());
+                    builder.pythonOutput(varName,values[i].name());
+                    codeBuffer.append(varName + " += '1'\n");
+                    data.put(varName,String.valueOf(1));
+                    assertion.put(varName,"11");
                     break;
                 case NDARRAY:
-                    builder.pythonInput(String.valueOf(i),values[i].name());
-                    data.put("i" + String.valueOf(i),new ND4JNDArray(Nd4j.scalar(1.0)));
+                    builder.pythonInput(varName,values[i].name());
+                    builder.pythonOutput(varName,values[i].name());
+                    codeBuffer.append(codeSnippet);
+                    data.put(varName,new ND4JNDArray(Nd4j.scalar(1.0)));
+                    assertion.put(varName,new ND4JNDArray(Nd4j.scalar(2.0)));
                     break;
                 case BYTES:
-                    builder.pythonInput("i" + String.valueOf(i),values[i].name());
+                   /* builder.pythonInput(varName,values[i].name());
+                    builder.pythonOutput(varName,values[i].name());
+                    codeBuffer.append(varName + ".append(1)");
+                    data.put(varName,new byte[]{1});*/
                     break;
          /*       case LIST:
                     break;*/
                 case BOOL:
-                    builder.pythonInput(String.valueOf(i),values[i].name());
-                    data.put("i" + String.valueOf(i),true);
+                    builder.pythonInput(varName,values[i].name());
+                    builder.pythonOutput(varName,values[i].name());
+                    data.put(varName,true);
+                    codeBuffer.append(varName + " = True\n");
+                    assertion.put(varName,true);
                     break;
             }
         }
@@ -69,5 +87,8 @@ public class PythonRunnerTests {
         PipelineExecutor executor = sequencePipeline.executor();
         Data exec = executor.exec(data);
         assertEquals(exec.keys().size(),pythonConfig.getPythonOutputs().size());
+        assertEquals(assertion,exec);
+
+
     }
 }

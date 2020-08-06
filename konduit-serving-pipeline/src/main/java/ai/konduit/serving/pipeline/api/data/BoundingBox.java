@@ -25,7 +25,7 @@ import java.util.Objects;
  * @author Alex Black
  */
 @Schema(description = "This object is usually used to represent a rectangular region in an image, along with an optional String label, " +
-        "and an aptional double probability. Bounding boxes can be defined in two (essentially equivalent) formats: " +
+        "and an optional double probability. Bounding boxes can be defined in two (essentially equivalent) formats: " +
         "(a) Based on center X, center Y, height and width " +
         "(b) Based on x1, x2, y1 and y2 locations (i.e., lower/upper X, lower/upper Y coordinate) " +
         "As a general rule, bounding box coordinates are specified as a fraction of the image - with coordinates (x,y)=(0.0, 0.0) " +

@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.model;
 
+import ai.konduit.serving.pipeline.api.data.ValueType;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,6 +56,16 @@ public class PythonConfig implements Serializable {
     private boolean returnAllInputs;
 
     private boolean setupAndRun;
+    @Singular("listTypeForVariableName")
+    private Map<String, ValueType> listTypesForVariableName;
+    @Singular("typeForDictionaryForVariableName")
+    private Map<String,ValueType> typeForDictionaryForVariableName;
+
+    @Singular("listTypeForOutputVariableName")
+    private Map<String, ValueType> listTypesForOutputVariableNames;
+    @Singular("typeForDictionaryForOutputVariableName")
+    private Map<String,ValueType> typeForDictionaryForOutputVariableNames;
+
 
     private static String defaultPythonPath;
 }
