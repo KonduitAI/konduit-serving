@@ -23,6 +23,11 @@ import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.Point;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.nd4j.common.base.Preconditions;
+import org.nd4j.nativeblas.NativeOpsHolder;
 
 public class ImageUtils {
 
@@ -66,5 +71,7 @@ public class ImageUtils {
                 relPoint.probability()
         ).toAbsolute(width, height);
     }
+
+
 
 }

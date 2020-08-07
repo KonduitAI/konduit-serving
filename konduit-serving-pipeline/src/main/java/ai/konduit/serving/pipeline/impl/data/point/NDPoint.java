@@ -21,6 +21,7 @@ package ai.konduit.serving.pipeline.impl.data.point;
 import ai.konduit.serving.pipeline.api.data.Point;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.nd4j.common.base.Preconditions;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 @Data
@@ -31,6 +32,7 @@ public class NDPoint implements Point {
     private final Double probability;
 
     public NDPoint(@JsonProperty("coords") double[] coords, @JsonProperty("label") String label, @JsonProperty("probability") Double probability){
+        Preconditions.checkState(coords != null && coords.length < 4,"Invalid coordinates. Only 3 points are currently supported.");
         this.coords = coords;
         this.label = label;
         this.probability = probability;
@@ -39,7 +41,7 @@ public class NDPoint implements Point {
     @Override
     public double get(int n) {
         if(n >= coords.length){
-            throw new IllegalArgumentException("Can not access dimension "+n+" of "+coords.length+" dimensional point!");
+            throw new IllegalArgumentException("Can not access dimension " + n + " of " + coords.length +" dimensional point!");
         }
         return coords[n];
     }

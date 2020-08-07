@@ -31,6 +31,7 @@ import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -41,7 +42,9 @@ public interface Data {
 
     String RESERVED_KEY_TYPE = "@type";
     String RESERVED_KEY_BYTES_BASE64 = "@BytesBase64";
+    String RESERVED_KEY_BYTEBUFFER_BASE64 = "@ByteBufferBase64";
     String RESERVED_KEY_BYTES_ARRAY = "@BytesArray";
+    String RESERVED_KEY_BYTEBUFFER = "@ByteBuffer";
     String RESERVED_KEY_IMAGE_FORMAT = "@ImageFormat";
     String RESERVED_KEY_IMAGE_DATA = "@ImageData";
     String RESERVED_KEY_NDARRAY_SHAPE = "@NDArrayShape";
@@ -106,6 +109,8 @@ public interface Data {
     String getString(String key) throws ValueNotFoundException;
     boolean getBoolean(String key) throws ValueNotFoundException;
     byte[] getBytes(String key) throws ValueNotFoundException;
+    ByteBuffer getByteBuffer(String key) throws ValueNotFoundException;
+
     double getDouble(String key) throws ValueNotFoundException;
     Image getImage(String key) throws ValueNotFoundException;
     long getLong(String key) throws ValueNotFoundException;
@@ -127,6 +132,9 @@ public interface Data {
 
     void put(String key, String data);
     void put(String key, NDArray data);
+
+    void put(String key, ByteBuffer data);
+
     void put(String key, byte[] data);
     void put(String key, Image data);
     void put(String key, long data);
@@ -138,6 +146,8 @@ public interface Data {
     void putListString(String key, List<String> data);
     void putListInt64(String key, List<Long> data);
     void putListBoolean(String key, List<Boolean> data);
+    void putListByteBuffer(String key, List<ByteBuffer> data);
+
     void putListBytes(String key, List<byte[]> data);
     void putListDouble(String key, List<Double> data);
     void putListData(String key, List<Data> data);
@@ -339,6 +349,9 @@ public interface Data {
                 return;
             case BYTES:
                 put(key, from.getBytes(key));
+                return;
+            case BYTEBUFFER:
+                put(key, from.getByteBuffer(key));
                 return;
             case IMAGE:
                 put(key, from.getImage(key));

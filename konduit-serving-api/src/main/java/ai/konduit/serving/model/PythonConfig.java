@@ -66,6 +66,8 @@ public class PythonConfig implements Serializable {
     @Singular("typeForDictionaryForOutputVariableName")
     private Map<String,ValueType> typeForDictionaryForOutputVariableNames;
 
+    @Singular("outputTypeByteConversion")
+    private Map<String,ValueType> outputTypeByteConversions;
 
     private static String defaultPythonPath;
 }

@@ -40,7 +40,7 @@ public interface Point {
      * As per {@link #create(double, double, String, Double)} without a label or probability
      */
     static Point create(double x, double y) {
-        return create(x, y, null, null);
+        return create(x, y, "", 0.0);
     }
 
     /**
@@ -61,7 +61,7 @@ public interface Point {
      * As per {@link #create(double, double, double, String, Double)} without a label or probability
      */
     static Point create(double x, double y, double z) {
-        return create(x, y, z, null, null);
+        return create(x, y, z, "", 0.0);
     }
 
     /**
@@ -83,12 +83,13 @@ public interface Point {
      * As per {@link #create(double[], String, Double)} without a label or probability
      */
     static Point create(double... x) {
-        return create(x, null, null);
+        return create(x, "", 0.0);
     }
 
     /**
      * Create a n-d Point instance.
-     * As per {@link Point}, specifying these as as a fraction of image size (i.e., 0.0 to 1.0) is generally preferred
+     * As per {@link Point}, specifying these as  a fraction of image size (i.e., 0.0 to 1.0) is
+     * generally preferred.
      *
      * @param x          coordinates of the point in n-dimensional space
      * @param label       Label for the point. May be null.
@@ -167,7 +168,7 @@ public interface Point {
     /**
      * Turn relative defined coordinates into absolute coordinates
      */
-    default Point toAbsolute(double... absoluteSizes){
+    default Point toAbsolute(double... absoluteSizes) {
         // if the first point is absolute (not between 0 and 1), all others should be too
         if(!(0.0 < x() && x() < 1.0)) { return this; }
 

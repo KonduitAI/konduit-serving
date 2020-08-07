@@ -43,14 +43,19 @@ public class DictUtils {
      */
     public static Point fromPointDict(Map<String,Object> dictPoint) {
         Point point = Point.create(
-                (double) dictPoint.get("x"),
-                (double) dictPoint.get("y"),
-                (double) dictPoint.get("z"),
-                (String) dictPoint.getOrDefault("label",""),
-                (double) dictPoint.getOrDefault("probability",0.0)
+                castNumber(dictPoint.get("x")).doubleValue(),
+                castNumber(dictPoint.get("y")).doubleValue(),
+                castNumber(dictPoint.get("z")).doubleValue(),
+                dictPoint.getOrDefault("label","").toString(),
+                castNumber(dictPoint.getOrDefault("probability",0.0))
+                        .doubleValue()
         );
 
         return point;
+    }
+
+    private static Number castNumber(Object input) {
+        return (Number) input;
     }
 
     /**
@@ -64,7 +69,8 @@ public class DictUtils {
         ret.put("x",point.x());
         ret.put("y",point.y());
         ret.put("label",point.label());
-        ret.put("z",point.z());
+        if(point.dimensions() > 2)
+            ret.put("z",point.z());
         ret.put("dimensions",point.dimensions());
         return ret;
     }

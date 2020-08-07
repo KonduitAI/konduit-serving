@@ -79,11 +79,16 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                     Pair<List<Object>, ValueType> p = deserializeList(jp, n2);
                     d.putList(s, p.getFirst(), p.getSecond());
                 } else if (n2.isObject()) {
-                    //Could be: Bytes, image, NDArray, BoundingBox, Point or Data
+                    //Could be: Bytes, image, NDArray,ByteBuffer BoundingBox, Point or Data
                     if (n2.has(Data.RESERVED_KEY_BYTES_BASE64) || n2.has(Data.RESERVED_KEY_BYTES_ARRAY)) {
                         //byte[] stored in base64 or byte[] as JSON array
                         byte[] bytes = deserializeBytes(n2);
                         d.put(s, bytes);
+                    } else   if (n2.has(Data.RESERVED_KEY_BYTEBUFFER) || n2.has(Data.RESERVED_KEY_BYTEBUFFER_BASE64)) {
+                        //byte[] stored in base64 or byte[] as JSON array
+                        byte[] bytes = deserializeBytes(n2);
+                        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+                        d.put(s, byteBuffer);
                     } else if (n2.has(Data.RESERVED_KEY_NDARRAY_TYPE)) {
                         //NDArray
                         d.put(s, deserializeNDArray(n2));

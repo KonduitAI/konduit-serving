@@ -16,30 +16,18 @@
 package ai.konduit.serving.python;
 
 import ai.konduit.serving.annotation.runner.CanRun;
-import ai.konduit.serving.data.image.data.FrameImage;
-import ai.konduit.serving.data.image.data.MatImage;
 import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
-import ai.konduit.serving.pipeline.impl.data.image.*;
+import ai.konduit.serving.python.util.PythonUtils;
 import lombok.SneakyThrows;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.datavec.python.PythonContextManager;
-import org.datavec.python.PythonJob;
-import org.datavec.python.PythonType;
-import org.datavec.python.PythonVariables;
+import org.datavec.python.*;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -111,41 +99,7 @@ public class PythonRunner implements PipelineStepRunner {
                     break;
                 case IMAGE:
                     Image image = data.getImage(key);
-                    if(image instanceof BImage) {
-                        BImage bImage = (BImage) image;
-                        BufferedImage bufferedImage = bImage.getAs(BufferedImage.class);
-                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                        ImageIO.write(bufferedImage,"jpg",byteArrayOutputStream);
-                    }
-                    else if(image instanceof PngImage) {
-                        PngImage pngImage = (PngImage) image;
-                        Png png = pngImage.getAs(Png.class);
-                        ret.put(key,png.getBytes());
-                    }
-                    else if(image instanceof GifImage) {
-                        GifImage gifImage = (GifImage) image;
-                        Gif gif = gifImage.getAs(Gif.class);
-                        ret.put(key,gif.getBytes());
-                    }
-                    else if(image instanceof JpegImage) {
-                        JpegImage jpegImage = (JpegImage) image;
-                        Jpeg jpeg = jpegImage.getAs(Jpeg.class);
-                        ret.put(key,jpeg.getBytes());
-                    }
-                    else if(image instanceof BmpImage) {
-                        BmpImage bmpImage = (BmpImage) image;
-                        Bmp bmp = bmpImage.getAs(Bmp.class);
-                        ret.put(key,bmp.getBytes());
-                    }
-                    else if(image instanceof FrameImage) {
-                        FrameImage frameImage = (FrameImage) image;
-                        ret.put(key,frameImage);
-                    }
-                    else if(image instanceof MatImage) {
-                        MatImage matImage = (MatImage) image;
-                        ret.put(key,matImage);
-                    }
-
+                    PythonUtils.addImageToPython(pythonVariables,key,image);
                     break;
                 case BOUNDING_BOX:
                     BoundingBox boundingBox = data.getBoundingBox(key);
@@ -153,14 +107,8 @@ public class PythonRunner implements PipelineStepRunner {
                     pythonVariables.addDict(key,boundingBoxValues);
                     break;
                 case POINT:
-                    Map<String,Object> pointerValue = new LinkedHashMap<>();
                     Point point = data.getPoint(key);
-                    pointerValue.put("x",point.x());
-                    pointerValue.put("y",point.y());
-                    pointerValue.put("z",point.z());
-                    pointerValue.put("dimensions",point.dimensions());
-                    pointerValue.put("label",point.label());
-                    pointerValue.put("probability", point.probability());
+                    Map<String,Object> pointerValue = DictUtils.toPointDict(point);
                     pythonVariables.addDict(key,pointerValue);
                     break;
                 case DATA:
@@ -186,88 +134,14 @@ public class PythonRunner implements PipelineStepRunner {
                     Preconditions.checkState(pythonStep.pythonConfig().getListTypesForVariableName().containsKey(variable),"No input type specified for list with key " + variable);
                     List listValue = outputs.getListValue(variable);
                     ValueType valueType = pythonStep.pythonConfig().getListTypesForVariableName().get(variable);
-                    switch(valueType) {
-                        case IMAGE:
-                            /**
-                             * TODO: LIKELY DOES NOT WORK. NEED TO LOOK IN TO IMAGE FACTORIES.
-                             */
-                            List<Image> images = new ArrayList<>(listValue.size());
-                            for(Object  o : listValue) {
-                                Image image = Image.create(o);
-                                images.add(image);
-                            }
-                            ret.putListImage(variable,images);
-                            break;
-                        case DOUBLE:
-                            List<Double> doubles = new ArrayList<>(listValue.size());
-                            for(Object o : listValue) {
-                                Number number = (Number) o;
-                                doubles.add(number.doubleValue());
-                            }
-                            ret.putListDouble(variable,doubles);
-                            break;
-                        case INT64:
-                            List<Long> longs = new ArrayList<>(listValue.size());
-                            for(Object o : listValue) {
-                                Number number = (Number) o;
-                                longs.add(number.longValue());
-                            }
-                            ret.putListInt64(variable,longs);
-                            break;
-                        case BOOLEAN:
-                            List<Boolean> booleans = new ArrayList<>(listValue.size());
-                            for(Object o : listValue) {
-                                Boolean b = (Boolean) o;
-                                booleans.add(b);
-                            }
-                            ret.putListBoolean(variable,booleans);
-                            break;
-                        case BOUNDING_BOX:
-                            List<BoundingBox> boundingBoxes = new ArrayList<>(listValue.size());
-                            for(Object input : listValue) {
-                                Map<String,Object> dict = (Map<String,Object>) input;
-                                BoundingBox boundingBox = DictUtils.boundingBoxFromDict(dict);
-                                boundingBoxes.add(boundingBox);
-                            }
-                            ret.putListBoundingBox(variable,boundingBoxes);
-                            break;
-                        case STRING:
-                            List<String> strings = new ArrayList<>(listValue.size());
-                            for(Object o : listValue) {
-                                strings.add(o.toString());
-                            }
-                            break;
-                        case POINT:
-                            List<Point> points = new ArrayList<>();
-                            for(Object o : listValue) {
-                                Map<String,Object> dict = (Map<String,Object>) o;
-                                points.add(DictUtils.fromPointDict(dict));
-                            }
-                            ret.putListPoint(variable,points);
-                            break;
-                        case DATA:
-                            throw new IllegalArgumentException("Unable to de serialize dat from python");
-                        case NDARRAY:
-                            List<INDArray> ndArrays = new ArrayList<>(listValue.size());
-                            for(Object o : listValue) {
-                                INDArray arr = (INDArray) o;
-                                ndArrays.add(arr);
-                            }
-                            break;
-                        case BYTES:
-                            List<byte[]> bytes = new ArrayList<>(listValue.size());
-                            for(Object o : listValue) {
-                                byte[] arr = (byte[]) o;
-                                bytes.add(arr);
-                            }
-                            ret.putListBytes(variable,bytes);
-                            break;
-                        case LIST:
-                            throw new IllegalArgumentException("List of lists not allowed");
-                    }
-                    throw new IllegalArgumentException("Illegal output type " + outputs.getType(variable).getName());
+                    PythonUtils.insertListIntoData(ret, variable, listValue, valueType);
+                    break;
                 case BYTES:
-                    ret.put(variable,outputs.getBytesValue(variable).getStringBytes());
+                    PythonUtils.insertBytesIntoPythonVariables(
+                            ret,
+                            outputs,
+                            variable,
+                            pythonStep.pythonConfig());
                     break;
                 case NDARRAY:
                     ret.put(variable,new ND4JNDArray(outputs.getNDArrayValue(variable)));
@@ -278,35 +152,18 @@ public class PythonRunner implements PipelineStepRunner {
                 case DICT:
                     ValueType dictValueType = pythonStep.pythonConfig().getTypeForDictionaryForOutputVariableNames().get(variable);
                     Map<String,Object> items = (Map<String, Object>) outputs.getDictValue(variable);
-                    /**
-                     * TODO: Figure out how to handle attributes
-                     */
-                    throw new IllegalArgumentException("Unable to handle dictionary attributes");
-      /*           switch(dictValueType) {
-                     case BYTES:
-                         break;
-                     case LIST:
-                         break;
-                     case NDARRAY:
-                         break;
-                     case DATA:
-                         break;
-                     case POINT:
-                         break;
-                     case STRING:
-                         break;
-                     case BOUNDING_BOX:
-                          break;
-                     case BOOLEAN:
-                         break;
-                     case INT64:
-                         break;
-                     case DOUBLE:
-                         break;
-                     case IMAGE:
-                         break;
-                 }
-                    break;*/
+                    switch(dictValueType) {
+                        case POINT:
+                            ret.put(variable,DictUtils.fromPointDict(items));
+                            break;
+                        case BOUNDING_BOX:
+                            ret.put(variable,DictUtils.boundingBoxFromDict(items));
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Limited support for de serializing dictionaries. Invalid type " + dictValueType);
+
+                    }
+                    break;
                 case INT:
                     ret.put(variable,outputs.getIntValue(variable));
                     break;
@@ -319,4 +176,5 @@ public class PythonRunner implements PipelineStepRunner {
 
         return ret;
     }
+
 }

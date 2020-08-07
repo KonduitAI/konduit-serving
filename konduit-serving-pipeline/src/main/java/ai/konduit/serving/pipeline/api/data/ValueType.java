@@ -29,5 +29,6 @@ public enum ValueType {
     BOUNDING_BOX,
     DATA,
     LIST,
-    POINT
+    POINT,
+    BYTEBUFFER
 }
