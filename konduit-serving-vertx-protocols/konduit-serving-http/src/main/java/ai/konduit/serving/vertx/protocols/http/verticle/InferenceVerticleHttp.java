@@ -34,8 +34,12 @@ import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
+import io.vertx.core.http.Http2Settings;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpVersion;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.PemKeyCertOptions;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -46,6 +50,7 @@ import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -87,9 +92,9 @@ public class InferenceVerticleHttp extends InferenceVerticle {
             return;
         }
 
-        vertx.createHttpServer()
+        vertx.createHttpServer(createOptions(inferenceConfiguration.port()))
                 .requestHandler(createRouter())
-                .exceptionHandler(throwable -> log.error("Could not start HTTP server", throwable))
+                .exceptionHandler(throwable -> log.error("Error occurred during http request.", throwable))
                 .listen(port, inferenceConfiguration.host(), handler -> {
                     if (handler.failed()) {
                         startPromise.fail(handler.cause());
@@ -117,6 +122,21 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                         }
                     }
                 });
+    }
+
+    private HttpServerOptions createOptions(int port) {
+        HttpServerOptions serverOptions = new HttpServerOptions()
+                .setPort(port)
+                .setHost("0.0.0.0");
+        serverOptions.setSsl(false)
+                .setSslHandshakeTimeout(0)
+                .setCompressionSupported(true)
+                .setTcpKeepAlive(true)
+                .setTcpNoDelay(true)
+                .setAlpnVersions(Arrays.asList(HttpVersion.HTTP_1_0,HttpVersion.HTTP_1_1))
+                .setUseAlpn(false);
+
+        return serverOptions;
     }
 
     public Router createRouter() {

@@ -36,6 +36,15 @@
             <artifactId>konduit-serving-pipeline</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Needed for ALPN-->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-tcnative-boringssl-static</artifactId>
+            <version>${netty.boringssl.version}</version>
+        </dependency>
+
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

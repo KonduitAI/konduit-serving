@@ -122,7 +122,7 @@
         <lombok.version>1.18.2</lombok.version>
         <jackson.version>2.10.0</jackson.version>
         <tensorflow.version>1.15.2</tensorflow.version>
-
+        <netty.boringssl.version>2.0.31.Final</netty.boringssl.version>
         <javacpp.version>1.5.3</javacpp.version>
         <javacpp-presets.version>1.5.3</javacpp-presets.version>
         <javacv.version>1.5.3</javacv.version>
