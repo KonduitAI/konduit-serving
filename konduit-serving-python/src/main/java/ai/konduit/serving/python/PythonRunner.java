@@ -21,28 +21,48 @@ import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
-import ai.konduit.serving.python.util.PythonUtils;
+import ai.konduit.serving.python.util.KonduitPythonUtils;
 import lombok.SneakyThrows;
-import org.bytedeco.javacpp.BytePointer;
-import org.datavec.python.*;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.python4j.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+import static org.nd4j.python4j.PythonTypes.*;
+
 @CanRun(PythonStep.class)
+@Slf4j
 public class PythonRunner implements PipelineStepRunner {
 
     private PythonStep pythonStep;
-    private PythonJob pythonJob;
+    private KonduitPythonJob konduitPythonJob;
 
     @SneakyThrows
     public PythonRunner(PythonStep pythonStep) {
         this.pythonStep = pythonStep;
-        pythonJob = PythonJob.builder()
+        String code = pythonStep.pythonConfig().getPythonCode();
+        if (code == null) {
+            try {
+                code = FileUtils.readFileToString(new File(pythonStep.pythonConfig().getPythonCodePath()), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                log.error("Unable to read code from " + pythonStep.pythonConfig().getPythonCodePath());
+            }
+            log.info("Resolving code from " + pythonStep.pythonConfig().getPythonCodePath());
+        }
+
+        konduitPythonJob = KonduitPythonJob.builder()
+                .name(pythonStep.pythonConfig().getJobSuffix())
                 .setupRunMode(pythonStep.pythonConfig().isSetupAndRun())
-                .code(pythonStep.pythonConfig().getPythonCode())
+                .code(code)
+                .useGil(pythonStep.pythonConfig().isUseGil())
                 .build();
     }
 
@@ -60,7 +80,6 @@ public class PythonRunner implements PipelineStepRunner {
     @SneakyThrows
     @Override
     public Data exec(Context ctx, Data data) {
-        PythonContextManager.deleteNonMainContexts();
         PythonVariables pythonVariables = new PythonVariables();
         Data ret = Data.empty();
         for(String key : data.keys()) {
@@ -68,48 +87,47 @@ public class PythonRunner implements PipelineStepRunner {
                 case NDARRAY:
                     NDArray ndArray = data.getNDArray(key);
                     INDArray arr = ndArray.getAs(INDArray.class);
-                    pythonVariables.addNDArray(key,arr);
+                    pythonVariables.add(key, NumpyArray.INSTANCE,arr);
                     break;
                 case BYTES:
                     byte[] bytes = data.getBytes(key);
-                    BytePointer bytePointer = new BytePointer(bytes);
-                    pythonVariables.addBytes(key,bytePointer);
+                    pythonVariables.add(key, BYTES,bytes);
                     break;
                 case DOUBLE:
                     double aDouble = data.getDouble(key);
-                    pythonVariables.addFloat(key,aDouble);
+                    pythonVariables.add(key,PythonTypes.FLOAT,aDouble);
                     break;
                 case LIST:
                     Preconditions.checkState(pythonStep.pythonConfig().getListTypesForVariableName().containsKey(key),"No input type specified for list with key " + key);
                     ValueType valueType = pythonStep.pythonConfig().getListTypesForVariableName().get(key);
                     List<Object> list = data.getList(key, valueType);
-                    pythonVariables.addList(key,list.toArray(new Object[list.size()]));
+                    pythonVariables.add(key, LIST,list);
                     break;
                 case INT64:
                     long aLong = data.getLong(key);
-                    pythonVariables.addInt(key,aLong);
+                    pythonVariables.add(key,PythonTypes.INT,aLong);
                     break;
                 case BOOLEAN:
                     boolean aBoolean = data.getBoolean(key);
-                    pythonVariables.addBool(key,aBoolean);
+                    pythonVariables.add(key, BOOL,aBoolean);
                     break;
                 case STRING:
                     String string = data.getString(key);
-                    pythonVariables.addStr(key,string);
+                    pythonVariables.add(key,PythonTypes.STR,string);
                     break;
                 case IMAGE:
                     Image image = data.getImage(key);
-                    PythonUtils.addImageToPython(pythonVariables,key,image);
+                    KonduitPythonUtils.addImageToPython(pythonVariables,key,image);
                     break;
                 case BOUNDING_BOX:
                     BoundingBox boundingBox = data.getBoundingBox(key);
                     Map<String,Object> boundingBoxValues = DictUtils.toBoundingBoxDict(boundingBox);
-                    pythonVariables.addDict(key,boundingBoxValues);
+                    pythonVariables.add(key,KonduitPythonUtils.pythonTypeFor(Map.class),boundingBoxValues);
                     break;
                 case POINT:
                     Point point = data.getPoint(key);
                     Map<String,Object> pointerValue = DictUtils.toPointDict(point);
-                    pythonVariables.addDict(key,pointerValue);
+                    pythonVariables.add(key,KonduitPythonUtils.pythonTypeFor(Map.class),pointerValue);
                     break;
                 case DATA:
                     throw new IllegalArgumentException("Illegal type " + data.type(key));
@@ -120,55 +138,55 @@ public class PythonRunner implements PipelineStepRunner {
         PythonVariables outputs = new PythonVariables();
         Map<String, String> pythonOutputs = pythonStep.pythonConfig().getPythonOutputs();
         for(Map.Entry<String,String> entry : pythonOutputs.entrySet()) {
-            outputs.add(entry.getKey(), PythonType.valueOf(entry.getValue()));
+            outputs.add(new PythonVariable(entry.getKey(),PythonTypes.get(entry.getValue())));
         }
 
-        pythonJob.exec(pythonVariables,outputs);
+        konduitPythonJob.exec(pythonVariables,outputs);
 
-        for(String variable : outputs.getVariables()) {
-            switch(outputs.getType(variable).getName()) {
-                case BOOL:
-                    ret.put(variable,outputs.getBooleanValue(variable));
+        for(PythonVariable variable : outputs) {
+            switch(variable.getType().getName().toLowerCase()) {
+                case "bool":
+                    ret.put(variable.getName(),KonduitPythonUtils.getWithType(outputs,variable.getName(),Boolean.class));
                     break;
-                case LIST:
-                    Preconditions.checkState(pythonStep.pythonConfig().getListTypesForVariableName().containsKey(variable),"No input type specified for list with key " + variable);
-                    List listValue = outputs.getListValue(variable);
-                    ValueType valueType = pythonStep.pythonConfig().getListTypesForVariableName().get(variable);
-                    PythonUtils.insertListIntoData(ret, variable, listValue, valueType);
+                case "list":
+                    Preconditions.checkState(pythonStep.pythonConfig().getListTypesForVariableName().containsKey(variable.getName()),"No input type specified for list with key " + variable);
+                    List listValue = KonduitPythonUtils.getWithType(outputs,variable.getName(),List.class);
+                    ValueType valueType = pythonStep.pythonConfig().getListTypesForVariableName().get(variable.getName());
+                    KonduitPythonUtils.insertListIntoData(ret, variable.getName(), listValue, valueType);
                     break;
-                case BYTES:
-                    PythonUtils.insertBytesIntoPythonVariables(
+                case "bytes":
+                    KonduitPythonUtils.insertBytesIntoPythonVariables(
                             ret,
                             outputs,
-                            variable,
+                            variable.getName(),
                             pythonStep.pythonConfig());
                     break;
-                case NDARRAY:
-                    ret.put(variable,new ND4JNDArray(outputs.getNDArrayValue(variable)));
+                case "numpy.ndarray":
+                    ret.put(variable.getName(),new ND4JNDArray(KonduitPythonUtils.getWithType(outputs,variable.getName(),INDArray.class)));
                     break;
-                case STR:
-                    ret.put(variable,outputs.getStrValue(variable));
+                case "str":
+                    ret.put(variable.getName(),KonduitPythonUtils.getWithType(outputs,variable.getName(),String.class));
                     break;
-                case DICT:
-                    ValueType dictValueType = pythonStep.pythonConfig().getTypeForDictionaryForOutputVariableNames().get(variable);
-                    Map<String,Object> items = (Map<String, Object>) outputs.getDictValue(variable);
+                case "dict":
+                    ValueType dictValueType = pythonStep.pythonConfig().getTypeForDictionaryForOutputVariableNames().get(variable.getName());
+                    Map<String,Object> items = (Map<String, Object>) KonduitPythonUtils.getWithType(outputs,variable.getName(),Map.class);
                     switch(dictValueType) {
                         case POINT:
-                            ret.put(variable,DictUtils.fromPointDict(items));
+                            ret.put(variable.getName(),DictUtils.fromPointDict(items));
                             break;
                         case BOUNDING_BOX:
-                            ret.put(variable,DictUtils.boundingBoxFromDict(items));
+                            ret.put(variable.getName(),DictUtils.boundingBoxFromDict(items));
                             break;
                         default:
                             throw new IllegalArgumentException("Limited support for de serializing dictionaries. Invalid type " + dictValueType);
 
                     }
                     break;
-                case INT:
-                    ret.put(variable,outputs.getIntValue(variable));
+                case "int":
+                    ret.put(variable.getName(),KonduitPythonUtils.getWithType(outputs,variable.getName(),Long.class));
                     break;
-                case FLOAT:
-                    ret.put(variable,outputs.getFloatValue(variable));
+                case "float":
+                    ret.put(variable.getName(),KonduitPythonUtils.getWithType(outputs,variable.getName(),Double.class));
                     break;
 
             }

@@ -25,6 +25,7 @@ package ai.konduit.serving.model;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.datavec.python.PythonVariables;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -70,4 +71,8 @@ public class PythonConfig implements Serializable {
     private Map<String,ValueType> outputTypeByteConversions;
 
     private static String defaultPythonPath;
+    @Builder.Default
+    private String jobSuffix = "konduit_job";
+    @Builder.Default
+    private boolean useGil = false;
 }

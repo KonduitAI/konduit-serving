@@ -21,6 +21,7 @@ package ai.konduit.serving.annotation.json;
 import ai.konduit.serving.annotation.AnnotationUtils;
 import ai.konduit.serving.annotation.module.ModuleInfo;
 import ai.konduit.serving.annotation.module.RequiresDependenciesAll;
+import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -36,6 +37,7 @@ import java.util.*;
 @SupportedAnnotationTypes({"ai.konduit.serving.annotation.json.JsonName",
         "ai.konduit.serving.annotation.module.ModuleInfo"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
+@AutoService(Processor.class)
 public class JsonNameProcessor extends AbstractProcessor {
     private static final String PIPELINE_STEP = "ai.konduit.serving.pipeline.api.step.PipelineStep";
     private static final String SWITCH_FN = "ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn";

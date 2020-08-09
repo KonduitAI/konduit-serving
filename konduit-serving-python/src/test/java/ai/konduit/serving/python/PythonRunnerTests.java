@@ -20,30 +20,25 @@ import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
-import ai.konduit.serving.pipeline.impl.data.image.BImage;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import ai.konduit.serving.python.util.PythonUtils;
+import ai.konduit.serving.python.util.KonduitPythonUtils;
 import org.apache.commons.io.IOUtils;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.datavec.python.Python;
-import org.datavec.python.PythonExecutioner;
-import org.datavec.python.PythonType;
-import org.datavec.python.PythonVariables;
+
 import org.junit.Test;
 import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.python4j.PythonContextManager;
+import org.nd4j.python4j.PythonVariables;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.bytedeco.opencv.global.opencv_core.compare;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 import static org.junit.Assert.*;
 
@@ -52,7 +47,7 @@ public class PythonRunnerTests {
 
     @Test
     public void testDictUtilsPoint() {
-        Python.deleteNonMainContexts();
+        PythonContextManager.deleteNonMainContexts();
 
         Point point = Point.create(1,2);
         Map<String,Object> convertedDict = DictUtils.toPointDict(point);
@@ -92,7 +87,7 @@ public class PythonRunnerTests {
 
     @Test
     public void testDictUtilsBoundingBox() {
-        Python.deleteNonMainContexts();
+        PythonContextManager.deleteNonMainContexts();
 
         BoundingBox boundingBox = BoundingBox.create(0.0,1.0,1.0,1.0);
         Map<String, Object> boundingBoxDict = DictUtils.toBoundingBoxDict(boundingBox);
@@ -128,34 +123,33 @@ public class PythonRunnerTests {
 
     @Test
     public void testAllInputTypes() {
-        Python.deleteNonMainContexts();
-        PythonType.TypeName[] values = PythonType.TypeName.values();
+        PythonContextManager.deleteNonMainContexts();
         PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
         StringBuffer codeBuffer = new StringBuffer();
 
         Data data = Data.empty();
         Data assertion = Data.empty();
-        for(int i = 0; i < values.length; i++) {
+        for(int i = 0; i < KonduitPythonUtils.PYTHON_VARIABLE_TYPES.length; i++) {
             String varName = "i" + i;
             String codeSnippet = varName + " += 1\n";
-            switch(values[i]) {
-                case FLOAT:
-                    builder.pythonInput(String.valueOf(i),values[i].name());
-                    builder.pythonOutput(varName,values[i].name());
+            switch(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]) {
+                case "float":
+                    builder.pythonInput(String.valueOf(i),KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     codeBuffer.append(codeSnippet);
                     data.put(varName,1.0f);
                     assertion.put(varName,2.0f);
                     break;
-                case INT:
-                    builder.pythonInput(varName,values[i].name());
-                    builder.pythonOutput(varName,values[i].name());
+                case "int":
+                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     codeBuffer.append(codeSnippet);
                     data.put(varName,1);
                     assertion.put(varName,2);
                     break;
-                case DICT:
-                    builder.pythonInput(varName,values[i].name());
-                    builder.pythonOutput(varName,values[i].name());
+                case "dict":
+                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     builder.typeForDictionaryForVariableName(varName,ValueType.POINT);
                     builder.typeForDictionaryForOutputVariableName(varName,ValueType.POINT);
                     codeBuffer.append(varName + "['z'] = 1\n");
@@ -163,42 +157,42 @@ public class PythonRunnerTests {
                     data.put(varName,point);
                     assertion.put(varName,Point.create(1,2,1));
                     break;
-                case STR:
-                    builder.pythonInput(varName,values[i].name());
-                    builder.pythonOutput(varName,values[i].name());
+                case "str":
+                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     codeBuffer.append(varName + " += '1'\n");
                     data.put(varName,String.valueOf(1));
                     assertion.put(varName,"11");
                     break;
-                case NDARRAY:
-                    builder.pythonInput(varName,values[i].name());
-                    builder.pythonOutput(varName,values[i].name());
+                case "numpy.ndarray":
+                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     codeBuffer.append(codeSnippet);
                     data.put(varName,new ND4JNDArray(Nd4j.scalar(1.0)));
                     assertion.put(varName,new ND4JNDArray(Nd4j.scalar(2.0)));
                     break;
-                case BYTES:
-                    builder.pythonInput(varName,values[i].name());
-                    builder.pythonOutput(varName,values[i].name());
-                    builder.pythonOutput("len_" + varName ,PythonType.TypeName.INT.name());
+                case "bytes":
+                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    builder.pythonOutput("len_" + varName ,"int");
                     builder.outputTypeByteConversion(varName,ValueType.BYTES);
                     codeBuffer.append(varName + "= bytes(" + varName + "); len_" + varName + " = len(" + varName + ")\n");
                     data.put(varName,new byte[]{1});
                     assertion.put(varName,new byte[]{1});
                     assertion.put("len_" + varName,1);
                     break;
-                case LIST:
-                    builder.pythonInput(varName,values[i].name());
-                    builder.pythonOutput(varName,values[i].name());
+                case "list":
+                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     builder.listTypeForVariableName(varName, ValueType.INT64);
                     builder.listTypeForOutputVariableName(varName,ValueType.INT64);
                     codeBuffer.append(varName + ".append(1)\n");
                     data.putListInt64(varName,Arrays.asList(1L));
                     assertion.putListInt64(varName, Arrays.asList(1L,1L));
                     break;
-                case BOOL:
-                    builder.pythonInput(varName,values[i].name());
-                    builder.pythonOutput(varName,values[i].name());
+                case "bool":
+                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     data.put(varName,true);
                     codeBuffer.append(varName + " = True\n");
                     assertion.put(varName,true);
@@ -224,11 +218,11 @@ public class PythonRunnerTests {
 
     @Test
     public void testImageSerde() throws Exception {
-        Python.deleteNonMainContexts();
+        PythonContextManager.deleteNonMainContexts();
         PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
-        builder.pythonInput("input2", PythonType.TypeName.BYTES.name());
-        builder.pythonOutput("len_output2",PythonType.TypeName.INT.name());
-        builder.pythonOutput("output2",PythonType.TypeName.BYTES.name());
+        builder.pythonInput("input2", "bytes");
+        builder.pythonOutput("len_output2","int");
+        builder.pythonOutput("output2","bytes");
 
         builder.pythonCode("output2 = bytes(input2); len_output2 = len(output2)\n");
         builder.outputTypeByteConversion("output2",ValueType.IMAGE);
@@ -269,15 +263,39 @@ public class PythonRunnerTests {
         Mat mat = imread(image.getAbsolutePath());
         MatImage matImage = new MatImage(mat);
 
-        PythonUtils.addImageToPython(pythonVariables,"image",matImage);
-        assertNotNull(pythonVariables.getBytesValue("image"));
+        KonduitPythonUtils.addImageToPython(pythonVariables,"image",matImage);
+        assertNotNull(KonduitPythonUtils.getWithType(pythonVariables,"image",byte[].class));
 
-        BytePointer image1 = pythonVariables.getBytesValue("image");
+        BytePointer image1 = new BytePointer(KonduitPythonUtils.getWithType(pythonVariables,"image",byte[].class));
         Mat mat2 = new Mat(mat.rows(),mat.cols(),mat.type(),image1,mat.step());
-        assertEquals(mat.data(),mat2.data());
         assertEquals(mat.rows(),mat2.rows());
         assertEquals(mat.cols(),mat2.cols());
         assertEquals(mat.step(),mat2.step());
+    }
+
+    @Test
+    public void testNdArray() {
+        PythonConfig pythonConfig = PythonConfig.builder()
+                .pythonInput("input","numpy.ndarray")
+                .pythonInput("input2","numpy.ndarray")
+                .pythonOutput("output","numpy.ndarray")
+                .pythonOutput("type_str","str")
+                .pythonCode("import numpy as np; output = np.array(input + input2); type_str = type(output);\n")
+                .build();
+        Data data = Data.empty();
+        data.put("input",new ND4JNDArray(Nd4j.scalar(1.0)));
+        data.put("input2",new ND4JNDArray(Nd4j.scalar(1.0)));
+        Data assertion = Data.empty();
+        assertion.put("output",new ND4JNDArray(Nd4j.scalar(2.0)));
+        assertion.put("type_str","str");
+        PythonStep pythonStep = new PythonStep()
+                .pythonConfig(pythonConfig);
+        SequencePipeline sequencePipeline = SequencePipeline.builder()
+                .add(pythonStep)
+                .build();
+        PipelineExecutor executor = sequencePipeline.executor();
+        Data exec = executor.exec(data);
+        assertEquals(assertion.getNDArray("output"),exec.getNDArray("output"));
     }
 
 }

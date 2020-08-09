@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ai.onnxruntime.OrtEnvironment.LoggingLevel.ORT_LOGGING_LEVEL_WARNING;
 import static org.bytedeco.onnxruntime.global.onnxruntime.*;
 
 @Slf4j
@@ -32,7 +31,7 @@ public class ONNXRunner implements PipelineStepRunner {
 
     public ONNXRunner(ONNXStep onnxStep) {
         this.onnxStep = onnxStep;
-        Env env = new Env(ORT_LOGGING_LEVEL_WARNING.getValue(), new BytePointer("konduit-serving-onnx-session" + System.currentTimeMillis()));
+        Env env = new Env(ORT_LOGGING_LEVEL_WARNING, new BytePointer("konduit-serving-onnx-session" + System.currentTimeMillis()));
 
         try (SessionOptions sessionOptions = new SessionOptions()) {
             try (Pointer bp = Loader.getPlatform().toLowerCase().startsWith("windows") ? new CharPointer(onnxStep.modelUri()) : new BytePointer(onnxStep.modelUri())) {

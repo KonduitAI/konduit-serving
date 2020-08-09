@@ -16,15 +16,10 @@
 package ai.konduit.serving.python.util;
 
 import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
-import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.api.data.*;
-import ai.konduit.serving.pipeline.impl.data.image.PngImage;
-import com.google.flatbuffers.ByteBufferUtil;
 import org.apache.commons.io.IOUtils;
 import org.bytedeco.javacpp.BytePointer;
-import org.datavec.python.Python;
-import org.datavec.python.PythonType;
-import org.datavec.python.PythonVariables;
+
 import org.junit.Test;
 import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.factory.Nd4j;
@@ -36,10 +31,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
+import ai.konduit.serving.model.PythonConfig;
+import org.nd4j.python4j.PythonType;
+import org.nd4j.python4j.PythonTypes;
+import org.nd4j.python4j.PythonVariable;
+import org.nd4j.python4j.PythonVariables;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-public class PythonUtilsTest {
+public class KonduitPythonUtilsTest {
 
     @Test
     public void testListInsert() throws Exception {
@@ -47,14 +48,14 @@ public class PythonUtilsTest {
         for(ValueType valueType : ValueType.values()) {
             switch(valueType) {
                 case STRING:
-                    PythonUtils.insertListIntoData(
+                    KonduitPythonUtils.insertListIntoData(
                             data,valueType.toString(),
                             Arrays.asList("value"),
                             valueType);
                     assertEquals(Arrays.asList("value"),data.getList(valueType.toString(),valueType));
                     break;
                 case BYTES:
-                    PythonUtils.insertListIntoData(
+                    KonduitPythonUtils.insertListIntoData(
                             data,valueType.toString(),
                             Arrays.asList("value".getBytes()),
                             valueType);
@@ -64,7 +65,7 @@ public class PythonUtilsTest {
                     ClassPathResource classPathResource = new ClassPathResource("data/5_32x32.png");
                     File image = classPathResource.getFile();
                     Image image2 = Image.create(image);
-                    PythonUtils.insertListIntoData(
+                    KonduitPythonUtils.insertListIntoData(
                             data,valueType.toString(),
                             Arrays.asList(image2),
                             valueType);
@@ -72,14 +73,14 @@ public class PythonUtilsTest {
 
                     break;
                 case DOUBLE:
-                    PythonUtils.insertListIntoData(
+                    KonduitPythonUtils.insertListIntoData(
                             data,valueType.toString(),
                             Arrays.asList(1.0),
                             valueType);
                     assertEquals(Arrays.asList(1.0),data.getList(valueType.toString(),valueType));
                     break;
                 case INT64:
-                    PythonUtils.insertListIntoData(
+                    KonduitPythonUtils.insertListIntoData(
                             data,valueType.toString(),
                             Arrays.asList(1),
                             valueType);
@@ -87,14 +88,14 @@ public class PythonUtilsTest {
 
                     break;
                 case BOOLEAN:
-                    PythonUtils.insertListIntoData(
+                    KonduitPythonUtils.insertListIntoData(
                             data,valueType.toString(),
                             Arrays.asList(true),
                             valueType);
                     assertEquals(Arrays.asList(true),data.getList(valueType.toString(),valueType));
                     break;
                 case BOUNDING_BOX:
-                    PythonUtils.insertListIntoData(
+                    KonduitPythonUtils.insertListIntoData(
                             data,valueType.toString(),
                             Arrays.asList(BoundingBox.create(1.0,1.0,1.0,1.0)),
                             valueType);
@@ -102,7 +103,7 @@ public class PythonUtilsTest {
 
                     break;
                 case POINT:
-                    PythonUtils.insertListIntoData(
+                    KonduitPythonUtils.insertListIntoData(
                             data,valueType.toString(),
                             Arrays.asList(Point.create(1,1,1)),
                             valueType);
@@ -111,7 +112,7 @@ public class PythonUtilsTest {
                     break;
 
                 case NDARRAY:
-                    PythonUtils.insertListIntoData(
+                    KonduitPythonUtils.insertListIntoData(
                             data,valueType.toString(),
                             Arrays.asList(Nd4j.scalar(1.0)),
                             valueType);
@@ -120,7 +121,7 @@ public class PythonUtilsTest {
                     break;
 
                 case BYTEBUFFER:
-                    PythonUtils.insertListIntoData(
+                    KonduitPythonUtils.insertListIntoData(
                             data,valueType.toString(),
                             Arrays.asList(ByteBuffer.wrap(new byte[]{1})),
                             valueType);
@@ -134,21 +135,22 @@ public class PythonUtilsTest {
     @Test
     public void testInsertBytes() throws Exception {
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonOutput("len_input",PythonType.TypeName.INT.name())
-                .pythonOutput("input", PythonType.TypeName.BYTES.name())
+                .pythonOutput("len_input","int")
+                .pythonOutput("input", "bytes")
                 .outputTypeByteConversion("input",ValueType.BYTES)
                 .build();
 
         Data input = Data.empty();
         PythonVariables pythonVariables = new PythonVariables();
         for(Map.Entry<String,String> entry : pythonConfig.getPythonOutputs().entrySet()) {
-            pythonVariables.add(entry.getKey(),PythonType.valueOf(entry.getValue()));
+            pythonVariables.add(new PythonVariable(entry.getKey(),PythonTypes.get(entry.getKey())));
         }
 
-        pythonVariables.addBytes("input",new BytePointer(new byte[]{1}));
-        pythonVariables.addInt("len_input",1);
+        KonduitPythonUtils.addObjectToPythonVariables(pythonVariables,"input",new byte[]{1});
+        KonduitPythonUtils.addObjectToPythonVariables(pythonVariables,"len_input",1);
 
-        PythonUtils.insertBytesIntoPythonVariables(
+
+        KonduitPythonUtils.insertBytesIntoPythonVariables(
                 input,
                 pythonVariables,
                 "input"
@@ -161,25 +163,25 @@ public class PythonUtilsTest {
     @Test
     public void testInsertImage() throws Exception {
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonOutput("len_input",PythonType.TypeName.INT.name())
-                .pythonOutput("input", PythonType.TypeName.BYTES.name())
+                .pythonOutput("len_input","int")
+                .pythonOutput("input", "bytes")
                 .outputTypeByteConversion("input",ValueType.IMAGE)
                 .build();
 
         Data input = Data.empty();
         PythonVariables pythonVariables = new PythonVariables();
         for(Map.Entry<String,String> entry : pythonConfig.getPythonOutputs().entrySet()) {
-            pythonVariables.add(entry.getKey(),PythonType.valueOf(entry.getValue()));
+            pythonVariables.add(new PythonVariable(entry.getKey(),PythonTypes.get(entry.getKey())));
         }
 
         ClassPathResource testImage = new ClassPathResource("data/5_32x32.png");
         File image = testImage.getFile();
         byte[] imageBytes = IOUtils.toByteArray(new FileInputStream(image));
         Image assertionImage = Image.create(image);
-        pythonVariables.addBytes("input",new BytePointer(imageBytes));
-        pythonVariables.addInt("len_input",imageBytes.length);
+        pythonVariables.add("input",PythonTypes.BYTES,imageBytes);
+        pythonVariables.add("len_input",PythonTypes.INT,imageBytes.length);
 
-        PythonUtils.insertBytesIntoPythonVariables(
+        KonduitPythonUtils.insertBytesIntoPythonVariables(
                 input,
                 pythonVariables,
                 "input"
@@ -194,21 +196,22 @@ public class PythonUtilsTest {
     @Test
     public void testInsertString() throws Exception {
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonOutput("len_input",PythonType.TypeName.INT.name())
-                .pythonOutput("input", PythonType.TypeName.BYTES.name())
+                .pythonOutput("len_input","int")
+                .pythonOutput("input", "bytes")
                 .outputTypeByteConversion("input",ValueType.STRING)
                 .build();
 
         Data input = Data.empty();
         PythonVariables pythonVariables = new PythonVariables();
         for(Map.Entry<String,String> entry : pythonConfig.getPythonOutputs().entrySet()) {
-            pythonVariables.add(entry.getKey(),PythonType.valueOf(entry.getValue()));
+            pythonVariables.add(new PythonVariable(entry.getKey(),PythonTypes.get(entry.getKey())));
         }
 
-        pythonVariables.addBytes("input",new BytePointer("input".getBytes()));
-        pythonVariables.addInt("len_input","input".getBytes().length);
 
-        PythonUtils.insertBytesIntoPythonVariables(
+        pythonVariables.add("input",PythonTypes.BYTES,"input".getBytes());
+        pythonVariables.add("len_input",PythonTypes.INT,"input".getBytes().length);
+
+        KonduitPythonUtils.insertBytesIntoPythonVariables(
                 input,
                 pythonVariables,
                 "input"
@@ -220,21 +223,22 @@ public class PythonUtilsTest {
     @Test
     public void testInsertByteBuffer() throws Exception {
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonOutput("len_input",PythonType.TypeName.INT.name())
-                .pythonOutput("input", PythonType.TypeName.BYTES.name())
+                .pythonOutput("len_input","int")
+                .pythonOutput("input", "bytes")
                 .outputTypeByteConversion("input",ValueType.BYTEBUFFER)
                 .build();
 
         Data input = Data.empty();
         PythonVariables pythonVariables = new PythonVariables();
         for(Map.Entry<String,String> entry : pythonConfig.getPythonOutputs().entrySet()) {
-            pythonVariables.add(entry.getKey(),PythonType.valueOf(entry.getValue()));
+            pythonVariables.add(new PythonVariable(entry.getKey(),PythonTypes.get(entry.getKey())));
         }
 
-        pythonVariables.addBytes("input",new BytePointer(new byte[]{1}));
-        pythonVariables.addInt("len_input",1);
+        pythonVariables.add("input",PythonTypes.BYTES,new byte[]{1});
+        pythonVariables.add("len_input",PythonTypes.INT,1);
 
-        PythonUtils.insertBytesIntoPythonVariables(
+
+        KonduitPythonUtils.insertBytesIntoPythonVariables(
                 input,
                 pythonVariables,
                 "input"
@@ -245,7 +249,7 @@ public class PythonUtilsTest {
 
     @Test
     public void testIllegalInsertList() {
-        PythonUtils.insertListIntoData(
+        KonduitPythonUtils.insertListIntoData(
                 Data.empty(),"illegal",
                 Arrays.asList(Collections.emptyList()),
                 ValueType.LIST);
@@ -253,7 +257,7 @@ public class PythonUtilsTest {
 
     @Test
     public void testIllegalInsertData() {
-        PythonUtils.insertListIntoData(
+        KonduitPythonUtils.insertListIntoData(
                 Data.empty(),"illegal",
                 Arrays.asList(Data.empty()),
                 ValueType.DATA);
