@@ -30,6 +30,8 @@ public interface Image {
 
     int width();
 
+    int channels();
+
     Object get();
 
     <T> T getAs(ImageFormat<T> format);

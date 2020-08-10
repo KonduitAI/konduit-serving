@@ -19,14 +19,15 @@
 package ai.konduit.serving.data.image.convert;
 
 import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
-import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
 import ai.konduit.serving.data.image.convert.config.NDFormat;
+import ai.konduit.serving.data.image.util.ImageUtils;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
+import com.google.common.primitives.Longs;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.indexer.*;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -34,10 +35,10 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.common.primitives.Pair;
-import org.nd4j.common.util.ArrayUtil;
 
 import java.nio.*;
-import java.util.function.IntToDoubleFunction;
+
+import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 
 /**
  * Utility method for converting Image objects to NDArrays.
@@ -167,19 +168,32 @@ public class ImageToNDArray {
         }
 
         m = convertColor(m, config);
+        Preconditions.checkState(m.channels() <= 3,"Channels must not be greater than 3!");
 
         ByteBuffer bb = toFloatBuffer(m, config);
 
         if (config.dataType() != NDArrayType.FLOAT) //TODO there are likely more efficient ways than this!
-            bb = cast(bb, NDArrayType.FLOAT, config.dataType());
+            bb = ImageUtils.cast(bb, NDArrayType.FLOAT, config.dataType());
 
         int ch = config.channelLayout().numChannels();
 
         long[] shape;
         if (config.format() == NDFormat.CHANNELS_FIRST) {
-            shape = config.includeMinibatchDim() ? new long[]{1, ch, outH, outW} : new long[]{ch, outH, outW};
+            shape =  new long[]{ch, outH, outW};
         } else {
-            shape = config.includeMinibatchDim() ? new long[]{1, outH, outW, ch} : new long[]{outH, outW, ch};
+            shape = new long[]{outH, outW, ch};
+        }
+
+        /*   INDArray arrCreate = Nd4j.create(ND4JUtil.typeNDArrayTypeToNd4j(config.dataType()),shape, Nd4j.getStrides(shape),'c');
+         *//**
+         * Note this logic assumes 3d arrays.
+         * Postpone reshape till after the data is filled in
+         * since the new shape is just the minibatch size.
+         *//*
+        ImageUtils.fillNDArray(m,true,arrCreate);
+        ByteBuffer bb = arrCreate.data().asNio();*/
+        if(config.includeMinibatchDim()) {
+            shape = Longs.concat(new long[]{1},shape);
         }
 
         SerializedNDArray arr = new SerializedNDArray(config.dataType(), shape, bb);
@@ -281,10 +295,6 @@ public class ImageToNDArray {
         return m;
     }
 
-    public interface FloatNormalizer {
-        float normalize(float f, int channel);
-    }
-
     protected static ByteBuffer toFloatBuffer(Mat m, ImageToNDArrayConfig config) {
         Preconditions.checkState(config.channelLayout() == NDChannelLayout.RGB || config.channelLayout() == NDChannelLayout.BGR,
                 "Only RGB and BGR conversion implement so far");
@@ -307,78 +317,34 @@ public class ImageToNDArray {
 
         boolean rgb = config.channelLayout() == NDChannelLayout.RGB;
 
-        FloatNormalizer f;
-        ImageNormalization n = config.normalization();
-        if(n == null || n.type() == ImageNormalization.Type.NONE){
-            f = (x,c) -> x;     //No-op
-        } else {
-            switch (config.normalization().type()){
-                case SCALE:
-                    float scale = (n.maxValue() == null ? 255.0f : n.maxValue().floatValue()) / 2.0f;
-                    f = (x,c) -> (x / scale - 1.0f);
-                    break;
-                case SCALE_01:
-                    float scale01 = n.maxValue() == null ? 255.0f : n.maxValue().floatValue();
-                    f = (x,c) -> (x / scale01);
-                    break;
-                case SUBTRACT_MEAN:
-                    //TODO support grayscale
-                    Preconditions.checkState(n.meanRgb() != null, "Error during normalization: Normalization type is set to " +
-                            "SUBTRACT_MEAN but not meanRgb array is provided");
-                    double[] mrgb = n.meanRgb();
-                    float[] channelMeans = rgb ? ArrayUtil.toFloats(mrgb) : new float[]{(float) mrgb[2], (float) mrgb[1], (float) mrgb[0]};
-                    f = (x,c) -> (x - channelMeans[c]);
-                    break;
-                case STANDARDIZE:
-                    Preconditions.checkState(n.meanRgb() != null, "Error during normalization: Normalization type is set to " +
-                            "STANDARDIZE but not meanRgb array is provided");
-                    Preconditions.checkState(n.stdRgb() != null, "Error during normalization: Normalization type is set to " +
-                            "STANDARDIZE but not stdRgb array is provided");
-                    double[] mrgb2 = n.meanRgb();
-                    double[] stdrgb = n.stdRgb();
-                    float[] channelMeans2 = rgb ? ArrayUtil.toFloats(mrgb2) : new float[]{(float) mrgb2[2], (float) mrgb2[1], (float) mrgb2[0]};
-                    float[] channelStd = rgb ? ArrayUtil.toFloats(stdrgb) : new float[]{(float) stdrgb[2], (float) stdrgb[1], (float) stdrgb[0]};
-                    f = (x,c) -> ( (x-channelMeans2[c]) / channelStd[c]);
-                    break;
-                case INCEPTION:
-                    float scale2 = n.maxValue() == null ? 255.0f : n.maxValue().floatValue();
-                    f = (x,c) -> ( ((x/scale2) - 0.5f) * 2.0f );
-                    break;
-                case VGG_SUBTRACT_MEAN:
-                    double[] mrgbVgg = ImageNormalization.getVggMeanRgb();
-                    float[] channelMeansVGG = rgb ? ArrayUtil.toFloats(mrgbVgg) : new float[]{(float) mrgbVgg[2], (float) mrgbVgg[1], (float) mrgbVgg[0]};
-                    f = (x,c) -> (x - channelMeansVGG[c]);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unsupported image normalization type: " + config.normalization().type());
-            }
-        }
+        ImageUtils.FloatNormalizer f = ImageUtils.getFloatNormalizer(config, rgb);
+
 
         Indexer imgIdx = m.createIndexer(direct);
         if (imgIdx instanceof UByteIndexer) {
             UByteIndexer ubIdx = (UByteIndexer) imgIdx;
-
             if (config.format() == NDFormat.CHANNELS_FIRST) {
                 if (rgb) {
                     //Mat is HWC in BGR, we want (N)CHW in RGB format
                     int[] rgbToBgr = {2, 1, 0};
-                    for (int c = 0; c < 3; c++) {
+                    for (int c = 0; c < rgbToBgr.length; c++) {
                         for (int y = 0; y < h; y++) {
                             for (int x = 0; x < w; x++) {
-                                int idxBGR = (ch * w * y) + (ch * x) + rgbToBgr[c];
-                                int v = ubIdx.get(idxBGR);
+                                //int idxBGR = (ch * w * y) + (ch * x) + rgbToBgr[c];
+                                int v = ubIdx.get(y,x,rgbToBgr[c]);
                                 float normalized = f.normalize(v, c);
                                 fb.put(normalized);
                             }
                         }
                     }
                 } else {
+                    UByteRawIndexer uByteRawIndexer = (UByteRawIndexer) ubIdx;
                     //Mat is HWC in BGR, we want (N)CHW in BGR format
                     for (int c = 0; c < 3; c++) {
                         for (int y = 0; y < h; y++) {
                             for (int x = 0; x < w; x++) {
                                 int idxBGR = (ch * w * y) + (ch * x) + c;
-                                int v = ubIdx.get(idxBGR);
+                                int v = uByteRawIndexer.getRaw(idxBGR);
                                 float normalized = f.normalize(v, c);
                                 fb.put(normalized);
                             }
@@ -388,18 +354,22 @@ public class ImageToNDArray {
             } else {
                 if (rgb) {
                     //Mat is HWC in BGR, we want (N)HWC in RGB format
+                    fb.position(0);
+                    UByteRawIndexer uByteRawIndexer = (UByteRawIndexer) ubIdx;
                     for (int i = 0; i < lengthElements; i += 3) {
-                        int b = ubIdx.get(i);
-                        int g = ubIdx.get(i + 1);
-                        int r = ubIdx.get(i + 2);
+                        int b = uByteRawIndexer.getRaw(i);
+                        int g = uByteRawIndexer.getRaw(i + 1);
+                        int r = uByteRawIndexer.getRaw(i + 2);
                         fb.put(f.normalize(r, 0));
                         fb.put(f.normalize(g, 1));
                         fb.put(f.normalize(b, 2));
                     }
                 } else {
                     //Mat is HWC in BGR, we want (N)HWC in BGR format
+                    UByteRawIndexer uByteRawIndexer = (UByteRawIndexer) ubIdx;
+
                     for (int i = 0; i < lengthElements; i++) {
-                        float normalized = f.normalize(ubIdx.get(i), i % 3);
+                        float normalized = f.normalize(uByteRawIndexer.getRaw(i), i % 3);
                         fb.put(normalized);
                     }
                 }
@@ -411,126 +381,4 @@ public class ImageToNDArray {
         return bb;
     }
 
-    //TODO This isn't the most efficient or elegant approach, but it should work OK for images
-    protected static ByteBuffer cast(ByteBuffer from, NDArrayType fromType, NDArrayType toType) {
-        if (fromType == toType)
-            return from;
-
-        boolean direct = !Loader.getPlatform().startsWith("android");
-
-
-        IntToDoubleFunction f;
-
-        int length;
-        switch (fromType) {
-            case DOUBLE:
-                DoubleBuffer db = from.asDoubleBuffer();
-                length = db.limit();
-                f = db::get;
-                break;
-            case FLOAT:
-                FloatBuffer fb = from.asFloatBuffer();
-                length = fb.limit();
-                f = fb::get;
-                break;
-            case INT64:
-                LongBuffer lb = from.asLongBuffer();
-                length = lb.limit();
-                f = i -> (double) lb.get();
-                break;
-            case INT32:
-                IntBuffer ib = from.asIntBuffer();
-                length = ib.limit();
-                f = ib::get;
-                break;
-            case INT16:
-                ShortBuffer sb = from.asShortBuffer();
-                length = sb.limit();
-                f = sb::get;
-                break;
-            case INT8:
-                length = from.limit();
-                f = from::get;
-                break;
-            case FLOAT16:
-            case BFLOAT16:
-            case UINT64:
-            case UINT32:
-            case UINT16:
-            case UINT8:
-            case BOOL:
-            case UTF8:
-            default:
-                throw new UnsupportedOperationException("Conversion to " + fromType + " not supported or not yet implemented");
-        }
-
-        int bytesLength = toType.width() * length;
-        ByteBuffer bb = direct ? ByteBuffer.allocateDirect(bytesLength).order(ByteOrder.LITTLE_ENDIAN) : ByteBuffer.allocate(bytesLength).order(ByteOrder.LITTLE_ENDIAN);
-
-        switch (toType) {
-            case DOUBLE:
-                DoubleBuffer db = bb.asDoubleBuffer();
-                for (int i = 0; i < length; i++)
-                    db.put(f.applyAsDouble(i));
-                break;
-            case FLOAT:
-                FloatBuffer fb = bb.asFloatBuffer();
-                for (int i = 0; i < length; i++)
-                    fb.put((float) f.applyAsDouble(i));
-                break;
-            case INT64:
-                LongBuffer lb = bb.asLongBuffer();
-                for (int i = 0; i < length; i++)
-                    lb.put((long) f.applyAsDouble(i));
-                break;
-            case INT32:
-                IntBuffer ib = bb.asIntBuffer();
-                for (int i = 0; i < length; i++)
-                    ib.put((int) f.applyAsDouble(i));
-                break;
-            case INT16:
-                ShortBuffer sb = bb.asShortBuffer();
-                for (int i = 0; i < length; i++)
-                    sb.put((short) f.applyAsDouble(i));
-                break;
-            case INT8:
-                for (int i = 0; i < length; i++)
-                    bb.put((byte) f.applyAsDouble(i));
-                break;
-            case UINT8:
-                //TODO inefficient - x -> double -> int -> uint8
-                UByteIndexer idx_ui8 = UByteIndexer.create(bb);
-                for( int i=0; i<length; i++ )
-                    idx_ui8.put(i, (int)f.applyAsDouble(i));
-                break;
-            case FLOAT16:
-                HalfIndexer idx_f16 = HalfIndexer.create(bb.asShortBuffer());
-                for( int i=0; i<length; i++)
-                    idx_f16.put(i, (float)f.applyAsDouble(i));
-                break;
-            case BFLOAT16:
-                Bfloat16Indexer idx_bf16 = Bfloat16Indexer.create(bb.asShortBuffer());
-                for( int i=0; i<length; i++ )
-                    idx_bf16.put(i, (float)f.applyAsDouble(i));
-                break;
-            case UINT64:
-                ULongIndexer idx_ui64 = ULongIndexer.create(bb.asLongBuffer());
-                for( int i=0; i<length; i++)
-                    idx_ui64.put(i, (long)f.applyAsDouble(i));
-                break;
-            case UINT32:
-                UIntIndexer idx_ui32 = UIntIndexer.create(bb.asIntBuffer());
-                for( int i=0; i<length; i++ )
-                    idx_ui32.put(i, (int)f.applyAsDouble(i));
-                break;
-            case UINT16:
-                UShortIndexer idx_ui16 = UShortIndexer.create(bb.asShortBuffer());
-                for( int i=0; i<length; i++ )
-                    idx_ui16.put(i, (int)f.applyAsDouble(i));
-                break;
-            default:
-                throw new UnsupportedOperationException("Conversion to " + fromType + " to " + toType + " not supported or not yet implemented");
-        }
-        return bb;
-    }
 }

@@ -106,9 +106,9 @@ public class NDArrayUtils {
 
         float[][][][] nchw = new float[n][c][h][w];
         for( int i=0; i<n; i++ ){
-            for( int j=0; j<h; j++ ){
-                for( int k=0; k<w; k++ ){
-                    for( int l=0; l<c; l++ ){
+            for( int j=0; j < h; j++ ){
+                for( int k=0; k < w; k++ ){
+                    for( int l=0; l <c; l++ ){
                         nchw[i][l][j][k] = nhwc[i][j][k][l];
                     }
                 }

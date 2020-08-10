@@ -42,6 +42,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.datavec</groupId>
+            <artifactId>datavec-data-image</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv-platform</artifactId>
             <version>${javacpp.version}</version>
@@ -67,7 +72,6 @@
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-nd4j</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
