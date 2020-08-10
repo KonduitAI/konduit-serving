@@ -97,7 +97,7 @@ public class DL4JRunner implements PipelineStepRunner {
     public DL4JRunner(DL4JStep step) {
         this.step = step;
 
-        if(this.step.loaderClass() != null){
+        if(this.step.loaderClass() != null) {
             //TODO this probably won't work for OSGi due to Class.forName
             Function<String,Object> fn;
             try{

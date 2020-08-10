@@ -40,6 +40,8 @@ public class InferenceConfiguration implements Serializable, TextConfig {
     @Schema(description = "Server host", defaultValue = "localhost")
     private String host = "localhost";
 
+
+
     @Schema(description = "Server port. 0 means that a random port will be selected.", defaultValue = "0")
     private int port = 0;
     

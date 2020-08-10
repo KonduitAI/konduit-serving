@@ -41,7 +41,7 @@ public abstract class BaseSwaggerAnnotationCheck {
 
     public void runTest() throws ClassNotFoundException {
 
-            Set<Class<?>> failedClasses = new HashSet<Class<?>>();
+            Set<Class<?>> failedClasses = new HashSet<>();
             Reflections reflections = new Reflections(getPackageName());
             Class<Object> tcClass = (Class<Object>) Class.forName("ai.konduit.serving.pipeline.api.step.PipelineStep");
             Set<Class<?>> subTypes = reflections.getSubTypesOf(tcClass);
