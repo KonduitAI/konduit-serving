@@ -54,6 +54,8 @@ import static ai.konduit.serving.cli.launcher.command.KonduitRunCommand.DEFAULT_
 @Slf4j
 public class ServeCommand extends DefaultCommand {
 
+    protected String host;
+    protected int port;
     protected String id;
     protected String launcher;
     protected int instances = 1;
@@ -63,6 +65,32 @@ public class ServeCommand extends DefaultCommand {
 
     protected boolean redirect;
     protected String jvmOptions;
+
+    /**
+     * Sets the host name of the konduit server.
+     *
+     * @param host host name
+     */
+    @Option(shortName = "h", longName = "host", argName = "host")
+    @DefaultValue("localhost")
+    @Description("Specifies the host name of the konduit server when the configuration provided is " +
+            "just a pipeline configuration instead of a whole inference configuration. Defaults to 'localhost'.")
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    /**
+     * Sets the port of the konduit server.
+     *
+     * @param port port number
+     */
+    @Option(shortName = "p", longName = "port", argName = "port")
+    @DefaultValue("0")
+    @Description("Specifies the port number of the konduit server when the configuration provided is " +
+            "just a pipeline configuration instead of a whole inference configuration. Defaults to '0'.")
+    public void setPort(int port) {
+        this.port = port;
+    }
 
     /**
      * Sets the number of instance of the verticle to create.
