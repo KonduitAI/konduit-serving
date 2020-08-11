@@ -104,9 +104,6 @@ public class InferenceVerticleHttp extends InferenceVerticle {
 
                             saveInspectionDataIfRequired(pid);
 
-                            // Periodically checks for configuration updates and save them.
-                            vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
-
                             log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.host());
                             log.info("Inference HTTP server started on port {} with {} pipeline steps", actualPort, pipeline.size());
                             startPromise.complete();

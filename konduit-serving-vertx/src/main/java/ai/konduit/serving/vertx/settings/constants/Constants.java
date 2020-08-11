@@ -33,7 +33,12 @@ public class Constants {
     public static final String DEFAULT_WORKING_BASE_DIR_NAME = ".konduit-serving";
 
     /**
-     * The name of the default konduit-serving build data directory .
+     * The name of the default konduit-serving vertx runtime and cache data directory.
+     */
+    public static final String DEFAULT_VERTX_DIR_NAME = "vertx";
+
+    /**
+     * The name of the default konduit-serving build data directory.
      */
     public static final String DEFAULT_BUILD_DIR_NAME = "build";
 
