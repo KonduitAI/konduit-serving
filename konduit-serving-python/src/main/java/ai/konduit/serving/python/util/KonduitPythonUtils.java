@@ -24,6 +24,7 @@ import ai.konduit.serving.pipeline.impl.data.image.*;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.python.DictUtils;
 import ai.konduit.serving.python.PythonStep;
+import com.google.gson.internal.$Gson$Preconditions;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import org.bytedeco.javacpp.BytePointer;
@@ -78,9 +79,19 @@ public class KonduitPythonUtils {
         for(Object inputItem : input) {
             switch(valueType) {
                 case NDARRAY:
-                    NDArray ndArray = (NDArray) inputItem;
-                    INDArray arr = ndArray.getAs(INDArray.class);
-                    ret.add(arr);
+                    if(inputItem instanceof INDArray) {
+                        INDArray arr = (INDArray) inputItem;
+                        ret.add(arr);
+                    }
+                    else if(inputItem instanceof NDArray) {
+                        NDArray ndArray = (NDArray) inputItem;
+                        INDArray arr = ndArray.getAs(INDArray.class);
+                        ret.add(arr);
+                    }
+                    else {
+                        throw new IllegalArgumentException("Value type NDArray was specified but item found in list was neither of type NDArray or INDArray");
+                    }
+
                     break;
                 case BYTEBUFFER:
                     ByteBuffer byteBuffer = (ByteBuffer) inputItem;
@@ -535,7 +546,8 @@ public class KonduitPythonUtils {
                     Preconditions.checkState(pythonConfig.getListTypesForVariableName().containsKey(key),"No input type specified for list with key " + key);
                     ValueType valueType = pythonConfig.getListTypesForVariableName().get(key);
                     List<Object> list = data.getList(key, valueType);
-                    KonduitPythonUtils.addObjectToPythonVariables(pythonVariables,key,list);
+                    List<Object> preProcessed = createValidListForPythonVariables(list,valueType);
+                    KonduitPythonUtils.addObjectToPythonVariables(pythonVariables,key,preProcessed);
                     break;
                 case INT64:
                     long aLong = data.getLong(key);

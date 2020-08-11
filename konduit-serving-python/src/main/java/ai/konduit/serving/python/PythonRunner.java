@@ -95,9 +95,9 @@ public class PythonRunner implements PipelineStepRunner {
                     ret.put(variable.getName(),KonduitPythonUtils.getWithType(outputs,variable.getName(),Boolean.class));
                     break;
                 case "list":
-                    Preconditions.checkState(pythonStep.pythonConfig().getListTypesForVariableName().containsKey(variable.getName()),"No input type specified for list with key " + variable);
+                    Preconditions.checkState(pythonStep.pythonConfig().getListTypesForOutputVariableNames().containsKey(variable.getName()),"No output type specified for list with key " + variable);
                     List<Object> listValue = KonduitPythonUtils.getWithType(outputs,variable.getName(),List.class);
-                    ValueType valueType = pythonStep.pythonConfig().getListTypesForVariableName().get(variable.getName());
+                    ValueType valueType = pythonStep.pythonConfig().getListTypesForOutputVariableNames().get(variable.getName());
                     List<Object> convertedInput = KonduitPythonUtils.createValidListForPythonVariables(listValue,valueType);
                     KonduitPythonUtils.insertListIntoData(ret, variable.getName(), convertedInput, valueType);
                     break;

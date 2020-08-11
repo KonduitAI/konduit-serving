@@ -67,29 +67,40 @@ public class KonduitPythonJob {
 
     public void setup() {
         if (setupDone.get()) return;
-        try (PythonGIL gil = PythonGIL.lock()) {
-            PythonContextManager.setContext(context);
-            PythonObject runF = PythonExecutioner.getVariable("run");
-
-            if (runF == null || runF.isNone() || !Python.callable(runF)) {
-                PythonExecutioner.exec(code);
-                runF = PythonExecutioner.getVariable("run");
-            }
-            if (runF.isNone() || !Python.callable(runF)) {
-                throw new PythonException("run() method not found! " +
-                        "If a PythonJob is created with 'setup and run' " +
-                        "mode enabled, the associated python code is " +
-                        "expected to contain a run() method " +
-                        "(with or without arguments).");
-            }
-            this.runF = runF;
-            PythonObject setupF = PythonExecutioner.getVariable("setup");
-            if (!setupF.isNone()) {
-                setupF.call();
-            }
-            setupDone.set(true);
+        if(useGil) {
+            doSetup();
         }
+        else {
+            try (PythonGIL gil = PythonGIL.lock()) {
+                doSetup();
+            }
+        }
+
     }
+
+    private void doSetup() {
+        PythonContextManager.setContext(context);
+        PythonObject runF = PythonExecutioner.getVariable("run");
+
+        if (runF == null || runF.isNone() || !Python.callable(runF)) {
+            PythonExecutioner.exec(code);
+            runF = PythonExecutioner.getVariable("run");
+        }
+        if (runF.isNone() || !Python.callable(runF)) {
+            throw new PythonException("run() method not found! " +
+                    "If a PythonJob is created with 'setup and run' " +
+                    "mode enabled, the associated python code is " +
+                    "expected to contain a run() method " +
+                    "(with or without arguments).");
+        }
+        this.runF = runF;
+        PythonObject setupF = PythonExecutioner.getVariable("setup");
+        if (!setupF.isNone()) {
+            setupF.call();
+        }
+        setupDone.set(true);
+    }
+
 
     public void exec(List<PythonVariable> inputs, List<PythonVariable> outputs) {
         if (setupRunMode)
