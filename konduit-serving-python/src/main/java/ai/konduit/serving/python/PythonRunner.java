@@ -36,8 +36,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import static org.nd4j.python4j.PythonTypes.*;
-
 @CanRun(PythonStep.class)
 @Slf4j
 public class PythonRunner implements PipelineStepRunner {
@@ -80,60 +78,8 @@ public class PythonRunner implements PipelineStepRunner {
     @SneakyThrows
     @Override
     public Data exec(Context ctx, Data data) {
-        PythonVariables pythonVariables = new PythonVariables();
         Data ret = Data.empty();
-        for(String key : data.keys()) {
-            switch(data.type(key)) {
-                case NDARRAY:
-                    NDArray ndArray = data.getNDArray(key);
-                    INDArray arr = ndArray.getAs(INDArray.class);
-                    pythonVariables.add(key, NumpyArray.INSTANCE,arr);
-                    break;
-                case BYTES:
-                    byte[] bytes = data.getBytes(key);
-                    pythonVariables.add(key, BYTES,bytes);
-                    break;
-                case DOUBLE:
-                    double aDouble = data.getDouble(key);
-                    pythonVariables.add(key,PythonTypes.FLOAT,aDouble);
-                    break;
-                case LIST:
-                    Preconditions.checkState(pythonStep.pythonConfig().getListTypesForVariableName().containsKey(key),"No input type specified for list with key " + key);
-                    ValueType valueType = pythonStep.pythonConfig().getListTypesForVariableName().get(key);
-                    List<Object> list = data.getList(key, valueType);
-                    pythonVariables.add(key, LIST,list);
-                    break;
-                case INT64:
-                    long aLong = data.getLong(key);
-                    pythonVariables.add(key,PythonTypes.INT,aLong);
-                    break;
-                case BOOLEAN:
-                    boolean aBoolean = data.getBoolean(key);
-                    pythonVariables.add(key, BOOL,aBoolean);
-                    break;
-                case STRING:
-                    String string = data.getString(key);
-                    pythonVariables.add(key,PythonTypes.STR,string);
-                    break;
-                case IMAGE:
-                    Image image = data.getImage(key);
-                    KonduitPythonUtils.addImageToPython(pythonVariables,key,image);
-                    break;
-                case BOUNDING_BOX:
-                    BoundingBox boundingBox = data.getBoundingBox(key);
-                    Map<String,Object> boundingBoxValues = DictUtils.toBoundingBoxDict(boundingBox);
-                    pythonVariables.add(key,KonduitPythonUtils.pythonTypeFor(Map.class),boundingBoxValues);
-                    break;
-                case POINT:
-                    Point point = data.getPoint(key);
-                    Map<String,Object> pointerValue = DictUtils.toPointDict(point);
-                    pythonVariables.add(key,KonduitPythonUtils.pythonTypeFor(Map.class),pointerValue);
-                    break;
-                case DATA:
-                    throw new IllegalArgumentException("Illegal type " + data.type(key));
-
-            }
-        }
+        PythonVariables pythonVariables = KonduitPythonUtils.createPythonVariablesFromDataInput(data, pythonStep.pythonConfig());
 
         PythonVariables outputs = new PythonVariables();
         Map<String, String> pythonOutputs = pythonStep.pythonConfig().getPythonOutputs();
@@ -150,9 +96,10 @@ public class PythonRunner implements PipelineStepRunner {
                     break;
                 case "list":
                     Preconditions.checkState(pythonStep.pythonConfig().getListTypesForVariableName().containsKey(variable.getName()),"No input type specified for list with key " + variable);
-                    List listValue = KonduitPythonUtils.getWithType(outputs,variable.getName(),List.class);
+                    List<Object> listValue = KonduitPythonUtils.getWithType(outputs,variable.getName(),List.class);
                     ValueType valueType = pythonStep.pythonConfig().getListTypesForVariableName().get(variable.getName());
-                    KonduitPythonUtils.insertListIntoData(ret, variable.getName(), listValue, valueType);
+                    List<Object> convertedInput = KonduitPythonUtils.createValidListForPythonVariables(listValue,valueType);
+                    KonduitPythonUtils.insertListIntoData(ret, variable.getName(), convertedInput, valueType);
                     break;
                 case "bytes":
                     KonduitPythonUtils.insertBytesIntoPythonVariables(

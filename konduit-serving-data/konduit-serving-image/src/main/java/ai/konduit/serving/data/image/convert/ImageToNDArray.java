@@ -38,7 +38,6 @@ import org.nd4j.common.primitives.Pair;
 
 import java.nio.*;
 
-import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 
 /**
  * Utility method for converting Image objects to NDArrays.

@@ -21,7 +21,11 @@ import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.impl.data.image.*;
+import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.python.DictUtils;
+import ai.konduit.serving.python.PythonStep;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -35,11 +39,14 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.nd4j.python4j.PythonTypes.*;
 
 public class KonduitPythonUtils {
 
@@ -55,6 +62,112 @@ public class KonduitPythonUtils {
     };
 
     private KonduitPythonUtils() {}
+
+
+    /**
+     * Create a valid list for input in to
+     * {@link PythonVariables}
+     * based on the input value type
+     * @param input the input to convert
+     * @param valueType the value type to add
+     * @return the equivalent list for safe insertion
+     * in to a {@link PythonVariables} object
+     */
+    public static List<Object> createValidListForPythonVariables(List<Object> input,ValueType valueType) {
+        List<Object> ret = new ArrayList<>(input.size());
+        for(Object inputItem : input) {
+            switch(valueType) {
+                case NDARRAY:
+                    NDArray ndArray = (NDArray) inputItem;
+                    INDArray arr = ndArray.getAs(INDArray.class);
+                    ret.add(arr);
+                    break;
+                case BYTEBUFFER:
+                    ByteBuffer byteBuffer = (ByteBuffer) inputItem;
+                    if(byteBuffer.hasArray()) {
+                        ret.add(byteBuffer.array());
+                    }
+                    else {
+                        byte[] toAdd = new byte[byteBuffer.capacity()];
+                        byteBuffer.get(toAdd);
+                        ret.add(toAdd);
+                        byteBuffer.rewind();
+                    }
+                    break;
+                case INT64:
+                    ret.add(inputItem);
+                    break;
+                case IMAGE:
+                    Image image = (Image) inputItem;
+                    try {
+                        byte[] imageConvert = convertImageToBytes(image);
+                        ret.add(imageConvert);
+                    } catch (IOException e) {
+                        throw new IllegalArgumentException("Unable to convert image to bytes for addition in to python. Image was of type " + inputItem.getClass().getName());
+                    }
+
+                    break;
+                case DATA:
+                    break;
+                case STRING:
+                    ret.add(inputItem);
+                    break;
+                case DOUBLE:
+                    ret.add(inputItem);
+                    break;
+                case LIST:
+                    break;
+                case BYTES:
+                    ret.add(inputItem);
+                    break;
+                case BOOLEAN:
+                    ret.add(inputItem);
+                    break;
+                case BOUNDING_BOX:
+                    BoundingBox boundingBox = (BoundingBox) inputItem;
+                    ret.add(DictUtils.toBoundingBoxDict(boundingBox));
+                    break;
+                case POINT:
+                    Point point = (Point) inputItem;
+                    ret.add(DictUtils.toPointDict(point));
+                    break;
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     * Returns an {@link PythonType}
+     * for the given {@link ValueType}
+     * @param valueType the value type to get the input for
+     * @return the value type
+     */
+    public static PythonType typeForValueType(ValueType valueType) {
+        switch(valueType) {
+            default:
+                throw new IllegalArgumentException("Data is not a valid value type for input in to a python script");
+            case BOOLEAN:
+                return BOOL;
+            case STRING:
+                return STR;
+            case DOUBLE:
+                return FLOAT;
+            case INT64:
+                return INT;
+            case NDARRAY:
+                return NumpyArray.INSTANCE;
+            case LIST:
+                return LIST;
+            case BYTES:
+            case IMAGE:
+            case BYTEBUFFER:
+                return BYTES;
+            case BOUNDING_BOX:
+            case POINT:
+                return DICT;
+        }
+    }
 
 
     /**
@@ -88,12 +201,12 @@ public class KonduitPythonUtils {
             return PythonTypes.INT;
         } else if(clazz.isAssignableFrom(Map.class)) {
             return PythonTypes.DICT;
-        } else if(clazz.isAssignableFrom(List.class)) {
+        } else if(List.class.isAssignableFrom(clazz)) {
             return PythonTypes.LIST;
         } else if(clazz.equals(Boolean.class) || clazz.equals(boolean.class)) {
             return PythonTypes.BOOL;
             //clazz is assignable from doesn't seem to work with direct byte buffer
-        } else if(clazz.equals(byte[].class) || clazz.isAssignableFrom(ByteBuffer.class) || clazz.getName().contains("Buffer")) {
+        } else if(clazz.equals(byte[].class) || Buffer.class.isAssignableFrom(clazz) || clazz.getName().contains("Buffer")) {
             return PythonTypes.BYTES;
         } else if(clazz.isAssignableFrom(CharSequence.class)) {
             return PythonTypes.STR;
@@ -134,46 +247,49 @@ public class KonduitPythonUtils {
     }
 
     /**
-     * Adds an image to a set of python variables.
-     * Also adds the length as key_len
-     * @param pythonVariables
-     * @param key
-     * @param image
-     * @throws Exception
+     * Convert the given {@link Image}
+     * to bytes
+     * @param image the image
+     * @return the output bytearray for the image
+     * @throws IOException
      */
-    public static void addImageToPython(PythonVariables pythonVariables, String key, Image image) throws Exception {
+    public static byte[] convertImageToBytes(Image image) throws IOException {
         if(image instanceof BImage) {
             BImage bImage = (BImage) image;
             BufferedImage bufferedImage = bImage.getAs(BufferedImage.class);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ImageIO.write(bufferedImage,"jpg",byteArrayOutputStream);
-            addObjectToPythonVariables(pythonVariables,key,byteArrayOutputStream.toByteArray());
+            return byteArrayOutputStream.toByteArray();
 
         }
         else if(image instanceof PngImage) {
             PngImage pngImage = (PngImage) image;
             Png png = pngImage.getAs(Png.class);
-            addObjectToPythonVariables(pythonVariables,key,png.getBytes());
+            return png.getBytes();
         }
         else if(image instanceof GifImage) {
             GifImage gifImage = (GifImage) image;
             Gif gif = gifImage.getAs(Gif.class);
-            addObjectToPythonVariables(pythonVariables,key,gif.getBytes());
+            return gif.getBytes();
         }
         else if(image instanceof JpegImage) {
             JpegImage jpegImage = (JpegImage) image;
             Jpeg jpeg = jpegImage.getAs(Jpeg.class);
-            addObjectToPythonVariables(pythonVariables,key,jpeg.getBytes());
+            return jpeg.getBytes();
         }
         else if(image instanceof BmpImage) {
             BmpImage bmpImage = (BmpImage) image;
             Bmp bmp = bmpImage.getAs(Bmp.class);
-            addObjectToPythonVariables(pythonVariables,key,bmp.getBytes());
+            return bmp.getBytes();
         }
         else if(image instanceof FrameImage) {
             FrameImage frameImage = (FrameImage) image;
             Frame frame = frameImage.getAs(Frame.class);
-            addObjectToPythonVariables(pythonVariables,key,frame.data);
+            ByteBuffer byteBuffer = frame.data;
+            int totalLen = frame.data.capacity();
+            byte[] convert = new byte[totalLen];
+            byteBuffer.get(convert.length);
+            return convert;
         }
         else if(image instanceof MatImage) {
             MatImage matImage = (MatImage) image;
@@ -182,8 +298,22 @@ public class KonduitPythonUtils {
             ByteBuffer byteBuffer = mat.data().asByteBuffer();
             byte[] convert = new byte[totalLen];
             byteBuffer.get(convert.length);
-            addObjectToPythonVariables(pythonVariables,key,convert);
+            return convert;
         }
+
+        throw new IllegalArgumentException("Illegal image type " + image.getClass());
+    }
+
+    /**
+     * Adds an image to a set of python variables.
+     * Also adds the length as key_len
+     * @param pythonVariables
+     * @param key
+     * @param image
+     * @throws Exception
+     */
+    public static void addImageToPython(PythonVariables pythonVariables, String key, Image image) throws Exception {
+        addObjectToPythonVariables(pythonVariables,key,convertImageToBytes(image));
     }
 
     /**
@@ -282,7 +412,7 @@ public class KonduitPythonUtils {
                 ret.putListPoint(variable,points);
                 break;
             case DATA:
-                throw new IllegalArgumentException("Unable to de serialize dat from python");
+                throw new IllegalArgumentException("Unable to de serialize data from python");
             case NDARRAY:
                 List<NDArray> ndArrays = new ArrayList<>(listValue.size());
                 for(Object o : listValue) {
@@ -305,7 +435,7 @@ public class KonduitPythonUtils {
     }
 
     /**
-     * Insert a bytes object in to the givnen {@link Data}
+     * Insert a bytes object in to the given {@link Data}
      * object
      * @param ret the data object to insert in to
      * @param outputs the outputs variable to insert in to
@@ -318,6 +448,7 @@ public class KonduitPythonUtils {
         ValueType byteOutputValueType = pythonConfig.getOutputTypeByteConversions().get(variable);
         Preconditions.checkState(outputs.get("len_" + variable) != null,"Please ensure a len_" + variable + " is defined for your python script output to get a consistent length from python.");
         Long length = getWithType(outputs,"len_" + variable,Long.class);
+        Preconditions.checkNotNull(length,"No byte pointer length found for variable");
         Preconditions.checkNotNull("No byte pointer length found for variable",variable);
 
         BytePointer bytesValue = new BytePointer(getWithType(outputs,variable,byte[].class));
@@ -360,5 +491,86 @@ public class KonduitPythonUtils {
             default:
                 throw new IllegalArgumentException("Illegal type found for output type conversion  " + byteOutputValueType);
         }
+    }
+
+    /**
+     * Create a set of {@link PythonVariables}
+     *  to use in with {@link PythonStep}
+     * @param data the data input to use
+     * @param pythonConfig the python configuration to sue
+     * @return the created {@link PythonVariables}
+     * @throws Exception
+     */
+    public static PythonVariables createPythonVariablesFromDataInput(Data data, PythonConfig pythonConfig) throws Exception {
+        PythonVariables pythonVariables = new PythonVariables();
+        for(String key : data.keys()) {
+            switch(data.type(key)) {
+                case NDARRAY:
+                    NDArray ndArray = data.getNDArray(key);
+                    INDArray arr = ndArray.getAs(INDArray.class);
+                    pythonVariables.add(key, NumpyArray.INSTANCE,arr);
+                    break;
+                case BYTES:
+                    byte[] bytes = data.getBytes(key);
+                    pythonVariables.add(key, BYTES,bytes);
+                    break;
+                case BYTEBUFFER:
+                    ByteBuffer byteBuffer = data.getByteBuffer(key);
+                    if(byteBuffer.hasArray()) {
+                        byte[] backingArr = byteBuffer.array();
+                        pythonVariables.add(key, BYTES,backingArr);
+                    }
+                    else {
+                        byte[] newArr = new byte[byteBuffer.capacity()];
+                        byteBuffer.get(newArr);
+                        byteBuffer.rewind();
+                        pythonVariables.add(key,BYTES,newArr);
+                    }
+                    break;
+                case DOUBLE:
+                    double aDouble = data.getDouble(key);
+                    pythonVariables.add(key, PythonTypes.FLOAT,aDouble);
+                    break;
+                case LIST:
+                    Preconditions.checkState(pythonConfig.getListTypesForVariableName().containsKey(key),"No input type specified for list with key " + key);
+                    ValueType valueType = pythonConfig.getListTypesForVariableName().get(key);
+                    List<Object> list = data.getList(key, valueType);
+                    KonduitPythonUtils.addObjectToPythonVariables(pythonVariables,key,list);
+                    break;
+                case INT64:
+                    long aLong = data.getLong(key);
+                    pythonVariables.add(key,PythonTypes.INT,aLong);
+                    break;
+                case BOOLEAN:
+                    boolean aBoolean = data.getBoolean(key);
+                    pythonVariables.add(key, BOOL,aBoolean);
+                    break;
+                case STRING:
+                    String string = data.getString(key);
+                    pythonVariables.add(key,PythonTypes.STR,string);
+                    break;
+                case IMAGE:
+                    Image image = data.getImage(key);
+                    addImageToPython(pythonVariables,key,image);
+                    break;
+                case BOUNDING_BOX:
+                    BoundingBox boundingBox = data.getBoundingBox(key);
+                    Map<String,Object> boundingBoxValues = DictUtils.toBoundingBoxDict(boundingBox);
+                    pythonVariables.add(key, pythonTypeFor(Map.class),boundingBoxValues);
+                    break;
+                case POINT:
+                    Point point = data.getPoint(key);
+                    Map<String,Object> pointerValue = DictUtils.toPointDict(point);
+                    pythonVariables.add(key, pythonTypeFor(Map.class),pointerValue);
+                    break;
+                case DATA:
+                    throw new IllegalArgumentException("Illegal type " + data.type(key));
+
+            }
+
+        }
+
+        return pythonVariables;
+
     }
 }

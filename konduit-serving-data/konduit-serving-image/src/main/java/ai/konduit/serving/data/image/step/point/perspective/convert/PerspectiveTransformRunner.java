@@ -27,6 +27,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.bytedeco.javacpp.indexer.DoubleIndexer;
+import org.bytedeco.javacpp.indexer.DoubleRawIndexer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -224,8 +225,9 @@ public class PerspectiveTransformRunner implements PipelineStepRunner {
         Mat dst = new Mat();
         Mat src = new Mat(1, 1, CvType.CV_64FC(it.dimensions()));
         DoubleIndexer idx = src.createIndexer();
+        DoubleRawIndexer doubleRawIndexer = (DoubleRawIndexer) idx;
         for (int i = 0; i < it.dimensions(); i++) {
-            idx.put(0, i, it.get(i));
+            doubleRawIndexer.putRaw( i, it.get(i));
         }
         opencv_core.perspectiveTransform(src, dst, transform);
 
@@ -269,38 +271,41 @@ public class PerspectiveTransformRunner implements PipelineStepRunner {
     private double[] calculateExtremes(Mat transform, int width, int height) {
         Mat src = new Mat(4, 1, CvType.CV_64FC2);
         DoubleIndexer idx = src.createIndexer();
+        DoubleRawIndexer idxRaw = src.createIndexer();
+
         // topLeft
-        idx.put(0, 0, 0);
-        idx.put(0, 1, 0);
+        idxRaw.putRaw(0,  0);
+        idxRaw.putRaw(1, 0);
 
         // topRight
-        idx.put(1, 0, width);
-        idx.put(1, 1, 0);
+        idxRaw.putRaw(2, width);
+        idxRaw.putRaw(3, 0);
 
         // bottomLeft
-        idx.put(2, 0, 0);
-        idx.put(2, 1, height);
+        idxRaw.putRaw(4, 0);
+        idxRaw.putRaw(5, height);
 
         // bottomRight
-        idx.put(3, 0, width);
-        idx.put(3, 1, height);
+        idxRaw.putRaw(6, width);
+        idxRaw.putRaw(7, height);
 
 
         Mat dst = new Mat();
         opencv_core.perspectiveTransform(src, dst, transform);
 
         idx = dst.createIndexer();
-        double[] xValues = new double[]{
-                idx.get(0, 0),
-                idx.get(1, 0),
-                idx.get(2, 0),
-                idx.get(3, 0)
+        idxRaw = (DoubleRawIndexer) idx;
+        double[] xValues = new double[] {
+                idxRaw.getRaw(0),
+                idxRaw.getRaw(2),
+                idxRaw.getRaw(4),
+                idxRaw.getRaw(6)
         };
         double[] yValues = new double[]{
-                idx.get(0, 1),
-                idx.get(1, 1),
-                idx.get(2, 1),
-                idx.get(3, 1)
+                idxRaw.getRaw(1),
+                idxRaw.getRaw(3),
+                idxRaw.getRaw(5),
+                idxRaw.getRaw(7)
         };
 
         double minX = DoubleStream.of(xValues).min().getAsDouble();
