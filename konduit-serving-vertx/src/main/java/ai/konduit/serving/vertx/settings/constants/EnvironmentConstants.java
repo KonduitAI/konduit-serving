@@ -31,7 +31,7 @@ public class EnvironmentConstants {
 
     /**
      * Environment variable name for storing port number for the konduit server.
-     * This variable will be prioritizes over {@link InferenceConfiguration#getPort()}
+     * This variable will be prioritizes over {@link InferenceConfiguration#port()}
      */
     public static final String KONDUIT_SERVING_PORT = "KONDUIT_SERVING_PORT";
 
@@ -42,6 +42,11 @@ public class EnvironmentConstants {
      * running process details, vertx cache files etc.
      */
     public static final String WORKING_DIR = "KONDUIT_WORKING_DIR";
+
+    /**
+     * Environment variable specifying vertx runtime and cache directory.
+     */
+    public static final String VERTX_DIR = "KONDUIT_VERTX_DIR";
 
     /**
      * Environment variable specifying build data directory where build logs for the build CLI are kept.
