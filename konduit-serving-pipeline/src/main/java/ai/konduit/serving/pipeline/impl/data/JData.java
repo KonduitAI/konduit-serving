@@ -202,6 +202,12 @@ public class JData implements Data {
         return listIfFound(key, ValueType.BYTES);
     }
 
+
+    @Override
+    public List<ByteBuffer> getListByteBuffer(String key) {
+        return listIfFound(key, ValueType.BYTEBUFFER);
+    }
+
     @Override
     public List<Double> getListDouble(String key) {
         return listIfFound(key, ValueType.DOUBLE);
@@ -489,6 +495,8 @@ public class JData implements Data {
         } else if (valueType == ValueType.LIST) {
             //TODO don't use JData - use Data interface
             instance.putList(key, data, valueType);
+        } else if(valueType == ValueType.BYTEBUFFER) {
+          instance.putListByteBuffer(key,(List<ByteBuffer>) data);
         } else {
             throw new IllegalStateException("Trying to put list data of not supported type: " + valueType);
         }

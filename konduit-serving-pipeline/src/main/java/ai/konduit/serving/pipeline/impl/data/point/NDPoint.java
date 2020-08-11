@@ -32,7 +32,7 @@ public class NDPoint implements Point {
     private final Double probability;
 
     public NDPoint(@JsonProperty("coords") double[] coords, @JsonProperty("label") String label, @JsonProperty("probability") Double probability){
-        Preconditions.checkState(coords != null && coords.length < 4,"Invalid coordinates. Only 3 points are currently supported.");
+        Preconditions.checkState(coords != null ,"Invalid coordinates. Coordinates must not be null!");
         this.coords = coords;
         this.label = label;
         this.probability = probability;

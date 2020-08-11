@@ -123,6 +123,9 @@ public interface Data {
     List<Long> getListInt64(String key);
     List<Boolean> getListBoolean(String key);
     List<byte[]> getListBytes(String key);
+
+    List<ByteBuffer> getListByteBuffer(String key);
+
     List<Double> getListDouble(String key);
     List<Point> getListPoint(String key);
     List<List<?>> getListData(String key);
@@ -219,7 +222,7 @@ public interface Data {
         return sb.toString();
     }
 
-    static boolean equals(@NonNull Data d1, @NonNull Data d2){
+    static boolean equals(@NonNull Data d1, @NonNull Data d2) {
 
         if(d1.size() != d2.size())
             return false;
@@ -275,6 +278,10 @@ public interface Data {
                     if(!d1.getString(s).equals(d2.getString(s)))
                         return false;
                     break;
+                case BYTEBUFFER:
+                    ByteBuffer b1Buffer = d1.getByteBuffer(s);
+                    ByteBuffer b2Buffer = d2.getByteBuffer(s);
+                    return b1Buffer.equals(b2Buffer);
                 case BYTES:
                     byte[] b1 = d1.getBytes(s);
                     byte[] b2 = d2.getBytes(s);
