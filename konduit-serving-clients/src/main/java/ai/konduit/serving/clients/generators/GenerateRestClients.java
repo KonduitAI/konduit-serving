@@ -169,47 +169,40 @@ public class GenerateRestClients {
         log.info("\n\nReplacing new line characters in the generated files: ");
         for(File file : generatedFiles) {
             if(file.getAbsolutePath().endsWith(".md") || file.getAbsolutePath().endsWith(".java")) {
-                FileUtils.writeStringToFile(file,
-                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replace("&lt;br&gt;", "<br>"),
-                        StandardCharsets.UTF_8);
-
-                log.info("Replaced &lt;br&gt; to <br> in {}", file.getAbsolutePath());
+                replace(file, "&lt;br&gt;", "<br>");
             }
 
             if(file.getAbsolutePath().endsWith(".md")) {
-                FileUtils.writeStringToFile(file,
-                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replace("&quot;", "\""),
-                        StandardCharsets.UTF_8);
-
-                log.info("Replaced &quot; to \" in {}", file.getAbsolutePath());
-            }
-
-            if(file.getAbsolutePath().endsWith(".md")) {
-                FileUtils.writeStringToFile(file,
-                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replace("&lt;", "<"),
-                        StandardCharsets.UTF_8);
-
-                log.info("Replaced &lt; to < in {}", file.getAbsolutePath());
-            }
-
-            if(file.getAbsolutePath().endsWith(".md")) {
-                FileUtils.writeStringToFile(file,
-                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replace("&gt;", ">"),
-                        StandardCharsets.UTF_8);
-
-                log.info("Replaced &gt; to > in {}", file.getAbsolutePath());
+                replace(file, "&quot;", "\"");
+                replace(file, "&lt;", "<");
+                replace(file, "&gt;", ">");
             }
 
             if(file.getAbsolutePath().endsWith(".py")) {
-                FileUtils.writeStringToFile(file,
-                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replace("<br>", "\n\t\t"),
-                        StandardCharsets.UTF_8);
-
-                log.info("Replaced <br> to \\n\\t\\t in {}", file.getAbsolutePath());
+                replace(file, "<br>", "\n\t\t");
             }
         }
     }
 
+    private static String escape(String input) {
+        return input.replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\t", "\\t");
+    }
+
+    private static void replace(File file, String target, String replacement) throws IOException {
+        replace(file, target, replacement, true);
+    }
+
+    private static void replace(File file, String target, String replacement, boolean showMessage) throws IOException {
+        FileUtils.writeStringToFile(file,
+                FileUtils.readFileToString(file, StandardCharsets.UTF_8).replace(target, replacement),
+                StandardCharsets.UTF_8);
+
+        if(showMessage) {
+            log.info("Replaced {} to {} in {}", escape(target), escape(replacement), file.getAbsolutePath());
+        }
+    }
 
     private static int findIndex(List<CtClass> array, String className) {
         for(int i = 0; i < array.size(); i++) {
