@@ -37,6 +37,13 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
+        try {
+            initialize();
+        } catch (Exception exception) {
+            startPromise.fail(exception);
+            return;
+        }
+
         int port;
 
         String portEnvValue = System.getenv(EnvironmentConstants.KONDUIT_SERVING_PORT);
@@ -89,9 +96,6 @@ public class InferenceVerticleGrpc extends InferenceVerticle {
                     long pid = getPid();
 
                     saveInspectionDataIfRequired(pid);
-
-                    // Periodically checks for configuration updates and save them.
-                    vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
 
                     log.info("Inference gRPC server is listening on host: '{}'", inferenceConfiguration.host());
                     log.info("Inference gRPC server started on port {} with {} pipeline steps", actualPort, pipeline.size());
