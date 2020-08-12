@@ -20,6 +20,8 @@ package ai.konduit.serving.python;
 
 import ai.konduit.serving.common.test.BaseJsonCoverageTest;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.model.PythonIO;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import org.junit.Test;
 
@@ -46,6 +48,20 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
         .build())));
     }
 
+    @Test
+    public void testPythonIO() {
+        testConfigSerDe(new PythonIO()
+                .name("input")
+                .pythonType("list")
+                .secondaryType(ValueType.BOOLEAN));
+    }
+
+    @Test
+    public void testConfigPythonIO() {
+        testConfigSerDe(PythonConfig.builder().ioInput("input",PythonIO.builder()
+                .name("input1").pythonType("list").secondaryType(ValueType.BOOLEAN)
+                .build()).build());
+    }
 
 
 

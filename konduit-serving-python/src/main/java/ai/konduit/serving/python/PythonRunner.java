@@ -17,6 +17,7 @@ package ai.konduit.serving.python;
 
 import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
+import ai.konduit.serving.model.PythonIO;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -81,23 +82,20 @@ public class PythonRunner implements PipelineStepRunner {
         Data ret = Data.empty();
         PythonVariables pythonVariables = KonduitPythonUtils.createPythonVariablesFromDataInput(data, pythonStep.pythonConfig());
 
-        PythonVariables outputs = new PythonVariables();
-        Map<String, String> pythonOutputs = pythonStep.pythonConfig().getPythonOutputs();
-        for(Map.Entry<String,String> entry : pythonOutputs.entrySet()) {
-            outputs.add(new PythonVariable(entry.getKey(),PythonTypes.get(entry.getValue())));
-        }
-
+        PythonVariables outputs = KonduitPythonUtils.createOutputVariables(pythonStep.pythonConfig());
         konduitPythonJob.exec(pythonVariables,outputs);
 
         for(PythonVariable variable : outputs) {
+            PythonIO pythonIO = pythonStep.pythonConfig().getIoOutputs().get(variable.getName());
+            Preconditions.checkNotNull(pythonIO,"No variable found for " + variable.getName());
             switch(variable.getType().getName().toLowerCase()) {
                 case "bool":
                     ret.put(variable.getName(),KonduitPythonUtils.getWithType(outputs,variable.getName(),Boolean.class));
                     break;
                 case "list":
-                    Preconditions.checkState(pythonStep.pythonConfig().getListTypesForOutputVariableNames().containsKey(variable.getName()),"No output type specified for list with key " + variable);
+                    Preconditions.checkState(pythonIO.isListWithType(),"No output type specified for list with key " + variable);
                     List<Object> listValue = KonduitPythonUtils.getWithType(outputs,variable.getName(),List.class);
-                    ValueType valueType = pythonStep.pythonConfig().getListTypesForOutputVariableNames().get(variable.getName());
+                    ValueType valueType = pythonIO.secondaryType();
                     List<Object> convertedInput = KonduitPythonUtils.createValidListForPythonVariables(listValue,valueType);
                     KonduitPythonUtils.insertListIntoData(ret, variable.getName(), convertedInput, valueType);
                     break;
@@ -115,7 +113,7 @@ public class PythonRunner implements PipelineStepRunner {
                     ret.put(variable.getName(),KonduitPythonUtils.getWithType(outputs,variable.getName(),String.class));
                     break;
                 case "dict":
-                    ValueType dictValueType = pythonStep.pythonConfig().getTypeForDictionaryForOutputVariableNames().get(variable.getName());
+                    ValueType dictValueType = pythonIO.type();
                     Map<String,Object> items = (Map<String, Object>) KonduitPythonUtils.getWithType(outputs,variable.getName(),Map.class);
                     switch(dictValueType) {
                         case POINT:

@@ -18,6 +18,7 @@ package ai.konduit.serving.python;
 import ai.konduit.serving.data.image.data.MatImage;
 import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.model.PythonIO;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
@@ -79,11 +80,6 @@ public class PythonRunnerTests {
 
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void test4dPointFailure() {
-        Point point4 = Point.create(new double[]{1,2,3,4},"",0.0);
-        fail("Should have failed with an IllegalStateException");
-    }
 
     @Test
     public void testDictUtilsBoundingBox() {
@@ -132,76 +128,107 @@ public class PythonRunnerTests {
         for(int i = 0; i < KonduitPythonUtils.PYTHON_VARIABLE_TYPES.length; i++) {
             String varName = "i" + i;
             String codeSnippet = varName + " += 1\n";
+            PythonIO.PythonIOBuilder ioInputBuilder = PythonIO.builder();
+            PythonIO.PythonIOBuilder ioOutputBuilder = PythonIO.builder();
+
             switch(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]) {
                 case "float":
-                    builder.pythonInput(String.valueOf(i),KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
-                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioInputBuilder.name(varName)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioOutputBuilder.name(varName)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     codeBuffer.append(codeSnippet);
                     data.put(varName,1.0f);
                     assertion.put(varName,2.0f);
                     break;
                 case "int":
-                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
-                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                     ioInputBuilder.name(varName)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioOutputBuilder.name(varName)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+
                     codeBuffer.append(codeSnippet);
                     data.put(varName,1);
                     assertion.put(varName,2);
                     break;
                 case "dict":
-                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
-                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
-                    builder.typeForDictionaryForVariableName(varName,ValueType.POINT);
-                    builder.typeForDictionaryForOutputVariableName(varName,ValueType.POINT);
+                    ioInputBuilder.name(varName)
+                            .type(ValueType.POINT)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioOutputBuilder.name(varName)
+                            .type(ValueType.POINT)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     codeBuffer.append(varName + "['z'] = 1\n");
                     Point point = Point.create(1, 2);
                     data.put(varName,point);
                     assertion.put(varName,Point.create(1,2,1));
                     break;
                 case "str":
-                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
-                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioInputBuilder.name(varName)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioOutputBuilder.name(varName)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+
                     codeBuffer.append(varName + " += '1'\n");
                     data.put(varName,String.valueOf(1));
                     assertion.put(varName,"11");
                     break;
                 case "numpy.ndarray":
-                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
-                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioInputBuilder.name(varName)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioOutputBuilder.name(varName)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     codeBuffer.append(codeSnippet);
                     data.put(varName,new ND4JNDArray(Nd4j.scalar(1.0)));
                     assertion.put(varName,new ND4JNDArray(Nd4j.scalar(2.0)));
                     break;
                 case "bytes":
-                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
-                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
-                    builder.pythonOutput("len_" + varName ,"int");
-                    builder.outputTypeByteConversion(varName,ValueType.BYTES);
+                    ioInputBuilder.name(varName)
+                            .type(ValueType.BYTES)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioOutputBuilder.name(varName)
+                            .type(ValueType.BYTES)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    builder.ioOutput("len_" + varName,PythonIO.builder()
+                    .name("len_" + varName)
+                            .pythonType("int")
+                            .type(ValueType.INT64).build());
                     codeBuffer.append(varName + "= bytes(" + varName + "); len_" + varName + " = len(" + varName + ")\n");
                     data.put(varName,new byte[]{1});
                     assertion.put(varName,new byte[]{1});
                     assertion.put("len_" + varName,1);
                     break;
                 case "list":
-                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
-                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
-                    builder.listTypeForVariableName(varName, ValueType.INT64);
-                    builder.listTypeForOutputVariableName(varName,ValueType.INT64);
+                     ioInputBuilder.name(varName)
+                            .type(ValueType.LIST)
+                             .secondaryType(ValueType.INT64)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioOutputBuilder.name(varName)
+                            .type(ValueType.LIST)
+                            .secondaryType(ValueType.INT64)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     codeBuffer.append(varName + ".append(1)\n");
                     data.putListInt64(varName,Arrays.asList(1L));
                     assertion.putListInt64(varName, Arrays.asList(1L,1L));
                     break;
                 case "bool":
-                    builder.pythonInput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
-                    builder.pythonOutput(varName,KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioInputBuilder.name(varName)
+                            .type(ValueType.BOOLEAN)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
+                    ioOutputBuilder.name(varName)
+                            .type(ValueType.BOOLEAN)
+                            .pythonType(KonduitPythonUtils.PYTHON_VARIABLE_TYPES[i]);
                     data.put(varName,true);
                     codeBuffer.append(varName + " = True\n");
                     assertion.put(varName,true);
                     break;
             }
+
+            builder.ioOutput(varName,ioOutputBuilder.build());
+            builder.ioInput(varName,ioInputBuilder.build());
         }
 
         builder.pythonCode(codeBuffer.toString());
-
         PythonConfig pythonConfig = builder.build();
         PythonStep pythonStep = new PythonStep()
                 .pythonConfig(pythonConfig);
@@ -211,7 +238,7 @@ public class PythonRunnerTests {
 
         PipelineExecutor executor = sequencePipeline.executor();
         Data exec = executor.exec(data);
-        assertEquals(exec.keys().size(),pythonConfig.getPythonOutputs().size());
+        assertEquals(exec.keys().size(),pythonConfig.getIoOutputs().keySet().size());
         assertEquals(assertion,exec);
     }
 
@@ -220,12 +247,29 @@ public class PythonRunnerTests {
     public void testImageSerde() throws Exception {
         PythonContextManager.deleteNonMainContexts();
         PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
-        builder.pythonInput("input2", "bytes");
-        builder.pythonOutput("len_output2","int");
-        builder.pythonOutput("output2","bytes");
+        PythonIO input2 = PythonIO.builder()
+                .name("input2")
+                .pythonType("bytes")
+                .type(ValueType.BYTES)
+                .build();
+
+        PythonIO len = PythonIO.builder()
+                .name("len_output2")
+                .pythonType("int")
+                .type(ValueType.INT64)
+                .build();
+
+        PythonIO output2 = PythonIO.builder()
+                .name("output2")
+                .pythonType("bytes")
+                .type(ValueType.IMAGE)
+                .build();
+        builder.ioInput("input2",input2);
+        builder.ioOutput("output2",output2);
+        builder.ioOutput("len_output2",len);
+
 
         builder.pythonCode("output2 = bytes(input2); len_output2 = len(output2)\n");
-        builder.outputTypeByteConversion("output2",ValueType.IMAGE);
 
         PythonConfig pythonConfig = builder.build();
         PythonStep pythonStep = new PythonStep()
@@ -276,10 +320,22 @@ public class PythonRunnerTests {
     @Test
     public void testNdArray() {
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonInput("input","numpy.ndarray")
-                .pythonInput("input2","numpy.ndarray")
-                .pythonOutput("output","numpy.ndarray")
-                .pythonOutput("type_str","str")
+                .ioInput("input", PythonIO.builder()
+                        .pythonType("numpy.ndarray")
+                        .type(ValueType.NDARRAY)
+                        .build())
+                .ioInput("input2", PythonIO.builder()
+                        .pythonType("numpy.ndarray")
+                        .type(ValueType.NDARRAY)
+                        .build())
+                .ioOutput("output", PythonIO.builder()
+                        .pythonType("numpy.ndarray")
+                        .type(ValueType.NDARRAY)
+                        .build())
+                .ioOutput("type_str", PythonIO.builder()
+                        .pythonType("str")
+                        .type(ValueType.STRING)
+                        .build())
                 .pythonCode("import numpy as np; output = np.array(input + input2); type_str = type(output);\n")
                 .build();
         Data data = Data.empty();

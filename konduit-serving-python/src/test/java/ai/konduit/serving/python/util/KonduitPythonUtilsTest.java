@@ -16,6 +16,7 @@
 package ai.konduit.serving.python.util;
 
 import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
+import ai.konduit.serving.model.PythonIO;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.impl.data.Value;
 import ai.konduit.serving.python.DictUtils;
@@ -148,7 +149,13 @@ public class KonduitPythonUtilsTest {
         for(ValueType valueType : ValueType.values()) {
             //skip data
             if(valueType != ValueType.DATA) {
-                builder.pythonInput(valueType.name().toLowerCase(), KonduitPythonUtils.typeForValueType(valueType).getName());
+                PythonIO input = PythonIO.builder()
+                        .pythonType(KonduitPythonUtils.typeForValueType(valueType).getName())
+                        .secondaryType(valueType)
+                        .type(ValueType.LIST)
+                        .name(valueType.name().toLowerCase())
+                        .build();
+                builder.ioInput(input.name(),input);
             }
             switch(valueType) {
                 case BOOLEAN:
@@ -196,8 +203,6 @@ public class KonduitPythonUtilsTest {
                     break;
             }
 
-            builder.listTypeForVariableName(valueType.name().toLowerCase(),valueType);
-
         }
 
         PythonConfig config = builder.build();
@@ -208,7 +213,7 @@ public class KonduitPythonUtilsTest {
             PythonVariable assertionVariable = assertion.get(pythonVariable.getName());
             assertNotNull(pythonVariable);
             assertNotNull(assertionVariable);
-            ValueType listType = config.getListTypesForVariableName().get(pythonVariable.getName());
+            ValueType listType = config.getIoInputs().get(pythonVariable.getName()).secondaryType();
             if(KonduitPythonUtils.typeForValueType(listType).equals(PythonTypes.BYTES)) {
                 List value = (List) pythonVariable.getValue();
                 byte[] createdBytes = (byte[]) value.get(0);
@@ -227,9 +232,16 @@ public class KonduitPythonUtilsTest {
         PythonVariables assertion = new PythonVariables();
 
         for(ValueType valueType : ValueType.values()) {
+            PythonIO input = null;
             //skip data
-            if(valueType != ValueType.DATA) {
-                builder.pythonInput(valueType.name().toLowerCase(), KonduitPythonUtils.typeForValueType(valueType).getName());
+            if(valueType != ValueType.DATA && valueType != ValueType.NONE) {
+                input = PythonIO.builder()
+                        .pythonType(KonduitPythonUtils.typeForValueType(valueType).getName())
+                        .secondaryType(valueType)
+                        .type(valueType)
+                        .name(valueType.name().toLowerCase())
+                        .build();
+                builder.ioInput(input.name(),input);
             }
             switch(valueType) {
                 case BOOLEAN:
@@ -249,7 +261,7 @@ public class KonduitPythonUtilsTest {
                     assertion.add(valueType.name().toLowerCase(),KonduitPythonUtils.typeForValueType(valueType),new byte[]{1});
                     break;
                 case LIST:
-                    builder.listTypeForVariableName(valueType.name().toLowerCase(),ValueType.STRING);
+                    input.secondaryType(ValueType.STRING);
                     data.putListString(valueType.name().toLowerCase(),Arrays.asList("1"));
                     assertion.add(valueType.name().toLowerCase(),KonduitPythonUtils.typeForValueType(valueType),Arrays.asList("1"));
                     break;
@@ -398,10 +410,19 @@ public class KonduitPythonUtilsTest {
 
     @Test
     public void testInsertBytes() throws Exception {
+        PythonIO lenOutput = PythonIO.builder()
+                .name("len_input")
+                .type(ValueType.INT64)
+                .pythonType("int")
+                .build();
+        PythonIO pythonInput = PythonIO.builder()
+                .type(ValueType.BYTES)
+                .pythonType("bytes")
+                .name("input")
+                .build();
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonOutput("len_input","int")
-                .pythonOutput("input", "bytes")
-                .outputTypeByteConversion("input",ValueType.BYTES)
+                 .ioOutput("input",pythonInput)
+                .ioOutput("len_input",lenOutput)
                 .build();
 
         Data input = Data.empty();
@@ -423,10 +444,19 @@ public class KonduitPythonUtilsTest {
 
     @Test
     public void testInsertImage() throws Exception {
+        PythonIO lenOutput = PythonIO.builder()
+                .name("len_input")
+                .type(ValueType.INT64)
+                .pythonType("int")
+                .build();
+        PythonIO pythonInput = PythonIO.builder()
+                .type(ValueType.IMAGE)
+                .pythonType("bytes")
+                .name("input")
+                .build();
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonOutput("len_input","int")
-                .pythonOutput("input", "bytes")
-                .outputTypeByteConversion("input",ValueType.IMAGE)
+                .ioOutput("input",pythonInput)
+                .ioOutput("len_input",lenOutput)
                 .build();
 
         Data input = Data.empty();
@@ -454,10 +484,19 @@ public class KonduitPythonUtilsTest {
 
     @Test
     public void testInsertString() throws Exception {
+        PythonIO lenOutput = PythonIO.builder()
+                .name("len_input")
+                .type(ValueType.INT64)
+                .pythonType("int")
+                .build();
+        PythonIO pythonInput = PythonIO.builder()
+                .type(ValueType.BYTES)
+                .pythonType("bytes")
+                .name("input")
+                .build();
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonOutput("len_input","int")
-                .pythonOutput("input", "bytes")
-                .outputTypeByteConversion("input",ValueType.STRING)
+                .ioOutput("input",pythonInput)
+                .ioOutput("len_input",lenOutput)
                 .build();
 
         Data input = Data.empty();
@@ -479,10 +518,19 @@ public class KonduitPythonUtilsTest {
 
     @Test
     public void testInsertByteBuffer() throws Exception {
+        PythonIO lenOutput = PythonIO.builder()
+                .name("len_input")
+                .type(ValueType.INT64)
+                .pythonType("int")
+                .build();
+        PythonIO pythonInput = PythonIO.builder()
+                .type(ValueType.BYTEBUFFER)
+                .pythonType("bytes")
+                .name("input")
+                .build();
         PythonConfig pythonConfig = PythonConfig.builder()
-                .pythonOutput("len_input","int")
-                .pythonOutput("input", "bytes")
-                .outputTypeByteConversion("input",ValueType.BYTEBUFFER)
+                .ioOutput("input",pythonInput)
+                .ioOutput("len_input",lenOutput)
                 .build();
 
         Data input = Data.empty();

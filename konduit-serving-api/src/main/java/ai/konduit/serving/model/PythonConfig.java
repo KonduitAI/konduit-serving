@@ -22,10 +22,9 @@
 
 package ai.konduit.serving.model;
 
-import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.TextConfig;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.datavec.python.PythonVariables;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -47,32 +46,31 @@ import java.util.Map;
 @Slf4j
 @Builder
 @AllArgsConstructor
-public class PythonConfig implements Serializable {
+public class PythonConfig implements Serializable, TextConfig {
 
     private String  pythonCode, pythonCodePath, pythonPath;
 
     @Singular
+    @Deprecated
     private Map<String,String>  pythonInputs, pythonOutputs, extraInputs;
 
     private boolean returnAllInputs;
 
     private boolean setupAndRun;
-    @Singular("listTypeForVariableName")
-    private Map<String, ValueType> listTypesForVariableName;
-    @Singular("typeForDictionaryForVariableName")
-    private Map<String,ValueType> typeForDictionaryForVariableName;
 
-    @Singular("listTypeForOutputVariableName")
-    private Map<String, ValueType> listTypesForOutputVariableNames;
-    @Singular("typeForDictionaryForOutputVariableName")
-    private Map<String,ValueType> typeForDictionaryForOutputVariableNames;
+    @Singular("ioInput")
+    private Map<String,PythonIO> ioInputs;
 
-    @Singular("outputTypeByteConversion")
-    private Map<String,ValueType> outputTypeByteConversions;
+    @Singular("ioOutput")
+    private Map<String,PythonIO> ioOutputs;
 
     private static String defaultPythonPath;
     @Builder.Default
     private String jobSuffix = "konduit_job";
     @Builder.Default
     private boolean useGil = false;
+
+
+
+
 }

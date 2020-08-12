@@ -19,14 +19,12 @@ import ai.konduit.serving.data.image.data.FrameImage;
 import ai.konduit.serving.data.image.data.MatImage;
 import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
 import ai.konduit.serving.model.PythonConfig;
+import ai.konduit.serving.model.PythonIO;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.impl.data.image.*;
-import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.python.DictUtils;
 import ai.konduit.serving.python.PythonStep;
-import com.google.gson.internal.$Gson$Preconditions;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
+import ai.konduit.serving.python.NoneType;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -64,6 +62,34 @@ public class KonduitPythonUtils {
 
     private KonduitPythonUtils() {}
 
+
+    /**
+     * Create the input {@link PythonVariables}
+     * based on the {@link PythonConfig#getIoOutputs()}
+     * @param pythonConfig the python configuration to derive inputs from
+     * @return
+     */
+    public static PythonVariables createInputVariables(PythonConfig pythonConfig) {
+        PythonVariables ret = new PythonVariables();
+        for(Map.Entry<String,PythonIO> entry : pythonConfig.getIoInputs().entrySet()) {
+            ret.add(new PythonVariable<>(entry.getKey(),PythonTypes.get(entry.getValue().pythonType())));
+        }
+        return ret;
+    }
+
+    /**
+     * Create the input {@link PythonVariables}
+     * based on the {@link PythonConfig#getIoOutputs()} ()}
+     * @param pythonConfig the python configuration to derive inputs from
+     * @return
+     */
+    public static PythonVariables createOutputVariables(PythonConfig pythonConfig) {
+        PythonVariables ret = new PythonVariables();
+        for(Map.Entry<String,PythonIO> entry : pythonConfig.getIoOutputs().entrySet()) {
+            ret.add(new PythonVariable<>(entry.getKey(),PythonTypes.get(entry.getValue().pythonType())));
+        }
+        return ret;
+    }
 
     /**
      * Create a valid list for input in to
@@ -158,6 +184,8 @@ public class KonduitPythonUtils {
         switch(valueType) {
             default:
                 throw new IllegalArgumentException("Data is not a valid value type for input in to a python script");
+            case NONE:
+                return NoneType.instance();
             case BOOLEAN:
                 return BOOL;
             case STRING:
@@ -455,8 +483,10 @@ public class KonduitPythonUtils {
      * @throws IOException
      */
     public static void insertBytesIntoPythonVariables(Data ret, PythonVariables outputs, String variable, PythonConfig pythonConfig) throws IOException {
-        Preconditions.checkState(pythonConfig.getOutputTypeByteConversions().containsKey(variable),"No output type conversion found for " + variable + " please ensure a type exists for converting bytes to an appropriate data type.");
-        ValueType byteOutputValueType = pythonConfig.getOutputTypeByteConversions().get(variable);
+        PythonIO pythonIO = pythonConfig.getIoOutputs().get(variable);
+        Preconditions.checkState(pythonConfig.getIoOutputs().containsKey(variable),"No output type conversion found for " + variable + " please ensure a type exists for converting bytes to an appropriate data type.");
+        ValueType byteOutputValueType = pythonIO.type();
+        Preconditions.checkNotNull(byteOutputValueType,"No byte value output type specified!");
         Preconditions.checkState(outputs.get("len_" + variable) != null,"Please ensure a len_" + variable + " is defined for your python script output to get a consistent length from python.");
         Long length = getWithType(outputs,"len_" + variable,Long.class);
         Preconditions.checkNotNull(length,"No byte pointer length found for variable");
@@ -515,6 +545,8 @@ public class KonduitPythonUtils {
     public static PythonVariables createPythonVariablesFromDataInput(Data data, PythonConfig pythonConfig) throws Exception {
         PythonVariables pythonVariables = new PythonVariables();
         for(String key : data.keys()) {
+            PythonIO pythonIO = pythonConfig.getIoInputs() .get(key);
+            Preconditions.checkNotNull(pythonIO,"No python IO found for key " + key);
             switch(data.type(key)) {
                 case NDARRAY:
                     NDArray ndArray = data.getNDArray(key);
@@ -543,8 +575,8 @@ public class KonduitPythonUtils {
                     pythonVariables.add(key, PythonTypes.FLOAT,aDouble);
                     break;
                 case LIST:
-                    Preconditions.checkState(pythonConfig.getListTypesForVariableName().containsKey(key),"No input type specified for list with key " + key);
-                    ValueType valueType = pythonConfig.getListTypesForVariableName().get(key);
+                    Preconditions.checkState(pythonIO.isListWithType(),"No input type specified for list with key " + key);
+                    ValueType valueType = pythonIO.secondaryType();
                     List<Object> list = data.getList(key, valueType);
                     List<Object> preProcessed = createValidListForPythonVariables(list,valueType);
                     KonduitPythonUtils.addObjectToPythonVariables(pythonVariables,key,preProcessed);

@@ -30,5 +30,6 @@ public enum ValueType {
     DATA,
     LIST,
     POINT,
-    BYTEBUFFER
+    BYTEBUFFER,
+    NONE
 }

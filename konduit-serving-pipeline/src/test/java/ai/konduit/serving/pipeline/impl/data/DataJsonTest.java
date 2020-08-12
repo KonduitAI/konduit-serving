@@ -80,6 +80,9 @@ public class DataJsonTest {
                 case BYTEBUFFER:
                     d = Data.singleton("myKey", ByteBuffer.wrap(new byte[]{1}));
                     break;
+                case NONE:
+                    d = Data.singleton("myKey","null");
+                    break;
                 default:
                     throw new RuntimeException();
             }
@@ -174,6 +177,10 @@ public class DataJsonTest {
                     );
                     d = Data.singletonList("key",byteBuffers,ValueType.BYTEBUFFER);
                     break;
+                case NONE:
+                    d = Data.singleton("key","null");
+                    break;
+
                 default:
                     throw new RuntimeException();
             }
