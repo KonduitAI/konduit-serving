@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>ai.konduit.serving</groupId>
@@ -48,21 +48,7 @@
       <artifactId>lombok</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.bytedeco</groupId>
-      <artifactId>onnxruntime-platform</artifactId>
-      <version>${onnxruntime.javacpp.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.bytedeco</groupId>
-          <artifactId>dnnl-platform</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.bytedeco</groupId>
-          <artifactId>dnnl</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+
 
     <dependency>
       <groupId>junit</groupId>
@@ -83,4 +69,58 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <profiles>
+    <profile>
+      <id>cpu</id>
+      <activation>
+        <property>
+          <name>chip</name>
+          <value>cpu</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.bytedeco</groupId>
+          <artifactId>onnxruntime-platform</artifactId>
+          <version>${onnxruntime.javacpp.version}</version>
+          <exclusions>
+            <exclusion>
+              <groupId>org.bytedeco</groupId>
+              <artifactId>dnnl-platform</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>org.bytedeco</groupId>
+              <artifactId>dnnl</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>gpu</id>
+      <activation>
+        <property>
+          <name>chip</name>
+          <value>gpu</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.bytedeco</groupId>
+          <artifactId>onnxruntime-platform-gpu</artifactId>
+          <version>${onnxruntime.javacpp.version}</version>
+          <exclusions>
+            <exclusion>
+              <groupId>org.bytedeco</groupId>
+              <artifactId>dnnl-platform</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>org.bytedeco</groupId>
+              <artifactId>dnnl</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 </project>
