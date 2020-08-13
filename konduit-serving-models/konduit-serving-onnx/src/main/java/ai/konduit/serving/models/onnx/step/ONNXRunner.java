@@ -54,14 +54,15 @@ public class ONNXRunner implements PipelineStepRunner {
     private MemoryInfo memoryInfo;
     private AllocatorWithDefaultOptions allocator;
     private  SessionOptions sessionOptions;
-    private   Env env;
+    private   static Env env;
     private Pointer bp;
 
     public ONNXRunner(ONNXStep onnxStep) {
         this.onnxStep = onnxStep;
-        Env env = new Env(ONNXUtils.getOnnxLogLevelFromLogger(log), new BytePointer("konduit-serving-onnx-session-" + UUID.randomUUID().toString()));
-        env.retainReference();
-
+        if(env == null) {
+            env = new Env(ONNXUtils.getOnnxLogLevelFromLogger(log), new BytePointer("konduit-serving-onnx-session-" + UUID.randomUUID().toString()));
+            env.retainReference();
+        }
         sessionOptions = new SessionOptions();
         sessionOptions.SetGraphOptimizationLevel(ORT_ENABLE_EXTENDED);
         sessionOptions.SetIntraOpNumThreads(1);
