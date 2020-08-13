@@ -21,10 +21,4 @@ public class ONNXUtilsTests {
         INDArray convertedArr = ONNXUtils.getArray(value);
         assertEquals(arr,convertedArr);
     }
-
-    @Test
-    public void testDataBuffer() {
-
-    }
-
 }

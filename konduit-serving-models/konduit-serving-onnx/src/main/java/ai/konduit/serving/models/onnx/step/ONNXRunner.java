@@ -38,6 +38,7 @@ import org.nd4j.linalg.factory.Nd4j;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static ai.konduit.serving.models.onnx.utils.ONNXUtils.getDataBuffer;
 import static ai.konduit.serving.models.onnx.utils.ONNXUtils.getTensor;
@@ -53,16 +54,13 @@ public class ONNXRunner implements PipelineStepRunner {
     private MemoryInfo memoryInfo;
     private AllocatorWithDefaultOptions allocator;
     private  SessionOptions sessionOptions;
-    private  static Env env;
+    private   Env env;
     private Pointer bp;
 
     public ONNXRunner(ONNXStep onnxStep) {
         this.onnxStep = onnxStep;
-        //ORT_DISABLE_ALL
-        if(env == null) {
-            env = new Env(ONNXUtils.getOnnxLogLevelFromLogger(log), new BytePointer("konduit-serving-onnx-session"));
-            env.retainReference();
-        }
+        Env env = new Env(ONNXUtils.getOnnxLogLevelFromLogger(log), new BytePointer("konduit-serving-onnx-session-" + UUID.randomUUID().toString()));
+        env.retainReference();
 
         sessionOptions = new SessionOptions();
         sessionOptions.SetGraphOptimizationLevel(ORT_ENABLE_EXTENDED);
@@ -90,7 +88,6 @@ public class ONNXRunner implements PipelineStepRunner {
         sessionOptions.releaseReference();
         allocator.releaseReference();
         runOptions.releaseReference();
-        env.releaseReference();
     }
 
     @Override

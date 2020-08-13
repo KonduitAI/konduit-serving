@@ -17,12 +17,24 @@
   </parent>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
+
   <dependencies>
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>onnxruntime-platform</artifactId>
+      <version>${onnxruntime.javacpp.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>onnxruntime</artifactId>
+      <version>${onnxruntime.javacpp.version}</version>
+    </dependency>
+
 
     <dependency>
       <groupId>ai.konduit.serving</groupId>
@@ -73,59 +85,7 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+
+
   </dependencies>
-  <profiles>
-    <profile>
-      <id>cpu</id>
-      <activation>
-        <property>
-          <name>chip</name>
-          <value>cpu</value>
-        </property>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.bytedeco</groupId>
-          <artifactId>onnxruntime-platform</artifactId>
-          <version>${onnxruntime.javacpp.version}</version>
-          <exclusions>
-            <exclusion>
-              <groupId>org.bytedeco</groupId>
-              <artifactId>dnnl-platform</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>org.bytedeco</groupId>
-              <artifactId>dnnl</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
-      <id>gpu</id>
-      <activation>
-        <property>
-          <name>chip</name>
-          <value>gpu</value>
-        </property>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.bytedeco</groupId>
-          <artifactId>onnxruntime-platform-gpu</artifactId>
-          <version>${onnxruntime.javacpp.version}</version>
-          <exclusions>
-            <exclusion>
-              <groupId>org.bytedeco</groupId>
-              <artifactId>dnnl-platform</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>org.bytedeco</groupId>
-              <artifactId>dnnl</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
 </project>
