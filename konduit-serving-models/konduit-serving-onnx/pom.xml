@@ -50,14 +50,18 @@
 
     <dependency>
       <groupId>org.bytedeco</groupId>
-      <artifactId>onnxruntime</artifactId>
-      <version>${onnxruntime.javacpp.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.bytedeco</groupId>
       <artifactId>onnxruntime-platform</artifactId>
       <version>${onnxruntime.javacpp.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bytedeco</groupId>
+          <artifactId>dnnl-platform</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bytedeco</groupId>
+          <artifactId>dnnl</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
