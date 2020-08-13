@@ -141,7 +141,7 @@
         <onnxruntime.javacpp.version>${onnxruntime.version}-${javacpp.version}</onnxruntime.javacpp.version>
         <openblas.version>0.3.10</openblas.version>
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>
-        <leptonica.version>1.79.0</leptonica.version>
+        <leptonica.version>1.80.0</leptonica.version>
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
         <hdf5.version>1.12.0</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
