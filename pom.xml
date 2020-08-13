@@ -128,7 +128,7 @@
         <javacv.version>1.5.4-SNAPSHOT</javacv.version>
         <opencv.version>4.3.0</opencv.version>
         <cpython.version>3.7.7</cpython.version>
-        <mkl.version>2020.1</mkl.version>
+        <mkl.version>2020.2</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
@@ -777,6 +777,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <testFailureIgnore>false</testFailureIgnore>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.projectlombok</groupId>
@@ -848,9 +851,6 @@
 
         <profile>
             <id>test</id>
-            <modules>
-                <module>konduit-serving-test</module>
-            </modules>
         </profile>
         <profile>
             <id>exe</id>
