@@ -34,4 +34,9 @@ public class BmpImage extends BaseImage<Bmp> {
     public int width() {
         return image.width();
     }
+
+    @Override
+    public int channels() {
+        return image.channels();
+    }
 }

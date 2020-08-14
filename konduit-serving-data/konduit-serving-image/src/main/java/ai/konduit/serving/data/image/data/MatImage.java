@@ -35,4 +35,9 @@ public class MatImage extends BaseImage<Mat> {
     public int width() {
         return image.cols();
     }
+
+    @Override
+    public int channels() {
+        return image.channels();
+    }
 }

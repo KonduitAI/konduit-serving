@@ -34,4 +34,9 @@ public class PngImage extends BaseImage<Png> {
     public int width() {
         return image.width();
     }
+
+    @Override
+    public int channels() {
+        return image.channels();
+    }
 }

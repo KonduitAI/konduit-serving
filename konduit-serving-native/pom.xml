@@ -64,9 +64,16 @@
                     <groupId>org.bytedeco</groupId>
                     <artifactId>openblas</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>javacpp</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
-
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacpp</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>openblas</artifactId>

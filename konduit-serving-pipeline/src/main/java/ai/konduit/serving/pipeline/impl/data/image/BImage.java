@@ -36,4 +36,9 @@ public class BImage extends BaseImage<BufferedImage> {
     public int width() {
         return image.getWidth();
     }
+
+    @Override
+    public int channels() {
+        return Math.min(3,image.getColorModel().getNumComponents());
+    }
 }

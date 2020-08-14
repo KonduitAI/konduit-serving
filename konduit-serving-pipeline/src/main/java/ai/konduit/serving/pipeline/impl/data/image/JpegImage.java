@@ -34,4 +34,9 @@ public class JpegImage extends BaseImage<Jpeg> {
     public int width() {
         return image.width();
     }
+
+    @Override
+    public int channels() {
+        return image.channels();
+    }
 }

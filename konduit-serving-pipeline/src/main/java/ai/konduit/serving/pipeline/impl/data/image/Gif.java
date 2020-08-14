@@ -26,27 +26,27 @@ import java.nio.ByteBuffer;
 public class Gif extends BaseImageFile {
 
     public Gif(File file) {
-        this(file, null, null);
+        this(file, null, null,null);
     }
 
-    public Gif(File file, Integer height, Integer width){
-        super(file, height, width);
+    public Gif(File file, Integer height, Integer width,Integer channels){
+        super(file, height, width,channels);
     }
 
     public Gif(byte[] bytes){
-        this(bytes, null, null);
+        this(bytes, null, null,null);
     }
 
-    public Gif(byte[] bytes, Integer height, Integer width){
-        super(bytes, height, width);
+    public Gif(byte[] bytes, Integer height, Integer width,Integer channels){
+        super(bytes, height, width,channels);
     }
 
     public Gif(ByteBuffer byteBuffer){
         super(byteBuffer);
     }
 
-    public Gif(ByteBuffer byteBuffer, Integer height, Integer width){
-        super(byteBuffer, height, width);
+    public Gif(ByteBuffer byteBuffer, Integer height, Integer width,Integer channels){
+        super(byteBuffer, height, width,channels);
     }
 
     @Override

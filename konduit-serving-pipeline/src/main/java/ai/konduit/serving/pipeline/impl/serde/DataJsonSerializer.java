@@ -104,6 +104,10 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
                     Point p = data.getPoint(s);
                     writePoint(jg, p);
                     break;
+                case BYTEBUFFER:
+                    ByteBuffer byteBuffer = data.getByteBuffer(s);
+                    writeBytes(jg,byteBuffer);
+                    break;
                 default:
                     throw new IllegalStateException("Value type not yet supported/implemented: " + vt);
             }
@@ -122,6 +126,25 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
         ObjectMapper om = (ObjectMapper) jg.getCodec();
         String dataStr = om.writeValueAsString(data);
         jg.writeRawValue(dataStr);
+    }
+
+    private void writeBytes(JsonGenerator jg, ByteBuffer bytes) throws IOException {
+        //TODO add option to do raw bytes array - [0, 1, 2, ...] style
+        jg.writeStartObject();
+        jg.writeFieldName(Data.RESERVED_KEY_BYTEBUFFER_BASE64);
+        if(bytes.hasArray()) {
+            String base64 = Base64.getEncoder().encodeToString(bytes.array());
+            jg.writeString(base64);
+            jg.writeEndObject();
+        }
+        else {
+            byte[] bytesArr = new byte[bytes.capacity()];
+            bytes.get(bytesArr.length);
+            String base64 = Base64.getEncoder().encodeToString(bytesArr);
+            jg.writeString(base64);
+            jg.writeEndObject();
+        }
+
     }
 
     private void writeBytes(JsonGenerator jg, byte[] bytes) throws IOException {
@@ -257,6 +280,11 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
             case BYTES:
                 for (byte[] bytes : (List<byte[]>) list) {
                     writeBytes(jg, bytes);
+                }
+                break;
+            case BYTEBUFFER:
+                for(ByteBuffer b: (List<ByteBuffer>) list) {
+                    writeBytes(jg,b);
                 }
                 break;
             case IMAGE:

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>ai.konduit.serving</groupId>
@@ -17,12 +17,24 @@
   </parent>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
+
   <dependencies>
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>onnxruntime-platform</artifactId>
+      <version>${onnxruntime.javacpp.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>onnxruntime</artifactId>
+      <version>${onnxruntime.javacpp.version}</version>
+    </dependency>
+
 
     <dependency>
       <groupId>ai.konduit.serving</groupId>
@@ -49,15 +61,10 @@
     </dependency>
 
     <dependency>
-      <groupId>org.bytedeco</groupId>
-      <artifactId>onnxruntime</artifactId>
-      <version>${onnxruntime.javacpp.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.bytedeco</groupId>
-      <artifactId>onnxruntime-platform</artifactId>
-      <version>${onnxruntime.javacpp.version}</version>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.3</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -70,7 +77,6 @@
       <groupId>org.nd4j</groupId>
       <artifactId>nd4j-native-platform</artifactId>
       <version>${nd4j.version}</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -79,5 +85,7 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+
+
   </dependencies>
 </project>
