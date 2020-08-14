@@ -48,15 +48,13 @@ import java.util.Map;
 @AllArgsConstructor
 public class PythonConfig implements Serializable, TextConfig {
 
-    private String  pythonCode, pythonCodePath, pythonPath;
+    private String  pythonCode, pythonCodePath, pythonPath,importCode,importCodePath;
 
     @Singular
     @Deprecated
     private Map<String,String>  pythonInputs, pythonOutputs, extraInputs;
 
-    private boolean returnAllInputs;
-
-    private boolean setupAndRun;
+    private boolean returnAllInputs,setupAndRun;
 
     @Singular("ioInput")
     private Map<String,PythonIO> ioInputs;
@@ -64,7 +62,6 @@ public class PythonConfig implements Serializable, TextConfig {
     @Singular("ioOutput")
     private Map<String,PythonIO> ioOutputs;
 
-    private static String defaultPythonPath;
     @Builder.Default
     private String jobSuffix = "konduit_job";
     @Builder.Default

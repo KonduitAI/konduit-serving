@@ -2,11 +2,13 @@ package ai.konduit.serving.python;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.python4j.*;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -20,13 +22,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class KonduitPythonJob {
 
 
-    private String code;
+    private String code,importCode;
     private String name;
     private String context;
-    private final boolean setupRunMode;
+    private  boolean setupRunMode;
     private PythonObject runF;
     private final AtomicBoolean setupDone = new AtomicBoolean(false);
-    private boolean useGil= false;
+    private boolean useGil = false;
     static {
         new PythonExecutioner();
     }
@@ -35,6 +37,7 @@ public class KonduitPythonJob {
     /**
      * @param name Name for the python job.
      * @param code Python code.
+     * @param importCode code to run for imports
      * @param setupRunMode If true, the python code is expected to have two methods: setup(), which takes no arguments,
      *                     and run() which takes some or no arguments. setup() method is executed once,
      *                     and the run() method is called with the inputs(if any) per transaction, and is expected to return a dictionary
@@ -43,15 +46,22 @@ public class KonduitPythonJob {
      *                     after execution.
      * @param useGil       whether to use {@link PythonGIL#lock()} when executing the job
      */
-    public KonduitPythonJob(@Nonnull String name, @Nonnull String code, boolean setupRunMode,boolean useGil) {
+    public KonduitPythonJob(@Nonnull String name, @Nonnull String code,  String importCode, boolean setupRunMode, boolean useGil) {
         this.name = name;
         this.code = code;
+        this.importCode = importCode;
         this.setupRunMode = setupRunMode;
         this.useGil = useGil;
-        context = "__job_" + name;
+        context = "__job_" + name + UUID.randomUUID().toString().replace("-","_");
         if (PythonContextManager.hasContext(context)) {
             throw new PythonException("Unable to create python job " + name + ". Context " + context + " already exists!");
         }
+
+        //run upon job creation
+        if(importCode != null) {
+           runImport();
+        }
+
     }
 
 
@@ -116,10 +126,17 @@ public class KonduitPythonJob {
             try (PythonGC _ = PythonGC.watch()) {
                 execJob(inputs, outputs);
             }
-
         }
+    }
 
-
+    /**
+     * Runs the given import code and returns all the associated python variables
+     * @return
+     */
+    private List<PythonVariable> runImport() {
+        PythonContextManager.setContext(context);
+        PythonExecutioner.exec(importCode);
+        return PythonExecutioner.getAllVariables();
     }
 
     private void execJob(List<PythonVariable> inputs, List<PythonVariable> outputs) {
@@ -155,8 +172,12 @@ public class KonduitPythonJob {
         PythonExecutioner.getVariables(outputs);
     }
 
-    public List<PythonVariable> execAndReturnAllVariables(List<PythonVariable> inputs){
-        if (setupRunMode)setup();
+    public List<PythonVariable> execAndReturnAllVariables(List<PythonVariable> inputs) {
+        if (setupRunMode)
+            setup();
+
+
+
         try (PythonGIL gil = PythonGIL.lock()) {
             try (PythonGC _ = PythonGC.watch()) {
                 PythonContextManager.setContext(context);

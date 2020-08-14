@@ -54,10 +54,22 @@ public class PythonRunner implements PipelineStepRunner {
             } catch (IOException e) {
                 log.error("Unable to read code from " + pythonStep.pythonConfig().getPythonCodePath());
             }
-            log.info("Resolving code from " + pythonStep.pythonConfig().getPythonCodePath());
+            log.info("Resolving execution code from " + pythonStep.pythonConfig().getPythonCodePath());
+        }
+
+        String importCode = pythonStep.pythonConfig().getImportCode();
+        if (importCode == null) {
+            try {
+                importCode = FileUtils.readFileToString(new File(pythonStep.pythonConfig().getImportCodePath()), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                log.error("Unable to read code from " + pythonStep.pythonConfig().getImportCodePath());
+            }
+
+            log.info("Resolving import code from " + pythonStep.pythonConfig().getImportCodePath());
         }
 
         konduitPythonJob = KonduitPythonJob.builder()
+                .importCode(importCode)
                 .name(pythonStep.pythonConfig().getJobSuffix())
                 .setupRunMode(pythonStep.pythonConfig().isSetupAndRun())
                 .code(code)

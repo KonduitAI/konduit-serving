@@ -45,6 +45,22 @@ import static org.junit.Assert.*;
 
 public class PythonRunnerTests {
 
+    @Test
+    public void testPythonImport() {
+        PythonContextManager.deleteNonMainContexts();
+        PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
+        PythonConfig config = builder
+                .importCode("ab = 'hello'")
+                .pythonCode("print(ab)")
+                .build();
+        PythonStep pythonStep = new PythonStep().pythonConfig(config);
+        SequencePipeline sequencePipeline = SequencePipeline.builder()
+                .add(pythonStep).build();
+        PipelineExecutor executor = sequencePipeline.executor();
+        Data data = Data.empty();
+        executor.exec(data);
+
+    }
 
     @Test
     public void testDictUtilsPoint() {
