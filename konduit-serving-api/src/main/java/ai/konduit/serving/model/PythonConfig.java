@@ -64,8 +64,6 @@ public class PythonConfig implements Serializable, TextConfig {
 
     @Builder.Default
     private String jobSuffix = "konduit_job";
-    @Builder.Default
-    private boolean useGil = false;
 
 
 

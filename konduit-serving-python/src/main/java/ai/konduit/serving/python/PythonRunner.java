@@ -69,7 +69,7 @@ public class PythonRunner implements PipelineStepRunner {
         String importCodePath = pythonStep.pythonConfig().getImportCodePath();
         if (importCode == null && importCodePath != null) {
             try {
-                importCode = FileUtils.readFileToString(new File(importCode), StandardCharsets.UTF_8);
+                importCode = FileUtils.readFileToString(new File(importCodePath), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 log.error("Unable to read code from " + pythonStep.pythonConfig().getImportCodePath());
             }
