@@ -1,0 +1,5 @@
+<root>
+    <item name='ai.konduit.serving.python.KonduitPythonJob void exec(java.util.List&lt;org.nd4j.python4j.PythonVariable&gt;, java.util.List&lt;org.nd4j.python4j.PythonVariable&gt;)'>
+        <annotation name='lombok.SneakyThrows'/>
+    </item>
+</root>

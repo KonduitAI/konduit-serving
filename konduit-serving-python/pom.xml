@@ -18,8 +18,9 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
-    <dependencies>
-        <dependency>
+
+
+    <dependencies><dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>python4j-core</artifactId>
             <version>${dl4j.version}</version>
