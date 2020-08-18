@@ -19,17 +19,20 @@ import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
 import ai.konduit.serving.model.PythonIO;
 import ai.konduit.serving.pipeline.api.context.Context;
-import ai.konduit.serving.pipeline.api.data.*;
+import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.python.util.KonduitPythonUtils;
 import lombok.SneakyThrows;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.python4j.*;
+import org.nd4j.python4j.PythonExecutioner;
+import org.nd4j.python4j.PythonGIL;
+import org.nd4j.python4j.PythonVariable;
+import org.nd4j.python4j.PythonVariables;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,12 +40,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+import static org.bytedeco.cpython.global.python.PyGILState_Check;
+
 @CanRun(PythonStep.class)
 @Slf4j
 public class PythonRunner implements PipelineStepRunner {
 
     private PythonStep pythonStep;
-    private KonduitPythonJob konduitPythonJob;
+    private String code;
+
 
     @SneakyThrows
     public PythonRunner(PythonStep pythonStep) {
@@ -50,17 +56,20 @@ public class PythonRunner implements PipelineStepRunner {
         String code = pythonStep.pythonConfig().getPythonCode();
         if (code == null) {
             try {
-                code = FileUtils.readFileToString(new File(pythonStep.pythonConfig().getPythonCodePath()), StandardCharsets.UTF_8);
+                this.code = FileUtils.readFileToString(new File(pythonStep.pythonConfig().getPythonCodePath()), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 log.error("Unable to read code from " + pythonStep.pythonConfig().getPythonCodePath());
             }
             log.info("Resolving execution code from " + pythonStep.pythonConfig().getPythonCodePath());
         }
+        else
+            this.code = code;
 
         String importCode = pythonStep.pythonConfig().getImportCode();
-        if (importCode == null) {
+        String importCodePath = pythonStep.pythonConfig().getImportCodePath();
+        if (importCode == null && importCodePath != null) {
             try {
-                importCode = FileUtils.readFileToString(new File(pythonStep.pythonConfig().getImportCodePath()), StandardCharsets.UTF_8);
+                importCode = FileUtils.readFileToString(new File(importCode), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 log.error("Unable to read code from " + pythonStep.pythonConfig().getImportCodePath());
             }
@@ -68,13 +77,13 @@ public class PythonRunner implements PipelineStepRunner {
             log.info("Resolving import code from " + pythonStep.pythonConfig().getImportCodePath());
         }
 
-        konduitPythonJob = KonduitPythonJob.builder()
-                .importCode(importCode)
-                .name(pythonStep.pythonConfig().getJobSuffix())
-                .setupRunMode(pythonStep.pythonConfig().isSetupAndRun())
-                .code(code)
-                .useGil(pythonStep.pythonConfig().isUseGil())
-                .build();
+        if(importCode != null) {
+            try(PythonGIL pythonGIL = PythonGIL.lock()) {
+                PythonExecutioner.exec(importCode);
+            }
+        }
+
+
     }
 
 
@@ -92,11 +101,22 @@ public class PythonRunner implements PipelineStepRunner {
     @Override
     public Data exec(Context ctx, Data data) {
         Data ret = Data.empty();
-        PythonVariables pythonVariables = KonduitPythonUtils.createPythonVariablesFromDataInput(data, pythonStep.pythonConfig());
-
         PythonVariables outputs = KonduitPythonUtils.createOutputVariables(pythonStep.pythonConfig());
-        konduitPythonJob.exec(pythonVariables,outputs);
+        PythonVariables pythonVariables = KonduitPythonUtils.createPythonVariablesFromDataInput(data, pythonStep.pythonConfig());
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            log.debug("Thread " + Thread.currentThread().getId() + " has the GIL. Name of thread " + Thread.currentThread().getName());
+            log.debug("Py gil state " + (PyGILState_Check() > 0));
+            runExec(ret, outputs, pythonVariables);
+        }
 
+
+
+        return ret;
+    }
+
+    private void runExec(Data ret, PythonVariables outputs, PythonVariables pythonVariables) throws IOException {
+        PythonExecutioner.exec(code, pythonVariables, outputs);
+        Preconditions.checkNotNull(outputs,"No outputs found!");
         for(PythonVariable variable : outputs) {
             PythonIO pythonIO = pythonStep.pythonConfig().getIoOutputs().get(variable.getName());
             Preconditions.checkNotNull(pythonIO,"No variable found for " + variable.getName());
@@ -108,6 +128,7 @@ public class PythonRunner implements PipelineStepRunner {
                     Preconditions.checkState(pythonIO.isListWithType(),"No output type specified for list with key " + variable);
                     List<Object> listValue = KonduitPythonUtils.getWithType(outputs,variable.getName(),List.class);
                     ValueType valueType = pythonIO.secondaryType();
+                    Preconditions.checkNotNull(listValue,"List value returned null for output named " + variable.getName() + " type should have been list of " + valueType);
                     List<Object> convertedInput = KonduitPythonUtils.createValidListForPythonVariables(listValue,valueType);
                     KonduitPythonUtils.insertListIntoData(ret, variable.getName(), convertedInput, valueType);
                     break;
@@ -148,8 +169,6 @@ public class PythonRunner implements PipelineStepRunner {
 
             }
         }
-
-        return ret;
     }
 
 }

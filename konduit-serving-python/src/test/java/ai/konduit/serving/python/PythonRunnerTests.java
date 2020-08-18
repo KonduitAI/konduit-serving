@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.python4j.PythonContextManager;
+import org.nd4j.python4j.PythonGIL;
 import org.nd4j.python4j.PythonVariables;
 
 import java.io.File;
@@ -47,7 +48,10 @@ public class PythonRunnerTests {
 
     @Test
     public void testPythonImport() {
-        PythonContextManager.deleteNonMainContexts();
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            PythonContextManager.deleteNonMainContexts();
+
+        }
         PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
         PythonConfig config = builder
                 .importCode("ab = 'hello'")
@@ -64,8 +68,10 @@ public class PythonRunnerTests {
 
     @Test
     public void testDictUtilsPoint() {
-        PythonContextManager.deleteNonMainContexts();
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            PythonContextManager.deleteNonMainContexts();
 
+        }
         Point point = Point.create(1,2);
         Map<String,Object> convertedDict = DictUtils.toPointDict(point);
         Map<String,Object> assertion = new LinkedHashMap<>();
@@ -99,8 +105,10 @@ public class PythonRunnerTests {
 
     @Test
     public void testDictUtilsBoundingBox() {
-        PythonContextManager.deleteNonMainContexts();
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            PythonContextManager.deleteNonMainContexts();
 
+        }
         BoundingBox boundingBox = BoundingBox.create(0.0,1.0,1.0,1.0);
         Map<String, Object> boundingBoxDict = DictUtils.toBoundingBoxDict(boundingBox);
         Map<String,Object> assertion = new LinkedHashMap<>();
@@ -135,8 +143,10 @@ public class PythonRunnerTests {
 
     @Test
     public void testAllInputTypes() {
-        PythonContextManager.deleteNonMainContexts();
-        PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            PythonContextManager.deleteNonMainContexts();
+
+        }        PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
         StringBuffer codeBuffer = new StringBuffer();
 
         Data data = Data.empty();
@@ -261,8 +271,10 @@ public class PythonRunnerTests {
 
     @Test
     public void testImageSerde() throws Exception {
-        PythonContextManager.deleteNonMainContexts();
-        PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            PythonContextManager.deleteNonMainContexts();
+
+        }        PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
         PythonIO input2 = PythonIO.builder()
                 .name("input2")
                 .pythonType("bytes")
