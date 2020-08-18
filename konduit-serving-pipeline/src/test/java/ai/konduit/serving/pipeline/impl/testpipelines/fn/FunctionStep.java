@@ -22,7 +22,6 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 @lombok.Data

@@ -30,6 +30,8 @@ public interface Image {
 
     int width();
 
+    int channels();
+
     Object get();
 
     <T> T getAs(ImageFormat<T> format);
@@ -41,7 +43,10 @@ public interface Image {
     boolean canGetAs(Class<?> type);
 
     //TODO how will this work for PNG, JPG etc files?
-    static Image create(@NonNull Object from){
+    static Image create(@NonNull Object from) {
+        if(from instanceof  Image) {
+            return (Image) from;
+        }
         ImageFactory f = ImageFactoryRegistry.getFactoryFor(from);
         Preconditions.checkState(f != null, "Unable to create Image from object of %s - no ImageFactory instances" +
                 " are available that can convert this type to Konduit Serving Image", from.getClass());

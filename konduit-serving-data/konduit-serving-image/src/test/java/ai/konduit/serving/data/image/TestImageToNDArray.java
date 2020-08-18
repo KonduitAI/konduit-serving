@@ -1,6 +1,5 @@
 package ai.konduit.serving.data.image;
 
-import ai.konduit.serving.data.image.convert.ImageToNDArray;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.convert.config.ImageNormalization;
 import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
@@ -8,10 +7,11 @@ import ai.konduit.serving.data.image.convert.config.NDFormat;
 import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
 import ai.konduit.serving.data.nd4j.util.ND4JUtil;
 import ai.konduit.serving.pipeline.api.data.*;
-import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.datavec.image.loader.NativeImageLoader;
 import org.junit.Test;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.common.resources.Resources;
@@ -30,12 +30,15 @@ import static org.junit.Assert.*;
 public class TestImageToNDArray {
 
     @Test
-    public void testBasic(){
+    public void testBasic() throws Exception {
 
         File f = Resources.asFile("data/5_32x32.png");
-
+        NativeImageLoader loader = new NativeImageLoader();
+        org.datavec.image.data.Image image = loader.asImageMatrix(f);
         Image i = Image.create(f);
-
+        assertEquals("Image not correct number of channels.",image.getOrigC(),i.channels());
+        Mat as = i.getAs(Mat.class);
+        assertTrue(as.channels() <= 3);
         Data in = Data.singleton("image", i);
 
         Pipeline p = SequencePipeline.builder()
@@ -43,6 +46,7 @@ public class TestImageToNDArray {
                         .config(new ImageToNDArrayConfig()
                                 .height(128)
                                 .width(128)
+                                .includeMinibatchDim(true)
                         )
                 )
                 .build();
@@ -89,8 +93,8 @@ public class TestImageToNDArray {
                                                     .format(f)
                                                     .includeMinibatchDim(leadingDim)
                                                     .normalization(new ImageNormalization(scaleNorm ? ImageNormalization.Type.SCALE_01 : ImageNormalization.Type.NONE))
-                                                    )
                                             )
+                                    )
                                     .build();
 
                             PipelineExecutor exec = p.executor();
@@ -189,7 +193,7 @@ public class TestImageToNDArray {
 
 
     @Test
-    public void testDataTypes(){
+    public void testDataTypes() {
         //Test image -> Float16, Float32, Float64, int8, int16, int32, int64, uint8, unt16, uint32, uint64
         for(NDArrayType t : new NDArrayType[]{NDArrayType.FLOAT, NDArrayType.DOUBLE,
                 NDArrayType.INT8, NDArrayType.INT16, NDArrayType.INT32, NDArrayType.INT64,
@@ -220,8 +224,8 @@ public class TestImageToNDArray {
                                                     .format(f)
                                                     .includeMinibatchDim(leadingDim)
                                                     .dataType(t)
-                                                    )
                                             )
+                                    )
                                     .build();
 
                             PipelineExecutor exec = p.executor();
@@ -404,8 +408,8 @@ public class TestImageToNDArray {
                                             .format(f)
                                             .includeMinibatchDim(false)
                                             .dataType(NDArrayType.FLOAT)
-                                            )
                                     )
+                            )
                             .build();
 
                     PipelineExecutor exec = p.executor();
@@ -496,8 +500,8 @@ public class TestImageToNDArray {
                                     .width(oW)
                                     .includeMinibatchDim(false)
                                     .dataType(NDArrayType.FLOAT)
-                                    )
                             )
+                    )
                     .build();
 
             PipelineExecutor exec = p.executor();
@@ -581,8 +585,7 @@ public class TestImageToNDArray {
     }
 
     @Test
-    public void testTypes(){
-
+    public void testTypes() {
         int oH = 128;
         int oW = 128;
 
@@ -597,8 +600,8 @@ public class TestImageToNDArray {
                                 .includeMinibatchDim(false)
                                 .dataType(NDArrayType.FLOAT)
                                 .normalization(null)
-                                )
                         )
+                )
                 .build();
 
         Data in = Data.singleton("image", Image.create(f));
@@ -633,8 +636,8 @@ public class TestImageToNDArray {
                                     .includeMinibatchDim(false)
                                     .dataType(t)
                                     .normalization(null)
-                                    )
                             )
+                    )
                     .build();
 
             Data out2 = p2.executor().exec(in);
@@ -686,10 +689,10 @@ public class TestImageToNDArray {
                                                 .normalization(norm)
                                                 .listHandling(lh)
                                                 .format(f)
-                                                )
+                                        )
                                         .keys(Collections.singletonList("images"))
                                         .outputNames(Collections.singletonList("out"))
-                                        )
+                                )
                                 .build();
 
                         Pipeline pSingle = SequencePipeline.builder()
@@ -703,10 +706,10 @@ public class TestImageToNDArray {
                                                 .normalization(norm)
                                                 .listHandling(ImageToNDArrayConfig.ListHandling.NONE)
                                                 .format(f)
-                                                )
+                                        )
                                         .keys(Collections.singletonList("images"))
                                         .outputNames(Collections.singletonList("out"))
-                                        )
+                                )
                                 .build();
 
 

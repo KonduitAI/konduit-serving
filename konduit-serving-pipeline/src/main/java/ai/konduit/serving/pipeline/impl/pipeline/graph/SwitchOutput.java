@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +53,7 @@ public class SwitchOutput extends BaseGraphStep implements GraphStep {
      * @param switchName Name of the Switch node that this SwitchOutput represents the output for
      * @param outputNum  Output number of the SwitchStep that this is for
      */
-    public SwitchOutput(GraphBuilder b, String name, String switchName, int outputNum){
+    public SwitchOutput(@JsonProperty("GraphBuilder") GraphBuilder b, @JsonProperty("name") String name, @JsonProperty("switchName") String switchName, @JsonProperty("outputNum") int outputNum){
         super(b, name);
         this.switchName = switchName;
         this.outputNum = outputNum;

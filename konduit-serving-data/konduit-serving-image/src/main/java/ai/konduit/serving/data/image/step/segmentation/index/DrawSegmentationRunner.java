@@ -28,6 +28,7 @@ import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import lombok.NonNull;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
+import org.bytedeco.javacpp.indexer.UByteRawIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -116,7 +117,7 @@ public class DrawSegmentationRunner implements PipelineStepRunner {
 
         //TODO ideally we'd use OpenCV's bitwise methods to do this, but it seems like JavaCV doesn't have those...
         UByteIndexer idx = drawOn.createIndexer();      //HWC BGR format
-
+        UByteRawIndexer uByteRawIndexer = (UByteRawIndexer) idx;
 
         IntGetter ig = null;
         if (nd.getType() == NDArrayType.INT32) {
@@ -156,24 +157,24 @@ public class DrawSegmentationRunner implements PipelineStepRunner {
 
                     int b,g,r;
                     if(skipBackgroundClass && classIdx == backgroundClass){
-                        b = idx.get(idxB);
-                        g = idx.get(idxB+1);
-                        r = idx.get(idxB+2);
+                        b = uByteRawIndexer.getRaw(idxB);
+                        g = uByteRawIndexer.getRaw(idxB+1);
+                        r = uByteRawIndexer.getRaw(idxB+2);
                     } else {
-                        b = (int) (opacity * colorsB[classIdx] + o2 * idx.get(idxB));
-                        g = (int) (opacity * colorsG[classIdx] + o2 * idx.get(idxB+1));
-                        r = (int) (opacity * colorsR[classIdx] + o2 * idx.get(idxB+2));
+                        b = (int) (opacity * colorsB[classIdx] + o2 * uByteRawIndexer.getRaw(idxB));
+                        g = (int) (opacity * colorsG[classIdx] + o2 * uByteRawIndexer.getRaw(idxB+1));
+                        r = (int) (opacity * colorsR[classIdx] + o2 * uByteRawIndexer.getRaw(idxB+2));
                     }
 
-                    idx.put(idxB, b);
-                    idx.put(idxB + 1, g);
-                    idx.put(idxB + 2, r);
+                    uByteRawIndexer.putRaw(idxB, b);
+                    uByteRawIndexer.putRaw(idxB + 1, g);
+                    uByteRawIndexer.putRaw(idxB + 2, r);
                 }
             }
 
         } else {
             UByteIndexer bMaskIdx = backgroundMask == null ? null : backgroundMask.createIndexer();
-
+            UByteRawIndexer uByteRawIndexer2 = (UByteRawIndexer) bMaskIdx;
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
                     int classIdx = ig.get();
@@ -181,13 +182,13 @@ public class DrawSegmentationRunner implements PipelineStepRunner {
                         initColors(step.classColors(), colorsB.length + 32);
 
                     long idxB = (3 * w * y) + (3 * x);
-                    idx.put(idxB, colorsB[classIdx]);
-                    idx.put(idxB + 1, colorsG[classIdx]);
-                    idx.put(idxB + 2, colorsR[classIdx]);
+                    uByteRawIndexer.putRaw(idxB,colorsB[classIdx]);
+                    uByteRawIndexer.putRaw(idxB + 1, colorsG[classIdx]);
+                    uByteRawIndexer.putRaw(idxB + 2, colorsR[classIdx]);
 
                     if(backgroundMask != null) {
                         long idxMask = w * y + x;
-                        bMaskIdx.put(idxMask, classIdx == backgroundClass ? 0 : 1);
+                        uByteRawIndexer2.putRaw(idxMask, classIdx == backgroundClass ? 0 : 1);
                     }
                 }
             }

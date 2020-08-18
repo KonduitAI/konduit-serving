@@ -111,7 +111,7 @@ public class KonduitServingLauncher extends Launcher {
                 String serviceType = verticleName.replace(KONDUIT_PREFIX + ":", "");
 
                 if(services.containsKey(serviceType)) {
-                    return (Verticle) ClassLoader.getSystemClassLoader().loadClass(services.get(serviceType)).getConstructor().newInstance();
+                    return (Verticle) Thread.currentThread().getContextClassLoader().loadClass(services.get(serviceType)).getConstructor().newInstance();
                 } else {
                     log.error("Invalid service type {}. Possible values are: {}", serviceType, services.keySet());
                     System.exit(1);

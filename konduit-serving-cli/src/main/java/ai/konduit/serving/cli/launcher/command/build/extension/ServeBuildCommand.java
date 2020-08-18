@@ -31,6 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.shade.guava.base.Strings;
 import org.nd4j.shade.jackson.databind.JsonNode;
+import org.nd4j.shade.jackson.databind.node.JsonNodeFactory;
+import org.nd4j.shade.jackson.databind.node.ObjectNode;
 import org.nd4j.shade.jackson.databind.node.TextNode;
 
 import java.io.File;
@@ -61,11 +63,18 @@ import java.util.Scanner;
 public class ServeBuildCommand extends ServeCommand {
 
     private String profileName;
+    private List<String> additionalDependencies;
 
     @Option(shortName = "p", longName = "profileName", argName = "profile_name")
     @Description("Name of the profile to be used with the server launch.")
     public void setProfileName(String profileName) {
         this.profileName = profileName;
+    }
+
+    @Option(shortName = "ad", longName = "addDep", argName = "additional_dependencies")
+    @Description("Additional dependencies to include with the launch")
+    public void setAdditionalDependencies(List<String> additionalDependencies) {
+        this.additionalDependencies = additionalDependencies;
     }
 
     @Override
@@ -85,6 +94,15 @@ public class ServeBuildCommand extends ServeCommand {
                 out.format("Invalid JSON/YAML configuration or invalid configuration file path defined by: %n%s", configuration);
                 System.exit(1);
             } else {
+                if(!(jsonConfiguration.has("host") || jsonConfiguration.has("port") ||
+                        jsonConfiguration.has("pipeline"))) {
+                    // Assume that it's a json for a konduit serving pipeline and not a complete inference configuration
+                    jsonConfiguration = new ObjectNode(JsonNodeFactory.instance)
+                            .put("host", this.host)
+                            .put("port", this.port)
+                            .set("pipeline", jsonConfiguration.deepCopy());
+                }
+
                 Object pipeline = jsonConfiguration.get("pipeline");
                 if(pipeline == null) {
                     out.format("Invalid JSON/YAML configuration or invalid configuration file path defined by: %n%s", configuration);
@@ -117,11 +135,21 @@ public class ServeBuildCommand extends ServeCommand {
                     }
                 }
 
-                if(profile.additionalDependencies() != null) {
-                    for(String additionalDependency : profile.additionalDependencies()) {
-                        args.add("-ad"); args.add(additionalDependency);
+                List<String> additionalDeps = null;
+                if(profile.additionalDependencies() != null && !profile.additionalDependencies().isEmpty()) {
+                    additionalDeps = new ArrayList<>(profile.additionalDependencies());
+                }
+                if(this.additionalDependencies != null && !this.additionalDependencies.isEmpty()){
+                    additionalDeps = new ArrayList<>();
+                    additionalDeps.addAll(this.additionalDependencies);
+                }
+
+                if(additionalDeps != null){
+                    for(String ad : additionalDeps) {
+                        args.add("-ad"); args.add(ad);
                     }
                 }
+
 
                 // Issue: https://github.com/KonduitAI/konduit-serving/issues/437
                 BuildCLI.main(args.toArray(new String[0]));     //TODO we could just call build tool directly instead of via CLI (more robust to refactoring, compile time args checking etc)
@@ -163,7 +191,7 @@ public class ServeBuildCommand extends ServeCommand {
     /**
      * Parse the given configuration yaml/json string to {@link JsonNode}.
      *
-     * @param configurationString given configuration string. Can be a file path or a JSON string
+     * @param configurationString given configuration string. Can be a JSON/YAML string
      * @return Read configuration to {@link JsonNode}. Returns null on failure.
      */
     private JsonNode readConfiguration(String configurationString) {
@@ -173,8 +201,7 @@ public class ServeBuildCommand extends ServeCommand {
             try {
                 JsonNode jsonNode = ObjectMappers.yaml().readTree(configurationString);
                 if(jsonNode instanceof TextNode) {
-                    throw new IllegalStateException("Expected JsonNode to be ObjectNode but was TextNode while parsing as a YAML object. " +
-                            "This usually indicates that the YAML was not parsed as expected. Could be a bad configuration file path in: " + configurationString);
+                    throw new FileNotFoundException("File does not exist at path: " + configurationString);
                 } else {
                     return jsonNode;
                 }
