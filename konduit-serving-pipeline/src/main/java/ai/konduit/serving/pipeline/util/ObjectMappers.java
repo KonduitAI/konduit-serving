@@ -43,6 +43,7 @@ public class ObjectMappers {
     private static final Set<JsonSubType> manuallyRegisteredSubtypes = new HashSet<>();
 
     private static ObjectMapper jsonMapper = configureMapper(new ObjectMapper());
+    private static ObjectMapper jsonMapperMinimal = configureMapper(new ObjectMapper(), true);
     private static ObjectMapper yamlMapper = configureMapper(new ObjectMapper(new YAMLFactory()
             .disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)  // For preventing YAML from adding `!<TYPE>` with polymorphic objects
             // and use Jackson's type information mechanism.
@@ -60,6 +61,10 @@ public class ObjectMappers {
         return jsonMapper;
     }
 
+    public static ObjectMapper jsonMinimal(){
+        return jsonMapperMinimal;
+    }
+
     /**
      * Get a single object mapper for use with reading and writing YAML
      *
@@ -70,10 +75,15 @@ public class ObjectMappers {
     }
 
     private static ObjectMapper configureMapper(ObjectMapper ret) {
+        return configureMapper(ret, false);
+    }
+
+    private static ObjectMapper configureMapper(ObjectMapper ret, boolean minimal) {
         ret.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ret.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         ret.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);         //Use order in which fields are defined in classes
-        ret.enable(SerializationFeature.INDENT_OUTPUT);
+        if(!minimal)
+            ret.enable(SerializationFeature.INDENT_OUTPUT);
         ret.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         ret.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         ret.setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);

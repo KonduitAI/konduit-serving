@@ -35,7 +35,9 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.shade.jackson.annotation.JsonIgnore;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
+import org.nd4j.shade.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -176,6 +178,19 @@ public class Config {
             throw new RuntimeException("Error converting Config to JSON", e);   //Should never happen
         }
     }
+
+    public synchronized String toJsonMinimal(){
+        try {
+            ObjectMapper m = ObjectMappers.jsonMinimal();
+            if(!registeredMixin){
+                m.addMixIn(Config.class, ConfigJsonMixin.class);
+            }
+            return m.writeValueAsString(this);
+        } catch (IOException e){
+            throw new RuntimeException("Error converting Config to JSON", e);   //Should never happen
+        }
+    }
+
 
     public String toYaml(){
         try {
@@ -365,4 +380,15 @@ public class Config {
         return new ArrayList<>(deps);
     }
 
+    private static boolean registeredMixin = false;
+    private static class ConfigJsonMixin {
+
+        @JsonIgnore
+        private List<Module> modules;
+        @JsonIgnore
+        private List<Deployment> deployments;
+        @JsonIgnore
+        private String pipelinePath;
+
+    }
 }

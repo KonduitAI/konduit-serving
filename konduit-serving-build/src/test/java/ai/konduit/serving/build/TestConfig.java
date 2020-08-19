@@ -48,8 +48,8 @@ public class TestConfig {
         String json = c.toJson();
         String yaml = c.toYaml();
 
-        System.out.println(json);
-        System.out.println(yaml);
+//        System.out.println(json);
+//        System.out.println(yaml);
 
         Config cJ = Config.fromJson(json);
         Config cY = Config.fromYaml(yaml);
@@ -57,6 +57,8 @@ public class TestConfig {
         assertEquals(c, cJ);
         assertEquals(c, cY);
 
+        String s2 = c.toJsonMinimal();
+        System.out.println(s2);
     }
 
 }

@@ -106,6 +106,8 @@ public class TestGradleGeneration {
         File dest = new File(dir, "mf.txt");
         ArchiveUtils.zipExtractSingleFile(expUberJar, dest, "META-INF/MANIFEST.MF");
         String mfContent = FileUtils.readFileToString(dest, StandardCharsets.UTF_8);
+        System.out.println(mfContent);
+        mfContent = mfContent.replace("\r\n ", "");  //Windows line endings
         mfContent = mfContent.replace("\n ", "");
         boolean found = false;
         for(String line : mfContent.split("\n")){
@@ -115,6 +117,7 @@ public class TestGradleGeneration {
             }
         }
         assertTrue("No main class attribute found", found);
+        assertTrue(mfContent.contains("Konduit-Serving-Build"));
     }
 
     @Ignore
@@ -161,12 +164,14 @@ public class TestGradleGeneration {
         File dest = new File(dir, "mf.txt");
         ArchiveUtils.zipExtractSingleFile(mfJar, dest, "META-INF/MANIFEST.MF");
         String mfContent = FileUtils.readFileToString(dest, StandardCharsets.UTF_8);
+        mfContent = mfContent.replace("\r\n ", "");  //Windows line endings
         mfContent = mfContent.replace("\n ", "");
         assertTrue(mfContent.contains("Class-Path: "));
         assertTrue(mfContent.contains(".jar"));
         assertTrue(mfContent.contains("konduit-serving-pipeline"));
         assertTrue(mfContent.contains("nd4j-native-1.0.0"));
         assertTrue(mfContent.contains("deeplearning4j-core"));
+        assertTrue(mfContent.contains("Konduit-Serving-Build"));
     }
 
     @Test

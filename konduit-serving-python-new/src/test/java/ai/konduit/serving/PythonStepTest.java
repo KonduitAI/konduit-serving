@@ -238,5 +238,5 @@ public class PythonStepTest {
         Data output = pipeline.executor().exec(inputData);
         Assert.assertEquals(expected, output);
     }
-    
+
 }
