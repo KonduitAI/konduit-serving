@@ -29,40 +29,50 @@
 
     <artifactId>konduit-serving-annotation</artifactId>
 
-<!--    <build>-->
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-compiler-plugin</artifactId>-->
-<!--                <version>3.5.1</version>-->
-<!--                <configuration>-->
-<!--                    <source>1.8</source>-->
-<!--                    <target>1.8</target>-->
-<!--                    <encoding>UTF-8</encoding>-->
-<!--                    <generatedSourcesDirectory>${project.build.directory}/generated-sources/</generatedSourcesDirectory>-->
-<!--                    <annotationProcessors>-->
-<!--                        <annotationProcessor>-->
-<!--                            ai.konduit.serving.annotation.TestAnnotationProcessor-->
-<!--                        </annotationProcessor>-->
-<!--                    </annotationProcessors>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
-<!--    </build>-->
+    <properties>
+        <auto-service.version>1.0-rc2</auto-service.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>${auto-service.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <!-- Configure the project to use java 8 version. -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.5.1</version>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                        <!-- Disable annotation processing for ourselves. -->
+                        <compilerArgument>-proc:none</compilerArgument>
+                        <generatedSourcesDirectory>${project.build.directory}/generated-sources/</generatedSourcesDirectory>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>com.google.auto.service</groupId>
+                                <artifactId>auto-service</artifactId>
+                                <version>${auto-service.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+
         <plugins>
             <plugin>
                 <!-- Configure the project to use java 8 version. -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <!-- Disable annotation processing for ourselves. -->
-                     <compilerArgument>-proc:none</compilerArgument>
-                </configuration>
             </plugin>
         </plugins>
     </build>

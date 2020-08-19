@@ -67,3 +67,6 @@ dependency-reduced-pom.xml
 
 # python
 */__pycache__/
+*Miniconda3*
+
+konduit-serving-metadata/test-gradle

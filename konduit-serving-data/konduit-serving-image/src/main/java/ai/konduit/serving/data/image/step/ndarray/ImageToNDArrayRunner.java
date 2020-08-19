@@ -203,7 +203,7 @@ public class ImageToNDArrayRunner implements PipelineStepRunner {
         }
 
         if(step.keepOtherValues()) {
-            for (String s : data.keys()){
+            for (String s : data.keys()) {
                 if(toConvert.contains(s))
                     continue;
                 d.copyFrom(s, data);

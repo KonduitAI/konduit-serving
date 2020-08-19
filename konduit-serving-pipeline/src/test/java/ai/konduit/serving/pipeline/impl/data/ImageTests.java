@@ -176,6 +176,11 @@ public class ImageTests {
         public int width() {
             return 0;
         }
+
+        @Override
+        public int channels() {
+            return 0;
+        }
     }
 
     public  static class TestImageFactory implements ImageFactory {

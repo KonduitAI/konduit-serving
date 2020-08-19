@@ -166,7 +166,7 @@ public class ProtobufUtils {
 
     private static Point deserializePoint(DataProtoMessage.Point pbPoint) {
         double[] coords = pbPoint.getCoordsList().stream().mapToDouble(Double::doubleValue).toArray();
-        String lbl = pbPoint.getLabel().isEmpty() ? null : pbPoint.getLabel();
+        String lbl = pbPoint.getLabel().isEmpty() ? "" : pbPoint.getLabel();
         Double prob = Double.isNaN(pbPoint.getProbability()) ? null : pbPoint.getProbability();
         Point point = Point.create(coords, lbl, prob);
         return point;

@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
+import lombok.SneakyThrows;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.common.primitives.Pair;
 import org.nd4j.shade.jackson.core.JsonParser;
@@ -30,6 +31,7 @@ import org.nd4j.shade.jackson.databind.DeserializationContext;
 import org.nd4j.shade.jackson.databind.JsonDeserializer;
 import org.nd4j.shade.jackson.databind.JsonNode;
 import org.nd4j.shade.jackson.databind.node.ArrayNode;
+import org.nd4j.shade.jackson.databind.node.TextNode;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -79,11 +81,16 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                     Pair<List<Object>, ValueType> p = deserializeList(jp, n2);
                     d.putList(s, p.getFirst(), p.getSecond());
                 } else if (n2.isObject()) {
-                    //Could be: Bytes, image, NDArray, BoundingBox, Point or Data
+                    //Could be: Bytes, image, NDArray,ByteBuffer BoundingBox, Point or Data
                     if (n2.has(Data.RESERVED_KEY_BYTES_BASE64) || n2.has(Data.RESERVED_KEY_BYTES_ARRAY)) {
                         //byte[] stored in base64 or byte[] as JSON array
                         byte[] bytes = deserializeBytes(n2);
                         d.put(s, bytes);
+                    } else   if (n2.has(Data.RESERVED_KEY_BYTEBUFFER) || n2.has(Data.RESERVED_KEY_BYTEBUFFER_BASE64)) {
+                        //byte[] stored in base64 or byte[] as JSON array
+                        byte[] bytes = deserializeBytes(n2);
+                        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+                        d.put(s, byteBuffer);
                     } else if (n2.has(Data.RESERVED_KEY_NDARRAY_TYPE)) {
                         //NDArray
                         d.put(s, deserializeNDArray(n2));
@@ -188,7 +195,8 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
         return Point.create(coords, label, prob);
     }
 
-    protected byte[] deserializeBytes(JsonNode n2){
+    @SneakyThrows
+    protected byte[] deserializeBytes(JsonNode n2) {
         if (n2.has(Data.RESERVED_KEY_BYTES_BASE64)) {
             //byte[] stored in base64
             JsonNode n3 = n2.get(Data.RESERVED_KEY_BYTES_BASE64);
@@ -209,6 +217,10 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                 b[i] = (byte) bVal;
             }
             return b;
+        } else if(n2.has(Data.RESERVED_KEY_BYTEBUFFER_BASE64)) {
+            TextNode n3 = (TextNode) n2.get(Data.RESERVED_KEY_BYTEBUFFER_BASE64);
+            byte[] bytes = n3.binaryValue();
+            return bytes;
         } else {
             throw new UnsupportedOperationException("JSON node is not a bytes node");
         }
@@ -223,23 +235,28 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
         ValueType listType = nodeType(n3);
         List<Object> list = new ArrayList<>();
         switch (listType){
+            case BYTEBUFFER:
+                for( int i = 0; i < size; i++) {
+                    list.add(ByteBuffer.wrap(deserializeBytes(n.get(i))));
+                }
+                break;
             case NDARRAY:
-                for( int i=0; i<size; i++ ){
+                for( int i = 0; i < size; i++) {
                     list.add(deserializeNDArray(n.get(i)));
                 }
                 break;
             case STRING:
-                for( int i=0; i<size; i++ ){
+                for( int i = 0; i < size; i++) {
                     list.add(n.get(i).textValue());
                 }
                 break;
             case BYTES:
-                for( int i=0; i<size; i++ ){
+                for( int i = 0; i<size; i++) {
                     list.add(deserializeBytes(n.get(i)));
                 }
                 break;
             case IMAGE:
-                for( int i=0; i<size; i++ ){
+                for( int i = 0; i < size; i++) {
                     list.add(deserializeImage(n.get(i)));
                 }
                 break;
@@ -311,6 +328,8 @@ public class DataJsonDeserializer extends JsonDeserializer<Data> {
                 return ValueType.BOUNDING_BOX;
             } else if(n.has(Data.RESERVED_KEY_POINT_COORDS)){
                 return ValueType.POINT;
+            } else if(n.has(Data.RESERVED_KEY_BYTEBUFFER_BASE64)) {
+                return ValueType.BYTEBUFFER;
             } else {
                 //Must be data
                 return ValueType.DATA;

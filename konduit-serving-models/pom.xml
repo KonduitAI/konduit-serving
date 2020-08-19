@@ -34,6 +34,7 @@
         <module>konduit-serving-tensorflow</module>
         <module>konduit-serving-samediff</module>
         <module>konduit-serving-tensorflow-python</module>
+        <module>konduit-serving-onnx</module>
     </modules>
 
 </project>

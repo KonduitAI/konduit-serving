@@ -22,6 +22,7 @@
 
 package ai.konduit.serving.model;
 
+import ai.konduit.serving.pipeline.api.TextConfig;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,16 +46,26 @@ import java.util.Map;
 @Slf4j
 @Builder
 @AllArgsConstructor
-public class PythonConfig implements Serializable {
+public class PythonConfig implements Serializable, TextConfig {
 
-    private String  pythonCode, pythonCodePath, pythonPath;
+    private String  pythonCode, pythonCodePath, pythonPath,importCode,importCodePath;
 
     @Singular
+    @Deprecated
     private Map<String,String>  pythonInputs, pythonOutputs, extraInputs;
 
-    private boolean returnAllInputs;
+    private boolean returnAllInputs,setupAndRun;
 
-    private boolean setupAndRun;
+    @Singular("ioInput")
+    private Map<String,PythonIO> ioInputs;
 
-    private static String defaultPythonPath;
+    @Singular("ioOutput")
+    private Map<String,PythonIO> ioOutputs;
+
+    @Builder.Default
+    private String jobSuffix = "konduit_job";
+
+
+
+
 }
