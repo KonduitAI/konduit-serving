@@ -16,5 +16,5 @@
 #  ******************************************************************************/
 #
 
-ai.konduit.serving.models.tensorflowpython.NumpyArrayConverters$NumpyArrayToSerializedConverter
-ai.konduit.serving.models.tensorflowpython.NumpyArrayConverters$SerializedToNumpyArrayConverter
+ai.konduit.serving.models.tensorflow.python.NumpyArrayConverters$NumpyArrayToSerializedConverter
+ai.konduit.serving.models.tensorflow.python.NumpyArrayConverters$SerializedToNumpyArrayConverter

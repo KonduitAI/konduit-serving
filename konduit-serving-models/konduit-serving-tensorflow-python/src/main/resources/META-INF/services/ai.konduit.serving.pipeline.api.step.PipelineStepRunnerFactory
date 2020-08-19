@@ -14,5 +14,5 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################################
 
-ai.konduit.serving.models.tensorflowpython.KerasStep$Factory
-ai.konduit.serving.models.tensorflowpython.TFStep$Factory
+ai.konduit.serving.models.tensorflow.python.KerasStep$Factory
+ai.konduit.serving.models.tensorflow.python.TFStep$Factory

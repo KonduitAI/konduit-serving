@@ -32,7 +32,7 @@
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>python4j-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${nd4j.version}</version>
         </dependency>
 
         <dependency>

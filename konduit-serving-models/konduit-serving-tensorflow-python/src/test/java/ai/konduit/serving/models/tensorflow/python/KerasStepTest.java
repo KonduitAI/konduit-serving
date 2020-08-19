@@ -1,21 +1,23 @@
-/* ******************************************************************************
- * Copyright (c) 2020 Konduit K.K.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Apache License, Version 2.0 which is available at
- * https://www.apache.org/licenses/LICENSE-2.0.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- ******************************************************************************/
+/*
+ *  ******************************************************************************
+ *  * Copyright (c) 2020 Konduit K.K.
+ *  *
+ *  * This program and the accompanying materials are made available under the
+ *  * terms of the Apache License, Version 2.0 which is available at
+ *  * https://www.apache.org/licenses/LICENSE-2.0.
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  * License for the specific language governing permissions and limitations
+ *  * under the License.
+ *  *
+ *  * SPDX-License-Identifier: Apache-2.0
+ *  *****************************************************************************
+ */
 
 
-package ai.konduit.serving.models.tensorflowpython;
+package ai.konduit.serving.models.tensorflow.python;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
@@ -23,10 +25,7 @@ import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import org.junit.Assert;
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,19 +36,18 @@ import org.nd4j.python4j.PythonProcess;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 @RunWith(Parameterized.class)
-public class TFStepTest {
+public class KerasStepTest {
 
     @ClassRule
     public static TemporaryFolder testDir = new TemporaryFolder();
+    public static String modelFileH5 = null;
     public static String modelFileSM = null;
 
     private String modelPath;
     private String[] inputKeys;
-    private String outputKey;
+    private String[] outputKeys;
     private NDArray[] inputs;
     private NDArray[] outputs;
 
@@ -78,12 +76,15 @@ public class TFStepTest {
 
         testDir.create();
         File dir = testDir.newFolder();
+        File pathH5 = new File(dir, "model1.h5");
         File pathSM = new File(dir, "savedModel1");
+        modelFileH5 = pathH5.getAbsolutePath();
         modelFileSM = pathSM.getAbsolutePath();
 
         // single input/output sequential
         model = models.attr("Sequential").call();
         model.attr("add").call(layers.attr("Dense").callWithArgsAndKwargs(Collections.singletonList(10), Collections.singletonMap("input_dim", 5)));
+        model.attr("save").call(modelFileH5);
         model.attr("save").call(modelFileSM);
 
 
@@ -95,32 +96,25 @@ public class TFStepTest {
         }
 
         return new Object[]{
-                new Object[]{modelFileSM, inputs, outputs, null, "out"}
+                new Object[]{modelFileH5, inputs, outputs, null, new String[]{"out"}},
+                new Object[]{modelFileH5, inputs, outputs, new String[]{"inp"}, new String[]{"out"}},
+                new Object[]{modelFileSM, inputs, outputs, null, new String[]{"out"}},
+                new Object[]{modelFileSM, inputs, outputs, new String[]{"inp"}, new String[]{"out"}},
         };
 
     }
 
-    public TFStepTest(String modelPath, NDArray[] inputs, NDArray[] outputs, String inputKeys[], String outputKey) {
+    public KerasStepTest(String modelPath, NDArray[] inputs, NDArray[] outputs, String inputKeys[], String outputKeys[]) {
         this.modelPath = modelPath;
         this.inputs = inputs;
         this.outputs = outputs;
         this.inputKeys = inputKeys;
-        this.outputKey = outputKey;
+        this.outputKeys = outputKeys;
     }
 
     @Test
-    public void testTFStep() {
-        Map<String, String> inputKeyMap;
-        if (inputKeys == null){
-            inputKeyMap = null;
-        }
-        else{
-            inputKeyMap = new HashMap<>();
-            for (String k: inputKeys){
-                inputKeyMap.put(k, k);
-            }
-        }
-        PipelineStep step = new TFStep().modelUri(modelPath).inputKeyMap(inputKeyMap).outputKey(outputKey);
+    public void testKerasStep() {
+        PipelineStep step = new KerasStep().modelUri(modelPath).inputKeys(inputKeys).outputKeys(outputKeys);
         Pipeline pipeline = SequencePipeline.builder().add(step).build();
         Data inp = new JData();
         if (inputKeys == null) {
@@ -133,9 +127,25 @@ public class TFStepTest {
 
         Data out = pipeline.executor().exec(inp);
 
-        Assert.assertEquals(outputs[0], out.getNDArray(outputKey));
-
+        for (int i = 0; i < outputKeys.length; i++) {
+            Assert.assertEquals(outputs[i], out.getNDArray(outputKeys[i]));
+        }
     }
 
+    @Test @Ignore
+    public void testKerasStepBadPath() {
+        PipelineStep step = new KerasStep().modelUri("C:/this_doesnt_exist").inputKeys(inputKeys).outputKeys(outputKeys);
+        Pipeline pipeline = SequencePipeline.builder().add(step).build();
+        Data inp = new JData();
+        if (inputKeys == null) {
+            inp.put("xxx", inputs[0]);
+        } else {
+            for (int i = 0; i < inputs.length; i++) {
+                inp.put(inputKeys[i], inputs[i]);
+            }
+        }
+
+        Data out = pipeline.executor().exec(inp);
+    }
 
 }

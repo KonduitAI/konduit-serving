@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.models.tensorflowpython;
+package ai.konduit.serving.models.tensorflow.python;
 
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
@@ -27,7 +27,6 @@ import org.nd4j.python4j.PythonObject;
 import org.nd4j.python4j.PythonTypes;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
