@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.pipeline;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
@@ -48,6 +49,7 @@ import java.util.UUID;
 @JsonPropertyOrder({"outputStep", "steps"})
 @Schema(description = "A type of pipeline that defines the execution flow in a directed acyclic graph (DAG) of configurable steps. " +
         "The execution flow can also contain optional steps.")
+@JsonName("GRAPH_PIPELINE")
 public class GraphPipeline implements Pipeline {
     public static final String INPUT_KEY = "input";
 

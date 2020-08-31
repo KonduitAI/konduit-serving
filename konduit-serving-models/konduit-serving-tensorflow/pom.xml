@@ -33,8 +33,22 @@
         <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>tensorflow</artifactId>
-            <version>1.15.0</version>
+            <version>1.15.3</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>tensorflow</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>tensorflow-platform</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-tensorflow</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>ai.konduit.serving</groupId>
