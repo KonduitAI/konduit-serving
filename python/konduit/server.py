@@ -31,7 +31,7 @@ class Server(object):
         steps=None,
         extra_start_args="-Xmx8g",
         extra_jar_args=None,
-        config_path="config.json",
+        config_path="config.yaml",
         jar_path=None,
         pid_file_path="konduit-serving.pid"
     ):
@@ -151,7 +151,7 @@ class Server(object):
         json_config = config_to_dict_with_type(self.config)
         with open(self.config_path, "w") as f:
             abs_path = os.path.abspath(self.config_path)
-            logging.info("Wrote config.json to path " + abs_path)
+            logging.info("Wrote config.yaml to path " + abs_path)
             json.dump(json_config, f)
 
         args = self._process_extra_args(abs_path, server_id)

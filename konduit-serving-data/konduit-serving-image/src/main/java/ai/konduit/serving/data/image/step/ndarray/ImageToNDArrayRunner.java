@@ -20,6 +20,7 @@ package ai.konduit.serving.data.image.step.ndarray;
 
 import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.image.convert.ImageToNDArray;
+import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -68,8 +69,9 @@ public class ImageToNDArrayRunner implements PipelineStepRunner {
         List<String> toConvert = step.keys();
         List<String> outNames = step.outputNames();
         boolean inferOutNames = (outNames == null) || outNames.isEmpty();
-        if(inferOutNames)
+        if(inferOutNames) {
             outNames = new ArrayList<>();
+        }
 
         if(toConvert == null){
             toConvert = new ArrayList<>();
@@ -79,11 +81,16 @@ public class ImageToNDArrayRunner implements PipelineStepRunner {
 
                     if(inferOutNames)
                         outNames.add(s);
+                } else if(step.config().listHandling() != ImageToNDArrayConfig.ListHandling.NONE && data.type(s) == ValueType.LIST && data.listType(s) == ValueType.IMAGE){
+                    toConvert.add(s);
+
+                    if(inferOutNames)
+                        outNames.add(s);
                 }
             }
         }
 
-        Preconditions.checkState(!toConvert.isEmpty(), "No input images were specified, and no Image field could be inferred as input");
+        Preconditions.checkState(!toConvert.isEmpty(), "No input images were specified, and no Image field could be inferred from input");
 
         Preconditions.checkState(toConvert.size() == outNames.size(), "Got (or inferred) a difference number of input images key" +
                 " vs. output names: inputToConvert=%s, outputNames=%s", toConvert, outNames);
@@ -196,7 +203,7 @@ public class ImageToNDArrayRunner implements PipelineStepRunner {
         }
 
         if(step.keepOtherValues()) {
-            for (String s : data.keys()){
+            for (String s : data.keys()) {
                 if(toConvert.contains(s))
                     continue;
                 d.copyFrom(s, data);

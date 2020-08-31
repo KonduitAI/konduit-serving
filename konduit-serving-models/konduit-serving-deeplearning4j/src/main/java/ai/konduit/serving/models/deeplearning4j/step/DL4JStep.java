@@ -46,6 +46,11 @@ public class DL4JStep implements PipelineStep {
             "from the computation graph output - INDArray[] to data keys).")
     private List<String> outputNames;
 
+    @Schema(description = "Optional, usually unnecessary. Specifies a class used to load the model if customization in how " +
+            "model loading is performed, instead of the usual MultiLayerNetwork.load or ComputationGraph.load methods. " +
+            "Must be a java.util.Function<String,MultiLayerNetwork> or java.util.Function<String,ComputationGraph>")
+    private String loaderClass;
+
     public DL4JStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputNames") List<String> inputNames,
                     @JsonProperty("outputNames") List<String> outputNames){
         this.modelUri = modelUri;

@@ -28,7 +28,7 @@ services:
       - /srv/konduit-serving.jar
       - ai.konduit.serving.configprovider.KonduitServingMain
       - --configPath
-      - /usr/share/input-data/config.json
+      - /usr/share/input-data/config.yaml
 
   # ---------------------------
   # grafana

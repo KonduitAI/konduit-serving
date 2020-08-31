@@ -24,8 +24,9 @@ import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.nd4j.common.base.Preconditions;
@@ -33,7 +34,6 @@ import org.nd4j.common.base.Preconditions;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -111,6 +111,8 @@ public class GradleBuild {
         kts.append("\n}")
             .append("\n");
 
+
+
         /*
         //Uncomment once gradle-javacpp-platform plugin available
         kts.append("ext {\n")
@@ -119,6 +121,7 @@ public class GradleBuild {
          */
 
         kts.append("group = \"ai.konduit\"\n");
+
         //kts.append("version = \"1.0-SNAPSHOT\"\n");
 
         List<Dependency> dependencies = config.resolveDependencies();
@@ -354,9 +357,16 @@ public class GradleBuild {
         kts.append("tasks.withType<ShadowJar> {\n");
         String jarName = fileName;
         kts.append("\tbaseName = \"" + jarName + "\"\n");
+        //needed for larger build files, shadowJar
+        //extends Jar which extends Zip
+        //a lot of documentation on the internet points to zip64 : true
+        //as the way to set this, the only way I found to do it in the
+        //kotlin dsl was to invoke the setter directly after a bit of reverse engineering
+        kts.append("\tsetZip64(true)\n");
         kts.append("\tdestinationDirectory.set(file(\"" + directoryName + "\"))\n");
         kts.append("\tmergeServiceFiles()");  //For service loader files
         kts.append("}\n");
+
         kts.append("//Add manifest - entry point\n")
                 .append("tasks.withType(Jar::class) {\n")
                 .append("    manifest {\n")
@@ -367,6 +377,8 @@ public class GradleBuild {
     }
 
     private static void addClassPathTask(StringBuilder kts, ClassPathDeployment cpd){
+        String filePrefix = "file:/" + (SystemUtils.IS_OS_WINDOWS ? "" : "/");
+
         //Adapted from: https://stackoverflow.com/a/54159784
         if(cpd.type() == ClassPathDeployment.Type.TEXT_FILE) {
             kts.append("//Task: ClassPathDeployment - writes the absolute path of all JAR files for the build to the specified text file, one per line\n")
@@ -386,11 +398,12 @@ public class GradleBuild {
                     .append("}\n");
         } else {
             //Write a manifest JAR
-            kts.append("//Write a JAR with a manifest containin the path of all dependencies, but no other content\n")
+            kts.append("//Write a JAR with a manifest containing the path of all dependencies, but no other content\n")
                     .append("tasks.withType(Jar::class) {\n")
                     .append("    manifest {\n")
                     .append("        attributes[\"Manifest-Version\"] = \"1.0\"\n")
-                    .append("        attributes[\"Class-Path\"] = configurations.runtimeClasspath.get().getFiles().joinToString(separator=\" \")\n")
+                    .append("        attributes[\"Main-Class\"] = \"ai.konduit.serving.cli.launcher.KonduitServingLauncher\"\n")
+                    .append("        attributes[\"Class-Path\"] = \"" + filePrefix + "\" + configurations.runtimeClasspath.get().getFiles().joinToString(separator=\" " + filePrefix + "\")\n")
                     .append("    }\n");
 
             if(cpd.outputFile() != null){

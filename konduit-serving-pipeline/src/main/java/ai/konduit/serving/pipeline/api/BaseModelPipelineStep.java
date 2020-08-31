@@ -16,9 +16,9 @@
 package ai.konduit.serving.pipeline.api;
 
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @AllArgsConstructor
@@ -26,7 +26,10 @@ import lombok.experimental.SuperBuilder;
 @Data
 public abstract class BaseModelPipelineStep<T extends Configuration> implements PipelineStep {
 
+    @Schema(description = "Uniform Resource Identifier of a model.")
     private String modelUri;
+
+    @Schema(description = "Generic for model`s config.")
     private T config;
 
 }

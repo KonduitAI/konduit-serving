@@ -43,10 +43,7 @@ public abstract class InferenceVerticle extends AbstractVerticle {
     protected Pipeline pipeline;
     protected PipelineExecutor pipelineExecutor;
 
-    @Override
-    public void init(Vertx vertx, Context context) {
-        super.init(vertx, context);
-
+    protected void initialize() throws Exception {
         inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
         pipeline = inferenceConfiguration.pipeline();
         pipelineExecutor = pipeline.executor();

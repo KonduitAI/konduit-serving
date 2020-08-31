@@ -34,8 +34,12 @@ import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
+import io.vertx.core.http.Http2Settings;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpVersion;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.PemKeyCertOptions;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -46,6 +50,7 @@ import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -59,57 +64,92 @@ public class InferenceVerticleHttp extends InferenceVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
-        int port;
-
-        String portEnvValue = System.getenv(EnvironmentConstants.KONDUIT_SERVING_PORT);
-        if (portEnvValue != null) {
+        vertx.executeBlocking(handler -> {
             try {
-                port = Integer.parseInt(portEnvValue);
-            } catch (NumberFormatException exception) {
-                log.error("Environment variable \"{}={}\" isn't a valid port number.",
-                        EnvironmentConstants.KONDUIT_SERVING_PORT, portEnvValue);
+                initialize();
+                handler.complete();
+            } catch (Exception exception) {
+                handler.fail(exception);
                 startPromise.fail(exception);
                 return;
             }
-        } else {
-            port = inferenceConfiguration.port();
-        }
 
-        if (port < 0 || port > 0xFFFF) {
-            startPromise.fail(new Exception("Valid port range is 0 <= port <= 65535. The given port was " + port));
-            return;
-        }
+        },resultHandler -> {
+            if(resultHandler.failed()) {
+                if(resultHandler.cause() != null)
+                    startPromise.fail(resultHandler.cause());
+                else {
+                    startPromise.fail("Failed to start. Unknown cause.");
+                }
+            }
+            else {
 
-        vertx.createHttpServer()
-                .requestHandler(createRouter())
-                .exceptionHandler(throwable -> log.error("Could not start HTTP server", throwable))
-                .listen(port, inferenceConfiguration.host(), handler -> {
-                    if (handler.failed()) {
-                        startPromise.fail(handler.cause());
-                    } else {
-                        int actualPort = handler.result().actualPort();
-                        inferenceConfiguration.port(actualPort);
+                int port;
 
-                        try {
-                            ((ContextInternal) context).getDeployment()
-                                    .deploymentOptions()
-                                    .setConfig(new JsonObject(inferenceConfiguration.toJson()));
-
-                            long pid = getPid();
-
-                            saveInspectionDataIfRequired(pid);
-
-                            // Periodically checks for configuration updates and save them.
-                            vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
-
-                            log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.host());
-                            log.info("Inference HTTP server started on port {} with {} pipeline steps", actualPort, pipeline.size());
-                            startPromise.complete();
-                        } catch (Throwable throwable) {
-                            startPromise.fail(throwable);
-                        }
+                String portEnvValue = System.getenv(EnvironmentConstants.KONDUIT_SERVING_PORT);
+                if (portEnvValue != null) {
+                    try {
+                        port = Integer.parseInt(portEnvValue);
+                    } catch (NumberFormatException exception) {
+                        log.error("Environment variable \"{}={}\" isn't a valid port number.",
+                                EnvironmentConstants.KONDUIT_SERVING_PORT, portEnvValue);
+                        startPromise.fail(exception);
+                        return;
                     }
-                });
+                } else {
+                    port = inferenceConfiguration.port();
+                }
+
+                if (port < 0 || port > 0xFFFF) {
+                    startPromise.fail(new Exception("Valid port range is 0 <= port <= 65535. The given port was " + port));
+                    return;
+                }
+
+                vertx.createHttpServer(createOptions(inferenceConfiguration.port()))
+                        .requestHandler(createRouter())
+                        .exceptionHandler(throwable -> log.error("Error occurred during http request.", throwable))
+                        .listen(port, inferenceConfiguration.host(), handler -> {
+                            if (handler.failed()) {
+                                startPromise.fail(handler.cause());
+                            } else {
+                                int actualPort = handler.result().actualPort();
+                                inferenceConfiguration.port(actualPort);
+
+                                try {
+                                    ((ContextInternal) context).getDeployment()
+                                            .deploymentOptions()
+                                            .setConfig(new JsonObject(inferenceConfiguration.toJson()));
+
+                                    long pid = getPid();
+
+                                    saveInspectionDataIfRequired(pid);
+
+                                    log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.host());
+                                    log.info("Inference HTTP server started on port {} with {} pipeline steps", actualPort, pipeline.size());
+                                    startPromise.complete();
+                                } catch (Throwable throwable) {
+                                    startPromise.fail(throwable);
+                                }
+                            }
+                        });
+            }
+        });
+
+    }
+
+    private HttpServerOptions createOptions(int port) {
+        HttpServerOptions serverOptions = new HttpServerOptions()
+                .setPort(port)
+                .setHost("0.0.0.0");
+        serverOptions.setSsl(false)
+                .setSslHandshakeTimeout(0)
+                .setCompressionSupported(true)
+                .setTcpKeepAlive(true)
+                .setTcpNoDelay(true)
+                .setAlpnVersions(Arrays.asList(HttpVersion.HTTP_1_0,HttpVersion.HTTP_1_1))
+                .setUseAlpn(false);
+
+        return serverOptions;
     }
 
     public Router createRouter() {

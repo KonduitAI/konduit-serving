@@ -161,6 +161,12 @@ public class KonduitRunCommand extends RunCommand {
             throw new CLIException(String.format("Unsupported service type %s", serviceType));
         }
 
-        deploy(mainVerticle, vertx, deploymentOptions, res -> {});
+        deploy(mainVerticle, vertx, deploymentOptions, handler -> {
+            if (handler.failed()) {
+                out.format("Unable to deploy server for configuration %n%s%n", inferenceConfiguration.toJson());
+
+                vertx.close();
+            }
+        });
     }
 }

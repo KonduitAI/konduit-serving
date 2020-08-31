@@ -21,12 +21,18 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
 import ai.konduit.serving.pipeline.registry.PipelineRegistry;
-import lombok.AllArgsConstructor;
+import lombok.*;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.function.Consumer;
 
-@AllArgsConstructor
+@lombok.Data
 public class CallbackStep implements PipelineStep {
+
+
+    public CallbackStep(@JsonProperty("consumer") Consumer<Data> consumer){
+        this.consumer = consumer;
+    }
 
     static {
         PipelineRegistry.registerStepRunnerFactory(new Factory());

@@ -24,8 +24,8 @@ import ai.konduit.serving.build.steps.StepId;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.nd4j.common.base.Preconditions;
 import org.nd4j.common.io.ClassPathResource;
+import org.nd4j.shade.jackson.databind.JsonNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,16 +38,40 @@ public class ModuleUtils {
     private ModuleUtils(){ }
 
     public static Map<StepId, List<RunnerInfo>> runnersForFile(File f){
-        //First determine if JSON or YAML...
-        boolean json = true;    //TODO
         try {
-            if (json) {
-                return runnersForJson(FileUtils.readFileToString(f, StandardCharsets.UTF_8));
+            JsonNode jsonConfiguration = readConfiguration(FileUtils.readFileToString(f, StandardCharsets.UTF_8));
+            if(jsonConfiguration == null) {
+                throw new IllegalStateException("Unable to parse string into a valid pipeline configuration from file: " + f.getAbsolutePath());
             } else {
-                return runnersForYaml(FileUtils.readFileToString(f, StandardCharsets.UTF_8));
+                return runnersForJson(
+                        (jsonConfiguration.has("pipeline") ?
+                            jsonConfiguration.get("pipeline") :
+                            jsonConfiguration)
+                        .toString());
             }
         } catch (IOException e){
             throw new RuntimeException("Error reading JSON/YAML from file: " + f.getAbsolutePath(), e);
+        }
+    }
+
+    /**
+     * Parse the given configuration yaml/json string to {@link JsonNode}.
+     *
+     * @param configurationString given configuration string. Can be a JSON/YAML string
+     * @return Read configuration to {@link JsonNode}. Returns null on failure.
+     */
+    private static JsonNode readConfiguration(String configurationString) {
+        try {
+            return ObjectMappers.json().readTree(configurationString);
+        } catch (Exception jsonProcessingErrors) {
+            try {
+                return ObjectMappers.yaml().readTree(configurationString);
+            } catch (Exception yamlProcessingErrors) {
+                log.error("Given configuration: '{}' does not contain a valid JSON/YAML object", configurationString);
+                log.error("\n\nErrors while processing as a json string:", jsonProcessingErrors);
+                log.error("\n\nErrors while processing as a yaml string:", yamlProcessingErrors);
+                return null;
+            }
         }
     }
 
@@ -110,13 +134,12 @@ public class ModuleUtils {
         return out;
     }
 
-    public static Map<StepId, List<RunnerInfo>> runnersForYaml(String yaml){
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
     public static Module moduleForJsonType(String jsonType){
         Map<String,List<RunnerInfo>> map = jsonNameToRunnerClass();
-        Preconditions.checkState(map.containsKey(jsonType), "No JSON subtype known for: %s", jsonType);
+        if(!map.containsKey(jsonType)){
+            log.warn("No JSON subtype known for: {} (safe to ignore for custom pipeline steps)", jsonType);
+            return null;
+        }
 
         List<RunnerInfo> l = map.get(jsonType);
         if(l == null || l.isEmpty()){

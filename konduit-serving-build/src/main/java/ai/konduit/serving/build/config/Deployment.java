@@ -36,6 +36,7 @@ import static org.nd4j.shade.jackson.annotation.JsonTypeInfo.Id.NAME;
 @JsonTypeInfo(use = NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 public interface Deployment {
 
+    String CLASSPATH = "CLASSPATH";
     String JAR = "JAR";
     String UBERJAR = "UBERJAR";
     String DOCKER = "DOCKER";

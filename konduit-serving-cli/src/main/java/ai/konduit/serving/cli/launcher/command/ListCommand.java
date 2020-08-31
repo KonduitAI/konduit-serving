@@ -19,7 +19,7 @@
 package ai.konduit.serving.cli.launcher.command;
 
 import ai.konduit.serving.cli.launcher.LauncherUtils;
-import ai.konduit.serving.vertx.config.InferenceConfiguration;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
 import ai.konduit.serving.vertx.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
@@ -27,11 +27,9 @@ import io.vertx.core.cli.annotations.Summary;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import org.apache.commons.io.FileUtils;
+import org.nd4j.shade.jackson.databind.JsonNode;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,12 +118,17 @@ public class ListCommand extends DefaultCommand {
 
         try {
             configuration = FileUtils.readFileToString(new File(DirectoryFetcher.getServersDataDir(), pid + ".data"), StandardCharsets.UTF_8);
-            InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(configuration);
-            hostAndPort = String.format("%s:%s", inferenceConfiguration.host(), inferenceConfiguration.port());
+            JsonNode jsonNode = ObjectMappers.json().readTree(configuration);
+
+            hostAndPort = String.format("%s:%s", jsonNode.get("host"), jsonNode.get("port")).replaceAll("\"", "");
             status = "started";
         } catch (IOException exception) {
-            out.println("Error occurred while reading server configuration file:");
-            exception.printStackTrace(out);
+            if (exception instanceof FileNotFoundException) {
+                status = String.format("failed: Check '%s' logs for more details...", id);
+            } else {
+                out.println("Error occurred listing servers:");
+                exception.printStackTrace(out);
+            }
         }
 
         out.format(printFormat, index, id, getServiceType(line), hostAndPort, pid, status);

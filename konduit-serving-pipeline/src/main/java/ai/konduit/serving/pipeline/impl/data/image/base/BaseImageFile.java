@@ -21,6 +21,7 @@ package ai.konduit.serving.pipeline.impl.data.image.base;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.exception.DataLoadingException;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.awt.image.BufferedImage;
@@ -29,19 +30,20 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-
+@Slf4j
 public abstract class BaseImageFile {
 
     @Getter
     protected ByteBuffer fileBytes;
     protected Integer height;
     protected Integer width;
+    protected Integer channels;
 
     public BaseImageFile(File file) {
-        this(file, null, null);
+        this(file, null, null,null);
     }
 
-    public BaseImageFile(File file, Integer height, Integer width){
+    public BaseImageFile(File file, Integer height, Integer width,Integer channels) {
         try {
             fileBytes = ByteBuffer.wrap(FileUtils.readFileToByteArray(file));
         } catch (IOException e){
@@ -49,49 +51,83 @@ public abstract class BaseImageFile {
         }
         this.height = height;
         this.width = width;
+        this.channels = channels;
     }
 
     public BaseImageFile(byte[] bytes){
-        this(bytes, null, null);
+        this(bytes, null, null,null);
     }
 
-    public BaseImageFile(byte[] bytes, Integer height, Integer width){
-        this(ByteBuffer.wrap(bytes), height, width);
+    public BaseImageFile(byte[] bytes, Integer height, Integer width,Integer channels){
+        this(ByteBuffer.wrap(bytes), height, width,channels);
     }
 
     public BaseImageFile(ByteBuffer fileBytes){
-        this(fileBytes, null, null);
+        this(fileBytes, null, null,null);
     }
 
-    public BaseImageFile(ByteBuffer fileBytes, Integer height, Integer width){
+    public BaseImageFile(ByteBuffer fileBytes, Integer height, Integer width,Integer channels) {
         this.fileBytes = fileBytes;
         this.height = height;
         this.width = width;
+        this.channels = channels;
     }
 
     public abstract String formatName();
 
-    public int height(){
+    public int channels() {
+        initHW();
+        return channels;
+    }
+
+    public int height() {
         initHW();
         return height;
     }
 
-    public int width(){
+    public int width() {
         initHW();
         return width;
     }
 
-    protected void initHW(){
+    protected void initHW() {
         if(height != null && width != null)
             return;
         BufferedImage bi = Image.create(this).getAs(BufferedImage.class);
         height = bi.getHeight();
         width = bi.getWidth();
+        switch(bi.getType()) {
+            case BufferedImage.TYPE_3BYTE_BGR:
+            case BufferedImage.TYPE_INT_RGB:
+            case BufferedImage.TYPE_INT_BGR:
+            case BufferedImage.TYPE_USHORT_555_RGB:
+            case BufferedImage.TYPE_USHORT_565_RGB:
+                channels = 3;
+                break;
+            case BufferedImage.TYPE_INT_ARGB:
+            case BufferedImage.TYPE_4BYTE_ABGR_PRE:
+            case BufferedImage.TYPE_4BYTE_ABGR:
+            case BufferedImage.TYPE_INT_ARGB_PRE:
+                log.warn("Note: Loaded image resolved to a channel with an alpha channel. Defaulting to 3 channels. Konduit Serving currently ignores the alpha channel (which normally would be a 4th channel.)");
+                channels = 4 - 1;
+                break;
+            case BufferedImage.TYPE_BYTE_BINARY:
+            case BufferedImage.TYPE_BYTE_GRAY:
+            case BufferedImage.TYPE_BYTE_INDEXED:
+            case BufferedImage.TYPE_USHORT_GRAY:
+                channels = 1;
+                break;
+            case BufferedImage.TYPE_CUSTOM:
+               channels = 3;
+               log.warn("Note: Loaded image resolved to type custom with BufferedImage. Defaulting to 3 channels for custom image type.");
+               break;
+
+        }
     }
 
 
-    public byte[] getBytes(){
-        if(fileBytes.hasArray()){
+    public byte[] getBytes() {
+        if(fileBytes.hasArray()) {
             return fileBytes.array();
         } else {
             byte[] bytes = new byte[fileBytes.capacity()];

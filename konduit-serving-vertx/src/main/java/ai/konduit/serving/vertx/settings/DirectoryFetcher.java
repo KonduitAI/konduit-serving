@@ -49,6 +49,48 @@ public class DirectoryFetcher {
     }
 
     /**
+     * Creates the vertx runtime and cache data directory, if missing and fetches it.
+     * @return konduit-serving vertx cache and runtime data directory.
+     */
+    public static File getVertxDir() {
+        return createAndValidateDirectory(
+                fetchValueBasedOnPriority(
+                        System.getenv(EnvironmentConstants.VERTX_DIR),
+                        System.getProperty(PropertiesConstants.VERTX_DIR),
+                        getDefaultVertxDir()
+                )
+        );
+    }
+
+    /**
+     * Creates the build directory if missing and fetches it.
+     * @return konduit-serving build directory.
+     */
+    public static File getBuildDir() {
+        return createAndValidateDirectory(
+                fetchValueBasedOnPriority(
+                        System.getenv(EnvironmentConstants.BUILD_DIR),
+                        System.getProperty(PropertiesConstants.BUILD_DIR),
+                        getDefaultBuildDir()
+                )
+        );
+    }
+
+    /**
+     * Creates the profiles directory if missing and fetches it.
+     * @return konduit-serving profiles directory.
+     */
+    public static File getProfilesDir() {
+        return createAndValidateDirectory(
+                fetchValueBasedOnPriority(
+                        System.getenv(EnvironmentConstants.PROFILES_DIR),
+                        System.getProperty(PropertiesConstants.PROFILES_DIR),
+                        getDefaultProfilesDir()
+                )
+        );
+    }
+
+    /**
      * Creates the server data directory if missing and fetches it.
      * @return konduit-serving server data directory
      */
@@ -112,6 +154,30 @@ public class DirectoryFetcher {
      */
     public static String getDefaultWorkingDir() {
         return createAndValidateDirectory(Paths.get(getUserHomeDir(), Constants.DEFAULT_WORKING_BASE_DIR_NAME).toFile()).getAbsolutePath();
+    }
+
+    /**
+     * Creates the default vertx runtime and cache data directory, if missing and fetches it.
+     * @return konduit-serving default vertx runtime and cache data directory absolute path.
+     */
+    public static String getDefaultVertxDir() {
+        return createAndValidateDirectory(new File(getWorkingDir(), Constants.DEFAULT_VERTX_DIR_NAME)).getAbsolutePath();
+    }
+
+    /**
+     * Creates the default build directory if missing and fetches it.
+     * @return konduit-serving default build directory absolute path.
+     */
+    public static String getDefaultBuildDir() {
+        return createAndValidateDirectory(new File(getWorkingDir(), Constants.DEFAULT_BUILD_DIR_NAME)).getAbsolutePath();
+    }
+
+    /**
+     * Creates the default profiles directory if missing and fetches it.
+     * @return konduit-serving default profiles directory absolute path.
+     */
+    public static String getDefaultProfilesDir() {
+        return createAndValidateDirectory(new File(getWorkingDir(), Constants.DEFAULT_PROFILES_DIR_NAME)).getAbsolutePath();
     }
 
     /**

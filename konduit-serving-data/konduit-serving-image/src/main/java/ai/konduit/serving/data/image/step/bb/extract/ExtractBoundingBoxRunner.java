@@ -104,32 +104,30 @@ public class ExtractBoundingBoxRunner implements PipelineStepRunner {
         for(BoundingBox bb : list) {
             bb = ImageUtils.accountForCrop(i, bb, im2ndConf);
 
+            BoundingBox bbPx = BoundingBox.create(bb.cx() * img.cols(), bb.cy() * img.rows(),
+                    bb.height() * img.rows(), bb.width() * img.cols());
+
             if(step.aspectRatio() != null){
                 double desiredAR = step.aspectRatio();
-                double actualAR = bb.width() / bb.height();
+                double actualAR = bbPx.width() / bbPx.height();
                 if(desiredAR < actualAR){
                     //Increase height dimension to give desired AR
-                    double newH = bb.width() / desiredAR;
-                    bb = BoundingBox.create(bb.cx(), bb.cy(), newH, bb.width());
+                    double newH = bbPx.width() / desiredAR;
+                    bbPx = BoundingBox.create(bbPx.cx(), bbPx.cy(), newH, bbPx.width());
                 } else if(desiredAR > actualAR){
                     //Increase width dimension to give desired AR
-                    double newW = bb.height() * desiredAR;
-                    bb = BoundingBox.create(bb.cx(), bb.cy(), bb.height(), newW);
+                    double newW = bbPx.height() * desiredAR;
+                    bbPx = BoundingBox.create(bbPx.cx(), bbPx.cy(), bbPx.height(), newW);
                 }
             }
 
-            double x1 = Math.min(bb.x1(), bb.x2());
-            double y1 = Math.min(bb.y1(), bb.y2());
+            double x1 = Math.min(bbPx.x1(), bbPx.x2());
+            double y1 = Math.min(bbPx.y1(), bbPx.y2());
 
-            int x = (int)(x1 * img.cols());
-            int y = (int)(y1 * img.rows());
-            int h = (int) Math.round(bb.height() * img.rows());
-            int w = (int)Math.round(bb.width() * img.cols());
-
-//            int x = (int)(x1 * img.cols()) - 30;
-//            int y = (int)(y1 * img.rows()) - 30;
-//            int h = (int) Math.round(bb.height() * img.rows()) + 60;
-//            int w = (int)Math.round(bb.width() * img.cols()) + 60;
+            int x = (int) Math.round(x1);
+            int y = (int)Math.round(y1);
+            int h = (int)Math.round(bbPx.height());
+            int w = (int)Math.round(bbPx.width());
 
             Rect r = new Rect(x, y, w, h);
             Mat m = img.apply(r);

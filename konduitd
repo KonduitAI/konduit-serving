@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export KONDUIT_WORKING_DIR=${KONDUIT_WORKING_DIR:-$(pwd)/cli-dev}
+
+java -jar -Dvertx.cli.usage.prefix=$(basename $0) "${JAR_PATH}" "$@"

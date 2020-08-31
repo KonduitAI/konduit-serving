@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 
 @Slf4j
@@ -126,6 +127,13 @@ public class JData implements Data {
         return data.get();
     }
 
+
+    @Override
+    public ByteBuffer getByteBuffer(String key) {
+        Value<ByteBuffer> data = valueIfFound(key, ValueType.BYTEBUFFER);
+        return data.get();
+    }
+
     @Override
     public byte[] getBytes(String key) {
         Value<byte[]> data = valueIfFound(key, ValueType.BYTES);
@@ -194,6 +202,12 @@ public class JData implements Data {
         return listIfFound(key, ValueType.BYTES);
     }
 
+
+    @Override
+    public List<ByteBuffer> getListByteBuffer(String key) {
+        return listIfFound(key, ValueType.BYTEBUFFER);
+    }
+
     @Override
     public List<Double> getListDouble(String key) {
         return listIfFound(key, ValueType.DOUBLE);
@@ -234,6 +248,12 @@ public class JData implements Data {
     public void put(String key, NDArray data) {
         Data.assertNotReservedKey(key);
         dataMap.put(key, new NDArrayValue(data));
+    }
+
+    @Override
+    public void put(String key, ByteBuffer data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new ByteBufferValue(data));
     }
 
     @Override
@@ -304,6 +324,12 @@ public class JData implements Data {
     }
 
     @Override
+    public void putListByteBuffer(String key, List<ByteBuffer> data) {
+        Data.assertNotReservedKey(key);
+        dataMap.put(key, new ListValue(data, ValueType.BYTEBUFFER));
+    }
+
+    @Override
     public void putListBytes(String key, List<byte[]> data) {
         Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, ValueType.BYTES));
@@ -343,6 +369,7 @@ public class JData implements Data {
         dataMap.put(key, new ListValue(data, ValueType.POINT));
     }
 
+    @Override
     public void putList(String key, List<?> data, ValueType vt){
         Data.assertNotReservedKey(key);
         dataMap.put(key, new ListValue(data, vt));
@@ -415,6 +442,9 @@ public class JData implements Data {
         else if (data instanceof byte[]) {
             instance.put(key, (byte[]) data);
         }
+        else if (data instanceof ByteBuffer) {
+            instance.put(key, (ByteBuffer) data);
+        }
         else if (data instanceof Data) {
             instance.put(key, (Data)data);
         }
@@ -465,6 +495,8 @@ public class JData implements Data {
         } else if (valueType == ValueType.LIST) {
             //TODO don't use JData - use Data interface
             instance.putList(key, data, valueType);
+        } else if(valueType == ValueType.BYTEBUFFER) {
+          instance.putListByteBuffer(key,(List<ByteBuffer>) data);
         } else {
             throw new IllegalStateException("Trying to put list data of not supported type: " + valueType);
         }
@@ -492,6 +524,11 @@ public class JData implements Data {
             return this;
         }
 
+
+        public DataBuilder add(String key, ByteBuffer data) {
+            instance.put(key, data);
+            return this;
+        }
         public DataBuilder add(String key, byte[] data) {
             instance.put(key, data);
             return this;
