@@ -1065,7 +1065,12 @@ public class TestTensorFlowStep {
 
 
         //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", new DrawBoundingBoxStep().bboxName("facemask_bboxes"));
+        GraphStep drawer = merged.then("drawer", new DrawBoundingBoxStep()
+                .bboxName("facemask_bboxes")
+                .drawProbability(true)
+                .imageToNDArrayConfig(c)
+                .color("red").lineThickness(3)
+                .drawCropRegion(true));
 
         //Show image in Java frame
         GraphStep show = drawer.then("show", new ShowImageStep()

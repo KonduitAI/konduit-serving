@@ -190,12 +190,9 @@ def run(input):
            xmax = min(int(bbox[2] * width), width)
            ymax = min(int(bbox[3] * height), height)
 
-           ret[str(idx)] = BoundingBox(xmin,ymin,xmax,ymax, 'facemask', conf)
+           bboxes.append(BoundingBox(xmin,ymin,xmax,ymax, 'facemask', conf))
 
-    # python4j part
-#     print(bboxes)
-#     ret = Data()
-#     ret['facemask_bboxes'] = np.array(bboxes)
+    ret['facemask_bboxes'] = bboxes
 
     return ret
 
