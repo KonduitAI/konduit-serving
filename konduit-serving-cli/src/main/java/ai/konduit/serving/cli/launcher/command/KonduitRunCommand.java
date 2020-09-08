@@ -60,8 +60,8 @@ public class KonduitRunCommand extends RunCommand {
         } else {
             throw new CLIException(
                     String.format("Invalid service type %s. Allowed values are: %s",
-                    serviceType,
-                    VALID_SERVICE_TYPES)
+                            serviceType,
+                            VALID_SERVICE_TYPES)
             );
         }
     }
@@ -136,15 +136,23 @@ public class KonduitRunCommand extends RunCommand {
      * @return Read configuration to JsonObject. Returns null on failure.
      */
     private JsonObject readConfiguration(String configurationString) {
+        JsonObject jsonObject = null;
         try {
+            jsonObject = new JsonObject(configurationString);
             inferenceConfiguration = InferenceConfiguration.fromJson(configurationString);
-            return new JsonObject(inferenceConfiguration.toJson());
+            return jsonObject;
         } catch (Exception jsonProcessingErrors) {
             try {
                 inferenceConfiguration = InferenceConfiguration.fromYaml(configurationString);
                 return new JsonObject(inferenceConfiguration.toJson());
             } catch (Exception yamlProcessingErrors) {
-                log.error("Given configuration: {} does not contain a valid JSON/YAML object", configurationString);
+                if(jsonObject != null) {
+                    log.error("Given configuration: {} does not contain a valid JSON/YAML object", jsonObject.encodePrettily());
+                } else {
+                    log.error("Given configuration was malformatted JSON or invalid YAML configuration:", configurationString);
+
+                }
+
                 log.error("\n\nErrors while processing as a json string:", jsonProcessingErrors);
                 log.error("\n\nErrors while processing as a yaml string:", yamlProcessingErrors);
                 return null;

@@ -203,8 +203,8 @@ public class ObjectMappers {
         return m;
     }
 
-    public static JsonSubType findSubtypeByName(String name){
-        for(JsonSubType type : getAllSubtypes()){
+    public static JsonSubType findSubtypeByName(String name) {
+        for(JsonSubType type : getAllSubtypes()) {
             if(type.getName().equals(name)){
                 return type;
             }

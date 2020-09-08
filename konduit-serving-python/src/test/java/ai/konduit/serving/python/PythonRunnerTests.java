@@ -23,18 +23,23 @@ import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.python.util.KonduitPythonUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.python4j.PythonContextManager;
+import org.nd4j.python4j.PythonGIL;
 import org.nd4j.python4j.PythonVariables;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,11 +50,35 @@ import static org.junit.Assert.*;
 
 public class PythonRunnerTests {
 
+    @Rule
+    public TemporaryFolder folder= new TemporaryFolder();
+
+    @Test
+    public void testPythonImport() {
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            PythonContextManager.deleteNonMainContexts();
+
+        }
+        PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
+        PythonConfig config = builder
+                .importCode("ab = 'hello'")
+                .pythonCode("print(ab)")
+                .build();
+        PythonStep pythonStep = new PythonStep().pythonConfig(config);
+        SequencePipeline sequencePipeline = SequencePipeline.builder()
+                .add(pythonStep).build();
+        PipelineExecutor executor = sequencePipeline.executor();
+        Data data = Data.empty();
+        executor.exec(data);
+
+    }
 
     @Test
     public void testDictUtilsPoint() {
-        PythonContextManager.deleteNonMainContexts();
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            PythonContextManager.deleteNonMainContexts();
 
+        }
         Point point = Point.create(1,2);
         Map<String,Object> convertedDict = DictUtils.toPointDict(point);
         Map<String,Object> assertion = new LinkedHashMap<>();
@@ -83,8 +112,10 @@ public class PythonRunnerTests {
 
     @Test
     public void testDictUtilsBoundingBox() {
-        PythonContextManager.deleteNonMainContexts();
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            PythonContextManager.deleteNonMainContexts();
 
+        }
         BoundingBox boundingBox = BoundingBox.create(0.0,1.0,1.0,1.0);
         Map<String, Object> boundingBoxDict = DictUtils.toBoundingBoxDict(boundingBox);
         Map<String,Object> assertion = new LinkedHashMap<>();
@@ -118,8 +149,39 @@ public class PythonRunnerTests {
     }
 
     @Test
+    public void testpythonCodeImportPath() throws Exception {
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            PythonContextManager.deleteNonMainContexts();
+        }
+
+        File tmpFile = folder.newFile("tmp-import.py");
+        File tmpExec = folder.newFile("tmp-exec.py");
+        FileUtils.writeStringToFile(tmpFile,"import sys", Charset.defaultCharset());
+        Data data = Data.empty();
+        PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
+        builder.importCodePath(tmpFile.getAbsolutePath());
+        builder.pythonCodePath(tmpExec.getAbsolutePath());
+        PythonConfig config = builder.build();
+
+        PythonStep pythonStep = new PythonStep()
+                .pythonConfig(config);
+
+        SequencePipeline sequencePipeline = SequencePipeline.builder()
+                .add(pythonStep).build();
+
+
+        PipelineExecutor exec = sequencePipeline.executor();
+        exec.exec(data);
+    }
+
+
+    @Test
     public void testAllInputTypes() {
-        PythonContextManager.deleteNonMainContexts();
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            PythonContextManager.deleteNonMainContexts();
+
+        }
+
         PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
         StringBuffer codeBuffer = new StringBuffer();
 
@@ -245,8 +307,10 @@ public class PythonRunnerTests {
 
     @Test
     public void testImageSerde() throws Exception {
-        PythonContextManager.deleteNonMainContexts();
-        PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
+        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            PythonContextManager.deleteNonMainContexts();
+
+        }        PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
         PythonIO input2 = PythonIO.builder()
                 .name("input2")
                 .pythonType("bytes")

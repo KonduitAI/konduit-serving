@@ -61,9 +61,9 @@ konduit-serving-codegen/src/main/resources/docker/centos/aarch64/cuda/10.0/nvidi
 konduit-serving-core-git.properties
 builds
 
-
 dependency-reduced-pom.xml
 */dependency-reduced-pom.xml
 
-# python
-*/__pycache__/
+*Miniconda3*
+
+konduit-serving-metadata/test-gradle
