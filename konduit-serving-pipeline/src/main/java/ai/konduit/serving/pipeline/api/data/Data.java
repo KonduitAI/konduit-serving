@@ -17,7 +17,9 @@
  */
 package ai.konduit.serving.pipeline.api.data;
 
-import ai.konduit.serving.pipeline.impl.data.*;
+import ai.konduit.serving.pipeline.impl.data.JData;
+import ai.konduit.serving.pipeline.impl.data.ProtoData;
+import ai.konduit.serving.pipeline.impl.data.ValueNotFoundException;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.impl.serde.DataJsonDeserializer;
@@ -30,7 +32,10 @@ import org.nd4j.shade.jackson.core.JsonProcessingException;
 import org.nd4j.shade.jackson.databind.annotation.JsonDeserialize;
 import org.nd4j.shade.jackson.databind.annotation.JsonSerialize;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
