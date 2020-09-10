@@ -49,7 +49,6 @@ import ai.konduit.serving.pipeline.impl.step.bbox.point.BoundingBoxToPointStep;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 import ai.konduit.serving.pipeline.util.ArchiveUtils;
 import ai.konduit.serving.pipeline.util.TestUtils;
-import ai.konduit.serving.python.PythonStep;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
@@ -58,10 +57,7 @@ import org.nd4j.common.resources.Resources;
 
 import java.io.File;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -1008,9 +1004,8 @@ public class TestTensorFlowStep {
     @Test
     @Ignore   //To be run manually due to need for webcam and frame output
     public void testFaceMaskDetection() throws Exception {
-        //Pretrained model source: https://github.com/AIZOOTech/FaceMaskDetection
-
-        String fileUrl = "https://github.com/AIZOOTech/FaceMaskDetection/raw/master/models/face_mask_detection.pb";
+        //Pretrained model source: https://github.com/wangyifan411/Face-Mask-Type-Detector
+        String fileUrl = "https://github.com/wangyifan411/Face-Mask-Type-Detector/raw/master/workspace/trained-inference-graphs/output_inference_graph_mobile.pb/frozen_inference_graph.pb";
         File testDir = TestUtils.testResourcesStorageDir();
         File saveDir = new File(testDir, "konduit-serving-tensorflow/facemask-detection");
         File f = new File(saveDir, "facemask_frozen_inference_graph.pb");
@@ -1034,50 +1029,65 @@ public class TestTensorFlowStep {
         //Detect faces using mobilenet model: image -> NDArray -> TF -> SSD post processor
         ImageToNDArrayConfig c = new ImageToNDArrayConfig()
                 .channelLayout(NDChannelLayout.RGB)
-                .width(260).height(260) // https://github.com/AIZOOTech/FaceMaskDetection/blob/master/tensorflow_infer.py#L116
+                .width(480).height(640)
                 .includeMinibatchDim(true)
                 .format(NDFormat.CHANNELS_LAST)
-                .dataType(NDArrayType.FLOAT)
+                .dataType(NDArrayType.UINT8)
                 .normalization(null);
 
         GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
                 .config(c)
                 .keys(Collections.singletonList("image"))
-                .outputNames(Collections.singletonList("data_1")));
+                .outputNames(Collections.singletonList("image_tensor:0")));
 
         GraphStep tf = i2n.then("tf", new TensorFlowStep()
-                .inputNames(Collections.singletonList("data_1"))
-                .outputNames(Arrays.asList("loc_branch_concat_1/concat","cls_branch_concat_1/concat"))
+                .inputNames(Collections.singletonList("image_tensor:0"))
+                .outputNames(Arrays.asList("detection_boxes", "detection_scores", "detection_classes", "num_detections"))
                 .modelUri(f.toURI().toString()));
 
-        String resourceName = "data/mask_detector_postprocessing.py";
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(resourceName).getFile());
-        String code = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-
-        GraphStep pythonPostProcessing = tf.then("pythonPostProcessing", new PythonStep()
-                .code(code).setupMethod("setup").runMethod("run"));
 
 
+        //Post process SSD outputs to BoundingBox objects
+        GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
+                .outputName("img_bbox")
+                .threshold(0.8)
+                .classLabels(new String[]{"homemade", "surgical","n95","bare"})
+                .keepOtherValues(true)
 
-        //  Merge camera image with face keypoints
-        GraphStep merged = camera.mergeWith("facemask-points", pythonPostProcessing);
+        );
+
+        //Merge camera image with bounding boxes
+        GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
+
+
+        Map<String, String> labelColors  = new HashMap<String, String>() {{
+            put("homemade", "green");
+            put("surgical", "green");
+            put("n95", "green");
+            put("bare", "red");
+        }};
 
 
         //Draw bounding boxes on the image
         GraphStep drawer = merged.then("drawer", new DrawBoundingBoxStep()
-                .bboxName("facemask_bboxes")
-                .drawProbability(true)
-                .imageToNDArrayConfig(c)
-                .color("red").lineThickness(3)
-                .drawCropRegion(true));
+                .imageName("image")
+                .bboxName("img_bbox")
+                .lineThickness(2)
+                .classColors(labelColors)
+                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
+                .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
+        );
+
 
         //Show image in Java frame
         GraphStep show = drawer.then("show", new ShowImageStep()
-                .displayName("person in mask")
-                .imageName("image"));
+                .displayName("Mask detector")
+                .imageName("image")
+        );
+
 
         GraphPipeline p = b.build(show);
+
 
         PipelineExecutor exec = p.executor();
 
