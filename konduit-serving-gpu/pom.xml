@@ -14,10 +14,10 @@
     <name>konduit-serving-gpu</name>
 
     <properties>
-        <cuda.version>10.2</cuda.version>
+        <cuda.version>11.0</cuda.version>
         <nd4j.cuda.version>${nd4j.version}-${cuda.version}</nd4j.cuda.version>
-        <javacpp.date>7.6</javacpp.date>
-        <cuda.javacpp.version>${cuda.version}-${javacpp.date}-${javacpp.version}</cuda.javacpp.version>
+        <cudnn.version>8.0</cudnn.version>
+        <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.version}</cuda.javacpp.version>
     </properties>
 
     <profiles>
