@@ -124,19 +124,19 @@
         <jackson.version>2.10.0</jackson.version>
         <tensorflow.version>1.15.3</tensorflow.version>
         <netty.boringssl.version>2.0.31.Final</netty.boringssl.version>
-        <javacpp.version>1.5.4-SNAPSHOT</javacpp.version>
-        <javacpp-presets.version>1.5.4-SNAPSHOT</javacpp-presets.version>
-        <javacv.version>1.5.4-SNAPSHOT</javacv.version>
-        <opencv.version>4.3.0</opencv.version>
-        <cpython.version>3.7.7</cpython.version>
-        <mkl.version>2020.2</mkl.version>
+        <javacpp.version>1.5.4</javacpp.version>
+        <javacpp-presets.version>1.5.4</javacpp-presets.version>
+        <javacv.version>1.5.4</javacv.version>
+        <opencv.version>4.4.0</opencv.version>
+        <cpython.version>3.7.9</cpython.version>
+        <mkl.version>2020.3</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
         <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}</tensorflow.javacpp.version>
-        <mkl-dnn.version>0.21.4</mkl-dnn.version>
+        <mkl-dnn.version>0.21.5</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
-        <numpy.version>1.19.0</numpy.version>
+        <numpy.version>1.19.1</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
         <onnxruntime.version>1.4.0</onnxruntime.version>
         <onnxruntime.javacpp.version>${onnxruntime.version}-${javacpp.version}</onnxruntime.javacpp.version>
@@ -147,8 +147,9 @@
         <hdf5.version>1.12.0</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
         <jna.version>5.5.0</jna.version>
-        <cuda.version>10.2</cuda.version>
-        <cuda.javacpp.version>${cuda.version}-${javacpp.version}</cuda.javacpp.version>
+        <cuda.version>11.0</cuda.version>
+        <cudnn.version>8.0</cudnn.version>
+        <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.version}</cuda.javacpp.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
 
