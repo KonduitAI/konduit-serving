@@ -21,12 +21,12 @@ package ai.konduit.serving.models.nd4j.tensorflow.step;
 import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.impl.data.ValueNotFoundException;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.Input;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -35,7 +35,6 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.tensorflow.conversion.graphrunner.GraphRunnerServiceProvider;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,10 +53,9 @@ public class Nd4jTensorFlowRunner implements PipelineStepRunner {
 
     @Override
     public void close() {
-        if (sess != null){
+        if (sess != null) {
             sess.run(inputData).clear();
         }
-
 
 
     }
@@ -87,27 +85,30 @@ public class Nd4jTensorFlowRunner implements PipelineStepRunner {
         }
 
 
-        this.inputData = new HashMap<String, INDArray>();
+        this.inputData = new HashMap<>();
         for (String s : step.inputNames()) {
-            if (data.type(s) == ValueType.NDARRAY){
+            if (data.type(s) == ValueType.NDARRAY) {
                 inputData.put(s, data.getNDArray(s).getAs(INDArray.class));
 
             }
         }
 
 
+        Map<String, INDArray> graphOutput = this.sess.run(inputData);
 
-            this.sess.run(inputData).;
+        for (Map.Entry<String, INDArray> entry : graphOutput.entrySet()) {
+            data.put(entry.getKey(), NDArray.create(entry.getValue()));
 
-//        how to retrieve output ?
+        }
 
+        return data;
 
 
     }
 
     protected Map<String, String> getDataTypes(Data data, List<String> inputNames) {
 
-        Map<String, String> inputDataTypes = new HashMap<String, String>();
+        Map<String, String> inputDataTypes = new HashMap<>();
         for (String s : inputNames) {
             if (!data.has(s)) {
                 throw new ValueNotFoundException("Error in TensorFlowStep: Input data does not have a value corresponding to TensorFlowStep.inputNames value \"" +
