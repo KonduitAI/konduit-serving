@@ -125,13 +125,17 @@ Based on the above info (gained from command: `konduit pythonpaths`), it's much 
 - `environment` will be looked into if `type==conda` to locate the python installation for conda environment.
                                
 ### Defaults and Priorities
-The defaults for python paths are to be expected in the following way: 
+The defaults for python paths are to be expected in the following way:
+
+![Python Paths Defaults](../markdown_images/python-installation-paths-defaults.png)
 
 ### Usage with Profiles
 The profiles should be extended to incorporate the python paths settings for running with the `serve` command. The same items names that are used for the PythonStep config are going to be used here. For example: 
 
 ```shell script
-konduit profile create -n python_37_env --python-type=conda --location=1 --conda-env=py37 <...other_options...>
+konduit profile create python_37_env --python-type=conda --python-location=1 --conda-env=py37 <...other_options...>
+                                        # OR
+konduit profile create python_37_env -pt=conda -pl=1 -ce=py37 <...other_options...>
 ```
 
 When the above profile is used with the `serve` command, the usage will look like the following:
