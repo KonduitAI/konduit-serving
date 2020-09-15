@@ -44,7 +44,7 @@ import java.util.Map;
 public class Nd4jTensorFlowRunner implements PipelineStepRunner {
 
     private final Nd4jTensorFlowStep step;
-    private GraphRunnerServiceProvider sess;
+    private GraphRunnerServiceProvider sess = new GraphRunnerServiceProvider();
     private Map<String, INDArray> inputData;
 
     public Nd4jTensorFlowRunner(@NonNull Nd4jTensorFlowStep step) {
@@ -76,7 +76,6 @@ public class Nd4jTensorFlowRunner implements PipelineStepRunner {
 
             byte[] bytes = FileUtils.readFileToByteArray(origFile);
             Map<String, String> inputDataTypes = getDataTypes(data, step.inputNames());
-
             this.sess.init(step.inputNames(), step.outputNames(), bytes, step.constants(), inputDataTypes);
             log.info("Loaded TensorFlow frozen model");
         } catch (Throwable t) {

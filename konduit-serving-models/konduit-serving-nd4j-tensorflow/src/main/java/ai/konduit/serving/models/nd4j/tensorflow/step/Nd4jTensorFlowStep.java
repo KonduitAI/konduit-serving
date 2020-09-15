@@ -29,6 +29,7 @@ import lombok.experimental.Tolerate;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,8 +48,8 @@ public class Nd4jTensorFlowStep implements PipelineStep {
     @Schema(description = "A list of names of the output arrays - i.e., what should be predicted.")
     private List<String> outputNames;
 
-    @Schema(description = "A map of constants", defaultValue = "null")
-    private Map<String, INDArray> constants;
+    @Schema(description = "A map of constants")
+    private Map<String, INDArray> constants = new HashMap<>();
 
 
     @Schema(description = "Uniform Resource Identifier of model")
