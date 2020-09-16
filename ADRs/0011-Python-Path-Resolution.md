@@ -8,7 +8,7 @@ Proposed by: Shams Ul Azeem (15/09/2020)
 Discussed with: Adam Gibson
 
 ## Context
-Konduit Serving has the ability to run a python script using a PythonStep. There are a bunch of options that need to be setup for the PythonStep which includes, names and data types for inputs & outputs, script locations, python library paths. All of these options remain static from system to system apart from the python library paths variable. Since, every system has a different set of python installations using either conda, virtual environments or regular python installs, it becomes a hassle to manage a PythonStep configuration that's widely usable across different systems. The point of creating this ADR is to specify a simple enough workflow that can take care of the python library paths resolution for us through both using the konduit-serving cli **profiles** and simple configs.  
+Konduit Serving has the ability to run a python script using a PythonStep. There are a bunch of options that need to be setup for the PythonStep which includes, names and data types for inputs & outputs, script locations, python library paths. All of these options remain static from system to system apart from the python library paths variable. Since, every system has a different set of python installations using either conda, virtual environments or regular python installs, it becomes a hassle to manage a PythonStep configuration that's widely usable across different systems. The point of creating this ADR is to specify a simple enough workflow that can take care of the python library paths resolution for us through both using the konduit-serving cli **profiles** and simple configs. This basically will try to find the python and conda installations through executables found inside the **PATH** environment variable.
 
 ## Proposal
 The base of the proposal is to be able to assign identification tokens to different python install locations. Instead of knowing and specifying absolute python path locations, the user can just specify the identification token of system found python installs. There is still going to be options available for specifying a custom python install that are not present in system environment **PATH** variable. 
@@ -145,6 +145,22 @@ konduit serve -c config.json -id python-server -p python_37_env
 ```
 
 When the above command is run, all the python paths are automatically updated in the configurations to the values specified in the profile settings. 
+
+### Registering a Python Path
+If you needed python or conda installation isn't available inside the **PATH** environment variable, you can register it through the `pythonpaths add` command. For example:
+
+```shell script
+konduit pythonpaths add --type=python --path=E:\python37\python.exe
+                        # OR
+konduit pythonpaths add -t=python -p=E:\python37\python.exe
+```
+
+Where `--type` or `-t` can be either `python` or `conda`. By running the above command, you will see the following output
+
+```text
+Id: 4
+Python path at location "E:\python37\python.exe" has been registered.
+```
 
 #### Specifying Different Python Paths for Different PythonSteps
 If you want to specify different python paths for different PythonSteps and don't want profiles to update your configurations dynamically, then you can specify `python-paths-resolution: static` in the particular step configuration and it won't be affected by the profiles settings.
