@@ -106,7 +106,7 @@ Based on the above info (gained from the command: `konduit pythonpaths`), it's m
 
 #### Possible Values
 - The `type` property will take one of the following values: [`python`, `conda`, `virtualenv`, `custom`]
-- `path` will have the *id* of the python install for `type==python` or the id of the conda install for `type==conda`. Otherwise, it will contain the absolute path of the python executable file when `type==custom` or the absolute root directory path for `type==virtualenv`.
+- `python-path` will have the *id* of the python install for `type==python` or the id of the conda install for `type==conda`. Otherwise, it will contain the absolute path of the python executable file when `type==custom` or the absolute root directory path for `type==virtualenv`.
 - `environment` will be looked into if `type==conda` to locate the python installation for a particular conda environment.
                                
 ### Defaults and Priorities
