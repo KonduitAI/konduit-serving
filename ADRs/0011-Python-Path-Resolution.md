@@ -78,11 +78,11 @@ which will output the python install locations as follows:
     path: C:\VirtualEnvs\python37
     version: 3.7.8
 
--   id: 1
+-   id: 2
     path: C:\VirtualEnvs\python27
     version: 2.7.1
 
--   id: 1
+-   id: 3
     path: C:\VirtualEnvs\python35
     version: 3.5.1
 -----------------------------------------------------------------------------------------------------
@@ -388,11 +388,11 @@ konduit-pc ~ % konduit pythonpaths
     path: C:\VirtualEnvs\python37
     version: 3.7.8
 
--   id: 1
+-   id: 2
     path: C:\VirtualEnvs\python27
     version: 2.7.1
 
--   id: 1
+-   id: 3
     path: C:\VirtualEnvs\python35
     version: 3.5.1
 -----------------------------------------------------------------------------------------------------
