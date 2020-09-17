@@ -135,9 +135,9 @@ When the above command is run, all the python paths are automatically updated in
 If you needed python or conda installation isn't available inside the **PATH** environment variable, you can register it through the `pythonpaths add` subcommand. For example:
 
 ```shell script
-konduit pythonpaths add --type=python --python-path=E:\python37\python.exe
+konduit pythonpaths add --type=python --path=E:\python37\python.exe
                         # OR
-konduit pythonpaths add -t=python -pp=E:\python37\python.exe
+konduit pythonpaths add -t=python -p=E:\python37\python.exe
 ```
 
 Where `--type` or `-t` can be either `python`, `virtualenv` or `conda`. By running the above command, you will see the following output
