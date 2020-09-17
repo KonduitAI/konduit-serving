@@ -363,7 +363,7 @@ konduit-pc ~ % konduit pythonpaths
 .
 ```
 
-Now we want to specify the conda install with `id = 1` and the conda environment `py37 into the PythonStep configuration in Java. The code would look similar to: 
+Now we want to specify the conda install with `id = 1` and the conda environment `py37` into the PythonStep configuration in Java. The code would look similar to: 
 
 ```java
 PythonConfig pythonConfig = PythonConfig.builder()
