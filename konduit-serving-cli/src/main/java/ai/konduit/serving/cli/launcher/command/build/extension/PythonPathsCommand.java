@@ -28,8 +28,8 @@ import oshi.SystemInfo;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -115,7 +115,7 @@ public class PythonPathsCommand extends DefaultCommand {
                     this.type = PythonPathsCommand.Type.valueOf(((String) type).toUpperCase());
                 } catch (Exception e) {
                     out.format("Invalid type name: '%s'. Allowed values are: %s -> (case insensitive).",
-                            subCommand, Arrays.toString(PythonPathsCommand.Type.values()));
+                            type, Arrays.toString(PythonPathsCommand.Type.values()));
                     System.exit(1);
                 }
                 break;
@@ -124,7 +124,7 @@ public class PythonPathsCommand extends DefaultCommand {
                     this.type = PythonPathsCommand.ListInstallationType.valueOf(((String) type).toUpperCase());
                 } catch (Exception e) {
                     out.format("Invalid type name: '%s'. Allowed values are: %s -> (case insensitive).",
-                            subCommand, Arrays.toString(PythonPathsCommand.ListInstallationType.values()));
+                            type, Arrays.toString(PythonPathsCommand.ListInstallationType.values()));
                     System.exit(1);
                 }
                 break;
@@ -173,6 +173,10 @@ public class PythonPathsCommand extends DefaultCommand {
         }
     }
 
+    public static void registerInstallation() {
+
+    }
+
     private static void listJavacppInstallations() {
 
     }
@@ -183,30 +187,83 @@ public class PythonPathsCommand extends DefaultCommand {
         System.out.println("\n----------------------------PYTHON INSTALLS----------------------------");
         System.out.print(
                 IntStream.range(0, paths.size())
-                        .mapToObj(index -> formatPythonInstallation(paths.get(index), String.valueOf(index + 1)))
+                        .mapToObj(index -> formatPythonInstallation(paths.get(index), String.valueOf(index + 1), 1))
                         .collect(Collectors.joining(System.lineSeparator()))
         );
         System.out.println("-----------------------------------------------------------------------");
     }
 
-    private static String formatPythonInstallation(String pythonPath, String pythonId) {
-        return String.format(" -\tid: %s%n\t%s%n\t%s", pythonId, pythonPath, runAndGetOutput(pythonPath, "-V"));
-    }
 
     private static void listCondaInstallations() {
+        List<String> paths = findInstallationPaths("conda");
 
+        System.out.println("\n----------------------------CONDA INSTALLS-----------------------------");
+        System.out.print(
+                IntStream.range(0, paths.size())
+                        .mapToObj(index -> formatCondaInstallation(paths.get(index), String.valueOf(index + 1)))
+                        .collect(Collectors.joining(System.lineSeparator()))
+        );
+        System.out.println("-----------------------------------------------------------------------");
+    }
+
+    private static String formatPythonInstallation(String pythonPath, String pythonId, int numberOfTabs) {
+        String tabs = IntStream.range(0, numberOfTabs).mapToObj(index -> "\t").collect(Collectors.joining(""));
+        return String.format(" -%s%s: %s%n%spath: %s%n%sversion: %s",
+                "\t",
+                numberOfTabs > 1 ? "name" : "id",
+                pythonId,
+                tabs,
+                pythonPath,
+                tabs,
+                runAndGetOutput(pythonPath, "--version").replace("Python ", ""));
+    }
+
+    private static String formatCondaInstallation(String condaPath, String condaId) {
+        Map<String, String> condaEnvironments = findCondaEnvironments(condaPath);
+        List<String> formattedCondaEnvironments = new ArrayList<>();
+
+        condaEnvironments.forEach((environmentName, environmentPath) -> formattedCondaEnvironments.add(
+                formatPythonInstallation(
+                        Paths.get(environmentPath, "python.exe").toFile().getAbsolutePath(),
+                        environmentName,
+                        2)
+                )
+        );
+
+        return String.format(" -\tid: %s%n\tpath: %s%n\tversion: %s%s",
+                condaId,
+                condaPath,
+                runAndGetOutput(condaPath, "--version").replace("conda ", ""),
+                String.format(
+                                "\t--------------------------ENVIRONMENTS-------------------------%n" +
+                                "\t%s" +
+                                "\t---------------------------------------------------------------%n",
+                        String.join(System.lineSeparator() + "\t", formattedCondaEnvironments)
+                )
+        );
     }
 
     private static void listVenvInstallations() {
 
     }
 
-    public static void registerInstallation() {
-
+    private static List<String> findInstallationPaths(String type) {
+        return Arrays.stream(runAndGetOutput(FINDER_COMMAND, type).split(System.lineSeparator()))
+                .collect(Collectors.toList());
     }
 
-    private static List<String> findInstallationPaths(String type) {
-        return Arrays.stream(runAndGetOutput(FINDER_COMMAND, type).split(System.lineSeparator())).collect(Collectors.toList());
+    private static Map<String, String> findCondaEnvironments(String condaPath) {
+        return Arrays.stream(
+                runAndGetOutput(condaPath, "info", "-e")
+                        .replace("*", " ")
+                        .replace("# conda environments:", "")
+                        .replace("#", "")
+                        .trim()
+                        .split(System.lineSeparator()))
+                .collect(Collectors.toList())
+                .stream()
+                .map(envInfo -> envInfo.split("\\s+", 2))
+                .collect(Collectors.toMap(split -> split[0], split -> split[1]));
     }
 
     private static String runAndGetOutput(String... command){
