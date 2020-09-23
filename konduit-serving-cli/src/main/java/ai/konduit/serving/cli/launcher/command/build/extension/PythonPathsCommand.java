@@ -23,13 +23,17 @@ import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.shade.guava.collect.Streams;
 import oshi.PlatformEnum;
 import oshi.SystemInfo;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -215,7 +219,7 @@ public class PythonPathsCommand extends DefaultCommand {
                 tabs,
                 pythonPath,
                 tabs,
-                runAndGetOutput(pythonPath, "--version").replace("Python ", ""));
+                runAndGetOutput(pythonPath, "-c", "import sys; print(sys.version.split(' ')[0])").replace("Python ", ""));
     }
 
     private static String formatCondaInstallation(String condaPath, String condaId) {
@@ -293,9 +297,13 @@ public class PythonPathsCommand extends DefaultCommand {
     }
 
     private static ProcessBuilder getProcessBuilderFromCommand(String... command) {
-        List<String> fullCommand = Arrays.stream(command).collect(Collectors.toList());
+        List<String> fullCommand = Streams.concat(getBaseCommand().stream(), Arrays.stream(command)).collect(Collectors.toList());
         log.debug("Running command (sub): {}", String.join(" ", command));
         return new ProcessBuilder(fullCommand);
+    }
+
+    private static List<String> getBaseCommand() {
+        return Arrays.asList();
     }
 
     private static String getProcessOutput(Process process) throws IOException {
