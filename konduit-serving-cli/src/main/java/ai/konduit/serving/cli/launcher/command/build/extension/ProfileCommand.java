@@ -81,7 +81,7 @@ public class ProfileCommand extends DefaultCommand {
     private List<String> additionalDependencies;
 
     @Argument(index = 0, argName = "sub_command", required = false)
-    @DefaultValue("LISTs")
+    @DefaultValue("LIST")
     @Description("Sub command to be used with the profile command. Sub commands are: [default, create, list, view, edit, delete]. " +
             "Defaults to 'LIST'")
     public void setSubCommand(String subCommand) {
@@ -103,7 +103,7 @@ public class ProfileCommand extends DefaultCommand {
     @Option(shortName = "a", longName = "arch", argName = "cpu_architecture")
     @DefaultValue("x86_avx2")
     @Description("Name of the cpu architecture. Accepted values are: [x86, x86_64, x86_avx2, x86_64-avx2, x86_64_avx2, x86_avx512, x86_64-avx512, " +
-            "x86_64_avx512, armhf, arm64, ppc64le;].")
+            "x86_64_avx512, armhf, arm64, ppc64le].")
     public void setCpuArchitecture(String cpuArchitecture) {
         this.cpuArchitecture = cpuArchitecture;
     }
