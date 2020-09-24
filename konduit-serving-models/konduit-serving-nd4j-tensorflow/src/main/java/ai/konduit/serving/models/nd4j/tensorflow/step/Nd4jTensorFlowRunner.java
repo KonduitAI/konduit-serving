@@ -28,14 +28,20 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.pipeline.impl.data.ValueNotFoundException;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
 import org.nd4j.tensorflow.conversion.graphrunner.GraphRunnerServiceProvider;
 
 import java.io.File;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,20 +50,23 @@ import java.util.Map;
 public class Nd4jTensorFlowRunner implements PipelineStepRunner {
 
     private final Nd4jTensorFlowStep step;
-    private GraphRunnerServiceProvider sess = new GraphRunnerServiceProvider();
-    private Map<String, INDArray> inputData;
+    private GraphRunner sess;
 
+    @SneakyThrows
     public Nd4jTensorFlowRunner(@NonNull Nd4jTensorFlowStep step) {
         this.step = step;
+        File origFile = URIResolver.getFile(step.modelUri());
+        Preconditions.checkState(origFile.exists(), "Model file does not exist: " + step.modelUri());
+        sess = GraphRunner.builder()
+                .inputNames(step.inputNames())
+                .graphPath(origFile)
+                .outputNames(step.outputNames()).
+                build();
     }
 
     @Override
     public void close() {
-        if (sess != null) {
-            sess.run(inputData).clear();
-        }
-
-
+        sess.close();
     }
 
     @Override
@@ -68,30 +77,12 @@ public class Nd4jTensorFlowRunner implements PipelineStepRunner {
     @Override
     public Data exec(Context ctx, Data data) {
         Preconditions.checkState(step.inputNames() != null, "TensorFlowStep input array names are not set (null)");
-
-        try {
-
-            File origFile = URIResolver.getFile(step.modelUri());
-            Preconditions.checkState(origFile.exists(), "Model file does not exist: " + step.modelUri());
-
-            byte[] bytes = FileUtils.readFileToByteArray(origFile);
-            Map<String, String> inputDataTypes = getDataTypes(data, step.inputNames());
-            this.sess.init(step.inputNames(), step.outputNames(), bytes, step.constants(), inputDataTypes);
-            log.info("Loaded TensorFlow frozen model");
-        } catch (Throwable t) {
-            log.info("An error occurred during graph initialization: " + t);
-
+        Map<String,INDArray> inputData = new LinkedHashMap<>();
+        for(String key : data.keys()) {
+            NDArray ndArray = data.getNDArray(key);
+            INDArray arr = ndArray.getAs(INDArray.class);
+            inputData.put(key,arr);
         }
-
-
-        this.inputData = new HashMap<>();
-        for (String s : step.inputNames()) {
-            if (data.type(s) == ValueType.NDARRAY) {
-                inputData.put(s, data.getNDArray(s).getAs(INDArray.class));
-
-            }
-        }
-
 
         Map<String, INDArray> graphOutput = this.sess.run(inputData);
 
@@ -99,34 +90,6 @@ public class Nd4jTensorFlowRunner implements PipelineStepRunner {
             data.put(entry.getKey(), NDArray.create(entry.getValue()));
 
         }
-
         return data;
-
-
     }
-
-    protected Map<String, String> getDataTypes(Data data, List<String> inputNames) {
-
-        Map<String, String> inputDataTypes = new HashMap<>();
-        for (String s : inputNames) {
-            if (!data.has(s)) {
-                throw new ValueNotFoundException("Error in TensorFlowStep: Input data does not have a value corresponding to TensorFlowStep.inputNames value \"" +
-                        s + "\" - data keys = " + data.keys());
-            }
-            if (data.type(s) != ValueType.NDARRAY) {
-                String listType = data.type(s) == ValueType.LIST ? data.listType(s).toString() : null;
-                throw new ValueNotFoundException("Error in TensorFlowStep (" + name() + "): Input data value corresponding to TensorFlowStep.inputNames value \"" +
-                        s + "\" is not an NDArray type - is " + (listType == null ? data.type(s) : "List<" + listType + ">"));
-            }
-
-            inputDataTypes.put(s, data.type(s).toString());
-
-
-        }
-
-        return inputDataTypes;
-
-    }
-
-
 }

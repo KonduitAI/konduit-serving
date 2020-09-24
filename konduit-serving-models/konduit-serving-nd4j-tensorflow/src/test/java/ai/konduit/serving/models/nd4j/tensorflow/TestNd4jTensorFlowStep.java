@@ -18,256 +18,50 @@
 
 package ai.konduit.serving.models.nd4j.tensorflow;
 
-import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
-import ai.konduit.serving.data.image.convert.config.NDChannelLayout;
-import ai.konduit.serving.data.image.convert.config.NDFormat;
-import ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep;
-import ai.konduit.serving.data.image.step.capture.CameraFrameCaptureStep;
-import ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep;
-import ai.konduit.serving.data.image.step.show.ShowImageStep;
+
 import ai.konduit.serving.models.nd4j.tensorflow.step.Nd4jTensorFlowStep;
-import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
-import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.NDArrayType;
-import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
-import ai.konduit.serving.pipeline.impl.pipeline.GraphPipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphBuilder;
-import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
-import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
-import ai.konduit.serving.pipeline.util.ArchiveUtils;
-import ai.konduit.serving.pipeline.util.TestUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.nd4j.common.resources.Resources;
+import org.nd4j.common.io.ClassPathResource;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import java.io.File;
-import java.net.URL;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+
 
 @Slf4j
 public class TestNd4jTensorFlowStep {
 
+
+
     @Test
-    @Ignore   //To be run manually due to need for webcam and frame output
-    public void testFrozenModelGraph() throws Exception {
-        //Pretrained model source: https://github.com/yeephycho/tensorflow-face-detection
-        String fileUrl = "https://drive.google.com/uc?export=download&id=0B5ttP5kO_loUdWZWZVVrN2VmWFk";
-        File testDir = TestUtils.testResourcesStorageDir();
-        File saveDir = new File(testDir, "konduit-serving-tensorflow/facedetection");
-        File f = new File(saveDir, "frozen_inference_graph_face.pb");
+    public void testStep() throws Exception {
+        ClassPathResource classPathResource = new ClassPathResource("add.pb");
+        File f = classPathResource.getFile();
+        Nd4jTensorFlowStep nd4jTensorFlowStep = new Nd4jTensorFlowStep()
+                .modelUri(f.getAbsolutePath())
+                .inputNames("a","b")
+                .outputNames("output");
 
-        if (!f.exists()) {
-            log.info("Downloading model: {} -> {}", fileUrl, f.getAbsolutePath());
-            FileUtils.copyURLToFile(new URL(fileUrl), f);
-            log.info("Download complete");
-        }
-
-        GraphBuilder b = new GraphBuilder();
-        GraphStep input = b.input();
-
-        //Capture frame from webcam
-        GraphStep camera = input.then("camera", new CameraFrameCaptureStep()
-                .camera(0)
-                .outputKey("image")
-        );
-
-        //Convert image to NDArray (can configure size, BGR/RGB, normalization, etc here)
-        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
-                .height(256)
-                .width(256)
-                .channelLayout(NDChannelLayout.RGB)
-                .includeMinibatchDim(true)
-                .format(NDFormat.CHANNELS_LAST)
-                .dataType(NDArrayType.UINT8)
-                .normalization(null);
-
-        GraphStep i2n = camera.then("image2NDArray", new ImageToNDArrayStep()
-                .config(c)
-                .keys("image")
-                .outputNames("image_tensor")
-        );
-
-        //Run image in TF model
-        GraphStep tf = i2n.then("tf", new Nd4jTensorFlowStep()
-                .inputNames("image_tensor")
-                .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
-                .modelUri(f.toURI().toString())      //Face detection model
-        );
-
-        //Post process SSD outputs to BoundingBox objects
-        GraphStep ssdProc = tf.then("bbox", new SSDToBoundingBoxStep()
-                .outputName("img_bbox"));
-
-        //Merge camera image with bounding boxes
-        GraphStep merged = camera.mergeWith("img_bbox", ssdProc);
-
-        //Draw bounding boxes on the image
-        GraphStep drawer = merged.then("drawer", new DrawBoundingBoxStep()
-                .imageName("image")
-                .bboxName("img_bbox")
-                .lineThickness(2)
-                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
-                .drawCropRegion(true)           //Draw the region of the camera that is cropped when using ImageToNDArray
-        );
-
-        /*
-        //Crop out the detected face region instead, for visualization
-        //This works, but is a little buggy ATM as there's obviously no image to draw when there's no face, and it
-        // can't yet draw multiple images simultaneously
-        GraphStep drawer = merged.then("drawer", ExtractBoundingBoxStep()
-                .imageName("image")
-                .bboxName("img_bbox")
-                .imageToNDArrayConfig(c)        //Provide the config to account for the fact that the input image is cropped
-                .build());
-         */
-
-        //Show image in Java frame
-        GraphStep show = drawer.then("show", new ShowImageStep()
-                .displayName("Face detection")
-                .imageName("image")
-        );
-
-
-        GraphPipeline p = b.build(show);
-
-
-        PipelineExecutor exec = p.executor();
-
-        Data in = Data.empty();
-        for (int i = 0; i < 1000; i++) {
-            exec.exec(in);
-        }
-    }
-
-
-    @Ignore("24/06/2020 Failed on CI https://github.com/KonduitAI/konduit-serving/issues/403")
-    @Test
-    public void testFrozenModel() throws Exception {
-
-        //Pretrained model source: https://github.com/yeephycho/tensorflow-face-detection
-        String fileUrl = "https://drive.google.com/uc?export=download&id=0B5ttP5kO_loUdWZWZVVrN2VmWFk";
-        File testDir = TestUtils.testResourcesStorageDir();
-        File saveDir = new File(testDir, "konduit-serving-tensorflow/facedetection");
-        File f = new File(saveDir, "frozen_inference_graph_face.pb");
-
-        if (!f.exists()) {
-            log.info("Downloading model: {} -> {}", fileUrl, f.getAbsolutePath());
-            FileUtils.copyURLToFile(new URL(fileUrl), f);
-            log.info("Download complete");
-        }
-
-        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
-                .height(256)
-                .width(256)
-                .channelLayout(NDChannelLayout.RGB)
-                .includeMinibatchDim(true)
-                .format(NDFormat.CHANNELS_LAST)
-                .dataType(NDArrayType.UINT8)
-                .normalization(null);
-
-        Pipeline p = SequencePipeline.builder()
-                .add(new ImageToNDArrayStep()
-                        .config(c)
-                        .outputNames("image_tensor")
-                )
-                .add(new Nd4jTensorFlowStep()
-                        .inputNames("image_tensor")
-                        .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
-                        .modelUri(f.toURI().toString())      //Face detection model
-                )
-                .add(new SSDToBoundingBoxStep()
-                        .keepOtherValues(false)
-                        .outputName("bbox")
-                )
+        SequencePipeline sequencePipeline = SequencePipeline.builder()
+                .add(nd4jTensorFlowStep)
                 .build();
 
-        Image img = Image.create(Resources.asFile("data/mona_lisa.png"));
-        PipelineExecutor exec = p.executor();
+        PipelineExecutor executor = sequencePipeline.executor();
+        Data data = Data.empty();
+        data.put("a", NDArray.create(Nd4j.scalar(1.0f)));
+        data.put("b", NDArray.create(Nd4j.scalar(1.0f)));
+        Data exec = executor.exec(data);
+        INDArray arr = exec.getNDArray("output").getAs(INDArray.class);
+        assertEquals(2.0f,arr.sumNumber().floatValue(),1e-2f);
 
-        Data in = Data.singleton("image", img);
-        Data out = exec.exec(in);
-
-        List<BoundingBox> l = out.getListBoundingBox("bbox");
-
-        assertEquals(1, l.size());
     }
-
-
-    @Test
-    public void testSavedModel() throws Exception {
-
-        String url = "http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz";
-
-        File testDir = TestUtils.testResourcesStorageDir();
-        File saveDir = new File(testDir, "konduit-serving-tensorflow/ssd_mobilenet_v2_coco_2018_03_29/");
-        File archive = new File(saveDir, "ssd_mobilenet_v2_coco_2018_03_29.tar.gz");
-        File f = new File(saveDir, "frozen_model.pb");
-
-        if (!archive.exists()) {
-            log.info("Downloading model: {} -> {}", url, archive.getAbsolutePath());
-            FileUtils.copyURLToFile(new URL(url), archive);
-            log.info("Download complete");
-        }
-        if (!f.exists()) {
-            ArchiveUtils.tarGzExtractSingleFile(archive, f, "ssd_mobilenet_v2_coco_2018_03_29/saved_model/saved_model.pb");
-        }
-
-        String testImageUrl = "https://github.com/tensorflow/models/blob/master/research/deeplab/g3doc/img/image2.jpg?raw=true";
-        File testImg = new File(saveDir, "image2.jpg");
-        if (!testImg.exists()) {
-            log.info("Downloading test image...");
-            FileUtils.copyURLToFile(new URL(testImageUrl), testImg);
-        }
-
-
-        ImageToNDArrayConfig c = new ImageToNDArrayConfig()
-                .height(128)
-                .width(128)
-                .channelLayout(NDChannelLayout.RGB)
-                .includeMinibatchDim(true)
-                .format(NDFormat.CHANNELS_LAST)
-                .dataType(NDArrayType.UINT8)
-                .normalization(null);
-
-        Pipeline p = SequencePipeline.builder()
-                .add(new ImageToNDArrayStep()
-                        .config(c)
-                )
-                .add(new Nd4jTensorFlowStep()
-                        .inputNames("image_tensor")
-                        .outputNames("detection_boxes", "detection_scores", "detection_classes", "num_detections")
-                        .modelUri(f.toURI().toString())
-                )
-                .add(new SSDToBoundingBoxStep())
-                .build();
-
-        Image img = Image.create(testImg);
-
-        PipelineExecutor exec = p.executor();
-
-        log.info("About to perform inference...");
-        try {
-            Data in = Data.singleton("image_tensor", img);
-
-            Data out = exec.exec(in);
-            System.out.println(out);
-            System.out.println(out.getListBoundingBox("bounding_boxes"));
-        } catch (Throwable t) {
-            t.printStackTrace();
-            throw t;
-        } finally {
-            log.info("Closing executor...");
-            exec.close();
-        }
-    }
-
 
 
 }
