@@ -228,7 +228,10 @@ public class PythonPathsCommand extends DefaultCommand {
 
         condaEnvironments.forEach((environmentName, environmentPath) -> formattedCondaEnvironments.add(
                 formatPythonInstallation(
-                        Paths.get(environmentPath, "python.exe").toFile().getAbsolutePath(),
+                        (currentPlatformEnum == PlatformEnum.WINDOWS ?
+                                Paths.get(environmentPath, "python") :
+                                Paths.get(environmentPath, "bin", "python"))
+                                .toFile().getAbsolutePath(),
                         environmentName,
                         2)
                 )
