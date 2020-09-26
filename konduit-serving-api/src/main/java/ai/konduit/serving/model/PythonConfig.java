@@ -23,6 +23,8 @@
 package ai.konduit.serving.model;
 
 import ai.konduit.serving.pipeline.api.TextConfig;
+import ai.konduit.serving.pipeline.api.process.ProcessUtils;
+import ai.konduit.serving.pipeline.api.python.PythonPathUtils;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,7 +73,30 @@ public class PythonConfig implements Serializable, TextConfig {
     private String jobSuffix = "konduit_job";
 
     public String resolvePythonLibrariesPath() {
-        return null;
+        switch (pythonType) {
+            case JAVACPP:
+                break;
+            case PYTHON:
+                this.pythonLibrariesPath = pythonLibrariesFromAbsolutePath(PythonPathUtils.findPythonInstallations().stream().filter(pythonDetails -> pythonDetails.id().equals(pythonPath)).findFirst().get().path());
+                break;
+            case CONDA:
+                this.pythonLibrariesPath = pythonLibrariesFromAbsolutePath(PythonPathUtils.findCondaInstallations().stream()
+                        .filter(condaDetails -> condaDetails.id().equals(pythonPath)).findFirst().get().environments().stream()
+                        .filter(pythonDetails -> pythonDetails.id().equals(environmentName)).findFirst().get().path());
+                break;
+            case VENV:
+                break;
+            case CUSTOM:
+                break;
+            default:
+                break;
+        }
+
+        return this.pythonLibrariesPath;
+    }
+
+    public static String pythonLibrariesFromAbsolutePath(String pythonPath) {
+        return ProcessUtils.runAndGetOutput(pythonPath, "-c", "import sys, os; print(os.pathsep.join([path for path in sys.path if path]))");
     }
 
     public enum PythonType {
