@@ -95,6 +95,7 @@ public class PythonStepRunner extends BaseStepRunner {
             String pythonLibrariesPath = currConfig.getPythonLibrariesPath();
             if(pythonLibrariesPath == null) {
                 pythonLibrariesPath = currConfig.resolvePythonLibrariesPath();
+                currConfig.setPythonLibrariesPath(pythonLibrariesPath);
             }
 
             PythonConfig.AppendType appendType = currConfig.getAppendType();

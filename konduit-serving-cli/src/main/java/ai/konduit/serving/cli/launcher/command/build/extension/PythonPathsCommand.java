@@ -18,24 +18,20 @@
 
 package ai.konduit.serving.cli.launcher.command.build.extension;
 
+import ai.konduit.serving.pipeline.api.python.models.CondaDetails;
+import ai.konduit.serving.pipeline.api.python.models.PythonDetails;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.nd4j.common.base.Preconditions;
-import org.nd4j.shade.guava.collect.Streams;
-import oshi.PlatformEnum;
-import oshi.SystemInfo;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static ai.konduit.serving.pipeline.api.python.PythonPathUtils.findCondaInstallations;
+import static ai.konduit.serving.pipeline.api.python.PythonPathUtils.findPythonInstallations;
 
 @Name("pythonpaths")
 @Summary("A utility command to manage system installed and manually registered python binaries.")
@@ -57,8 +53,6 @@ import java.util.stream.IntStream;
 @Slf4j
 public class PythonPathsCommand extends DefaultCommand {
 
-    public static PlatformEnum currentPlatformEnum = SystemInfo.getCurrentPlatformEnum();
-    public static String FINDER_COMMAND = currentPlatformEnum == PlatformEnum.WINDOWS || currentPlatformEnum == PlatformEnum.MACOSX ? "where" : "which";
     private SubCommand subCommand;
     private Object type;
     private String path;
@@ -186,12 +180,10 @@ public class PythonPathsCommand extends DefaultCommand {
     }
 
     private static void listPythonInstallations() {
-        List<String> paths = findInstallationPaths("python");
-
         System.out.println("\n----------------------------PYTHON INSTALLS----------------------------");
         System.out.print(
-                IntStream.range(0, paths.size())
-                        .mapToObj(index -> formatPythonInstallation(paths.get(index), String.valueOf(index + 1), 1))
+                findPythonInstallations().stream()
+                        .map(PythonPathsCommand::formatPythonInstallation)
                         .collect(Collectors.joining(System.lineSeparator()))
         );
         System.out.println("-----------------------------------------------------------------------");
@@ -199,48 +191,41 @@ public class PythonPathsCommand extends DefaultCommand {
 
 
     private static void listCondaInstallations() {
-        List<String> paths = findInstallationPaths("conda");
-
         System.out.println("\n----------------------------CONDA INSTALLS-----------------------------");
         System.out.print(
-                IntStream.range(0, paths.size())
-                        .mapToObj(index -> formatCondaInstallation(paths.get(index), String.valueOf(index + 1)))
+                findCondaInstallations().stream()
+                        .map(PythonPathsCommand::formatCondaInstallation)
                         .collect(Collectors.joining(System.lineSeparator()))
         );
         System.out.println("-----------------------------------------------------------------------");
     }
 
-    private static String formatPythonInstallation(String pythonPath, String pythonId, int numberOfTabs) {
+    private static String formatPythonInstallation(PythonDetails pythonDetails) {
+        return formatPythonInstallation(pythonDetails, 1);
+    }
+
+    private static String formatPythonInstallation(PythonDetails pythonDetails, int numberOfTabs) {
         String tabs = IntStream.range(0, numberOfTabs).mapToObj(index -> "\t").collect(Collectors.joining(""));
         return String.format(" -%s%s: %s%n%spath: %s%n%sversion: %s",
                 "\t",
                 numberOfTabs > 1 ? "name" : "id",
-                pythonId,
+                pythonDetails.id(),
                 tabs,
-                pythonPath,
+                pythonDetails.path(),
                 tabs,
-                runAndGetOutput(pythonPath, "-c", "import sys; print(sys.version.split(' ')[0])").replace("Python ", ""));
+                pythonDetails.version());
     }
 
-    private static String formatCondaInstallation(String condaPath, String condaId) {
-        Map<String, String> condaEnvironments = findCondaEnvironments(condaPath);
+    private static String formatCondaInstallation(CondaDetails condaDetails) {
         List<String> formattedCondaEnvironments = new ArrayList<>();
 
-        condaEnvironments.forEach((environmentName, environmentPath) -> formattedCondaEnvironments.add(
-                formatPythonInstallation(
-                        (currentPlatformEnum == PlatformEnum.WINDOWS ?
-                                Paths.get(environmentPath, "python") :
-                                Paths.get(environmentPath, "bin", "python"))
-                                .toFile().getAbsolutePath(),
-                        environmentName,
-                        2)
-                )
-        );
+        condaDetails.environments().forEach(pythonDetails ->
+                formattedCondaEnvironments.add(formatPythonInstallation(pythonDetails, 2)));
 
         return String.format(" -\tid: %s%n\tpath: %s%n\tversion: %s%s",
-                condaId,
-                condaPath,
-                runAndGetOutput(condaPath, "--version").replace("conda ", ""),
+                condaDetails.id(),
+                condaDetails.path(),
+                condaDetails.version(),
                 String.format(
                                 "\t--------------------------ENVIRONMENTS-------------------------%n" +
                                 "\t%s" +
@@ -254,66 +239,5 @@ public class PythonPathsCommand extends DefaultCommand {
 
     }
 
-    private static List<String> findInstallationPaths(String type) {
-        return Arrays.stream(runAndGetOutput(FINDER_COMMAND, type).split(System.lineSeparator()))
-                .collect(Collectors.toList());
-    }
 
-    private static Map<String, String> findCondaEnvironments(String condaPath) {
-        return Arrays.stream(
-                runAndGetOutput(condaPath, "info", "-e")
-                        .replace("*", " ")
-                        .replace("# conda environments:", "")
-                        .replace("#", "")
-                        .trim()
-                        .split(System.lineSeparator()))
-                .collect(Collectors.toList())
-                .stream()
-                .map(envInfo -> envInfo.split("\\s+", 2))
-                .collect(Collectors.toMap(split -> split[0], split -> split[1]));
-    }
-
-    private static String runAndGetOutput(String... command){
-        try {
-            Process process = startProcessFromCommand(command);
-
-            String output = getProcessOutput(process);
-            String errorOutput = getProcessErrorOutput(process);
-
-            Preconditions.checkState(0 == process.waitFor(),
-                    "Process exited with non-zero exit code. Details: \n" + output + "\n" + errorOutput
-            );
-
-            log.debug("Process output: {}", output);
-            log.debug("Process errors (ignore if none): '{}'", errorOutput);
-
-            return output;
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            System.exit(1);
-            return null;
-        }
-    }
-
-    private static Process startProcessFromCommand(String... command) throws IOException {
-        return getProcessBuilderFromCommand(command).start();
-    }
-
-    private static ProcessBuilder getProcessBuilderFromCommand(String... command) {
-        List<String> fullCommand = Streams.concat(getBaseCommand().stream(), Arrays.stream(command)).collect(Collectors.toList());
-        log.debug("Running command (sub): {}", String.join(" ", command));
-        return new ProcessBuilder(fullCommand);
-    }
-
-    private static List<String> getBaseCommand() {
-        return Arrays.asList();
-    }
-
-    private static String getProcessOutput(Process process) throws IOException {
-        return IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
-    }
-
-    private static String getProcessErrorOutput(Process process) throws IOException {
-        return IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8);
-    }
 }
