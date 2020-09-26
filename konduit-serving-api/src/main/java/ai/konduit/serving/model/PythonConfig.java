@@ -48,11 +48,16 @@ import java.util.Map;
 @AllArgsConstructor
 public class PythonConfig implements Serializable, TextConfig {
 
-    private String  pythonCode, pythonCodePath, pythonPath,importCode,importCodePath;
+    private PythonType pythonType;
+    private String pythonPath;
+    private String environmentName;
+    private AppendType appendType;
+
+    private String pythonCode, pythonCodePath, pythonLibrariesPath, importCode, importCodePath;
 
     @Singular
     @Deprecated
-    private Map<String,String>  pythonInputs, pythonOutputs, extraInputs;
+    private Map<String, String> pythonInputs, pythonOutputs, extraInputs;
 
     private boolean returnAllInputs,setupAndRun;
 
@@ -65,7 +70,21 @@ public class PythonConfig implements Serializable, TextConfig {
     @Builder.Default
     private String jobSuffix = "konduit_job";
 
+    public String resolvePythonLibrariesPath() {
+        return null;
+    }
 
+    public enum PythonType {
+        JAVACPP,
+        PYTHON,
+        CONDA,
+        VENV,
+        CUSTOM
+    }
 
-
+    public enum AppendType {
+        BEFORE,
+        NONE,
+        AFTER
+    }
 }

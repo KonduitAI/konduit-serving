@@ -78,14 +78,11 @@ public class PythonRunner implements PipelineStepRunner {
         }
 
         if(importCode != null) {
-            try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            try(PythonGIL ignored = PythonGIL.lock()) {
                 PythonExecutioner.exec(importCode);
             }
         }
-
-
     }
-
 
     @Override
     public void close() {
@@ -103,13 +100,11 @@ public class PythonRunner implements PipelineStepRunner {
         Data ret = Data.empty();
         PythonVariables outputs = KonduitPythonUtils.createOutputVariables(pythonStep.pythonConfig());
         PythonVariables pythonVariables = KonduitPythonUtils.createPythonVariablesFromDataInput(data, pythonStep.pythonConfig());
-        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+        try(PythonGIL ignored = PythonGIL.lock()) {
             log.debug("Thread " + Thread.currentThread().getId() + " has the GIL. Name of thread " + Thread.currentThread().getName());
             log.debug("Py gil state " + (PyGILState_Check() > 0));
             runExec(ret, outputs, pythonVariables);
         }
-
-
 
         return ret;
     }
@@ -166,7 +161,8 @@ public class PythonRunner implements PipelineStepRunner {
                 case "float":
                     ret.put(variable.getName(),KonduitPythonUtils.getWithType(outputs,variable.getName(),Double.class));
                     break;
-
+                default:
+                    break;
             }
         }
     }

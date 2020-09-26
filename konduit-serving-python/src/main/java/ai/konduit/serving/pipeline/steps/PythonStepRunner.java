@@ -91,9 +91,21 @@ public class PythonStepRunner extends BaseStepRunner {
             Preconditions.checkState(pipelineStep.hasInputName(configEntry.getKey()),
                     "Invalid input name specified for transform " + configEntry.getKey());
             PythonConfig currConfig = configEntry.getValue();
-            if (currConfig.getPythonPath() != null && !setPath) {
-                log.info("Over riding python path " + currConfig.getPythonPath());
-                System.setProperty(PythonExecutioner.DEFAULT_PYTHON_PATH_PROPERTY, currConfig.getPythonPath());
+
+            String pythonLibrariesPath = currConfig.getPythonLibrariesPath();
+            if(pythonLibrariesPath == null) {
+                pythonLibrariesPath = currConfig.resolvePythonLibrariesPath();
+            }
+
+            PythonConfig.AppendType appendType = currConfig.getAppendType();
+
+            if (pythonLibrariesPath != null && !setPath) {
+                log.info("Over riding python path " + pythonLibrariesPath);
+                System.setProperty(PythonExecutioner.DEFAULT_PYTHON_PATH_PROPERTY, pythonLibrariesPath);
+                System.setProperty(PythonExecutioner.JAVACPP_PYTHON_APPEND_TYPE, appendType == null ?
+                        PythonExecutioner.DEFAULT_APPEND_TYPE :
+                        appendType.name().toLowerCase());
+
                 setPath = true;
             }
 
