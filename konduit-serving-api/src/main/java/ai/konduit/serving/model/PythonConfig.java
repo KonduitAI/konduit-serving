@@ -86,9 +86,7 @@ public class PythonConfig implements Serializable, TextConfig {
                 this.pythonLibrariesPath = findPythonLibariesPath(pythonPath);
                 break;
             case CONDA:
-                this.pythonLibrariesPath = pythonLibrariesFromAbsolutePath(PythonPathUtils.findCondaInstallations().stream()
-                        .filter(condaDetails -> condaDetails.id().equals(pythonPath)).findFirst().get().environments().stream()
-                        .filter(pythonDetails -> pythonDetails.id().equals(environmentName)).findFirst().get().path());
+                this.pythonLibrariesPath = findPythonLibrariesPathFromCondaDetails(pythonPath, environmentName);
                 break;
             case VENV:
                 break;
@@ -114,10 +112,10 @@ public class PythonConfig implements Serializable, TextConfig {
         if(optionalPythonDetails.isPresent()) {
             return pythonLibrariesFromAbsolutePath(optionalPythonDetails.get().path());
         } else {
-            throw new IllegalStateException(String.format("No environment available with the name '%s' for conda path id '%s'. Available python environments for conda path id '%s' are: %s",
+            throw new IllegalStateException(String.format("No environment available with the name '%s' for conda path id '%s'. Available python environments for conda path id '%s' are: %n%s",
                     environmentName, condaPathId, condaPathId,
-                    String.format("%n---%n%s%n---%n", pythonDetailsList.stream()
-                            .map(pythonDetails -> String.format("-\tname: %s%n\tpath: %s%n\tversion: %s%n",
+                    String.format("%n---%n%s---%n", pythonDetailsList.stream()
+                            .map(pythonDetails -> String.format("-\tname: %s%n\tpath: %s%n\tversion: %s",
                                     pythonDetails.id(), pythonDetails.path(), pythonDetails.version()))
                             .collect(Collectors.joining(System.lineSeparator()))
                     )));
@@ -134,10 +132,10 @@ public class PythonConfig implements Serializable, TextConfig {
         if(optionalCondaDetails.isPresent()) {
             return optionalCondaDetails.get();
         } else {
-            throw new IllegalStateException(String.format("No id '%s' available for conda path type. Available conda type paths are: %s",
+            throw new IllegalStateException(String.format("No id '%s' available for conda path type. Available conda type paths are: %n%s",
                     condaPathId,
-                    String.format("%n---%n%s%n---%n", condaDetailsList.stream()
-                            .map(condaDetails -> String.format("-\tid: %s%n\tpath: %s%n\tversion: %s%n",
+                    String.format("%n---%n%s---%n", condaDetailsList.stream()
+                            .map(condaDetails -> String.format("-\tid: %s%n\tpath: %s%n\tversion: %s",
                                     condaDetails.id(), condaDetails.path(), condaDetails.version()))
                             .collect(Collectors.joining(System.lineSeparator()))
                     )));
@@ -154,10 +152,10 @@ public class PythonConfig implements Serializable, TextConfig {
         if(optionalPythonDetails.isPresent()) {
             return pythonLibrariesFromAbsolutePath(optionalPythonDetails.get().path());
         } else {
-            throw new IllegalStateException(String.format("No id '%s' available for python path type. Available python type paths are: %s",
+            throw new IllegalStateException(String.format("No id '%s' available for python path type. Available python type paths are: %n%s",
                     pythonPathId,
-                    String.format("%n---%n%s%n---%n", pythonDetailsList.stream()
-                            .map(pythonDetails -> String.format("-\tid: %s%n\tpath: %s%n\tversion: %s%n",
+                    String.format("%n---%n%s---%n", pythonDetailsList.stream()
+                            .map(pythonDetails -> String.format("-\tid: %s%n\tpath: %s%n\tversion: %s",
                                     pythonDetails.id(), pythonDetails.path(), pythonDetails.version()))
                             .collect(Collectors.joining(System.lineSeparator()))
                     )));
