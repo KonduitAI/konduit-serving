@@ -113,6 +113,12 @@
         </dependency>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-nd4j-tensorflow</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-tensorflow</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
