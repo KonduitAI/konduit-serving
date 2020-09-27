@@ -25,11 +25,17 @@ package ai.konduit.serving.model;
 import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.process.ProcessUtils;
 import ai.konduit.serving.pipeline.api.python.PythonPathUtils;
+import ai.konduit.serving.pipeline.api.python.models.CondaDetails;
+import ai.konduit.serving.pipeline.api.python.models.PythonDetails;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Python configuration for specifying:
@@ -77,7 +83,7 @@ public class PythonConfig implements Serializable, TextConfig {
             case JAVACPP:
                 break;
             case PYTHON:
-                this.pythonLibrariesPath = pythonLibrariesFromAbsolutePath(PythonPathUtils.findPythonInstallations().stream().filter(pythonDetails -> pythonDetails.id().equals(pythonPath)).findFirst().get().path());
+                this.pythonLibrariesPath = findPythonLibariesPath(pythonPath);
                 break;
             case CONDA:
                 this.pythonLibrariesPath = pythonLibrariesFromAbsolutePath(PythonPathUtils.findCondaInstallations().stream()
@@ -87,6 +93,7 @@ public class PythonConfig implements Serializable, TextConfig {
             case VENV:
                 break;
             case CUSTOM:
+                this.pythonLibrariesPath = pythonLibrariesFromAbsolutePath(pythonPath);
                 break;
             default:
                 break;
@@ -95,8 +102,75 @@ public class PythonConfig implements Serializable, TextConfig {
         return this.pythonLibrariesPath;
     }
 
+    public static String findPythonLibrariesPathFromCondaDetails(String condaPathId, String environmentName) {
+        CondaDetails condaDetails = findCondaDetails(condaPathId);
+
+        List<PythonDetails> pythonDetailsList = condaDetails.environments();
+        Optional<PythonDetails> optionalPythonDetails = pythonDetailsList
+                .stream()
+                .filter(pythonDetails -> pythonDetails.id().equals(environmentName))
+                .findFirst();
+
+        if(optionalPythonDetails.isPresent()) {
+            return pythonLibrariesFromAbsolutePath(optionalPythonDetails.get().path());
+        } else {
+            throw new IllegalStateException(String.format("No environment available with the name '%s' for conda path id '%s'. Available python environments for conda path id '%s' are: %s",
+                    environmentName, condaPathId, condaPathId,
+                    String.format("%n---%n%s%n---%n", pythonDetailsList.stream()
+                            .map(pythonDetails -> String.format("-\tname: %s%n\tpath: %s%n\tversion: %s%n",
+                                    pythonDetails.id(), pythonDetails.path(), pythonDetails.version()))
+                            .collect(Collectors.joining(System.lineSeparator()))
+                    )));
+        }
+    }
+
+    public static CondaDetails findCondaDetails(String condaPathId) {
+        List<CondaDetails> condaDetailsList = PythonPathUtils.findCondaInstallations();
+        Optional<CondaDetails> optionalCondaDetails = condaDetailsList
+                .stream()
+                .filter(condaDetails -> condaDetails.id().equals(condaPathId))
+                .findFirst();
+
+        if(optionalCondaDetails.isPresent()) {
+            return optionalCondaDetails.get();
+        } else {
+            throw new IllegalStateException(String.format("No id '%s' available for conda path type. Available conda type paths are: %s",
+                    condaPathId,
+                    String.format("%n---%n%s%n---%n", condaDetailsList.stream()
+                            .map(condaDetails -> String.format("-\tid: %s%n\tpath: %s%n\tversion: %s%n",
+                                    condaDetails.id(), condaDetails.path(), condaDetails.version()))
+                            .collect(Collectors.joining(System.lineSeparator()))
+                    )));
+        }
+    }
+
+    public static String findPythonLibariesPath(String pythonPathId) {
+        List<PythonDetails> pythonDetailsList = PythonPathUtils.findPythonInstallations();
+        Optional<PythonDetails> optionalPythonDetails = pythonDetailsList
+                .stream()
+                .filter(pythonDetails -> pythonDetails.id().equals(pythonPathId))
+                .findFirst();
+
+        if(optionalPythonDetails.isPresent()) {
+            return pythonLibrariesFromAbsolutePath(optionalPythonDetails.get().path());
+        } else {
+            throw new IllegalStateException(String.format("No id '%s' available for python path type. Available python type paths are: %s",
+                    pythonPathId,
+                    String.format("%n---%n%s%n---%n", pythonDetailsList.stream()
+                            .map(pythonDetails -> String.format("-\tid: %s%n\tpath: %s%n\tversion: %s%n",
+                                    pythonDetails.id(), pythonDetails.path(), pythonDetails.version()))
+                            .collect(Collectors.joining(System.lineSeparator()))
+                    )));
+        }
+    }
+
     public static String pythonLibrariesFromAbsolutePath(String pythonPath) {
-        return ProcessUtils.runAndGetOutput(pythonPath, "-c", "import sys, os; print(os.pathsep.join([path for path in sys.path if path]))");
+        File pythonPathFile = new File(pythonPath);
+        if(pythonPathFile.exists() && pythonPathFile.isFile()) {
+            return ProcessUtils.runAndGetOutput(pythonPath, "-c", "import sys, os; print(os.pathsep.join([path for path in sys.path if path]))").replace(System.lineSeparator(), "").trim();
+        } else {
+            throw new IllegalStateException(String.format("No python executable path exist at: '%s'", pythonPathFile.getAbsoluteFile()));
+        }
     }
 
     public enum PythonType {
