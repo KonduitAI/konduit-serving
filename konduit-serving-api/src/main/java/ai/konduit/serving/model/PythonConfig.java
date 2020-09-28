@@ -27,6 +27,7 @@ import ai.konduit.serving.pipeline.api.process.ProcessUtils;
 import ai.konduit.serving.pipeline.api.python.PythonPathUtils;
 import ai.konduit.serving.pipeline.api.python.models.CondaDetails;
 import ai.konduit.serving.pipeline.api.python.models.PythonDetails;
+import ai.konduit.serving.pipeline.api.python.models.VenvDetails;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -80,8 +81,6 @@ public class PythonConfig implements Serializable, TextConfig {
 
     public String resolvePythonLibrariesPath() {
         switch (pythonType) {
-            case JAVACPP:
-                break;
             case PYTHON:
                 this.pythonLibrariesPath = findPythonLibariesPath(pythonPath);
                 break;
@@ -89,10 +88,12 @@ public class PythonConfig implements Serializable, TextConfig {
                 this.pythonLibrariesPath = findPythonLibrariesPathFromCondaDetails(pythonPath, environmentName);
                 break;
             case VENV:
+                this.pythonLibrariesPath = findPythonLibariesPathFromVenvDetails(pythonPath);
                 break;
             case CUSTOM:
                 this.pythonLibrariesPath = pythonLibrariesFromAbsolutePath(pythonPath);
                 break;
+            case JAVACPP:
             default:
                 break;
         }
@@ -137,6 +138,26 @@ public class PythonConfig implements Serializable, TextConfig {
                     String.format("%n---%n%s---%n", condaDetailsList.stream()
                             .map(condaDetails -> String.format("-\tid: %s%n\tpath: %s%n\tversion: %s",
                                     condaDetails.id(), condaDetails.path(), condaDetails.version()))
+                            .collect(Collectors.joining(System.lineSeparator()))
+                    )));
+        }
+    }
+
+    public static String findPythonLibariesPathFromVenvDetails(String venvPathId) {
+        List<VenvDetails> venvDetailsList = PythonPathUtils.findVenvInstallations();
+        Optional<VenvDetails> optionalVenvDetails = venvDetailsList
+                .stream()
+                .filter(venvDetails -> venvDetails.id().equals(venvPathId))
+                .findFirst();
+
+        if(optionalVenvDetails.isPresent()) {
+            return pythonLibrariesFromAbsolutePath(PythonPathUtils.getVenvPythonFile(optionalVenvDetails.get().path()).getAbsolutePath());
+        } else {
+            throw new IllegalStateException(String.format("No id '%s' available for venv path type. Available venv type paths are: %n%s",
+                    venvPathId,
+                    String.format("%n---%n%s---%n", venvDetailsList.stream()
+                            .map(pythonDetails -> String.format("-\tid: %s%n\tpath: %s%n\tversion: %s",
+                                    pythonDetails.id(), pythonDetails.path(), pythonDetails.version()))
                             .collect(Collectors.joining(System.lineSeparator()))
                     )));
         }

@@ -42,7 +42,20 @@
     <dependencies>
         <dependency>
             <groupId>org.bytedeco</groupId>
+            <artifactId>javacpp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacpp-platform</artifactId>
+            <version>${javacpp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
             <artifactId>cpython</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>cpython-platform</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.oshi</groupId>

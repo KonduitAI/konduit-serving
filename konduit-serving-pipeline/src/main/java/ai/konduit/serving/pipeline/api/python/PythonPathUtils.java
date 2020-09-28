@@ -75,7 +75,7 @@ public class PythonPathUtils {
     }
 
     public static List<VenvDetails> findVenvInstallations() {
-        List<RegisteredPythonInstall> allVenvInstallations = filterRegisteredInstalls(PythonType.PYTHON);
+        List<RegisteredPythonInstall> allVenvInstallations = filterRegisteredInstalls(PythonType.VENV);
 
         return IntStream.range(0, allVenvInstallations.size())
                 .mapToObj(index -> getPythonDetails(String.valueOf(index + 1), getVenvPythonFile(allVenvInstallations.get(index).path()).getAbsolutePath()))
@@ -84,7 +84,7 @@ public class PythonPathUtils {
     }
 
     public static String getPythonVersion(String pythonPath) {
-        String pythonCommandOutput = ProcessUtils.runAndGetOutput(pythonPath, "-c", "import sys; print(sys.version.split(' ')[0])");
+        String pythonCommandOutput = ProcessUtils.runAndGetOutput(pythonPath, "-c", "import sys; print('Python ' + sys.version.split(' ')[0])");
         if(pythonCommandOutput.contains("Python ")) {
             return pythonCommandOutput.replace("Python ", "");
         } else {
@@ -103,7 +103,7 @@ public class PythonPathUtils {
 
     public static String getVenvVersion(String venvPath) {
         File venvPythonPath = getVenvPythonFile(venvPath);
-        if(venvPythonPath.exists()) {
+        if(!venvPythonPath.exists()) {
             throw new IllegalStateException(String.format("Unable to find python path associated with the virtual environment at '%s'. " +
                     "Please ensure the specified venv path at '%s' is a valid python virtual environment.", venvPythonPath.getAbsoluteFile(), new File(venvPath).getAbsoluteFile()));
         } else {
@@ -168,7 +168,7 @@ public class PythonPathUtils {
 
     public static List<RegisteredPythonInstall> getRegisteredPythonInstalls() {
         try {
-            return ObjectMappers.fromJson(FileUtils.readFileToString(registeredInstallDetailsLocation, StandardCharsets.UTF_8), List.class);
+            return ObjectMappers.fromJson(FileUtils.readFileToString(registeredInstallDetailsLocation, StandardCharsets.UTF_8), RegisteredPythonInstalls.class).registeredPythonInstalls();
         } catch (FileNotFoundException e) {
             return new ArrayList<>();
         } catch (IOException e) {
@@ -186,7 +186,7 @@ public class PythonPathUtils {
 
     public static void saveRegisteredPythonInstalls(List<RegisteredPythonInstall> registeredPythonInstalls) {
         try {
-            FileUtils.writeStringToFile(registeredInstallDetailsLocation, ObjectMappers.toJson(registeredPythonInstalls), StandardCharsets.UTF_8);
+            FileUtils.writeStringToFile(registeredInstallDetailsLocation, ObjectMappers.toJson(new RegisteredPythonInstalls(registeredPythonInstalls)), StandardCharsets.UTF_8);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

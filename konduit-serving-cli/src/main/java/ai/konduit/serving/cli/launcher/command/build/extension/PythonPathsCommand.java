@@ -184,7 +184,7 @@ public class PythonPathsCommand extends DefaultCommand {
         System.out.print(
                 formatPythonInstallation(new PythonDetails(javaCppDetails.id(), javaCppDetails.path(), javaCppDetails.version()))
         );
-        System.out.println("-----------------------------------------------------------------------");
+        System.out.println("\n-----------------------------------------------------------------------");
     }
 
     public static JavaCppDetails getJavaCppDetails() {
@@ -202,7 +202,9 @@ public class PythonPathsCommand extends DefaultCommand {
             PyObject globals = PyModule_GetDict(PyImport_AddModule("__main__"));
 
             PyRun_StringFlags(
-                    "import sys; executable = sys.executable; version = sys.version.split(' ')[0]",
+                    "import os, sys; " +
+                            "executable = os.path.abspath(os.path.join(os.__file__, '..', '..')) + ' (embedded python)'; " +
+                            "version = sys.version.split(' ')[0]",
                     Py_single_input,
                     globals,
                     globals,
