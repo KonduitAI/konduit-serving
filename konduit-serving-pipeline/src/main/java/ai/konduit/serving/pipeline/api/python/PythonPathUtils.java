@@ -164,6 +164,7 @@ public class PythonPathUtils {
         }
 
         saveRegisteredPythonInstalls(registeredPythonInstalls);
+        System.out.format("Registered installation of type: '%s' from location: '%s'%n", pythonType.name(), path);
     }
 
     public static List<RegisteredPythonInstall> getRegisteredPythonInstalls() {
@@ -189,6 +190,7 @@ public class PythonPathUtils {
             FileUtils.writeStringToFile(registeredInstallDetailsLocation, ObjectMappers.toJson(new RegisteredPythonInstalls(registeredPythonInstalls)), StandardCharsets.UTF_8);
         } catch (IOException e) {
             System.out.println(e.getMessage());
+            System.exit(1);
         }
     }
 
