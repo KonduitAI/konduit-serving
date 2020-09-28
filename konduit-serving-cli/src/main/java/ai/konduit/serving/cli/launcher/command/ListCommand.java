@@ -20,7 +20,7 @@ package ai.konduit.serving.cli.launcher.command;
 
 import ai.konduit.serving.cli.launcher.LauncherUtils;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;

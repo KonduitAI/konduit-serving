@@ -19,7 +19,7 @@
 package ai.konduit.serving.cli.launcher.command;
 
 import ai.konduit.serving.cli.launcher.LauncherUtils;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import io.vertx.core.spi.launcher.DefaultCommand;

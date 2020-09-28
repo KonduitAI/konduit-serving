@@ -20,7 +20,7 @@ package ai.konduit.serving.cli.launcher.command.build.extension;
 
 import ai.konduit.serving.cli.launcher.command.build.extension.model.Profile;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.NonNull;

@@ -21,6 +21,8 @@ package ai.konduit.serving.pipeline.api.python;
 import ai.konduit.serving.pipeline.api.process.ProcessUtils;
 import ai.konduit.serving.pipeline.api.python.models.CondaDetails;
 import ai.konduit.serving.pipeline.api.python.models.PythonDetails;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Paths;
@@ -30,9 +32,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PythonPathUtils {
 
-    public static String FINDER_COMMAND = ProcessUtils.isWindows() || ProcessUtils.isMac() ? "where" : "which";
+    public static final String FINDER_COMMAND = ProcessUtils.isWindows() || ProcessUtils.isMac() ? "where" : "which";
 
     public static List<PythonDetails> findPythonInstallations() {
         List<String> pythonInstallationPaths = findInstallationPaths("python");
@@ -68,7 +71,7 @@ public class PythonPathUtils {
 
     public static String getPythonPathFromRoot(String rootPath) {
         return (ProcessUtils.isWindows() ?
-                Paths.get(rootPath, "python") :
+                Paths.get(rootPath, "python.exe") :
                 Paths.get(rootPath, "bin", "python"))
                                 .toFile().getAbsolutePath();
     }

@@ -16,7 +16,7 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.vertx.settings.constants;
+package ai.konduit.serving.pipeline.settings.constants;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

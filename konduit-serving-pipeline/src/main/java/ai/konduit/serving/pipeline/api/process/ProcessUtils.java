@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.pipeline.api.process;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.nd4j.common.base.Preconditions;
@@ -30,9 +32,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProcessUtils {
 
-    private static String OS = System.getProperty("os.name").toLowerCase();
+    private static final String OS = System.getProperty("os.name").toLowerCase();
 
     public static boolean isWindows() {
         return OS.contains("win");

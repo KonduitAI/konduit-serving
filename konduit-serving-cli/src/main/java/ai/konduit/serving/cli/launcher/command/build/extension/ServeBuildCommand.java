@@ -22,7 +22,7 @@ import ai.konduit.serving.build.cli.BuildCLI;
 import ai.konduit.serving.cli.launcher.command.ServeCommand;
 import ai.konduit.serving.cli.launcher.command.build.extension.model.Profile;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Option;
