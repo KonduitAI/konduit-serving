@@ -19,19 +19,25 @@
 package ai.konduit.serving.cli.launcher.command.build.extension;
 
 import ai.konduit.serving.pipeline.api.python.models.CondaDetails;
+import ai.konduit.serving.pipeline.api.python.models.JavaCppDetails;
 import ai.konduit.serving.pipeline.api.python.models.PythonDetails;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
+import org.bytedeco.cpython.PyObject;
+import org.bytedeco.javacpp.Pointer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static ai.konduit.serving.pipeline.api.python.PythonPathUtils.findCondaInstallations;
-import static ai.konduit.serving.pipeline.api.python.PythonPathUtils.findPythonInstallations;
+import static ai.konduit.serving.pipeline.api.python.PythonPathUtils.*;
+import static org.bytedeco.cpython.global.python.*;
+import static org.bytedeco.cpython.helper.python.Py_AddPath;
+import static org.bytedeco.cpython.presets.python.cachePackages;
 
 @Name("pythonpaths")
 @Summary("A utility command to manage system installed and manually registered python binaries.")
@@ -56,7 +62,7 @@ public class PythonPathsCommand extends DefaultCommand {
     private SubCommand subCommand;
     private Object type;
     private String path;
-    private boolean withInstalledPackages;
+    private boolean withInstalledPackages; // todo: add logic for this
 
     @Argument(index = 0, argName = "sub_command", required = false)
     @DefaultValue("LIST")
@@ -94,11 +100,7 @@ public class PythonPathsCommand extends DefaultCommand {
     }
 
     private enum SubCommand {
-        ADD, LIST
-    }
-
-    private enum Type {
-        PYTHON, CONDA, VENV
+        ADD, LIST, CONFIG
     }
 
     public enum ListInstallationType {
@@ -110,14 +112,15 @@ public class PythonPathsCommand extends DefaultCommand {
         switch (this.subCommand) {
             case ADD:
                 try {
-                    this.type = PythonPathsCommand.Type.valueOf(((String) type).toUpperCase());
+                    this.type = PythonType.valueOf(((String) type).toUpperCase());
                 } catch (Exception e) {
                     out.format("Invalid type name: '%s'. Allowed values are: %s -> (case insensitive).",
-                            type, Arrays.toString(PythonPathsCommand.Type.values()));
+                            type, Arrays.toString(PythonType.values()));
                     System.exit(1);
                 }
                 break;
             case LIST:
+            case CONFIG:
                 try {
                     this.type = PythonPathsCommand.ListInstallationType.valueOf(((String) type).toUpperCase());
                 } catch (Exception e) {
@@ -131,12 +134,15 @@ public class PythonPathsCommand extends DefaultCommand {
                         subCommand, Arrays.toString(PythonPathsCommand.SubCommand.values()));
         }
 
-        switch (subCommand) {
+        switch (this.subCommand) {
             case ADD:
-                registerInstallation();
+                registerInstallation((PythonType) type, path);
                 break;
             case LIST:
                 listInstallations((ListInstallationType) type);
+                break;
+            case CONFIG:
+                // todo: add logic here
                 break;
             default:
                 log.error("Invalid sub command name: {}. Allowed values are: {} -> (case insensitive).",
@@ -171,12 +177,50 @@ public class PythonPathsCommand extends DefaultCommand {
         }
     }
 
-    public static void registerInstallation() {
+    private static void listJavacppInstallations() {
+        JavaCppDetails javaCppDetails = getJavaCppDetails();
 
+        System.out.println("\n----------------------------JAVACPP INSTALLS---------------------------");
+        System.out.print(
+                formatPythonInstallation(new PythonDetails(javaCppDetails.id(), javaCppDetails.path(), javaCppDetails.version()))
+        );
+        System.out.println("-----------------------------------------------------------------------");
     }
 
-    private static void listJavacppInstallations() {
+    public static JavaCppDetails getJavaCppDetails() {
+        try {
+            Py_AddPath(cachePackages());
 
+            Pointer program = Py_DecodeLocale(PythonPathsCommand.class.getSimpleName(), null);
+            if (program == null) {
+                System.out.println("Fatal error: cannot get class name");
+                System.exit(1);
+            }
+            Py_SetProgramName(program);  /* optional but recommended */
+            Py_Initialize();
+
+            PyObject globals = PyModule_GetDict(PyImport_AddModule("__main__"));
+
+            PyRun_StringFlags(
+                    "import sys; executable = sys.executable; version = sys.version.split(' ')[0]",
+                    Py_single_input,
+                    globals,
+                    globals,
+                    null);
+
+            if (Py_FinalizeEx() < 0) {
+                System.exit(120);
+            }
+            PyMem_RawFree(program);
+
+            return new JavaCppDetails("0",
+                    getStringFromPythonObject(PyDict_GetItemString(globals, "executable")),
+                    getStringFromPythonObject(PyDict_GetItemString(globals, "version")));
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+            return null;
+        }
     }
 
     private static void listPythonInstallations() {
@@ -236,8 +280,19 @@ public class PythonPathsCommand extends DefaultCommand {
     }
 
     private static void listVenvInstallations() {
-
+        System.out.println("\n-----------------------------VENV INSTALLS-----------------------------");
+        System.out.print(
+                findVenvInstallations().stream()
+                        .map(venvDetails -> formatPythonInstallation(new PythonDetails(venvDetails.id(), venvDetails.path(), venvDetails.version())))
+                        .collect(Collectors.joining(System.lineSeparator()))
+        );
+        System.out.println("-----------------------------------------------------------------------");
     }
 
-
+    private static String getStringFromPythonObject(PyObject pythonObject) {
+        PyObject pythonEncodedString = PyUnicode_AsEncodedString(pythonObject, "utf-8", "~E~");
+        String javaString = PyBytes_AsString(pythonEncodedString).getString();
+        Py_DecRef(pythonEncodedString);
+        return javaString;
+    }
 }

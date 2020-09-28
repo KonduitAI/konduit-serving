@@ -83,6 +83,7 @@ public class Profile {
     private OperatingSystem operatingSystem;
     private List<ServerProtocol> serverTypes;
     private List<String> additionalDependencies;
+    // todo: add logic here for setting python paths profile variables
 
     public Profile() {
         this.computeDevice = "CPU";

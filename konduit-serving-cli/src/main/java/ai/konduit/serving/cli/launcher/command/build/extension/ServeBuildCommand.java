@@ -121,6 +121,8 @@ public class ServeBuildCommand extends ServeCommand {
                     System.exit(1);
                 }
 
+                // todo: add logic here for overriding python paths variable through profiles.
+
                 List<String> args = new ArrayList<>();
                 args.add("-p"); args.add(savePath.getAbsolutePath());
                 args.add("-c"); args.add(String.format("classpath.outputFile=%s", mfJar.getAbsolutePath())); args.add("classpath.type=JAR_MANIFEST");
