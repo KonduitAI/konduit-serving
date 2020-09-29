@@ -81,24 +81,41 @@ public class PythonConfig implements Serializable, TextConfig {
     private String jobSuffix = "konduit_job";
 
     public String resolvePythonLibrariesPath() {
-        // todo: add logic for selecting defaults here
-
-        switch (pythonConfigType) {
-            case PYTHON:
-                this.pythonLibrariesPath = findPythonLibariesPath(pythonPath);
-                break;
-            case CONDA:
-                this.pythonLibrariesPath = findPythonLibrariesPathFromCondaDetails(pythonPath, environmentName);
-                break;
-            case VENV:
-                this.pythonLibrariesPath = findPythonLibariesPathFromVenvDetails(pythonPath);
-                break;
-            case CUSTOM:
-                this.pythonLibrariesPath = pythonLibrariesFromAbsolutePath(pythonPath);
-                break;
-            case JAVACPP:
-            default:
-                break;
+        if(pythonConfigType == null) {
+            log.info("Python config type not specified...");
+            List<CondaDetails> condaInstalls = PythonPathUtils.findCondaInstallations();
+            if(!condaInstalls.isEmpty()) {
+                String baseEnvironmentName = "base";
+                log.info("Using conda at path '{}' and environment '{}'", condaInstalls.get(0).path(), baseEnvironmentName);
+                this.pythonLibrariesPath = findPythonLibrariesPathFromCondaDetails(condaInstalls.get(0).id(), baseEnvironmentName);
+            } else {
+                List<PythonDetails> pythonInstalls = PythonPathUtils.findPythonInstallations();
+                if(!pythonInstalls.isEmpty()) {
+                    log.info("Using python install at path '{}'", pythonInstalls.get(0));
+                    this.pythonLibrariesPath = findPythonLibariesPath(pythonInstalls.get(0).id());
+                } else {
+                    throw new IllegalStateException("Unable to resolve python paths automatically. Please specify a python config type in the python step configuration " +
+                            "with appropriate id and environment name. Run 'konduit pythonpaths --help' for more information.");
+                }
+            }
+        } else {
+            switch (pythonConfigType) {
+                case PYTHON:
+                    this.pythonLibrariesPath = findPythonLibariesPath(pythonPath);
+                    break;
+                case CONDA:
+                    this.pythonLibrariesPath = findPythonLibrariesPathFromCondaDetails(pythonPath, environmentName);
+                    break;
+                case VENV:
+                    this.pythonLibrariesPath = findPythonLibariesPathFromVenvDetails(pythonPath);
+                    break;
+                case CUSTOM:
+                    this.pythonLibrariesPath = pythonLibrariesFromAbsolutePath(pythonPath);
+                    break;
+                case JAVACPP:
+                default:
+                    break;
+            }
         }
 
         return this.pythonLibrariesPath;
