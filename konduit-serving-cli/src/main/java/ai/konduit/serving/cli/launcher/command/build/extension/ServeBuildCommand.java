@@ -121,7 +121,7 @@ public class ServeBuildCommand extends ServeCommand {
                     System.exit(1);
                 }
 
-                // todo: add logic here for overriding python paths variable through profiles.
+                // todo: add logic here for overriding python paths variable through profiles (kept for a separate PR).
 
                 List<String> args = new ArrayList<>();
                 args.add("-p"); args.add(savePath.getAbsolutePath());

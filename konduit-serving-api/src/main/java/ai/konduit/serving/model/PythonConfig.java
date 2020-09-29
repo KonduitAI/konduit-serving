@@ -25,9 +25,7 @@ package ai.konduit.serving.model;
 import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.process.ProcessUtils;
 import ai.konduit.serving.pipeline.api.python.PythonPathUtils;
-import ai.konduit.serving.pipeline.api.python.models.CondaDetails;
-import ai.konduit.serving.pipeline.api.python.models.PythonDetails;
-import ai.konduit.serving.pipeline.api.python.models.VenvDetails;
+import ai.konduit.serving.pipeline.api.python.models.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,10 +55,13 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class PythonConfig implements Serializable, TextConfig {
 
-    private PythonType pythonType;
+    private PythonConfigType pythonConfigType;
     private String pythonPath;
     private String environmentName;
     private AppendType appendType;
+
+    @Builder.Default
+    private PythonPathResolution pythonPathResolution = PythonPathResolution.STATIC;
 
     private String pythonCode, pythonCodePath, pythonLibrariesPath, importCode, importCodePath;
 
@@ -80,7 +81,9 @@ public class PythonConfig implements Serializable, TextConfig {
     private String jobSuffix = "konduit_job";
 
     public String resolvePythonLibrariesPath() {
-        switch (pythonType) {
+        // todo: add logic for selecting defaults here
+
+        switch (pythonConfigType) {
             case PYTHON:
                 this.pythonLibrariesPath = findPythonLibariesPath(pythonPath);
                 break;
@@ -192,17 +195,8 @@ public class PythonConfig implements Serializable, TextConfig {
         }
     }
 
-    public enum PythonType {
-        JAVACPP,
-        PYTHON,
-        CONDA,
-        VENV,
-        CUSTOM
-    }
-
-    public enum AppendType {
-        BEFORE,
-        NONE,
-        AFTER
+    public enum PythonPathResolution {
+        STATIC,
+        DYNAMIC
     }
 }

@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.cli.launcher.command.build.extension.model;
 
+import ai.konduit.serving.pipeline.api.python.models.AppendType;
+import ai.konduit.serving.pipeline.api.python.models.PythonConfigType;
 import ai.konduit.serving.vertx.config.ServerProtocol;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -83,7 +85,11 @@ public class Profile {
     private OperatingSystem operatingSystem;
     private List<ServerProtocol> serverTypes;
     private List<String> additionalDependencies;
-    // todo: add logic here for setting python paths profile variables
+
+    private PythonConfigType pythonConfigType;
+    private String pythonPath;
+    private String environmentName;
+    private AppendType appendType;
 
     public Profile() {
         this.computeDevice = "CPU";
@@ -91,6 +97,11 @@ public class Profile {
         this.operatingSystem = getCurrentOS();
         this.serverTypes = Arrays.asList(ServerProtocol.HTTP, ServerProtocol.GRPC);
         this.additionalDependencies = null;
+
+        this.pythonConfigType = null;
+        this.pythonPath = null;
+        this.environmentName = null;
+        this.appendType = null;
     }
 
     public Profile(String computeDevice, String cpuArchitecture, String operatingSystem, List<String> serverTypes,
@@ -100,6 +111,11 @@ public class Profile {
         this.operatingSystem = OperatingSystem.forName(operatingSystem);
         serverTypes(serverTypes);
         additionalDependencies(additionalDependencies);
+
+        this.pythonConfigType = pythonConfigType;
+        this.pythonPath = pythonPath;
+        this.environmentName = environmentName;
+        this.appendType = appendType;
     }
 
     @JsonSetter("computeDevice")
@@ -163,6 +179,34 @@ public class Profile {
         return this;
     }
 
+    @JsonSetter("pythonConfigType")
+    public Profile pythonConfigType(String pythonConfigType) {
+        this.pythonConfigType = PythonConfigType.valueOf(pythonConfigType.toUpperCase());
+
+        return this;
+    }
+
+    @JsonSetter("pythonPath")
+    public Profile pythonPath(String pythonPath) {
+        this.pythonPath = pythonPath;
+
+        return this;
+    }
+
+    @JsonSetter("environmentName")
+    public Profile environmentName(String environmentName) {
+        this.environmentName = environmentName;
+
+        return this;
+    }
+
+    @JsonSetter("appendType")
+    public Profile appendType(String appendType) {
+        this.appendType = AppendType.valueOf(appendType.toUpperCase());
+
+        return this;
+    }
+
     @JsonGetter("computeDevice")
     public String computeDevice() {
         return this.computeDevice;
@@ -186,6 +230,26 @@ public class Profile {
     @JsonGetter("additionalDependencies")
     public List<String> additionalDependencies() {
         return this.additionalDependencies;
+    }
+
+    @JsonGetter("pythonConfigType")
+    public String pythonConfigType() {
+        return this.pythonConfigType.name();
+    }
+
+    @JsonGetter("pythonPath")
+    public String pythonPath() {
+        return this.pythonPath;
+    }
+
+    @JsonGetter("environmentName")
+    public String environmentName() {
+        return this.environmentName;
+    }
+
+    @JsonGetter("appendType")
+    public String appendType() {
+        return this.appendType.name();
     }
 
     public static OperatingSystem getCurrentOS() {

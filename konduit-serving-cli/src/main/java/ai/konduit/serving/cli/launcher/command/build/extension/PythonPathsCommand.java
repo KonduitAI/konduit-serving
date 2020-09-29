@@ -18,8 +18,10 @@
 
 package ai.konduit.serving.cli.launcher.command.build.extension;
 
+import ai.konduit.serving.pipeline.api.process.ProcessUtils;
 import ai.konduit.serving.pipeline.api.python.models.CondaDetails;
 import ai.konduit.serving.pipeline.api.python.models.JavaCppDetails;
+import ai.konduit.serving.pipeline.api.python.models.PythonConfigType;
 import ai.konduit.serving.pipeline.api.python.models.PythonDetails;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.spi.launcher.DefaultCommand;
@@ -62,7 +64,7 @@ public class PythonPathsCommand extends DefaultCommand {
     private SubCommand subCommand;
     private Object type;
     private String path;
-    private boolean withInstalledPackages; // todo: add logic for this
+    private boolean withInstalledPackages;
 
     @Argument(index = 0, argName = "sub_command", required = false)
     @DefaultValue("LIST")
@@ -80,7 +82,8 @@ public class PythonPathsCommand extends DefaultCommand {
 
     @Option(shortName = "t", longName = "type", argName = "type", required = true)
     @Description("Name of the python type. For the 'add' subcommand, accepted values are: [python, conda, venv]. " +
-            "For the 'list' subcommand, accepted values are: [all, javacpp, python, conda, venv]")
+            "For the 'list' subcommand, accepted values are: [all, javacpp, python, conda, venv]. " +
+            "For 'config' subcommand the accepted values are: [custom, javacpp, python, conda, venv")
     public void setType(String type) {
         this.type = type;
     }
@@ -119,8 +122,16 @@ public class PythonPathsCommand extends DefaultCommand {
                     System.exit(1);
                 }
                 break;
-            case LIST:
             case CONFIG:
+                try {
+                    this.type = PythonConfigType.valueOf(((String) type).toUpperCase());
+                } catch (Exception e) {
+                    out.format("Invalid type name: '%s'. Allowed values are: %s -> (case insensitive).",
+                            type, Arrays.toString(PythonConfigType.values()));
+                    System.exit(1);
+                }
+                break;
+            case LIST:
                 try {
                     this.type = PythonPathsCommand.ListInstallationType.valueOf(((String) type).toUpperCase());
                 } catch (Exception e) {
@@ -139,10 +150,10 @@ public class PythonPathsCommand extends DefaultCommand {
                 registerInstallation((PythonType) type, path);
                 break;
             case LIST:
-                listInstallations((ListInstallationType) type);
+                listInstallations((ListInstallationType) type, withInstalledPackages);
                 break;
             case CONFIG:
-                // todo: add logic here
+                createConfig((PythonConfigType) type);
                 break;
             default:
                 log.error("Invalid sub command name: {}. Allowed values are: {} -> (case insensitive).",
@@ -150,26 +161,31 @@ public class PythonPathsCommand extends DefaultCommand {
         }
     }
 
+    private void createConfig(PythonConfigType pythonConfigType) {
+        throw new UnsupportedOperationException("This will be implemented in a continuation PR");
+        // add logic here
+    }
 
-    public static void listInstallations(ListInstallationType type) {
+
+    public static void listInstallations(ListInstallationType type, boolean withInstalledPackages) {
         switch (type) {
             case ALL:
-                listJavacppInstallations();
-                listPythonInstallations();
-                listCondaInstallations();
-                listVenvInstallations();
+                listJavacppInstallations(withInstalledPackages);
+                listPythonInstallations(withInstalledPackages);
+                listCondaInstallations(withInstalledPackages);
+                listVenvInstallations(withInstalledPackages);
                 break;
             case JAVACPP:
-                listJavacppInstallations();
+                listJavacppInstallations(withInstalledPackages);
                 break;
             case PYTHON:
-                listPythonInstallations();
+                listPythonInstallations(withInstalledPackages);
                 break;
             case CONDA:
-                listCondaInstallations();
+                listCondaInstallations(withInstalledPackages);
                 break;
             case VENV:
-                listVenvInstallations();
+                listVenvInstallations(withInstalledPackages);
                 break;
             default:
                 System.out.format("Invalid installation type name: '%s'. Allowed values are: %s -> (case insensitive).",
@@ -177,14 +193,19 @@ public class PythonPathsCommand extends DefaultCommand {
         }
     }
 
-    private static void listJavacppInstallations() {
+    private static void listJavacppInstallations(boolean withInstalledPackages) {
         JavaCppDetails javaCppDetails = getJavaCppDetails();
 
         System.out.println("\n----------------------------JAVACPP INSTALLS---------------------------");
         System.out.print(
-                formatPythonInstallation(new PythonDetails(javaCppDetails.id(), javaCppDetails.path(), javaCppDetails.version()))
+                formatPythonInstallation(new PythonDetails(javaCppDetails.id(), javaCppDetails.path(), javaCppDetails.version()),
+                        false)
         );
-        System.out.println("\n-----------------------------------------------------------------------");
+        if(!withInstalledPackages) { System.out.print("\n-----------------------------------------------------------------------"); }
+        System.out.println("\t--------Installed Modules--------");
+        printJavaCppInstalledModules();
+        System.out.println("\t---------------------------------");
+        if(withInstalledPackages) { System.out.println("-----------------------------------------------------------------------"); }
     }
 
     public static JavaCppDetails getJavaCppDetails() {
@@ -213,11 +234,13 @@ public class PythonPathsCommand extends DefaultCommand {
             if (Py_FinalizeEx() < 0) {
                 System.exit(120);
             }
+            JavaCppDetails javaCppDetails = new JavaCppDetails("0",
+                    getStringFromPythonObject(PyDict_GetItemString(globals, "executable")),
+                    getStringFromPythonObject(PyDict_GetItemString(globals, "version")) + System.lineSeparator());
+
             PyMem_RawFree(program);
 
-            return new JavaCppDetails("0",
-                    getStringFromPythonObject(PyDict_GetItemString(globals, "executable")),
-                    getStringFromPythonObject(PyDict_GetItemString(globals, "version")));
+            return javaCppDetails;
         } catch (IOException e) {
             System.out.println(e.getMessage());
             System.exit(1);
@@ -225,48 +248,103 @@ public class PythonPathsCommand extends DefaultCommand {
         }
     }
 
-    private static void listPythonInstallations() {
+    private static void listPythonInstallations(boolean withInstalledPackages) {
         System.out.println("\n----------------------------PYTHON INSTALLS----------------------------");
         System.out.print(
                 findPythonInstallations().stream()
-                        .map(PythonPathsCommand::formatPythonInstallation)
+                        .map(pythonDetails -> formatPythonInstallation(pythonDetails, withInstalledPackages))
                         .collect(Collectors.joining(System.lineSeparator()))
         );
         System.out.println("-----------------------------------------------------------------------");
     }
 
 
-    private static void listCondaInstallations() {
+    private static void listCondaInstallations(boolean withInstalledPackages) {
         System.out.println("\n----------------------------CONDA INSTALLS-----------------------------");
         System.out.print(
                 findCondaInstallations().stream()
-                        .map(PythonPathsCommand::formatCondaInstallation)
+                        .map(condaDetails -> formatCondaInstallation(condaDetails, withInstalledPackages))
                         .collect(Collectors.joining(System.lineSeparator()))
         );
         System.out.println("-----------------------------------------------------------------------");
     }
 
-    private static String formatPythonInstallation(PythonDetails pythonDetails) {
-        return formatPythonInstallation(pythonDetails, 1);
+    private static String formatPythonInstallation(PythonDetails pythonDetails, boolean withInstalledPackages) {
+        return formatPythonInstallation(pythonDetails, 1, withInstalledPackages);
     }
 
-    private static String formatPythonInstallation(PythonDetails pythonDetails, int numberOfTabs) {
+    private static String formatPythonInstallation(PythonDetails pythonDetails, int numberOfTabs, boolean withInstalledPackages) {
         String tabs = IntStream.range(0, numberOfTabs).mapToObj(index -> "\t").collect(Collectors.joining(""));
-        return String.format(" -%s%s: %s%n%spath: %s%n%sversion: %s",
+
+        return String.format(" -%s%s: %s%n%spath: %s%n%sversion: %s%s",
                 "\t",
                 numberOfTabs > 1 ? "name" : "id",
                 pythonDetails.id(),
                 tabs,
                 pythonDetails.path(),
                 tabs,
-                pythonDetails.version());
+                pythonDetails.version(),
+                withInstalledPackages ?
+                        String.format("%s--------Installed Modules--------%n%s%n%s---------------------------------%n",
+                                tabs,
+                                Arrays.stream(ProcessUtils.runAndGetOutput(pythonDetails.path(), "-c", "from pip import _internal; _internal.main(['list'])")
+                                        .split(System.lineSeparator()))
+                                        .map(line -> String.format("%s- %s", tabs, line))
+                                        .collect(Collectors.joining(System.lineSeparator())),
+                                tabs) :
+                        "");
     }
 
-    private static String formatCondaInstallation(CondaDetails condaDetails) {
+    private static void printJavaCppInstalledModules() {
+        try {
+            Py_AddPath(cachePackages());
+
+            Pointer program = Py_DecodeLocale(PythonPathsCommand.class.getSimpleName(), null);
+            if (program == null) {
+                System.out.println("Fatal error: cannot get class name");
+                System.exit(1);
+            }
+            Py_SetProgramName(program);  /* optional but recommended */
+            Py_Initialize();
+
+            PyRun_SimpleStringFlags(
+                "from pip import _internal\n" +
+                    "import warnings\n" +
+                    "warnings.filterwarnings(action='ignore')\n" +
+
+                    "class writer :\n" +
+                            "    def __init__(self, *writers) :\n" +
+                            "        self.writers = writers\n" +
+                            "\n" +
+                            "    def write(self, text) :\n" +
+                            "        for w in self.writers :\n" +
+                            "            w.write('\t- ' + text)\n" +
+                            "\n" +
+                            "    def flush(self):\n" +
+                            "        pass\n" +
+
+                            "import sys\n" +
+
+                            "sys.stdout = writer(sys.stdout)\n" +
+                            "installed_modules = _internal.main(['list'])",
+                    null);
+
+            if (Py_FinalizeEx() < 0) {
+                System.exit(120);
+            }
+
+            PyMem_RawFree(program);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    private static String formatCondaInstallation(CondaDetails condaDetails, boolean withInstalledPackages) {
         List<String> formattedCondaEnvironments = new ArrayList<>();
 
         condaDetails.environments().forEach(pythonDetails ->
-                formattedCondaEnvironments.add(formatPythonInstallation(pythonDetails, 2)));
+                formattedCondaEnvironments.add(formatPythonInstallation(pythonDetails, 2, withInstalledPackages)));
 
         return String.format(" -\tid: %s%n\tpath: %s%n\tversion: %s%s",
                 condaDetails.id(),
@@ -281,11 +359,14 @@ public class PythonPathsCommand extends DefaultCommand {
         );
     }
 
-    private static void listVenvInstallations() {
+    private static void listVenvInstallations(boolean withInstalledPackages) {
         System.out.println("\n-----------------------------VENV INSTALLS-----------------------------");
         System.out.print(
                 findVenvInstallations().stream()
-                        .map(venvDetails -> formatPythonInstallation(new PythonDetails(venvDetails.id(), venvDetails.path(), venvDetails.version())))
+                        .map(venvDetails -> formatPythonInstallation(new PythonDetails(venvDetails.id(),
+                                        venvDetails.path(),
+                                        venvDetails.version()),
+                                withInstalledPackages))
                         .collect(Collectors.joining(System.lineSeparator()))
         );
         System.out.println("-----------------------------------------------------------------------");

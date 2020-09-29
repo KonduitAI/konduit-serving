@@ -17,11 +17,11 @@ package ai.konduit.serving.python;
 
 import ai.konduit.serving.annotation.runner.CanRun;
 import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
-import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.model.PythonIO;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.python.models.AppendType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.python.util.KonduitPythonUtils;
@@ -56,7 +56,7 @@ public class PythonRunner implements PipelineStepRunner {
         this.pythonStep = pythonStep;
         String code = pythonStep.pythonConfig().getPythonCode();
 
-        PythonConfig.AppendType appendType = this.pythonStep.pythonConfig().getAppendType();
+        AppendType appendType = this.pythonStep.pythonConfig().getAppendType();
         String pythonLibrariesPath = this.pythonStep.pythonConfig().getPythonLibrariesPath();
 
         if(pythonLibrariesPath == null) pythonLibrariesPath = this.pythonStep.pythonConfig().resolvePythonLibrariesPath();
@@ -64,7 +64,7 @@ public class PythonRunner implements PipelineStepRunner {
         log.info("Over riding python path " + pythonLibrariesPath);
         System.setProperty("org.eclipse.python4j.path", pythonLibrariesPath);
         System.setProperty("org.eclipse.python4j.path.append", appendType == null ?
-                PythonConfig.AppendType.BEFORE.name() :
+                AppendType.BEFORE.name() :
                 appendType.name().toLowerCase());
 
         new PythonExecutioner();

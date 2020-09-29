@@ -25,6 +25,7 @@ package ai.konduit.serving.pipeline.steps;
 import ai.konduit.serving.executioner.Pipeline;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.PipelineStep;
+import ai.konduit.serving.pipeline.api.python.models.AppendType;
 import ai.konduit.serving.pipeline.step.PythonStep;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -97,7 +98,7 @@ public class PythonStepRunner extends BaseStepRunner {
                 pythonLibrariesPath = currConfig.resolvePythonLibrariesPath();
             }
 
-            PythonConfig.AppendType appendType = currConfig.getAppendType();
+            AppendType appendType = currConfig.getAppendType();
 
             if (pythonLibrariesPath != null && !setPath) {
                 log.info("Over riding python path " + pythonLibrariesPath);
