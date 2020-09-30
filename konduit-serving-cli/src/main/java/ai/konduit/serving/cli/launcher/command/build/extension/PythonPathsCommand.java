@@ -68,7 +68,7 @@ public class PythonPathsCommand extends DefaultCommand {
 
     @Argument(index = 0, argName = "sub_command", required = false)
     @DefaultValue("LIST")
-    @Description("Sub command to be used with the pythonpaths command. Sub commands are: [add, list]. " +
+    @Description("Sub command to be used with the pythonpaths command. Sub commands are: [add, list, config]. " +
             "Defaults to 'LIST'")
     public void setSubCommand(String subCommand) {
         try {
@@ -83,7 +83,7 @@ public class PythonPathsCommand extends DefaultCommand {
     @Option(shortName = "t", longName = "type", argName = "type", required = true)
     @Description("Name of the python type. For the 'add' subcommand, accepted values are: [python, conda, venv]. " +
             "For the 'list' subcommand, accepted values are: [all, javacpp, python, conda, venv]. " +
-            "For 'config' subcommand the accepted values are: [custom, javacpp, python, conda, venv")
+            "For 'config' subcommand the accepted values are: [custom, javacpp, python, conda, venv]")
     public void setType(String type) {
         this.type = type;
     }
@@ -201,11 +201,14 @@ public class PythonPathsCommand extends DefaultCommand {
                 formatPythonInstallation(new PythonDetails(javaCppDetails.id(), javaCppDetails.path(), javaCppDetails.version()),
                         false)
         );
-        if(!withInstalledPackages) { System.out.print("\n-----------------------------------------------------------------------"); }
-        System.out.println("\t--------Installed Modules--------");
-        printJavaCppInstalledModules();
-        System.out.println("\t---------------------------------");
-        if(withInstalledPackages) { System.out.println("-----------------------------------------------------------------------"); }
+        if(!withInstalledPackages) {
+            System.out.println("\n-----------------------------------------------------------------------");
+        } else {
+            System.out.println("\t--------Installed Modules--------");
+            printJavaCppInstalledModules();
+            System.out.println("\t---------------------------------");
+            System.out.println("-----------------------------------------------------------------------");
+        }
     }
 
     public static JavaCppDetails getJavaCppDetails() {

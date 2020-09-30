@@ -206,7 +206,7 @@ public class PythonConfig implements Serializable, TextConfig {
     public static String pythonLibrariesFromAbsolutePath(String pythonPath) {
         File pythonPathFile = new File(pythonPath);
         if(pythonPathFile.exists() && pythonPathFile.isFile()) {
-            return ProcessUtils.runAndGetOutput(pythonPath, "-c", "import sys, os; print(os.pathsep.join([path for path in sys.path if path]))").replace(System.lineSeparator(), "").trim();
+            return ProcessUtils.runAndGetOutput(pythonPath, "-c", "import sys, os; print(os.pathsep.join([path for path in sys.path]))").replace(System.lineSeparator(), "").trim();
         } else {
             throw new IllegalStateException(String.format("No python executable path exist at: '%s'", pythonPathFile.getAbsoluteFile()));
         }
