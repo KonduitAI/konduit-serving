@@ -16,11 +16,11 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.vertx.settings;
+package ai.konduit.serving.pipeline.settings;
 
-import ai.konduit.serving.vertx.settings.constants.Constants;
-import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
-import ai.konduit.serving.vertx.settings.constants.PropertiesConstants;
+import ai.konduit.serving.pipeline.settings.constants.Constants;
+import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
+import ai.konduit.serving.pipeline.settings.constants.PropertiesConstants;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.nd4j.shade.guava.base.Strings;

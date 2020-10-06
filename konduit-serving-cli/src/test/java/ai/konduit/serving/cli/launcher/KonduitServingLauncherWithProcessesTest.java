@@ -22,7 +22,7 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
-import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
+import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;

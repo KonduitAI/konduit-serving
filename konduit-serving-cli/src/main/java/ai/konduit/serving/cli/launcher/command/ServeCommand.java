@@ -20,7 +20,7 @@ package ai.konduit.serving.cli.launcher.command;
 
 import ai.konduit.serving.cli.launcher.KonduitServingLauncher;
 import ai.konduit.serving.cli.launcher.LauncherUtils;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.ExecUtils;

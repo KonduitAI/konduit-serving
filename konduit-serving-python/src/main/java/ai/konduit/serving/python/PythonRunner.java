@@ -21,6 +21,7 @@ import ai.konduit.serving.model.PythonIO;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.python.models.AppendType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import ai.konduit.serving.python.util.KonduitPythonUtils;
@@ -54,6 +55,20 @@ public class PythonRunner implements PipelineStepRunner {
     public PythonRunner(PythonStep pythonStep) {
         this.pythonStep = pythonStep;
         String code = pythonStep.pythonConfig().getPythonCode();
+
+        AppendType appendType = this.pythonStep.pythonConfig().getAppendType();
+        String pythonLibrariesPath = this.pythonStep.pythonConfig().getPythonLibrariesPath();
+
+        if(pythonLibrariesPath == null) pythonLibrariesPath = this.pythonStep.pythonConfig().resolvePythonLibrariesPath();
+
+        log.info("Over riding python path " + pythonLibrariesPath);
+        System.setProperty("org.eclipse.python4j.path", pythonLibrariesPath);
+        System.setProperty("org.eclipse.python4j.path.append", appendType == null ?
+                AppendType.BEFORE.name() :
+                appendType.name().toLowerCase());
+
+        new PythonExecutioner();
+
         if (code == null) {
             try {
                 this.code = FileUtils.readFileToString(new File(pythonStep.pythonConfig().getPythonCodePath()), StandardCharsets.UTF_8);
@@ -78,14 +93,11 @@ public class PythonRunner implements PipelineStepRunner {
         }
 
         if(importCode != null) {
-            try(PythonGIL pythonGIL = PythonGIL.lock()) {
+            try(PythonGIL ignored = PythonGIL.lock()) {
                 PythonExecutioner.exec(importCode);
             }
         }
-
-
     }
-
 
     @Override
     public void close() {
@@ -103,13 +115,11 @@ public class PythonRunner implements PipelineStepRunner {
         Data ret = Data.empty();
         PythonVariables outputs = KonduitPythonUtils.createOutputVariables(pythonStep.pythonConfig());
         PythonVariables pythonVariables = KonduitPythonUtils.createPythonVariablesFromDataInput(data, pythonStep.pythonConfig());
-        try(PythonGIL pythonGIL = PythonGIL.lock()) {
+        try(PythonGIL ignored = PythonGIL.lock()) {
             log.debug("Thread " + Thread.currentThread().getId() + " has the GIL. Name of thread " + Thread.currentThread().getName());
             log.debug("Py gil state " + (PyGILState_Check() > 0));
             runExec(ret, outputs, pythonVariables);
         }
-
-
 
         return ret;
     }
@@ -166,7 +176,8 @@ public class PythonRunner implements PipelineStepRunner {
                 case "float":
                     ret.put(variable.getName(),KonduitPythonUtils.getWithType(outputs,variable.getName(),Double.class));
                     break;
-
+                default:
+                    break;
             }
         }
     }

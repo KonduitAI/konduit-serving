@@ -21,6 +21,7 @@ package ai.konduit.serving.cli.launcher;
 import ai.konduit.serving.build.cli.BuildCLI;
 import ai.konduit.serving.cli.launcher.command.*;
 import ai.konduit.serving.cli.launcher.command.build.extension.ProfileCommand;
+import ai.konduit.serving.cli.launcher.command.build.extension.PythonPathsCommand;
 import ai.konduit.serving.cli.launcher.command.build.extension.ServeBuildCommand;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.vertx.core.Launcher;
@@ -86,7 +87,8 @@ public class KonduitServingLauncher extends Launcher {
             .register(InspectCommand.class, InspectCommand::new)
             .register(LogsCommand.class, LogsCommand::new)
             .register(ProfileCommand.class, ProfileCommand::new)
-            .register(BuildCLI.class, BuildCLI::new);
+            .register(BuildCLI.class, BuildCLI::new)
+            .register(PythonPathsCommand.class, PythonPathsCommand::new);
     }
 
     public String commandLinePrefix() {

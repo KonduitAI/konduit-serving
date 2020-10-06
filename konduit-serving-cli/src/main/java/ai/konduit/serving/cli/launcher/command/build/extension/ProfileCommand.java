@@ -19,8 +19,10 @@
 package ai.konduit.serving.cli.launcher.command.build.extension;
 
 import ai.konduit.serving.cli.launcher.command.build.extension.model.Profile;
+import ai.konduit.serving.pipeline.api.python.models.AppendType;
+import ai.konduit.serving.pipeline.api.python.models.PythonConfigType;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.NonNull;
@@ -79,9 +81,13 @@ public class ProfileCommand extends DefaultCommand {
     private String computeDevice;
     private List<String> serverTypes;
     private List<String> additionalDependencies;
+    private PythonConfigType pythonConfigType;
+    private String pythonPath;
+    private String environmentName;
+    private AppendType appendType;
 
     @Argument(index = 0, argName = "sub_command", required = false)
-    @DefaultValue("LISTs")
+    @DefaultValue("LIST")
     @Description("Sub command to be used with the profile command. Sub commands are: [default, create, list, view, edit, delete]. " +
             "Defaults to 'LIST'")
     public void setSubCommand(String subCommand) {
@@ -103,7 +109,7 @@ public class ProfileCommand extends DefaultCommand {
     @Option(shortName = "a", longName = "arch", argName = "cpu_architecture")
     @DefaultValue("x86_avx2")
     @Description("Name of the cpu architecture. Accepted values are: [x86, x86_64, x86_avx2, x86_64-avx2, x86_64_avx2, x86_avx512, x86_64-avx512, " +
-            "x86_64_avx512, armhf, arm64, ppc64le;].")
+            "x86_64_avx512, armhf, arm64, ppc64le].")
     public void setCpuArchitecture(String cpuArchitecture) {
         this.cpuArchitecture = cpuArchitecture;
     }
@@ -121,7 +127,7 @@ public class ProfileCommand extends DefaultCommand {
         this.computeDevice = computeDevice;
     }
 
-    @Option(shortName = "st", longName = "server_types", argName = "serverTypes", acceptMultipleValues = true)
+    @Option(shortName = "st", longName = "server_types", argName = "server_types", acceptMultipleValues = true)
     @DefaultValue("HTTP GRPC")
     @Description("One or more space separated values, indicating the backend server type. Accepted values are: [HTTP, GRPC, MQTT].")
     public void setServerTypes(List<String> serverTypes) {
@@ -134,6 +140,44 @@ public class ProfileCommand extends DefaultCommand {
             "<group_id>:<artifact_id>:<version>:<classifier>.")
     public void setAdditionalDependencies(List<String> additionalDependencies) {
         this.additionalDependencies = additionalDependencies;
+    }
+
+    @Option(shortName = "pt", longName = "python_type", argName = "python_type")
+    @Description("Override property for python config for selecting python install type. Available values are: [JAVACPP, CUSTOM, PYTHON, CONDA, VENV].")
+    public void setPythonType(String pythonType) {
+        try {
+            this.pythonConfigType = PythonConfigType.valueOf(pythonType.toUpperCase());
+        } catch (Exception e) {
+            System.out.format("Invalid python type: '%s'. Allowed values are: %s -> (case insensitive).",
+                    pythonType, Arrays.toString(PythonConfigType.values()));
+            System.exit(1);
+        }
+    }
+
+
+    @Option(shortName = "pp", longName = "python_path", argName = "python_path")
+    @Description("Override property for python config for selecting specifying python path id for python type [PYTHON, CONDA, VENV] and absolute path " +
+            "for python type CUSTOM. Ignored for python type JAVACPP.")
+    public void setPythonPath(String pythonPath) {
+        this.pythonPath = pythonPath;
+    }
+
+    @Option(shortName = "en", longName = "env_name", argName = "env_name")
+    @Description("Override property for python config for selecting environment name for python type CONDA. Ignored for python type [CUSTOM, JAVACPP, VENV, PYTHON].")
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
+    }
+
+    @Option(shortName = "at", longName = "append_type", argName = "append_type")
+    @Description("Override property for python config for specifying append type with javacpp cpython library paths. Available values are: [BEFORE, NONE, AFTER].")
+    public void setAppendType(String appendType) {
+        try {
+            this.appendType = AppendType.valueOf(appendType.toUpperCase());
+        } catch (Exception e) {
+            System.out.format("Invalid append type: '%s'. Allowed values are: %s -> (case insensitive).",
+                    appendType, Arrays.toString(AppendType.values()));
+            System.exit(1);
+        }
     }
 
     private enum SubCommand {
@@ -237,8 +281,25 @@ public class ProfileCommand extends DefaultCommand {
         if(serverTypes != null && !serverTypes.isEmpty()) {
             profile.serverTypes(serverTypes);
         }
+
         if(additionalDependencies != null && !additionalDependencies.isEmpty()) {
             profile.additionalDependencies(additionalDependencies);
+        }
+
+        if(pythonConfigType != null) {
+            profile.pythonConfigType(pythonConfigType.name());
+        }
+
+        if(pythonPath != null) {
+            profile.pythonPath(pythonPath);
+        }
+
+        if(environmentName != null) {
+            profile.environmentName(environmentName);
+        }
+
+        if(appendType != null) {
+            profile.appendType(appendType.name());
         }
 
         if(StringUtils.containsIgnoreCase(profile.computeDevice(), "cuda")) {
