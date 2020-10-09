@@ -22,7 +22,7 @@ import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.impl.data.ProtoData;
 import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme;
 import ai.konduit.serving.vertx.protocols.grpc.api.InferenceGrpc;
-import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
+import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
 import io.grpc.stub.StreamObserver;
 import io.vertx.core.Promise;

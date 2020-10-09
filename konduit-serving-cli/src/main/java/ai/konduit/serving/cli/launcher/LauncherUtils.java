@@ -18,7 +18,7 @@
 
 package ai.konduit.serving.cli.launcher;
 
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

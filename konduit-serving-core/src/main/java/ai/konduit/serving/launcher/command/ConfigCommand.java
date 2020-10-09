@@ -184,7 +184,7 @@ public class ConfigCommand extends DefaultCommand {
                                 .pythonInput("x2", PythonType.TypeName.NDARRAY.name())
                                 .pythonOutput("y1", PythonType.TypeName.NDARRAY.name())
                                 .pythonOutput("y2", PythonType.TypeName.NDARRAY.name())
-                                .pythonPath("# Execute <python -c \"import sys, os; print(os.pathsep.join([path for path in sys.path if path]))\"> to find the value of it.")
+                                .pythonLibrariesPath("# Execute <python -c \"import sys, os; print(os.pathsep.join([path for path in sys.path if path]))\"> to find the value of it.")
                                 .pythonCode("<python-script # Remove this if 'pythonCodePath' is set>")
                                 .pythonCodePath("<python-code-path # Remove this if 'pythonCode' is set>")
                                 .build())

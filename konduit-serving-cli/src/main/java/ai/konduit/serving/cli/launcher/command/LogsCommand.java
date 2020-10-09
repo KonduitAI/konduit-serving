@@ -19,7 +19,7 @@
 package ai.konduit.serving.cli.launcher.command;
 
 import ai.konduit.serving.cli.launcher.LauncherUtils;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.SneakyThrows;
@@ -30,8 +30,6 @@ import org.apache.commons.io.input.TailerListenerAdapter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-
-import static java.lang.System.out;
 
 @Slf4j
 @Name("logs")

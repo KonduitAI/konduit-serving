@@ -24,7 +24,7 @@ import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.ServerProtocol;
 import ai.konduit.serving.vertx.protocols.grpc.api.InferenceGrpc;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
