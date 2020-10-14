@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+cd "$(dirname "$0")"/.. || exit
+. conf/konduit-serving-env.sh
+
+java -jar -Dvertx.cli.usage.prefix=konduit konduit.jar "$@"

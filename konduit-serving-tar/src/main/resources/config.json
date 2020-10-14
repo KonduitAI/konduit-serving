@@ -1,0 +1,25 @@
+{
+  "steps" : [ {
+    "@type" : "IMAGE_TO_NDARRAY",
+    "config" : {
+      "height" : 256,
+      "width" : 256,
+      "dataType" : "FLOAT",
+      "includeMinibatchDim" : false,
+      "aspectRatioHandling" : "CENTER_CROP",
+      "format" : "CHANNELS_LAST",
+      "channelLayout" : "BGR",
+      "listHandling" : "LIST_OUT"
+    },
+    "keepOtherValues" : true,
+    "metadata" : false,
+    "metadataKey" : "@ImageToNDArrayStepMetadata"
+  }, {
+    "@type" : "PYTHON",
+    "pythonConfig" : {
+      "returnAllInputs" : false,
+      "setupAndRun" : false,
+      "jobSuffix" : "konduit_job"
+    }
+  } ]
+}
