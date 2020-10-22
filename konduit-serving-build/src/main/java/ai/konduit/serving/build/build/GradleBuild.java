@@ -87,7 +87,7 @@ public class GradleBuild {
         }
 
         // ----- Repositories Section -----
-        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n}\n");
+        kts.append("repositories {\n\tmavenCentral()\n\tmavenLocal()\n\tjcenter()\n\tmaven(\"https://oss.sonatype.org/content/repositories/snapshots\")\n}\n");
 
 
         // ----- Plugins Section -----
@@ -293,8 +293,7 @@ public class GradleBuild {
             }
         }
 
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             connection.newBuild().setStandardOutput(baos).setStandardError(System.err).forTasks(tasks.toArray(new String[0])).run();
             String output = baos.toString();
             Pattern pattern = Pattern.compile("(Successfully built )(\\w)+");

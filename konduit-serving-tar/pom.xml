@@ -71,14 +71,18 @@
                                 <argument>build</argument>
                                 <argument>-p</argument>
                                 <argument>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/config.json</argument>
+                                <argument>-m</argument>
+                                <argument>${modules}</argument>
                                 <argument>-s</argument>
-                                <argument>http</argument>
+                                <argument>${serverTypes}</argument>
                                 <argument>-dt</argument>
-                                <argument>UBERJAR</argument>
+                                <argument>uberjar</argument>
+                                <argument>-o</argument>
+                                <argument>${platforms}</argument>
                                 <argument>-c</argument>
-                                <argument>jar.outputdir=${project.build.directory}</argument>
-                                <argument>-c</argument>
-                                <argument>jar.name=konduit-serving-dist-${project.version}.jar</argument>
+                                <argument>jar.outputdir=${project.build.directory},jar.name=konduit-serving-dist-${project.version}.jar</argument>
+                                <argument>-ad</argument>
+                                <argument>${additionalDependencies}</argument>
                             </arguments>
                             <systemProperties>
                                 <systemProperty>

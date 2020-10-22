@@ -64,6 +64,7 @@ public class ServeBuildCommand extends ServeCommand {
 
     private String profileName;
     private List<String> additionalDependencies;
+    private boolean runWithoutManifestJar;
 
     @Option(shortName = "p", longName = "profileName", argName = "profile_name")
     @Description("Name of the profile to be used with the server launch.")
@@ -77,10 +78,16 @@ public class ServeBuildCommand extends ServeCommand {
         this.additionalDependencies = additionalDependencies;
     }
 
+    @Option(shortName = "rwm", longName = "runWithoutManifest", argName = "run_without_manifest", flag = true)
+    @Description("Do not create the manifest jar file before launching the server.")
+    public void setRunWithoutManifestJar(boolean runWithoutManifestJar) {
+        this.runWithoutManifestJar = runWithoutManifestJar;
+    }
+
     @Override
     public void run() {
         File profileRootDir = new File(DirectoryFetcher.getBuildDir(), getId());
-        if((!profileRootDir.exists() || !profileRootDir.isDirectory()) && !profileRootDir.mkdir()) {
+        if ((!profileRootDir.exists() || !profileRootDir.isDirectory()) && !profileRootDir.mkdir()) {
             log.error("Unable to create build directory for path: {}.", profileRootDir.getAbsolutePath());
             System.exit(1);
         }
@@ -94,72 +101,83 @@ public class ServeBuildCommand extends ServeCommand {
                 out.format("Invalid JSON/YAML configuration or invalid configuration file path defined by: %n%s", configuration);
                 System.exit(1);
             } else {
-                if(!(jsonConfiguration.has("host") || jsonConfiguration.has("port") ||
-                        jsonConfiguration.has("pipeline"))) {
-                    // Assume that it's a json for a konduit serving pipeline and not a complete inference configuration
-                    jsonConfiguration = new ObjectNode(JsonNodeFactory.instance)
-                            .put("host", this.host)
-                            .put("port", this.port)
-                            .set("pipeline", jsonConfiguration.deepCopy());
-                }
+                if (!runWithoutManifestJar) {
+                    if (!(jsonConfiguration.has("host") || jsonConfiguration.has("port") ||
+                            jsonConfiguration.has("pipeline"))) {
+                        // Assume that it's a json for a konduit serving pipeline and not a complete inference configuration
+                        jsonConfiguration = new ObjectNode(JsonNodeFactory.instance)
+                                .put("host", this.host)
+                                .put("port", this.port)
+                                .set("pipeline", jsonConfiguration.deepCopy());
+                    }
 
-                Object pipeline = jsonConfiguration.get("pipeline");
-                if(pipeline == null) {
-                    out.format("Invalid JSON/YAML configuration or invalid configuration file path defined by: %n%s", configuration);
-                    System.exit(1);
-                }
+                    Object pipeline = jsonConfiguration.get("pipeline");
+                    if (pipeline == null) {
+                        out.format("Invalid JSON/YAML configuration or invalid configuration file path defined by: %n%s", configuration);
+                        System.exit(1);
+                    }
 
-                FileUtils.writeStringToFile(savePath, pipeline.toString(), StandardCharsets.UTF_8);
+                    FileUtils.writeStringToFile(savePath, pipeline.toString(), StandardCharsets.UTF_8);
 
-                Profile profile = profileName != null ? ProfileCommand.getProfile(profileName) : ProfileCommand.getDefaultProfile();
-                if(profile == null) {
-                    if(profileName == null) {
-                        out.println("Couldn't find a default profile.");
+                    Profile profile = profileName != null ? ProfileCommand.getProfile(profileName) : ProfileCommand.getDefaultProfile();
+                    if (profile == null) {
+                        if (profileName == null) {
+                            out.println("Couldn't find a default profile.");
+                        } else {
+                            out.format("Couldn't find a profile with the specified name: '%s'.%n", profileName);
+                        }
+                        System.exit(1);
+                    }
+
+                    // todo: add logic here for overriding python paths variable through profiles (kept for a separate PR).
+
+                    List<String> args = new ArrayList<>();
+                    args.add("-p");
+                    args.add(savePath.getAbsolutePath());
+                    args.add("-c");
+                    args.add(String.format("classpath.outputFile=%s", mfJar.getAbsolutePath()));
+                    args.add("classpath.type=JAR_MANIFEST");
+                    args.add("-dt");
+                    args.add("CLASSPATH");
+                    args.add("-d");
+                    args.add(profile.computeDevice());
+                    args.add("-a");
+                    args.add(profile.cpuArchitecture());
+                    args.add("-o");
+                    args.add(profile.operatingSystem());
+
+                    if (profile.serverTypes() != null) {
+                        for (String serverType : profile.serverTypes()) {
+                            args.add("-s");
+                            args.add(serverType);
+                        }
+                    }
+
+                    List<String> additionalDeps = null;
+                    if (profile.additionalDependencies() != null && !profile.additionalDependencies().isEmpty()) {
+                        additionalDeps = new ArrayList<>(profile.additionalDependencies());
+                    }
+                    if (this.additionalDependencies != null && !this.additionalDependencies.isEmpty()) {
+                        additionalDeps = new ArrayList<>();
+                        additionalDeps.addAll(this.additionalDependencies);
+                    }
+
+                    if (additionalDeps != null) {
+                        for (String ad : additionalDeps) {
+                            args.add("-ad");
+                            args.add(ad);
+                        }
+                    }
+
+
+                    // Issue: https://github.com/KonduitAI/konduit-serving/issues/437
+                    BuildCLI.main(args.toArray(new String[0]));     //TODO we could just call build tool directly instead of via CLI (more robust to refactoring, compile time args checking etc)
+
+                    if (Strings.isNullOrEmpty(this.classpath)) {
+                        this.classpath = mfJar.getAbsolutePath();
                     } else {
-                        out.format("Couldn't find a profile with the specified name: '%s'.%n", profileName);
+                        this.classpath += File.pathSeparator + mfJar.getAbsolutePath();
                     }
-                    System.exit(1);
-                }
-
-                // todo: add logic here for overriding python paths variable through profiles (kept for a separate PR).
-
-                List<String> args = new ArrayList<>();
-                args.add("-p"); args.add(savePath.getAbsolutePath());
-                args.add("-c"); args.add(String.format("classpath.outputFile=%s", mfJar.getAbsolutePath())); args.add("classpath.type=JAR_MANIFEST");
-                args.add("-dt"); args.add("CLASSPATH");
-                args.add("-d"); args.add(profile.computeDevice());
-                args.add("-a"); args.add(profile.cpuArchitecture());
-                args.add("-o"); args.add(profile.operatingSystem());
-
-                if(profile.serverTypes() != null) {
-                    for(String serverType : profile.serverTypes()) {
-                        args.add("-s"); args.add(serverType);
-                    }
-                }
-
-                List<String> additionalDeps = null;
-                if(profile.additionalDependencies() != null && !profile.additionalDependencies().isEmpty()) {
-                    additionalDeps = new ArrayList<>(profile.additionalDependencies());
-                }
-                if(this.additionalDependencies != null && !this.additionalDependencies.isEmpty()){
-                    additionalDeps = new ArrayList<>();
-                    additionalDeps.addAll(this.additionalDependencies);
-                }
-
-                if(additionalDeps != null){
-                    for(String ad : additionalDeps) {
-                        args.add("-ad"); args.add(ad);
-                    }
-                }
-
-
-                // Issue: https://github.com/KonduitAI/konduit-serving/issues/437
-                BuildCLI.main(args.toArray(new String[0]));     //TODO we could just call build tool directly instead of via CLI (more robust to refactoring, compile time args checking etc)
-
-                if (Strings.isNullOrEmpty(this.classpath)) {
-                    this.classpath = mfJar.getAbsolutePath();
-                } else {
-                    this.classpath += File.pathSeparator + mfJar.getAbsolutePath();
                 }
             }
         } catch (IOException e) {
@@ -175,6 +193,7 @@ public class ServeBuildCommand extends ServeCommand {
 
     /**
      * Takes a file path to a valid JSON/YAML or a JSON String and parses it into {@link JsonNode}
+     *
      * @param jsonOrYamlFileOrString JSON/YAML file or a valid JSON String
      * @return {@link JsonNode} that was parsed
      */
@@ -202,7 +221,7 @@ public class ServeBuildCommand extends ServeCommand {
         } catch (Exception jsonProcessingErrors) {
             try {
                 JsonNode jsonNode = ObjectMappers.yaml().readTree(configurationString);
-                if(jsonNode instanceof TextNode) {
+                if (jsonNode instanceof TextNode) {
                     throw new FileNotFoundException("File does not exist at path: " + configurationString);
                 } else {
                     return jsonNode;

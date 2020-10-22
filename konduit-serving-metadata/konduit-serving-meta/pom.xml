@@ -60,6 +60,11 @@
             <artifactId>konduit-serving-tensorflow</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-onnx</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- konduit-serving-data -->
         <dependency>
@@ -218,7 +223,6 @@
                     </execution>
                 </executions>
             </plugin>
-
 
             <!-- Disable enforcer plugin dependency convergence for this module (which doesn't actually use the dependencies
              other than to aggregate metadata -->

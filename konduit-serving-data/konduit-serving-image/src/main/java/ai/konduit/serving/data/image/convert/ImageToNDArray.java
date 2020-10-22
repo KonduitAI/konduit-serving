@@ -285,7 +285,7 @@ public class ImageToNDArray {
 
     protected static Mat convertColor(Mat m, ImageToNDArrayConfig config) {
         int ch = config.channelLayout().numChannels();
-        if (ch != 3) {
+        if (ch != 3 && ch != 1) {
             throw new UnsupportedOperationException("Not yet implemented: Channels != 3 support");
         }
 
@@ -295,8 +295,10 @@ public class ImageToNDArray {
     }
 
     protected static ByteBuffer toFloatBuffer(Mat m, ImageToNDArrayConfig config) {
-        Preconditions.checkState(config.channelLayout() == NDChannelLayout.RGB || config.channelLayout() == NDChannelLayout.BGR,
-                "Only RGB and BGR conversion implement so far");
+        Preconditions.checkState(config.channelLayout() == NDChannelLayout.RGB ||
+                        config.channelLayout() == NDChannelLayout.BGR ||
+                        config.channelLayout() == NDChannelLayout.GRAYSCALE,
+                "Only GRAYSCALE, RGB and BGR conversion implement so far");
 
         Preconditions.checkState(config.dataType() != NDArrayType.BOOL && config.dataType() != NDArrayType.UTF8,
                 "%s datatype is not supported for ImageToNDArray", config.dataType());

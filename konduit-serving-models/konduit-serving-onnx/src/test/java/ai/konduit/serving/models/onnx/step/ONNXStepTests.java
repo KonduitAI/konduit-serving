@@ -36,6 +36,7 @@ public class ONNXStepTests {
         INDArray arr = Nd4j.zeros(DataType.FLOAT, 1,1,28,28);
         Data d = Data.singleton("Input3", NDArray.create(arr));
         Data out = e.exec(d);
+
         INDArray outRet = out.getNDArray("Plus214_Output_0").getAs(INDArray.class);
         assertNotNull(outRet);
         System.out.println(outRet);

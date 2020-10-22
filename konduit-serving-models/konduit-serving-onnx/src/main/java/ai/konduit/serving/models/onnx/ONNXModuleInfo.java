@@ -22,7 +22,7 @@ import ai.konduit.serving.annotation.module.InheritRequiredDependencies;
 import ai.konduit.serving.annotation.module.ModuleInfo;
 
 @ModuleInfo("konduit-serving-onnx")
-@InheritRequiredDependencies("konduit-serving-onnx")
+@InheritRequiredDependencies("konduit-serving-nd4j")
 public class ONNXModuleInfo {
     private ONNXModuleInfo(){ }
 }

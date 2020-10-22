@@ -105,7 +105,9 @@ public class ConfigCommand extends DefaultCommand {
         SSD_TO_BOUNDING_BOX,
         SAMEDIFF,
         SHOW_IMAGE,
-        TENSORFLOW
+        TENSORFLOW,
+        PYTHON,
+        ONNX
     }
 
     private enum GraphStepType {
@@ -138,8 +140,9 @@ public class ConfigCommand extends DefaultCommand {
     @Description("A comma-separated list of sequence/graph pipeline steps to create boilerplate configuration from. " +
             "For sequences, allowed values are: " +
             "[crop_grid, crop_fixed_grid, dl4j, keras, draw_bounding_box, draw_fixed_grid, draw_grid, " +
-            "draw_segmentation, extract_bounding_box, camera_frame_capture, video_frame_capture" +
-            "image_to_ndarray, logging, ssd_to_bounding_box, samediff, show_image, tensorflow]. " +
+            "draw_segmentation, extract_bounding_box, camera_frame_capture, video_frame_capture, " +
+            "image_to_ndarray, logging, ssd_to_bounding_box, samediff, show_image, tensorflow, " +
+            "python, onnx]. " +
             "For graphs, the list item should be in the format '<output>=<type>(<inputs>)' or " +
             "'[outputs]=switch(<inputs>)' for switches. The pre-defined root input is named, 'input'. " +
             "Examples are ==> " +
@@ -494,7 +497,7 @@ public class ConfigCommand extends DefaultCommand {
                             .newInstance("<path_to_model>", Arrays.asList("1", "2"), Arrays.asList("11", "22"));
                 case KERAS:
                     moduleName = "konduit-serving-deeplearning4j";
-                    clazz = Class.forName("ai.konduit.serving.models.deeplearning4j.step.keras.KerasModelStep");
+                    clazz = Class.forName("ai.konduit.serving.models.deeplearning4j.step.keras.KerasStep");
                     return (PipelineStep) clazz
                             .getConstructor(String.class, List.class, List.class)
                             .newInstance("<path_to_model>", Arrays.asList("1", "2"), Arrays.asList("11", "22"));
@@ -605,6 +608,16 @@ public class ConfigCommand extends DefaultCommand {
                     return (PipelineStep) clazz
                             .getConstructor(List.class, List.class, String.class)
                             .newInstance(Arrays.asList("1", "2"), Arrays.asList("11", "22"), "<path_to_model>");
+                case ONNX:
+                    moduleName = "konduit-serving-onnx";
+                    clazz = Class.forName("ai.konduit.serving.models.onnx.step.ONNXStep");
+                    return (PipelineStep) clazz
+                            .getConstructor(String.class, List.class, List.class)
+                            .newInstance("<path_to_model>", Arrays.asList("1", "2"), Arrays.asList("11", "22"));
+                case PYTHON:
+                    moduleName = "konduit-serving-python";
+                    return (PipelineStep) Class.forName("ai.konduit.serving.python.PythonStep")
+                            .getConstructor().newInstance();
                 default:
                     out.format("Invalid step type '%s'. Allowed values are %s%n", type, Arrays.asList(PipelineStepType.values()));
                     System.exit(1);
