@@ -19,28 +19,19 @@
   ~  */
   ~
   -->
-<assembly>
-    <id>dist</id>
-    <formats>
-        <format>dir</format>
-        <format>tar.gz</format>
-        <format>zip</format>
-    </formats>
-    <includeBaseDirectory>false</includeBaseDirectory>
 
-    <files>
-        <file>
-            <source>${konduit-serving.root.dir}/konduit-serving-tar/target/konduit-serving-dist-${project.version}.jar</source>
-            <destName>konduit.jar</destName>
-        </file>
-        <file>
-            <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/bin/konduit</source>
-            <outputDirectory>./bin</outputDirectory>
-        </file>
-        <file>
-            <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/conf/konduit-serving-env.sh</source>
-            <outputDirectory>./conf</outputDirectory>
-        </file>
-    </files>
+<configuration scan="true" scanPeriod="30 seconds">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
-</assembly>
+    <logger name="ai.konduit.serving" level="INFO"/>\
+    <logger name="org.gradle" level="INFO"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

@@ -25,6 +25,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.apache.commons.lang3.SystemUtils;
 import org.nd4j.shade.jackson.annotation.JsonGetter;
+import org.nd4j.shade.jackson.annotation.JsonInclude;
 import org.nd4j.shade.jackson.annotation.JsonSetter;
 
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 
 @EqualsAndHashCode
 @ToString
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Profile {
 
     private static final List<String> validComputeDevices = Arrays.asList("CPU", "CUDA_10.0", "CUDA_10.1", "CUDA_10.2");

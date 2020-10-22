@@ -43,7 +43,7 @@
     <dependencies>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-uberjar</artifactId>
+            <artifactId>konduit-serving-cli</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -53,6 +53,45 @@
             <id>tar</id>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>ai.konduit.serving.cli.launcher.KonduitServingLauncher</mainClass>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>-p</argument>
+                                <argument>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/config.json</argument>
+                                <argument>-m</argument>
+                                <argument>${modules}</argument>
+                                <argument>-s</argument>
+                                <argument>${serverTypes}</argument>
+                                <argument>-dt</argument>
+                                <argument>uberjar</argument>
+                                <argument>-o</argument>
+                                <argument>${platforms}</argument>
+                                <argument>-c</argument>
+                                <argument>jar.outputdir=${project.build.directory},jar.name=konduit-serving-dist-${project.version}.jar</argument>
+                                <argument>-ad</argument>
+                                <argument>${additionalDependencies}</argument>
+                            </arguments>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>konduit.build.dir</key>
+                                    <value>${project.build.directory}/build</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>

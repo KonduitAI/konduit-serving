@@ -24,7 +24,6 @@ import ai.konduit.serving.build.config.Serving;
 import ai.konduit.serving.build.config.Target;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.deployments.*;
-import ai.konduit.serving.build.build.GradleBuild;
 import ai.konduit.serving.models.deeplearning4j.step.DL4JStep;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;

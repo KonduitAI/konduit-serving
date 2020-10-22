@@ -28,6 +28,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -40,8 +41,6 @@ public class InferenceConfiguration implements Serializable, TextConfig {
     @Schema(description = "Server host", defaultValue = "localhost")
     private String host = "localhost";
 
-
-
     @Schema(description = "Server port. 0 means that a random port will be selected.", defaultValue = "0")
     private int port = 0;
     
@@ -50,12 +49,12 @@ public class InferenceConfiguration implements Serializable, TextConfig {
 
     @Schema(description = "List of custom endpoint class names that are configured to " +
             "provide custom endpoints functionality (fully qualified Java path - for example com.mycompany.MyEndpointsClass).")
-    private List<String> customEndpoints;
+    private List<String> customEndpoints = new ArrayList<>();
 
     @Schema(description = "The main konduit serving pipeline configuration.")
     private Pipeline pipeline;
 
-    public static InferenceConfiguration fromJson(String json){
+    public static InferenceConfiguration fromJson(String json) {
         return ObjectMappers.fromJson(json, InferenceConfiguration.class);
     }
 

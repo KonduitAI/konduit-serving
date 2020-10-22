@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(dirname "$0")"
+
+. ${SCRIPT_DIR}/../conf/konduit-serving-env.sh
+
+java -jar -Dvertx.cli.usage.prefix=konduit ${SCRIPT_DIR}/../konduit.jar "$@"

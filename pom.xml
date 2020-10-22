@@ -89,6 +89,11 @@
     </scm>
 
     <properties>
+        <logback.version>1.2.3</logback.version>
+        <additionalDependencies>ch.qos.logback:logback-classic:${logback.version}</additionalDependencies>
+        <serverTypes>http,grpc</serverTypes>
+        <modules>python,pipeline,tensorflow,image,nd4j,vertx,http,grpc,mqtt,deeplearning4j,samediff,onnx</modules>
+        <platforms>windows,linux,mac</platforms>
         <spin.version>custom</spin.version>
         <jna.platform.version>5.3.2</jna.platform.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
@@ -98,7 +103,6 @@
         <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-        <logback.version>1.2.3</logback.version>
         <micrometer.version>1.2.0</micrometer.version>
         <netty.version>4.1.48.Final</netty.version>
         <arrow.version>0.15.1</arrow.version>
