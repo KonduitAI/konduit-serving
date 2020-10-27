@@ -38,8 +38,6 @@
         <module>konduit-serving-api</module>
         <module>konduit-serving-codegen</module>
         <module>konduit-serving-distro-bom</module>
-        <module>konduit-serving-orchestration</module>
-        <module>konduit-serving-tfjava</module>
         <module>konduit-serving-pipeline</module>
         <module>konduit-serving-models</module>
         <module>konduit-serving-data</module>
