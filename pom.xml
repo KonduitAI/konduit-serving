@@ -36,7 +36,6 @@
         <module>konduit-serving-common-tests</module>
         <module>konduit-serving-core</module>
         <module>konduit-serving-api</module>
-        <module>konduit-serving-codegen</module>
         <module>konduit-serving-distro-bom</module>
         <module>konduit-serving-pipeline</module>
         <module>konduit-serving-models</module>
