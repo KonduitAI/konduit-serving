@@ -44,21 +44,14 @@ public class Nd4jTensorFlowStep implements PipelineStep {
     @Schema(description = "A list of names of the input placeholders.")
     private List<String> inputNames;
 
-
     @Schema(description = "A list of names of the output arrays - i.e., what should be predicted.")
     private List<String> outputNames;
 
     @Schema(description = "A map of constants")
     private Map<String, INDArray> constants = new HashMap<>();
 
-
     @Schema(description = "Uniform Resource Identifier of model")
     private String modelUri;
-
-
-
-
-
 
     @Tolerate
     public Nd4jTensorFlowStep inputNames(String... inputNames) {

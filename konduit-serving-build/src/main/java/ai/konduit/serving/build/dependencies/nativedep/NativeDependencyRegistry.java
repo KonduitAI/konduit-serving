@@ -62,19 +62,19 @@ public class NativeDependencyRegistry {
         //TODO - TF, ONNX, etc
 
         //ND4J native
-        put(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null), Target.LWM_X86);
+        put(new Dependency("org.nd4j", "nd4j-native", "1.0.0-SNAPSHOT", null), Target.LWM_X86);
 
         //CUDA
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-beta7", null), Target.LINUX_CUDA_10_0, Target.WINDOWS_CUDA_10_0);
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-beta7", null), Target.LINUX_CUDA_10_1, Target.WINDOWS_CUDA_10_1);
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.2", "1.0.0-beta7", null), Target.LINUX_CUDA_10_2, Target.WINDOWS_CUDA_10_2);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-SNAPSHOT", null), Target.LINUX_CUDA_10_0, Target.WINDOWS_CUDA_10_0);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-SNAPSHOT", null), Target.LINUX_CUDA_10_1, Target.WINDOWS_CUDA_10_1);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.2", "1.0.0-SNAPSHOT", null), Target.LINUX_CUDA_10_2, Target.WINDOWS_CUDA_10_2);
         //CUDA classifiers
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-beta7", LINUX_X86_64), Target.LINUX_CUDA_10_0);
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-beta7", LINUX_X86_64), Target.LINUX_CUDA_10_1);
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.2", "1.0.0-beta7", LINUX_X86_64), Target.LINUX_CUDA_10_2);
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-beta7", WINDOWS_X86_64), Target.WINDOWS_CUDA_10_0);
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-beta7", WINDOWS_X86_64), Target.WINDOWS_CUDA_10_1);
-        put(new Dependency("org.nd4j", "nd4j-cuda-10.2", "1.0.0-beta7", WINDOWS_X86_64), Target.WINDOWS_CUDA_10_2);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-SNAPSHOT", LINUX_X86_64), Target.LINUX_CUDA_10_0);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-SNAPSHOT", LINUX_X86_64), Target.LINUX_CUDA_10_1);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.2", "1.0.0-SNAPSHOT", LINUX_X86_64), Target.LINUX_CUDA_10_2);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.0", "1.0.0-SNAPSHOT", WINDOWS_X86_64), Target.WINDOWS_CUDA_10_0);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.1", "1.0.0-SNAPSHOT", WINDOWS_X86_64), Target.WINDOWS_CUDA_10_1);
+        put(new Dependency("org.nd4j", "nd4j-cuda-10.2", "1.0.0-SNAPSHOT", WINDOWS_X86_64), Target.WINDOWS_CUDA_10_2);
     }
 
     public static boolean isNativeDependency(Dependency d){
