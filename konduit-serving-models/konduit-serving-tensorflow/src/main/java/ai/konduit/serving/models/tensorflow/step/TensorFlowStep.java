@@ -26,6 +26,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.Tolerate;
+import org.bytedeco.javacpp.Loader;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +38,11 @@ import java.util.List;
 @JsonName("TENSORFLOW")
 @Schema(description = "A pipeline step that configures a TensorFlow model that is to be executed.")
 public class TensorFlowStep implements PipelineStep {
+
+    static {
+        //ensure native libraries get loaded
+        Loader.load(org.bytedeco.tensorflow.presets.tensorflow.class);
+    }
 
     @Schema(description = "A list of names of the input placeholders.")
     private List<String> inputNames;
