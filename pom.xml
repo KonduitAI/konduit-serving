@@ -36,10 +36,7 @@
         <module>konduit-serving-common-tests</module>
         <module>konduit-serving-core</module>
         <module>konduit-serving-api</module>
-        <module>konduit-serving-codegen</module>
         <module>konduit-serving-distro-bom</module>
-        <module>konduit-serving-orchestration</module>
-        <module>konduit-serving-tfjava</module>
         <module>konduit-serving-pipeline</module>
         <module>konduit-serving-models</module>
         <module>konduit-serving-data</module>
@@ -96,7 +93,7 @@
         <javacpp.version>1.5.4</javacpp.version>
         <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.version}</cuda.javacpp.version>
         <additionalDependencies>ch.qos.logback:logback-classic:${logback.version}</additionalDependencies>
-        <serverTypes>http</serverTypes>
+        <serverTypes>http,grpc</serverTypes>
         <modules>python,tensorflow,image,deeplearning4j,onnx,nd4j-tensorflow,nd4j-tensorflow</modules>
         <platforms>linux,windows,mac</platforms>
         <architectures>x86</architectures>

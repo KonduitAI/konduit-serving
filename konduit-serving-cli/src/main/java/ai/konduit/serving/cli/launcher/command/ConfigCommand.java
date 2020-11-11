@@ -143,7 +143,7 @@ public class ConfigCommand extends DefaultCommand {
             "[crop_grid, crop_fixed_grid, dl4j, keras, draw_bounding_box, draw_fixed_grid, draw_grid, " +
             "draw_segmentation, extract_bounding_box, camera_frame_capture, video_frame_capture, " +
             "image_to_ndarray, logging, ssd_to_bounding_box, samediff, show_image, tensorflow, " +
-            "nd4jtensorflow,python, onnx]. " +
+            "nd4jtensorflow, python, onnx]. " +
             "For graphs, the list item should be in the format '<output>=<type>(<inputs>)' or " +
             "'[outputs]=switch(<inputs>)' for switches. The pre-defined root input is named, 'input'. " +
             "Examples are ==> " +
