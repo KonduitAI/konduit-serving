@@ -72,21 +72,21 @@ public class Constants {
 
     public static final String DEFAULT_CONSUMER_TOPIC_NAME = "inference-in";
 
-    public static final String DEFAULT_KAFKA_CONSUMER_SERIALIZER_CLASS = "org.apache.kafka.common.serialization.StringDeserializer";
+    public static final String DEFAULT_KAFKA_CONSUMER_KEY_DESERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectDeserializer";
 
-    public static final String DEFAULT_KAFKA_CONSUMER_DESERIALIZER_CLASS = "org.apache.kafka.common.serialization.StringDeserializer";
+    public static final String DEFAULT_KAFKA_CONSUMER_VALUE_DESERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectDeserializer";
 
     public static final String DEFAULT_CONSUMER_GROUP_ID = "konduit-serving-consumer-group";
 
-    public static final String DEFAULT_CONSUMER_OFFSET_RESET = "earliest";
+    public static final String DEFAULT_CONSUMER_AUTO_OFFSET_RESET = "earliest";
 
     public static final String DEFAULT_CONSUMER_AUTO_COMMIT = "false";
 
     public static final String DEFAULT_PRODUCER_TOPIC_NAME = "inference-out";
 
-    public static final String DEFAULT_KAFKA_PRODUCER_SERIALIZER_CLASS = "org.apache.kafka.common.serialization.StringDeserializer";
+    public static final String DEFAULT_KAFKA_PRODUCER_KEY_SERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectDeserializer";
 
-    public static final String DEFAULT_KAFKA_PRODUCER_DESERIALIZER_CLASS = "org.apache.kafka.common.serialization.StringDeserializer";
+    public static final String DEFAULT_KAFKA_PRODUCER_VALUE_SERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectDeserializer";
 
     public static final String DEFAULT_PRODUCER_ACKS = "1";
 }

@@ -8,6 +8,8 @@ import io.vertx.kafka.client.producer.KafkaProducer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 import io.vertx.kafka.client.producer.RecordMetadata;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,22 +60,21 @@ public class InferenceVerticleKafka extends InferenceVerticle {
                 }
 
 
-                Map<String, String> config = new HashMap<>();
-                config.put("bootstrap.servers", String.format("%s:%s", inferenceConfiguration.host(), port));
-                config.put("key.deserializer", getKafkaConsumerSerializerClass());
-                config.put("value.deserializer", getKafkaConsumerDeserializerClass());
-                config.put("group.id", getConsumerGroupId());
-                config.put("auto.offset.reset", getConsumerOffsetReset());
-                config.put("enable.auto.commit", getConsumerAutoCommit());
+                Map<String, String> configConsumer = new HashMap<>();
+                configConsumer.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%s", inferenceConfiguration.host(), port));
+                configConsumer.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, getKafkaConsumerKeyDeserializerClass());
+                configConsumer.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, getKafkaConsumerValueDeserializerClass());
+                configConsumer.put(ConsumerConfig.GROUP_ID_CONFIG, getConsumerGroupId());
+                configConsumer.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, getConsumerAutoOffsetReset());
+                configConsumer.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, getConsumerAutoCommit());
 
                 Map<String, String> configProducer = new HashMap<>();
-                configProducer.put("bootstrap.servers", String.format("%s:%s", inferenceConfiguration.host(), port));
-                configProducer.put("key.serializer", getKafkaProducerSerializerClass());
-                configProducer.put("value.serializer", getKafkaProducerDeserializerClass());
-                configProducer.put("acks", getProducerAcks());
+                configProducer.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%s", inferenceConfiguration.host(), port));
+                configProducer.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, getKafkaProducerKeySerializerClass());
+                configProducer.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, getKafkaProducerValueSerializerClass());
+                configProducer.put(ProducerConfig.ACKS_CONFIG, getProducerAcks());
 
-
-                KafkaConsumer<String, String> consumer = KafkaConsumer.create(vertx, config);
+                KafkaConsumer<String, String> consumer = KafkaConsumer.create(vertx, configConsumer);
                 KafkaProducer<String, String> producer = KafkaProducer.create(vertx, configProducer);
 
                 consumer.handler(
@@ -85,14 +86,12 @@ public class InferenceVerticleKafka extends InferenceVerticle {
                                     KafkaProducerRecord.create(getProducerTopicName(), "message_=" + record.value());
 
                             producer.send(recordOut, done -> {
-
                                 if (done.succeeded()) {
                                     RecordMetadata recordMetadata = done.result();
                                     log.info("Message " + record.value() + " written on topic=" + recordMetadata.getTopic() +
                                             ", partition=" + recordMetadata.getPartition() +
                                             ", offset=" + recordMetadata.getOffset());
                                 }
-
                             });
                         }
                 );

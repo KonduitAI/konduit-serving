@@ -15,19 +15,19 @@ public class KonduitSettings {
         );
     }
 
-    public static String getKafkaConsumerSerializerClass() {
+    public static String getKafkaConsumerKeyDeserializerClass() {
         return KonduitSettings.fetchValueBasedOnPriority(
-                System.getenv(EnvironmentConstants.KAFKA_CONSUMER_SERIALIZER_CLASS),
-                System.getProperty(PropertiesConstants.KAFKA_CONSUMER_SERIALIZER_CLASS),
-                Constants.DEFAULT_KAFKA_CONSUMER_SERIALIZER_CLASS
+                System.getenv(EnvironmentConstants.KAFKA_CONSUMER_KEY_DESERIALIZER_CLASS),
+                System.getProperty(PropertiesConstants.KAFKA_CONSUMER_KEY_DESERIALIZER_CLASS),
+                Constants.DEFAULT_KAFKA_CONSUMER_KEY_DESERIALIZER_CLASS
         );
     }
 
-    public static String getKafkaConsumerDeserializerClass() {
+    public static String getKafkaConsumerValueDeserializerClass() {
         return KonduitSettings.fetchValueBasedOnPriority(
-                System.getenv(EnvironmentConstants.KAFKA_CONSUMER_DESERIALIZER_CLASS),
-                System.getProperty(PropertiesConstants.KAFKA_CONSUMER_DESERIALIZER_CLASS),
-                Constants.DEFAULT_KAFKA_CONSUMER_DESERIALIZER_CLASS
+                System.getenv(EnvironmentConstants.KAFKA_CONSUMER_VALUE_DESERIALIZER_CLASS),
+                System.getProperty(PropertiesConstants.KAFKA_CONSUMER_VALUE_DESERIALIZER_CLASS),
+                Constants.DEFAULT_KAFKA_CONSUMER_VALUE_DESERIALIZER_CLASS
         );
     }
 
@@ -39,11 +39,11 @@ public class KonduitSettings {
         );
     }
 
-    public static String getConsumerOffsetReset() {
+    public static String getConsumerAutoOffsetReset() {
         return KonduitSettings.fetchValueBasedOnPriority(
-                System.getenv(EnvironmentConstants.CONSUMER_OFFSET_RESET),
-                System.getProperty(PropertiesConstants.CONSUMER_OFFSET_RESET),
-                Constants.DEFAULT_CONSUMER_OFFSET_RESET
+                System.getenv(EnvironmentConstants.CONSUMER_AUTO_OFFSET_RESET),
+                System.getProperty(PropertiesConstants.CONSUMER_AUTO_OFFSET_RESET),
+                Constants.DEFAULT_CONSUMER_AUTO_OFFSET_RESET
         );
     }
 
@@ -63,19 +63,19 @@ public class KonduitSettings {
         );
     }
 
-    public static String getKafkaProducerSerializerClass() {
+    public static String getKafkaProducerKeySerializerClass() {
         return KonduitSettings.fetchValueBasedOnPriority(
-                System.getenv(EnvironmentConstants.KAFKA_PRODUCER_SERIALIZER_CLASS),
-                System.getProperty(PropertiesConstants.KAFKA_PRODUCER_SERIALIZER_CLASS),
-                Constants.DEFAULT_KAFKA_PRODUCER_SERIALIZER_CLASS
+                System.getenv(EnvironmentConstants.KAFKA_PRODUCER_KEY_SERIALIZER_CLASS),
+                System.getProperty(PropertiesConstants.KAFKA_PRODUCER_KEY_SERIALIZER_CLASS),
+                Constants.DEFAULT_KAFKA_PRODUCER_KEY_SERIALIZER_CLASS
         );
     }
 
-    public static String getKafkaProducerDeserializerClass() {
+    public static String getKafkaProducerValueSerializerClass() {
         return KonduitSettings.fetchValueBasedOnPriority(
-                System.getenv(EnvironmentConstants.KAFKA_PRODUCER_DESERIALIZER_CLASS),
-                System.getProperty(PropertiesConstants.KAFKA_PRODUCER_DESERIALIZER_CLASS),
-                Constants.DEFAULT_KAFKA_PRODUCER_DESERIALIZER_CLASS
+                System.getenv(EnvironmentConstants.KAFKA_PRODUCER_VALUE_SERIALIZER_CLASS),
+                System.getProperty(PropertiesConstants.KAFKA_PRODUCER_VALUE_SERIALIZER_CLASS),
+                Constants.DEFAULT_KAFKA_PRODUCER_VALUE_SERIALIZER_CLASS
         );
     }
 

@@ -69,21 +69,21 @@ public class PropertiesConstants {
 
     public static final String CONSUMER_TOPIC_NAME = "konduit.consumer.topic.name";
 
-    public static final String KAFKA_CONSUMER_SERIALIZER_CLASS = "konduit.kafka.consumer.serializer.class";
+    public static final String KAFKA_CONSUMER_KEY_DESERIALIZER_CLASS = "konduit.kafka.consumer.serializer.class";
 
-    public static final String KAFKA_CONSUMER_DESERIALIZER_CLASS = "konduit.kafka.consumer.deserializer.class";
+    public static final String KAFKA_CONSUMER_VALUE_DESERIALIZER_CLASS = "konduit.kafka.consumer.deserializer.class";
 
     public static final String CONSUMER_GROUP_ID = "konduit.consumer.group.id";
 
-    public static final String CONSUMER_OFFSET_RESET = "konduit.consumer.offset.reset";
+    public static final String CONSUMER_AUTO_OFFSET_RESET = "konduit.consumer.offset.reset";
 
     public static final String CONSUMER_AUTO_COMMIT = "konduit.consumer.auto.commit";
 
     public static final String PRODUCER_TOPIC_NAME = "konduit.producer.topic.name";
 
-    public static final String KAFKA_PRODUCER_SERIALIZER_CLASS = "konduit.kafka.producer.serializer.class";
+    public static final String KAFKA_PRODUCER_KEY_SERIALIZER_CLASS = "konduit.kafka.producer.serializer.class";
 
-    public static final String KAFKA_PRODUCER_DESERIALIZER_CLASS = "konduit.kafka.producer.deserializer.class";
+    public static final String KAFKA_PRODUCER_VALUE_SERIALIZER_CLASS = "konduit.kafka.producer.deserializer.class";
 
     public static final String PRODUCER_ACKS = "konduit.producer.acks";
 }
