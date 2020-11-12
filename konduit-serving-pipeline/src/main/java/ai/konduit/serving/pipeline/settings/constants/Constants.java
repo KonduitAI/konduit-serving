@@ -62,11 +62,31 @@ public class Constants {
      * this directory usually contains the server configurations. The format of the files is
      * {@code <pid>.data}
      */
-    public static final String SERVERS_DATA_DIR_NAME = "servers";
+    public static final String DEFAULT_SERVERS_DATA_DIR_NAME = "servers";
 
     /**
      * Name of the log file which contains the logging data for the {@code /logs}
      * endpoint.
      */
-    public static final String MAIN_ENDPOINT_LOGS_FILE = "main.log";
+    public static final String DEFAULT_MAIN_ENDPOINT_LOGS_FILE = "main.log";
+
+    public static final String DEFAULT_CONSUMER_TOPIC_NAME = "inference-in";
+
+    public static final String DEFAULT_KAFKA_CONSUMER_SERIALIZER_CLASS = "org.apache.kafka.common.serialization.StringDeserializer";
+
+    public static final String DEFAULT_KAFKA_CONSUMER_DESERIALIZER_CLASS = "org.apache.kafka.common.serialization.StringDeserializer";
+
+    public static final String DEFAULT_CONSUMER_GROUP_ID = "konduit-serving-consumer-group";
+
+    public static final String DEFAULT_CONSUMER_OFFSET_RESET = "earliest";
+
+    public static final String DEFAULT_CONSUMER_AUTO_COMMIT = "false";
+
+    public static final String DEFAULT_PRODUCER_TOPIC_NAME = "inference-out";
+
+    public static final String DEFAULT_KAFKA_PRODUCER_SERIALIZER_CLASS = "org.apache.kafka.common.serialization.StringDeserializer";
+
+    public static final String DEFAULT_KAFKA_PRODUCER_DESERIALIZER_CLASS = "org.apache.kafka.common.serialization.StringDeserializer";
+
+    public static final String DEFAULT_PRODUCER_ACKS = "1";
 }
