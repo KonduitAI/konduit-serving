@@ -1,16 +1,28 @@
 package ai.konduit.serving.vertx.protocols.kafka.verticle;
 
+import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumer;
+import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.producer.KafkaProducer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 import io.vertx.kafka.client.producer.RecordMetadata;
+import io.vertx.kafka.client.serialization.BufferSerializer;
+import io.vertx.kafka.client.serialization.JsonObjectSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
 
+import java.sql.Date;
+import java.time.Instant;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,40 +81,86 @@ public class InferenceVerticleKafka extends InferenceVerticle {
                 configConsumer.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, getConsumerAutoCommit());
 
                 Map<String, String> configProducer = new HashMap<>();
+                String producerValueSerializerClass = getKafkaProducerValueSerializerClass();
                 configProducer.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%s", inferenceConfiguration.host(), port));
                 configProducer.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, getKafkaProducerKeySerializerClass());
-                configProducer.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, getKafkaProducerValueSerializerClass());
+                configProducer.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, producerValueSerializerClass);
                 configProducer.put(ProducerConfig.ACKS_CONFIG, getProducerAcks());
 
-                KafkaConsumer<String, String> consumer = KafkaConsumer.create(vertx, configConsumer);
-                KafkaProducer<String, String> producer = KafkaProducer.create(vertx, configProducer);
+                KafkaConsumer consumer = KafkaConsumer.create(vertx, configConsumer);
+                KafkaProducer producer = KafkaProducer.create(vertx, configProducer);
 
                 consumer.handler(
-                        record -> {
-                            log.info("Processing key=" + record.key() + ",value=" + record.value() +
-                                    ",partition=" + record.partition() + ",offset=" + record.offset());
+                        recordIn -> {
+                            KafkaConsumerRecord castedRecordIn = (KafkaConsumerRecord) recordIn;
+                            Object input = castedRecordIn.value();
 
-                            KafkaProducerRecord<String, String> recordOut =
-                                    KafkaProducerRecord.create(getProducerTopicName(), "message_=" + record.value());
+                            log.debug("Processing input from topic: {} at {}. " +
+                                            "Headers={}, Key={}, " +
+                                            "Value={}, Partition={}, " +
+                                            "Offset={}",
+                                    castedRecordIn.topic(), Date.from(Instant.ofEpochMilli(castedRecordIn.timestamp())),
+                                    castedRecordIn.headers(), castedRecordIn.key(),
+                                    input, castedRecordIn.partition(),
+                                    castedRecordIn.offset());
 
-                            producer.send(recordOut, done -> {
-                                if (done.succeeded()) {
-                                    RecordMetadata recordMetadata = done.result();
-                                    log.info("Message " + record.value() + " written on topic=" + recordMetadata.getTopic() +
-                                            ", partition=" + recordMetadata.getPartition() +
-                                            ", offset=" + recordMetadata.getOffset());
+                            Data output;
+
+                            if(input instanceof Buffer) {
+                                output = pipelineExecutor.exec(Data.fromBytes(((Buffer) input).getBytes()));
+                            } else if(input instanceof JsonObject) {
+                                output = pipelineExecutor.exec(Data.fromJson(((JsonObject) input).encode()));
+                            } else if(input instanceof String) {
+                                output = pipelineExecutor.exec(Data.fromJson((String) input));
+                            } else {
+                                throw new IllegalStateException("No conversion format exist for input value class type: " + input.getClass().getCanonicalName());
+                            }
+
+                            KafkaProducerRecord recordOut;
+                            if(producerValueSerializerClass.equals(BufferSerializer.class.getCanonicalName())) {
+                                recordOut = KafkaProducerRecord.create(getProducerTopicName(), Buffer.buffer(output.asBytes()));
+                            } else if(producerValueSerializerClass.equals(JsonObjectSerializer.class.getCanonicalName())) {
+                                recordOut = KafkaProducerRecord.create(getProducerTopicName(), new JsonObject(output.toJson()));
+                            } else if(producerValueSerializerClass.equals(StringSerializer.class.getCanonicalName())) {
+                                recordOut = KafkaProducerRecord.create(getProducerTopicName(), output.toJson());
+                            } else {
+                                throw new IllegalStateException("No conversion format exist for output value class type: " + producerValueSerializerClass);
+                            }
+
+                            producer.send(recordOut, recordOutHandler -> {
+                                AsyncResult<RecordMetadata> castedRecordOutHandler = (AsyncResult<RecordMetadata>) recordOutHandler;
+
+                                if (castedRecordOutHandler.succeeded()) {
+                                    log.debug("Sent output to topic: {} at {}. " +
+                                                    "Headers={}, Key={}, " +
+                                                    "Value={}, Partition={}, " +
+                                                    "Offset={}",
+                                            recordOut.topic(), Date.from(Instant.ofEpochMilli(recordOut.timestamp())),
+                                            recordOut.headers(), recordOut.key(),
+                                            recordOut.value(), recordOut.partition(),
+                                            castedRecordOutHandler.result().getOffset());
+                                } else {
+                                    log.error("Failed to send output to topic: {} at {}. " +
+                                                    "Headers={}, Key={}, " +
+                                                    "Value={}, Partition={}",
+                                            recordOut.topic(), Date.from(Instant.ofEpochMilli(recordOut.timestamp())),
+                                            recordOut.headers(), recordOut.key(),
+                                            recordOut.value(), recordOut.partition(),
+                                            castedRecordOutHandler.cause());
                                 }
                             });
                         }
                 );
 
                 consumer.subscribe(getConsumerTopicName(), subscribeHandler -> {
-                    if (subscribeHandler.succeeded()) {
-                        log.info("subscribed");
+                    AsyncResult<Void> castedSubscribeHandler = (AsyncResult<Void>) subscribeHandler;
+
+                    if (castedSubscribeHandler.succeeded()) {
+                        log.info("Subscribed to topic: {}", getConsumerTopicName());
                         startPromise.complete();
                     } else {
-                        log.error("Could not subscribe", subscribeHandler.cause());
-                        startPromise.fail(subscribeHandler.cause());
+                        log.error("Could not subscribe to topic: {}", getConsumerTopicName(), castedSubscribeHandler.cause());
+                        startPromise.fail(castedSubscribeHandler.cause());
                     }
                 });
             }
