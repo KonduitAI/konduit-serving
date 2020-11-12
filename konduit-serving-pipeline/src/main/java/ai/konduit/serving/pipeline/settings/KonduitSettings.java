@@ -59,7 +59,7 @@ public class KonduitSettings {
         return KonduitSettings.fetchValueBasedOnPriority(
                 System.getenv(EnvironmentConstants.PRODUCER_TOPIC_NAME),
                 System.getProperty(PropertiesConstants.PRODUCER_TOPIC_NAME),
-                Constants.DEFAULT_CONSUMER_TOPIC_NAME
+                Constants.DEFAULT_PRODUCER_TOPIC_NAME
         );
     }
 

@@ -80,13 +80,13 @@ public class Constants {
 
     public static final String DEFAULT_CONSUMER_AUTO_OFFSET_RESET = "earliest";
 
-    public static final String DEFAULT_CONSUMER_AUTO_COMMIT = "false";
+    public static final String DEFAULT_CONSUMER_AUTO_COMMIT = "true";
 
     public static final String DEFAULT_PRODUCER_TOPIC_NAME = "inference-out";
 
-    public static final String DEFAULT_KAFKA_PRODUCER_KEY_SERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectDeserializer";
+    public static final String DEFAULT_KAFKA_PRODUCER_KEY_SERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectSerializer";
 
-    public static final String DEFAULT_KAFKA_PRODUCER_VALUE_SERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectDeserializer";
+    public static final String DEFAULT_KAFKA_PRODUCER_VALUE_SERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectSerializer";
 
     public static final String DEFAULT_PRODUCER_ACKS = "1";
 }
