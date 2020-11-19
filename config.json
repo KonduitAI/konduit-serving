@@ -19,40 +19,6 @@
       "keepOtherValues" : true,
       "metadata" : false,
       "metadataKey" : "@ImageToNDArrayStepMetadata"
-    }, {
-      "@type" : "PYTHON",
-      "pythonConfig" : {
-        "pythonCodePath" : "C:\\Users\\agibs\\Documents\\GitHub\\keras-ocr-konduit-serving\\src\\main\\resources\\run3.py",
-        "pythonInputs" : { },
-        "pythonOutputs" : { },
-        "extraInputs" : { },
-        "returnAllInputs" : false,
-        "setupAndRun" : false,
-        "ioInputs" : {
-          "images" : {
-            "name" : "images",
-            "pythonType" : "list",
-            "secondaryType" : "NDARRAY",
-            "type" : "LIST"
-          }
-        },
-        "ioOutputs" : {
-          "texts" : {
-            "name" : "texts",
-            "pythonType" : "list",
-            "secondaryType" : "STRING",
-            "type" : "LIST"
-          },
-          "boxes" : {
-            "name" : "boxes",
-            "pythonType" : "list",
-            "secondaryType" : "NDARRAY",
-            "type" : "LIST"
-          }
-        },
-        "jobSuffix" : "konduit_job",
-        "useGil" : false
-      }
     } ]
   }
 }

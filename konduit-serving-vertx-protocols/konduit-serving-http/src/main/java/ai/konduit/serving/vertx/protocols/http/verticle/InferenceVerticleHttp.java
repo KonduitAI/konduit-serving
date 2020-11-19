@@ -38,6 +38,7 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpVersion;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.PemKeyCertOptions;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -103,7 +104,10 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                     return;
                 }
 
-                vertx.createHttpServer(createOptions(inferenceConfiguration.port()))
+                vertx.createHttpServer(createOptions(inferenceConfiguration.port(),
+                        inferenceConfiguration.useSsl(),
+                        inferenceConfiguration.sslKeyPath(),
+                        inferenceConfiguration.sslCertificatePath()))
                         .requestHandler(createRouter())
                         .exceptionHandler(throwable -> log.error("Error occurred during http request.", throwable))
                         .listen(port, inferenceConfiguration.host(), handler -> {
@@ -135,7 +139,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
 
     }
 
-    private HttpServerOptions createOptions(int port) {
+    private HttpServerOptions createOptions(int port, boolean useSsl, String sslKeyPath, String sslCertificatePath) {
         HttpServerOptions serverOptions = new HttpServerOptions()
                 .setPort(port)
                 .setHost("0.0.0.0");
@@ -145,7 +149,9 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                 .setTcpKeepAlive(true)
                 .setTcpNoDelay(true)
                 .setAlpnVersions(Arrays.asList(HttpVersion.HTTP_1_0,HttpVersion.HTTP_1_1))
-                .setUseAlpn(false);
+                .setUseAlpn(false)
+                .setPemKeyCertOptions(new PemKeyCertOptions().setKeyPath(sslKeyPath).setCertPath(sslCertificatePath))
+                .setSsl(useSsl);
 
         return serverOptions;
     }
