@@ -32,6 +32,7 @@ import ai.konduit.serving.vertx.protocols.http.api.KonduitServingHttpException;
 import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
+import com.google.common.base.Strings;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServerOptions;
@@ -39,6 +40,7 @@ import io.vertx.core.http.HttpVersion;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.PemKeyCertOptions;
+import io.vertx.core.net.SelfSignedCertificate;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -48,6 +50,7 @@ import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -140,20 +143,39 @@ public class InferenceVerticleHttp extends InferenceVerticle {
     }
 
     private HttpServerOptions createOptions(int port, boolean useSsl, String sslKeyPath, String sslCertificatePath) {
-        HttpServerOptions serverOptions = new HttpServerOptions()
+        HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setPort(port)
-                .setHost("0.0.0.0");
-        serverOptions.setSsl(false)
+                .setHost("0.0.0.0")
                 .setSslHandshakeTimeout(0)
                 .setCompressionSupported(true)
                 .setTcpKeepAlive(true)
                 .setTcpNoDelay(true)
                 .setAlpnVersions(Arrays.asList(HttpVersion.HTTP_1_0,HttpVersion.HTTP_1_1))
                 .setUseAlpn(false)
-                .setPemKeyCertOptions(new PemKeyCertOptions().setKeyPath(sslKeyPath).setCertPath(sslCertificatePath))
                 .setSsl(useSsl);
 
-        return serverOptions;
+        if (useSsl) {
+            if (Strings.isNullOrEmpty(sslKeyPath) || Strings.isNullOrEmpty(sslCertificatePath)) {
+                if (Strings.isNullOrEmpty(sslKeyPath)) {
+                    log.warn("No pem key file specified for SSL.");
+                }
+
+                if (Strings.isNullOrEmpty(sslCertificatePath)) {
+                    log.warn("No pem certificate file specified for SSL.");
+                }
+
+                log.info("Using an auto generated self signed pem key and certificate with SSL.");
+                httpServerOptions.setKeyCertOptions(SelfSignedCertificate.create().keyCertOptions());
+            } else {
+                sslKeyPath = new File(sslKeyPath).getAbsolutePath();
+                sslCertificatePath = new File(sslCertificatePath).getAbsolutePath();
+                log.info("Using SSL with PEM Key: {} and certificate {}.", sslKeyPath, sslCertificatePath);
+
+                httpServerOptions.setPemKeyCertOptions(new PemKeyCertOptions().setKeyPath(sslKeyPath).setCertPath(sslCertificatePath));
+            }
+        }
+
+        return httpServerOptions;
     }
 
     public Router createRouter() {
