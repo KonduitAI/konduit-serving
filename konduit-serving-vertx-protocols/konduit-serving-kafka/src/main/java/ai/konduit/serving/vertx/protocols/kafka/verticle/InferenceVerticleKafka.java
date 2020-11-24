@@ -2,9 +2,9 @@ package ai.konduit.serving.vertx.protocols.kafka.verticle;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
+import ai.konduit.serving.vertx.config.KafkaConfiguration;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
@@ -22,7 +22,6 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.sql.Date;
 import java.time.Instant;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,21 +70,23 @@ public class InferenceVerticleKafka extends InferenceVerticle {
                     return;
                 }
 
+                KafkaConfiguration kafkaConfiguration = inferenceConfiguration.kafkaConfiguration();
 
                 Map<String, String> configConsumer = new HashMap<>();
                 configConsumer.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%s", inferenceConfiguration.host(), port));
-                configConsumer.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, getKafkaConsumerKeyDeserializerClass());
-                configConsumer.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, getKafkaConsumerValueDeserializerClass());
-                configConsumer.put(ConsumerConfig.GROUP_ID_CONFIG, getConsumerGroupId());
-                configConsumer.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, getConsumerAutoOffsetReset());
-                configConsumer.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, getConsumerAutoCommit());
+                configConsumer.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, getKafkaConsumerKeyDeserializerClass(kafkaConfiguration != null ? kafkaConfiguration.consumerKeyDeserializerClass() : null));
+                configConsumer.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, getKafkaConsumerValueDeserializerClass(kafkaConfiguration != null ? kafkaConfiguration.consumerValueDeserializerClass() : null));
+                configConsumer.put(ConsumerConfig.GROUP_ID_CONFIG, getConsumerGroupId(kafkaConfiguration != null ? kafkaConfiguration.consumerGroupId() : null));
+                configConsumer.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, getConsumerAutoOffsetReset(kafkaConfiguration != null ? kafkaConfiguration.consumerAutoOffsetReset() : null));
+                configConsumer.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, getConsumerAutoCommit(kafkaConfiguration != null ? kafkaConfiguration.consumerAutoCommit() : null));
+
+                String producerValueSerializerClass = getKafkaProducerValueSerializerClass(kafkaConfiguration != null ? kafkaConfiguration.producerValueSerializerClass() : null);
 
                 Map<String, String> configProducer = new HashMap<>();
-                String producerValueSerializerClass = getKafkaProducerValueSerializerClass();
                 configProducer.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%s", inferenceConfiguration.host(), port));
-                configProducer.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, getKafkaProducerKeySerializerClass());
+                configProducer.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, getKafkaProducerKeySerializerClass(kafkaConfiguration != null ? kafkaConfiguration.producerKeySerializerClass() : null));
                 configProducer.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, producerValueSerializerClass);
-                configProducer.put(ProducerConfig.ACKS_CONFIG, getProducerAcks());
+                configProducer.put(ProducerConfig.ACKS_CONFIG, getProducerAcks(kafkaConfiguration != null ? kafkaConfiguration.producerAcks() : null));
 
                 KafkaConsumer consumer = KafkaConsumer.create(vertx, configConsumer);
                 KafkaProducer producer = KafkaProducer.create(vertx, configProducer);
@@ -116,13 +117,15 @@ public class InferenceVerticleKafka extends InferenceVerticle {
                                 throw new IllegalStateException("No conversion format exist for input value class type: " + input.getClass().getCanonicalName());
                             }
 
+                            String producerTopicName = getProducerTopicName(kafkaConfiguration != null ? kafkaConfiguration.producerTopicName() : null);
+
                             KafkaProducerRecord recordOut;
                             if(producerValueSerializerClass.equals(BufferSerializer.class.getCanonicalName())) {
-                                recordOut = KafkaProducerRecord.create(getProducerTopicName(), Buffer.buffer(output.asBytes()));
+                                recordOut = KafkaProducerRecord.create(producerTopicName, Buffer.buffer(output.asBytes()));
                             } else if(producerValueSerializerClass.equals(JsonObjectSerializer.class.getCanonicalName())) {
-                                recordOut = KafkaProducerRecord.create(getProducerTopicName(), new JsonObject(output.toJson()));
+                                recordOut = KafkaProducerRecord.create(producerTopicName, new JsonObject(output.toJson()));
                             } else if(producerValueSerializerClass.equals(StringSerializer.class.getCanonicalName())) {
-                                recordOut = KafkaProducerRecord.create(getProducerTopicName(), output.toJson());
+                                recordOut = KafkaProducerRecord.create(producerTopicName, output.toJson());
                             } else {
                                 throw new IllegalStateException("No conversion format exist for output value class type: " + producerValueSerializerClass);
                             }
@@ -152,14 +155,16 @@ public class InferenceVerticleKafka extends InferenceVerticle {
                         }
                 );
 
-                consumer.subscribe(getConsumerTopicName(), subscribeHandler -> {
+                String consumerTopicName = getConsumerTopicName(kafkaConfiguration != null ? kafkaConfiguration.consumerTopicName() : null);
+
+                consumer.subscribe(consumerTopicName, subscribeHandler -> {
                     AsyncResult<Void> castedSubscribeHandler = (AsyncResult<Void>) subscribeHandler;
 
                     if (castedSubscribeHandler.succeeded()) {
-                        log.info("Subscribed to topic: {}", getConsumerTopicName());
+                        log.info("Subscribed to topic: {}", consumerTopicName);
                         startPromise.complete();
                     } else {
-                        log.error("Could not subscribe to topic: {}", getConsumerTopicName(), castedSubscribeHandler.cause());
+                        log.error("Could not subscribe to topic: {}", consumerTopicName, castedSubscribeHandler.cause());
                         startPromise.fail(castedSubscribeHandler.cause());
                     }
                 });
