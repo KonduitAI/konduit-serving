@@ -33,8 +33,10 @@ public class CUDADevice implements ComputeDevice {
             return new CUDADevice("10.0");
         } else if(str.contains("10.1")){
             return new CUDADevice("10.1");
-        } else if(str.contains("10.2")){
+        } else if(str.contains("10.2")) {
             return new CUDADevice("10.2");
+        } else if(str.contains("11.0")){
+                return new CUDADevice("11.0");
         } else {
             throw new UnsupportedOperationException("Invalid, unknown, not supported or not yet implemneted CUDA version: " + s);
         }
