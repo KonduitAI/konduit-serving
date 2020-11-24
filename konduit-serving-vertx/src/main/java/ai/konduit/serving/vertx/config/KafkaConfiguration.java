@@ -31,6 +31,15 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Schema(description = "Kafka related configuration.")
 public class KafkaConfiguration {
+    @Schema(description = "Whether to start an http server alongside the kafka server for some standard endpoints.", defaultValue = "true")
+    private boolean startHttpServerForKafka = Constants.DEFAULT_START_HTTP_SERVER_FOR_KAFKA;
+
+    @Schema(description = "Whether to start an http server alongside the kafka server for some standard endpoints.", defaultValue = Constants.DEFAULT_HTTP_KAFKA_HOST)
+    private String httpKafkaHost = Constants.DEFAULT_HTTP_KAFKA_HOST;
+
+    @Schema(description = "Whether to start an http server alongside the kafka server for some standard endpoints.", defaultValue = "0")
+    private int httpKafkaPort = Constants.DEFAULT_HTTP_KAFKA_PORT;
+
     @Schema(description = "Topic name for the consumer.", defaultValue = Constants.DEFAULT_CONSUMER_TOPIC_NAME)
     private String consumerTopicName = Constants.DEFAULT_CONSUMER_TOPIC_NAME;
 

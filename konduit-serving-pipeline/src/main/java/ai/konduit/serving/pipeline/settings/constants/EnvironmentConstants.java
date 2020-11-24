@@ -73,6 +73,12 @@ public class EnvironmentConstants {
      */
     public static final String FILE_UPLOADS_DIR = "KONDUIT_FILE_UPLOADS_DIR";
 
+    public static final String START_HTTP_SERVER_FOR_KAFKA = "KONDUIT_START_HTTP_SERVER_FOR_KAFKA";
+
+    public static final String HTTP_KAFKA_HOST = "KONDUIT_HTTP_KAFKA_HOST";
+
+    public static final String HTTP_KAFKA_PORT = "KONDUIT_HTTP_KAFKA_PORT";
+
     public static final String CONSUMER_TOPIC_NAME = "KONDUIT_CONSUMER_TOPIC_NAME";
 
     public static final String KAFKA_CONSUMER_KEY_DESERIALIZER_CLASS = "KONDUIT_KAFKA_CONSUMER_SERIALIZER_CLASS";

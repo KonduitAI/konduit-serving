@@ -7,6 +7,33 @@ import org.nd4j.shade.guava.base.Strings;
 
 public class KonduitSettings {
 
+    public static boolean getStartHttpServerForKafka() { return getStartHttpServerForKafka(Constants.DEFAULT_START_HTTP_SERVER_FOR_KAFKA); }
+    public static boolean getStartHttpServerForKafka(boolean defaultValue) {
+        return Boolean.parseBoolean(KonduitSettings.fetchValueBasedOnPriority(
+                System.getenv(EnvironmentConstants.START_HTTP_SERVER_FOR_KAFKA),
+                System.getProperty(PropertiesConstants.START_HTTP_SERVER_FOR_KAFKA),
+                String.valueOf(defaultValue))
+        );
+    }
+
+    public static String getHttpKafkaHost() { return getHttpKafkaHost(null); }
+    public static String getHttpKafkaHost(String defaultValue) {
+        return KonduitSettings.fetchValueBasedOnPriority(
+                System.getenv(EnvironmentConstants.HTTP_KAFKA_HOST),
+                System.getProperty(PropertiesConstants.HTTP_KAFKA_HOST),
+                defaultValue != null ? defaultValue : Constants.DEFAULT_HTTP_KAFKA_HOST
+        );
+    }
+
+    public static int getHttpKafkaPort() { return getHttpKafkaPort(Constants.DEFAULT_HTTP_KAFKA_PORT); }
+    public static int getHttpKafkaPort(int defaultValue) {
+        return Integer.parseInt(KonduitSettings.fetchValueBasedOnPriority(
+                System.getenv(EnvironmentConstants.HTTP_KAFKA_PORT),
+                System.getProperty(PropertiesConstants.HTTP_KAFKA_PORT),
+                String.valueOf(defaultValue))
+        );
+    }
+
     public static String getConsumerTopicName() { return getConsumerTopicName(null); }
     public static String getConsumerTopicName(String defaultValue) {
         return KonduitSettings.fetchValueBasedOnPriority(

@@ -67,6 +67,12 @@ public class PropertiesConstants {
      */
     public static final String FILE_UPLOADS_DIR = "konduit.file.uploads.dir";
 
+    public static final String START_HTTP_SERVER_FOR_KAFKA = "konduit.start.http.server.for.kafka";
+
+    public static final String HTTP_KAFKA_HOST = "konduit.http.kafka.host";
+
+    public static final String HTTP_KAFKA_PORT = "konduit.http.kafka.port";
+
     public static final String CONSUMER_TOPIC_NAME = "konduit.consumer.topic.name";
 
     public static final String KAFKA_CONSUMER_KEY_DESERIALIZER_CLASS = "konduit.kafka.consumer.serializer.class";

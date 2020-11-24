@@ -70,6 +70,12 @@ public class Constants {
      */
     public static final String DEFAULT_MAIN_ENDPOINT_LOGS_FILE = "main.log";
 
+    public static final boolean DEFAULT_START_HTTP_SERVER_FOR_KAFKA = true;
+
+    public static final String DEFAULT_HTTP_KAFKA_HOST = "localhost";
+
+    public static final int DEFAULT_HTTP_KAFKA_PORT = 0;
+
     public static final String DEFAULT_CONSUMER_TOPIC_NAME = "inference-in";
 
     public static final String DEFAULT_KAFKA_CONSUMER_KEY_DESERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectDeserializer";

@@ -1,12 +1,16 @@
 package ai.konduit.serving.vertx.protocols.kafka.verticle;
 
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.settings.constants.Constants;
 import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.config.KafkaConfiguration;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpVersion;
+import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumer;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
@@ -22,6 +26,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.sql.Date;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -162,7 +167,68 @@ public class InferenceVerticleKafka extends InferenceVerticle {
 
                     if (castedSubscribeHandler.succeeded()) {
                         log.info("Subscribed to topic: {}", consumerTopicName);
-                        startPromise.complete();
+
+                        if(getStartHttpServerForKafka(kafkaConfiguration != null ? kafkaConfiguration.startHttpServerForKafka() : Constants.DEFAULT_START_HTTP_SERVER_FOR_KAFKA)) {
+                            String httpHost = getHttpKafkaHost(kafkaConfiguration != null ? kafkaConfiguration.httpKafkaHost() : Constants.DEFAULT_HTTP_KAFKA_HOST);
+                            int httpPort = getHttpKafkaPort(kafkaConfiguration != null ? kafkaConfiguration. httpKafkaPort(): Constants.DEFAULT_HTTP_KAFKA_PORT);
+
+                            log.info("Starting HTTP server for kafka on host {} and port {}", httpHost, httpPort);
+
+                            vertx.createHttpServer(new HttpServerOptions()
+                                    .setPort(httpPort)
+                                    .setHost(httpHost)
+                                    .setSsl(false)
+                                    .setSslHandshakeTimeout(0)
+                                    .setCompressionSupported(true)
+                                    .setTcpKeepAlive(true)
+                                    .setTcpNoDelay(true)
+                                    .setAlpnVersions(Arrays.asList(HttpVersion.HTTP_1_0,HttpVersion.HTTP_1_1))
+                                    .setUseAlpn(false))
+                            .requestHandler(httpHandler -> {
+                                if (httpHandler.path().equals("/health")) {
+                                    httpHandler.response().end("Kafka server running");
+                                } else {
+                                    httpHandler.response().end("Route not implemented");
+                                }
+                            })
+                                    .exceptionHandler(throwable -> log.error("Error occurred during http request.", throwable))
+                                    .listen(httpPort, httpHost, handler -> {
+                                        if (handler.failed()) {
+                                            startPromise.fail(handler.cause());
+                                        } else {
+                                            int actualPort = handler.result().actualPort();
+
+                                            if(inferenceConfiguration.kafkaConfiguration() == null) {
+                                                inferenceConfiguration.kafkaConfiguration(new KafkaConfiguration());
+                                            }
+
+                                            inferenceConfiguration.kafkaConfiguration().httpKafkaPort(actualPort);
+
+                                            try {
+                                                ((ContextInternal) context).getDeployment()
+                                                        .deploymentOptions()
+                                                        .setConfig(new JsonObject(inferenceConfiguration.toJson()));
+
+                                                long pid = getPid();
+
+                                                saveInspectionDataIfRequired(pid);
+
+                                                log.info("HTTP server for kafka is listening on host: '{}'", inferenceConfiguration.host());
+                                                log.info("HTTP server for kafka started on port {}", actualPort);
+
+                                                startPromise.complete();
+                                            } catch (Throwable throwable) {
+                                                startPromise.fail(throwable);
+                                            }
+                                        }
+                                    });
+                        } else {
+                            long pid = getPid();
+
+                            saveInspectionDataIfRequired(pid);
+
+                            startPromise.complete();
+                        }
                     } else {
                         log.error("Could not subscribe to topic: {}", consumerTopicName, castedSubscribeHandler.cause());
                         startPromise.fail(castedSubscribeHandler.cause());
