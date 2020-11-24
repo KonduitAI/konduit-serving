@@ -66,4 +66,30 @@ public class PropertiesConstants {
      * Sets the directory where the file uploads are kept for Vertx BodyHandler
      */
     public static final String FILE_UPLOADS_DIR = "konduit.file.uploads.dir";
+
+    public static final String START_HTTP_SERVER_FOR_KAFKA = "konduit.start.http.server.for.kafka";
+
+    public static final String HTTP_KAFKA_HOST = "konduit.http.kafka.host";
+
+    public static final String HTTP_KAFKA_PORT = "konduit.http.kafka.port";
+
+    public static final String CONSUMER_TOPIC_NAME = "konduit.consumer.topic.name";
+
+    public static final String KAFKA_CONSUMER_KEY_DESERIALIZER_CLASS = "konduit.kafka.consumer.serializer.class";
+
+    public static final String KAFKA_CONSUMER_VALUE_DESERIALIZER_CLASS = "konduit.kafka.consumer.deserializer.class";
+
+    public static final String CONSUMER_GROUP_ID = "konduit.consumer.group.id";
+
+    public static final String CONSUMER_AUTO_OFFSET_RESET = "konduit.consumer.offset.reset";
+
+    public static final String CONSUMER_AUTO_COMMIT = "konduit.consumer.auto.commit";
+
+    public static final String PRODUCER_TOPIC_NAME = "konduit.producer.topic.name";
+
+    public static final String KAFKA_PRODUCER_KEY_SERIALIZER_CLASS = "konduit.kafka.producer.serializer.class";
+
+    public static final String KAFKA_PRODUCER_VALUE_SERIALIZER_CLASS = "konduit.kafka.producer.deserializer.class";
+
+    public static final String PRODUCER_ACKS = "konduit.producer.acks";
 }
