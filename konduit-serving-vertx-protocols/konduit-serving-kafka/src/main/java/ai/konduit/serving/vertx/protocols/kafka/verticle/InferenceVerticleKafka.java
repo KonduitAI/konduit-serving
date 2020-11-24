@@ -188,7 +188,7 @@ public class InferenceVerticleKafka extends InferenceVerticle {
                                 if (httpHandler.path().equals("/health")) {
                                     httpHandler.response().end("Kafka server running");
                                 } else {
-                                    httpHandler.response().end("Route not implemented");
+                                    httpHandler.response().setStatusCode(404).end("Route not implemented");
                                 }
                             })
                                     .exceptionHandler(throwable -> log.error("Error occurred during http request.", throwable))
