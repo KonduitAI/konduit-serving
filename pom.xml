@@ -96,6 +96,7 @@
         <modules>python,tensorflow,image,deeplearning4j,onnx,nd4j-tensorflow,nd4j-tensorflow</modules>
         <platforms>linux,windows,mac</platforms>
         <architectures>x86</architectures>
+        <device>CUDA_10.1</device>
         <spin.version>custom</spin.version>
         <jna.platform.version>5.3.2</jna.platform.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
