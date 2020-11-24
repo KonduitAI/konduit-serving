@@ -19,7 +19,15 @@
 package ai.konduit.serving.build.cli;
 
 import ai.konduit.serving.build.build.GradleBuild;
-import ai.konduit.serving.build.config.*;
+import ai.konduit.serving.build.config.Module;
+import ai.konduit.serving.build.config.Arch;
+import ai.konduit.serving.build.config.Target;
+import ai.konduit.serving.build.config.Deployment;
+import ai.konduit.serving.build.config.OS;
+import ai.konduit.serving.build.config.Config;
+import ai.konduit.serving.build.config.DeploymentValidation;
+import ai.konduit.serving.build.config.ComputeDevice;
+import ai.konduit.serving.build.config.Serving;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.dependencies.DependencyRequirement;
 import ai.konduit.serving.build.dependencies.ModuleRequirements;
